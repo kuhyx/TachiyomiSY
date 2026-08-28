@@ -21,7 +21,6 @@ import exh.source.MERGED_SOURCE_ID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.launch
 import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
@@ -119,6 +118,14 @@ class BackupRestorer(
             restoreAmount += 1
         }
 
+        // Each restorer opens its own write transaction on the same database. Upstream
+        // `launch`es all six into one coroutineScope, so they contend for SQLite's
+        // single writer; that surfaces as "Error code: 5, database is locked" from
+        // Room's InvalidationTracker and aborts most of the library restore
+        // (TachiyomiSY #1634 / #1638). Awaiting them in order costs a little wall time
+        // and removes the contention entirely. It also removes a second race: with
+        // appSettings and categories both enabled, restoreAppPreferences writes the
+        // category tables at the same time restoreCategories and restoreManga do.
         coroutineScope {
             if (options.categories) {
                 restoreCategories(backup.backupCategories)
@@ -145,7 +152,7 @@ class BackupRestorer(
         }
     }
 
-    private fun CoroutineScope.restoreCategories(backupCategories: List<BackupCategory>) = launch {
+    private suspend fun CoroutineScope.restoreCategories(backupCategories: List<BackupCategory>) {
         ensureActive()
         categoriesRestorer(backupCategories)
 
@@ -159,7 +166,7 @@ class BackupRestorer(
     }
 
     // SY -->
-    private fun CoroutineScope.restoreSavedSearches(backupSavedSearches: List<BackupSavedSearch>) = launch {
+    private suspend fun CoroutineScope.restoreSavedSearches(backupSavedSearches: List<BackupSavedSearch>) {
         ensureActive()
         savedSearchRestorer.restoreSavedSearches(backupSavedSearches)
 
@@ -173,10 +180,10 @@ class BackupRestorer(
     }
     // SY <--
 
-    private fun CoroutineScope.restoreManga(
+    private suspend fun CoroutineScope.restoreManga(
         backupMangas: List<BackupManga>,
         backupCategories: List<BackupCategory>,
-    ) = launch {
+    ) {
         mangaRestorer.sortByNew(backupMangas)
             /* SY --> */.sortedBy { it.source == MERGED_SOURCE_ID } /* SY <-- */
             .chunked(100)
@@ -199,10 +206,10 @@ class BackupRestorer(
             }
     }
 
-    private fun CoroutineScope.restoreAppPreferences(
+    private suspend fun CoroutineScope.restoreAppPreferences(
         preferences: List<BackupPreference>,
         categories: List<BackupCategory>?,
-    ) = launch {
+    ) {
         ensureActive()
         preferenceRestorer.restoreApp(
             preferences,
@@ -218,7 +225,7 @@ class BackupRestorer(
         )
     }
 
-    private fun CoroutineScope.restoreSourcePreferences(preferences: List<BackupSourcePreferences>) = launch {
+    private suspend fun CoroutineScope.restoreSourcePreferences(preferences: List<BackupSourcePreferences>) {
         ensureActive()
         preferenceRestorer.restoreSource(preferences)
 
@@ -231,9 +238,9 @@ class BackupRestorer(
         )
     }
 
-    private fun CoroutineScope.restoreExtensionStores(
+    private suspend fun CoroutineScope.restoreExtensionStores(
         backupExtensionStores: List<BackupExtensionStore>,
-    ) = launch {
+    ) {
         backupExtensionStores
             .chunked(100)
             .forEach { chunk ->

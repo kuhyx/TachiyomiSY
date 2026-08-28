@@ -15,6 +15,18 @@ class SyncPreferences(
 
     val lastSyncEtag: Preference<String> = preferenceStore.getString("sync_etag", "")
 
+    /**
+     * Number of library entries in the last payload this device pushed successfully.
+     *
+     * The baseline for the collapse guard in [eu.kanade.tachiyomi.data.sync.service.SyncService].
+     * It only ever grows in normal use: removing a manga from the library clears its
+     * `favorite` flag but keeps the row, so the entry stays in the payload.
+     */
+    val lastSyncEntryCount: Preference<Int> = preferenceStore.getInt(
+        Preference.appStateKey("last_sync_entry_count"),
+        0,
+    )
+
     val syncInterval: Preference<Int> = preferenceStore.getInt("sync_interval", 0)
     val syncService: Preference<Int> = preferenceStore.getInt("sync_service", 0)
 

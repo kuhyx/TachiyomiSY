@@ -23,12 +23,38 @@ data class SyncData(
     val backup: Backup? = null,
 )
 
+/**
+ * Raised when a merge would push a collapsed library over a healthy remote one.
+ *
+ * Sync is fail-closed on this: aborting costs one skipped sync, whereas pushing
+ * overwrites the last good copy on the server and there is nothing left to
+ * recover from.
+ */
+class SyncCollapseException(message: String) : Exception(message)
+
 abstract class SyncService(
     val context: Context,
     val json: Json,
     val syncPreferences: SyncPreferences,
 ) {
     abstract suspend fun doSync(syncData: SyncData): Backup?
+
+    /**
+     * Refuse to push a payload that lost entries since this device's last push.
+     *
+     * @param entryCount Library entries in the payload about to be uploaded.
+     * @throws SyncCollapseException If the payload shrank by more than
+     *   [MAX_REMOTE_DROP_RATIO] of the last pushed one.
+     */
+    protected fun assertNoLibraryCollapse(entryCount: Int) {
+        val baseline = syncPreferences.lastSyncEntryCount.get()
+        if (baseline <= 0) return
+        if (entryCount >= baseline * (1 - MAX_REMOTE_DROP_RATIO)) return
+        throw SyncCollapseException(
+            "Refusing to sync: this device now has $entryCount library entries, down from " +
+                "$baseline at the last sync. Restore this device from a backup before syncing again.",
+        )
+    }
 
     /**
      * Merges the local and remote sync data into a single JSON string.
@@ -137,6 +163,13 @@ abstract class SyncService(
         val lastSyncTime = syncPreferences.lastSyncTimestamp.get().milliseconds.inWholeSeconds
         val syncOptions = syncPreferences.getSyncSettings()
 
+        // Remote entries discarded because they look locally deleted. Deleting a manga
+        // in the app does not remove its row -- it clears `favorite` and stamps
+        // `favorite_modified_at` -- so a real deletion still appears in the local list
+        // and takes the local/remote branch below. A row that is missing outright means
+        // the local database lost it, which is what a failed restore does.
+        var droppedAsDeletedRemotely = 0
+
         val mergedList = (localMangaMap.keys + remoteMangaMap.keys).distinct().mapNotNull { compositeKey ->
             val local = localMangaMap[compositeKey]
             val remote = remoteMangaMap[compositeKey]
@@ -157,6 +190,10 @@ abstract class SyncService(
                         updateCategories(remote, remoteCategoriesMapByOrder)
                         remote
                     } else {
+                        // Absent locally and untouched on the server since our last sync,
+                        // so the user deleted it here. That reading only holds while the
+                        // local database is intact -- see droppedAsDeletedRemotely below.
+                        droppedAsDeletedRemotely++
                         logcat(LogPriority.DEBUG, logTag) { "Dropping deleted remote manga: ${remote.title}." }
                         null
                     }
@@ -181,6 +218,16 @@ abstract class SyncService(
                 }
                 else -> null // No manga found for key
             }
+        }
+
+        if (remoteMangaListSafe.isNotEmpty() &&
+            droppedAsDeletedRemotely > remoteMangaListSafe.size * MAX_REMOTE_DROP_RATIO
+        ) {
+            throw SyncCollapseException(
+                "Refusing to sync: $droppedAsDeletedRemotely of ${remoteMangaListSafe.size} server entries " +
+                    "are missing from this device. That is a damaged local library, not a deletion -- " +
+                    "restore this device from a backup before syncing again.",
+            )
         }
 
         // Counting favorites and non-favorites
@@ -587,4 +634,13 @@ abstract class SyncService(
         return mergedSearches
     }
     // SY <--
+
+    companion object {
+        /**
+         * Share of the server's entries that may vanish from this device before the
+         * merge is treated as local data loss. Removing a handful of finished series
+         * is normal; a tenth of the library disappearing at once is not.
+         */
+        private const val MAX_REMOTE_DROP_RATIO = 0.10
+    }
 }

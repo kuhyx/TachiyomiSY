@@ -77,9 +77,22 @@ class SyncYomiSyncService(
                 syncData
             }
 
+            // The merge guard only runs when there is remote data to merge against. When
+            // the server replies 304 the local payload is pushed verbatim, so it has to
+            // be checked against what this device pushed last time as well -- that is the
+            // path a collapsed library takes to overwrite a healthy server copy.
+            val entryCount = finalSyncData.backup?.backupManga?.size ?: 0
+            assertNoLibraryCollapse(entryCount)
+
             val success = pushSyncData(finalSyncData, etag)
 
             if (success) {
+                // Never let a zero-entry push become the baseline: assertNoLibraryCollapse
+                // treats a baseline of 0 as "no baseline yet" and would stay disabled from
+                // then on. pushSyncData also short-circuits to true on a null backup.
+                if (entryCount > 0) {
+                    syncPreferences.lastSyncEntryCount.set(entryCount)
+                }
                 reportSyncEvent(SyncEventStatus.SYNC_SUCCESS)
             } else {
                 reportSyncEvent(SyncEventStatus.SYNC_FAILED, "Failed to push sync data")
