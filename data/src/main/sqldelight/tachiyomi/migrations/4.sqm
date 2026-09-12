@@ -1,0 +1,3 @@
+-- Database version 4 changed no schema (Tachiyomi 0.x bumped the version
+-- without a migration). SQLDelight's verifier requires the sequence to be
+-- contiguous, so this file exists to say "nothing to do" explicitly.
