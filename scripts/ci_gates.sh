@@ -130,8 +130,15 @@ gradle_gate() {
     # Locally the build runs under the shared resource cap; on a runner there
     # is nothing else to protect and the cap script does not exist.
     if [[ -z "${CI:-}" && -x "$capped" ]]; then
+        # Measured 2026-09-12: with the project's default -Xmx4g and parallel
+        # workers a full check exceeds the 4 GiB cap and is SIGTERMed; with
+        # these limits it peaks at 1.9 GiB. Slower, but it finishes.
         CAP_MEM=4G CAP_CPU_PCT=20 "$capped" \
-            "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}"
+            "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" \
+            --max-workers=2 \
+            -Dorg.gradle.parallel=false \
+            -Dorg.gradle.jvmargs="-Xmx1536m -Dfile.encoding=UTF-8" \
+            -Dkotlin.daemon.jvm.options=-Xmx1024m
     else
         "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}"
     fi

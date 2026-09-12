@@ -14,3 +14,5 @@ gradle/wrapper/gradle-wrapper.jar
 # verifier diffs against; both are rebased in from upstream.
 app/src/main/ic_launcher-web.png
 data/src/main/sqldelight/*.db
+# Vendored Maven artifacts JitPack can no longer serve (see settings.gradle.kts).
+gradle/vendored-m2/*

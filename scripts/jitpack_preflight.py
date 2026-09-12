@@ -25,6 +25,7 @@ JITPACK = "https://www.jitpack.io"
 #: one of these is not JitPack's and is skipped.
 OTHER_REPOS = ("https://repo1.maven.org/maven2", "https://plugins.gradle.org/m2")
 TIMEOUT = 60.0
+VENDORED = Path("gradle/vendored-m2")
 DEFAULT_CATALOGS = (
     "gradle/libs.versions.toml",
     "gradle/mihon.versions.toml",
@@ -60,6 +61,13 @@ def jitpack_coordinates(catalog: Path) -> list[tuple[str, str, str]]:
     return found
 
 
+def vendored(group: str, artifact: str, version: str) -> bool:
+    """True when settings.gradle.kts serves this artifact from gradle/vendored-m2."""
+    return (
+        VENDORED / group.replace(".", "/") / artifact / version / f"{artifact}-{version}.pom"
+    ).is_file()
+
+
 def pom_url(repo: str, group: str, artifact: str, version: str) -> str:
     return f"{repo}/{group.replace('.', '/')}/{artifact}/{version}/{artifact}-{version}.pom"
 
@@ -84,6 +92,9 @@ def main(argv: list[str]) -> int:
     failures = 0
     for catalog in catalogs:
         for group, artifact, version in jitpack_coordinates(catalog):
+            if vendored(group, artifact, version):
+                print(f"  ok  vendored    {group}:{artifact}:{version}")
+                continue
             # A `com.github.*` group is not always JitPack: ben-manes'
             # versions plugin publishes to the plugin portal under that name.
             if any(pom_status(pom_url(r, group, artifact, version)) == 200 for r in OTHER_REPOS):

@@ -23,6 +23,14 @@ dependencyResolutionManagement {
 
     @Suppress("UnstableApiUsage")
     repositories {
+        // SY fork (kuhy): artifacts JitPack can no longer build. JitPack
+        // rebuilt com.github.arkon.FlexibleAdapter:flexible-adapter:c8013533
+        // on 2026-09-12, the rebuild failed, and every fresh runner has
+        // received a stub POM since; the AAR here is the last good build.
+        // Listed first so the vendored copy wins over the broken one.
+        maven(url = uri("gradle/vendored-m2")) {
+            content { includeGroup("com.github.arkon.FlexibleAdapter") }
+        }
         google()
         mavenCentral()
         maven(url = "https://www.jitpack.io")

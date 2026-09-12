@@ -22,3 +22,7 @@
 *.woff binary
 *.pyc binary
 *.swp binary
+
+# Vendored Maven artifacts (gradle/vendored-m2): text=auto above would CRLF-mangle them
+*.aar binary
+*.pom text eol=lf
