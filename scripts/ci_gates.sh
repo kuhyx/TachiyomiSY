@@ -111,6 +111,13 @@ build_inputs_changed() {
     echo "$changed" | sed 's/^/  /' | head -20
 }
 
+jitpack_preflight() {
+    # JitPack evicts builds it has not served for a while and Gradle then
+    # says "Could not find", which reads like a catalog typo. Ask first.
+    banner "jitpack artifacts are served"
+    python3 "$REPO_ROOT/scripts/jitpack_preflight.py"
+}
+
 gradle_gate() {
     banner "gradle $GRADLE_TASKS"
     local ci_jdk="/usr/lib/jvm/java-17-openjdk"
@@ -138,6 +145,7 @@ main() {
         RUN_GRADLE=0
     fi
     if [[ "$RUN_GRADLE" -eq 1 ]]; then
+        jitpack_preflight
         gradle_gate
     fi
     banner "all gates green"
