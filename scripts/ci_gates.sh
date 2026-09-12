@@ -29,15 +29,10 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly REPO_ROOT
+# shellcheck source=scripts/capped_modules.sh
+source "$REPO_ROOT/scripts/capped_modules.sh"
 RUN_GRADLE=1
 CHANGED_ONLY=0
-#: Gradle modules already brought under the 250-line cap. The cap is enforced
-#: on everything outside the module directories plus these; a module is
-#: appended in the same commit that makes it clean, and the list only grows.
-#: Rollout order (AGENTS.md): gradle/build-logic source-api core-metadata
-#: core/common domain data presentation-core presentation-widget
-#: source-local i18n i18n-sy baseline-profile app.
-readonly CAPPED_MODULES=()
 GRADLE_TASKS="${GRADLE_TASKS:-check}"
 #: Paths whose change makes the Gradle gate necessary.
 readonly BUILD_INPUTS=('*.kt' '*.kts' '*.java' '*.toml' '*.xml' '*.properties' '*.pro' 'gradlew')
@@ -58,21 +53,6 @@ banner() {
     echo "== $1"
 }
 
-uncapped_module_pattern() {
-    # ERE matching paths under modules NOT yet on the cap, e.g.
-    # ^(app|core/common)/ -- a module dir is wherever a build.gradle.kts is.
-    local dir name pattern=""
-    while IFS= read -r dir; do
-        name="${dir#"$REPO_ROOT"/}"
-        name="${name%/build.gradle.kts}"
-        if [[ " ${CAPPED_MODULES[*]:-} " == *" $name "* ]]; then
-            continue
-        fi
-        pattern="${pattern:+$pattern|}$name"
-    done < <(find "$REPO_ROOT" -mindepth 2 -maxdepth 4 -name build.gradle.kts -not -path '*/build/*' | sort)
-    echo "^($pattern)/"
-}
-
 shell_gates() {
     banner "file length <= 250 lines (root + capped modules)"
     local skip
@@ -88,6 +68,16 @@ shell_gates() {
     banner "no binaries outside .binary-allowlist"
     git -C "$REPO_ROOT" ls-files -z |
         xargs -0 bash "$REPO_ROOT/scripts/check_no_binaries.sh"
+
+    banner "dependencies on newest stable"
+    # --strict only where a network is guaranteed: offline the gate degrades
+    # to its cached answer, and a hook that hard-failed on a flaky connection
+    # would leave no way to push, since --no-verify is banned.
+    local strict=()
+    if [[ -n "${CI:-}" ]]; then
+        strict=(--strict)
+    fi
+    bash "$REPO_ROOT/scripts/check_dependency_freshness.sh" --all "${strict[@]}"
 }
 
 push_range() {

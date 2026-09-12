@@ -1,0 +1,25 @@
+# Dependency-freshness exceptions for this fork. Shared fleet-wide entries are
+# inherited from ~/src/utils; a repo entry for the same package overrides one.
+#
+# `upstream:` entries hold only while jobobby04/TachiyomiSY's own catalog pins
+# the same version; the gate exits 2 the day upstream bumps, which is the
+# signal to take the release here too.
+exceptions:
+  - ecosystem: maven
+    package: dev.icerock.moko:resources
+    pinned: "0.26.4"
+    reason: >-
+      moko-resources 0.27.0 generates every resource accessor as a top-level
+      extension property that must be imported per file: 1373 string keys
+      across 308 files here, no compatibility switch, and every future upstream
+      commit that uses a new string would fail to compile in the fork until an
+      import is added. Mihon and TachiyomiSY are both still on 0.26.4; the fork
+      follows the moment they move.
+    blocked_by: upstream:jobobby04/TachiyomiSY
+  - ecosystem: maven
+    package: dev.icerock.mobile.multiplatform-resources:dev.icerock.mobile.multiplatform-resources.gradle.plugin
+    pinned: "0.26.4"
+    reason: >-
+      The Gradle plugin half of moko-resources; same version, same reason as
+      dev.icerock.moko:resources above.
+    blocked_by: upstream:jobobby04/TachiyomiSY

@@ -23,11 +23,13 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalSlider
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -77,16 +79,14 @@ fun ChapterNavigator(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    val state = remember(totalPages) {
-        SliderState(
+    val state = key(totalPages) {
+        rememberSliderState(
             value = currentPage.toFloat(),
             steps = totalPages - 2,
-            valueRange = 1f..totalPages.toFloat(),
+            trackRange = 1f..totalPages.toFloat(),
         )
     }
     state.value = currentPage.toFloat()
-    state.onValueChange = { onPageIndexChange(it.roundToInt() - 1) }
-    state.onValueChangeFinished = onPageIndexChangeFinished
 
     val interactionSource = remember { MutableInteractionSource() }
     val sliderDragged by interactionSource.collectIsDraggedAsState()
@@ -112,6 +112,8 @@ fun ChapterNavigator(
         HorizontalChapterNavigator(
             isRtl = type == ChapterNavigatorType.HORIZONTAL_RTL,
             state = state,
+            onPageIndexChange = onPageIndexChange,
+            onPageIndexChangeFinished = onPageIndexChangeFinished,
             onNextChapter = onNextChapter,
             enabledNext = enabledNext,
             onPreviousChapter = onPreviousChapter,
@@ -129,6 +131,8 @@ fun ChapterNavigator(
     } else {
         VerticalChapterNavigator(
             state = state,
+            onPageIndexChange = onPageIndexChange,
+            onPageIndexChangeFinished = onPageIndexChangeFinished,
             onNextChapter = onNextChapter,
             enabledNext = enabledNext,
             onPreviousChapter = onPreviousChapter,
@@ -150,6 +154,8 @@ fun ChapterNavigator(
 fun HorizontalChapterNavigator(
     isRtl: Boolean,
     state: SliderState,
+    onPageIndexChange: (Int) -> Unit,
+    onPageIndexChangeFinished: () -> Unit,
     onNextChapter: () -> Unit,
     enabledNext: Boolean,
     onPreviousChapter: () -> Unit,
@@ -206,6 +212,8 @@ fun HorizontalChapterNavigator(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(horizontal = 8.dp),
+                            onValueChange = { onPageIndexChange(it.roundToInt() - 1) },
+                            onValueChangeFinished = onPageIndexChangeFinished,
                             interactionSource = interactionSource,
                         )
 
@@ -235,6 +243,8 @@ fun HorizontalChapterNavigator(
 @Composable
 fun VerticalChapterNavigator(
     state: SliderState,
+    onPageIndexChange: (Int) -> Unit,
+    onPageIndexChangeFinished: () -> Unit,
     onNextChapter: () -> Unit,
     enabledNext: Boolean,
     onPreviousChapter: () -> Unit,
@@ -285,6 +295,8 @@ fun VerticalChapterNavigator(
                     modifier = Modifier
                         .weight(1f)
                         .padding(vertical = 8.dp),
+                    onValueChange = { onPageIndexChange(it.roundToInt() - 1) },
+                    onValueChangeFinished = onPageIndexChangeFinished,
                     interactionSource = interactionSource,
                 )
 
