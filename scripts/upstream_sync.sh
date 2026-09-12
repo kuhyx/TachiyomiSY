@@ -54,8 +54,10 @@ require_branch() {
         echo "Error: run from $BRANCH, not $current" >&2
         exit 1
     fi
-    if [[ -n "$(git status --porcelain)" ]]; then
-        echo "Error: working tree is not clean" >&2
+    # Tracked files only: a rebase is unsafe with local edits, but an
+    # untracked log or the CI's .utils checkout is not local state.
+    if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+        echo "Error: tracked files have local changes" >&2
         exit 1
     fi
 }

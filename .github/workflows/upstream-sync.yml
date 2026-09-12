@@ -60,7 +60,7 @@ jobs:
         # "crashed" on a sync that had actually said status=current.
         run: |
           set -o pipefail
-          SYNC_OUTPUT="$GITHUB_OUTPUT" bash scripts/upstream_sync.sh 2>&1 | tee sync.log
+          SYNC_OUTPUT="$GITHUB_OUTPUT" bash scripts/upstream_sync.sh 2>&1 | tee "$RUNNER_TEMP/sync.log"
 
       - name: Report the outcome as an issue
         env:
