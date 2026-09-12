@@ -55,10 +55,12 @@ jobs:
         continue-on-error: true
         env:
           UTILS_ROOT: ${{ github.workspace }}/.utils
-          SYNC_OUTPUT: ${{ github.output }}
+        # $GITHUB_OUTPUT is an env var, not an expression context: the first
+        # run passed `${{ github.output }}`, got an empty path, and reported
+        # "crashed" on a sync that had actually said status=current.
         run: |
           set -o pipefail
-          bash scripts/upstream_sync.sh 2>&1 | tee sync.log
+          SYNC_OUTPUT="$GITHUB_OUTPUT" bash scripts/upstream_sync.sh 2>&1 | tee sync.log
 
       - name: Report the outcome as an issue
         env:
