@@ -123,3 +123,11 @@ See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
 
 [See our website.](https://mihon.app/)
 You can also reach out to us on [Discord](https://discord.gg/mihon).
+
+## kuhy fork
+
+This is [kuhyx/TachiyomiSY](https://github.com/kuhyx/TachiyomiSY), a fork that
+tracks upstream daily (`.github/workflows/upstream-sync.yml`) and publishes a
+signed drop-in replacement build on every green commit
+(`.github/workflows/release.yml`, prereleases tagged `v<version>-kuhy.<run>`).
+The fork's own rules and commands are in `AGENTS.md`.

@@ -1,0 +1,16 @@
+# Binaries the app genuinely ships. Everything else is blocked by
+# scripts/check_no_binaries.sh (shared gate in ~/src/utils). One glob per line.
+#
+# Launcher icons, notification icons and widget artwork are Android resources
+# the build needs in place; the README screenshots are upstream's and get
+# rebased in with every sync.
+app/src/*/res/mipmap-*/*
+app/src/*/res/drawable*/*
+presentation-widget/src/main/res/drawable*/*
+.github/readme-images/*
+.idea/icon.png
+gradle/wrapper/gradle-wrapper.jar
+# Upstream's Play Store icon and the SQLDelight schema snapshot the migration
+# verifier diffs against; both are rebased in from upstream.
+app/src/main/ic_launcher-web.png
+data/src/main/sqldelight/*.db

@@ -19,3 +19,5 @@ local.properties
 google-services.json
 /app/src/main/assets/client_secrets.json
 *.apk
+# kuhy fork: CI checks out github.com/kuhyx/utils here for the shared gates
+.utils

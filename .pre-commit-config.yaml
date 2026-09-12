@@ -1,0 +1,60 @@
+# Pre-commit configuration for the kuhy TachiyomiSY fork.
+#
+# Install:  scripts/install_hooks.sh
+# Run:      pre-commit run --all-files
+#
+# Only NON-MUTATING checks belong here. This tree is rebased onto upstream
+# daily; a hook that rewrites tracked files (whitespace fixers, formatters)
+# would edit upstream's files and turn every sync into a conflict.
+
+default_stages: [pre-commit]
+fail_fast: true
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: check-added-large-files
+        args: [--maxkb=2000]
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+
+  - repo: local
+    hooks:
+      # All four gates are thin delegates to ~/src/utils, which owns the rules
+      # so that one repo's idea of "too long", "badly named" or "binary"
+      # cannot drift from every other repo's.
+      - id: no-binaries
+        name: no binary / image files
+        entry: scripts/check_no_binaries.sh
+        language: system
+
+      - id: file-length
+        name: file length <= 250 lines
+        entry: scripts/check_file_length.sh
+        language: system
+
+      - id: md-naming
+        name: markdown naming convention
+        entry: scripts/check_md_naming.sh
+        language: system
+        files: \.(md|markdown)$
+
+      # The same gates CI runs, before the push that would trigger CI. The
+      # Gradle half runs under capped.sh locally and takes well over ten
+      # minutes, so it only runs when the pushed range touches build inputs
+      # (Kotlin, Gradle, resources); a docs-only push pays seconds.
+      - id: ci-gates
+        name: CI gates (file-length, md-naming, binaries, gradle when needed)
+        entry: bash scripts/ci_gates.sh --changed-only
+        language: system
+        pass_filenames: false
+        always_run: true
+        require_serial: true
+        stages: [pre-push]

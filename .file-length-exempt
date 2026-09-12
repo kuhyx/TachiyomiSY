@@ -1,0 +1,8 @@
+# Repo-local exemptions from the shared 250-line cap. One glob per line,
+# relative to the repo root, and every entry MUST carry a "# reason": the
+# gate (~/src/utils/file_length) refuses a bare glob as a suppression.
+#
+# Keep this list short. Anything that is code goes on the split list in
+# AGENTS.md, not here.
+
+app/src/main/java/exh/eh/tags/*.kt   # e-hentai tag tables: 6000-line string arrays regenerated upstream, data not code

@@ -1,0 +1,90 @@
+name: upstream sync
+
+# Daily: rebase this fork's commits onto jobobby04/TachiyomiSY master, run
+# every gate, and force-push master only when green. A conflict or a red
+# gate opens (or updates) one issue labelled `upstream-sync` and leaves
+# master untouched; the next green run closes it.
+#
+# The logic is in scripts/upstream_sync.sh so it can be run by hand with
+# --dry-run. This file only wires the runner, the token, and the issue.
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+jobs:
+  sync:
+    name: rebase onto upstream, gate, push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Check out the shared gates
+        uses: actions/checkout@v7
+        with:
+          repository: kuhyx/utils
+          path: .utils
+
+      - uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Identify the rebase author
+        run: |
+          git config user.name "upstream-sync[bot]"
+          git config user.email "upstream-sync@users.noreply.github.com"
+
+      - name: Fetch, rebase, gate, push
+        id: sync
+        continue-on-error: true
+        env:
+          UTILS_ROOT: ${{ github.workspace }}/.utils
+          SYNC_OUTPUT: ${{ github.output }}
+        run: |
+          set -o pipefail
+          bash scripts/upstream_sync.sh 2>&1 | tee sync.log
+
+      - name: Report the outcome as an issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS: ${{ steps.sync.outputs.status }}
+          CONFLICTS: ${{ steps.sync.outputs.conflicts }}
+          UPSTREAM_SHA: ${{ steps.sync.outputs.upstream_sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash scripts/upstream_sync_issue.sh
+
+      # A push made with GITHUB_TOKEN does not fire `on: push` workflows, so
+      # the release build is dispatched explicitly (workflow_dispatch is the
+      # documented exception to that rule).
+      - name: Publish the rebased build
+        if: steps.sync.outputs.status == 'pushed'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run release.yml --ref master
+          gh workflow run ci.yml --ref master
+
+      - name: Fail the job unless the fork is on top of upstream
+        env:
+          STATUS: ${{ steps.sync.outputs.status }}
+        run: |
+          case "$STATUS" in
+            current|pushed) echo "status=$STATUS" ;;
+            *) echo "::error::upstream sync ended with status '$STATUS'"; exit 1 ;;
+          esac

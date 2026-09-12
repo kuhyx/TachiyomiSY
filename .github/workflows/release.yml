@@ -1,0 +1,125 @@
+name: release
+
+# Builds the drop-in replacement APK (-PsyReplaceUpstream: same applicationId
+# as the official app, signed with the shared kuhy release key so it upgrades
+# in place), verifies the signature, and publishes it as a prerelease
+# `v<versionName>-kuhy.<run>` -- the same shape as the other kuhy Android
+# repos. Runs on every push to master and when the upstream sync dispatches
+# it after a green rebase.
+#
+# versionCode stays upstream's: Android only refuses downgrades, so an equal
+# code installs over the previous build, and bumping it would race upstream.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: signed drop-in APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Read versionName from the app module
+        id: ver
+        run: |
+          set -euo pipefail
+          name=$(grep -m1 -E '^\s*versionName = "' app/build.gradle.kts | sed -E 's/.*"([^"]+)".*/\1/')
+          if ! echo "$name" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::versionName '$name' is not X.Y.Z"; exit 1
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      # One step, no echoes, printf-into-file: the key must never reach the
+      # log. app/build.gradle.kts reads ~/.android/release/key.properties and
+      # resolves storeFile with file(), so the path is absolute.
+      - name: Materialise the release keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set; refusing to publish."
+            exit 1
+          fi
+          umask 077
+          mkdir -p "$HOME/.android/release"
+          ks="$HOME/.android/release/kuhy-release.jks"
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$ks"
+          {
+            printf 'storeFile=%s\n' "$ks"
+            printf 'storePassword=%s\n' "$STORE_PASS"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'keyPassword=%s\n' "$KEY_PASS"
+          } > "$HOME/.android/release/key.properties"
+          ls -l "$ks"
+
+      - name: Build the signed drop-in APK
+        run: |
+          ./gradlew assembleFoss -PsyReplaceUpstream \
+            -PsyBuildNumber="${{ github.run_number }}"
+
+      # Fail closed: if key.properties went missing the build type falls back
+      # to no signing config and the APK would be unsigned or debug-signed,
+      # which is a green build that can never be installed over. The cert
+      # digest is the canonical one every kuhy Android repo must match.
+      - name: Verify the APK is release-signed with the shared key
+        run: |
+          set -euo pipefail
+          apk=app/build/outputs/apk/foss/app-universal-foss.apk
+          signer=$(ls -d "$ANDROID_SDK_ROOT"/build-tools/* | sort -V | tail -1)/apksigner
+          "$signer" verify --print-certs "$apk" | tee /tmp/certs.txt
+          if grep -qi 'CN=Android Debug' /tmp/certs.txt; then
+            echo "::error::APK is debug-signed; not publishing."; exit 1
+          fi
+          if ! grep -q '9dcc2e6c053c44bb0507903b9dd351015ea7d4315b6ee6c853dd8d807b98f846' /tmp/certs.txt; then
+            echo "::error::APK is not signed with the shared kuhy release key."; exit 1
+          fi
+
+      - name: Shred the signing material
+        if: always()
+        run: rm -rf "$HOME/.android/release"
+
+      - name: Name the assets
+        id: art
+        run: |
+          set -euo pipefail
+          stem="TachiyomiSY-kuhy-${{ steps.ver.outputs.name }}.${{ github.run_number }}"
+          cp app/build/outputs/apk/foss/app-universal-foss.apk "$stem.apk"
+          cp app/build/outputs/apk/foss/app-arm64-v8a-foss.apk "$stem-arm64-v8a.apk"
+          echo "universal=$stem.apk" >> "$GITHUB_OUTPUT"
+          echo "arm64=$stem-arm64-v8a.apk" >> "$GITHUB_OUTPUT"
+
+      # Prerelease only. Upstream's own vX.Y.Z tags are fetched into this
+      # fork, so a "clean" tag would collide with theirs.
+      - name: Publish the per-build prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="v${{ steps.ver.outputs.name }}-kuhy.${{ github.run_number }}"
+          gh release create "$tag" \
+            "${{ steps.art.outputs.universal }}" "${{ steps.art.outputs.arm64 }}" \
+            --prerelease \
+            --target "${{ github.sha }}" \
+            --title "$tag" \
+            --notes "Drop-in build of ${{ github.sha }} (versionName ${{ steps.ver.outputs.name }}-kuhy.${{ github.run_number }})."
