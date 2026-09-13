@@ -20,48 +20,47 @@ import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.coroutines.resumeWithException
 
+/** The JSON media type with UTF-8 charset. */
 public val jsonMime: MediaType = "application/json; charset=utf-8".toMediaType()
 
+/** Runs the call as an RxJava observable that emits the response. */
 @OptIn(ExperimentalAtomicApi::class)
 @Deprecated("Use suspend APIs instead")
-public fun Call.asObservable(): Observable<Response> {
-    return Observable.unsafeCreate { subscriber ->
-        // Since Call is a one-shot type, clone it for each new subscriber.
-        val call = clone()
+public fun Call.asObservable(): Observable<Response> = Observable.unsafeCreate { subscriber ->
+    // Since Call is a one-shot type, clone it for each new subscriber.
+    val call = clone()
 
-        // Wrap the call in a helper which handles both unsubscription and backpressure.
-        val requestArbiter = object : Producer, Subscription {
-            val boolean = AtomicBoolean(false)
-            override fun request(n: Long) {
-                if (n == 0L || !boolean.compareAndSet(expectedValue = false, newValue = true)) return
+    // Wrap the call in a helper which handles both unsubscription and backpressure.
+    val requestArbiter = object : Producer, Subscription {
+        val boolean = AtomicBoolean(false)
+        override fun request(n: Long) {
+            if (n == 0L || !boolean.compareAndSet(expectedValue = false, newValue = true)) return
 
-                try {
-                    val response = call.execute()
-                    if (!subscriber.isUnsubscribed) {
-                        subscriber.onNext(response)
-                        subscriber.onCompleted()
-                    }
-                } catch (e: Exception) {
-                    if (!subscriber.isUnsubscribed) {
-                        subscriber.onError(e)
-                    }
+            try {
+                val response = call.execute()
+                if (!subscriber.isUnsubscribed) {
+                    subscriber.onNext(response)
+                    subscriber.onCompleted()
                 }
-            }
-
-            override fun unsubscribe() {
-                call.cancel()
-            }
-
-            override fun isUnsubscribed(): Boolean {
-                return call.isCanceled()
+            } catch (e: Exception) {
+                if (!subscriber.isUnsubscribed) {
+                    subscriber.onError(e)
+                }
             }
         }
 
-        subscriber.add(requestArbiter)
-        subscriber.setProducer(requestArbiter)
+        override fun unsubscribe() {
+            call.cancel()
+        }
+
+        override fun isUnsubscribed(): Boolean = call.isCanceled()
     }
+
+    subscriber.add(requestArbiter)
+    subscriber.setProducer(requestArbiter)
 }
 
+/** Like [asObservable] but errors with [HttpException] on a non-2xx response. */
 @Deprecated("Use suspend APIs instead")
 public fun Call.asObservableSuccess(): Observable<Response> {
     @Suppress("DEPRECATION")
@@ -75,8 +74,8 @@ public fun Call.asObservableSuccess(): Observable<Response> {
 
 // Based on https://github.com/square/okhttp/blob/master/okhttp-coroutines/src/main/kotlin/okhttp3/coroutines/ExecuteAsync.kt
 // and https://github.com/gildor/kotlin-coroutines-okhttp
-private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
-    return suspendCancellableCoroutine { continuation ->
+private suspend fun Call.await(callStack: Array<StackTraceElement>): Response =
+    suspendCancellableCoroutine { continuation ->
         continuation.invokeOnCancellation {
             try {
                 this.cancel()
@@ -99,18 +98,18 @@ private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
             }
         })
     }
-}
 
+/** Runs the call, cancelling it when the coroutine is cancelled. */
 public suspend fun Call.await(): Response {
-    val callStack = Exception().stackTrace.run { copyOfRange(1, size) }
+    val callStack = Exception("call site").stackTrace.run { copyOfRange(1, size) }
     return await(callStack)
 }
 
 /**
- * Similar to [await] but throws [HttpException] if [Response.isSuccessful] returns false
+ * Similar to [await] but throws [HttpException] if [Response.isSuccessful] returns false.
  */
 public suspend fun Call.awaitSuccess(): Response {
-    val callStack = Exception().stackTrace.run { copyOfRange(1, size) }
+    val callStack = Exception("call site").stackTrace.run { copyOfRange(1, size) }
     val response = await(callStack)
     if (!response.isSuccessful) {
         response.close()
@@ -119,6 +118,7 @@ public suspend fun Call.awaitSuccess(): Response {
     return response
 }
 
+/** A call that bypasses the cache and reports download progress to [listener]. */
 public fun OkHttpClient.newCachelessCallWithProgress(
     request: Request,
     listener: ProgressListener,
@@ -146,11 +146,11 @@ public fun OkHttpClient.newCachelessCallWithProgress(
     return progressClient.newCall(request)
 }
 
+/** Decodes the JSON body as [T] with the contextual [Json]. */
 context(_: Json)
-public inline fun <reified T> Response.parseAs(): T {
-    return decodeFromJsonResponse(serializer(), this)
-}
+public inline fun <reified T> Response.parseAs(): T = decodeFromJsonResponse(serializer(), this)
 
+/** Decodes the JSON body of [response] with [deserializer] using the contextual [Json]. */
 context(json: Json)
 public fun <T> decodeFromJsonResponse(
     deserializer: DeserializationStrategy<T>,

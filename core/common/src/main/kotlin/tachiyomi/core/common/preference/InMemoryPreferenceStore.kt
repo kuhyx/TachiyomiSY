@@ -7,9 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 
-/**
- * Local-copy implementation of PreferenceStore mostly for test and preview purposes
- */
+/** Local-copy implementation of PreferenceStore mostly for test and preview purposes. */
 public class InMemoryPreferenceStore(
     initialPreferences: Sequence<InMemoryPreference<*>> = sequenceOf(),
 ) : PreferenceStore {
@@ -91,9 +89,9 @@ public class InMemoryPreferenceStore(
         return if (data == null) default else InMemoryPreference(key, data, defaultValue)
     }
 
-    override fun getAll(): Map<String, *> {
-        return preferences
-    }
+    override fun getAll(): Map<String, *> = preferences
+
+    /** A preference held in memory, for tests and previews. */
 
     public class InMemoryPreference<T>(
         private val key: String,
@@ -114,9 +112,8 @@ public class InMemoryPreferenceStore(
 
         override fun changes(): Flow<T> = flow { data }
 
-        override fun stateIn(scope: CoroutineScope): StateFlow<T> {
-            return changes().stateIn(scope, SharingStarted.Eagerly, get())
-        }
+        override fun stateIn(scope: CoroutineScope): StateFlow<T> =
+            changes().stateIn(scope, SharingStarted.Eagerly, get())
 
         override fun set(value: T) {
             data = value

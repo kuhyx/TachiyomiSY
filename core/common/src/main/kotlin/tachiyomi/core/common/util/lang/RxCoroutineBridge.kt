@@ -21,6 +21,7 @@ import kotlin.coroutines.resumeWithException
  * Util functions for bridging RxJava and coroutines. Taken from TachiyomiEH/SY.
  */
 
+/** Suspends until the observable emits its single value. */
 public suspend fun <T> Observable<T>.awaitSingle(): T = single().awaitOne()
 
 @OptIn(InternalCoroutinesApi::class)
@@ -65,6 +66,7 @@ private suspend fun <T> Observable<T>.awaitOne(): T = suspendCancellableCoroutin
 internal fun <T> CancellableContinuation<T>.unsubscribeOnCancellation(sub: Subscription) =
     invokeOnCancellation { sub.unsubscribe() }
 
+/** Wraps a suspending [block] as a cold observable. */
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 public fun <T> runAsObservable(
     backpressureMode: Emitter.BackpressureMode = Emitter.BackpressureMode.NONE,

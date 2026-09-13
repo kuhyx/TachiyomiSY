@@ -9,6 +9,7 @@ import java.nio.ByteBuffer
 import kotlin.concurrent.Volatile
 import mihon.core.common.archive.ArchiveEntry as MihonArchiveEntry
 
+/** Reads an archive mapped in memory entry by entry through libarchive. */
 public class ArchiveInputStream(
     buffer: Long,
     size: Long,
@@ -68,8 +69,9 @@ public class ArchiveInputStream(
         Archive.readFree(archive)
     }
 
-    public fun getNextEntry(): MihonArchiveEntry? {
-        return Archive.readNextHeader(archive).takeUnless { it == 0L }?.let { entry ->
+    /** Advances to the next entry, or null at the end. */
+    public fun getNextEntry(): MihonArchiveEntry? =
+        Archive.readNextHeader(archive).takeUnless { it == 0L }?.let { entry ->
             val name = ArchiveEntry.pathnameUtf8(entry) ?: ArchiveEntry.pathname(entry)?.decodeToString() ?: return null
             val isFile = ArchiveEntry.filetype(entry) == ArchiveEntry.AE_IFREG
             // SY -->
@@ -83,5 +85,4 @@ public class ArchiveInputStream(
                 // SY <--
             )
         }
-    }
 }

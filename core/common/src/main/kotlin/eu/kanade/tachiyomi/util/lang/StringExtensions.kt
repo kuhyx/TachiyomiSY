@@ -42,9 +42,7 @@ public fun String.compareToCaseInsensitiveNaturalOrder(other: String): Int {
 /**
  * Returns the size of the string as the number of bytes.
  */
-public fun String.byteSize(): Int {
-    return toByteArray(StandardCharsets.UTF_8).size
-}
+public fun String.byteSize(): Int = toByteArray(StandardCharsets.UTF_8).size
 
 /**
  * Returns a string containing the first [n] bytes from this string, or the entire string if this
@@ -60,8 +58,6 @@ public fun String.takeBytes(n: Int): String {
 }
 
 /**
- * HTML-decode the string
+ * HTML-decode the string.
  */
-public fun String.htmlDecode(): String {
-    return this.parseAsHtml().toString()
-}
+public fun String.htmlDecode(): String = this.parseAsHtml().toString()

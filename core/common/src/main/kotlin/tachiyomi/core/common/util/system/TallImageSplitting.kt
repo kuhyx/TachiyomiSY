@@ -14,8 +14,44 @@ import java.io.InputStream
 import java.util.Locale
 import kotlin.math.min
 
+private const val JPEG_QUALITY = 100
+
 /** Splits very tall images into parts the reader can decode one at a time. */
 internal object TallImageSplitting {
+    val BitmapFactory.Options.splitData
+        get(): List<SplitData> {
+            val imageHeight = outHeight
+            val imageWidth = outWidth
+
+            val partCount = TallImageSplitCalculator.calculatePartCount(imageHeight, optimalImageHeight)
+            val optimalSplitHeight = imageHeight / partCount
+
+            logcat {
+                "Generating SplitData for image (height: $imageHeight): " +
+                    "$partCount parts @ ${optimalSplitHeight}px height per part"
+            }
+
+            return buildList {
+                val range = 0..<partCount
+                for (index in range) {
+                    // Only continue if the list is empty or there is image remaining
+                    if (isNotEmpty() && imageHeight <= last().bottomOffset) break
+
+                    val topOffset = index * optimalSplitHeight
+                    var splitHeight = min(optimalSplitHeight, imageHeight - topOffset)
+
+                    if (index == range.last) {
+                        val remainingHeight = imageHeight - (topOffset + splitHeight)
+                        splitHeight += remainingHeight
+                    }
+
+                    add(SplitData(index, topOffset, splitHeight, imageWidth))
+                }
+            }
+        }
+
+    val optimalImageHeight = getDisplayMaxHeightInPx * 2
+
     /**
      * Check whether the image is considered a tall image.
      *
@@ -31,7 +67,7 @@ internal object TallImageSplitting {
     }
 
     /**
-     * Splits tall images to improve performance of reader
+     * Splits tall images to improve performance of reader.
      */
     fun splitTallImage(
         tmpDir: UniFile,
@@ -66,7 +102,7 @@ internal object TallImageSplitting {
 
                 splitFile.openOutputStream().use { outputStream ->
                     val splitBitmap = bitmapRegionDecoder.decodeRegion(region, options)
-                    splitBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                    splitBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, outputStream)
                     splitBitmap.recycle()
                 }
                 logcat {
@@ -93,38 +129,6 @@ internal object TallImageSplitting {
         index + 1,
     )}.jpg"
 
-    val BitmapFactory.Options.splitData
-        get(): List<SplitData> {
-            val imageHeight = outHeight
-            val imageWidth = outWidth
-
-            val partCount = TallImageSplitCalculator.calculatePartCount(imageHeight, optimalImageHeight)
-            val optimalSplitHeight = imageHeight / partCount
-
-            logcat {
-                "Generating SplitData for image (height: $imageHeight): " +
-                    "$partCount parts @ ${optimalSplitHeight}px height per part"
-            }
-
-            return buildList {
-                val range = 0..<partCount
-                for (index in range) {
-                    // Only continue if the list is empty or there is image remaining
-                    if (isNotEmpty() && imageHeight <= last().bottomOffset) break
-
-                    val topOffset = index * optimalSplitHeight
-                    var splitHeight = min(optimalSplitHeight, imageHeight - topOffset)
-
-                    if (index == range.last) {
-                        val remainingHeight = imageHeight - (topOffset + splitHeight)
-                        splitHeight += remainingHeight
-                    }
-
-                    add(SplitData(index, topOffset, splitHeight, imageWidth))
-                }
-            }
-        }
-
     fun getBitmapRegionDecoder(imageStream: InputStream): BitmapRegionDecoder? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             BitmapRegionDecoder.newInstance(imageStream)
@@ -133,6 +137,4 @@ internal object TallImageSplitting {
             BitmapRegionDecoder.newInstance(imageStream, false)
         }
     }
-
-    val optimalImageHeight = getDisplayMaxHeightInPx * 2
 }

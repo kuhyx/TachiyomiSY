@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import tachiyomi.core.common.util.system.logcat
 
+/** A [Preference] stored in [SharedPreferences], one subclass per storage type. */
 public sealed class AndroidPreference<T>(
     private val preferences: SharedPreferences,
     private val keyFlow: Flow<String?>,
@@ -21,31 +22,27 @@ public sealed class AndroidPreference<T>(
     private val defaultValue: T,
 ) : Preference<T> {
 
+    /** Reads the stored value or [defaultValue]. */
     public abstract fun read(preferences: SharedPreferences, key: String, defaultValue: T): T
 
+    /** The editor action that stores [value]. */
     public abstract fun write(key: String, value: T): Editor.() -> Unit
 
-    override fun key(): String {
-        return key
-    }
+    override fun key(): String = key
 
-    override fun get(): T {
-        return try {
-            read(preferences, key, defaultValue)
-        } catch (e: ClassCastException) {
-            logcat { "Invalid value for $key; deleting" }
-            delete()
-            defaultValue
-        }
+    override fun get(): T = try {
+        read(preferences, key, defaultValue)
+    } catch (_: ClassCastException) {
+        logcat { "Invalid value for $key; deleting" }
+        delete()
+        defaultValue
     }
 
     override fun set(value: T) {
         preferences.edit(action = write(key, value))
     }
 
-    override fun isSet(): Boolean {
-        return preferences.contains(key)
-    }
+    override fun isSet(): Boolean = preferences.contains(key)
 
     override fun delete() {
         preferences.edit {
@@ -53,22 +50,17 @@ public sealed class AndroidPreference<T>(
         }
     }
 
-    override fun defaultValue(): T {
-        return defaultValue
-    }
+    override fun defaultValue(): T = defaultValue
 
-    override fun changes(): Flow<T> {
-        return keyFlow
-            .filter { it == key || it == null }
-            .onStart { emit("ignition") }
-            .map { get() }
-            .conflate()
-    }
+    override fun changes(): Flow<T> = keyFlow
+        .filter { it == key || it == null }
+        .onStart { emit("ignition") }
+        .map { get() }
+        .conflate()
 
-    override fun stateIn(scope: CoroutineScope): StateFlow<T> {
-        return changes().stateIn(scope, SharingStarted.Eagerly, get())
-    }
+    override fun stateIn(scope: CoroutineScope): StateFlow<T> = changes().stateIn(scope, SharingStarted.Eagerly, get())
 
+    /** A string preference. */
     public class StringPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
@@ -88,51 +80,52 @@ public sealed class AndroidPreference<T>(
         }
     }
 
+    /** A long preference. */
     public class LongPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
         defaultValue: Long,
     ) : AndroidPreference<Long>(preferences, keyFlow, key, defaultValue) {
-        override fun read(preferences: SharedPreferences, key: String, defaultValue: Long): Long {
-            return preferences.getLong(key, defaultValue)
-        }
+        override fun read(preferences: SharedPreferences, key: String, defaultValue: Long): Long =
+            preferences.getLong(key, defaultValue)
 
         override fun write(key: String, value: Long): Editor.() -> Unit = {
             putLong(key, value)
         }
     }
 
+    /** An int preference. */
     public class IntPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
         defaultValue: Int,
     ) : AndroidPreference<Int>(preferences, keyFlow, key, defaultValue) {
-        override fun read(preferences: SharedPreferences, key: String, defaultValue: Int): Int {
-            return preferences.getInt(key, defaultValue)
-        }
+        override fun read(preferences: SharedPreferences, key: String, defaultValue: Int): Int =
+            preferences.getInt(key, defaultValue)
 
         override fun write(key: String, value: Int): Editor.() -> Unit = {
             putInt(key, value)
         }
     }
 
+    /** A float preference. */
     public class FloatPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
         defaultValue: Float,
     ) : AndroidPreference<Float>(preferences, keyFlow, key, defaultValue) {
-        override fun read(preferences: SharedPreferences, key: String, defaultValue: Float): Float {
-            return preferences.getFloat(key, defaultValue)
-        }
+        override fun read(preferences: SharedPreferences, key: String, defaultValue: Float): Float =
+            preferences.getFloat(key, defaultValue)
 
         override fun write(key: String, value: Float): Editor.() -> Unit = {
             putFloat(key, value)
         }
     }
 
+    /** A boolean preference. */
     public class BooleanPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
@@ -152,6 +145,7 @@ public sealed class AndroidPreference<T>(
         }
     }
 
+    /** A string-set preference. */
     public class StringSetPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
@@ -171,6 +165,7 @@ public sealed class AndroidPreference<T>(
         }
     }
 
+    /** An object stored through a string conversion. */
     public class ObjectAsString<T>(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
@@ -179,12 +174,10 @@ public sealed class AndroidPreference<T>(
         private val serializer: (T) -> String,
         private val deserializer: (String) -> T,
     ) : AndroidPreference<T>(preferences, keyFlow, key, defaultValue) {
-        override fun read(preferences: SharedPreferences, key: String, defaultValue: T): T {
-            return try {
-                preferences.getString(key, null)?.let(deserializer) ?: defaultValue
-            } catch (e: Exception) {
-                defaultValue
-            }
+        override fun read(preferences: SharedPreferences, key: String, defaultValue: T): T = try {
+            preferences.getString(key, null)?.let(deserializer) ?: defaultValue
+        } catch (_: Exception) {
+            defaultValue
         }
 
         override fun write(key: String, value: T): Editor.() -> Unit = {
@@ -192,6 +185,7 @@ public sealed class AndroidPreference<T>(
         }
     }
 
+    /** An object stored through an int conversion. */
     public class ObjectAsInt<T>(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
@@ -200,12 +194,10 @@ public sealed class AndroidPreference<T>(
         private val serializer: (T) -> Int,
         private val deserializer: (Int) -> T,
     ) : AndroidPreference<T>(preferences, keyFlow, key, defaultValue) {
-        override fun read(preferences: SharedPreferences, key: String, defaultValue: T): T {
-            return try {
-                if (preferences.contains(key)) preferences.getInt(key, 0).let(deserializer) else defaultValue
-            } catch (e: Exception) {
-                defaultValue
-            }
+        override fun read(preferences: SharedPreferences, key: String, defaultValue: T): T = try {
+            if (preferences.contains(key)) preferences.getInt(key, 0).let(deserializer) else defaultValue
+        } catch (_: Exception) {
+            defaultValue
         }
 
         override fun write(key: String, value: T): Editor.() -> Unit = {
@@ -213,6 +205,7 @@ public sealed class AndroidPreference<T>(
         }
     }
 
+    /** A set of objects stored through string conversions. */
     public class ObjectSetAsStringSet<T>(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
@@ -221,12 +214,10 @@ public sealed class AndroidPreference<T>(
         private val serializer: (T) -> String,
         private val deserializer: (String) -> T?,
     ) : AndroidPreference<Set<T>>(preferences, keyFlow, key, defaultValue) {
-        override fun read(preferences: SharedPreferences, key: String, defaultValue: Set<T>): Set<T> {
-            return try {
-                preferences.getStringSet(key, null)?.mapNotNull(deserializer)?.toSet() ?: defaultValue
-            } catch (_: Exception) {
-                defaultValue
-            }
+        override fun read(preferences: SharedPreferences, key: String, defaultValue: Set<T>): Set<T> = try {
+            preferences.getStringSet(key, null)?.mapNotNull(deserializer)?.toSet() ?: defaultValue
+        } catch (_: Exception) {
+            defaultValue
         }
 
         override fun write(key: String, value: Set<T>): Editor.() -> Unit = {

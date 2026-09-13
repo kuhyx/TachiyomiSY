@@ -19,7 +19,7 @@ import kotlin.math.abs
 /** Picks the page background that best continues a page's edges. */
 internal object ImageBackground {
     /**
-     * Algorithm for determining what background to accompany a comic/manga page
+     * Algorithm for determining what background to accompany a comic/manga page.
      */
     fun chooseBackground(context: Context, imageSource: BufferedSource): Drawable {
         val decoder = ImageDecoder.newInstance(imageSource.inputStream())

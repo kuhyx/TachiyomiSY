@@ -11,7 +11,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Think twice before using this. This is a delicate API. It is easy to accidentally create resource or memory leaks when GlobalScope is used.
+ * Think twice before using this. This is a delicate API. It is easy to accidentally create resource or
+ * memory leaks when GlobalScope is used.
  *
  * **Possible replacements**
  * - suspend function
@@ -22,7 +23,8 @@ public fun launchUI(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, block)
 
 /**
- * Think twice before using this. This is a delicate API. It is easy to accidentally create resource or memory leaks when GlobalScope is used.
+ * Think twice before using this. This is a delicate API. It is easy to accidentally create resource or
+ * memory leaks when GlobalScope is used.
  *
  * **Possible replacements**
  * - suspend function
@@ -33,7 +35,8 @@ public fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT, block)
 
 /**
- * Think twice before using this. This is a delicate API. It is easy to accidentally create resource or memory leaks when GlobalScope is used.
+ * Think twice before using this. This is a delicate API. It is easy to accidentally create resource or
+ * memory leaks when GlobalScope is used.
  *
  * **Possible replacements**
  * - suspend function
@@ -43,24 +46,30 @@ public fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
 public fun launchNow(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED, block)
 
+/** Launches [block] on the main dispatcher. */
 public fun CoroutineScope.launchUI(block: suspend CoroutineScope.() -> Unit): Job =
     launch(Dispatchers.Main, block = block)
 
+/** Launches [block] on the IO dispatcher. */
 public fun CoroutineScope.launchIO(block: suspend CoroutineScope.() -> Unit): Job =
     launch(Dispatchers.IO, block = block)
 
+/** Launches [block] on IO where it cannot be cancelled. */
 public fun CoroutineScope.launchNonCancellable(block: suspend CoroutineScope.() -> Unit): Job =
     launchIO { withContext(NonCancellable, block) }
 
+/** Runs [block] on the main dispatcher. */
 public suspend fun <T> withUIContext(block: suspend CoroutineScope.() -> T): T = withContext(
     Dispatchers.Main,
     block,
 )
 
+/** Runs [block] on the IO dispatcher. */
 public suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T = withContext(
     Dispatchers.IO,
     block,
 )
 
+/** Runs [block] on IO where it cannot be cancelled. */
 public suspend fun <T> withNonCancellableContext(block: suspend CoroutineScope.() -> T): T =
     withContext(NonCancellable, block)

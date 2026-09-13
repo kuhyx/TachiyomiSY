@@ -10,8 +10,17 @@ import okio.Buffer
 import okio.BufferedSource
 import kotlin.math.max
 
+private const val PROGRESS_FIRST_PAGE = 98
+private const val PROGRESS_SECOND_PAGE = 99
+private const val PROGRESS_DONE = 100
+private const val JPEG_QUALITY = 100
+
 /** Joins two pages side by side into one image. */
 internal object BitmapMerging {
+    val Bitmap.rect: Rect
+        get() = Rect(0, 0, width, height)
+    // SY <--
+
     // SY -->
     fun mergeBitmaps(
         imageBitmap: Bitmap,
@@ -39,7 +48,7 @@ internal object BitmapMerging {
         )
 
         canvas.drawBitmap(imageBitmap, imageBitmap.rect, upperPart, null)
-        progressCallback?.invoke(98)
+        progressCallback?.invoke(PROGRESS_FIRST_PAGE)
         val bottomPart = Rect(
             if (!isLTR) 0 else width + centerMargin,
             (maxHeight - height2) / 2,
@@ -48,15 +57,11 @@ internal object BitmapMerging {
         )
 
         canvas.drawBitmap(imageBitmap2, imageBitmap2.rect, bottomPart, null)
-        progressCallback?.invoke(99)
+        progressCallback?.invoke(PROGRESS_SECOND_PAGE)
 
         val output = Buffer()
-        result.compress(Bitmap.CompressFormat.JPEG, 100, output.outputStream())
-        progressCallback?.invoke(100)
+        result.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, output.outputStream())
+        progressCallback?.invoke(PROGRESS_DONE)
         return output
     }
-
-    val Bitmap.rect: Rect
-        get() = Rect(0, 0, width, height)
-    // SY <--
 }

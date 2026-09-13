@@ -13,29 +13,37 @@ import java.nio.ByteBuffer
 import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
 
+/** File-system helpers: hashing keys, sizes, safe names and `.nomedia` markers. */
 public object DiskUtil {
+
+    /** Name of the marker file that hides a folder from media scanners. */
+    public const val NOMEDIA_FILE: String = ".nomedia"
+
+    /** Longest file name written, in UTF-8 bytes. */
+    // Safe theoretical max filename size is 255 bytes and 1 char = 2-4 bytes (UTF-8).
+    // To allow for writing to ext4 through a FUSE layer in the future, also subtract 15
+    // reserved characters.
+    public const val MAX_FILE_NAME_BYTES: Int = 240
 
     /**
      * Returns the root folders of all the available external storages.
      */
-    public fun getExternalStorages(context: Context): List<File> {
-        return ContextCompat.getExternalFilesDirs(context, null)
-            .filterNotNull()
-            .mapNotNull {
-                val file = File(it.absolutePath.substringBefore("/Android/"))
-                val state = Environment.getExternalStorageState(file)
-                if (state == Environment.MEDIA_MOUNTED || state == Environment.MEDIA_MOUNTED_READ_ONLY) {
-                    file
-                } else {
-                    null
-                }
+    public fun getExternalStorages(context: Context): List<File> = ContextCompat.getExternalFilesDirs(context, null)
+        .filterNotNull()
+        .mapNotNull {
+            val file = File(it.absolutePath.substringBefore("/Android/"))
+            val state = Environment.getExternalStorageState(file)
+            if (state == Environment.MEDIA_MOUNTED || state == Environment.MEDIA_MOUNTED_READ_ONLY) {
+                file
+            } else {
+                null
             }
-    }
+        }
 
-    public fun hashKeyForDisk(key: String): String {
-        return Hash.md5(key)
-    }
+    /** A file-system safe digest of [key]. */
+    public fun hashKeyForDisk(key: String): String = Hash.md5(key)
 
+    /** Total size of [f] in bytes, recursively. */
     public fun getDirectorySize(f: File): Long {
         var size: Long = 0
         if (f.isDirectory) {
@@ -51,37 +59,31 @@ public object DiskUtil {
     /**
      * Gets the total space for the disk that a file path points to, in bytes.
      */
-    public fun getTotalStorageSpace(file: File): Long {
-        return try {
-            val stat = StatFs(file.absolutePath)
-            stat.blockCountLong * stat.blockSizeLong
-        } catch (_: Exception) {
-            -1L
-        }
+    public fun getTotalStorageSpace(file: File): Long = try {
+        val stat = StatFs(file.absolutePath)
+        stat.blockCountLong * stat.blockSizeLong
+    } catch (_: Exception) {
+        -1L
     }
 
     /**
      * Gets the available space for the disk that a file path points to, in bytes.
      */
-    public fun getAvailableStorageSpace(file: File): Long {
-        return try {
-            val stat = StatFs(file.absolutePath)
-            stat.availableBlocksLong * stat.blockSizeLong
-        } catch (_: Exception) {
-            -1L
-        }
+    public fun getAvailableStorageSpace(file: File): Long = try {
+        val stat = StatFs(file.absolutePath)
+        stat.availableBlocksLong * stat.blockSizeLong
+    } catch (_: Exception) {
+        -1L
     }
 
     /**
      * Gets the available space for the disk that a file path points to, in bytes.
      */
-    public fun getAvailableStorageSpace(f: UniFile): Long {
-        return try {
-            val stat = StatFs(f.uri.path)
-            stat.availableBlocksLong * stat.blockSizeLong
-        } catch (_: Exception) {
-            -1L
-        }
+    public fun getAvailableStorageSpace(f: UniFile): Long = try {
+        val stat = StatFs(f.uri.path)
+        stat.availableBlocksLong * stat.blockSizeLong
+    } catch (_: Exception) {
+        -1L
     }
 
     /**
@@ -185,9 +187,7 @@ public object DiskUtil {
         return String(cb.array(), 0, cb.position())
     }
 
-    /**
-     * Returns true if the given character is a valid filename character, false otherwise.
-     */
+    // Returns true if the given character is a valid filename character, false otherwise.
     private fun isValidFatFilenameChar(c: Char): Boolean {
         if (0x00.toChar() <= c && c <= 0x1f.toChar()) {
             return false
@@ -197,11 +197,4 @@ public object DiskUtil {
             else -> true
         }
     }
-
-    public const val NOMEDIA_FILE: String = ".nomedia"
-
-    // Safe theoretical max filename size is 255 bytes and 1 char = 2-4 bytes (UTF-8).
-    // To allow for writing to ext4 through a FUSE layer in the future, also subtract 15
-    // reserved characters.
-    public const val MAX_FILE_NAME_BYTES: Int = 240
 }

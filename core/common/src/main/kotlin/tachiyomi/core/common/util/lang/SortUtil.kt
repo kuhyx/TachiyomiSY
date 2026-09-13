@@ -10,6 +10,5 @@ private val collator by lazy {
     }
 }
 
-public fun String.compareToWithCollator(other: String): Int {
-    return collator.compare(this, other)
-}
+/** Locale-aware comparison. */
+public fun String.compareToWithCollator(other: String): Int = collator.compare(this, other)

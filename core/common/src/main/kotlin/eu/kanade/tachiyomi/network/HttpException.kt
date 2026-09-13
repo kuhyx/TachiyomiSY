@@ -8,6 +8,6 @@ import okhttp3.Response
  *
  * @see Response.isSuccessful
  * @since tachiyomix 1.6
- * @param code [Int] the HTTP status code
+ * @property code the HTTP status code.
  */
 public class HttpException(public val code: Int) : IllegalStateException("HTTP error $code")

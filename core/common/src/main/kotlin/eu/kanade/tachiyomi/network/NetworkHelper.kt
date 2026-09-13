@@ -10,24 +10,32 @@ import okhttp3.logging.HttpLoggingInterceptor
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+private const val CONNECT_TIMEOUT_SECONDS = 30L
+private const val READ_TIMEOUT_SECONDS = 30L
+private const val CALL_TIMEOUT_MINUTES = 2L
+
 /* SY --> */
+
+/** The shared OkHttp client with cache, Cloudflare handling, DoH and logging wired in. */
 public open /* SY <-- */ class NetworkHelper(
     private val context: Context,
     private val preferences: NetworkPreferences,
     // SY -->
+    /** SY: true in debug builds, where request logging is verbose. */
     public val isDebugBuild: Boolean,
     // SY <--
 ) {
 
     /* SY --> */
+    /** The cookie store shared with WebView. */
     public open /* SY <-- */ val cookieJar: AndroidCookieJar = AndroidCookieJar()
 
     private val clientBuilder: OkHttpClient.Builder = run {
         val builder = OkHttpClient.Builder()
             .cookieJar(cookieJar)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .callTimeout(2, TimeUnit.MINUTES)
+            .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .callTimeout(CALL_TIMEOUT_MINUTES, TimeUnit.MINUTES)
             .cache(
                 Cache(
                     directory = File(context.cacheDir, "network_cache"),
@@ -62,19 +70,20 @@ public open /* SY <-- */ class NetworkHelper(
     }
 
     /* SY --> */
+
+    /** The configured client. */
     public open /* SY <-- */ val client: OkHttpClient = clientBuilder
         .addInterceptor(
             CloudflareInterceptor(context, cookieJar, ::defaultUserAgentProvider),
         )
         .build()
 
-    /**
-     * @deprecated Since extension-lib 1.5
-     */
+    /** Kept for extensions built before extension-lib 1.5; the regular client handles Cloudflare. */
     @Deprecated("The regular client handles Cloudflare by default")
     @Suppress("UNUSED")
     /* SY --> */
     public open /* SY <-- */val cloudflareClient: OkHttpClient = client
 
+    /** The trimmed User-Agent from preferences. */
     public fun defaultUserAgentProvider(): String = preferences.defaultUserAgent.get().trim()
 }

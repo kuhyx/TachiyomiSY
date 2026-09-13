@@ -13,17 +13,13 @@ import java.io.InputStream
  */
 public class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
 
-    /**
-     * Path separator used by this epub.
-     */
+    // Path separator used by this epub.
     private val pathSeparator = getPathSeparator()
 
     /**
      * Returns an input stream for reading the contents of the specified zip file entry.
      */
-    public fun getInputStream(entryName: String): InputStream? {
-        return reader.getInputStream(entryName)
-    }
+    public fun getInputStream(entryName: String): InputStream? = reader.getInputStream(entryName)
 
     /**
      * Returns the path of all the images found in the epub file.
@@ -53,13 +49,10 @@ public class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
     /**
      * Returns the package document where all the files are listed.
      */
-    public fun getPackageDocument(ref: String): Document {
-        return getInputStream(ref)!!.use { Jsoup.parse(it, null, "", Parser.xmlParser()) }
-    }
+    public fun getPackageDocument(ref: String): Document =
+        getInputStream(ref)!!.use { Jsoup.parse(it, null, "", Parser.xmlParser()) }
 
-    /**
-     * Returns all the pages from the epub.
-     */
+    // Returns all the pages from the epub.
     private fun getPagesFromDocument(document: Document): List<String> {
         val pages = document.select("manifest > item")
             .filter { node -> "application/xhtml+xml" == node.attr("media-type") }
@@ -69,9 +62,7 @@ public class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
         return spine.mapNotNull { pages[it] }.map { it.attr("href") }
     }
 
-    /**
-     * Returns all the images contained in every page from the epub.
-     */
+    // Returns all the images contained in every page from the epub.
     private fun getImagesFromPages(pages: List<String>, packageHref: String): List<String> {
         val result = mutableListOf<String>()
         val basePath = getParentDirectory(packageHref)
@@ -91,9 +82,7 @@ public class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
         return result
     }
 
-    /**
-     * Returns the path separator used by the epub file.
-     */
+    // Returns the path separator used by the epub file.
     private fun getPathSeparator(): String {
         val meta = getInputStream("META-INF\\container.xml")
         return if (meta != null) {
@@ -104,9 +93,7 @@ public class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
         }
     }
 
-    /**
-     * Resolves a zip path from base and relative components and a path separator.
-     */
+    // Resolves a zip path from base and relative components and a path separator.
     private fun resolveZipPath(basePath: String, relativePath: String): String {
         if (relativePath.startsWith(pathSeparator)) {
             // Path is absolute, so return as-is.
@@ -123,9 +110,7 @@ public class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
         return resolvedPath.replace(File.separator, pathSeparator).substring(1)
     }
 
-    /**
-     * Gets the parent directory of a path.
-     */
+    // Gets the parent directory of a path.
     private fun getParentDirectory(path: String): String {
         val separatorIndex = path.lastIndexOf(pathSeparator)
         return if (separatorIndex >= 0) {

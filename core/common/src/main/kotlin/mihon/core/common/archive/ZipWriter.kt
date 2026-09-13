@@ -13,7 +13,9 @@ import tachiyomi.core.common.storage.openFileDescriptor
 import java.io.Closeable
 import java.nio.ByteBuffer
 
+/** Writes a ZIP archive, optionally encrypted (SY), through libarchive. */
 public class ZipWriter(
+    /** Used to open file descriptors. */
     public val context: Context,
     file: UniFile,
     // SY -->
@@ -47,6 +49,7 @@ public class ZipWriter(
         }
     }
 
+    /** Adds [file] under its own name. */
     public fun write(file: UniFile) {
         file.openFileDescriptor(context, "r").use {
             val fd = it.fileDescriptor
@@ -67,6 +70,8 @@ public class ZipWriter(
     }
 
     // SY -->
+
+    /** Adds [fileData] as [fileName]. */
     public fun write(fileData: ByteArray, fileName: String) {
         ArchiveEntry.clear(entry)
         ArchiveEntry.setPathnameUtf8(entry, fileName)
@@ -94,6 +99,8 @@ public class ZipWriter(
     }
 
     // SY -->
+
+    /** Libarchive format and filter constants. */
     public companion object {
         private const val BUFFER_SIZE = 8192
     }

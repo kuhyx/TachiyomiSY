@@ -225,7 +225,8 @@ style:
     active: true
   UnnecessaryParentheses:
     active: true
-    allowForUnclearPrecedence: false
+    # ktlint's mixed-condition-operators demands them; the two tools must agree.
+    allowForUnclearPrecedence: true
   UntilInsteadOfRangeTo:
     active: true
   UnusedImports:

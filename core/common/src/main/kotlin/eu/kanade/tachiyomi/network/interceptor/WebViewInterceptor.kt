@@ -20,16 +20,17 @@ import java.util.Locale
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
+private const val WEBVIEW_TIMEOUT_SECONDS = 30L
+
+/** Base for interceptors that replay a failed request inside a WebView. */
 public abstract class WebViewInterceptor(
     private val context: Context,
     private val defaultUserAgentProvider: () -> String,
 ) : Interceptor {
 
-    /**
-     * When this is called, it initializes the WebView if it wasn't already. We use this to avoid
-     * blocking the main thread too much. If used too often we could consider moving it to the
-     * Application class.
-     */
+    // When this is called, it initializes the WebView if it wasn't already. We use this to avoid
+    // blocking the main thread too much. If used too often we could consider moving it to the
+    // Application class.
     private val initWebView by lazy {
         // Crashes on some devices. We skip this in some cases since the only impact is slower
         // WebView init in those rare cases.
@@ -45,8 +46,10 @@ public abstract class WebViewInterceptor(
         }
     }
 
+    /** True when [response] is a challenge this interceptor can solve. */
     public abstract fun shouldIntercept(response: Response): Boolean
 
+    /** Solves the challenge behind [response] and proceeds with [request]. */
     public abstract fun intercept(chain: Interceptor.Chain, request: Request, response: Response): Response
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -68,34 +71,33 @@ public abstract class WebViewInterceptor(
         return intercept(chain, request, response)
     }
 
-    public fun parseHeaders(headers: Headers): Map<String, String> {
-        return headers
-            // Keeping unsafe header makes webview throw [net::ERR_INVALID_ARGUMENT]
-            .filter { (name, value) ->
-                isRequestHeaderSafe(name, value)
-            }
-            .groupBy(keySelector = { (name, _) -> name }) { (_, value) -> value }
-            .mapValues { it.value.getOrNull(0).orEmpty() }
-    }
-
-    public fun CountDownLatch.awaitFor30Seconds() {
-        await(30, TimeUnit.SECONDS)
-    }
-
-    public fun createWebView(request: Request): WebView {
-        return WebView(context).apply {
-            setDefaultSettings()
-            // Avoid sending empty User-Agent, Chromium WebView will reset to default if empty
-            settings.userAgentString = request.header("User-Agent") ?: defaultUserAgentProvider()
+    /** [headers] as a plain map for the WebView. */
+    public fun parseHeaders(headers: Headers): Map<String, String> = headers
+        // Keeping unsafe header makes webview throw [net::ERR_INVALID_ARGUMENT]
+        .filter { (name, value) ->
+            isRequestHeaderSafe(name, value)
         }
+        .groupBy(keySelector = { (name, _) -> name }) { (_, value) -> value }
+        .mapValues { it.value.getOrNull(0).orEmpty() }
+
+    /** Waits at most thirty seconds for the latch. */
+    public fun CountDownLatch.awaitFor30Seconds() {
+        await(WEBVIEW_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+    }
+
+    /** A WebView configured with the request's user agent and headers. */
+    public fun createWebView(request: Request): WebView = WebView(context).apply {
+        setDefaultSettings()
+        // Avoid sending empty User-Agent, Chromium WebView will reset to default if empty
+        settings.userAgentString = request.header("User-Agent") ?: defaultUserAgentProvider()
     }
 }
 
 // Based on [IsRequestHeaderSafe] in
 // https://source.chromium.org/chromium/chromium/src/+/main:services/network/public/cpp/header_util.cc
-private fun isRequestHeaderSafe(_name: String, _value: String): Boolean {
-    val name = _name.lowercase(Locale.ENGLISH)
-    val value = _value.lowercase(Locale.ENGLISH)
+private fun isRequestHeaderSafe(rawName: String, rawValue: String): Boolean {
+    val name = rawName.lowercase(Locale.ENGLISH)
+    val value = rawValue.lowercase(Locale.ENGLISH)
     if (name in unsafeHeaderNames || name.startsWith("proxy-")) return false
     if (name == "connection" && value == "upgrade") return false
     return true

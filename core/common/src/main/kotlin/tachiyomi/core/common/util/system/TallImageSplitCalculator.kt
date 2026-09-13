@@ -1,5 +1,6 @@
 package tachiyomi.core.common.util.system
 
+private const val TALL_RATIO = 3
 internal object TallImageSplitCalculator {
 
     fun calculatePartCount(imageHeight: Int, optimalImageHeight: Int): Int {
@@ -11,7 +12,7 @@ internal object TallImageSplitCalculator {
 
     fun shouldSplit(imageWidth: Int, imageHeight: Int, optimalImageHeight: Int): Boolean {
         require(imageWidth > 0) { "imageWidth must be positive" }
-        return imageHeight > imageWidth * 3 &&
+        return imageHeight > imageWidth * TALL_RATIO &&
             calculatePartCount(imageHeight, optimalImageHeight) > 1
     }
 }

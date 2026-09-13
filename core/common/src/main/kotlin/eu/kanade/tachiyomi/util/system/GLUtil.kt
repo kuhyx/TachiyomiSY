@@ -5,7 +5,9 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
 import kotlin.math.max
 
+/** OpenGL texture limits, which bound hardware bitmap sizes. */
 public object GLUtil {
+    /** The GPU's maximum texture size. */
     public val DEVICE_TEXTURE_LIMIT: Int by lazy {
         // Get EGL Display
         val egl = EGLContext.getEGL() as EGL10
@@ -42,8 +44,10 @@ public object GLUtil {
         max(maximumTextureSize, SAFE_TEXTURE_LIMIT)
     }
 
+    /** A size every device handles. */
     public const val SAFE_TEXTURE_LIMIT: Int = 2048
 
+    /** Choices offered in settings, from safe up to the device limit. */
     public val CUSTOM_TEXTURE_LIMIT_OPTIONS: List<Int> by lazy {
         val steps = DEVICE_TEXTURE_LIMIT / MULTIPLIER
         buildList(steps) {

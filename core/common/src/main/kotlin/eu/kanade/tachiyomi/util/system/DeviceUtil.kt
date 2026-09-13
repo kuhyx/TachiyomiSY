@@ -8,8 +8,15 @@ import androidx.core.content.getSystemService
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 
+private const val LOW_RAM_BYTES = 3L * 1024 * 1024 * 1024
+private const val ONE_UI_BASE = 90_000
+private const val ONE_UI_MAJOR = 10_000
+private const val ONE_UI_MINOR = 100
+
+/** Vendor and ROM detection for device-specific workarounds. */
 public object DeviceUtil {
 
+    /** True on Xiaomi's MIUI. */
     public val isMiui: Boolean by lazy {
         getSystemProperty("ro.miui.ui.version.name")?.isNotEmpty() ?: false
     }
@@ -28,36 +35,22 @@ public object DeviceUtil {
             .toIntOrNull()
     }
 
-    @SuppressLint("PrivateApi")
-    public fun isMiuiOptimizationDisabled(): Boolean {
-        val sysProp = getSystemProperty("persist.sys.miui_optimization")
-        if (sysProp == "0" || sysProp == "false") {
-            return true
-        }
-
-        return try {
-            Class.forName("android.miui.AppOpsUtils")
-                .getDeclaredMethod("isXOptMode")
-                .invoke(null) as Boolean
-        } catch (e: Exception) {
-            false
-        }
-    }
-
+    /** True on Samsung devices. */
     public val isSamsung: Boolean by lazy {
         Build.MANUFACTURER.equals("samsung", ignoreCase = true)
     }
 
+    /** Samsung One UI version, or null elsewhere. */
     public val oneUiVersion: Double? by lazy {
         try {
             val semPlatformIntField = Build.VERSION::class.java.getDeclaredField("SEM_PLATFORM_INT")
-            val version = semPlatformIntField.getInt(null) - 90000
+            val version = semPlatformIntField.getInt(null) - ONE_UI_BASE
             if (version < 0) {
                 1.0
             } else {
-                ((version / 10000).toString() + "." + version % 10000 / 100).toDouble()
+                ((version / ONE_UI_MAJOR).toString() + "." + version % ONE_UI_MAJOR / ONE_UI_MINOR).toDouble()
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -96,18 +89,33 @@ public object DeviceUtil {
         val memInfo = ActivityManager.MemoryInfo()
         context.getSystemService<ActivityManager>()!!.getMemoryInfo(memInfo)
         val totalMemBytes = memInfo.totalMem
-        return totalMemBytes < 3L * 1024 * 1024 * 1024
+        return totalMemBytes < LOW_RAM_BYTES
+    }
+
+    /** True when MIUI optimisation is off, which changes how the ROM behaves. */
+    @SuppressLint("PrivateApi")
+    public fun isMiuiOptimizationDisabled(): Boolean {
+        val sysProp = getSystemProperty("persist.sys.miui_optimization")
+        if (sysProp == "0" || sysProp == "false") {
+            return true
+        }
+
+        return try {
+            Class.forName("android.miui.AppOpsUtils")
+                .getDeclaredMethod("isXOptMode")
+                .invoke(null) as Boolean
+        } catch (_: Exception) {
+            false
+        }
     }
 
     @SuppressLint("PrivateApi")
-    private fun getSystemProperty(key: String?): String? {
-        return try {
-            Class.forName("android.os.SystemProperties")
-                .getDeclaredMethod("get", String::class.java)
-                .invoke(null, key) as String
-        } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "Unable to use SystemProperties.get()" }
-            null
-        }
+    private fun getSystemProperty(key: String?): String? = try {
+        Class.forName("android.os.SystemProperties")
+            .getDeclaredMethod("get", String::class.java)
+            .invoke(null, key) as String
+    } catch (e: Exception) {
+        logcat(LogPriority.WARN, e) { "Unable to use SystemProperties.get()" }
+        null
     }
 }

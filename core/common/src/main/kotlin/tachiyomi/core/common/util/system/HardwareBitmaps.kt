@@ -7,26 +7,11 @@ import okio.BufferedSource
 
 /** Decides when a hardware bitmap is safe on this device. */
 internal object HardwareBitmaps {
-    fun canUseHardwareBitmap(bitmap: Bitmap): Boolean {
-        return canUseHardwareBitmap(bitmap.width, bitmap.height)
-    }
-
-    fun canUseHardwareBitmap(imageSource: BufferedSource): Boolean {
-        return with(extractImageOptions(imageSource)) {
-            canUseHardwareBitmap(outWidth, outHeight)
-        }
-    }
-
-    fun canUseHardwareBitmap(width: Int, height: Int): Boolean {
-        if (HARDWARE_BITMAP_UNSUPPORTED) return false
-        return maxOf(width, height) <= hardwareBitmapThreshold
-    }
-
     var hardwareBitmapThreshold: Int = GLUtil.SAFE_TEXTURE_LIMIT
 
     /**
      * Taken from Coil
-     * (https://github.com/coil-kt/coil/blob/1674d3516f061aeacbe749a435b1924f9648fd41/coil-core/src/androidMain/kotlin/coil3/util/hardwareBitmaps.kt)
+     * (coil-core/src/androidMain/kotlin/coil3/util/hardwareBitmaps.kt at 1674d3516f061aeacbe749a435b1924f9648fd41)
      * ---
      * Maintains a list of devices with broken/incomplete/unstable hardware bitmap implementations.
      *
@@ -35,7 +20,7 @@ internal object HardwareBitmaps {
      *
      */
     val HARDWARE_BITMAP_UNSUPPORTED = when (Build.VERSION.SDK_INT) {
-        26 -> run {
+        Build.VERSION_CODES.O -> run {
             val model = Build.MODEL ?: return@run false
 
             // Samsung Galaxy (ALL)
@@ -64,7 +49,7 @@ internal object HardwareBitmaps {
             )
         }
 
-        27 -> run {
+        Build.VERSION_CODES.O_MR1 -> run {
             val device = Build.DEVICE ?: return@run false
 
             return@run device in arrayOf(
@@ -137,5 +122,20 @@ internal object HardwareBitmaps {
         }
 
         else -> false
+    }
+
+    fun canUseHardwareBitmap(bitmap: Bitmap): Boolean {
+        return canUseHardwareBitmap(bitmap.width, bitmap.height)
+    }
+
+    fun canUseHardwareBitmap(imageSource: BufferedSource): Boolean {
+        return with(extractImageOptions(imageSource)) {
+            canUseHardwareBitmap(outWidth, outHeight)
+        }
+    }
+
+    fun canUseHardwareBitmap(width: Int, height: Int): Boolean {
+        if (HARDWARE_BITMAP_UNSUPPORTED) return false
+        return maxOf(width, height) <= hardwareBitmapThreshold
     }
 }

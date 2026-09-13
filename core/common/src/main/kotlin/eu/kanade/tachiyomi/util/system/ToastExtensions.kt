@@ -10,6 +10,7 @@ import tachiyomi.core.common.i18n.stringResource
  *
  * @param resource the text resource.
  * @param duration the duration of the toast. Defaults to short.
+ * @param block customises the toast before it is shown.
  */
 public fun Context.toast(
     resource: StringResource,
@@ -24,6 +25,7 @@ public fun Context.toast(
  *
  * @param text the text to display.
  * @param duration the duration of the toast. Defaults to short.
+ * @param block customises the toast before it is shown.
  */
 public fun Context.toast(
     text: String?,

@@ -15,6 +15,7 @@ public class JavaScriptEngine(context: Context) {
      * (e.g., String, Int).
      *
      * @since extensions-lib 1.4
+     * @param T the primitive type to cast the result to.
      * @param script JavaScript to execute.
      * @return Result of JavaScript code as a primitive type.
      */

@@ -7,18 +7,15 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import java.io.File
 
+/** The app's default storage folder on external storage. */
 public class AndroidStorageFolderProvider(
     private val context: Context,
 ) : FolderProvider {
 
-    override fun directory(): File {
-        return File(
-            Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.stringResource(MR.strings.app_name),
-        )
-    }
+    override fun directory(): File = File(
+        Environment.getExternalStorageDirectory().absolutePath + File.separator +
+            context.stringResource(MR.strings.app_name),
+    )
 
-    override fun path(): String {
-        return directory().toUri().toString()
-    }
+    override fun path(): String = directory().toUri().toString()
 }

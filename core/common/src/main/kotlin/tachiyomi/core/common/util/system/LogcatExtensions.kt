@@ -4,25 +4,28 @@ import logcat.LogPriority
 import logcat.asLog
 import logcat.logcat
 
+/** Logs [message] (with [tag] and [throwable]) at [priority] under the receiver's class name. */
 public inline fun Any.logcat(
     priority: LogPriority = LogPriority.DEBUG,
     throwable: Throwable? = null,
     tag: String? = null,
     message: () -> String = { "" },
-): Unit = logcat(priority = priority) {
-    val logMessage = StringBuilder()
+) {
+    logcat(priority = priority) {
+        val logMessage = StringBuilder()
 
-    if (!tag.isNullOrEmpty()) {
-        logMessage.append("[$tag] ")
+        if (!tag.isNullOrEmpty()) {
+            logMessage.append("[$tag] ")
+        }
+
+        val msg = message()
+        logMessage.append(msg)
+
+        if (throwable != null) {
+            if (msg.isNotBlank()) logMessage.append("\n")
+            logMessage.append(throwable.asLog())
+        }
+
+        logMessage.toString()
     }
-
-    val msg = message()
-    logMessage.append(msg)
-
-    if (throwable != null) {
-        if (msg.isNotBlank()) logMessage.append("\n")
-        logMessage.append(throwable.asLog())
-    }
-
-    logMessage.toString()
 }

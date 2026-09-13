@@ -11,10 +11,12 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import java.util.concurrent.TimeUnit.MINUTES
 
-private val DEFAULT_CACHE_CONTROL = CacheControl.Builder().maxAge(10, MINUTES).build()
+private const val CACHE_MAX_AGE_MINUTES = 10
+private val DEFAULT_CACHE_CONTROL = CacheControl.Builder().maxAge(CACHE_MAX_AGE_MINUTES, MINUTES).build()
 private val DEFAULT_HEADERS = Headers.Builder().build()
 private val DEFAULT_BODY: RequestBody = FormBody.Builder().build()
 
+/** A GET request for [url] with [headers] and the default cache control. */
 public fun GET(
     url: String,
     headers: Headers = DEFAULT_HEADERS,
@@ -38,6 +40,7 @@ public fun GET(
         .build()
 }
 
+/** A POST request for [url] with [headers] and the default cache control. */
 public fun POST(
     url: String,
     headers: Headers = DEFAULT_HEADERS,
@@ -52,6 +55,7 @@ public fun POST(
         .build()
 }
 
+/** A PUT request for [url] with [headers] and the default cache control. */
 public fun PUT(
     url: String,
     headers: Headers = DEFAULT_HEADERS,
@@ -65,6 +69,8 @@ public fun PUT(
         .cacheControl(cache)
         .build()
 }
+
+/** A PATCH request for [url] with [headers] and the default cache control. */
 public fun PATCH(
     url: String,
     headers: Headers = DEFAULT_HEADERS,
@@ -79,6 +85,7 @@ public fun PATCH(
         .build()
 }
 
+/** A DELETE request for [url] with [headers] and the default cache control. */
 public fun DELETE(
     url: String,
     headers: Headers = DEFAULT_HEADERS,

@@ -13,6 +13,9 @@ import tachiyomi.core.common.util.system.ImageUtil.Side
 import tachiyomi.decoder.ImageDecoder
 import kotlin.math.max
 
+private const val JPEG_QUALITY = 100
+private const val CENTER_PADDING = 96
+
 /** Cuts, rotates and re-joins double-page spreads. */
 internal object ImageSplitting {
     /**
@@ -44,7 +47,7 @@ internal object ImageSplitting {
             drawBitmap(imageBitmap, part, singlePage, null)
         }
         val output = Buffer()
-        half.compress(Bitmap.CompressFormat.JPEG, 100, output.outputStream())
+        half.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, output.outputStream())
 
         return output
     }
@@ -54,7 +57,7 @@ internal object ImageSplitting {
         val rotated = rotateBitMap(imageBitmap, degrees)
 
         val output = Buffer()
-        rotated.compress(Bitmap.CompressFormat.JPEG, 100, output.outputStream())
+        rotated.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, output.outputStream())
 
         return output
     }
@@ -92,7 +95,7 @@ internal object ImageSplitting {
         }
 
         val output = Buffer()
-        result.compress(Bitmap.CompressFormat.JPEG, 100, output.outputStream())
+        result.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, output.outputStream())
         return output
     }
 
@@ -110,7 +113,7 @@ internal object ImageSplitting {
         val height = imageBitmap.height
         val width = imageBitmap.width
 
-        val centerPadding = 96 / (max(1, viewHeight) / height).coerceAtLeast(1)
+        val centerPadding = CENTER_PADDING / (max(1, viewHeight) / height).coerceAtLeast(1)
 
         val leftSourcePart = Rect(0, 0, width / 2, height)
         val rightSourcePart = Rect(width / 2, 0, width, height)
@@ -128,7 +131,7 @@ internal object ImageSplitting {
         }
 
         val output = Buffer()
-        result.compress(Bitmap.CompressFormat.JPEG, 100, output.outputStream())
+        result.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, output.outputStream())
         return output
     }
     // SY <--

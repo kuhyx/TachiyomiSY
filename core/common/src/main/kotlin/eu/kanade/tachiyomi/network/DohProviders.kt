@@ -10,18 +10,41 @@ import java.net.InetAddress
  */
 
 public const val PREF_DOH_CLOUDFLARE: Int = 1
+
+/** Preference value selecting Google as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_GOOGLE: Int = 2
+
+/** Preference value selecting AdGuard as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_ADGUARD: Int = 3
+
+/** Preference value selecting Quad9 as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_QUAD9: Int = 4
+
+/** Preference value selecting AliDNS as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_ALIDNS: Int = 5
+
+/** Preference value selecting DNSPod as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_DNSPOD: Int = 6
+
+/** Preference value selecting 360 as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_360: Int = 7
+
+/** Preference value selecting Quad 101 as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_QUAD101: Int = 8
+
+/** Preference value selecting Mullvad as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_MULLVAD: Int = 9
+
+/** Preference value selecting Control D as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_CONTROLD: Int = 10
+
+/** Preference value selecting Njalla as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_NJALLA: Int = 11
+
+/** Preference value selecting Shecan as the DNS-over-HTTPS provider. */
 public const val PREF_DOH_SHECAN: Int = 12
 
+/** Resolves names through Cloudflare's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.dohCloudflare(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://cloudflare-dns.com/dns-query".toHttpUrl())
@@ -39,6 +62,7 @@ public fun OkHttpClient.Builder.dohCloudflare(): OkHttpClient.Builder = dns(
         .build(),
 )
 
+/** Resolves names through Google's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.dohGoogle(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.google/dns-query".toHttpUrl())
@@ -53,6 +77,8 @@ public fun OkHttpClient.Builder.dohGoogle(): OkHttpClient.Builder = dns(
 
 // AdGuard "Default" DNS works too but for the sake of making sure no site is blacklisted,
 // we use "Unfiltered"
+
+/** Resolves names through AdGuard's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.dohAdGuard(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns-unfiltered.adguard.com/dns-query".toHttpUrl())
@@ -65,6 +91,7 @@ public fun OkHttpClient.Builder.dohAdGuard(): OkHttpClient.Builder = dns(
         .build(),
 )
 
+/** Resolves names through Quad9's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.dohQuad9(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.quad9.net/dns-query".toHttpUrl())
@@ -77,6 +104,7 @@ public fun OkHttpClient.Builder.dohQuad9(): OkHttpClient.Builder = dns(
         .build(),
 )
 
+/** Resolves names through AliDNS's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.dohAliDNS(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.alidns.com/dns-query".toHttpUrl())
@@ -89,6 +117,7 @@ public fun OkHttpClient.Builder.dohAliDNS(): OkHttpClient.Builder = dns(
         .build(),
 )
 
+/** Resolves names through DNSPod's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.dohDNSPod(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://doh.pub/dns-query".toHttpUrl())
@@ -99,6 +128,7 @@ public fun OkHttpClient.Builder.dohDNSPod(): OkHttpClient.Builder = dns(
         .build(),
 )
 
+/** Resolves names through 360's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.doh360(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://doh.360.cn/dns-query".toHttpUrl())
@@ -114,6 +144,7 @@ public fun OkHttpClient.Builder.doh360(): OkHttpClient.Builder = dns(
         .build(),
 )
 
+/** Resolves names through Quad 101's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.dohQuad101(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.twnic.tw/dns-query".toHttpUrl())
@@ -130,6 +161,8 @@ public fun OkHttpClient.Builder.dohQuad101(): OkHttpClient.Builder = dns(
  * without ad blocking option
  * Source: https://mullvad.net/en/help/dns-over-https-and-dns-over-tls
  */
+
+/** Resolves names through Mullvad's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.dohMullvad(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url(" https://dns.mullvad.net/dns-query".toHttpUrl())
@@ -145,6 +178,8 @@ public fun OkHttpClient.Builder.dohMullvad(): OkHttpClient.Builder = dns(
  * unfiltered option
  * Source: https://controld.com/free-dns/?
  */
+
+/** Resolves names through Control D's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.dohControlD(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://freedns.controld.com/p0".toHttpUrl())
@@ -161,6 +196,8 @@ public fun OkHttpClient.Builder.dohControlD(): OkHttpClient.Builder = dns(
  * Njalla
  * Non logging and uncensored
  */
+
+/** Resolves names through Njalla's DNS-over-HTTPS endpoint. */
 public fun OkHttpClient.Builder.dohNajalla(): OkHttpClient.Builder = dns(
     DnsOverHttps.Builder().client(build())
         .url("https://dns.njal.la/dns-query".toHttpUrl())

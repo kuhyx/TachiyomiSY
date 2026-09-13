@@ -19,6 +19,7 @@ import tachiyomi.i18n.MR
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 
+/** Solves Cloudflare challenges in a WebView and retries the request with the clearance cookie. */
 public class CloudflareInterceptor(
     private val context: Context,
     private val cookieManager: AndroidCookieJar,
@@ -41,7 +42,7 @@ public class CloudflareInterceptor(
             response.close()
             cookieManager.remove(request.url, COOKIE_NAMES, 0)
             val oldCookie = cookieManager.get(request.url)
-                .firstOrNull { it.name == "cf_clearance" }
+                .firstOrNull { it.name == CLEARANCE_COOKIE }
             resolveWithWebView(request, oldCookie)
 
             return chain.proceed(request)
@@ -75,11 +76,9 @@ public class CloudflareInterceptor(
 
             webview.webViewClient = object : WebViewClientCompat() {
                 override fun onPageFinished(view: WebView, url: String) {
-                    fun isCloudFlareBypassed(): Boolean {
-                        return cookieManager.get(origRequestUrl.toHttpUrl())
-                            .firstOrNull { it.name == "cf_clearance" }
-                            .let { it != null && it != oldCookie }
-                    }
+                    fun isCloudFlareBypassed(): Boolean = cookieManager.get(origRequestUrl.toHttpUrl())
+                        .firstOrNull { it.name == CLEARANCE_COOKIE }
+                        .let { it != null && it != oldCookie }
 
                     if (isCloudFlareBypassed()) {
                         cloudflareBypassed = true
@@ -139,8 +138,11 @@ public class CloudflareInterceptor(
     }
 }
 
-private val ERROR_CODES = listOf(403, 503)
+private const val HTTP_FORBIDDEN = 403
+private const val HTTP_SERVICE_UNAVAILABLE = 503
+private val ERROR_CODES = listOf(HTTP_FORBIDDEN, HTTP_SERVICE_UNAVAILABLE)
 private val SERVER_CHECK = arrayOf("cloudflare-nginx", "cloudflare")
-private val COOKIE_NAMES = listOf("cf_clearance")
+private const val CLEARANCE_COOKIE = "cf_clearance"
+private val COOKIE_NAMES = listOf(CLEARANCE_COOKIE)
 
 private class CloudflareBypassException : Exception()

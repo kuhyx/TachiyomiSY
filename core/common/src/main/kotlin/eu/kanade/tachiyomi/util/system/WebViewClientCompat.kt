@@ -8,17 +8,17 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 
+/** A [WebViewClient] that funnels the old and new callback overloads into one set of `*Compat` hooks. */
 @Suppress("OverridingDeprecatedMember")
 public abstract class WebViewClientCompat : WebViewClient() {
 
-    public open fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
-        return false
-    }
+    /** [WebViewClient.shouldOverrideUrlLoading] for either overload. */
+    public open fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean = false
 
-    public open fun shouldInterceptRequestCompat(view: WebView, url: String): WebResourceResponse? {
-        return null
-    }
+    /** [WebViewClient.shouldInterceptRequest] for either overload. */
+    public open fun shouldInterceptRequestCompat(view: WebView, url: String): WebResourceResponse? = null
 
+    /** [WebViewClient.onReceivedError] for either overload. */
     public open fun onReceivedErrorCompat(
         view: WebView,
         errorCode: Int,
@@ -37,9 +37,8 @@ public abstract class WebViewClientCompat : WebViewClient() {
     }
 
     @Deprecated("shouldOverrideUrlLoading(WebView, WebResourceRequest)")
-    final override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-        return shouldOverrideUrlCompat(view, url)
-    }
+    final override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean =
+        shouldOverrideUrlCompat(view, url)
 
     final override fun shouldInterceptRequest(
         view: WebView,
@@ -49,9 +48,8 @@ public abstract class WebViewClientCompat : WebViewClient() {
     }
 
     @Deprecated("shouldInterceptRequest(WebView, WebResourceRequest)")
-    final override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? {
-        return shouldInterceptRequestCompat(view, url)
-    }
+    final override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? =
+        shouldInterceptRequestCompat(view, url)
 
     final override fun onReceivedError(
         view: WebView,

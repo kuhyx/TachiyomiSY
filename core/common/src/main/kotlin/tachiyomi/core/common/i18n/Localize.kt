@@ -9,22 +9,22 @@ import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.StringDesc
 
-public fun Context.stringResource(resource: StringResource): String {
-    return StringDesc.Resource(resource).toString(this).fixed()
-}
+/** The localized string for [resource]. */
+public fun Context.stringResource(resource: StringResource): String =
+    StringDesc.Resource(resource).toString(this).fixed()
 
-public fun Context.stringResource(resource: StringResource, vararg args: Any): String {
-    return StringDesc.ResourceFormatted(resource, *args).toString(this).fixed()
-}
+/** The localized string for [resource] formatted with [args]. */
+public fun Context.stringResource(resource: StringResource, vararg args: Any): String =
+    StringDesc.ResourceFormatted(resource, *args).toString(this).fixed()
 
-public fun Context.pluralStringResource(resource: PluralsResource, count: Int): String {
-    return StringDesc.Plural(resource, count).toString(this).fixed()
-}
+/** The localized plural for [count]. */
+public fun Context.pluralStringResource(resource: PluralsResource, count: Int): String =
+    StringDesc.Plural(resource, count).toString(this).fixed()
 
-public fun Context.pluralStringResource(resource: PluralsResource, count: Int, vararg args: Any): String {
-    return StringDesc.PluralFormatted(resource, count, *args).toString(this).fixed()
-}
+/** The localized plural for [count] formatted with [args]. */
+public fun Context.pluralStringResource(resource: PluralsResource, count: Int, vararg args: Any): String =
+    StringDesc.PluralFormatted(resource, count, *args).toString(this).fixed()
 
-// TODO: janky workaround for https://github.com/icerockdev/moko-resources/issues/337
+// Workaround for https://github.com/icerockdev/moko-resources/issues/337 until it is fixed upstream.
 private fun String.fixed() =
     this.replace("""\""", """"""")

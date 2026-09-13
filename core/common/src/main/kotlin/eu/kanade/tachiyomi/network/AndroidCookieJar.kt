@@ -5,6 +5,7 @@ import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
 
+/** A [CookieJar] backed by the system WebView cookie store, so WebView and OkHttp share cookies. */
 public class AndroidCookieJar : CookieJar {
 
     private val manager = CookieManager.getInstance()
@@ -15,10 +16,9 @@ public class AndroidCookieJar : CookieJar {
         cookies.forEach { manager.setCookie(urlString, it.toString()) }
     }
 
-    override fun loadForRequest(url: HttpUrl): List<Cookie> {
-        return get(url)
-    }
+    override fun loadForRequest(url: HttpUrl): List<Cookie> = get(url)
 
+    /** The cookies the store holds for [url]. */
     public fun get(url: HttpUrl): List<Cookie> {
         val cookies = manager.getCookie(url.toString())
 
@@ -29,16 +29,15 @@ public class AndroidCookieJar : CookieJar {
         }
     }
 
+    /** Expires the cookies of [url] named in [cookieNames] (all when null); returns how many were removed. */
     public fun remove(url: HttpUrl, cookieNames: List<String>? = null, maxAge: Int = -1): Int {
         val urlString = url.toString()
         val cookies = manager.getCookie(urlString) ?: return 0
 
-        fun List<String>.filterNames(): List<String> {
-            return if (cookieNames != null) {
-                this.filter { it in cookieNames }
-            } else {
-                this
-            }
+        fun List<String>.filterNames(): List<String> = if (cookieNames != null) {
+            this.filter { it in cookieNames }
+        } else {
+            this
         }
 
         return cookies.split(";")
@@ -48,6 +47,7 @@ public class AndroidCookieJar : CookieJar {
             .count()
     }
 
+    /** Drops every cookie in the store. */
     public fun removeAll() {
         manager.removeAllCookies {}
     }

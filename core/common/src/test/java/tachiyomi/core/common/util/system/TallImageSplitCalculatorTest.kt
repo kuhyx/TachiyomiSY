@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-class TallImageSplitCalculatorTest {
+internal class TallImageSplitCalculatorTest {
 
     @Test
     fun `does not split when aspect ratio is tall but computed split count is one`() {

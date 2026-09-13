@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
+/** Adds the E-Hentai request logger when the log level asks for it. */
 public fun OkHttpClient.Builder.maybeInjectEHLogger(): OkHttpClient.Builder {
     if (EHLogLevel.shouldLog(EHLogLevel.EXTREME)) {
         val xlogBorder = XLog.tag("||EH-NETWORK-JSON").build()
@@ -13,7 +14,7 @@ public fun OkHttpClient.Builder.maybeInjectEHLogger(): OkHttpClient.Builder {
             try {
                 Json.decodeFromString<Any>(message)
                 xlogBorder.json(message)
-            } catch (ex: Exception) {
+            } catch (_: Exception) {
                 xlogNoBorder.d(message)
             }
         }
