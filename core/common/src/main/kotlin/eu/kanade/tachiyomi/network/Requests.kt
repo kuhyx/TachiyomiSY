@@ -21,9 +21,7 @@ public fun GET(
     url: String,
     headers: Headers = DEFAULT_HEADERS,
     cache: CacheControl = DEFAULT_CACHE_CONTROL,
-): Request {
-    return GET(url.toHttpUrl(), headers, cache)
-}
+): Request = GET(url.toHttpUrl(), headers, cache)
 
 /**
  * @since extensions-lib 1.4

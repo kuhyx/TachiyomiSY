@@ -32,9 +32,7 @@ public abstract class WebViewClientCompat : WebViewClient() {
     final override fun shouldOverrideUrlLoading(
         view: WebView,
         request: WebResourceRequest,
-    ): Boolean {
-        return shouldOverrideUrlCompat(view, request.url.toString())
-    }
+    ): Boolean = shouldOverrideUrlCompat(view, request.url.toString())
 
     @Deprecated("shouldOverrideUrlLoading(WebView, WebResourceRequest)")
     final override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean =
@@ -43,9 +41,7 @@ public abstract class WebViewClientCompat : WebViewClient() {
     final override fun shouldInterceptRequest(
         view: WebView,
         request: WebResourceRequest,
-    ): WebResourceResponse? {
-        return shouldInterceptRequestCompat(view, request.url.toString())
-    }
+    ): WebResourceResponse? = shouldInterceptRequestCompat(view, request.url.toString())
 
     @Deprecated("shouldInterceptRequest(WebView, WebResourceRequest)")
     final override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? =

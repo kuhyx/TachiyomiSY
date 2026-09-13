@@ -71,9 +71,7 @@ public sealed class AndroidPreference<T>(
             preferences: SharedPreferences,
             key: String,
             defaultValue: String,
-        ): String {
-            return preferences.getString(key, defaultValue) ?: defaultValue
-        }
+        ): String = preferences.getString(key, defaultValue) ?: defaultValue
 
         override fun write(key: String, value: String): Editor.() -> Unit = {
             putString(key, value)
@@ -136,9 +134,7 @@ public sealed class AndroidPreference<T>(
             preferences: SharedPreferences,
             key: String,
             defaultValue: Boolean,
-        ): Boolean {
-            return preferences.getBoolean(key, defaultValue)
-        }
+        ): Boolean = preferences.getBoolean(key, defaultValue)
 
         override fun write(key: String, value: Boolean): Editor.() -> Unit = {
             putBoolean(key, value)
@@ -156,9 +152,7 @@ public sealed class AndroidPreference<T>(
             preferences: SharedPreferences,
             key: String,
             defaultValue: Set<String>,
-        ): Set<String> {
-            return preferences.getStringSet(key, defaultValue) ?: defaultValue
-        }
+        ): Set<String> = preferences.getStringSet(key, defaultValue) ?: defaultValue
 
         override fun write(key: String, value: Set<String>): Editor.() -> Unit = {
             putStringSet(key, value)

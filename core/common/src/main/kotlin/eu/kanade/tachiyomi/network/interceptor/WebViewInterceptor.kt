@@ -35,14 +35,13 @@ public abstract class WebViewInterceptor(
         // Crashes on some devices. We skip this in some cases since the only impact is slower
         // WebView init in those rare cases.
         // See https://bugs.chromium.org/p/chromium/issues/detail?id=1279562
-        if (DeviceUtil.isMiui || (Build.VERSION.SDK_INT == Build.VERSION_CODES.S && DeviceUtil.isSamsung)) {
-            return@lazy
-        }
-
-        try {
-            WebSettings.getDefaultUserAgent(context)
-        } catch (_: Exception) {
-            // Avoid some crashes like when Chrome/WebView is being updated.
+        val skipWarmUp = DeviceUtil.isMiui || (Build.VERSION.SDK_INT == Build.VERSION_CODES.S && DeviceUtil.isSamsung)
+        if (!skipWarmUp) {
+            try {
+                WebSettings.getDefaultUserAgent(context)
+            } catch (_: Exception) {
+                // Avoid some crashes like when Chrome/WebView is being updated.
+            }
         }
     }
 
@@ -56,19 +55,21 @@ public abstract class WebViewInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val response = chain.proceed(request)
-        if (!shouldIntercept(response)) {
-            return response
-        }
-
-        if (!WebViewUtil.supportsWebView(context)) {
-            launchUI {
-                context.toast(MR.strings.information_webview_required, Toast.LENGTH_LONG)
+        return when {
+            !shouldIntercept(response) -> {
+                response
             }
-            return response
+            !WebViewUtil.supportsWebView(context) -> {
+                launchUI {
+                    context.toast(MR.strings.information_webview_required, Toast.LENGTH_LONG)
+                }
+                response
+            }
+            else -> {
+                initWebView
+                intercept(chain, request, response)
+            }
         }
-        initWebView
-
-        return intercept(chain, request, response)
     }
 
     /** [headers] as a plain map for the WebView. */
@@ -98,9 +99,9 @@ public abstract class WebViewInterceptor(
 private fun isRequestHeaderSafe(rawName: String, rawValue: String): Boolean {
     val name = rawName.lowercase(Locale.ENGLISH)
     val value = rawValue.lowercase(Locale.ENGLISH)
-    if (name in unsafeHeaderNames || name.startsWith("proxy-")) return false
-    if (name == "connection" && value == "upgrade") return false
-    return true
+    val unsafeName = name in unsafeHeaderNames || name.startsWith("proxy-")
+    val upgrade = name == "connection" && value == "upgrade"
+    return !unsafeName && !upgrade
 }
 private val unsafeHeaderNames = listOf(
     "content-length", "host", "trailer", "te", "upgrade", "cookie2", "keep-alive", "transfer-encoding", "set-cookie",

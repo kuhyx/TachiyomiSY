@@ -117,9 +117,10 @@ internal class RateLimitInterceptor(
         val response = chain.proceed(request)
         if (response.networkResponse == null) { // response is cached, remove it from queue
             synchronized(requestQueue) {
-                if (requestQueue.isEmpty() || timestamp < requestQueue.first) return@synchronized
-                requestQueue.removeFirstOccurrence(timestamp)
-                (requestQueue as Object).notifyAll()
+                if (requestQueue.isNotEmpty() && timestamp >= requestQueue.first) {
+                    requestQueue.removeFirstOccurrence(timestamp)
+                    (requestQueue as Object).notifyAll()
+                }
             }
         }
 

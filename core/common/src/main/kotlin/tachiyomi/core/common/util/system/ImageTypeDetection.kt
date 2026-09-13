@@ -5,7 +5,6 @@ import okio.BufferedSource
 import tachiyomi.core.common.util.system.ImageUtil.ImageType
 import tachiyomi.decoder.Format
 import tachiyomi.decoder.ImageDecoder
-import java.io.File
 import java.io.InputStream
 
 private const val HEADER_BYTES = 32
@@ -14,12 +13,11 @@ private const val HEADER_BYTES = 32
 internal object ImageTypeDetection {
     fun isImage(name: String?, openStream: (() -> InputStream)? = null): Boolean {
         if (name == null) return false
-        // SY -->
-        if (File(name).extension.equals("cbi", ignoreCase = true)) return true
-        // SY <--
-
         val extension = name.substringAfterLast('.')
-        return ImageType.entries.any { it.extension == extension } || openStream?.let { findImageType(it) } != null
+        // SY: encrypted archives (.cbi) count as images too.
+        return extension.equals("cbi", ignoreCase = true) ||
+            ImageType.entries.any { it.extension == extension } ||
+            openStream?.let { findImageType(it) } != null
     }
 
     fun findImageType(openStream: () -> InputStream): ImageType? = openStream().use { findImageType(it) }

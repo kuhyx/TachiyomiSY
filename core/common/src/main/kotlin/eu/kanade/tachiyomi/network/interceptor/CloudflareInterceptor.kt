@@ -28,10 +28,9 @@ public class CloudflareInterceptor(
 
     private val executor = ContextCompat.getMainExecutor(context)
 
-    override fun shouldIntercept(response: Response): Boolean {
-        // Check if Cloudflare anti-bot is on
-        return response.code in ERROR_CODES && response.header("Server") in SERVER_CHECK
-    }
+    // True when Cloudflare's anti-bot page answered instead of the site.
+    override fun shouldIntercept(response: Response): Boolean =
+        response.code in ERROR_CODES && response.header("Server") in SERVER_CHECK
 
     override fun intercept(
         chain: Interceptor.Chain,

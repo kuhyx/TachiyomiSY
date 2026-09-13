@@ -27,12 +27,14 @@ public object DeviceUtil {
      * @return MIUI major version code (e.g., 13) or null if can't be parsed.
      */
     public val miuiMajorVersion: Int? by lazy {
-        if (!isMiui) return@lazy null
-
-        Build.VERSION.INCREMENTAL
-            .substringBefore('.')
-            .trimStart('V')
-            .toIntOrNull()
+        if (isMiui) {
+            Build.VERSION.INCREMENTAL
+                .substringBefore('.')
+                .trimStart('V')
+                .toIntOrNull()
+        } else {
+            null
+        }
     }
 
     /** True on Samsung devices. */
