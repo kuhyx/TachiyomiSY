@@ -7,7 +7,7 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import java.io.File
 
-class AndroidStorageFolderProvider(
+public class AndroidStorageFolderProvider(
     private val context: Context,
 ) : FolderProvider {
 

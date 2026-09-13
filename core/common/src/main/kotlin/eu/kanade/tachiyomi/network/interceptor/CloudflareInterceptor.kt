@@ -19,7 +19,7 @@ import tachiyomi.i18n.MR
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 
-class CloudflareInterceptor(
+public class CloudflareInterceptor(
     private val context: Context,
     private val cookieManager: AndroidCookieJar,
     defaultUserAgentProvider: () -> String,

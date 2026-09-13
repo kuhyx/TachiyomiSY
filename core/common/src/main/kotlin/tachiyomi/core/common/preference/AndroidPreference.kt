@@ -14,16 +14,16 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import tachiyomi.core.common.util.system.logcat
 
-sealed class AndroidPreference<T>(
+public sealed class AndroidPreference<T>(
     private val preferences: SharedPreferences,
     private val keyFlow: Flow<String?>,
     private val key: String,
     private val defaultValue: T,
 ) : Preference<T> {
 
-    abstract fun read(preferences: SharedPreferences, key: String, defaultValue: T): T
+    public abstract fun read(preferences: SharedPreferences, key: String, defaultValue: T): T
 
-    abstract fun write(key: String, value: T): Editor.() -> Unit
+    public abstract fun write(key: String, value: T): Editor.() -> Unit
 
     override fun key(): String {
         return key
@@ -69,7 +69,7 @@ sealed class AndroidPreference<T>(
         return changes().stateIn(scope, SharingStarted.Eagerly, get())
     }
 
-    class StringPrimitive(
+    public class StringPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
@@ -88,7 +88,7 @@ sealed class AndroidPreference<T>(
         }
     }
 
-    class LongPrimitive(
+    public class LongPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
@@ -103,7 +103,7 @@ sealed class AndroidPreference<T>(
         }
     }
 
-    class IntPrimitive(
+    public class IntPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
@@ -118,7 +118,7 @@ sealed class AndroidPreference<T>(
         }
     }
 
-    class FloatPrimitive(
+    public class FloatPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
@@ -133,7 +133,7 @@ sealed class AndroidPreference<T>(
         }
     }
 
-    class BooleanPrimitive(
+    public class BooleanPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
@@ -152,7 +152,7 @@ sealed class AndroidPreference<T>(
         }
     }
 
-    class StringSetPrimitive(
+    public class StringSetPrimitive(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
@@ -171,7 +171,7 @@ sealed class AndroidPreference<T>(
         }
     }
 
-    class ObjectAsString<T>(
+    public class ObjectAsString<T>(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
@@ -192,7 +192,7 @@ sealed class AndroidPreference<T>(
         }
     }
 
-    class ObjectAsInt<T>(
+    public class ObjectAsInt<T>(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,
@@ -213,7 +213,7 @@ sealed class AndroidPreference<T>(
         }
     }
 
-    class ObjectSetAsStringSet<T>(
+    public class ObjectSetAsStringSet<T>(
         preferences: SharedPreferences,
         keyFlow: Flow<String?>,
         key: String,

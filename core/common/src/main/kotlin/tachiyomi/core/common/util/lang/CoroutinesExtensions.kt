@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
  * - custom scope like view or presenter scope
  */
 @DelicateCoroutinesApi
-fun launchUI(block: suspend CoroutineScope.() -> Unit): Job =
+public fun launchUI(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, block)
 
 /**
@@ -29,7 +29,7 @@ fun launchUI(block: suspend CoroutineScope.() -> Unit): Job =
  * - custom scope like view or presenter scope
  */
 @DelicateCoroutinesApi
-fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
+public fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT, block)
 
 /**
@@ -40,27 +40,27 @@ fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
  * - custom scope like view or presenter scope
  */
 @DelicateCoroutinesApi
-fun launchNow(block: suspend CoroutineScope.() -> Unit): Job =
+public fun launchNow(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED, block)
 
-fun CoroutineScope.launchUI(block: suspend CoroutineScope.() -> Unit): Job =
+public fun CoroutineScope.launchUI(block: suspend CoroutineScope.() -> Unit): Job =
     launch(Dispatchers.Main, block = block)
 
-fun CoroutineScope.launchIO(block: suspend CoroutineScope.() -> Unit): Job =
+public fun CoroutineScope.launchIO(block: suspend CoroutineScope.() -> Unit): Job =
     launch(Dispatchers.IO, block = block)
 
-fun CoroutineScope.launchNonCancellable(block: suspend CoroutineScope.() -> Unit): Job =
+public fun CoroutineScope.launchNonCancellable(block: suspend CoroutineScope.() -> Unit): Job =
     launchIO { withContext(NonCancellable, block) }
 
-suspend fun <T> withUIContext(block: suspend CoroutineScope.() -> T) = withContext(
+public suspend fun <T> withUIContext(block: suspend CoroutineScope.() -> T): T = withContext(
     Dispatchers.Main,
     block,
 )
 
-suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T) = withContext(
+public suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T = withContext(
     Dispatchers.IO,
     block,
 )
 
-suspend fun <T> withNonCancellableContext(block: suspend CoroutineScope.() -> T) =
+public suspend fun <T> withNonCancellableContext(block: suspend CoroutineScope.() -> T): T =
     withContext(NonCancellable, block)

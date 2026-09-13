@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.util.lang
 
 import java.security.MessageDigest
 
-object Hash {
+public object Hash {
 
     private val chars = charArrayOf(
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -13,19 +13,19 @@ object Hash {
 
     private val SHA256 get() = MessageDigest.getInstance("SHA-256")
 
-    fun sha256(bytes: ByteArray): String {
+    public fun sha256(bytes: ByteArray): String {
         return encodeHex(SHA256.digest(bytes))
     }
 
-    fun sha256(string: String): String {
+    public fun sha256(string: String): String {
         return sha256(string.toByteArray())
     }
 
-    fun md5(bytes: ByteArray): String {
+    public fun md5(bytes: ByteArray): String {
         return encodeHex(MD5.digest(bytes))
     }
 
-    fun md5(string: String): String {
+    public fun md5(string: String): String {
         return md5(string.toByteArray())
     }
 

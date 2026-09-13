@@ -1,44 +1,44 @@
 package tachiyomi.core.common.preference
 
-interface PreferenceStore {
+public interface PreferenceStore {
 
-    fun getString(key: String, defaultValue: String = ""): Preference<String>
+    public fun getString(key: String, defaultValue: String = ""): Preference<String>
 
-    fun getLong(key: String, defaultValue: Long = 0): Preference<Long>
+    public fun getLong(key: String, defaultValue: Long = 0): Preference<Long>
 
-    fun getInt(key: String, defaultValue: Int = 0): Preference<Int>
+    public fun getInt(key: String, defaultValue: Int = 0): Preference<Int>
 
-    fun getFloat(key: String, defaultValue: Float = 0f): Preference<Float>
+    public fun getFloat(key: String, defaultValue: Float = 0f): Preference<Float>
 
-    fun getBoolean(key: String, defaultValue: Boolean = false): Preference<Boolean>
+    public fun getBoolean(key: String, defaultValue: Boolean = false): Preference<Boolean>
 
-    fun getStringSet(key: String, defaultValue: Set<String> = emptySet()): Preference<Set<String>>
+    public fun getStringSet(key: String, defaultValue: Set<String> = emptySet()): Preference<Set<String>>
 
-    fun <T> getObjectFromString(
+    public fun <T> getObjectFromString(
         key: String,
         defaultValue: T,
         serializer: (T) -> String,
         deserializer: (String) -> T,
     ): Preference<T>
 
-    fun <T> getObjectFromInt(
+    public fun <T> getObjectFromInt(
         key: String,
         defaultValue: T,
         serializer: (T) -> Int,
         deserializer: (Int) -> T,
     ): Preference<T>
 
-    fun <T> getObjectSetFromStringSet(
+    public fun <T> getObjectSetFromStringSet(
         key: String,
         defaultValue: Set<T>,
         serializer: (T) -> String,
         deserializer: (String) -> T?,
     ): Preference<Set<T>>
 
-    fun getAll(): Map<String, *>
+    public fun getAll(): Map<String, *>
 }
 
-fun PreferenceStore.getLongArray(
+public fun PreferenceStore.getLongArray(
     key: String,
     defaultValue: List<Long>,
 ): Preference<List<Long>> {
@@ -50,7 +50,7 @@ fun PreferenceStore.getLongArray(
     )
 }
 
-inline fun <reified T : Enum<T>> PreferenceStore.getEnum(
+public inline fun <reified T : Enum<T>> PreferenceStore.getEnum(
     key: String,
     defaultValue: T,
 ): Preference<T> {
@@ -68,7 +68,7 @@ inline fun <reified T : Enum<T>> PreferenceStore.getEnum(
     )
 }
 
-inline fun <reified T : Enum<T>> PreferenceStore.getEnumSet(
+public inline fun <reified T : Enum<T>> PreferenceStore.getEnumSet(
     key: String,
     defaultValue: Set<T>,
 ): Preference<Set<T>> {

@@ -4,12 +4,12 @@ import logcat.LogPriority
 import logcat.asLog
 import logcat.logcat
 
-inline fun Any.logcat(
+public inline fun Any.logcat(
     priority: LogPriority = LogPriority.DEBUG,
     throwable: Throwable? = null,
     tag: String? = null,
     message: () -> String = { "" },
-) = logcat(priority = priority) {
+): Unit = logcat(priority = priority) {
     val logMessage = StringBuilder()
 
     if (!tag.isNullOrEmpty()) {

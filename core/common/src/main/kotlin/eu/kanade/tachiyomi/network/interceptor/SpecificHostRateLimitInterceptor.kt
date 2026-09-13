@@ -28,12 +28,12 @@ import kotlin.time.toDurationUnit
  * @param unit [TimeUnit]   The unit of time for the period. Defaults to seconds.
  */
 @Deprecated("Use the version with kotlin.time APIs instead.")
-fun OkHttpClient.Builder.rateLimitHost(
+public fun OkHttpClient.Builder.rateLimitHost(
     httpUrl: HttpUrl,
     permits: Int,
     period: Long = 1,
     unit: TimeUnit = TimeUnit.SECONDS,
-) = addInterceptor(
+): OkHttpClient.Builder = addInterceptor(
     RateLimitInterceptor(httpUrl.host, permits, period.toDuration(unit.toDurationUnit())),
 )
 
@@ -52,11 +52,11 @@ fun OkHttpClient.Builder.rateLimitHost(
  * @param period [Duration] The limiting duration. Defaults to 1.seconds.
  */
 @Suppress("UNUSED")
-fun OkHttpClient.Builder.rateLimitHost(
+public fun OkHttpClient.Builder.rateLimitHost(
     httpUrl: HttpUrl,
     permits: Int,
     period: Duration = 1.seconds,
-) = addInterceptor(RateLimitInterceptor(httpUrl.host, permits, period))
+): OkHttpClient.Builder = addInterceptor(RateLimitInterceptor(httpUrl.host, permits, period))
 
 /**
  * An OkHttp interceptor that handles given url host's rate limiting.
@@ -73,5 +73,5 @@ fun OkHttpClient.Builder.rateLimitHost(
  * @param period [Duration] The limiting duration. Defaults to 1.seconds.
  */
 @Suppress("UNUSED")
-fun OkHttpClient.Builder.rateLimitHost(url: String, permits: Int, period: Duration = 1.seconds) =
+public fun OkHttpClient.Builder.rateLimitHost(url: String, permits: Int, period: Duration = 1.seconds): OkHttpClient.Builder =
     addInterceptor(RateLimitInterceptor(url.toHttpUrlOrNull()?.host, permits, period))

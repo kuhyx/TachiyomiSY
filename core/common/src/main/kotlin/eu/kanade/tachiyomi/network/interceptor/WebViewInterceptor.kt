@@ -20,7 +20,7 @@ import java.util.Locale
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-abstract class WebViewInterceptor(
+public abstract class WebViewInterceptor(
     private val context: Context,
     private val defaultUserAgentProvider: () -> String,
 ) : Interceptor {
@@ -45,9 +45,9 @@ abstract class WebViewInterceptor(
         }
     }
 
-    abstract fun shouldIntercept(response: Response): Boolean
+    public abstract fun shouldIntercept(response: Response): Boolean
 
-    abstract fun intercept(chain: Interceptor.Chain, request: Request, response: Response): Response
+    public abstract fun intercept(chain: Interceptor.Chain, request: Request, response: Response): Response
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -68,7 +68,7 @@ abstract class WebViewInterceptor(
         return intercept(chain, request, response)
     }
 
-    fun parseHeaders(headers: Headers): Map<String, String> {
+    public fun parseHeaders(headers: Headers): Map<String, String> {
         return headers
             // Keeping unsafe header makes webview throw [net::ERR_INVALID_ARGUMENT]
             .filter { (name, value) ->
@@ -78,11 +78,11 @@ abstract class WebViewInterceptor(
             .mapValues { it.value.getOrNull(0).orEmpty() }
     }
 
-    fun CountDownLatch.awaitFor30Seconds() {
+    public fun CountDownLatch.awaitFor30Seconds() {
         await(30, TimeUnit.SECONDS)
     }
 
-    fun createWebView(request: Request): WebView {
+    public fun createWebView(request: Request): WebView {
         return WebView(context).apply {
             setDefaultSettings()
             // Avoid sending empty User-Agent, Chromium WebView will reset to default if empty

@@ -8,9 +8,9 @@ import androidx.core.content.getSystemService
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 
-object DeviceUtil {
+public object DeviceUtil {
 
-    val isMiui: Boolean by lazy {
+    public val isMiui: Boolean by lazy {
         getSystemProperty("ro.miui.ui.version.name")?.isNotEmpty() ?: false
     }
 
@@ -19,7 +19,7 @@ object DeviceUtil {
      *
      * @return MIUI major version code (e.g., 13) or null if can't be parsed.
      */
-    val miuiMajorVersion: Int? by lazy {
+    public val miuiMajorVersion: Int? by lazy {
         if (!isMiui) return@lazy null
 
         Build.VERSION.INCREMENTAL
@@ -29,7 +29,7 @@ object DeviceUtil {
     }
 
     @SuppressLint("PrivateApi")
-    fun isMiuiOptimizationDisabled(): Boolean {
+    public fun isMiuiOptimizationDisabled(): Boolean {
         val sysProp = getSystemProperty("persist.sys.miui_optimization")
         if (sysProp == "0" || sysProp == "false") {
             return true
@@ -44,11 +44,11 @@ object DeviceUtil {
         }
     }
 
-    val isSamsung: Boolean by lazy {
+    public val isSamsung: Boolean by lazy {
         Build.MANUFACTURER.equals("samsung", ignoreCase = true)
     }
 
-    val oneUiVersion: Double? by lazy {
+    public val oneUiVersion: Double? by lazy {
         try {
             val semPlatformIntField = Build.VERSION::class.java.getDeclaredField("SEM_PLATFORM_INT")
             val version = semPlatformIntField.getInt(null) - 90000
@@ -71,7 +71,7 @@ object DeviceUtil {
      *
      * Some of them may only be present on certain manufacturer's devices.
      */
-    val invalidDefaultBrowsers = listOf(
+    public val invalidDefaultBrowsers: List<String> = listOf(
         "android",
         // Honor
         "com.hihonor.android.internal.app",
@@ -92,7 +92,7 @@ object DeviceUtil {
      * Instead, we consider anything with less than 3GB of RAM as low memory
      * considering how heavy image processing can be.
      */
-    fun isLowRamDevice(context: Context): Boolean {
+    public fun isLowRamDevice(context: Context): Boolean {
         val memInfo = ActivityManager.MemoryInfo()
         context.getSystemService<ActivityManager>()!!.getMemoryInfo(memInfo)
         val totalMemBytes = memInfo.totalMem

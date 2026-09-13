@@ -1,19 +1,19 @@
 package tachiyomi.core.common
 
-object Constants {
-    const val URL_HELP = "https://mihon.app/docs/guides/troubleshooting/"
-    const val URL_HELP_UPCOMING = "https://mihon.app/docs/faq/updates/upcoming"
+public object Constants {
+    public const val URL_HELP: String = "https://mihon.app/docs/guides/troubleshooting/"
+    public const val URL_HELP_UPCOMING: String = "https://mihon.app/docs/faq/updates/upcoming"
 
-    const val MANGA_EXTRA = "manga"
+    public const val MANGA_EXTRA: String = "manga"
 
-    const val MAIN_ACTIVITY = "eu.kanade.tachiyomi.ui.main.MainActivity"
+    public const val MAIN_ACTIVITY: String = "eu.kanade.tachiyomi.ui.main.MainActivity"
 
     // Shortcut actions
-    const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"
-    const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
-    const val SHORTCUT_UPDATES = "eu.kanade.tachiyomi.SHOW_RECENTLY_UPDATED"
-    const val SHORTCUT_HISTORY = "eu.kanade.tachiyomi.SHOW_RECENTLY_READ"
-    const val SHORTCUT_SOURCES = "eu.kanade.tachiyomi.SHOW_CATALOGUES"
-    const val SHORTCUT_EXTENSIONS = "eu.kanade.tachiyomi.EXTENSIONS"
-    const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
+    public const val SHORTCUT_LIBRARY: String = "eu.kanade.tachiyomi.SHOW_LIBRARY"
+    public const val SHORTCUT_MANGA: String = "eu.kanade.tachiyomi.SHOW_MANGA"
+    public const val SHORTCUT_UPDATES: String = "eu.kanade.tachiyomi.SHOW_RECENTLY_UPDATED"
+    public const val SHORTCUT_HISTORY: String = "eu.kanade.tachiyomi.SHOW_RECENTLY_READ"
+    public const val SHORTCUT_SOURCES: String = "eu.kanade.tachiyomi.SHOW_CATALOGUES"
+    public const val SHORTCUT_EXTENSIONS: String = "eu.kanade.tachiyomi.EXTENSIONS"
+    public const val SHORTCUT_DOWNLOADS: String = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
 }

@@ -31,11 +31,11 @@ import kotlin.time.toDurationUnit
  * @param unit [TimeUnit] The unit of time for the period. Defaults to seconds.
  */
 @Deprecated("Use the version with kotlin.time APIs instead.")
-fun OkHttpClient.Builder.rateLimit(
+public fun OkHttpClient.Builder.rateLimit(
     permits: Int,
     period: Long = 1,
     unit: TimeUnit = TimeUnit.SECONDS,
-) = addInterceptor(RateLimitInterceptor(null, permits, period.toDuration(unit.toDurationUnit())))
+): OkHttpClient.Builder = addInterceptor(RateLimitInterceptor(null, permits, period.toDuration(unit.toDurationUnit())))
 
 /**
  * An OkHttp interceptor that handles rate limiting.
@@ -50,7 +50,7 @@ fun OkHttpClient.Builder.rateLimit(
  * @param permits [Int]     Number of requests allowed within a period of units.
  * @param period [Duration] The limiting duration. Defaults to 1.seconds.
  */
-fun OkHttpClient.Builder.rateLimit(permits: Int, period: Duration = 1.seconds) =
+public fun OkHttpClient.Builder.rateLimit(permits: Int, period: Duration = 1.seconds): OkHttpClient.Builder =
     addInterceptor(RateLimitInterceptor(null, permits, period))
 
 /** We can probably accept domains or wildcards by comparing with [endsWith], etc. */

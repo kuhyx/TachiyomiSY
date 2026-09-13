@@ -13,8 +13,8 @@ import tachiyomi.core.common.storage.openFileDescriptor
 import java.io.Closeable
 import java.nio.ByteBuffer
 
-class ZipWriter(
-    val context: Context,
+public class ZipWriter(
+    public val context: Context,
     file: UniFile,
     // SY -->
     encrypt: Boolean = false,
@@ -47,7 +47,7 @@ class ZipWriter(
         }
     }
 
-    fun write(file: UniFile) {
+    public fun write(file: UniFile) {
         file.openFileDescriptor(context, "r").use {
             val fd = it.fileDescriptor
             ArchiveEntry.clear(entry)
@@ -67,7 +67,7 @@ class ZipWriter(
     }
 
     // SY -->
-    fun write(fileData: ByteArray, fileName: String) {
+    public fun write(fileData: ByteArray, fileName: String) {
         ArchiveEntry.clear(entry)
         ArchiveEntry.setPathnameUtf8(entry, fileName)
         ArchiveEntry.setSize(entry, fileData.size.toLong())
@@ -94,7 +94,7 @@ class ZipWriter(
     }
 
     // SY -->
-    companion object {
+    public companion object {
         private const val BUFFER_SIZE = 8192
     }
     // SY <--

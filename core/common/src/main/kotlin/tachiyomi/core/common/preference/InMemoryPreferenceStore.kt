@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.stateIn
 /**
  * Local-copy implementation of PreferenceStore mostly for test and preview purposes
  */
-class InMemoryPreferenceStore(
+public class InMemoryPreferenceStore(
     initialPreferences: Sequence<InMemoryPreference<*>> = sequenceOf(),
 ) : PreferenceStore {
 
@@ -95,7 +95,7 @@ class InMemoryPreferenceStore(
         return preferences
     }
 
-    class InMemoryPreference<T>(
+    public class InMemoryPreference<T>(
         private val key: String,
         private var data: T?,
         private val defaultValue: T,

@@ -2,19 +2,19 @@ package exh.util
 
 import java.util.Locale
 
-fun Collection<String>.trimAll() = map { it.trim() }
-fun Collection<String>.dropBlank() = filter { it.isNotBlank() }
-fun Collection<String>.dropEmpty() = filter { it.isNotEmpty() }
+public fun Collection<String>.trimAll(): List<String> = map { it.trim() }
+public fun Collection<String>.dropBlank(): List<String> = filter { it.isNotBlank() }
+public fun Collection<String>.dropEmpty(): List<String> = filter { it.isNotEmpty() }
 
 private val articleRegex by lazy { "^(an|a|the) ".toRegex(RegexOption.IGNORE_CASE) }
 
-fun String.removeArticles(): String {
+public fun String.removeArticles(): String {
     return replace(articleRegex, "")
 }
 
-fun String.trimOrNull() = trim().nullIfBlank()
+public fun String.trimOrNull(): String? = trim().nullIfBlank()
 
-fun String.nullIfBlank(): String? = ifBlank { null }
+public fun String.nullIfBlank(): String? = ifBlank { null }
 
-fun String.capitalize(locale: Locale = Locale.getDefault()) =
+public fun String.capitalize(locale: Locale = Locale.getDefault()): String =
     replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }

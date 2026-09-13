@@ -11,7 +11,7 @@ import tachiyomi.core.common.i18n.stringResource
  * @param resource the text resource.
  * @param duration the duration of the toast. Defaults to short.
  */
-fun Context.toast(
+public fun Context.toast(
     resource: StringResource,
     duration: Int = Toast.LENGTH_SHORT,
     block: (Toast) -> Unit = {},
@@ -25,7 +25,7 @@ fun Context.toast(
  * @param text the text to display.
  * @param duration the duration of the toast. Defaults to short.
  */
-fun Context.toast(
+public fun Context.toast(
     text: String?,
     duration: Int = Toast.LENGTH_SHORT,
     block: (Toast) -> Unit = {},

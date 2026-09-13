@@ -5,7 +5,7 @@ import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
 
-class AndroidCookieJar : CookieJar {
+public class AndroidCookieJar : CookieJar {
 
     private val manager = CookieManager.getInstance()
 
@@ -19,7 +19,7 @@ class AndroidCookieJar : CookieJar {
         return get(url)
     }
 
-    fun get(url: HttpUrl): List<Cookie> {
+    public fun get(url: HttpUrl): List<Cookie> {
         val cookies = manager.getCookie(url.toString())
 
         return if (cookies != null && cookies.isNotEmpty()) {
@@ -29,7 +29,7 @@ class AndroidCookieJar : CookieJar {
         }
     }
 
-    fun remove(url: HttpUrl, cookieNames: List<String>? = null, maxAge: Int = -1): Int {
+    public fun remove(url: HttpUrl, cookieNames: List<String>? = null, maxAge: Int = -1): Int {
         val urlString = url.toString()
         val cookies = manager.getCookie(urlString) ?: return 0
 
@@ -48,7 +48,7 @@ class AndroidCookieJar : CookieJar {
             .count()
     }
 
-    fun removeAll() {
+    public fun removeAll() {
         manager.removeAllCookies {}
     }
 }

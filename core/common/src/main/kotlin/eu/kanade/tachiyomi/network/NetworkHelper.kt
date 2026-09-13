@@ -11,16 +11,16 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 /* SY --> */
-open /* SY <-- */ class NetworkHelper(
+public open /* SY <-- */ class NetworkHelper(
     private val context: Context,
     private val preferences: NetworkPreferences,
     // SY -->
-    val isDebugBuild: Boolean,
+    public val isDebugBuild: Boolean,
     // SY <--
 ) {
 
     /* SY --> */
-    open /* SY <-- */val cookieJar = AndroidCookieJar()
+    public open /* SY <-- */ val cookieJar: AndroidCookieJar = AndroidCookieJar()
 
     private val clientBuilder: OkHttpClient.Builder = run {
         val builder = OkHttpClient.Builder()
@@ -62,7 +62,7 @@ open /* SY <-- */ class NetworkHelper(
     }
 
     /* SY --> */
-    open /* SY <-- */ val client = clientBuilder
+    public open /* SY <-- */ val client: OkHttpClient = clientBuilder
         .addInterceptor(
             CloudflareInterceptor(context, cookieJar, ::defaultUserAgentProvider),
         )
@@ -74,7 +74,7 @@ open /* SY <-- */ class NetworkHelper(
     @Deprecated("The regular client handles Cloudflare by default")
     @Suppress("UNUSED")
     /* SY --> */
-    open /* SY <-- */val cloudflareClient: OkHttpClient = client
+    public open /* SY <-- */val cloudflareClient: OkHttpClient = client
 
-    fun defaultUserAgentProvider() = preferences.defaultUserAgent.get().trim()
+    public fun defaultUserAgentProvider(): String = preferences.defaultUserAgent.get().trim()
 }

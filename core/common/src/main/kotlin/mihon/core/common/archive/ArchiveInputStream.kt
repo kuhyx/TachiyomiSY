@@ -9,7 +9,7 @@ import java.nio.ByteBuffer
 import kotlin.concurrent.Volatile
 import mihon.core.common.archive.ArchiveEntry as MihonArchiveEntry
 
-class ArchiveInputStream(
+public class ArchiveInputStream(
     buffer: Long,
     size: Long,
     // SY -->
@@ -68,7 +68,7 @@ class ArchiveInputStream(
         Archive.readFree(archive)
     }
 
-    fun getNextEntry(): MihonArchiveEntry? {
+    public fun getNextEntry(): MihonArchiveEntry? {
         return Archive.readNextHeader(archive).takeUnless { it == 0L }?.let { entry ->
             val name = ArchiveEntry.pathnameUtf8(entry) ?: ArchiveEntry.pathname(entry)?.decodeToString() ?: return null
             val isFile = ArchiveEntry.filetype(entry) == ArchiveEntry.AE_IFREG

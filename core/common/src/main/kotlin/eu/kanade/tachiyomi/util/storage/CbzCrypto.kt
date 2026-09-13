@@ -30,8 +30,8 @@ import javax.crypto.spec.IvParameterSpec
  * passwords before storing
  * them in Shared Preferences
  */
-object CbzCrypto {
-    const val DATABASE_NAME = "tachiyomiEncrypted.db"
+public object CbzCrypto {
+    public const val DATABASE_NAME: String = "tachiyomiEncrypted.db"
     private const val DEFAULT_COVER_NAME = "cover.jpg"
     private val securityPreferences: SecurityPreferences by injectLazy()
     private val keyStore = KeyStore.getInstance(Keystore).apply {
@@ -119,16 +119,16 @@ object CbzCrypto {
         }
     }
 
-    fun deleteKeyCbz() {
+    public fun deleteKeyCbz() {
         keyStore.deleteEntry(AliasCbz)
         generateKey(AliasCbz)
     }
 
-    fun encryptCbz(password: String): String {
+    public fun encryptCbz(password: String): String {
         return encrypt(password.toByteArray(), encryptionCipherCbz)
     }
 
-    fun getDecryptedPasswordCbz(): ByteArray {
+    public fun getDecryptedPasswordCbz(): ByteArray {
         val encryptedPassword = securityPreferences.cbzPassword.get()
         if (encryptedPassword.isBlank()) error("This archive is encrypted please set a password")
 
@@ -152,26 +152,26 @@ object CbzCrypto {
             }
     }
 
-    fun getDecryptedPasswordSql(): ByteArray {
+    public fun getDecryptedPasswordSql(): ByteArray {
         if (securityPreferences.sqlPassword.get().isBlank()) generateAndEncryptSqlPw()
         return decrypt(securityPreferences.sqlPassword.get(), AliasSql)
     }
 
-    fun isPasswordSet(): Boolean {
+    public fun isPasswordSet(): Boolean {
         return securityPreferences.cbzPassword.get().isNotEmpty()
     }
 
-    fun isPasswordSetState(scope: CoroutineScope): StateFlow<Boolean> {
+    public fun isPasswordSetState(scope: CoroutineScope): StateFlow<Boolean> {
         return securityPreferences.cbzPassword.changes()
             .map { it.isNotEmpty() }
             .stateIn(scope, SharingStarted.Eagerly, false)
     }
 
-    fun getPasswordProtectDlPref(): Boolean {
+    public fun getPasswordProtectDlPref(): Boolean {
         return securityPreferences.passwordProtectDownloads.get()
     }
 
-    fun createComicInfoPadding(): String? {
+    public fun createComicInfoPadding(): String? {
         return if (getPasswordProtectDlPref()) {
             val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
             List(SecureRandom().nextInt(100) + 42) { charPool.random() }.joinToString("")
@@ -180,14 +180,14 @@ object CbzCrypto {
         }
     }
 
-    fun getPreferredEncryptionAlgo(): ByteArray =
+    public fun getPreferredEncryptionAlgo(): ByteArray =
         when (securityPreferences.encryptionType.get()) {
             SecurityPreferences.EncryptionType.AES_256 -> "zip:encryption=aes256".toByteArray()
             SecurityPreferences.EncryptionType.AES_128 -> "zip:encryption=aes128".toByteArray()
             SecurityPreferences.EncryptionType.ZIP_STANDARD -> "zip:encryption=zipcrypt".toByteArray()
         }
 
-    fun detectCoverImageArchive(stream: InputStream): Boolean {
+    public fun detectCoverImageArchive(stream: InputStream): Boolean {
         val bytes = ByteArray(128)
         if (stream.markSupported()) {
             stream.mark(bytes.size)
@@ -198,7 +198,7 @@ object CbzCrypto {
         return String(bytes).contains(DEFAULT_COVER_NAME, ignoreCase = true)
     }
 
-    fun ArchiveReader.getCoverStream(): BufferedInputStream? {
+    public fun ArchiveReader.getCoverStream(): BufferedInputStream? {
         this.getInputStream(DEFAULT_COVER_NAME)?.let { stream ->
             if (ImageUtil.isImage(DEFAULT_COVER_NAME) { stream }) {
                 return this.getInputStream(DEFAULT_COVER_NAME)?.buffered()

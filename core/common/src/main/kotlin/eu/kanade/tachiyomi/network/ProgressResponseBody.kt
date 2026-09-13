@@ -9,7 +9,7 @@ import okio.Source
 import okio.buffer
 import java.io.IOException
 
-class ProgressResponseBody(
+public class ProgressResponseBody(
     private val responseBody: ResponseBody,
     private val progressListener: ProgressListener,
     private val existingSize: Long, // bytes already downloaded

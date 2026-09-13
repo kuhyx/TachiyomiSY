@@ -1,3 +1,3 @@
 package exh.util
 
-fun <C : Collection<R>, R> C.nullIfEmpty() = ifEmpty { null }
+public fun <C : Collection<R>, R> C.nullIfEmpty(): C? = ifEmpty { null }

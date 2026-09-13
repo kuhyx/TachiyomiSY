@@ -10,23 +10,23 @@ import tachiyomi.core.common.storage.openFileDescriptor
 import java.io.Closeable
 import java.io.InputStream
 
-class ArchiveReader(pfd: ParcelFileDescriptor) : Closeable {
-    val size = pfd.statSize
-    val address = Os.mmap(0, size, OsConstants.PROT_READ, OsConstants.MAP_PRIVATE, pfd.fileDescriptor, 0)
+public class ArchiveReader(pfd: ParcelFileDescriptor) : Closeable {
+    public val size: Long = pfd.statSize
+    public val address: Long = Os.mmap(0, size, OsConstants.PROT_READ, OsConstants.MAP_PRIVATE, pfd.fileDescriptor, 0)
 
     // SY -->
-    var encrypted: Boolean = false
+    public var encrypted: Boolean = false
         private set
-    var wrongPassword: Boolean? = null
+    public var wrongPassword: Boolean? = null
         private set
-    val archiveHashCode = pfd.hashCode()
+    public val archiveHashCode: Int = pfd.hashCode()
 
     init {
         checkEncryptionStatus()
     }
     // SY <--
 
-    inline fun <T> useEntries(block: (Sequence<ArchiveEntry>) -> T): T = ArchiveInputStream(
+    public inline fun <T> useEntries(block: (Sequence<ArchiveEntry>) -> T): T = ArchiveInputStream(
         address,
         size,
         // SY -->
@@ -34,7 +34,7 @@ class ArchiveReader(pfd: ParcelFileDescriptor) : Closeable {
         // SY <--
     ).use { block(generateSequence { it.getNextEntry() }) }
 
-    fun getInputStream(entryName: String): InputStream? {
+    public fun getInputStream(entryName: String): InputStream? {
         val archive = ArchiveInputStream(address, size, /* SY --> */ encrypted /* SY <-- */)
         try {
             while (true) {
@@ -91,4 +91,4 @@ class ArchiveReader(pfd: ParcelFileDescriptor) : Closeable {
     }
 }
 
-fun UniFile.archiveReader(context: Context) = openFileDescriptor(context, "r").use { ArchiveReader(it) }
+public fun UniFile.archiveReader(context: Context): ArchiveReader = openFileDescriptor(context, "r").use { ArchiveReader(it) }

@@ -2,9 +2,9 @@ package tachiyomi.core.common.storage
 
 import java.io.File
 
-interface FolderProvider {
+public interface FolderProvider {
 
-    fun directory(): File
+    public fun directory(): File
 
-    fun path(): String
+    public fun path(): String
 }

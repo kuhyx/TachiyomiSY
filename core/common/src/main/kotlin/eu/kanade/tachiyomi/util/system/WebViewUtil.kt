@@ -12,12 +12,12 @@ import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import kotlin.coroutines.resume
 
-object WebViewUtil {
+public object WebViewUtil {
     private const val CHROME_PACKAGE = "com.android.chrome"
     private const val YOUTUBE_FOR_TV_PACKAGE = "com.google.android.youtube.tv"
     private const val SYSTEM_SETTINGS_PACKAGE = "com.android.settings"
 
-    const val MINIMUM_WEBVIEW_VERSION = 118
+    public const val MINIMUM_WEBVIEW_VERSION: Int = 118
 
     /**
      * Uses the WebView's user agent string to create something similar to what Chrome on Android
@@ -29,14 +29,14 @@ object WebViewUtil {
      * Example of Chrome on Android:
      *   Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.3
      */
-    fun getInferredUserAgent(context: Context): String {
+    public fun getInferredUserAgent(context: Context): String {
         return WebView(context)
             .getDefaultUserAgentString()
             .replace("; Android .*?\\)".toRegex(), "; Android 10; K)")
             .replace("Version/.* Chrome/".toRegex(), "Chrome/")
     }
 
-    fun getVersion(context: Context): String {
+    public fun getVersion(context: Context): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val webView = WebView.getCurrentWebViewPackage() ?: return "how did you get here?"
             val pm = context.packageManager
@@ -48,7 +48,7 @@ object WebViewUtil {
         }
     }
 
-    fun supportsWebView(context: Context): Boolean {
+    public fun supportsWebView(context: Context): Boolean {
         try {
             // May throw android.webkit.WebViewFactory$MissingWebViewPackageException if WebView
             // is not installed
@@ -61,7 +61,7 @@ object WebViewUtil {
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_WEBVIEW)
     }
 
-    fun spoofedPackageName(context: Context): String {
+    public fun spoofedPackageName(context: Context): String {
         return runCatching { context.packageManager.getPackageInfo(CHROME_PACKAGE, 0) }
             .recoverCatching { context.packageManager.getPackageInfo(SYSTEM_SETTINGS_PACKAGE, 0) }
             .recoverCatching { context.packageManager.getPackageInfo(YOUTUBE_FOR_TV_PACKAGE, 0) }
@@ -75,16 +75,16 @@ object WebViewUtil {
     }
 }
 
-fun WebView.isOutdated(): Boolean {
+public fun WebView.isOutdated(): Boolean {
     return getWebViewMajorVersion() < WebViewUtil.MINIMUM_WEBVIEW_VERSION
 }
 
-suspend fun WebView.getHtml(): String = suspendCancellableCoroutine {
+public suspend fun WebView.getHtml(): String = suspendCancellableCoroutine {
     evaluateJavascript("document.documentElement.outerHTML") { html -> it.resume(html) }
 }
 
 @SuppressLint("SetJavaScriptEnabled")
-fun WebView.setDefaultSettings() {
+public fun WebView.setDefaultSettings() {
     with(settings) {
         javaScriptEnabled = true
         domStorageEnabled = true

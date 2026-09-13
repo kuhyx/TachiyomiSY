@@ -7,6 +7,7 @@ import kotlinx.serialization.json.okio.decodeFromBufferedSource
 import kotlinx.serialization.serializer
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -19,11 +20,11 @@ import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.coroutines.resumeWithException
 
-val jsonMime = "application/json; charset=utf-8".toMediaType()
+public val jsonMime: MediaType = "application/json; charset=utf-8".toMediaType()
 
 @OptIn(ExperimentalAtomicApi::class)
 @Deprecated("Use suspend APIs instead")
-fun Call.asObservable(): Observable<Response> {
+public fun Call.asObservable(): Observable<Response> {
     return Observable.unsafeCreate { subscriber ->
         // Since Call is a one-shot type, clone it for each new subscriber.
         val call = clone()
@@ -62,7 +63,7 @@ fun Call.asObservable(): Observable<Response> {
 }
 
 @Deprecated("Use suspend APIs instead")
-fun Call.asObservableSuccess(): Observable<Response> {
+public fun Call.asObservableSuccess(): Observable<Response> {
     @Suppress("DEPRECATION")
     return asObservable().doOnNext { response ->
         if (!response.isSuccessful) {
@@ -100,7 +101,7 @@ private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
     }
 }
 
-suspend fun Call.await(): Response {
+public suspend fun Call.await(): Response {
     val callStack = Exception().stackTrace.run { copyOfRange(1, size) }
     return await(callStack)
 }
@@ -108,7 +109,7 @@ suspend fun Call.await(): Response {
 /**
  * Similar to [await] but throws [HttpException] if [Response.isSuccessful] returns false
  */
-suspend fun Call.awaitSuccess(): Response {
+public suspend fun Call.awaitSuccess(): Response {
     val callStack = Exception().stackTrace.run { copyOfRange(1, size) }
     val response = await(callStack)
     if (!response.isSuccessful) {
@@ -118,7 +119,7 @@ suspend fun Call.awaitSuccess(): Response {
     return response
 }
 
-fun OkHttpClient.newCachelessCallWithProgress(
+public fun OkHttpClient.newCachelessCallWithProgress(
     request: Request,
     listener: ProgressListener,
     existingSize: Long = 0L,
@@ -146,12 +147,12 @@ fun OkHttpClient.newCachelessCallWithProgress(
 }
 
 context(_: Json)
-inline fun <reified T> Response.parseAs(): T {
+public inline fun <reified T> Response.parseAs(): T {
     return decodeFromJsonResponse(serializer(), this)
 }
 
 context(json: Json)
-fun <T> decodeFromJsonResponse(
+public fun <T> decodeFromJsonResponse(
     deserializer: DeserializationStrategy<T>,
     response: Response,
 ): T {

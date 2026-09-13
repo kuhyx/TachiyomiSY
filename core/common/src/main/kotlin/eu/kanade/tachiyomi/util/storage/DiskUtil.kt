@@ -13,12 +13,12 @@ import java.nio.ByteBuffer
 import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
 
-object DiskUtil {
+public object DiskUtil {
 
     /**
      * Returns the root folders of all the available external storages.
      */
-    fun getExternalStorages(context: Context): List<File> {
+    public fun getExternalStorages(context: Context): List<File> {
         return ContextCompat.getExternalFilesDirs(context, null)
             .filterNotNull()
             .mapNotNull {
@@ -32,11 +32,11 @@ object DiskUtil {
             }
     }
 
-    fun hashKeyForDisk(key: String): String {
+    public fun hashKeyForDisk(key: String): String {
         return Hash.md5(key)
     }
 
-    fun getDirectorySize(f: File): Long {
+    public fun getDirectorySize(f: File): Long {
         var size: Long = 0
         if (f.isDirectory) {
             for (file in f.listFiles().orEmpty()) {
@@ -51,7 +51,7 @@ object DiskUtil {
     /**
      * Gets the total space for the disk that a file path points to, in bytes.
      */
-    fun getTotalStorageSpace(file: File): Long {
+    public fun getTotalStorageSpace(file: File): Long {
         return try {
             val stat = StatFs(file.absolutePath)
             stat.blockCountLong * stat.blockSizeLong
@@ -63,7 +63,7 @@ object DiskUtil {
     /**
      * Gets the available space for the disk that a file path points to, in bytes.
      */
-    fun getAvailableStorageSpace(file: File): Long {
+    public fun getAvailableStorageSpace(file: File): Long {
         return try {
             val stat = StatFs(file.absolutePath)
             stat.availableBlocksLong * stat.blockSizeLong
@@ -75,7 +75,7 @@ object DiskUtil {
     /**
      * Gets the available space for the disk that a file path points to, in bytes.
      */
-    fun getAvailableStorageSpace(f: UniFile): Long {
+    public fun getAvailableStorageSpace(f: UniFile): Long {
         return try {
             val stat = StatFs(f.uri.path)
             stat.availableBlocksLong * stat.blockSizeLong
@@ -87,7 +87,7 @@ object DiskUtil {
     /**
      * Don't display downloaded chapters in gallery apps creating `.nomedia`.
      */
-    fun createNoMediaFile(dir: UniFile?, context: Context?) {
+    public fun createNoMediaFile(dir: UniFile?, context: Context?) {
         if (dir != null && dir.exists()) {
             val nomedia = dir.findFile(NOMEDIA_FILE)
             if (nomedia == null) {
@@ -100,7 +100,7 @@ object DiskUtil {
     /**
      * Scans the given file so that it can be shown in gallery apps, for example.
      */
-    fun scanMedia(context: Context, uri: Uri) {
+    public fun scanMedia(context: Context, uri: Uri) {
         MediaScannerConnection.scanFile(context, arrayOf(uri.path), null, null)
     }
 
@@ -137,7 +137,7 @@ object DiskUtil {
      * their issue nor any documentation or tests that would allow us
      * to determine which characters are problems and which are not.
      */
-    fun buildValidFilename(
+    public fun buildValidFilename(
         origName: String,
         maxBytes: Int = MAX_FILE_NAME_BYTES,
         disallowNonAscii: Boolean = false,
@@ -168,7 +168,7 @@ object DiskUtil {
     /**
      * Truncate a string to a maximum length, while maintaining valid Unicode encoding.
      */
-    fun truncateToLength(s: String, maxBytes: Int): String {
+    public fun truncateToLength(s: String, maxBytes: Int): String {
         val charset = Charsets.UTF_8
         val decoder = charset.newDecoder()
         val sba = s.toByteArray(charset)
@@ -198,10 +198,10 @@ object DiskUtil {
         }
     }
 
-    const val NOMEDIA_FILE = ".nomedia"
+    public const val NOMEDIA_FILE: String = ".nomedia"
 
     // Safe theoretical max filename size is 255 bytes and 1 char = 2-4 bytes (UTF-8).
     // To allow for writing to ext4 through a FUSE layer in the future, also subtract 15
     // reserved characters.
-    const val MAX_FILE_NAME_BYTES = 240
+    public const val MAX_FILE_NAME_BYTES: Int = 240
 }

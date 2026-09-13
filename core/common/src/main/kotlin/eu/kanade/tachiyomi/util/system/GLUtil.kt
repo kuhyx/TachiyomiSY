@@ -5,8 +5,8 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
 import kotlin.math.max
 
-object GLUtil {
-    val DEVICE_TEXTURE_LIMIT: Int by lazy {
+public object GLUtil {
+    public val DEVICE_TEXTURE_LIMIT: Int by lazy {
         // Get EGL Display
         val egl = EGLContext.getEGL() as EGL10
         val display = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY)
@@ -42,9 +42,9 @@ object GLUtil {
         max(maximumTextureSize, SAFE_TEXTURE_LIMIT)
     }
 
-    const val SAFE_TEXTURE_LIMIT: Int = 2048
+    public const val SAFE_TEXTURE_LIMIT: Int = 2048
 
-    val CUSTOM_TEXTURE_LIMIT_OPTIONS: List<Int> by lazy {
+    public val CUSTOM_TEXTURE_LIMIT_OPTIONS: List<Int> by lazy {
         val steps = DEVICE_TEXTURE_LIMIT / MULTIPLIER
         buildList(steps) {
             add(DEVICE_TEXTURE_LIMIT)

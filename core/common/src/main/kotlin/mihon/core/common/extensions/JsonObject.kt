@@ -2,9 +2,9 @@ package mihon.core.common.extensions
 
 import kotlinx.serialization.json.JsonObject
 
-val JsonObjectEmpty = JsonObject(emptyMap())
+public val JsonObjectEmpty: JsonObject = JsonObject(emptyMap())
 
-val JsonObjectEmptyBytes = byteArrayOf(0x7B, 0x7D)
+public val JsonObjectEmptyBytes: ByteArray = byteArrayOf(0x7B, 0x7D)
 
-val JsonObject.Companion.EMPTY: JsonObject
+public val JsonObject.Companion.EMPTY: JsonObject
     inline get() = JsonObjectEmpty

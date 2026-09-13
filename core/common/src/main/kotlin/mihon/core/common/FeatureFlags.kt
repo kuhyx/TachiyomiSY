@@ -3,10 +3,10 @@ package mihon.core.common
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-object FeatureFlags {
+public object FeatureFlags {
 
     @OptIn(ExperimentalUuidApi::class)
-    fun newInstallationId(): String {
+    public fun newInstallationId(): String {
         return Uuid.random().toHexDashString()
     }
 }

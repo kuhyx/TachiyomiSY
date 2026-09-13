@@ -4,32 +4,32 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-interface Preference<T> {
+public interface Preference<T> {
 
-    fun key(): String
+    public fun key(): String
 
-    fun get(): T
+    public fun get(): T
 
-    fun set(value: T)
+    public fun set(value: T)
 
-    fun isSet(): Boolean
+    public fun isSet(): Boolean
 
-    fun delete()
+    public fun delete()
 
-    fun defaultValue(): T
+    public fun defaultValue(): T
 
-    fun changes(): Flow<T>
+    public fun changes(): Flow<T>
 
-    fun stateIn(scope: CoroutineScope): StateFlow<T>
+    public fun stateIn(scope: CoroutineScope): StateFlow<T>
 
-    companion object {
+    public companion object {
         /**
          * A preference that should not be exposed in places like backups without user consent.
          */
-        fun isPrivate(key: String): Boolean {
+        public fun isPrivate(key: String): Boolean {
             return key.startsWith(PRIVATE_PREFIX)
         }
-        fun privateKey(key: String): String {
+        public fun privateKey(key: String): String {
             return "$PRIVATE_PREFIX$key"
         }
 
@@ -37,10 +37,10 @@ interface Preference<T> {
          * A preference used for internal app state that isn't really a user preference
          * and therefore should not be in places like backups.
          */
-        fun isAppState(key: String): Boolean {
+        public fun isAppState(key: String): Boolean {
             return key.startsWith(APP_STATE_PREFIX)
         }
-        fun appStateKey(key: String): String {
+        public fun appStateKey(key: String): String {
             return "$APP_STATE_PREFIX$key"
         }
 
@@ -49,23 +49,23 @@ interface Preference<T> {
     }
 }
 
-inline fun <reified T, R : T> Preference<T>.getAndSet(crossinline block: (T) -> R) = set(
-    block(get()),
-)
+public inline fun <reified T, R : T> Preference<T>.getAndSet(crossinline block: (T) -> R) {
+    set(block(get()))
+}
 
-operator fun <T> Preference<Set<T>>.plusAssign(item: T) {
+public operator fun <T> Preference<Set<T>>.plusAssign(item: T) {
     set(get() + item)
 }
 
-operator fun <T> Preference<Set<T>>.plusAssign(items: Iterable<T>) {
+public operator fun <T> Preference<Set<T>>.plusAssign(items: Iterable<T>) {
     set(get() + items)
 }
 
-operator fun <T> Preference<Set<T>>.minusAssign(item: T) {
+public operator fun <T> Preference<Set<T>>.minusAssign(item: T) {
     set(get() - item)
 }
 
-fun Preference<Boolean>.toggle(): Boolean {
+public fun Preference<Boolean>.toggle(): Boolean {
     set(!get())
     return get()
 }

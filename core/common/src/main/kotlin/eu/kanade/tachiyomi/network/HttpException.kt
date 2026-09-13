@@ -10,4 +10,4 @@ import okhttp3.Response
  * @since tachiyomix 1.6
  * @param code [Int] the HTTP status code
  */
-class HttpException(val code: Int) : IllegalStateException("HTTP error $code")
+public class HttpException(public val code: Int) : IllegalStateException("HTTP error $code")

@@ -9,17 +9,17 @@ import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 
 @Suppress("OverridingDeprecatedMember")
-abstract class WebViewClientCompat : WebViewClient() {
+public abstract class WebViewClientCompat : WebViewClient() {
 
-    open fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
+    public open fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
         return false
     }
 
-    open fun shouldInterceptRequestCompat(view: WebView, url: String): WebResourceResponse? {
+    public open fun shouldInterceptRequestCompat(view: WebView, url: String): WebResourceResponse? {
         return null
     }
 
-    open fun onReceivedErrorCompat(
+    public open fun onReceivedErrorCompat(
         view: WebView,
         errorCode: Int,
         description: String?,

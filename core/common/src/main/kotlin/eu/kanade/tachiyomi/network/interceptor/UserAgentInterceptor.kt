@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.network.interceptor
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class UserAgentInterceptor(
+public class UserAgentInterceptor(
     private val defaultUserAgentProvider: () -> String,
 ) : Interceptor {
 

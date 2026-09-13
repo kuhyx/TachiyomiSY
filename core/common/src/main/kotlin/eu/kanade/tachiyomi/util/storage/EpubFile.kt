@@ -11,7 +11,7 @@ import java.io.InputStream
 /**
  * Wrapper over ZipFile to load files in epub format.
  */
-class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
+public class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
 
     /**
      * Path separator used by this epub.
@@ -21,14 +21,14 @@ class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
     /**
      * Returns an input stream for reading the contents of the specified zip file entry.
      */
-    fun getInputStream(entryName: String): InputStream? {
+    public fun getInputStream(entryName: String): InputStream? {
         return reader.getInputStream(entryName)
     }
 
     /**
      * Returns the path of all the images found in the epub file.
      */
-    fun getImagesFromPages(): List<String> {
+    public fun getImagesFromPages(): List<String> {
         val ref = getPackageHref()
         val doc = getPackageDocument(ref)
         val pages = getPagesFromDocument(doc)
@@ -38,7 +38,7 @@ class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
     /**
      * Returns the path to the package document.
      */
-    fun getPackageHref(): String {
+    public fun getPackageHref(): String {
         val meta = getInputStream(resolveZipPath("META-INF", "container.xml"))
         if (meta != null) {
             val metaDoc = meta.use { Jsoup.parse(it, null, "", Parser.xmlParser()) }
@@ -53,7 +53,7 @@ class EpubFile(private val reader: ArchiveReader) : Closeable by reader {
     /**
      * Returns the package document where all the files are listed.
      */
-    fun getPackageDocument(ref: String): Document {
+    public fun getPackageDocument(ref: String): Document {
         return getInputStream(ref)!!.use { Jsoup.parse(it, null, "", Parser.xmlParser()) }
     }
 

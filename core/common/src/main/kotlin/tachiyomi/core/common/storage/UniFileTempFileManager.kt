@@ -7,13 +7,13 @@ import com.hippo.unifile.UniFile
 import java.io.BufferedOutputStream
 import java.io.File
 
-class UniFileTempFileManager(
+public class UniFileTempFileManager(
     private val context: Context,
 ) {
 
     private val dir = File(context.externalCacheDir, "tmp")
 
-    fun createTempFile(file: UniFile): File {
+    public fun createTempFile(file: UniFile): File {
         dir.mkdirs()
 
         val inputStream = context.contentResolver.openInputStream(file.uri)!!
@@ -40,7 +40,7 @@ class UniFileTempFileManager(
         return tempFile
     }
 
-    fun deleteTempFiles() {
+    public fun deleteTempFiles() {
         dir.deleteRecursively()
     }
 }
