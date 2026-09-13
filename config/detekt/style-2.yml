@@ -1,0 +1,42 @@
+style:
+  UseAnyOrNoneInsteadOfFind:
+    active: true
+  UseArrayLiteralsInAnnotations:
+    active: true
+  UseCheckNotNull:
+    active: true
+  UseCheckOrError:
+    active: true
+  UseDataClass:
+    active: true
+    allowVars: false
+  UseEmptyCounterpart:
+    active: true
+  UseIfEmptyOrIfBlank:
+    active: true
+  UseIfInsteadOfWhen:
+    active: true
+    ignoreWhenContainingVariableDeclaration: false
+  UseIsNullOrEmpty:
+    active: true
+  UseLet:
+    active: true
+  UseOrEmpty:
+    active: true
+  UseRequire:
+    active: true
+  UseRequireNotNull:
+    active: true
+  UseSumOfInsteadOfFlatMapSize:
+    active: true
+  UselessCallOnNotNull:
+    active: true
+  UtilityClassWithPublicConstructor:
+    active: true
+  VarCouldBeVal:
+    active: true
+    ignoreLateinitVar: false
+  WildcardImport:
+    active: true
+    excludeImports:
+      - 'java.util.*'

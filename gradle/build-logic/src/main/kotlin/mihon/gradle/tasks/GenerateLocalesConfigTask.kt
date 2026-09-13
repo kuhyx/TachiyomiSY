@@ -7,16 +7,20 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
 
-abstract class GenerateLocalesConfigTask : DefaultTask() {
+/** Writes `res/xml/locales_config.xml` from the moko-resources string folders. */
+public abstract class GenerateLocalesConfigTask : DefaultTask() {
 
+    /** Injected by Gradle; used to walk the resource tree. */
     @get:Inject
-    abstract val objectFactory: ObjectFactory
+    public abstract val objectFactory: ObjectFactory
 
+    /** Generated resource root; the file lands in its `xml/` folder. */
     @get:OutputDirectory
-    abstract val outputDir: DirectoryProperty
+    public abstract val outputDir: DirectoryProperty
 
+    /** Collects every non-empty `strings.xml` locale and writes the config. */
     @TaskAction
-    fun action() {
+    public fun action() {
         val locales = objectFactory.fileTree()
             .from("src/commonMain/moko-resources")
             .matching { include("**/strings.xml") }
@@ -33,10 +37,10 @@ abstract class GenerateLocalesConfigTask : DefaultTask() {
             .joinToString("\n") { "|   <locale android:name=\"$it\"/>" }
 
         val content = """
-        |<?xml version="1.0" encoding="utf-8"?>
-        |<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
-        $locales
-        |</locale-config>
+            |<?xml version="1.0" encoding="utf-8"?>
+            |<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+            $locales
+            |</locale-config>
         """.trimMargin()
 
         outputDir.get().file("xml/locales_config.xml").asFile.apply {
@@ -44,8 +48,6 @@ abstract class GenerateLocalesConfigTask : DefaultTask() {
             writeText(content)
         }
     }
-
-    companion object {
-        private val emptyResourcesElement = "<resources>\\s*</resources>|<resources\\s*/>".toRegex()
-    }
 }
+
+private val emptyResourcesElement = "<resources>\\s*</resources>|<resources\\s*/>".toRegex()

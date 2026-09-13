@@ -8,15 +8,11 @@ import java.time.format.DateTimeFormatter
 
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
-fun Project.getLatestCommitCount(): String {
-    return exec("git rev-list --count HEAD")
-    // return "1"
-}
+/** Number of commits reachable from HEAD, used as the version code. */
+public fun Project.getLatestCommitCount(): String = exec("git rev-list --count HEAD")
 
-fun Project.getLatestCommitSha(): String {
-    return exec("git rev-parse --short HEAD")
-    // return "1"
-}
+/** Short SHA of HEAD, shown in the about screen. */
+public fun Project.getLatestCommitSha(): String = exec("git rev-parse --short HEAD")
 
 private val BUILD_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
@@ -25,7 +21,7 @@ private val BUILD_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:
  *                          otherwise, the current time is used. Both are in UTC.
  * @return A formatted string representing the build time. The format used is defined by [BUILD_TIME_FORMATTER].
  */
-fun Project.getBuildTime(useLatestCommitTime: Boolean): String {
+public fun Project.getBuildTime(useLatestCommitTime: Boolean): String {
     return if (useLatestCommitTime) {
         val epoch = exec("git log -1 --format=%ct").toLong()
         Instant.ofEpochSecond(epoch).atOffset(ZoneOffset.UTC).format(BUILD_TIME_FORMATTER)
@@ -34,7 +30,8 @@ fun Project.getBuildTime(useLatestCommitTime: Boolean): String {
     }
 }
 
-fun Project.exec(command: String): String {
+/** Runs [command] (split on spaces) and returns its trimmed stdout. */
+public fun Project.exec(command: String): String {
     return providers.exec {
         commandLine = command.split(" ")
     }

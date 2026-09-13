@@ -6,27 +6,35 @@ import org.gradle.api.artifacts.MinimalExternalModuleDependency
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.DependencyHandlerScope
 
-fun DependencyHandlerScope.api(dependencyNotation: Provider<MinimalExternalModuleDependency>) {
+private const val IMPLEMENTATION: String = "implementation"
+
+/** `api` for a catalog entry, usable inside compiled plugins. */
+public fun DependencyHandlerScope.api(dependencyNotation: Provider<MinimalExternalModuleDependency>) {
     add("api", dependencyNotation)
 }
 
-fun DependencyHandlerScope.coreLibraryDesugaring(dependencyNotation: Provider<MinimalExternalModuleDependency>) {
+/** `coreLibraryDesugaring` for a catalog entry. */
+public fun DependencyHandlerScope.coreLibraryDesugaring(dependencyNotation: Provider<MinimalExternalModuleDependency>) {
     add("coreLibraryDesugaring", dependencyNotation)
 }
 
-fun DependencyHandlerScope.debugApi(dependencyNotation: Provider<MinimalExternalModuleDependency>) {
+/** `debugApi` for a catalog entry. */
+public fun DependencyHandlerScope.debugApi(dependencyNotation: Provider<MinimalExternalModuleDependency>) {
     add("debugApi", dependencyNotation)
 }
 
+/** `implementation` for a catalog bundle. */
 @JvmName("implementationBundle")
-fun DependencyHandlerScope.implementation(dependencyNotation: Provider<ExternalModuleDependencyBundle>) {
-    add("implementation", dependencyNotation)
+public fun DependencyHandlerScope.implementation(dependencyNotation: Provider<ExternalModuleDependencyBundle>) {
+    add(IMPLEMENTATION, dependencyNotation)
 }
 
-fun DependencyHandlerScope.implementation(dependencyNotation: Provider<MinimalExternalModuleDependency>) {
-    add("implementation", dependencyNotation)
+/** `implementation` for a catalog entry. */
+public fun DependencyHandlerScope.implementation(dependencyNotation: Provider<MinimalExternalModuleDependency>) {
+    add(IMPLEMENTATION, dependencyNotation)
 }
 
-fun DependencyHandlerScope.implementation(dependencyNotation: Project) {
-    add("implementation", dependencyNotation)
+/** `implementation` for another module of this build. */
+public fun DependencyHandlerScope.implementation(dependencyNotation: Project) {
+    add(IMPLEMENTATION, dependencyNotation)
 }

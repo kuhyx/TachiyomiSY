@@ -24,7 +24,7 @@ plugins {
 
 val buildLogic: IncludedBuild = gradle.includedBuild("build-logic")
 tasks {
-    listOf("clean", "spotlessApply", "spotlessCheck").forEach { task ->
+    listOf("check", "clean", "spotlessApply", "spotlessCheck").forEach { task ->
         named(task) {
             dependsOn(buildLogic.task(":$task"))
         }

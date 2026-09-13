@@ -9,7 +9,6 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.the
-import org.gradle.kotlin.dsl.withType
 
 internal val Project.libs get() = the<LibrariesForLibs>()
 internal val Project.mihonx get() = the<LibrariesForMihonx>()
@@ -22,8 +21,9 @@ internal fun Project.android(block: CommonExtension.() -> Unit) {
     extensions.configure(block)
 }
 
-fun Project.configureTest() {
-    tasks.withType<Test> {
+/** JUnit Platform for every test task, logging each outcome. */
+public fun Project.configureTest() {
+    tasks.withType(Test::class.java).configureEach {
         useJUnitPlatform()
         testLogging {
             events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)

@@ -9,19 +9,24 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
-abstract class ReplaceShortcutsPlaceholderTask : DefaultTask() {
+/** Copies `shortcuts.xml` into generated resources with `\${applicationId}` filled in. */
+public abstract class ReplaceShortcutsPlaceholderTask : DefaultTask() {
 
+    /** The application id of the variant being built. */
     @get:Input
-    abstract val applicationId: Property<String>
+    public abstract val applicationId: Property<String>
 
+    /** The template shortcuts file. */
     @get:InputFile
-    abstract val shortcutsFile: RegularFileProperty
+    public abstract val shortcutsFile: RegularFileProperty
 
+    /** Generated resource root; the file lands in its `xml/` folder. */
     @get:OutputDirectory
-    abstract val outputDir: DirectoryProperty
+    public abstract val outputDir: DirectoryProperty
 
+    /** Performs the substitution and writes the result. */
     @TaskAction
-    fun action() {
+    public fun action() {
         val content = shortcutsFile.asFile.get()
             .readText()
             .replace($$"${applicationId}", applicationId.get())
