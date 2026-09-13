@@ -147,6 +147,7 @@ android {
                 "META-INF/*.properties",
                 "META-INF/*.version",
                 "META-INF/DEPENDENCIES",
+                "META-INF/INDEX.LIST",
                 "META-INF/LICENSE",
                 "META-INF/NOTICE",
                 "META-INF/README.md",
