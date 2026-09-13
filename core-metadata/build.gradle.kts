@@ -1,6 +1,7 @@
 plugins {
     alias(mihonx.plugins.android.library)
     alias(mihonx.plugins.spotless)
+    alias(mihonx.plugins.lint)
     alias(mihonx.plugins.coverage)
 
     alias(libs.plugins.kotlin.serialization)
