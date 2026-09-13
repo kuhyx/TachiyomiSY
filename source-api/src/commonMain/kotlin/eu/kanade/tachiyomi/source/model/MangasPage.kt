@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.source.model
 import exh.metadata.metadata.RaisedSearchMetadata
 
 /* SY --> */
-open /* SY <-- */ class MangasPage(open val mangas: List<SManga>, open val hasNextPage: Boolean) {
+public open /* SY <-- */ class MangasPage(public open val mangas: List<SManga>, public open val hasNextPage: Boolean) {
     // SY -->
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -27,13 +27,13 @@ open /* SY <-- */ class MangasPage(open val mangas: List<SManga>, open val hasNe
     // SY <--
 
     @Deprecated("MangasPage is now a regular class")
-    operator fun component1(): List<SManga> = mangas
+    public operator fun component1(): List<SManga> = mangas
 
     @Deprecated("MangasPage is now a regular class")
-    operator fun component2(): Boolean = hasNextPage
+    public operator fun component2(): Boolean = hasNextPage
 
     @Deprecated("MangasPage is now a regular class")
-    fun copy(
+    public fun copy(
         mangas: List<SManga> = this.mangas,
         hasNextPage: Boolean = this.hasNextPage,
     ): MangasPage = MangasPage(
@@ -43,13 +43,13 @@ open /* SY <-- */ class MangasPage(open val mangas: List<SManga>, open val hasNe
 }
 
 // SY -->
-class MetadataMangasPage(
+public class MetadataMangasPage(
     override val mangas: List<SManga>,
     override val hasNextPage: Boolean,
-    val mangasMetadata: List<RaisedSearchMetadata>,
-    val nextKey: Long? = null,
+    public val mangasMetadata: List<RaisedSearchMetadata>,
+    public val nextKey: Long? = null,
 ) : MangasPage(mangas, hasNextPage) {
-    fun copy(
+    public fun copy(
         mangas: List<SManga> = this.mangas,
         hasNextPage: Boolean = this.hasNextPage,
         mangasMetadata: List<RaisedSearchMetadata> = this.mangasMetadata,

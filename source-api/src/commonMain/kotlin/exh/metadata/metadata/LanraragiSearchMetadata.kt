@@ -9,27 +9,27 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.sy.SYMR
 
 @Serializable
-class LanraragiSearchMetadata : RaisedSearchMetadata() {
-    var url get() = arcId?.let { "/reader?id=$it" }
+public class LanraragiSearchMetadata : RaisedSearchMetadata() {
+    public var url: String? get() = arcId?.let { "/reader?id=$it" }
         set(a) {
             a?.let {
                 arcId = a
             }
         }
 
-    var arcId: String? = null
+    public var arcId: String? = null
 
-    var title: String? = null
+    public var title: String? = null
 
-    var summary: String? = null
+    public var summary: String? = null
 
-    var pageCount: Int? = null
+    public var pageCount: Int? = null
 
-    var baseUrl: String? = null
+    public var baseUrl: String? = null
 
-    var filename: String? = null
+    public var filename: String? = null
 
-    var extension: String? = null
+    public var extension: String? = null
 
     override fun createMangaInfo(manga: SManga): SManga {
         val key = url
@@ -76,22 +76,22 @@ class LanraragiSearchMetadata : RaisedSearchMetadata() {
         }
     }
 
-    companion object {
-        const val TAG_TYPE_DEFAULT = 0
+    public companion object {
+        public const val TAG_TYPE_DEFAULT: Int = 0
 
-        const val LANRARAGI_NAMESPACE_OTHER = "other"
+        public const val LANRARAGI_NAMESPACE_OTHER: String = "other"
 
-        const val LANRARAGI_NAMESPACE_DATE_ADDED = "date_added"
+        public const val LANRARAGI_NAMESPACE_DATE_ADDED: String = "date_added"
 
-        const val LANRARAGI_NAMESPACE_TIMESTAMP = "timestamp"
+        public const val LANRARAGI_NAMESPACE_TIMESTAMP: String = "timestamp"
 
-        const val LANRARAGI_NAMESPACE_ARTIST = "artist"
+        public const val LANRARAGI_NAMESPACE_ARTIST: String = "artist"
 
-        fun getApiUriBuilder(baseUrl: String, path: String): Uri.Builder {
+        public fun getApiUriBuilder(baseUrl: String, path: String): Uri.Builder {
             return Uri.parse("$baseUrl$path").buildUpon()
         }
 
-        fun getThumbnailUri(baseUrl: String, id: String, page: Int): String {
+        public fun getThumbnailUri(baseUrl: String, id: String, page: Int): String {
             val uri = getApiUriBuilder(baseUrl, "/api/archives/$id/thumbnail")
 
             if (page > 1) {

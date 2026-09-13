@@ -1,6 +1,7 @@
 package mihon.gradle.configurations
 
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.Lint
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
@@ -8,6 +9,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.HasConfigurableKotlinCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.io.File
 
 private const val JVM_TARGET: String = "17"
@@ -50,10 +52,13 @@ public fun Project.configureStrictKotlin() {
     }
 }
 
-/** Android Lint at its strictest; a no-op on modules without the Android plugin. */
+/** Android Lint at its strictest; a no-op on modules without an Android plugin or target. */
 public fun Project.configureAndroidLint() {
-    val android = extensions.findByType(CommonExtension::class.java) ?: return
-    strictLint(android.lint)
+    extensions.findByType(CommonExtension::class.java)?.let { strictLint(it.lint) }
+    val multiplatform = extensions.findByType(KotlinMultiplatformExtension::class.java) ?: return
+    multiplatform.targets
+        .withType(KotlinMultiplatformAndroidLibraryTarget::class.java)
+        .configureEach { strictLint(lint) }
 }
 
 /** The same knobs for the KMP Android target, whose lint block hangs off the target. */

@@ -11,7 +11,7 @@ import kotlinx.coroutines.supervisorScope
 import rx.Observable
 import tachiyomi.core.common.util.lang.awaitSingle
 
-interface CatalogueSource : Source {
+public interface CatalogueSource : Source {
 
     /**
      * An ISO 639-1 compliant language code (two letters in lower case).
@@ -52,7 +52,7 @@ interface CatalogueSource : Source {
      * @param page the page number to retrieve.
      */
     @Deprecated("Use the suspend API instead", ReplaceWith("getPopularManga"))
-    fun fetchPopularManga(page: Int): Observable<MangasPage> = throw UnsupportedOperationException()
+    public fun fetchPopularManga(page: Int): Observable<MangasPage> = throw UnsupportedOperationException()
 
     /**
      * Returns an observable containing a page with a list of manga.
@@ -62,7 +62,7 @@ interface CatalogueSource : Source {
      * @param filters the list of filters to apply.
      */
     @Deprecated("Use the suspend API instead", ReplaceWith("getSearchManga"))
-    fun fetchSearchManga(
+    public fun fetchSearchManga(
         page: Int,
         query: String,
         filters: FilterList,
@@ -74,5 +74,5 @@ interface CatalogueSource : Source {
      * @param page the page number to retrieve.
      */
     @Deprecated("Use the suspend API instead", ReplaceWith("getLatestUpdates"))
-    fun fetchLatestUpdates(page: Int): Observable<MangasPage> = throw UnsupportedOperationException()
+    public fun fetchLatestUpdates(page: Int): Observable<MangasPage> = throw UnsupportedOperationException()
 }

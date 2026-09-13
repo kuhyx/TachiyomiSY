@@ -1,9 +1,9 @@
 package exh.metadata.metadata.base
 
-interface TrackerIdMetadata {
-    var anilistId: String?
-    var kitsuId: String?
-    var myAnimeListId: String?
-    var mangaUpdatesId: String?
-    var animePlanetId: String?
+public interface TrackerIdMetadata {
+    public var anilistId: String?
+    public var kitsuId: String?
+    public var myAnimeListId: String?
+    public var mangaUpdatesId: String?
+    public var animePlanetId: String?
 }

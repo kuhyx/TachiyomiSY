@@ -9,24 +9,24 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
 @Serializable
-class PururinSearchMetadata : RaisedSearchMetadata() {
-    var prId: Int? = null
+public class PururinSearchMetadata : RaisedSearchMetadata() {
+    public var prId: Int? = null
 
-    var prShortLink: String? = null
+    public var prShortLink: String? = null
 
-    var title by titleDelegate(TITLE_TYPE_TITLE)
-    var altTitle by titleDelegate(TITLE_TYPE_ALT_TITLE)
+    public var title: String? by titleDelegate(TITLE_TYPE_TITLE)
+    public var altTitle: String? by titleDelegate(TITLE_TYPE_ALT_TITLE)
 
-    var thumbnailUrl: String? = null
+    public var thumbnailUrl: String? = null
 
-    var uploaderDisp: String? = null
+    public var uploaderDisp: String? = null
 
-    var pages: Int? = null
+    public var pages: Int? = null
 
-    var fileSize: String? = null
+    public var fileSize: String? = null
 
-    var ratingCount: Int? = null
-    var averageRating: Double? = null
+    public var ratingCount: Int? = null
+    public var averageRating: Double? = null
 
     override fun createMangaInfo(manga: SManga): SManga {
         val key = prId?.let { prId ->
@@ -72,15 +72,15 @@ class PururinSearchMetadata : RaisedSearchMetadata() {
         }
     }
 
-    companion object {
+    public companion object {
         private const val TITLE_TYPE_TITLE = 0
         private const val TITLE_TYPE_ALT_TITLE = 1
 
-        const val TAG_TYPE_DEFAULT = 0
+        public const val TAG_TYPE_DEFAULT: Int = 0
 
         private const val TAG_NAMESPACE_ARTIST = "artist"
-        const val TAG_NAMESPACE_CATEGORY = "category"
+        public const val TAG_NAMESPACE_CATEGORY: String = "category"
 
-        const val BASE_URL = "https://pururin.me"
+        public const val BASE_URL: String = "https://pururin.me"
     }
 }

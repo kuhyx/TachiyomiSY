@@ -3,28 +3,29 @@ package eu.kanade.tachiyomi.source.model
 import android.net.Uri
 import eu.kanade.tachiyomi.network.ProgressListener
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
-open class Page(
-    val index: Int,
+public open class Page(
+    public val index: Int,
     /* SY --> */
-    var /* SY <-- */ url: String = "",
-    var imageUrl: String? = null,
-    @Transient var uri: Uri? = null, // Deprecated but can't be deleted due to extensions
+    public var /* SY <-- */ url: String = "",
+    public var imageUrl: String? = null,
+    @Transient public var uri: Uri? = null, // Deprecated but can't be deleted due to extensions
 ) : ProgressListener {
 
-    val number: Int
+    public val number: Int
         get() = index + 1
 
     @Transient
     private val _statusFlow = MutableStateFlow<State>(State.Queue)
 
     @Transient
-    val statusFlow = _statusFlow.asStateFlow()
-    var status: State
+    public val statusFlow: StateFlow<State> = _statusFlow.asStateFlow()
+    public var status: State
         get() = _statusFlow.value
         set(value) {
             _statusFlow.value = value
@@ -34,8 +35,8 @@ open class Page(
     private val _progressFlow = MutableStateFlow(0)
 
     @Transient
-    val progressFlow = _progressFlow.asStateFlow()
-    var progress: Int
+    public val progressFlow: StateFlow<Int> = _progressFlow.asStateFlow()
+    public var progress: Int
         get() = _progressFlow.value
         set(value) {
             _progressFlow.value = value
@@ -49,11 +50,11 @@ open class Page(
         }
     }
 
-    sealed interface State {
-        data object Queue : State
-        data object LoadPage : State
-        data object DownloadImage : State
-        data object Ready : State
-        data class Error(val error: Throwable) : State
+    public sealed interface State {
+        public data object Queue : State
+        public data object LoadPage : State
+        public data object DownloadImage : State
+        public data object Ready : State
+        public data class Error(val error: Throwable) : State
     }
 }

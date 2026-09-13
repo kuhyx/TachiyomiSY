@@ -5,21 +5,21 @@ import eu.kanade.tachiyomi.source.Source
 import java.net.URI
 import java.net.URISyntaxException
 
-interface UrlImportableSource : Source {
-    val matchingHosts: List<String>
+public interface UrlImportableSource : Source {
+    public val matchingHosts: List<String>
 
-    fun matchesUri(uri: Uri): Boolean {
+    public fun matchesUri(uri: Uri): Boolean {
         return uri.host.orEmpty().lowercase() in matchingHosts
     }
 
-    fun mapUrlToChapterUrl(uri: Uri): String? = null
+    public fun mapUrlToChapterUrl(uri: Uri): String? = null
 
-    suspend fun mapChapterUrlToMangaUrl(uri: Uri): String? = null
+    public suspend fun mapChapterUrlToMangaUrl(uri: Uri): String? = null
 
     // This method is allowed to block for IO if necessary
-    suspend fun mapUrlToMangaUrl(uri: Uri): String?
+    public suspend fun mapUrlToMangaUrl(uri: Uri): String?
 
-    fun cleanMangaUrl(url: String): String {
+    public fun cleanMangaUrl(url: String): String {
         return try {
             val uri = URI(url)
             var out = uri.path
@@ -35,7 +35,7 @@ interface UrlImportableSource : Source {
         }
     }
 
-    fun cleanChapterUrl(url: String): String {
+    public fun cleanChapterUrl(url: String): String {
         return try {
             val uri = URI(url)
             var out = uri.path

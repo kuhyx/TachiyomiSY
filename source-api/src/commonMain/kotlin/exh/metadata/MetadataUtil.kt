@@ -7,8 +7,8 @@ import kotlin.math.pow
 /**
  * Metadata utils
  */
-object MetadataUtil {
-    fun humanReadableByteCount(bytes: Long, si: Boolean): String {
+public object MetadataUtil {
+    public fun humanReadableByteCount(bytes: Long, si: Boolean): String {
         val unit = if (si) 1000 else 1024
         if (bytes < unit) return "$bytes B"
         val exp = (ln(bytes.toDouble()) / ln(unit.toDouble())).toInt()
@@ -23,7 +23,7 @@ object MetadataUtil {
     private const val GB_FACTOR = 1000 * MB_FACTOR
     private const val GIB_FACTOR = 1024 * MIB_FACTOR
 
-    fun parseHumanReadableByteCount(bytes: String): Double? {
+    public fun parseHumanReadableByteCount(bytes: String): Double? {
         val ret = bytes.substringBefore(' ').toDouble()
         return when (bytes.substringAfter(' ')) {
             "GB" -> ret * GB_FACTOR
@@ -36,7 +36,7 @@ object MetadataUtil {
         }
     }
 
-    val ONGOING_SUFFIX = arrayOf(
+    public val ONGOING_SUFFIX: Array<String> = arrayOf(
         "[ongoing]",
         "(ongoing)",
         "{ongoing}",
@@ -54,5 +54,5 @@ object MetadataUtil {
         "wip",
     )
 
-    val EX_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    public val EX_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 }

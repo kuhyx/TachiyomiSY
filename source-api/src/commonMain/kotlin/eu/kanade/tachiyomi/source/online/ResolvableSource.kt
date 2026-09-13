@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.source.model.SManga
  *
  * @since extensions-lib 1.5
  */
-interface ResolvableSource : Source {
+public interface ResolvableSource : Source {
 
     /**
      * Returns what the given URI may open.
@@ -17,7 +17,7 @@ interface ResolvableSource : Source {
      *
      * @since extensions-lib 1.5
      */
-    fun getUriType(uri: String): UriType
+    public fun getUriType(uri: String): UriType
 
     /**
      * Called if [getUriType] is [UriType.Manga].
@@ -25,7 +25,7 @@ interface ResolvableSource : Source {
      *
      * @since extensions-lib 1.5
      */
-    suspend fun getManga(uri: String): SManga?
+    public suspend fun getManga(uri: String): SManga?
 
     /**
      * Called if [getUriType] is [UriType.Chapter].
@@ -33,11 +33,11 @@ interface ResolvableSource : Source {
      *
      * @since extensions-lib 1.5
      */
-    suspend fun getChapter(uri: String): SChapter?
+    public suspend fun getChapter(uri: String): SChapter?
 }
 
-sealed interface UriType {
-    data object Manga : UriType
-    data object Chapter : UriType
-    data object Unknown : UriType
+public sealed interface UriType {
+    public data object Manga : UriType
+    public data object Chapter : UriType
+    public data object Unknown : UriType
 }

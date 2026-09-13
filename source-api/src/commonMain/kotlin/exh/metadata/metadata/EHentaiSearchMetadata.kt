@@ -17,36 +17,36 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 @Serializable
-class EHentaiSearchMetadata : RaisedSearchMetadata() {
-    var gId: String?
+public class EHentaiSearchMetadata : RaisedSearchMetadata() {
+    public var gId: String?
         get() = indexedExtra
         set(value) {
             indexedExtra = value
         }
 
-    var gToken: String? = null
-    var exh: Boolean? = null
-    var thumbnailUrl: String? = null
+    public var gToken: String? = null
+    public var exh: Boolean? = null
+    public var thumbnailUrl: String? = null
 
-    var title by titleDelegate(TITLE_TYPE_TITLE)
-    var altTitle by titleDelegate(TITLE_TYPE_ALT_TITLE)
+    public var title: String? by titleDelegate(TITLE_TYPE_TITLE)
+    public var altTitle: String? by titleDelegate(TITLE_TYPE_ALT_TITLE)
 
-    var genre: String? = null
+    public var genre: String? = null
 
-    var datePosted: Long? = null
-    var parent: String? = null
+    public var datePosted: Long? = null
+    public var parent: String? = null
 
-    var visible: String? = null // Not a boolean
-    var language: String? = null
-    var translated: Boolean? = null
-    var size: Long? = null
-    var length: Int? = null
-    var favorites: Int? = null
-    var ratingCount: Int? = null
-    var averageRating: Double? = null
+    public var visible: String? = null // Not a boolean
+    public var language: String? = null
+    public var translated: Boolean? = null
+    public var size: Long? = null
+    public var length: Int? = null
+    public var favorites: Int? = null
+    public var ratingCount: Int? = null
+    public var averageRating: Double? = null
 
-    var aged: Boolean = false
-    var lastUpdateCheck: Long = 0
+    public var aged: Boolean = false
+    public var lastUpdateCheck: Long = 0
 
     override fun createMangaInfo(manga: SManga): SManga {
         val key = gId?.let { gId ->
@@ -139,21 +139,21 @@ class EHentaiSearchMetadata : RaisedSearchMetadata() {
         }
     }
 
-    companion object {
+    public companion object {
         private const val TITLE_TYPE_TITLE = 0
         private const val TITLE_TYPE_ALT_TITLE = 1
 
-        const val TAG_TYPE_NORMAL = 0
-        const val TAG_TYPE_LIGHT = 1
-        const val TAG_TYPE_WEAK = 2
+        public const val TAG_TYPE_NORMAL: Int = 0
+        public const val TAG_TYPE_LIGHT: Int = 1
+        public const val TAG_TYPE_WEAK: Int = 2
 
-        const val EH_GENRE_NAMESPACE = "genre"
+        public const val EH_GENRE_NAMESPACE: String = "genre"
         private const val EH_ARTIST_NAMESPACE = "artist"
         private const val EH_GROUP_NAMESPACE = "group"
-        const val EH_LANGUAGE_NAMESPACE = "language"
-        const val EH_META_NAMESPACE = "meta"
-        const val EH_UPLOADER_NAMESPACE = "uploader"
-        const val EH_VISIBILITY_NAMESPACE = "visibility"
+        public const val EH_LANGUAGE_NAMESPACE: String = "language"
+        public const val EH_META_NAMESPACE: String = "meta"
+        public const val EH_UPLOADER_NAMESPACE: String = "uploader"
+        public const val EH_VISIBILITY_NAMESPACE: String = "visibility"
 
         private fun splitGalleryUrl(url: String) =
             url.let {
@@ -166,15 +166,15 @@ class EHentaiSearchMetadata : RaisedSearchMetadata() {
                 pathSegments.filterNot(String::isNullOrBlank)
             }
 
-        fun galleryId(url: String): String = splitGalleryUrl(url)[1]
+        public fun galleryId(url: String): String = splitGalleryUrl(url)[1]
 
-        fun galleryToken(url: String): String =
+        public fun galleryToken(url: String): String =
             splitGalleryUrl(url)[2]
 
-        fun normalizeUrl(url: String) =
+        public fun normalizeUrl(url: String): String =
             idAndTokenToUrl(galleryId(url), galleryToken(url))
 
-        fun idAndTokenToUrl(id: String, token: String) =
+        public fun idAndTokenToUrl(id: String, token: String): String =
             "/g/$id/$token/?nw=always"
     }
 }

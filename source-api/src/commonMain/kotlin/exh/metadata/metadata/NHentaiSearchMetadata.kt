@@ -13,32 +13,32 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 @Serializable
-class NHentaiSearchMetadata : RaisedSearchMetadata() {
-    var url get() = nhId?.let { BASE_URL + nhIdToPath(it) }
+public class NHentaiSearchMetadata : RaisedSearchMetadata() {
+    public var url: String? get() = nhId?.let { BASE_URL + nhIdToPath(it) }
         set(a) {
             a?.let {
                 nhId = nhUrlToId(a)
             }
         }
 
-    var nhId: Long? = null
+    public var nhId: Long? = null
 
-    var uploadDate: Long? = null
+    public var uploadDate: Long? = null
 
-    var favoritesCount: Long? = null
+    public var favoritesCount: Long? = null
 
-    var mediaId: String? = null
+    public var mediaId: String? = null
 
-    var japaneseTitle by titleDelegate(TITLE_TYPE_JAPANESE)
-    var englishTitle by titleDelegate(TITLE_TYPE_ENGLISH)
-    var shortTitle by titleDelegate(TITLE_TYPE_SHORT)
+    public var japaneseTitle: String? by titleDelegate(TITLE_TYPE_JAPANESE)
+    public var englishTitle: String? by titleDelegate(TITLE_TYPE_ENGLISH)
+    public var shortTitle: String? by titleDelegate(TITLE_TYPE_SHORT)
 
-    var coverImageUrl: String? = null
-    var pageImagePreviewUrls: List<String> = emptyList()
+    public var coverImageUrl: String? = null
+    public var pageImagePreviewUrls: List<String> = emptyList()
 
-    var scanlator: String? = null
+    public var scanlator: String? = null
 
-    var preferredTitle: Int? = null
+    public var preferredTitle: Int? = null
 
     override fun createMangaInfo(manga: SManga): SManga {
         val key = nhId?.let { nhIdToPath(it) }
@@ -110,22 +110,22 @@ class NHentaiSearchMetadata : RaisedSearchMetadata() {
         }
     }
 
-    companion object {
+    public companion object {
         private const val TITLE_TYPE_JAPANESE = 0
-        const val TITLE_TYPE_ENGLISH = 1
-        const val TITLE_TYPE_SHORT = 2
+        public const val TITLE_TYPE_ENGLISH: Int = 1
+        public const val TITLE_TYPE_SHORT: Int = 2
 
-        const val TAG_TYPE_DEFAULT = 0
+        public const val TAG_TYPE_DEFAULT: Int = 0
 
-        const val BASE_URL = "https://nhentai.net"
+        public const val BASE_URL: String = "https://nhentai.net"
 
         private const val NHENTAI_ARTIST_NAMESPACE = "artist"
         private const val NHENTAI_GROUP_NAMESPACE = "group"
-        const val NHENTAI_CATEGORIES_NAMESPACE = "category"
+        public const val NHENTAI_CATEGORIES_NAMESPACE: String = "category"
 
-        fun nhUrlToId(url: String) =
+        public fun nhUrlToId(url: String): Long =
             url.split("/").last { it.isNotBlank() }.toLong()
 
-        fun nhIdToPath(id: Long) = "/g/$id/"
+        public fun nhIdToPath(id: Long): String = "/g/$id/"
     }
 }

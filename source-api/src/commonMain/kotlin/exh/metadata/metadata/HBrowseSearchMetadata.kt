@@ -9,17 +9,17 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
 @Serializable
-class HBrowseSearchMetadata : RaisedSearchMetadata() {
-    var hbId: Long? = null
+public class HBrowseSearchMetadata : RaisedSearchMetadata() {
+    public var hbId: Long? = null
 
-    var hbUrl: String? = null
+    public var hbUrl: String? = null
 
-    var thumbnail: String? = null
+    public var thumbnail: String? = null
 
-    var title: String? by titleDelegate(TITLE_TYPE_MAIN)
+    public var title: String? by titleDelegate(TITLE_TYPE_MAIN)
 
     // Length in pages
-    var length: Int? = null
+    public var length: Int? = null
 
     override fun createMangaInfo(manga: SManga): SManga {
         val key = hbUrl
@@ -61,15 +61,15 @@ class HBrowseSearchMetadata : RaisedSearchMetadata() {
         }
     }
 
-    companion object {
-        const val BASE_URL = "https://www.hbrowse.com"
+    public companion object {
+        public const val BASE_URL: String = "https://www.hbrowse.com"
 
         private const val TITLE_TYPE_MAIN = 0
 
-        const val TAG_TYPE_DEFAULT = 0
-        const val ARTIST_NAMESPACE = "artist"
+        public const val TAG_TYPE_DEFAULT: Int = 0
+        public const val ARTIST_NAMESPACE: String = "artist"
 
-        fun guessThumbnailUrl(hbid: String): String {
+        public fun guessThumbnailUrl(hbid: String): String {
             return "$BASE_URL/thumbnails/${hbid}_1.jpg#guessed"
         }
     }

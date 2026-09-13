@@ -7,171 +7,80 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import eu.kanade.tachiyomi.source.online.HttpSource
+import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 
 @Suppress("OverridingDeprecatedMember", "DEPRECATION")
-abstract class DelegatedHttpSource(val delegate: HttpSource) : HttpSource() {
-    /**
-     * Returns the request for the popular manga given the page.
-     *
-     * @param page the page number to retrieve.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
-    override fun popularMangaRequest(page: Int) =
+public abstract class DelegatedHttpSource(public val delegate: HttpSource) : HttpSource() {
+    @Deprecated(HELPER_DEPRECATION)
+    override fun popularMangaRequest(page: Int): Request =
         throw UnsupportedOperationException("Should never be called!")
 
-    /**
-     * Parses the response from the site and returns a [MangasPage] object.
-     *
-     * @param response the response from the site.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
-    override fun popularMangaParse(response: Response) =
+    @Deprecated(HELPER_DEPRECATION)
+    override fun popularMangaParse(response: Response): MangasPage =
         throw UnsupportedOperationException("Should never be called!")
 
-    /**
-     * Returns the request for the search manga given the page.
-     *
-     * @param page the page number to retrieve.
-     * @param query the search query.
-     * @param filters the list of filters to apply.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
-    override fun searchMangaRequest(page: Int, query: String, filters: FilterList) =
+    @Deprecated(HELPER_DEPRECATION)
+    override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request =
         throw UnsupportedOperationException("Should never be called!")
 
-    /**
-     * Parses the response from the site and returns a [MangasPage] object.
-     *
-     * @param response the response from the site.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
-    override fun searchMangaParse(response: Response) =
+    @Deprecated(HELPER_DEPRECATION)
+    override fun searchMangaParse(response: Response): MangasPage =
         throw UnsupportedOperationException("Should never be called!")
 
-    /**
-     * Returns the request for latest manga given the page.
-     *
-     * @param page the page number to retrieve.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
-    override fun latestUpdatesRequest(page: Int) =
+    @Deprecated(HELPER_DEPRECATION)
+    override fun latestUpdatesRequest(page: Int): Request =
         throw UnsupportedOperationException("Should never be called!")
 
-    /**
-     * Parses the response from the site and returns a [MangasPage] object.
-     *
-     * @param response the response from the site.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
-    override fun latestUpdatesParse(response: Response) =
+    @Deprecated(HELPER_DEPRECATION)
+    override fun latestUpdatesParse(response: Response): MangasPage =
         throw UnsupportedOperationException("Should never be called!")
 
-    /**
-     * Parses the response from the site and returns the details of a manga.
-     *
-     * @param response the response from the site.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
-    override fun mangaDetailsParse(response: Response) =
+    @Deprecated(HELPER_DEPRECATION)
+    override fun mangaDetailsParse(response: Response): SManga =
         throw UnsupportedOperationException("Should never be called!")
 
-    /**
-     * Parses the response from the site and returns a list of chapters.
-     *
-     * @param response the response from the site.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
-    override fun chapterListParse(response: Response) =
+    @Deprecated(HELPER_DEPRECATION)
+    override fun chapterListParse(response: Response): List<SChapter> =
         throw UnsupportedOperationException("Should never be called!")
 
-    /**
-     * Parses the response from the site and returns a list of pages.
-     *
-     * @param response the response from the site.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
-    override fun pageListParse(response: Response) =
+    @Deprecated(HELPER_DEPRECATION)
+    override fun pageListParse(response: Response): List<Page> =
         throw UnsupportedOperationException("Should never be called!")
 
-    /**
-     * Parses the response from the site and returns the absolute url to the source image.
-     *
-     * @param response the response from the site.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
-    override fun imageUrlParse(response: Response) =
+    @Deprecated(HELPER_DEPRECATION)
+    override fun imageUrlParse(response: Response): String =
         throw UnsupportedOperationException("Should never be called!")
 
-    override val lang get() = delegate.lang
+    override val lang: String get() = delegate.lang
 
-    /**
-     * Base url of the website without the trailing slash, like: http://mysite.com
-     */
-    override val baseUrl get() = delegate.baseUrl
+    override val baseUrl: String get() = delegate.baseUrl
 
-    /**
-     * Returns the base (home) URL of the website as a string.
-     *
-     * This is typically the root address that serves as the main entry point
-     * to the site's content, such as "https://mihon.tech".
-     *
-     * This method is used in the browse screen to determine the URL
-     * opened when tapping "Open in WebView".
-     *
-     * @return The website’s home page URL. Defaults to [baseUrl].
-     */
-    override fun getHomeUrl() = delegate.getHomeUrl()
+    override fun getHomeUrl(): String = delegate.getHomeUrl()
 
-    /**
-     * Headers used for requests.
-     */
-    override val headers get() = delegate.headers
+    override val headers: Headers get() = delegate.headers
 
-    /**
-     * Whether the source has support for latest updates.
-     */
-    override val supportsLatest get() = delegate.supportsLatest
+    override val supportsLatest: Boolean get() = delegate.supportsLatest
 
-    /**
-     * Name of the source.
-     */
-    final override val name get() = delegate.name
+    final override val name: String get() = delegate.name
 
     // ===> OPTIONAL FIELDS
 
-    /**
-     * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)
-     * of the MD5 of the string: sourcename/language/versionId
-     * Note the generated id sets the sign bit to 0.
-     */
-    override val id get() = delegate.id
+    override val id: Long get() = delegate.id
 
-    /**
-     * Default network client for doing requests.
-     */
-    final override val client get() = delegate.client
+    final override val client: OkHttpClient get() = delegate.client
 
     /**
      * You must NEVER call super.client if you override this!
      */
-    open val baseHttpClient: OkHttpClient? = null
-    open val networkHttpClient: OkHttpClient get() = network.client
+    public open val baseHttpClient: OkHttpClient? = null
+    public open val networkHttpClient: OkHttpClient get() = network.client
 
-    /**
-     * Visible name of the source.
-     */
-    override fun toString() = delegate.toString()
+    override fun toString(): String = delegate.toString()
 
-    /**
-     * Returns an observable containing a page with a list of manga. Normally it's not needed to
-     * override this method.
-     *
-     * @param page the page number to retrieve.
-     */
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getPopularManga"))
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
         ensureDelegateCompatible()
@@ -183,14 +92,6 @@ abstract class DelegatedHttpSource(val delegate: HttpSource) : HttpSource() {
         return delegate.getPopularManga(page)
     }
 
-    /**
-     * Returns an observable containing a page with a list of manga. Normally it's not needed to
-     * override this method.
-     *
-     * @param page the page number to retrieve.
-     * @param query the search query.
-     * @param filters the list of filters to apply.
-     */
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getSearchManga"))
     override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
         ensureDelegateCompatible()
@@ -202,11 +103,6 @@ abstract class DelegatedHttpSource(val delegate: HttpSource) : HttpSource() {
         return delegate.getSearchManga(page, query, filters)
     }
 
-    /**
-     * Returns an observable containing a page with a list of latest manga updates.
-     *
-     * @param page the page number to retrieve.
-     */
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getLatestUpdates"))
     override fun fetchLatestUpdates(page: Int): Observable<MangasPage> {
         ensureDelegateCompatible()
@@ -218,34 +114,12 @@ abstract class DelegatedHttpSource(val delegate: HttpSource) : HttpSource() {
         return delegate.getLatestUpdates(page)
     }
 
-    /**
-     * Returns an observable with the updated details for a manga. Normally it's not needed to
-     * override this method.
-     *
-     * @param manga the manga to be updated.
-     */
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getMangaDetails"))
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
         ensureDelegateCompatible()
         return delegate.fetchMangaDetails(manga)
     }
 
-    /**
-     * Fetches updated information for a manga.
-     *
-     * Depending on the provided flags or source availability, this may include
-     * updated manga metadata, available chapters, or both.
-     *
-     * If a value is not requested, the existing provided value can be returned as-is.
-     * The host app may apply any returned updates regardless of the flags,
-     * so care should be taken to only return accurate and intentional changes.
-     *
-     * @since tachiyomix 1.6
-     * @param manga The manga to fetch updates for.
-     * @param chapters Existing chapters of the manga
-     * @param fetchDetails Whether to fetch updated manga details.
-     * @param fetchChapters Whether to fetch available chapters.
-     */
     override suspend fun getMangaUpdate(
         manga: SManga,
         chapters: List<SChapter>,
@@ -256,55 +130,29 @@ abstract class DelegatedHttpSource(val delegate: HttpSource) : HttpSource() {
         return delegate.getMangaUpdate(manga, chapters, fetchDetails, fetchChapters)
     }
 
-    /**
-     * Returns the request for the details of a manga. Override only if it's needed to change the
-     * url, send different headers or request method like POST.
-     *
-     * @param manga the manga to be updated.
-     */
-    @Deprecated("The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.")
+    @Deprecated(HELPER_DEPRECATION)
     override fun mangaDetailsRequest(manga: SManga): Request {
         ensureDelegateCompatible()
         return delegate.mangaDetailsRequest(manga)
     }
 
-    /**
-     * Returns an observable with the updated chapter list for a manga. Normally it's not needed to
-     * override this method.  If a manga is licensed an empty chapter list observable is returned
-     *
-     * @param manga the manga to look for chapters.
-     */
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
     override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
         ensureDelegateCompatible()
         return delegate.fetchChapterList(manga)
     }
 
-    /**
-     * Returns an observable with the page list for a chapter.
-     *
-     * @param chapter the chapter whose page list has to be fetched.
-     */
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getPageList"))
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
         ensureDelegateCompatible()
         return delegate.fetchPageList(chapter)
     }
 
-    /**
-     * [1.x API] Get the list of pages a chapter has.
-     */
     override suspend fun getPageList(chapter: SChapter): List<Page> {
         ensureDelegateCompatible()
         return delegate.getPageList(chapter)
     }
 
-    /**
-     * Returns an observable with the page containing the source url of the image. If there's any
-     * error, it will return null instead of throwing an exception.
-     *
-     * @param page the page whose source image has to be fetched.
-     */
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getImageUrl"))
     override fun fetchImageUrl(page: Page): Observable<String> {
         ensureDelegateCompatible()
@@ -316,57 +164,28 @@ abstract class DelegatedHttpSource(val delegate: HttpSource) : HttpSource() {
         return delegate.getImageUrl(page)
     }
 
-    /**
-     * Returns the response of the source image.
-     *
-     * @param page the page whose source image has to be downloaded.
-     */
     override suspend fun getImage(page: Page, existingSize: Long): Response {
         ensureDelegateCompatible()
         return delegate.getImage(page, existingSize)
     }
 
-    /**
-     * Returns the url of the provided manga
-     *
-     * @since extensions-lib 1.4
-     * @param manga the manga
-     * @return url of the manga
-     */
     override fun getMangaUrl(manga: SManga): String {
         ensureDelegateCompatible()
         return delegate.getMangaUrl(manga)
     }
 
-    /**
-     * Returns the url of the provided chapter
-     *
-     * @since extensions-lib 1.4
-     * @param chapter the chapter
-     * @return url of the chapter
-     */
     override fun getChapterUrl(chapter: SChapter): String {
         ensureDelegateCompatible()
         return delegate.getChapterUrl(chapter)
     }
 
-    /**
-     * Called before inserting a new chapter into database. Use it if you need to override chapter
-     * fields, like the title or the chapter number. Do not change anything to [manga].
-     *
-     * @param chapter the chapter to be added.
-     * @param manga the manga of the chapter.
-     */
     @Deprecated("All modifications should be done when constructing the chapter")
     override fun prepareNewChapter(chapter: SChapter, manga: SManga) {
         ensureDelegateCompatible()
         return delegate.prepareNewChapter(chapter, manga)
     }
 
-    /**
-     * Returns the list of filters for the source.
-     */
-    override fun getFilterList() = delegate.getFilterList()
+    override fun getFilterList(): FilterList = delegate.getFilterList()
 
     protected open fun ensureDelegateCompatible() {
         if (versionId != delegate.versionId || lang != delegate.lang) {
@@ -378,7 +197,7 @@ abstract class DelegatedHttpSource(val delegate: HttpSource) : HttpSource() {
         }
     }
 
-    class IncompatibleDelegateException(message: String) : RuntimeException(message)
+    public class IncompatibleDelegateException(message: String) : RuntimeException(message)
 
     init {
         delegate.bindDelegate(this)

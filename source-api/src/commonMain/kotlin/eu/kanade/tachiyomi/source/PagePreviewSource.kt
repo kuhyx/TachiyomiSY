@@ -4,21 +4,22 @@ import eu.kanade.tachiyomi.network.ProgressListener
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import okhttp3.CacheControl
 import okhttp3.Response
 
-interface PagePreviewSource : Source {
+public interface PagePreviewSource : Source {
 
-    suspend fun getPagePreviewList(manga: SManga, chapters: List<SChapter>, page: Int): PagePreviewPage
+    public suspend fun getPagePreviewList(manga: SManga, chapters: List<SChapter>, page: Int): PagePreviewPage
 
-    suspend fun fetchPreviewImage(page: PagePreviewInfo, cacheControl: CacheControl? = null): Response
+    public suspend fun fetchPreviewImage(page: PagePreviewInfo, cacheControl: CacheControl? = null): Response
 }
 
 @Serializable
-data class PagePreviewPage(
+public data class PagePreviewPage(
     val page: Int,
     val pagePreviews: List<PagePreviewInfo>,
     val hasNextPage: Boolean,
@@ -26,14 +27,14 @@ data class PagePreviewPage(
 )
 
 @Serializable
-data class PagePreviewInfo(
+public data class PagePreviewInfo(
     val index: Int,
     val imageUrl: String,
     @Transient
     private val _progress: MutableStateFlow<Int> = MutableStateFlow(-1),
 ) : ProgressListener {
     @Transient
-    val progress = _progress.asStateFlow()
+    public val progress: StateFlow<Int> = _progress.asStateFlow()
 
     override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
         _progress.value = if (contentLength > 0) {

@@ -3,7 +3,7 @@ package exh.md.utils
 import dev.icerock.moko.resources.StringResource
 import tachiyomi.i18n.sy.SYMR
 
-enum class MangaDexRelation(val res: StringResource, val mdString: String?) {
+public enum class MangaDexRelation(public val res: StringResource, public val mdString: String?) {
     SIMILAR(SYMR.strings.relation_similar, null),
     MONOCHROME(SYMR.strings.relation_monochrome, "monochrome"),
     MAIN_STORY(SYMR.strings.relation_main_story, "main_story"),
@@ -23,7 +23,7 @@ enum class MangaDexRelation(val res: StringResource, val mdString: String?) {
     ALTERNATE_VERSION(SYMR.strings.relation_alternate_version, "alternate_version"),
     ;
 
-    companion object {
-        fun fromDex(mdString: String) = entries.find { it.mdString == mdString }
+    public companion object {
+        public fun fromDex(mdString: String): MangaDexRelation? = entries.find { it.mdString == mdString }
     }
 }

@@ -5,9 +5,9 @@ import eu.kanade.tachiyomi.source.model.SManga
 import kotlinx.serialization.Serializable
 
 @Serializable
-class RankedSearchMetadata : RaisedSearchMetadata() {
-    var rank: Int? = null
+public class RankedSearchMetadata : RaisedSearchMetadata() {
+    public var rank: Int? = null
 
-    override fun createMangaInfo(manga: SManga) = manga
+    override fun createMangaInfo(manga: SManga): SManga = manga
     override fun getExtraInfoPairs(context: Context): List<Pair<String, String>> = emptyList()
 }

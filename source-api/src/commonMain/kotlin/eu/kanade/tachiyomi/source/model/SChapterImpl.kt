@@ -5,7 +5,7 @@ package eu.kanade.tachiyomi.source.model
 import kotlinx.serialization.json.JsonObject
 import mihon.core.common.extensions.EMPTY
 
-class SChapterImpl : SChapter {
+public class SChapterImpl : SChapter {
 
     override lateinit var url: String
 

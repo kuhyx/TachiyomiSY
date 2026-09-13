@@ -5,4 +5,4 @@ package eu.kanade.tachiyomi.source
  *
  * This typically applies for self-hosted sources.
  */
-interface UnmeteredSource
+public interface UnmeteredSource

@@ -2,24 +2,24 @@ package eu.kanade.tachiyomi.source.online
 
 import eu.kanade.tachiyomi.source.Source
 
-interface LoginSource : Source {
-    val requiresLogin: Boolean
+public interface LoginSource : Source {
+    public val requiresLogin: Boolean
 
-    val twoFactorAuth: AuthSupport
+    public val twoFactorAuth: AuthSupport
 
-    fun isLogged(): Boolean
+    public fun isLogged(): Boolean
 
-    fun getUsername(): String
+    public fun getUsername(): String
 
-    fun getPassword(): String
+    public fun getPassword(): String
 
-    suspend fun login(username: String, password: String, twoFactorCode: String?): Boolean = false
+    public suspend fun login(username: String, password: String, twoFactorCode: String?): Boolean = false
 
-    suspend fun login(authCode: String): Boolean = false
+    public suspend fun login(authCode: String): Boolean = false
 
-    suspend fun logout(): Boolean
+    public suspend fun logout(): Boolean
 
-    enum class AuthSupport {
+    public enum class AuthSupport {
         NOT_SUPPORTED,
         SUPPORTED,
         REQUIRED,

@@ -15,34 +15,34 @@ import kotlin.reflect.KClass
 /**
  * LEWD!
  */
-interface MetadataSource<M : RaisedSearchMetadata, I> : Source {
-    interface GetMangaId {
-        suspend fun awaitId(url: String, sourceId: Long): Long?
+public interface MetadataSource<M : RaisedSearchMetadata, I> : Source {
+    public interface GetMangaId {
+        public suspend fun awaitId(url: String, sourceId: Long): Long?
     }
-    interface InsertFlatMetadata {
-        suspend fun await(metadata: RaisedSearchMetadata)
+    public interface InsertFlatMetadata {
+        public suspend fun await(metadata: RaisedSearchMetadata)
     }
-    interface GetFlatMetadataById {
-        suspend fun await(id: Long): FlatMetadata?
+    public interface GetFlatMetadataById {
+        public suspend fun await(id: Long): FlatMetadata?
     }
-    val getMangaId: GetMangaId get() = Injekt.get()
-    val insertFlatMetadata: InsertFlatMetadata get() = Injekt.get()
-    val getFlatMetadataById: GetFlatMetadataById get() = Injekt.get()
+    public val getMangaId: GetMangaId get() = Injekt.get()
+    public val insertFlatMetadata: InsertFlatMetadata get() = Injekt.get()
+    public val getFlatMetadataById: GetFlatMetadataById get() = Injekt.get()
 
     /**
      * The class of the metadata used by this source
      */
-    val metaClass: KClass<M>
+    public val metaClass: KClass<M>
 
     /**
      * Parse the supplied input into the supplied metadata object
      */
-    suspend fun parseIntoMetadata(metadata: M, input: I)
+    public suspend fun parseIntoMetadata(metadata: M, input: I)
 
     /**
      * Use reflection to create a new instance of metadata
      */
-    fun newMetaInstance(): M
+    public fun newMetaInstance(): M
 
     /**
      * Parses metadata from the input and then copies it into the manga
@@ -51,11 +51,11 @@ interface MetadataSource<M : RaisedSearchMetadata, I> : Source {
      */
     @Suppress("DeprecatedCallableAddReplaceWith")
     @Deprecated("Use the MangaInfo variant")
-    fun parseToMangaCompletable(manga: SManga, input: I): Completable = runAsObservable {
+    public fun parseToMangaCompletable(manga: SManga, input: I): Completable = runAsObservable {
         parseToManga(manga, input)
     }.toCompletable()
 
-    suspend fun parseToManga(manga: SManga, input: I): SManga {
+    public suspend fun parseToManga(manga: SManga, input: I): SManga {
         val mangaId = manga.id()
         val metadata = if (mangaId != null) {
             val flatMetadata = getFlatMetadataById.await(mangaId)
@@ -82,7 +82,7 @@ interface MetadataSource<M : RaisedSearchMetadata, I> : Source {
      */
     @Suppress("DeprecatedCallableAddReplaceWith")
     @Deprecated("use fetchOrLoadMetadata made for MangaInfo")
-    fun getOrLoadMetadata(mangaId: Long?, inputProducer: () -> Single<I>): Single<M> =
+    public fun getOrLoadMetadata(mangaId: Long?, inputProducer: () -> Single<I>): Single<M> =
         runAsObservable {
             fetchOrLoadMetadata(mangaId) { inputProducer().toObservable().awaitSingle() }
         }.toSingle()
@@ -94,7 +94,7 @@ interface MetadataSource<M : RaisedSearchMetadata, I> : Source {
      * If the metadata needs to be parsed from the input producer, the resulting parsed metadata will
      * also be saved to the DB.
      */
-    suspend fun fetchOrLoadMetadata(mangaId: Long?, inputProducer: suspend () -> I): M {
+    public suspend fun fetchOrLoadMetadata(mangaId: Long?, inputProducer: suspend () -> I): M {
         val meta = if (mangaId != null) {
             val flatMetadata = getFlatMetadataById.await(mangaId)
             flatMetadata?.raise(metaClass)
@@ -113,5 +113,5 @@ interface MetadataSource<M : RaisedSearchMetadata, I> : Source {
         }
     }
 
-    suspend fun SManga.id() = getMangaId.awaitId(url, id)
+    public suspend fun SManga.id(): Long? = getMangaId.awaitId(url, id)
 }

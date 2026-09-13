@@ -11,30 +11,30 @@ import rx.Observable
 /**
  * A basic interface for creating a source. It could be an online source, a local source, etc...
  */
-interface Source {
+public interface Source {
 
     /**
      * ID for the source. Must be unique.
      */
-    val id: Long
+    public val id: Long
 
     /**
      * Name of the source.
      */
-    val name: String
+    public val name: String
 
-    val lang: String
+    public val lang: String
         get() = ""
 
     /**
      * Whether the source has support for latest updates.
      */
-    val supportsLatest: Boolean
+    public val supportsLatest: Boolean
 
     /**
      * Returns the list of filters for the source.
      */
-    fun getFilterList(): FilterList = FilterList()
+    public fun getFilterList(): FilterList = FilterList()
 
     /**
      * Get a page with a list of manga.
@@ -42,7 +42,7 @@ interface Source {
      * @since tachiyomix 1.6
      * @param page the page number to retrieve.
      */
-    suspend fun getPopularManga(page: Int): MangasPage
+    public suspend fun getPopularManga(page: Int): MangasPage
 
     /**
      * Get a page with a list of latest manga updates.
@@ -50,7 +50,7 @@ interface Source {
      * @since tachiyomix 1.6
      * @param page the page number to retrieve.
      */
-    suspend fun getLatestUpdates(page: Int): MangasPage
+    public suspend fun getLatestUpdates(page: Int): MangasPage
 
     /**
      * Get a page with a list of manga.
@@ -60,7 +60,7 @@ interface Source {
      * @param query the search query.
      * @param filters the list of filters to apply.
      */
-    suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage
+    public suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage
 
     /**
      * Fetches updated information for a manga.
@@ -78,7 +78,7 @@ interface Source {
      * @param fetchDetails Whether to fetch updated manga details.
      * @param fetchChapters Whether to fetch available chapters.
      */
-    suspend fun getMangaUpdate(
+    public suspend fun getMangaUpdate(
         manga: SManga,
         chapters: List<SChapter>,
         fetchDetails: Boolean,
@@ -93,14 +93,14 @@ interface Source {
      * @param chapter the chapter.
      * @return the pages for the chapter.
      */
-    suspend fun getPageList(chapter: SChapter): List<Page>
+    public suspend fun getPageList(chapter: SChapter): List<Page>
 
     @Deprecated("Use the combined suspend API instead", ReplaceWith("getMangaUpdate"))
-    fun fetchMangaDetails(manga: SManga): Observable<SManga> = throw UnsupportedOperationException()
+    public fun fetchMangaDetails(manga: SManga): Observable<SManga> = throw UnsupportedOperationException()
 
     @Deprecated("Use the combined suspend API instead", ReplaceWith("getMangaUpdate"))
-    fun fetchChapterList(manga: SManga): Observable<List<SChapter>> = throw UnsupportedOperationException()
+    public fun fetchChapterList(manga: SManga): Observable<List<SChapter>> = throw UnsupportedOperationException()
 
     @Deprecated("Use the suspend API instead", ReplaceWith("getPageList"))
-    fun fetchPageList(chapter: SChapter): Observable<List<Page>> = throw UnsupportedOperationException()
+    public fun fetchPageList(chapter: SChapter): Observable<List<Page>> = throw UnsupportedOperationException()
 }

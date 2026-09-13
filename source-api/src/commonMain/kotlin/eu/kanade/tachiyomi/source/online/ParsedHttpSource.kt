@@ -16,7 +16,7 @@ import org.jsoup.nodes.Element
     message = "In most cases sources only require a subset of the methods from this class. " +
         "Source developers should make their own implementation according to their needs.",
 )
-abstract class ParsedHttpSource : HttpSource() {
+public abstract class ParsedHttpSource : HttpSource() {
 
     /**
      * Parses the response from the site and returns a [MangasPage] object.

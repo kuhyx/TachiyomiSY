@@ -10,12 +10,12 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
 @Serializable
-class EightMusesSearchMetadata : RaisedSearchMetadata() {
-    var path: List<String> = emptyList()
+public class EightMusesSearchMetadata : RaisedSearchMetadata() {
+    public var path: List<String> = emptyList()
 
-    var title by titleDelegate(TITLE_TYPE_MAIN)
+    public var title: String? by titleDelegate(TITLE_TYPE_MAIN)
 
-    var thumbnailUrl: String? = null
+    public var thumbnailUrl: String? = null
 
     override fun createMangaInfo(manga: SManga): SManga {
         val key = path.joinToString("/", prefix = "/")
@@ -52,12 +52,12 @@ class EightMusesSearchMetadata : RaisedSearchMetadata() {
         }
     }
 
-    companion object {
+    public companion object {
         private const val TITLE_TYPE_MAIN = 0
 
-        const val TAG_TYPE_DEFAULT = 0
+        public const val TAG_TYPE_DEFAULT: Int = 0
 
-        const val TAGS_NAMESPACE = "tags"
-        const val ARTIST_NAMESPACE = "artist"
+        public const val TAGS_NAMESPACE: String = "tags"
+        public const val ARTIST_NAMESPACE: String = "artist"
     }
 }

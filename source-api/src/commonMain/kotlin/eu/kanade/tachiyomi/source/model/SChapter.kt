@@ -5,17 +5,17 @@ package eu.kanade.tachiyomi.source.model
 import kotlinx.serialization.json.JsonObject
 import java.io.Serializable
 
-interface SChapter : Serializable {
+public interface SChapter : Serializable {
 
-    var url: String
+    public var url: String
 
-    var name: String
+    public var name: String
 
-    var chapter_number: Float
+    public var chapter_number: Float
 
-    var scanlator: String?
+    public var scanlator: String?
 
-    var date_upload: Long
+    public var date_upload: Long
 
     /**
      * Extra metadata associated with the chapter.
@@ -28,9 +28,9 @@ interface SChapter : Serializable {
      *
      * @since tachiyomix 1.6
      */
-    var memo: JsonObject
+    public var memo: JsonObject
 
-    fun copyFrom(other: SChapter) {
+    public fun copyFrom(other: SChapter) {
         name = other.name
         url = other.url
         date_upload = other.date_upload
@@ -39,13 +39,13 @@ interface SChapter : Serializable {
         memo = other.memo
     }
 
-    companion object {
-        fun create(): SChapter {
+    public companion object {
+        public fun create(): SChapter {
             return SChapterImpl()
         }
 
         // SY -->
-        operator fun invoke(
+        public operator fun invoke(
             name: String,
             url: String,
             date_upload: Long = 0,

@@ -18,7 +18,7 @@ import kotlinx.serialization.json.putJsonObject
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.isSubclassOf
 
-class FilterSerializer {
+public class FilterSerializer {
     private val serializers = listOf<Serializer<*>>(
         // SY -->
         AutoCompleteSerializer(this),
@@ -33,13 +33,13 @@ class FilterSerializer {
         SortSerializer(this),
     )
 
-    fun serialize(filters: FilterList) = buildJsonArray {
+    public fun serialize(filters: FilterList): JsonArray = buildJsonArray {
         filters.filterIsInstance<Filter<Any?>>().forEach {
             add(serialize(it))
         }
     }
 
-    fun serialize(filter: Filter<Any?>): JsonObject {
+    public fun serialize(filter: Filter<Any?>): JsonObject {
         return serializers
             .filterIsInstance<Serializer<Filter<Any?>>>()
             .firstOrNull {
@@ -67,13 +67,13 @@ class FilterSerializer {
             } ?: throw IllegalArgumentException("Cannot serialize this Filter object!")
     }
 
-    fun deserialize(filters: FilterList, json: JsonArray) {
+    public fun deserialize(filters: FilterList, json: JsonArray) {
         filters.filterIsInstance<Filter<Any?>>().zip(json).forEach { (filter, obj) ->
             deserialize(filter, obj.jsonObject)
         }
     }
 
-    fun deserialize(filter: Filter<Any?>, json: JsonObject) {
+    public fun deserialize(filter: Filter<Any?>, json: JsonObject) {
         val serializer = serializers
             .filterIsInstance<Serializer<Filter<Any?>>>()
             .firstOrNull {
@@ -86,15 +86,15 @@ class FilterSerializer {
             if (it.second is KMutableProperty1) {
                 val obj = json[it.first]!!.jsonPrimitive
                 val res: Any? = when (json[CLASS_MAPPINGS]!!.jsonObject[it.first]!!.jsonPrimitive.content) {
-                    java.lang.Integer::class.java.name -> obj.int
-                    java.lang.Long::class.java.name -> obj.long
-                    java.lang.Float::class.java.name -> obj.float
-                    java.lang.Double::class.java.name -> obj.double
-                    java.lang.String::class.java.name -> obj.content
-                    java.lang.Boolean::class.java.name -> obj.boolean
-                    java.lang.Byte::class.java.name -> obj.content.toByte()
-                    java.lang.Short::class.java.name -> obj.content.toShort()
-                    java.lang.Character::class.java.name -> obj.content[0]
+                    Int::class.javaObjectType.name -> obj.int
+                    Long::class.javaObjectType.name -> obj.long
+                    Float::class.javaObjectType.name -> obj.float
+                    Double::class.javaObjectType.name -> obj.double
+                    String::class.javaObjectType.name -> obj.content
+                    Boolean::class.javaObjectType.name -> obj.boolean
+                    Byte::class.javaObjectType.name -> obj.content.toByte()
+                    Short::class.javaObjectType.name -> obj.content.toShort()
+                    Char::class.javaObjectType.name -> obj.content[0]
                     "null" -> null
                     else -> throw IllegalArgumentException("Cannot deserialize this type!")
                 }
@@ -104,8 +104,8 @@ class FilterSerializer {
         }
     }
 
-    companion object {
-        const val TYPE = "_type"
-        const val CLASS_MAPPINGS = "_cmaps"
+    public companion object {
+        public const val TYPE: String = "_type"
+        public const val CLASS_MAPPINGS: String = "_cmaps"
     }
 }

@@ -1,5 +1,6 @@
 package mihon.gradle.plugins
 
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.LibraryExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
@@ -7,8 +8,10 @@ import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import mihon.gradle.catalogProject
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 import org.jetbrains.kotlin.gradle.dsl.HasConfigurableKotlinCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.junit.jupiter.api.Test
 
 internal class LintCoveragePluginsTest {
@@ -48,6 +51,18 @@ internal class LintCoveragePluginsTest {
         project.extensions.add(KotlinBaseExtension::class.java, "kotlin", mockk<KotlinBaseExtension>())
         project.plugins.apply(PluginLint::class.java)
         project.plugins.hasPlugin("io.gitlab.arturbosch.detekt") shouldBe true
+    }
+
+    @Test
+    fun lintConfiguresKmpAndroidTarget() {
+        val project = catalogProject()
+        project.plugins.apply(PluginKotlinMultiplatform::class.java)
+        project.plugins.apply(PluginLint::class.java)
+        val kotlin = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
+        val extensions = (kotlin as ExtensionAware).extensions
+        val android = extensions.getByType(KotlinMultiplatformAndroidLibraryTarget::class.java)
+        android.lint.warningsAsErrors shouldBe true
+        android.lint.checkDependencies shouldBe true
     }
 
     @Test

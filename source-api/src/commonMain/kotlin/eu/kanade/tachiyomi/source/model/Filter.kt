@@ -1,40 +1,40 @@
 package eu.kanade.tachiyomi.source.model
 
-sealed class Filter<T>(val name: String, var state: T) {
-    open class Header(name: String) : Filter<Any>(name, 0)
-    open class Separator(name: String = "") : Filter<Any>(name, 0)
-    abstract class Select<V>(name: String, val values: Array<V>, state: Int = 0) : Filter<Int>(
+public sealed class Filter<T>(public val name: String, public var state: T) {
+    public open class Header(name: String) : Filter<Any>(name, 0)
+    public open class Separator(name: String = "") : Filter<Any>(name, 0)
+    public abstract class Select<V>(name: String, public val values: Array<V>, state: Int = 0) : Filter<Int>(
         name,
         state,
     )
-    abstract class Text(name: String, state: String = "") : Filter<String>(name, state)
-    abstract class CheckBox(name: String, state: Boolean = false) : Filter<Boolean>(name, state)
-    abstract class TriState(name: String, state: Int = STATE_IGNORE) : Filter<Int>(name, state) {
-        fun isIgnored() = state == STATE_IGNORE
-        fun isIncluded() = state == STATE_INCLUDE
-        fun isExcluded() = state == STATE_EXCLUDE
+    public abstract class Text(name: String, state: String = "") : Filter<String>(name, state)
+    public abstract class CheckBox(name: String, state: Boolean = false) : Filter<Boolean>(name, state)
+    public abstract class TriState(name: String, state: Int = STATE_IGNORE) : Filter<Int>(name, state) {
+        public fun isIgnored(): Boolean = state == STATE_IGNORE
+        public fun isIncluded(): Boolean = state == STATE_INCLUDE
+        public fun isExcluded(): Boolean = state == STATE_EXCLUDE
 
-        companion object {
-            const val STATE_IGNORE = 0
-            const val STATE_INCLUDE = 1
-            const val STATE_EXCLUDE = 2
+        public companion object {
+            public const val STATE_IGNORE: Int = 0
+            public const val STATE_INCLUDE: Int = 1
+            public const val STATE_EXCLUDE: Int = 2
         }
     }
 
-    abstract class Group<V>(name: String, state: List<V>) : Filter<List<V>>(name, state)
+    public abstract class Group<V>(name: String, state: List<V>) : Filter<List<V>>(name, state)
 
-    abstract class Sort(name: String, val values: Array<String>, state: Selection? = null) :
+    public abstract class Sort(name: String, public val values: Array<String>, state: Selection? = null) :
         Filter<Sort.Selection?>(name, state) {
-        data class Selection(val index: Int, val ascending: Boolean)
+        public data class Selection(val index: Int, val ascending: Boolean)
     }
 
     // SY -->
-    abstract class AutoComplete(
+    public abstract class AutoComplete(
         name: String,
-        val hint: String,
-        val values: List<String>,
-        val skipAutoFillTags: List<String> = emptyList(),
-        val validPrefixes: List<String> = emptyList(),
+        public val hint: String,
+        public val values: List<String>,
+        public val skipAutoFillTags: List<String> = emptyList(),
+        public val validPrefixes: List<String> = emptyList(),
         state: List<String>,
     ) : Filter<List<String>>(name, state)
     // SY <--

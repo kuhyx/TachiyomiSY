@@ -17,34 +17,34 @@ import java.time.ZonedDateTime
 import java.util.Locale
 
 @Serializable
-class TsuminoSearchMetadata : RaisedSearchMetadata() {
-    var tmId: Int? = null
+public class TsuminoSearchMetadata : RaisedSearchMetadata() {
+    public var tmId: Int? = null
 
-    var title by titleDelegate(TITLE_TYPE_MAIN)
+    public var title: String? by titleDelegate(TITLE_TYPE_MAIN)
 
-    var artist: String? = null
+    public var artist: String? = null
 
-    var uploadDate: Long? = null
+    public var uploadDate: Long? = null
 
-    var length: Int? = null
+    public var length: Int? = null
 
-    var ratingString: String? = null
+    public var ratingString: String? = null
 
-    var averageRating: Float? = null
+    public var averageRating: Float? = null
 
-    var userRatings: Long? = null
+    public var userRatings: Long? = null
 
-    var favorites: Long? = null
+    public var favorites: Long? = null
 
-    var category: String? = null
+    public var category: String? = null
 
-    var collection: String? = null
+    public var collection: String? = null
 
-    var group: String? = null
+    public var group: String? = null
 
-    var parody: List<String> = emptyList()
+    public var parody: List<String> = emptyList()
 
-    var character: List<String> = emptyList()
+    public var character: List<String> = emptyList()
 
     override fun createMangaInfo(manga: SManga): SManga {
         val title = title
@@ -98,17 +98,17 @@ class TsuminoSearchMetadata : RaisedSearchMetadata() {
         }
     }
 
-    companion object {
+    public companion object {
         private const val TITLE_TYPE_MAIN = 0
 
-        const val TAG_TYPE_DEFAULT = 0
+        public const val TAG_TYPE_DEFAULT: Int = 0
 
-        val BASE_URL = "https://www.tsumino.com"
+        public val BASE_URL: String = "https://www.tsumino.com"
 
-        val TSUMINO_DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        public val TSUMINO_DATE_FORMAT: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
-        fun tmIdFromUrl(url: String) = url.toUri().lastPathSegment
+        public fun tmIdFromUrl(url: String): String? = url.toUri().lastPathSegment
 
-        fun thumbUrlFromId(id: String) = "/thumbs/$id/1"
+        public fun thumbUrlFromId(id: String): String = "/thumbs/$id/1"
     }
 }

@@ -3,7 +3,7 @@ package exh.metadata.sql.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SearchMetadata(
+public data class SearchMetadata(
     // Manga ID this gallery is linked to
     val mangaId: Long,
 

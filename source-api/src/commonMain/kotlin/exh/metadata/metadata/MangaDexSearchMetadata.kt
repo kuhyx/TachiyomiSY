@@ -11,25 +11,25 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
 @Serializable
-class MangaDexSearchMetadata : RaisedSearchMetadata(), TrackerIdMetadata {
-    var mdUuid: String? = null
+public class MangaDexSearchMetadata : RaisedSearchMetadata(), TrackerIdMetadata {
+    public var mdUuid: String? = null
 
     // var mdUrl: String? = null
 
-    var cover: String? = null
+    public var cover: String? = null
 
-    var title: String? by titleDelegate(TITLE_TYPE_MAIN)
-    var altTitles: List<String>? = null
+    public var title: String? by titleDelegate(TITLE_TYPE_MAIN)
+    public var altTitles: List<String>? = null
 
-    var description: String? = null
+    public var description: String? = null
 
-    var authors: List<String>? = null
-    var artists: List<String>? = null
+    public var authors: List<String>? = null
+    public var artists: List<String>? = null
 
-    var langFlag: String? = null
+    public var langFlag: String? = null
 
-    var lastChapterNumber: Int? = null
-    var rating: Float? = null
+    public var lastChapterNumber: Int? = null
+    public var rating: Float? = null
     // var users: String? = null
 
     override var anilistId: String? = null
@@ -38,12 +38,12 @@ class MangaDexSearchMetadata : RaisedSearchMetadata(), TrackerIdMetadata {
     override var mangaUpdatesId: String? = null
     override var animePlanetId: String? = null
 
-    var status: Int? = null
+    public var status: Int? = null
 
     // var missing_chapters: String? = null
 
-    var followStatus: Int? = null
-    var relation: MangaDexRelation? = null
+    public var followStatus: Int? = null
+    public var relation: MangaDexRelation? = null
 
     // var maxChapterNumber: Int? = null
 
@@ -101,9 +101,9 @@ class MangaDexSearchMetadata : RaisedSearchMetadata(), TrackerIdMetadata {
         }
     }
 
-    companion object {
+    public companion object {
         private const val TITLE_TYPE_MAIN = 0
 
-        const val TAG_TYPE_DEFAULT = 0
+        public const val TAG_TYPE_DEFAULT: Int = 0
     }
 }

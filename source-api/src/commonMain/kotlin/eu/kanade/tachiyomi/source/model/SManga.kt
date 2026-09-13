@@ -5,27 +5,27 @@ package eu.kanade.tachiyomi.source.model
 import kotlinx.serialization.json.JsonObject
 import java.io.Serializable
 
-interface SManga : Serializable {
+public interface SManga : Serializable {
 
-    var url: String
+    public var url: String
 
-    var title: String
+    public var title: String
 
-    var thumbnail_url: String?
+    public var thumbnail_url: String?
 
-    var artist: String?
+    public var artist: String?
 
-    var author: String?
+    public var author: String?
 
-    var status: Int
+    public var status: Int
 
-    var description: String?
+    public var description: String?
 
-    var genre: String?
+    public var genre: String?
 
-    var update_strategy: UpdateStrategy
+    public var update_strategy: UpdateStrategy
 
-    var initialized: Boolean
+    public var initialized: Boolean
 
     /**
      * Extra metadata associated with the manga.
@@ -38,24 +38,24 @@ interface SManga : Serializable {
      *
      * @since tachiyomix 1.6
      */
-    var memo: JsonObject
+    public var memo: JsonObject
 
-    fun getGenres(): List<String>? {
+    public fun getGenres(): List<String>? {
         if (genre.isNullOrBlank()) return null
         return genre?.split(", ")?.map { it.trim() }?.filterNot { it.isBlank() }?.distinct()
     }
 
     // SY -->
-    val originalTitle: String
-    val originalAuthor: String?
-    val originalArtist: String?
-    val originalThumbnailUrl: String?
-    val originalDescription: String?
-    val originalGenre: String?
-    val originalStatus: Int
+    public val originalTitle: String
+    public val originalAuthor: String?
+    public val originalArtist: String?
+    public val originalThumbnailUrl: String?
+    public val originalDescription: String?
+    public val originalGenre: String?
+    public val originalStatus: Int
     // SY <--
 
-    fun copy() = create().also {
+    public fun copy(): SManga = create().also {
         it.url = url
         // SY -->
         it.title = originalTitle
@@ -71,21 +71,21 @@ interface SManga : Serializable {
         it.memo = memo
     }
 
-    companion object {
-        const val UNKNOWN = 0
-        const val ONGOING = 1
-        const val COMPLETED = 2
-        const val LICENSED = 3
-        const val PUBLISHING_FINISHED = 4
-        const val CANCELLED = 5
-        const val ON_HIATUS = 6
+    public companion object {
+        public const val UNKNOWN: Int = 0
+        public const val ONGOING: Int = 1
+        public const val COMPLETED: Int = 2
+        public const val LICENSED: Int = 3
+        public const val PUBLISHING_FINISHED: Int = 4
+        public const val CANCELLED: Int = 5
+        public const val ON_HIATUS: Int = 6
 
-        fun create(): SManga {
+        public fun create(): SManga {
             return SMangaImpl()
         }
 
         // SY -->
-        operator fun invoke(
+        public operator fun invoke(
             url: String,
             title: String,
             artist: String? = null,
@@ -113,7 +113,7 @@ interface SManga : Serializable {
 }
 
 // SY -->
-fun SManga.copy(
+public fun SManga.copy(
     url: String = this.url,
     title: String = this.originalTitle,
     artist: String? = this.originalArtist,
@@ -123,7 +123,7 @@ fun SManga.copy(
     status: Int = this.status,
     thumbnail_url: String? = this.originalThumbnailUrl,
     initialized: Boolean = this.initialized,
-) = SManga.create().also {
+): SManga = SManga.create().also {
     it.url = url
     it.title = title
     it.artist = artist

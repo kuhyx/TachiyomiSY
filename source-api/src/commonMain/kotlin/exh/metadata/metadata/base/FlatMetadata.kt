@@ -10,15 +10,15 @@ import kotlinx.serialization.serializer
 import kotlin.reflect.KClass
 
 @Serializable
-data class FlatMetadata(
+public data class FlatMetadata(
     val metadata: SearchMetadata,
     val tags: List<SearchTag>,
     val titles: List<SearchTitle>,
 ) {
-    inline fun <reified T : RaisedSearchMetadata> raise(): T = raise(T::class)
+    public inline fun <reified T : RaisedSearchMetadata> raise(): T = raise(T::class)
 
     @OptIn(InternalSerializationApi::class)
-    fun <T : RaisedSearchMetadata> raise(clazz: KClass<T>): T =
+    public fun <T : RaisedSearchMetadata> raise(clazz: KClass<T>): T =
         RaisedSearchMetadata.raiseFlattenJson
             .decodeFromString(clazz.serializer(), metadata.extra).apply {
                 fillBaseFields(this@FlatMetadata)
