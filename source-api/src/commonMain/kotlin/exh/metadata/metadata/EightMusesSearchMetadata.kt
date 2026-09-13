@@ -9,12 +9,16 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
+/** Album metadata scraped from 8muses. */
 @Serializable
 public class EightMusesSearchMetadata : RaisedSearchMetadata() {
+    /** Path segments of the album URL. */
     public var path: List<String> = emptyList()
 
+    /** Title. */
     public var title: String? by titleDelegate(TITLE_TYPE_MAIN)
 
+    /** Cover URL. */
     public var thumbnailUrl: String? = null
 
     override fun createMangaInfo(manga: SManga): SManga {
@@ -52,12 +56,17 @@ public class EightMusesSearchMetadata : RaisedSearchMetadata() {
         }
     }
 
+    /** Constants and URL helpers. */
     public companion object {
         private const val TITLE_TYPE_MAIN = 0
 
+        /** Type of every scraped tag. */
         public const val TAG_TYPE_DEFAULT: Int = 0
 
+        /** Namespace of plain tags. */
         public const val TAGS_NAMESPACE: String = "tags"
+
+        /** Namespace of artist tags. */
         public const val ARTIST_NAMESPACE: String = "artist"
     }
 }

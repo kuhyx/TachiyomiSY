@@ -35,11 +35,7 @@ public abstract class HttpSource : HttpSourceManga() {
         this.url = getUrlWithoutDomain(url)
     }
 
-    /**
-     * Returns the url of the given string without the scheme and domain.
-     *
-     * @param orig the full url.
-     */
+    // The url of the given string without the scheme and domain.
     private fun getUrlWithoutDomain(orig: String): String {
         return try {
             val uri = URI(orig.replace(" ", "%20"))
@@ -57,28 +53,24 @@ public abstract class HttpSource : HttpSourceManga() {
     }
 
     /**
-     * Returns the url of the provided manga
+     * Returns the url of the provided manga.
      *
      * @since extensions-lib 1.4
      * @param manga the manga
      * @return url of the manga
      */
     @Suppress("DEPRECATION")
-    public open fun getMangaUrl(manga: SManga): String {
-        return mangaDetailsRequest(manga).url.toString()
-    }
+    public open fun getMangaUrl(manga: SManga): String = mangaDetailsRequest(manga).url.toString()
 
     /**
-     * Returns the url of the provided chapter
+     * Returns the url of the provided chapter.
      *
      * @since extensions-lib 1.4
      * @param chapter the chapter
      * @return url of the chapter
      */
     @Suppress("DEPRECATION")
-    public open fun getChapterUrl(chapter: SChapter): String {
-        return pageListRequest(chapter).url.toString()
-    }
+    public open fun getChapterUrl(chapter: SChapter): String = pageListRequest(chapter).url.toString()
 
     /**
      * Called before inserting a new chapter into database. Use it if you need to override chapter

@@ -16,34 +16,49 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.Locale
 
+/** Gallery metadata scraped from Tsumino. */
 @Serializable
 public class TsuminoSearchMetadata : RaisedSearchMetadata() {
+    /** Gallery id. */
     public var tmId: Int? = null
 
+    /** Title. */
     public var title: String? by titleDelegate(TITLE_TYPE_MAIN)
 
+    /** Artist credit. */
     public var artist: String? = null
 
+    /** Upload time in epoch milliseconds. */
     public var uploadDate: Long? = null
 
+    /** Page count. */
     public var length: Int? = null
 
+    /** Rating as the site prints it. */
     public var ratingString: String? = null
 
+    /** Average rating. */
     public var averageRating: Float? = null
 
+    /** Number of ratings. */
     public var userRatings: Long? = null
 
+    /** Favourite count. */
     public var favorites: Long? = null
 
+    /** Site category. */
     public var category: String? = null
 
+    /** Collection name. */
     public var collection: String? = null
 
+    /** Group credit. */
     public var group: String? = null
 
+    /** Parody tags. */
     public var parody: List<String> = emptyList()
 
+    /** Character tags. */
     public var character: List<String> = emptyList()
 
     override fun createMangaInfo(manga: SManga): SManga {
@@ -98,17 +113,23 @@ public class TsuminoSearchMetadata : RaisedSearchMetadata() {
         }
     }
 
+    /** Constants and URL helpers. */
     public companion object {
         private const val TITLE_TYPE_MAIN = 0
 
+        /** Type of every scraped tag. */
         public const val TAG_TYPE_DEFAULT: Int = 0
 
-        public val BASE_URL: String = "https://www.tsumino.com"
+        /** Site root. */
+        public const val BASE_URL: String = "https://www.tsumino.com"
 
+        /** The date format the site prints. */
         public val TSUMINO_DATE_FORMAT: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
+        /** The gallery id at the end of a gallery [url]. */
         public fun tmIdFromUrl(url: String): String? = url.toUri().lastPathSegment
 
+        /** The relative thumbnail path for [id]. */
         public fun thumbUrlFromId(id: String): String = "/thumbs/$id/1"
     }
 }

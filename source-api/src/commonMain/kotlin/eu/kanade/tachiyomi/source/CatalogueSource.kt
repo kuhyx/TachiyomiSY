@@ -11,6 +11,7 @@ import kotlinx.coroutines.supervisorScope
 import rx.Observable
 import tachiyomi.core.common.util.lang.awaitSingle
 
+/** A source with browsable listings: popular, latest and search, plus optional filters. */
 public interface CatalogueSource : Source {
 
     /**

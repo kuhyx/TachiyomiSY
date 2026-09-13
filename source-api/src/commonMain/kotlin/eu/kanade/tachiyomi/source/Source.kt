@@ -23,6 +23,8 @@ public interface Source {
      */
     public val name: String
 
+    /** ISO 639-1 language code of the content. */
+
     public val lang: String
         get() = ""
 
@@ -95,12 +97,15 @@ public interface Source {
      */
     public suspend fun getPageList(chapter: SChapter): List<Page>
 
+    /** Legacy RxJava details fetch; sources implement the suspend API instead. */
     @Deprecated("Use the combined suspend API instead", ReplaceWith("getMangaUpdate"))
     public fun fetchMangaDetails(manga: SManga): Observable<SManga> = throw UnsupportedOperationException()
 
+    /** Legacy RxJava chapter fetch; sources implement the suspend API instead. */
     @Deprecated("Use the combined suspend API instead", ReplaceWith("getMangaUpdate"))
     public fun fetchChapterList(manga: SManga): Observable<List<SChapter>> = throw UnsupportedOperationException()
 
+    /** Legacy RxJava page fetch; sources implement the suspend API instead. */
     @Deprecated("Use the suspend API instead", ReplaceWith("getPageList"))
     public fun fetchPageList(chapter: SChapter): Observable<List<Page>> = throw UnsupportedOperationException()
 }

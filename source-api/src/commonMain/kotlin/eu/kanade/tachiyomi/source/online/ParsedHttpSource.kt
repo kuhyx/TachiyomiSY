@@ -24,7 +24,8 @@ public abstract class ParsedHttpSource : HttpSource() {
      * @param response the response from the site.
      */
     @Deprecated(
-        "The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.",
+        message = "The helper functions are inherently limiting and hides the underlying implementation. " +
+            "Source developers should make their own implementation according to their needs.",
     )
     override fun popularMangaParse(response: Response): MangasPage {
         val document = response.asJsoup()
@@ -65,7 +66,8 @@ public abstract class ParsedHttpSource : HttpSource() {
      * @param response the response from the site.
      */
     @Deprecated(
-        "The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.",
+        message = "The helper functions are inherently limiting and hides the underlying implementation. " +
+            "Source developers should make their own implementation according to their needs.",
     )
     override fun searchMangaParse(response: Response): MangasPage {
         val document = response.asJsoup()
@@ -106,7 +108,8 @@ public abstract class ParsedHttpSource : HttpSource() {
      * @param response the response from the site.
      */
     @Deprecated(
-        "The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.",
+        message = "The helper functions are inherently limiting and hides the underlying implementation. " +
+            "Source developers should make their own implementation according to their needs.",
     )
     override fun latestUpdatesParse(response: Response): MangasPage {
         val document = response.asJsoup()
@@ -147,11 +150,10 @@ public abstract class ParsedHttpSource : HttpSource() {
      * @param response the response from the site.
      */
     @Deprecated(
-        "The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.",
+        message = "The helper functions are inherently limiting and hides the underlying implementation. " +
+            "Source developers should make their own implementation according to their needs.",
     )
-    override fun mangaDetailsParse(response: Response): SManga {
-        return mangaDetailsParse(response.asJsoup())
-    }
+    override fun mangaDetailsParse(response: Response): SManga = mangaDetailsParse(response.asJsoup())
 
     /**
      * Returns the details of the manga from the given [document].
@@ -166,7 +168,8 @@ public abstract class ParsedHttpSource : HttpSource() {
      * @param response the response from the site.
      */
     @Deprecated(
-        "The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.",
+        message = "The helper functions are inherently limiting and hides the underlying implementation. " +
+            "Source developers should make their own implementation according to their needs.",
     )
     override fun chapterListParse(response: Response): List<SChapter> {
         val document = response.asJsoup()
@@ -191,11 +194,10 @@ public abstract class ParsedHttpSource : HttpSource() {
      * @param response the response from the site.
      */
     @Deprecated(
-        "The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.",
+        message = "The helper functions are inherently limiting and hides the underlying implementation. " +
+            "Source developers should make their own implementation according to their needs.",
     )
-    override fun pageListParse(response: Response): List<Page> {
-        return pageListParse(response.asJsoup())
-    }
+    override fun pageListParse(response: Response): List<Page> = pageListParse(response.asJsoup())
 
     /**
      * Returns a page list from the given document.
@@ -210,11 +212,10 @@ public abstract class ParsedHttpSource : HttpSource() {
      * @param response the response from the site.
      */
     @Deprecated(
-        "The helper functions are inherently limiting and hides the underlying implementation. Source developers should make their own implementation according to their needs.",
+        message = "The helper functions are inherently limiting and hides the underlying implementation. " +
+            "Source developers should make their own implementation according to their needs.",
     )
-    override fun imageUrlParse(response: Response): String {
-        return imageUrlParse(response.asJsoup())
-    }
+    override fun imageUrlParse(response: Response): String = imageUrlParse(response.asJsoup())
 
     /**
      * Returns the absolute url to the source image from the document.

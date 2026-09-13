@@ -5,15 +5,27 @@ package eu.kanade.tachiyomi.source.model
 import kotlinx.serialization.json.JsonObject
 import java.io.Serializable
 
+/** A chapter as a source describes it; extensions fill these fields, the app reads them. */
+
 public interface SChapter : Serializable {
+
+    /** URL relative to the source's base URL. */
 
     public var url: String
 
+    /** Display name. */
+
     public var name: String
+
+    /** Chapter number, -1 when unknown. */
 
     public var chapter_number: Float
 
+    /** Scanlator credit. */
+
     public var scanlator: String?
+
+    /** Upload time in epoch milliseconds, 0 when unknown. */
 
     public var date_upload: Long
 
@@ -30,6 +42,8 @@ public interface SChapter : Serializable {
      */
     public var memo: JsonObject
 
+    /** Copies every field of [other] into this chapter. */
+
     public fun copyFrom(other: SChapter) {
         name = other.name
         url = other.url
@@ -39,12 +53,15 @@ public interface SChapter : Serializable {
         memo = other.memo
     }
 
+    /** Factories. */
+
     public companion object {
-        public fun create(): SChapter {
-            return SChapterImpl()
-        }
+        /** An empty chapter. */
+        public fun create(): SChapter = SChapterImpl()
 
         // SY -->
+
+        /** A chapter with the given fields set. */
         public operator fun invoke(
             name: String,
             url: String,

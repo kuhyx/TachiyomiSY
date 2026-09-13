@@ -16,55 +16,16 @@ import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+/** SY: a source that switches between an extension and its in-app enhanced twin by preference.
+ *
+ * @property originalSource the extension source.
+ * @property enhancedSource the in-app replacement. */
 @Suppress("OverridingDeprecatedMember", "DEPRECATION")
 public class EnhancedHttpSource(
     public val originalSource: HttpSource,
     public val enhancedSource: HttpSource,
 ) : HttpSource() {
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun popularMangaRequest(page: Int): Request =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun popularMangaParse(response: Response): MangasPage =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun searchMangaParse(response: Response): MangasPage =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun latestUpdatesRequest(page: Int): Request =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun latestUpdatesParse(response: Response): MangasPage =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun mangaDetailsParse(response: Response): SManga =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun chapterListParse(response: Response): List<SChapter> =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun pageListParse(response: Response): List<Page> =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun imageUrlParse(response: Response): String =
-        throw UnsupportedOperationException("Should never be called!")
-
     override val baseUrl: String get() = source().baseUrl
-
-    override fun getHomeUrl(): String = source().getHomeUrl()
 
     override val headers: Headers get() = source().headers
 
@@ -74,11 +35,53 @@ public class EnhancedHttpSource(
 
     override val lang: String get() = source().lang
 
-    // ===> OPTIONAL FIELDS
-
     override val id: Long get() = source().id
 
     override val client: OkHttpClient get() = originalSource.client // source().client
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun popularMangaRequest(page: Int): Request =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun popularMangaParse(response: Response): MangasPage =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun searchMangaParse(response: Response): MangasPage =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun latestUpdatesRequest(page: Int): Request =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun latestUpdatesParse(response: Response): MangasPage =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun mangaDetailsParse(response: Response): SManga =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun chapterListParse(response: Response): List<SChapter> =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun pageListParse(response: Response): List<Page> =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun imageUrlParse(response: Response): String =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    override fun getHomeUrl(): String = source().getHomeUrl()
+
+    // ===> OPTIONAL FIELDS
 
     override fun toString(): String = source().toString()
 
@@ -137,6 +140,8 @@ public class EnhancedHttpSource(
     }
 
     override fun getFilterList(): FilterList = source().getFilterList()
+
+    /** The active source: enhanced when delegated sources are enabled, original otherwise. */
 
     public fun source(): HttpSource {
         return if (Injekt.get<DelegateSourcePreferences>().delegateSources.get()) {

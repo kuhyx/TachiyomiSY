@@ -43,9 +43,7 @@ public abstract class HttpSourceManga : HttpSourceCatalogue() {
         message = "The helper functions are inherently limiting and hides the underlying implementation. " +
             "Source developers should make their own implementation according to their needs.",
     )
-    public open fun mangaDetailsRequest(manga: SManga): Request {
-        return GET(baseUrl + manga.url, headers)
-    }
+    public open fun mangaDetailsRequest(manga: SManga): Request = GET(baseUrl + manga.url, headers)
 
     /**
      * Parses the response from the site and returns the details of a manga.
@@ -84,9 +82,7 @@ public abstract class HttpSourceManga : HttpSourceCatalogue() {
         message = "The helper functions are inherently limiting and hides the underlying implementation. " +
             "Source developers should make their own implementation according to their needs.",
     )
-    protected open fun chapterListRequest(manga: SManga): Request {
-        return GET(baseUrl + manga.url, headers)
-    }
+    protected open fun chapterListRequest(manga: SManga): Request = GET(baseUrl + manga.url, headers)
 
     /**
      * Parses the response from the site and returns a list of chapters.
@@ -124,9 +120,7 @@ public abstract class HttpSourceManga : HttpSourceCatalogue() {
         message = "The helper functions are inherently limiting and hides the underlying implementation. " +
             "Source developers should make their own implementation according to their needs.",
     )
-    protected open fun pageListRequest(chapter: SChapter): Request {
-        return GET(baseUrl + chapter.url, headers)
-    }
+    protected open fun pageListRequest(chapter: SChapter): Request = GET(baseUrl + chapter.url, headers)
 
     /**
      * Parses the response from the site and returns a list of pages.
@@ -172,9 +166,7 @@ public abstract class HttpSourceManga : HttpSourceCatalogue() {
         message = "The helper functions are inherently limiting and hides the underlying implementation. " +
             "Source developers should make their own implementation according to their needs.",
     )
-    protected open fun imageUrlRequest(page: Page): Request {
-        return GET(page.url, headers)
-    }
+    protected open fun imageUrlRequest(page: Page): Request = GET(page.url, headers)
 
     /**
      * Parses the response from the site and returns the absolute url to the source image.
@@ -188,6 +180,8 @@ public abstract class HttpSourceManga : HttpSourceCatalogue() {
     protected open fun imageUrlParse(response: Response): String = throw UnsupportedOperationException()
 
     /* SY --> protected <-- SY */
+
+    /** Downloads the image of [page], resuming after [existingSize] bytes when possible. */
     public open suspend fun getImage(page: Page, existingSize: Long = 0L): Response {
         return client.newCachelessCallWithProgress(imageRequest(page), page, existingSize)
             .awaitSuccess()
@@ -199,7 +193,5 @@ public abstract class HttpSourceManga : HttpSourceCatalogue() {
      *
      * @param page the chapter whose page list has to be fetched
      */
-    protected open fun imageRequest(page: Page): Request {
-        return GET(page.imageUrl!!, headers)
-    }
+    protected open fun imageRequest(page: Page): Request = GET(page.imageUrl!!, headers)
 }

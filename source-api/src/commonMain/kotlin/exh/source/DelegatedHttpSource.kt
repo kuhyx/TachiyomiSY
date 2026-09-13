@@ -13,53 +13,14 @@ import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 
+/** SY: an in-app replacement for an extension source; every request goes through the [delegate].
+ *
+ * @property delegate the extension source being wrapped. */
 @Suppress("OverridingDeprecatedMember", "DEPRECATION")
 public abstract class DelegatedHttpSource(public val delegate: HttpSource) : HttpSource() {
-    @Deprecated(HELPER_DEPRECATION)
-    override fun popularMangaRequest(page: Int): Request =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun popularMangaParse(response: Response): MangasPage =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun searchMangaParse(response: Response): MangasPage =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun latestUpdatesRequest(page: Int): Request =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun latestUpdatesParse(response: Response): MangasPage =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun mangaDetailsParse(response: Response): SManga =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun chapterListParse(response: Response): List<SChapter> =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun pageListParse(response: Response): List<Page> =
-        throw UnsupportedOperationException("Should never be called!")
-
-    @Deprecated(HELPER_DEPRECATION)
-    override fun imageUrlParse(response: Response): String =
-        throw UnsupportedOperationException("Should never be called!")
-
     override val lang: String get() = delegate.lang
 
     override val baseUrl: String get() = delegate.baseUrl
-
-    override fun getHomeUrl(): String = delegate.getHomeUrl()
 
     override val headers: Headers get() = delegate.headers
 
@@ -67,17 +28,63 @@ public abstract class DelegatedHttpSource(public val delegate: HttpSource) : Htt
 
     final override val name: String get() = delegate.name
 
-    // ===> OPTIONAL FIELDS
-
     override val id: Long get() = delegate.id
 
     final override val client: OkHttpClient get() = delegate.client
 
-    /**
-     * You must NEVER call super.client if you override this!
-     */
+    /** The client the delegate should use instead of its own; never call `super.client` when overriding. */
     public open val baseHttpClient: OkHttpClient? = null
+
+    /** The client used for the delegate's network requests. */
     public open val networkHttpClient: OkHttpClient get() = network.client
+
+    init {
+        delegate.bindDelegate(this)
+    }
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun popularMangaRequest(page: Int): Request =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun popularMangaParse(response: Response): MangasPage =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun searchMangaParse(response: Response): MangasPage =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun latestUpdatesRequest(page: Int): Request =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun latestUpdatesParse(response: Response): MangasPage =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun mangaDetailsParse(response: Response): SManga =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun chapterListParse(response: Response): List<SChapter> =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun pageListParse(response: Response): List<Page> =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    @Deprecated(HELPER_DEPRECATION)
+    override fun imageUrlParse(response: Response): String =
+        throw UnsupportedOperationException(NEVER_CALLED)
+
+    override fun getHomeUrl(): String = delegate.getHomeUrl()
+
+    // ===> OPTIONAL FIELDS
 
     override fun toString(): String = delegate.toString()
 
@@ -197,9 +204,7 @@ public abstract class DelegatedHttpSource(public val delegate: HttpSource) : Htt
         }
     }
 
-    public class IncompatibleDelegateException(message: String) : RuntimeException(message)
+    /** Thrown when the delegate's version or language differs from this source's. */
 
-    init {
-        delegate.bindDelegate(this)
-    }
+    public class IncompatibleDelegateException(message: String) : RuntimeException(message)
 }

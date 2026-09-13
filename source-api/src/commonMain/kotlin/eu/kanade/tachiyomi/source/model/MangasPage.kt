@@ -3,6 +3,10 @@ package eu.kanade.tachiyomi.source.model
 import exh.metadata.metadata.RaisedSearchMetadata
 
 /* SY --> */
+/** One page of a manga listing.
+ *
+ * @property mangas the entries.
+ * @property hasNextPage whether another page can be requested. */
 public open /* SY <-- */ class MangasPage(public open val mangas: List<SManga>, public open val hasNextPage: Boolean) {
     // SY -->
     override fun equals(other: Any?): Boolean {
@@ -21,17 +25,18 @@ public open /* SY <-- */ class MangasPage(public open val mangas: List<SManga>, 
         return result
     }
 
-    override fun toString(): String {
-        return "MangasPage(mangas=$mangas, hasNextPage=$hasNextPage)"
-    }
+    override fun toString(): String = "MangasPage(mangas=$mangas, hasNextPage=$hasNextPage)"
     // SY <--
 
+    /** Destructuring kept for source compatibility. */
     @Deprecated("MangasPage is now a regular class")
     public operator fun component1(): List<SManga> = mangas
 
+    /** Destructuring kept for source compatibility. */
     @Deprecated("MangasPage is now a regular class")
     public operator fun component2(): Boolean = hasNextPage
 
+    /** Copy kept for source compatibility. */
     @Deprecated("MangasPage is now a regular class")
     public fun copy(
         mangas: List<SManga> = this.mangas,
@@ -43,20 +48,26 @@ public open /* SY <-- */ class MangasPage(public open val mangas: List<SManga>, 
 }
 
 // SY -->
+
+/** SY: a listing page whose entries carry parsed metadata and a cursor.
+ *
+ * @property mangas the entries.
+ * @property hasNextPage whether another page can be requested.
+ * @property mangasMetadata metadata per entry, index aligned with [mangas].
+ * @property nextKey cursor of the next page, when the site paginates by key. */
 public class MetadataMangasPage(
     override val mangas: List<SManga>,
     override val hasNextPage: Boolean,
     public val mangasMetadata: List<RaisedSearchMetadata>,
     public val nextKey: Long? = null,
 ) : MangasPage(mangas, hasNextPage) {
+    /** A copy with the given fields replaced. */
     public fun copy(
         mangas: List<SManga> = this.mangas,
         hasNextPage: Boolean = this.hasNextPage,
         mangasMetadata: List<RaisedSearchMetadata> = this.mangasMetadata,
         nextKey: Long? = this.nextKey,
-    ): MangasPage {
-        return MetadataMangasPage(mangas, hasNextPage, mangasMetadata, nextKey)
-    }
+    ): MangasPage = MetadataMangasPage(mangas, hasNextPage, mangasMetadata, nextKey)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -36,8 +36,15 @@ public interface ResolvableSource : Source {
     public suspend fun getChapter(uri: String): SChapter?
 }
 
+/** What a URI points at within a source. */
+
 public sealed interface UriType {
+    /** A manga. */
     public data object Manga : UriType
+
+    /** A chapter. */
     public data object Chapter : UriType
+
+    /** Nothing this source knows. */
     public data object Unknown : UriType
 }

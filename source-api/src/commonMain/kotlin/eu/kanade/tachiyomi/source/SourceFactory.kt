@@ -5,8 +5,9 @@ package eu.kanade.tachiyomi.source
  */
 public interface SourceFactory {
     /**
-     * Create a new copy of the sources
-     * @return The created sources
+     * Creates a new copy of the sources.
+     *
+     * @return the created sources.
      */
     public fun createSources(): List<Source>
 }

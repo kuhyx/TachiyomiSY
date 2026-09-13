@@ -10,25 +10,39 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
+/** Title metadata from the MangaDex API. */
 @Serializable
 public class MangaDexSearchMetadata : RaisedSearchMetadata(), TrackerIdMetadata {
+    /** MangaDex UUID. */
     public var mdUuid: String? = null
 
     // var mdUrl: String? = null
 
+    /** Cover URL. */
     public var cover: String? = null
 
+    /** Title. */
     public var title: String? by titleDelegate(TITLE_TYPE_MAIN)
+
+    /** Alternative titles. */
     public var altTitles: List<String>? = null
 
+    /** Description. */
     public var description: String? = null
 
+    /** Author credits. */
     public var authors: List<String>? = null
+
+    /** Artist credits. */
     public var artists: List<String>? = null
 
+    /** Original language code. */
     public var langFlag: String? = null
 
+    /** Last chapter number the site lists. */
     public var lastChapterNumber: Int? = null
+
+    /** Bayesian rating. */
     public var rating: Float? = null
     // var users: String? = null
 
@@ -38,11 +52,15 @@ public class MangaDexSearchMetadata : RaisedSearchMetadata(), TrackerIdMetadata 
     override var mangaUpdatesId: String? = null
     override var animePlanetId: String? = null
 
+    /** Publication status as an [eu.kanade.tachiyomi.source.model.SManga] constant. */
     public var status: Int? = null
 
     // var missing_chapters: String? = null
 
+    /** The user's follow status, when logged in. */
     public var followStatus: Int? = null
+
+    /** How this title relates to the one it was listed under. */
     public var relation: MangaDexRelation? = null
 
     // var maxChapterNumber: Int? = null
@@ -101,9 +119,11 @@ public class MangaDexSearchMetadata : RaisedSearchMetadata(), TrackerIdMetadata 
         }
     }
 
+    /** Constants and URL helpers. */
     public companion object {
         private const val TITLE_TYPE_MAIN = 0
 
+        /** Type of every scraped tag. */
         public const val TAG_TYPE_DEFAULT: Int = 0
     }
 }

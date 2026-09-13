@@ -9,18 +9,27 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
 import kotlin.reflect.KClass
 
+/**
+ * Metadata in its database shape: one row plus its tags and titles.
+ *
+ * @property metadata the metadata row.
+ * @property tags the tag rows.
+ * @property titles the title rows.
+ */
 @Serializable
 public data class FlatMetadata(
     val metadata: SearchMetadata,
     val tags: List<SearchTag>,
     val titles: List<SearchTitle>,
-) {
-    public inline fun <reified T : RaisedSearchMetadata> raise(): T = raise(T::class)
+)
 
-    @OptIn(InternalSerializationApi::class)
-    public fun <T : RaisedSearchMetadata> raise(clazz: KClass<T>): T =
-        RaisedSearchMetadata.raiseFlattenJson
-            .decodeFromString(clazz.serializer(), metadata.extra).apply {
-                fillBaseFields(this@FlatMetadata)
-            }
+/** Inflates the stored metadata into its concrete [T]. */
+public inline fun <reified T : RaisedSearchMetadata> FlatMetadata.raise(): T = raise(T::class)
+
+/** Inflates the stored metadata into an instance of [clazz], filling the base fields from this row. */
+@OptIn(InternalSerializationApi::class)
+public fun <T : RaisedSearchMetadata> FlatMetadata.raise(clazz: KClass<T>): T {
+    val raised = RaisedSearchMetadata.raiseFlattenJson.decodeFromString(clazz.serializer(), metadata.extra)
+    raised.fillBaseFields(this)
+    return raised
 }

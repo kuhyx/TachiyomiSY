@@ -49,19 +49,6 @@ public abstract class HttpSourceBase : CatalogueSource {
     public abstract val baseUrl: String
 
     /**
-     * Returns the base (home) URL of the website as a string.
-     *
-     * This is typically the root address that serves as the main entry point
-     * to the site's content, such as "https://mihon.tech".
-     *
-     * This method is used in the browse screen to determine the URL
-     * opened when tapping "Open in WebView".
-     *
-     * @return The website’s home page URL. Defaults to [baseUrl].
-     */
-    public open fun getHomeUrl(): String = baseUrl
-
-    /**
      * Version id used to generate the source id. If the site completely changes and urls are
      * incompatible, you may increase this value and it'll be considered as a new source.
      */
@@ -93,6 +80,27 @@ public abstract class HttpSourceBase : CatalogueSource {
         get() = delegate?.baseHttpClient ?: network.client
     // SY <--
 
+    // EXH -->
+    private var delegate: DelegatedHttpSource? = null
+        get() = if (Injekt.get<DelegateSourcePreferences>().delegateSources.get()) {
+            field
+        } else {
+            null
+        }
+
+    /**
+     * Returns the base (home) URL of the website as a string.
+     *
+     * This is typically the root address that serves as the main entry point
+     * to the site's content, such as "https://mihon.tech".
+     *
+     * This method is used in the browse screen to determine the URL
+     * opened when tapping "Open in WebView".
+     *
+     * @return The website’s home page URL. Defaults to [baseUrl].
+     */
+    public open fun getHomeUrl(): String = baseUrl
+
     /**
      * Generates a unique ID for the source based on the provided [name], [lang] and
      * [versionId]. It will use the first 16 characters (64 bits) of the MD5 of the string
@@ -113,7 +121,9 @@ public abstract class HttpSourceBase : CatalogueSource {
     protected fun generateId(name: String, lang: String, versionId: Int): Long {
         val key = "${name.lowercase()}/$lang/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
-        return (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
+        return (0 until ID_BYTES)
+            .map { bytes[it].toLong() and BYTE_MASK shl BITS_PER_BYTE * (ID_BYTES - 1 - it) }
+            .reduce(Long::or) and Long.MAX_VALUE
     }
 
     /**
@@ -128,16 +138,13 @@ public abstract class HttpSourceBase : CatalogueSource {
      */
     override fun toString(): String = "$name (${lang.uppercase()})"
 
-    // EXH -->
-    private var delegate: DelegatedHttpSource? = null
-        get() = if (Injekt.get<DelegateSourcePreferences>().delegateSources.get()) {
-            field
-        } else {
-            null
-        }
-
+    /** SY: routes this source's clients through [delegate] while delegated sources are enabled. */
     public fun bindDelegate(delegate: DelegatedHttpSource) {
         this.delegate = delegate
     }
     // EXH <--
 }
+
+private const val ID_BYTES: Int = 8
+private const val BITS_PER_BYTE: Int = 8
+private const val BYTE_MASK: Long = 0xff

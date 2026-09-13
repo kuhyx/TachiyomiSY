@@ -8,8 +8,10 @@ import kotlinx.serialization.Serializable
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.sy.SYMR
 
+/** Archive metadata from a LANraragi server. */
 @Serializable
 public class LanraragiSearchMetadata : RaisedSearchMetadata() {
+    /** Relative reader URL derived from [arcId]; setting it parses the id back. */
     public var url: String? get() = arcId?.let { "/reader?id=$it" }
         set(a) {
             a?.let {
@@ -17,18 +19,25 @@ public class LanraragiSearchMetadata : RaisedSearchMetadata() {
             }
         }
 
+    /** Archive id. */
     public var arcId: String? = null
 
+    /** Title. */
     public var title: String? = null
 
+    /** Summary text. */
     public var summary: String? = null
 
+    /** Page count. */
     public var pageCount: Int? = null
 
+    /** Server root the archive was fetched from. */
     public var baseUrl: String? = null
 
+    /** Archive file name on the server. */
     public var filename: String? = null
 
+    /** Archive file extension. */
     public var extension: String? = null
 
     override fun createMangaInfo(manga: SManga): SManga {
@@ -76,21 +85,28 @@ public class LanraragiSearchMetadata : RaisedSearchMetadata() {
         }
     }
 
+    /** Constants and URL helpers. */
     public companion object {
+        /** Type of every scraped tag. */
         public const val TAG_TYPE_DEFAULT: Int = 0
 
+        /** Namespace of untyped tags. */
         public const val LANRARAGI_NAMESPACE_OTHER: String = "other"
 
+        /** Namespace of the date-added tag. */
         public const val LANRARAGI_NAMESPACE_DATE_ADDED: String = "date_added"
 
+        /** Namespace of the timestamp tag. */
         public const val LANRARAGI_NAMESPACE_TIMESTAMP: String = "timestamp"
 
+        /** Namespace of artist tags. */
         public const val LANRARAGI_NAMESPACE_ARTIST: String = "artist"
 
-        public fun getApiUriBuilder(baseUrl: String, path: String): Uri.Builder {
-            return Uri.parse("$baseUrl$path").buildUpon()
-        }
+        /** A URI builder for an API [path] on [baseUrl]. */
+        public fun getApiUriBuilder(baseUrl: String, path: String): Uri.Builder =
+            Uri.parse("$baseUrl$path").buildUpon()
 
+        /** The thumbnail URL of [page] of archive [id] on [baseUrl]. */
         public fun getThumbnailUri(baseUrl: String, id: String, page: Int): String {
             val uri = getApiUriBuilder(baseUrl, "/api/archives/$id/thumbnail")
 

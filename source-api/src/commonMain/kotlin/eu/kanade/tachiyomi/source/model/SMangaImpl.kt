@@ -5,6 +5,7 @@ package eu.kanade.tachiyomi.source.model
 import kotlinx.serialization.json.JsonObject
 import mihon.core.common.extensions.EMPTY
 
+/** The default [SManga] implementation; SY keeps the original values next to the user's edits. */
 public class SMangaImpl : SManga {
 
     override lateinit var url: String

@@ -2,17 +2,21 @@ package exh.metadata.sql.models
 
 import kotlinx.serialization.Serializable
 
+/**
+ * A title row of the metadata search index.
+ *
+ * @property id row id, null before insertion.
+ * @property mangaId the manga the title belongs to.
+ * @property title the title text.
+ * @property type source-specific title type, such as main or alternative.
+ */
 @Serializable
 public data class SearchTitle(
-    // Title identifier, unique
     val id: Long?,
 
-    // Metadata this title is attached to
     val mangaId: Long,
 
-    // Title
     val title: String,
 
-    // Title type, useful for distinguishing between main/alt titles
     val type: Int,
 )
