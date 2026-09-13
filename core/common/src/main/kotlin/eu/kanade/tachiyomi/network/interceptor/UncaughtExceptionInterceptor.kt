@@ -16,11 +16,9 @@ public class UncaughtExceptionInterceptor : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response = try {
         chain.proceed(chain.request())
+    } catch (e: IOException) {
+        throw e
     } catch (e: Exception) {
-        if (e is IOException) {
-            throw e
-        } else {
-            throw IOException(e)
-        }
+        throw IOException(e)
     }
 }

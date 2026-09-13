@@ -6,6 +6,7 @@ import android.os.FileUtils
 import com.hippo.unifile.UniFile
 import java.io.BufferedOutputStream
 import java.io.File
+import java.io.InputStream
 
 // File.createTempFile rejects prefixes shorter than three characters.
 private const val MIN_PREFIX_LENGTH = 3
@@ -32,18 +33,22 @@ public class UniFileTempFileManager(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             FileUtils.copy(inputStream, tempFile.outputStream())
         } else {
-            BufferedOutputStream(tempFile.outputStream()).use { tmpOut ->
-                inputStream.use { input ->
-                    val buffer = ByteArray(COPY_BUFFER_BYTES)
-                    var count: Int
-                    while (input.read(buffer).also { count = it } > 0) {
-                        tmpOut.write(buffer, 0, count)
-                    }
-                }
-            }
+            copyBuffered(inputStream, tempFile)
         }
 
         return tempFile
+    }
+
+    private fun copyBuffered(inputStream: InputStream, tempFile: File) {
+        BufferedOutputStream(tempFile.outputStream()).use { tmpOut ->
+            inputStream.use { input ->
+                val buffer = ByteArray(COPY_BUFFER_BYTES)
+                var count: Int
+                while (input.read(buffer).also { count = it } > 0) {
+                    tmpOut.write(buffer, 0, count)
+                }
+            }
+        }
     }
 
     /** Removes every cached copy. */

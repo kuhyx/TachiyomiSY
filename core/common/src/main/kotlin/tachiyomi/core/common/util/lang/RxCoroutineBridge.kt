@@ -78,13 +78,11 @@ public fun <T> runAsObservable(
                 try {
                     emitter.onNext(block())
                     emitter.onCompleted()
+                } catch (_: CancellationException) {
+                    // Normal cancellation, not an error.
+                    emitter.onCompleted()
                 } catch (e: Throwable) {
-                    // Ignore `CancellationException` as error, since it indicates "normal cancellation"
-                    if (e !is CancellationException) {
-                        emitter.onError(e)
-                    } else {
-                        emitter.onCompleted()
-                    }
+                    emitter.onError(e)
                 }
             }
             emitter.setCancellation { job.cancel() }
