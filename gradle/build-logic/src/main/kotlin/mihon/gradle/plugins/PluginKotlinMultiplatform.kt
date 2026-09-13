@@ -2,6 +2,7 @@ package mihon.gradle.plugins
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import mihon.gradle.configurations.configureKotlin
+import mihon.gradle.configurations.stripMultiReleaseJars
 import mihon.gradle.extensions.alias
 import mihon.gradle.extensions.configureTest
 import mihon.gradle.extensions.coreLibraryDesugaring
@@ -29,6 +30,7 @@ public class PluginKotlinMultiplatform : Plugin<Project> {
 
             configureKotlin()
             configureTest()
+            stripMultiReleaseJars()
 
             kotlin {
                 @OptIn(ExperimentalKotlinGradlePluginApi::class)

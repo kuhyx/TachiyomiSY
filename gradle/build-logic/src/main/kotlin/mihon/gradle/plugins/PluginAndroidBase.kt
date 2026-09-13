@@ -4,6 +4,7 @@ import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.CompileOptions
 import com.android.build.api.dsl.DefaultConfig
 import mihon.gradle.configurations.configureKotlin
+import mihon.gradle.configurations.stripMultiReleaseJars
 import mihon.gradle.extensions.android
 import mihon.gradle.extensions.configureTest
 import mihon.gradle.extensions.coreLibraryDesugaring
@@ -21,6 +22,7 @@ public class PluginAndroidBase : Plugin<Project> {
             val sdk = mihonx.versions.android.sdk
             configureKotlin()
             configureTest()
+            stripMultiReleaseJars()
 
             android {
                 defaultConfig {
