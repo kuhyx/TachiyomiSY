@@ -123,18 +123,16 @@ gradle_gate() {
         # Measured 2026-09-12: with the project's default -Xmx4g and parallel
         # workers a full check exceeds the 4 GiB cap and is SIGTERMed; with
         # these limits it peaks at 1.9 GiB. Slower, but it finishes.
-        # 2026-09-13: 1.5 GiB thrashed the daemon's GC once every module's
-        # lintAnalyze ran in one build, and a separate lint worker JVM on top
-        # of a 2 GiB daemon pushed the scope past the 4 GiB cap (SIGTERM at
-        # :app:lintAnalyzeDebug). Lint therefore runs inside the daemon, which
-        # gets 2.5 GiB; the Kotlin daemon keeps 768 MiB.
+        # 2026-09-13: :app:lintAnalyzeDebug alone needs more than the cap
+        # leaves next to the daemon and the Kotlin daemon (SIGTERM 143 at
+        # 1.5, 2 and 2.5 GiB, in-process or as a worker), so Android Lint is
+        # CI's job: the local gate is compile, tests, detekt, ktlint, Kover.
         CAP_MEM=4G CAP_CPU_PCT=20 "$capped" \
-            "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" \
+            "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint \
             --max-workers=2 \
             -Dorg.gradle.parallel=false \
-            -Dorg.gradle.jvmargs="-Xmx2560m -Dfile.encoding=UTF-8" \
-            -Dkotlin.daemon.jvm.options=-Xmx768m \
-            -Pandroid.experimental.runLintInProcess=true
+            -Dorg.gradle.jvmargs="-Xmx2048m -Dfile.encoding=UTF-8" \
+            -Dkotlin.daemon.jvm.options=-Xmx768m
     else
         "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}"
     fi
