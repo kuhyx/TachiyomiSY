@@ -123,11 +123,14 @@ gradle_gate() {
         # Measured 2026-09-12: with the project's default -Xmx4g and parallel
         # workers a full check exceeds the 4 GiB cap and is SIGTERMed; with
         # these limits it peaks at 1.9 GiB. Slower, but it finishes.
+        # 2026-09-13: 1.5 GiB thrashed the daemon's GC once every module's
+        # lintAnalyze ran in one build; 2 GiB with the Kotlin daemon at 1 GiB
+        # still leaves a GiB of the cap for the lint worker.
         CAP_MEM=4G CAP_CPU_PCT=20 "$capped" \
             "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" \
             --max-workers=2 \
             -Dorg.gradle.parallel=false \
-            -Dorg.gradle.jvmargs="-Xmx1536m -Dfile.encoding=UTF-8" \
+            -Dorg.gradle.jvmargs="-Xmx2048m -Dfile.encoding=UTF-8" \
             -Dkotlin.daemon.jvm.options=-Xmx1024m
     else
         "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}"
