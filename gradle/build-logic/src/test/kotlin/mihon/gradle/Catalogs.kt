@@ -54,6 +54,7 @@ private fun mockLibs(project: Project): LibrariesForLibs = mockk {
     every { androidx.compose.uiToolingPreview } returns project.library("androidx.compose.ui", "ui-tooling-preview")
     every { androidx.compose.uiTooling } returns project.library("androidx.compose.ui", "ui-tooling")
     every { ktlint.bom } returns project.library("com.pinterest.ktlint", "ktlint-bom")
+    every { versions.jacoco } returns project.provider { "0.8.15" }
 }
 
 private fun mockMihonx(project: Project): LibrariesForMihonx = mockk {

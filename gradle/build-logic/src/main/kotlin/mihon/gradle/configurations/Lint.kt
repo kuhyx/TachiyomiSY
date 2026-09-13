@@ -61,11 +61,16 @@ public fun Project.configureAndroidLint() {
         .configureEach { strictLint(lint) }
 }
 
-/** The same knobs for the KMP Android target, whose lint block hangs off the target. */
+/**
+ * The same knobs for the KMP Android target, whose lint block hangs off the target.
+ * Dependencies are not re-checked from a library: the rollout is per module in
+ * dependency order, so a library must not fail on a module that is not gated yet;
+ * the app, last in the order, turns `checkDependencies` on and covers the tree.
+ */
 public fun strictLint(lint: Lint) {
     lint.warningsAsErrors = true
     lint.abortOnError = true
     lint.checkAllWarnings = true
-    lint.checkDependencies = true
+    lint.checkDependencies = false
     lint.checkReleaseBuilds = true
 }

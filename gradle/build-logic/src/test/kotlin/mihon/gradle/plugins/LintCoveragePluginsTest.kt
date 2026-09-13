@@ -29,7 +29,7 @@ internal class LintCoveragePluginsTest {
         lint.warningsAsErrors shouldBe true
         lint.abortOnError shouldBe true
         lint.checkAllWarnings shouldBe true
-        lint.checkDependencies shouldBe true
+        lint.checkDependencies shouldBe false
         lint.checkReleaseBuilds shouldBe true
         val kotlin = project.extensions.getByType(KotlinBaseExtension::class.java)
         val options = (kotlin as HasConfigurableKotlinCompilerOptions<*>).compilerOptions
@@ -62,14 +62,16 @@ internal class LintCoveragePluginsTest {
         val extensions = (kotlin as ExtensionAware).extensions
         val android = extensions.getByType(KotlinMultiplatformAndroidLibraryTarget::class.java)
         android.lint.warningsAsErrors shouldBe true
-        android.lint.checkDependencies shouldBe true
+        android.lint.checkDependencies shouldBe false
     }
 
     @Test
     fun coveragePluginAppliesKover() {
         val project = catalogProject()
         project.plugins.apply(PluginCoverage::class.java)
+        project.plugins.apply("base")
         project.plugins.hasPlugin("org.jetbrains.kotlinx.kover") shouldBe true
         (project.tasks.findByName("koverVerify") != null) shouldBe true
+        project.tasks.getByName("check").dependsOn.contains("koverVerify") shouldBe true
     }
 }

@@ -36,8 +36,11 @@ the sync job execute. Add a gate there, never in a workflow alone.
   `./gradlew -p gradle/build-logic check` (root `check` depends on it)
 - Lint stack per module: apply `mihonx.plugins.lint` (detekt every rule from
   `config/detekt/*.yml`, Android Lint warnings-as-errors, Kotlin
-  `-Werror -Xexplicit-api=strict`) and `mihonx.plugins.coverage` (Kover,
-  100% line + branch) in the commit that makes the module clean. The
+  `-Werror -Xexplicit-api=strict`) and `mihonx.plugins.coverage` (Kover on
+  the JaCoCo engine, whose Kotlin filters drop compiler-generated dead
+  branches; 100% line + branch, bound to `check`) in the commit that makes
+  the module clean. Libraries do not re-lint their dependencies
+  (`checkDependencies` is the app's job, last in the order). The
   compiler's explicit-API diagnostics are applied mechanically by
   `scripts/explicit_api.py <gradle-log>`; return types stay manual.
 - Drop-in APK: `./gradlew assembleFoss -PsyReplaceUpstream`

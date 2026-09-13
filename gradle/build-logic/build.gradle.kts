@@ -29,6 +29,7 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 }
 
 kover {
+    useJacoco(libs.versions.jacoco.get())
     reports {
         verify {
             rule("line coverage") {

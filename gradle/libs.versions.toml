@@ -48,6 +48,7 @@ kotest-assertions = "6.2.5"
 kotlin-gradle = "2.4.20"
 kotlinx-coroutines = "1.11.0"
 kotlinx-serialization = "1.11.0"
+jacoco = "0.8.15"
 kover = "0.9.9"
 ktlint = "1.8.0"
 leakCanary = "2.14"
@@ -176,6 +177,8 @@ shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizu
 spotless-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 detekt-gradle = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 kover-gradle = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
+# Only the version is consumed (Kover's JaCoCo engine); declared so the freshness gate tracks it.
+jacoco-agent = { module = "org.jacoco:org.jacoco.agent", version.ref = "jacoco" }
 sqldelight-androidDriver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight-androidxDriver = { module = "com.github.mihon.sqldelight-androidx-driver:sqldelight-androidx-driver", version.ref = "sqldelight-androidx-driver" }
 sqldelight-androidxPaging = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqldelight" }
