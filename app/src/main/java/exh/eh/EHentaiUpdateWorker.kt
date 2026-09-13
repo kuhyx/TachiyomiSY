@@ -25,6 +25,7 @@ import exh.debug.DebugToggles
 import exh.eh.EHentaiUpdateWorkerConstants.UPDATES_PER_ITERATION
 import exh.log.xLog
 import exh.metadata.metadata.EHentaiSearchMetadata
+import exh.metadata.metadata.base.raise
 import exh.source.ExhPreferences
 import exh.util.cancellable
 import kotlinx.coroutines.flow.asFlow

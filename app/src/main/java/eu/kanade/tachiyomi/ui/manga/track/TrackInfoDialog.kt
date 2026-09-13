@@ -66,6 +66,7 @@ import eu.kanade.tachiyomi.util.system.copyToClipboard
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import exh.metadata.metadata.base.TrackerIdMetadata
+import exh.metadata.metadata.base.raise
 import exh.source.getMainSource
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest

@@ -12,6 +12,7 @@ import exh.md.utils.MdUtil
 import exh.md.utils.asMdMap
 import exh.metadata.metadata.MangaDexSearchMetadata
 import exh.metadata.metadata.base.RaisedTag
+import exh.metadata.metadata.base.raise
 import exh.util.capitalize
 import exh.util.floor
 import exh.util.nullIfEmpty
