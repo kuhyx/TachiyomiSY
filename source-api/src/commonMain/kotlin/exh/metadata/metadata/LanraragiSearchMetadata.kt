@@ -63,7 +63,7 @@ public class LanraragiSearchMetadata : RaisedSearchMetadata() {
 
         return manga.copy(
             url = key ?: manga.url,
-            thumbnail_url = cover ?: manga.thumbnail_url,
+            thumbnailUrl = cover ?: manga.thumbnail_url,
             title = title ?: manga.title,
             artist = artist ?: manga.artist,
             author = artist ?: manga.artist,

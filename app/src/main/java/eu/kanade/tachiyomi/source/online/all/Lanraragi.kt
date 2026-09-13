@@ -150,7 +150,7 @@ class Lanraragi(delegate: HttpSource, val context: Context) :
     )
 
     override suspend fun getPagePreviewList(manga: SManga, chapters: List<SChapter>, page: Int): PagePreviewPage {
-        val metadata = fetchOrLoadMetadata(manga.id()) {
+        val metadata = fetchOrLoadMetadata(manga.mangaId()) {
             client.newCall(customMangaDetailsRequest(manga)).awaitSuccess()
         }
         return PagePreviewPage(

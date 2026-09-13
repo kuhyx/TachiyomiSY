@@ -61,7 +61,7 @@ public class PururinSearchMetadata : RaisedSearchMetadata() {
         return manga.copy(
             url = key ?: manga.url,
             title = title ?: manga.title,
-            thumbnail_url = cover ?: manga.thumbnail_url,
+            thumbnailUrl = cover ?: manga.thumbnail_url,
             artist = artist,
             genre = genres,
             description = description,

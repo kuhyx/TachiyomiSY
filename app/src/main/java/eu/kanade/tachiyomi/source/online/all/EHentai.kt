@@ -401,8 +401,8 @@ class EHentai(
         val self = SChapter(
             url = EHentaiSearchMetadata.normalizeUrl(location),
             name = "v1: " + doc.selectFirst("#gn")!!.text(),
-            chapter_number = 1f,
-            date_upload = ZonedDateTime.parse(
+            chapterNumber = 1f,
+            dateUpload = ZonedDateTime.parse(
                 doc.select("#gdd .gdt1").find { el ->
                     el.text().lowercase() == "posted:"
                 }!!.nextElementSibling()!!.text(),
@@ -421,8 +421,8 @@ class EHentai(
                 SChapter(
                     url = EHentaiSearchMetadata.normalizeUrl(link),
                     name = "v${index + 2}: $name",
-                    chapter_number = index + 2f,
-                    date_upload = ZonedDateTime.parse(
+                    chapterNumber = index + 2f,
+                    dateUpload = ZonedDateTime.parse(
                         posted,
                         MetadataUtil.EX_DATE_FORMAT.withZone(ZoneOffset.UTC),
                     ).toInstant().toEpochMilli(),

@@ -115,7 +115,7 @@ class BilibiliHandler(currentClient: OkHttpClient) {
     private fun chapterFromObject(episode: BilibiliEpisodeDto, comicId: Int): SChapter = SChapter(
         url = "/mc$comicId/${episode.id}",
         name = "Ep. " + episode.order.toString().removeSuffix(".0") + " - " + episode.title,
-        chapter_number = episode.order,
+        chapterNumber = episode.order,
     )
 
     private suspend fun fetchPageList(chapterUrl: String): List<Page> {

@@ -73,7 +73,7 @@ public interface MetadataSource<M : RaisedSearchMetadata, I> : Source {
     /** Parses [input] into fresh metadata, saves it and returns [manga] with it applied. */
 
     public suspend fun parseToManga(manga: SManga, input: I): SManga {
-        val mangaId = manga.id()
+        val mangaId = manga.mangaId()
         val metadata = if (mangaId != null) {
             val flatMetadata = getFlatMetadataById.await(mangaId)
             flatMetadata?.raise(metaClass) ?: newMetaInstance()
@@ -127,5 +127,5 @@ public interface MetadataSource<M : RaisedSearchMetadata, I> : Source {
 
     /** The database id of this manga in this source, if saved. */
 
-    public suspend fun SManga.id(): Long? = getMangaId.awaitId(url, id)
+    public suspend fun SManga.mangaId(): Long? = getMangaId.awaitId(url, id)
 }

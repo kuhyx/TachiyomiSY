@@ -74,7 +74,7 @@ class ComickPagingSource(
                     SManga(
                         title = rec["title"]!!.jsonPrimitive.content,
                         url = "/comic/${rec["hid"]!!.jsonPrimitive.content}#",
-                        thumbnail_url = thumbnailBaseUrl + rec["md_covers"]!!
+                        thumbnailUrl = thumbnailBaseUrl + rec["md_covers"]!!
                             .jsonArray
                             .map { it.jsonObject["b2key"]!!.jsonPrimitive.content }
                             .first(),

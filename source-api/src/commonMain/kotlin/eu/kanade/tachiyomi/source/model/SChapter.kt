@@ -65,15 +65,15 @@ public interface SChapter : Serializable {
         public operator fun invoke(
             name: String,
             url: String,
-            date_upload: Long = 0,
-            chapter_number: Float = -1F,
+            dateUpload: Long = 0,
+            chapterNumber: Float = -1F,
             scanlator: String? = null,
         ): SChapter {
             return create().apply {
                 this.name = name
                 this.url = url
-                this.date_upload = date_upload
-                this.chapter_number = chapter_number
+                this.date_upload = dateUpload
+                this.chapter_number = chapterNumber
                 this.scanlator = scanlator
             }
         }

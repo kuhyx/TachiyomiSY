@@ -44,7 +44,7 @@ class MyAnimeListPagingSource(manga: Manga) : TrackerRecommendationPagingSource(
                 SManga(
                     title = rec["title"]!!.jsonPrimitive.content,
                     url = rec["url"]!!.jsonPrimitive.content,
-                    thumbnail_url = rec["images"]
+                    thumbnailUrl = rec["images"]
                         ?.let(JsonElement::jsonObject)
                         ?.let(::getImage),
                     initialized = true,

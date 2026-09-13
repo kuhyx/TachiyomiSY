@@ -53,7 +53,7 @@ abstract class MangaUpdatesPagingSource(manga: Manga) : TrackerRecommendationPag
                 SManga(
                     title = rec["series_name"]!!.jsonPrimitive.content,
                     url = rec["series_url"]!!.jsonPrimitive.content,
-                    thumbnail_url = rec["series_image"]
+                    thumbnailUrl = rec["series_image"]
                         ?.jsonObject
                         ?.get("url")
                         ?.jsonObject

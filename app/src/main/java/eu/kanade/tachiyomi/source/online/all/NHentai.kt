@@ -186,7 +186,7 @@ class NHentai(delegate: HttpSource, val context: Context) :
 
     override suspend fun getPagePreviewList(manga: SManga, chapters: List<SChapter>, page: Int): PagePreviewPage {
         if (nhConfig == null) getNhConfig()
-        val metadata = fetchOrLoadMetadata(manga.id()) {
+        val metadata = fetchOrLoadMetadata(manga.mangaId()) {
             client.newCall(mangaDetailsRequest(manga)).awaitSuccess()
         }
         return PagePreviewPage(

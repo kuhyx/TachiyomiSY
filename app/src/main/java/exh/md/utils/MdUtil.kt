@@ -88,7 +88,7 @@ class MdUtil {
             return SManga(
                 url = buildMangaUrl(json.id),
                 title = getTitleFromManga(json.attributes, lang, true),
-                thumbnail_url = json.relationships
+                thumbnailUrl = json.relationships
                     .firstOrNull { relationshipDto -> relationshipDto.type == MdConstants.Types.coverArt }
                     ?.attributes
                     ?.fileName

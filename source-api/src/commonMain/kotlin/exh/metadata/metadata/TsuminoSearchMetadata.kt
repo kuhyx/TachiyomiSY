@@ -76,7 +76,7 @@ public class TsuminoSearchMetadata : RaisedSearchMetadata() {
 
         return manga.copy(
             title = title ?: manga.title,
-            thumbnail_url = cover ?: manga.thumbnail_url,
+            thumbnailUrl = cover ?: manga.thumbnail_url,
             artist = artist ?: manga.artist,
             status = status,
             genre = genres,

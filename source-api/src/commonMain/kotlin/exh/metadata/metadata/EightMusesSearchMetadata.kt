@@ -37,7 +37,7 @@ public class EightMusesSearchMetadata : RaisedSearchMetadata() {
         return manga.copy(
             url = key,
             title = title ?: manga.title,
-            thumbnail_url = cover ?: manga.thumbnail_url,
+            thumbnailUrl = cover ?: manga.thumbnail_url,
             artist = artist,
             genre = genres,
             description = description,

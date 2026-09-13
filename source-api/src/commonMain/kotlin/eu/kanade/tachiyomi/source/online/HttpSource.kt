@@ -9,9 +9,10 @@ import java.net.URISyntaxException
  * A simple implementation for sources from a website.
  *
  * The members live in a chain of superclasses ([HttpSourceBase], [HttpSourceCatalogue],
- * [HttpSourceManga]) so that no file exceeds the cap; extensions see one class.
+ * [HttpSourceManga], [HttpSourcePages]) so that no class or file outgrows the gates;
+ * extensions see one class.
  */
-public abstract class HttpSource : HttpSourceManga() {
+public abstract class HttpSource : HttpSourcePages() {
 
     /**
      * Assigns the url of the chapter without the scheme and domain. It saves some redundancy from

@@ -83,5 +83,8 @@ naming:
     active: true
     variablePattern: '[a-z][A-Za-z0-9]*'
     privateVariablePattern: '(_)?[a-z][A-Za-z0-9]*'
-    excludeClassPattern: '$^'
+    # SManga.thumbnail_url/update_strategy and SChapter.chapter_number/date_upload are the
+    # extension ABI: every extension APK links to their JVM accessors, and Kotlin forbids
+    # @JvmName on interface members, so the snake_case names cannot change.
+    excludeClassPattern: '^SManga$|^SChapter$'
 

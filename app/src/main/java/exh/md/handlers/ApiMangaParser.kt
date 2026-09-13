@@ -315,7 +315,7 @@ class ApiMangaParser(
             url = key,
             name = name,
             scanlator = scanlator,
-            date_upload = dateUpload,
+            dateUpload = dateUpload,
         )
     }
 }

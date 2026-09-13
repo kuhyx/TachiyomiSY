@@ -125,7 +125,7 @@ public class EHentaiSearchMetadata : RaisedSearchMetadata() {
             description = null,
             genre = genres,
             status = status,
-            thumbnail_url = cover ?: manga.thumbnail_url,
+            thumbnailUrl = cover ?: manga.thumbnail_url,
         )
     }
 

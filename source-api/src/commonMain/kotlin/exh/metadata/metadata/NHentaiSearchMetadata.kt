@@ -65,7 +65,7 @@ public class NHentaiSearchMetadata : RaisedSearchMetadata() {
 
         return manga.copy(
             url = key ?: manga.url,
-            thumbnail_url = coverImageUrl ?: manga.thumbnail_url,
+            thumbnailUrl = coverImageUrl ?: manga.thumbnail_url,
             title = title,
             artist = group ?: manga.artist,
             author = artist ?: manga.artist,

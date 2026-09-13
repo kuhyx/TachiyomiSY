@@ -135,7 +135,7 @@ public interface SManga : Serializable {
             description: String? = null,
             genre: String? = null,
             status: Int = 0,
-            thumbnail_url: String? = null,
+            thumbnailUrl: String? = null,
             initialized: Boolean = false,
         ): SManga {
             return create().also {
@@ -146,7 +146,7 @@ public interface SManga : Serializable {
                 it.description = description
                 it.genre = genre
                 it.status = status
-                it.thumbnail_url = thumbnail_url
+                it.thumbnail_url = thumbnailUrl
                 it.initialized = initialized
             }
         }
@@ -165,7 +165,7 @@ public fun SManga.copy(
     description: String? = this.originalDescription,
     genre: String? = this.originalGenre,
     status: Int = this.status,
-    thumbnail_url: String? = this.originalThumbnailUrl,
+    thumbnailUrl: String? = this.originalThumbnailUrl,
     initialized: Boolean = this.initialized,
 ): SManga = SManga.create().also {
     it.url = url
@@ -175,7 +175,7 @@ public fun SManga.copy(
     it.description = description
     it.genre = genre
     it.status = status
-    it.thumbnail_url = thumbnail_url
+    it.thumbnail_url = thumbnailUrl
     it.initialized = initialized
 }
 // SY <--

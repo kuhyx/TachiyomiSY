@@ -85,7 +85,7 @@ public class MangaDexSearchMetadata : RaisedSearchMetadata(), TrackerIdMetadata 
         return manga.copy(
             url = key ?: manga.url,
             title = title ?: manga.title,
-            thumbnail_url = cover ?: manga.thumbnail_url,
+            thumbnailUrl = cover ?: manga.thumbnail_url,
             author = author ?: manga.author,
             artist = artist ?: manga.artist,
             status = status ?: manga.status,

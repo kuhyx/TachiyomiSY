@@ -93,7 +93,7 @@ class AniListPagingSource(manga: Manga) : TrackerRecommendationPagingSource(
             logcat { "ANILIST > RECOMMENDATION: $recTitle" }
             SManga(
                 title = recTitle,
-                thumbnail_url = rec["coverImage"]!!.jsonObject["large"]!!.jsonPrimitive.content,
+                thumbnailUrl = rec["coverImage"]!!.jsonObject["large"]!!.jsonPrimitive.content,
                 initialized = true,
                 url = rec["siteUrl"]!!.jsonPrimitive.content,
             )
