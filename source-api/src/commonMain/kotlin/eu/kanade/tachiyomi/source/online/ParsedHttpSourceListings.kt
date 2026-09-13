@@ -11,6 +11,15 @@ import org.jsoup.nodes.Element
  * document with a selector, an element mapper and a next-page selector.
  */
 public abstract class ParsedHttpSourceListings : HttpSource() {
+    /**
+     * Parses the response from the site and returns a [MangasPage] object.
+     *
+     * @param response the response from the site.
+     */
+    @Deprecated(
+        message = "The helper functions are inherently limiting and hides the underlying implementation. " +
+            "Source developers should make their own implementation according to their needs.",
+    )
     override fun popularMangaParse(response: Response): MangasPage {
         val document = response.asJsoup()
 

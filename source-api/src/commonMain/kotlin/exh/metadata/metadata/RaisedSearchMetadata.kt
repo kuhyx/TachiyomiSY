@@ -49,16 +49,6 @@ public sealed class RaisedSearchMetadata {
         if (newTitle != null) titles += RaisedTitle(newTitle, type)
     }
 
-    /** A label/value pair for the details screen, or null when [item] is null. */
-    public fun <T : Any> getItem(
-        item: T?,
-        toString: (T) -> String = Any::toString,
-        block: (T) -> String,
-    ): Pair<String, String>? {
-        item ?: return null
-        return block(item) to toString(item)
-    }
-
     /*open fun copyTo(manga: SManga) {
         val infoManga = createMangaInfo(manga.copy())
         manga.copyFrom(infoManga)
@@ -92,9 +82,6 @@ public sealed class RaisedSearchMetadata {
         this += tags.joinToString(separator = " ", transform = { "<${it.name}>" })
         this += "\n"
     }
-
-    /** The tags whose namespace is [ns]. */
-    public fun List<RaisedTag>.ofNamespace(ns: String): List<RaisedTag> = filter { it.namespace == ns }
 
     /** The database representation; requires a saved [mangaId]. */
     public fun flatten(): FlatMetadata {
