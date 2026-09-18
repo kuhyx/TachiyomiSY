@@ -79,7 +79,7 @@ public abstract class WebViewInterceptor(
             isRequestHeaderSafe(name, value)
         }
         .groupBy(keySelector = { (name, _) -> name }) { (_, value) -> value }
-        .mapValues { it.value.getOrNull(0).orEmpty() }
+        .mapValues { it.value.first() }
 
     /** Waits at most thirty seconds for the latch. */
     public fun CountDownLatch.awaitFor30Seconds() {

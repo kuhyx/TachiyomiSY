@@ -191,7 +191,8 @@ public object DiskUtil {
 }
 
 private fun isValidFatFilenameChar(c: Char): Boolean {
-    if (0x00.toChar() <= c && c <= 0x1f.toChar()) {
+    // Char is unsigned, so the only control range below is the low one.
+    if (c <= 0x1f.toChar()) {
         return false
     }
     return when (c) {

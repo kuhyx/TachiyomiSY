@@ -1,40 +1,41 @@
 package mihon.core.common.archive
 
 import eu.kanade.tachiyomi.util.storage.CbzCrypto
-import me.zhanghai.android.libarchive.Archive
 import me.zhanghai.android.libarchive.ArchiveEntry
 import me.zhanghai.android.libarchive.ArchiveException
+import mihon.core.common.NativeBinding
 import java.io.InputStream
 import java.nio.ByteBuffer
 import kotlin.concurrent.Volatile
 import mihon.core.common.archive.ArchiveEntry as MihonArchiveEntry
 
 /** Reads an archive mapped in memory entry by entry through libarchive. */
-public class ArchiveInputStream(
+public class ArchiveInputStream internal constructor(
     buffer: Long,
     size: Long,
     // SY -->
     encrypted: Boolean,
     // SY <--
+    private val native: ArchiveNative,
 ) : InputStream() {
     private val lock = Any()
 
     @Volatile
     private var isClosed = false
 
-    private val archive = Archive.readNew()
+    private val archive = native.readNew()
 
     init {
         try {
             // SY -->
             if (encrypted) {
-                Archive.readAddPassphrase(archive, CbzCrypto.getDecryptedPasswordCbz())
+                native.readAddPassphrase(archive, CbzCrypto.getDecryptedPasswordCbz())
             }
             // SY <--
-            Archive.setCharset(archive, Charsets.UTF_8.name().toByteArray())
-            Archive.readSupportFilterAll(archive)
-            Archive.readSupportFormatAll(archive)
-            Archive.readOpenMemoryUnsafe(archive, buffer, size)
+            native.setCharset(archive, Charsets.UTF_8.name().toByteArray())
+            native.readSupportFilterAll(archive)
+            native.readSupportFormatAll(archive)
+            native.readOpenMemoryUnsafe(archive, buffer, size)
         } catch (e: ArchiveException) {
             close()
             throw e
@@ -43,20 +44,30 @@ public class ArchiveInputStream(
 
     private val oneByteBuffer = ByteBuffer.allocateDirect(1)
 
+    @NativeBinding
+    public constructor(
+        buffer: Long,
+        size: Long,
+        // SY -->
+        encrypted: Boolean,
+        // SY <--
+    ) : this(buffer, size, encrypted, LibArchive)
+
     override fun read(): Int {
         read(oneByteBuffer)
         return if (oneByteBuffer.hasRemaining()) oneByteBuffer.get().toUByte().toInt() else -1
     }
 
     override fun read(b: ByteArray, off: Int, len: Int): Int {
-        val buffer = ByteBuffer.wrap(b, off, len)
+        // slice() so that clear() in read() keeps the window at [off, off + len).
+        val buffer = ByteBuffer.wrap(b, off, len).slice()
         read(buffer)
         return if (buffer.hasRemaining()) buffer.remaining() else -1
     }
 
     private fun read(buffer: ByteBuffer) {
         buffer.clear()
-        Archive.readData(archive, buffer)
+        native.readData(archive, buffer)
         buffer.flip()
     }
 
@@ -66,16 +77,18 @@ public class ArchiveInputStream(
             isClosed = true
         }
 
-        Archive.readFree(archive)
+        native.readFree(archive)
     }
 
     /** Advances to the next entry, or null at the end. */
     public fun getNextEntry(): MihonArchiveEntry? =
-        Archive.readNextHeader(archive).takeUnless { it == 0L }?.let { entry ->
-            val name = ArchiveEntry.pathnameUtf8(entry) ?: ArchiveEntry.pathname(entry)?.decodeToString() ?: return null
-            val isFile = ArchiveEntry.filetype(entry) == ArchiveEntry.AE_IFREG
+        native.readNextHeader(archive).takeUnless { it == 0L }?.let { entry ->
+            val name = native.entryPathnameUtf8(entry)
+                ?: native.entryPathname(entry)?.decodeToString()
+                ?: return null
+            val isFile = native.entryFiletype(entry) == ArchiveEntry.AE_IFREG
             // SY -->
-            val isEncrypted = ArchiveEntry.isEncrypted(entry)
+            val isEncrypted = native.entryIsEncrypted(entry)
             // SY <--
             MihonArchiveEntry(
                 name,

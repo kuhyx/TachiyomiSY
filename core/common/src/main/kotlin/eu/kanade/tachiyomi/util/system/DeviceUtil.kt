@@ -44,17 +44,7 @@ public object DeviceUtil {
 
     /** Samsung One UI version, or null elsewhere. */
     public val oneUiVersion: Double? by lazy {
-        try {
-            val semPlatformIntField = Build.VERSION::class.java.getDeclaredField("SEM_PLATFORM_INT")
-            val version = semPlatformIntField.getInt(null) - ONE_UI_BASE
-            if (version < 0) {
-                1.0
-            } else {
-                ((version / ONE_UI_MAJOR).toString() + "." + version % ONE_UI_MAJOR / ONE_UI_MINOR).toDouble()
-            }
-        } catch (_: Exception) {
-            null
-        }
+        oneUiVersion { Build.VERSION::class.java.getDeclaredField("SEM_PLATFORM_INT").getInt(null) }
     }
 
     /**
@@ -79,6 +69,21 @@ public object DeviceUtil {
         // Xiaomi Redmi
         "com.android.intentresolver",
     )
+
+    /**
+     * One UI version derived from Samsung's `Build.VERSION.SEM_PLATFORM_INT`, read through
+     * [semPlatformInt]; null when the read fails (any non-Samsung firmware).
+     */
+    internal fun oneUiVersion(semPlatformInt: () -> Int): Double? = try {
+        val version = semPlatformInt() - ONE_UI_BASE
+        if (version < 0) {
+            1.0
+        } else {
+            ((version / ONE_UI_MAJOR).toString() + "." + version % ONE_UI_MAJOR / ONE_UI_MINOR).toDouble()
+        }
+    } catch (_: Exception) {
+        null
+    }
 
     /**
      * ActivityManager#isLowRamDevice is based on a system property, which isn't

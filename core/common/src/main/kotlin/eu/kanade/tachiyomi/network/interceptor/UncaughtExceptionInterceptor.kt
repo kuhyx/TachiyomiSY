@@ -18,7 +18,8 @@ public class UncaughtExceptionInterceptor : Interceptor {
         chain.proceed(chain.request())
     } catch (e: IOException) {
         throw e
-    } catch (e: Exception) {
-        throw IOException(e)
+    } catch (expected: Exception) {
+        // Any other failure is what this interceptor exists to wrap.
+        throw IOException(expected)
     }
 }

@@ -80,8 +80,9 @@ public fun <T> runAsObservable(
                 } catch (_: CancellationException) {
                     // Normal cancellation, not an error.
                     emitter.onCompleted()
-                } catch (e: Throwable) {
-                    emitter.onError(e)
+                } catch (expected: Throwable) {
+                    // Every other failure of the block is the observable's error.
+                    emitter.onError(expected)
                 }
             }
             emitter.setCancellation { job.cancel() }

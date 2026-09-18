@@ -2,21 +2,23 @@ package mihon.core.common.archive
 
 import android.content.Context
 import android.os.ParcelFileDescriptor
-import android.system.Os
-import android.system.OsConstants
 import com.hippo.unifile.UniFile
 import me.zhanghai.android.libarchive.ArchiveException
+import mihon.core.common.NativeBinding
 import tachiyomi.core.common.storage.openFileDescriptor
 import java.io.Closeable
 import java.io.InputStream
 
 /** An archive mapped into memory for repeated entry lookups. */
-public class ArchiveReader(pfd: ParcelFileDescriptor) : Closeable {
+public class ArchiveReader internal constructor(
+    pfd: ParcelFileDescriptor,
+    private val native: ArchiveNative,
+) : Closeable {
     /** Archive size in bytes. */
     public val size: Long = pfd.statSize
 
     /** Address of the memory mapping. */
-    public val address: Long = Os.mmap(0, size, OsConstants.PROT_READ, OsConstants.MAP_PRIVATE, pfd.fileDescriptor, 0)
+    public val address: Long = native.mmap(size, pfd.fileDescriptor)
 
     // SY -->
 
@@ -36,18 +38,16 @@ public class ArchiveReader(pfd: ParcelFileDescriptor) : Closeable {
     }
     // SY <--
 
+    @NativeBinding
+    public constructor(pfd: ParcelFileDescriptor) : this(pfd, LibArchive)
+
     /** Runs [block] over the entries and closes the stream afterwards. */
-    public inline fun <T> useEntries(block: (Sequence<ArchiveEntry>) -> T): T = ArchiveInputStream(
-        address,
-        size,
-        // SY -->
-        encrypted,
-        // SY <--
-    ).use { block(generateSequence { it.getNextEntry() }) }
+    public inline fun <T> useEntries(block: (Sequence<ArchiveEntry>) -> T): T =
+        openStream(encrypted).use { block(generateSequence { it.getNextEntry() }) }
 
     /** A stream over the entry named [entryName], or null when absent. */
     public fun getInputStream(entryName: String): InputStream? {
-        val archive = ArchiveInputStream(address, size, /* SY --> */ encrypted /* SY <-- */)
+        val archive = openStream(encrypted)
         try {
             while (true) {
                 val entry = archive.getNextEntry() ?: break
@@ -63,9 +63,14 @@ public class ArchiveReader(pfd: ParcelFileDescriptor) : Closeable {
         return null
     }
 
+    /** A fresh stream over the whole mapping, for [useEntries] to inline. */
+    @PublishedApi
+    internal fun openStream(encrypted: Boolean): ArchiveInputStream =
+        ArchiveInputStream(address, size, /* SY --> */ encrypted, /* SY <-- */ native)
+
     // SY -->
     private fun checkEncryptionStatus() {
-        val archive = ArchiveInputStream(address, size, false)
+        val archive = openStream(false)
         try {
             val encryptedEntry = generateSequence { archive.getNextEntry() }.firstOrNull { it.isEncrypted }
             if (encryptedEntry != null) {
@@ -96,10 +101,11 @@ public class ArchiveReader(pfd: ParcelFileDescriptor) : Closeable {
     // SY <--
 
     override fun close() {
-        Os.munmap(address, size)
+        native.munmap(address, size)
     }
 }
 
 /** An [ArchiveReader] over this file. */
+@NativeBinding
 public fun UniFile.archiveReader(context: Context): ArchiveReader =
     openFileDescriptor(context, "r").use { ArchiveReader(it) }

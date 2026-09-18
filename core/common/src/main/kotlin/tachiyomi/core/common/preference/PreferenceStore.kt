@@ -1,5 +1,7 @@
 package tachiyomi.core.common.preference
 
+import mihon.core.common.InlinedOnly
+
 /** Factory of typed [Preference]s over one key-value store. */
 public interface PreferenceStore {
 
@@ -82,20 +84,21 @@ public inline fun <reified T : Enum<T>> PreferenceStore.getEnum(
 }
 
 /** An enum-set preference stored by names. */
+@InlinedOnly
+@JvmName("getEnumSetReified")
 public inline fun <reified T : Enum<T>> PreferenceStore.getEnumSet(
     key: String,
     defaultValue: Set<T>,
-): Preference<Set<T>> {
-    return getObjectSetFromStringSet(
-        key = key,
-        defaultValue = defaultValue,
-        serializer = { it.name },
-        deserializer = {
-            try {
-                enumValueOf<T>(it)
-            } catch (_: IllegalArgumentException) {
-                null
-            }
-        },
-    )
-}
+): Preference<Set<T>> = getEnumSet(key, defaultValue, enumValues<T>())
+
+/** [getEnumSet] over [values]; a stored name that matches none of them is dropped. */
+public fun <T : Enum<T>> PreferenceStore.getEnumSet(
+    key: String,
+    defaultValue: Set<T>,
+    values: Array<T>,
+): Preference<Set<T>> = getObjectSetFromStringSet(
+    key = key,
+    defaultValue = defaultValue,
+    serializer = { it.name },
+    deserializer = { name -> values.firstOrNull { it.name == name } },
+)

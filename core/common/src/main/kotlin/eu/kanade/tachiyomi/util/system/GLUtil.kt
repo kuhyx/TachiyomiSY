@@ -1,11 +1,18 @@
 package eu.kanade.tachiyomi.util.system
 
+import mihon.core.common.NativeBinding
 import javax.microedition.khronos.egl.EGL10
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
 import kotlin.math.max
 
-/** OpenGL texture limits, which bound hardware bitmap sizes. */
+/**
+ * OpenGL texture limits, which bound hardware bitmap sizes.
+ *
+ * The object is a [NativeBinding]: both properties are EGL queries against the device's GPU.
+ * The stepping of the settings choices is [textureLimitOptions], which is pure.
+ */
+@NativeBinding
 public object GLUtil {
     /** The GPU's maximum texture size. */
     public val DEVICE_TEXTURE_LIMIT: Int by lazy {
@@ -48,15 +55,18 @@ public object GLUtil {
     public const val SAFE_TEXTURE_LIMIT: Int = 2048
 
     /** Choices offered in settings, from safe up to the device limit. */
-    public val CUSTOM_TEXTURE_LIMIT_OPTIONS: List<Int> by lazy {
-        val steps = DEVICE_TEXTURE_LIMIT / MULTIPLIER
-        buildList(steps) {
-            add(DEVICE_TEXTURE_LIMIT)
-            for (step in steps downTo 2) {
-                val value = step * MULTIPLIER
-                if (value >= DEVICE_TEXTURE_LIMIT) continue
-                add(value)
-            }
+    public val CUSTOM_TEXTURE_LIMIT_OPTIONS: List<Int> by lazy { textureLimitOptions(DEVICE_TEXTURE_LIMIT) }
+}
+
+/** [deviceLimit] first, then every multiple of 1024 below it down to [GLUtil.SAFE_TEXTURE_LIMIT]. */
+internal fun textureLimitOptions(deviceLimit: Int): List<Int> {
+    val steps = deviceLimit / MULTIPLIER
+    return buildList(steps) {
+        add(deviceLimit)
+        for (step in steps downTo 2) {
+            val value = step * MULTIPLIER
+            if (value >= deviceLimit) continue
+            add(value)
         }
     }
 }

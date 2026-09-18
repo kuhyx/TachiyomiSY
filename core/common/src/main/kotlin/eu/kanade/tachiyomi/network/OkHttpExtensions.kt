@@ -5,6 +5,7 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.okio.decodeFromBufferedSource
 import kotlinx.serialization.serializer
+import mihon.core.common.InlinedOnly
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType
@@ -42,9 +43,10 @@ public fun Call.asObservable(): Observable<Response> = Observable.unsafeCreate {
                     subscriber.onNext(response)
                     subscriber.onCompleted()
                 }
-            } catch (e: Exception) {
+            } catch (expected: Exception) {
+                // Anything the call throws is the subscriber's error, whatever its type.
                 if (!subscriber.isUnsubscribed) {
-                    subscriber.onError(e)
+                    subscriber.onError(expected)
                 }
             }
         }
@@ -146,11 +148,14 @@ public fun OkHttpClient.newCachelessCallWithProgress(
     return progressClient.newCall(request)
 }
 
-/** Decodes the JSON body as [T] with the contextual [Json]. */
-context(json: Json)
-public inline fun <reified T> Response.parseAs(): T = json.decodeFromResponse(serializer(), this)
+// The reified overloads carry distinct JVM names: Kover's annotation filter keys methods by
+// name, and the non-reified worker below must stay measured.
 
-/** Decodes the JSON body of [response] with [deserializer]. */
-@PublishedApi
-internal fun <T> Json.decodeFromResponse(deserializer: DeserializationStrategy<T>, response: Response): T =
-    response.body.source().use { decodeFromBufferedSource(deserializer, it) }
+/** Decodes the JSON body as [T] with [json]. */
+@InlinedOnly
+@JvmName("parseAsReified")
+public inline fun <reified T> Response.parseAs(json: Json): T = parseAs(json, serializer<T>())
+
+/** Decodes the JSON body with [deserializer] through [json]. */
+public fun <T> Response.parseAs(json: Json, deserializer: DeserializationStrategy<T>): T =
+    body.source().use { json.decodeFromBufferedSource(deserializer, it) }

@@ -100,8 +100,9 @@ public class CloudflareInterceptor(
         private val oldCookie: Cookie?,
         private val latch: CountDownLatch,
     ) : WebViewClientCompat() {
-        var challengeFound = false
+        private var challengeFound = false
         var cloudflareBypassed = false
+            private set
 
         override fun onPageFinished(view: WebView, url: String) {
             if (isCloudFlareBypassed()) {

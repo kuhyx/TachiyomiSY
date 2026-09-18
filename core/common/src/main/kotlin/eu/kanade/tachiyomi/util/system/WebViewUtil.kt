@@ -109,12 +109,9 @@ public fun WebView.setDefaultSettings() {
 }
 
 private fun WebView.getWebViewMajorVersion(): Int {
+    // The single capture group is present whenever the pattern matches at all.
     val uaRegexMatch = """.*Chrome/(\d+)\..*""".toRegex().matchEntire(getDefaultUserAgentString())
-    return if (uaRegexMatch != null && uaRegexMatch.groupValues.size > 1) {
-        uaRegexMatch.groupValues[1].toInt()
-    } else {
-        0
-    }
+    return uaRegexMatch?.groupValues?.get(1)?.toInt() ?: 0
 }
 
 // Based on https://stackoverflow.com/a/29218966

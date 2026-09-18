@@ -33,15 +33,13 @@ internal object TallImageSplitting {
             }
 
             return buildList {
-                val range = 0..<partCount
-                for (index in range) {
-                    // Only continue if the list is empty or there is image remaining
-                    if (isNotEmpty() && imageHeight <= last().bottomOffset) break
-
+                // partCount parts of imageHeight / partCount never overrun the image, so every
+                // index has image remaining.
+                repeat(partCount) { index ->
                     val topOffset = index * optimalSplitHeight
                     var splitHeight = min(optimalSplitHeight, imageHeight - topOffset)
 
-                    if (index == range.last) {
+                    if (index == partCount - 1) {
                         val remainingHeight = imageHeight - (topOffset + splitHeight)
                         splitHeight += remainingHeight
                     }
