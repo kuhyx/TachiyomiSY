@@ -16,14 +16,23 @@ public fun Project.getLatestCommitSha(): String = exec("git rev-parse --short HE
 
 private val BUILD_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
+// Top-anchored pathspecs: the build runs `git` from a module directory (and
+// tests from a temp dir under build/), so plain `:!scripts` would be relative.
+private val pathsThatDoNotChangeTheApk =
+    listOf("*.md", "scripts", ".github", "docs", ".editorconfig").map { ":(top,exclude)$it" }
+
 /**
- * @param useLatestCommitTime If `true`, the build time is based on the timestamp of the last Git commit;
- *                          otherwise, the current time is used. Both are in UTC.
+ * @param useLatestCommitTime If `true`, the build time is the timestamp of the last Git commit that
+ *                          touched a build input; otherwise, the current time is used. Both are in
+ *                          UTC. Commits under [pathsThatDoNotChangeTheApk] are skipped on purpose:
+ *                          `BUILD_TIME` is a `BuildConfig` field, so every commit that moves it
+ *                          re-runs `compileKotlin` and R8 for the app module (~6 min of a CI release
+ *                          build) even when only a script or a workflow changed.
  * @return A formatted string representing the build time. The format used is defined by [BUILD_TIME_FORMATTER].
  */
 public fun Project.getBuildTime(useLatestCommitTime: Boolean): String {
     return if (useLatestCommitTime) {
-        val epoch = exec("git log -1 --format=%ct").toLong()
+        val epoch = exec("git log -1 --format=%ct -- :/ ${pathsThatDoNotChangeTheApk.joinToString(" ")}").toLong()
         Instant.ofEpochSecond(epoch).atOffset(ZoneOffset.UTC).format(BUILD_TIME_FORMATTER)
     } else {
         LocalDateTime.now(ZoneOffset.UTC).format(BUILD_TIME_FORMATTER)

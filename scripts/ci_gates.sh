@@ -161,13 +161,19 @@ gradle_gate() {
                 -Dkotlin.daemon.jvm.options=-Xmx768m
         fi
     else
-        # A GitHub runner has 4 cores and 16 GiB; the project's -Xmx4g made
-        # Gradle warn "Performance may suffer from in-memory cache misses"
-        # 35 times per release build. Kotlin compiles in-process so there is
-        # one heap to size, not a daemon JVM next to it.
-        "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" \
-            -Dorg.gradle.jvmargs="-Xmx8g -Dfile.encoding=UTF-8" \
-            -Pkotlin.compiler.execution.strategy=in-process
+        # A GitHub runner has 4 cores and 16 GiB and runs one build: give
+        # the daemon (R8 runs inside it) half the machine.
+        # :app:lint is upstream's `abortOnError = false` lint: ~3 min of a
+        # 4-core run for a report nothing reads and that cannot fail. It
+        # leaves `check` until the app module joins the strict lint stack
+        # (build-logic Lint.kt) -- the grep below fails the gate the day
+        # that happens, so this exclusion cannot outlive its reason.
+        if ! grep -qE '^\s*abortOnError = false' "$REPO_ROOT/app/build.gradle.kts"; then
+            echo "app lint is now strict: drop '-x :app:lint' from $0" >&2
+            exit 1
+        fi
+        "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x :app:lint \
+            -Dorg.gradle.jvmargs="-Xmx8g -Dfile.encoding=UTF-8"
     fi
 }
 
