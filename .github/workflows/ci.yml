@@ -46,6 +46,15 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v5
 
+      # setup-gradle caches ~/.gradle only; Robolectric fetches android-all
+      # (~100 MB per SDK) into ~/.m2 on first use. Its contents never change
+      # for a given SDK, so the key is the SDK pinned in robolectric.properties.
+      - name: Cache the Robolectric android-all jars
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-android-all-${{ hashFiles('**/robolectric.properties') }}
+
       - name: Run every gate
         env:
           UTILS_ROOT: ${{ github.workspace }}/.utils

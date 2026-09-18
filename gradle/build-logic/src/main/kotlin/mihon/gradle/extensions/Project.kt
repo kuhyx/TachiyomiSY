@@ -21,10 +21,18 @@ internal fun Project.android(block: CommonExtension.() -> Unit) {
     extensions.configure(block)
 }
 
-/** JUnit Platform for every test task, logging each outcome. */
+/**
+ * JUnit Platform for every test task, logging each outcome.
+ *
+ * Only `*Test` classes are offered to the engines: the platform gets every class in the
+ * test output otherwise, and the vintage engine reflects over each one. A Robolectric
+ * shadow subclass (`ShadowView` names `ViewRootImpl$CalledFromWrongThreadException`,
+ * hidden from android.jar) fails that reflection outside the sandbox.
+ */
 public fun Project.configureTest() {
     tasks.withType(Test::class.java).configureEach {
         useJUnitPlatform()
+        include("**/*Test.class")
         testLogging {
             events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
         }

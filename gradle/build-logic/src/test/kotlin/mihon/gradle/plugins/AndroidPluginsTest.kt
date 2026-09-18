@@ -42,5 +42,6 @@ internal class AndroidPluginsTest {
         project.plugins.apply(PluginAndroidLibrary::class.java)
         val test = project.tasks.register("unitTest", Test::class.java).get()
         (test.options is JUnitPlatformOptions) shouldBe true
+        test.includes shouldBe setOf("**/*Test.class")
     }
 }
