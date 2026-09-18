@@ -1,6 +1,8 @@
 plugins {
     alias(mihonx.plugins.android.library)
     alias(mihonx.plugins.spotless)
+    alias(mihonx.plugins.lint)
+    alias(mihonx.plugins.coverage)
 
     alias(libs.plugins.kotlin.serialization)
 
@@ -9,6 +11,23 @@ plugins {
 
 android {
     namespace = "eu.kanade.tachiyomi.core.common"
+
+    // Robolectric (WebView, CookieManager, KeyStore, Bitmap*, ExifInterface,
+    // UniFile all need a real android.jar behaviour under test).
+    testOptions.unitTests.isIncludeAndroidResources = true
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                // Native-bound code cannot run on the JVM; see NativeBinding's KDoc.
+                annotatedBy("mihon.core.common.NativeBinding")
+                // Reified inline stubs only throw; see InlinedOnly's KDoc.
+                annotatedBy("mihon.core.common.InlinedOnly")
+            }
+        }
+    }
 }
 
 kotlin {
@@ -57,6 +76,15 @@ dependencies {
 
     testImplementation(libs.bundles.test)
     testRuntimeOnly(libs.junit.platform.launcher)
+    // Robolectric has no JUnit 5 runner: its tests are JUnit 4 classes run
+    // by the vintage engine next to the Jupiter ones.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.junit4)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlin.reflect)
+    testRuntimeOnly(libs.junit.vintage)
+    // Exercises network interceptors end to end; an application interceptor never reaches them.
+    testImplementation(libs.okhttp.mockwebserver)
 
     // SY -->
     implementation(sylibs.xlog)
