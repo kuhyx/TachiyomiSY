@@ -161,7 +161,13 @@ gradle_gate() {
                 -Dkotlin.daemon.jvm.options=-Xmx768m
         fi
     else
-        "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}"
+        # A GitHub runner has 4 cores and 16 GiB; the project's -Xmx4g made
+        # Gradle warn "Performance may suffer from in-memory cache misses"
+        # 35 times per release build. Kotlin compiles in-process so there is
+        # one heap to size, not a daemon JVM next to it.
+        "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" \
+            -Dorg.gradle.jvmargs="-Xmx8g -Dfile.encoding=UTF-8" \
+            -Pkotlin.compiler.execution.strategy=in-process
     fi
 }
 

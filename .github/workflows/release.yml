@@ -73,10 +73,14 @@ jobs:
           } > "$HOME/.android/release/key.properties"
           ls -l "$ks"
 
+      # Heap and in-process Kotlin: same reasoning as scripts/ci_gates.sh
+      # (4-core / 16 GiB runner; -Xmx4g thrashed Gradle's in-memory caches).
       - name: Build the signed drop-in APK
         run: |
           ./gradlew assembleFoss -PsyReplaceUpstream \
-            -PsyBuildNumber="${{ github.run_number }}"
+            -PsyBuildNumber="${{ github.run_number }}" \
+            -Dorg.gradle.jvmargs="-Xmx8g -Dfile.encoding=UTF-8" \
+            -Pkotlin.compiler.execution.strategy=in-process
 
       # Fail closed: if key.properties went missing the build type falls back
       # to no signing config and the APK would be unsigned or debug-signed,
