@@ -12,9 +12,9 @@
 #   scripts/ci_gates.sh --no-gradle    # only the shell gates (seconds, not minutes)
 #   scripts/ci_gates.sh --changed-only # gradle only if the push range touches
 #                                      # build inputs (the pre-push hook's mode:
-#                                      # under the local resource cap a full
-#                                      # check runs well over ten minutes, and a
-#                                      # docs-only push must not pay for it)
+#                                      # a full check is ~2 min under the local
+#                                      # cap, and a docs-only push must not pay
+#                                      # for it)
 #
 # Env:
 #   UTILS_ROOT     where github.com/kuhyx/utils is checked out
@@ -49,8 +49,14 @@ resolve_utils_root() {
     export UTILS_ROOT
 }
 
+# Each banner also reports how long the previous step took, so a slow push
+# says which gate to look at (the JitPack preflight was 17 s of a 114 s run
+# before it was parallelised, and nobody could tell without this).
+STEP_STARTED=$SECONDS
 banner() {
-    echo "== $1"
+    local now=$SECONDS
+    echo "== $1  (previous step $((now - STEP_STARTED))s)"
+    STEP_STARTED=$now
 }
 
 shell_gates() {
@@ -120,19 +126,40 @@ gradle_gate() {
     # Locally the build runs under the shared resource cap; on a runner there
     # is nothing else to protect and the cap script does not exist.
     if [[ -z "${CI:-}" && -x "$capped" ]]; then
-        # Measured 2026-09-12: with the project's default -Xmx4g and parallel
-        # workers a full check exceeds the 4 GiB cap and is SIGTERMed; with
-        # these limits it peaks at 1.9 GiB. Slower, but it finishes.
+        # The cap is whatever ceiling capped.sh currently allows, read from
+        # the script so a raised ceiling speeds the gate up without a second
+        # edit here and a lowered one cannot make it refuse to run.
         # 2026-09-13: :app:lintAnalyzeDebug alone needs more than the cap
         # leaves next to the daemon and the Kotlin daemon (SIGTERM 143 at
         # 1.5, 2 and 2.5 GiB, in-process or as a worker), so Android Lint is
         # CI's job: the local gate is compile, tests, detekt, ktlint, Kover.
-        CAP_MEM=4G CAP_CPU_PCT=20 "$capped" \
-            "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint \
-            --max-workers=2 \
-            -Dorg.gradle.parallel=false \
-            -Dorg.gradle.jvmargs="-Xmx2048m -Dfile.encoding=UTF-8" \
-            -Dkotlin.daemon.jvm.options=-Xmx768m
+        local mem_g cpu_pct workers
+        mem_g="$(sed -n 's/^readonly HARD_MEM_G=\([0-9]*\)$/\1/p' "$capped")"
+        cpu_pct="$(sed -n 's/^readonly HARD_CPU_PCT=\([0-9]*\)$/\1/p' "$capped")"
+        : "${mem_g:=4}" "${cpu_pct:=20}"
+        workers=$(( $(nproc) * cpu_pct / 100 ))
+        (( workers < 2 )) && workers=2
+        if (( mem_g >= 8 )); then
+            # 8 GiB and up: parallel project execution, one worker per capped
+            # core, half the cap for the daemon heap (measured 2026-09-18).
+            CAP_MEM="${mem_g}G" CAP_CPU_PCT="$cpu_pct" "$capped" \
+                "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint \
+                --max-workers="$workers" \
+                -Dorg.gradle.parallel=true \
+                -Dorg.gradle.jvmargs="-Xmx$((mem_g / 2))g -Dfile.encoding=UTF-8" \
+                -Dkotlin.daemon.jvm.options=-Xmx1024m
+        else
+            # Measured 2026-09-12: with the project's default -Xmx4g and
+            # parallel workers a full check exceeds a 4 GiB cap and is
+            # SIGTERMed; with these limits it peaks at 1.9 GiB. Slower, but
+            # it finishes.
+            CAP_MEM="${mem_g}G" CAP_CPU_PCT="$cpu_pct" "$capped" \
+                "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint \
+                --max-workers=2 \
+                -Dorg.gradle.parallel=false \
+                -Dorg.gradle.jvmargs="-Xmx2048m -Dfile.encoding=UTF-8" \
+                -Dkotlin.daemon.jvm.options=-Xmx768m
+        fi
     else
         "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}"
     fi

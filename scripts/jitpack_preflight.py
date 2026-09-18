@@ -13,9 +13,11 @@ Exit 0 when every POM answers 200, 1 otherwise.
 
 from __future__ import annotations
 
+import socket
 import sys
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import tomllib
@@ -72,6 +74,23 @@ def pom_url(repo: str, group: str, artifact: str, version: str) -> str:
     return f"{repo}/{group.replace('.', '/')}/{artifact}/{version}/{artifact}-{version}.pom"
 
 
+_addresses: dict[tuple, list] = {}
+_system_getaddrinfo = socket.getaddrinfo
+
+
+def cached_getaddrinfo(host, port, *hints):
+    """Resolve each registry host once: ~30 HEADs against 3 hosts used to
+    cost a resolver round-trip each, and the LAN router drops some of them
+    (5 s per drop -- the preflight took 17 s for 11 artifacts)."""
+    key = (host, port, *hints)
+    if key not in _addresses:
+        _addresses[key] = _system_getaddrinfo(host, port, *hints)
+    return _addresses[key]
+
+
+socket.getaddrinfo = cached_getaddrinfo
+
+
 def pom_status(url: str) -> int:
     request = urllib.request.Request(
         url, method="HEAD", headers={"User-Agent": "tachiyomisy-ci-preflight"}
@@ -85,25 +104,33 @@ def pom_status(url: str) -> int:
         return 0
 
 
+def verdict(coordinate: tuple[str, str, str]) -> tuple[str, bool]:
+    """One report line for the artifact, and whether it is a failure."""
+    group, artifact, version = coordinate
+    if vendored(group, artifact, version):
+        return f"  ok  vendored    {group}:{artifact}:{version}", False
+    # A `com.github.*` group is not always JitPack: ben-manes' versions
+    # plugin publishes to the plugin portal under that name.
+    if any(pom_status(pom_url(r, group, artifact, version)) == 200 for r in OTHER_REPOS):
+        return f"  ok  elsewhere   {group}:{artifact}:{version}", False
+    status = pom_status(pom_url(JITPACK, group, artifact, version))
+    mark = "ok " if status == 200 else "BAD"
+    return f"  {mark} jitpack {status:3d} {group}:{artifact}:{version}", status != 200
+
+
 def main(argv: list[str]) -> int:
     catalogs = [Path(a) for a in argv] or [
         Path(c) for c in DEFAULT_CATALOGS if Path(c).is_file()
     ]
+    coordinates = [c for catalog in catalogs for c in jitpack_coordinates(catalog)]
+    # The artifacts are independent; ask about all of them at once and
+    # print in catalog order so the report is stable.
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(verdict, coordinates))
     failures = 0
-    for catalog in catalogs:
-        for group, artifact, version in jitpack_coordinates(catalog):
-            if vendored(group, artifact, version):
-                print(f"  ok  vendored    {group}:{artifact}:{version}")
-                continue
-            # A `com.github.*` group is not always JitPack: ben-manes'
-            # versions plugin publishes to the plugin portal under that name.
-            if any(pom_status(pom_url(r, group, artifact, version)) == 200 for r in OTHER_REPOS):
-                print(f"  ok  elsewhere   {group}:{artifact}:{version}")
-                continue
-            status = pom_status(pom_url(JITPACK, group, artifact, version))
-            mark = "ok " if status == 200 else "BAD"
-            print(f"  {mark} jitpack {status:3d} {group}:{artifact}:{version}")
-            failures += status != 200
+    for line, failed in results:
+        print(line)
+        failures += failed
     if failures:
         print(
             f"JitPack preflight: {failures} artifact(s) not served; Gradle would report them as not found."
