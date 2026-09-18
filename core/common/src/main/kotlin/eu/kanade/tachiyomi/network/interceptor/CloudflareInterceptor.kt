@@ -45,13 +45,9 @@ public class CloudflareInterceptor(
             resolveWithWebView(request, oldCookie)
 
             return chain.proceed(request)
-        }
-        // Because OkHttp's enqueue only handles IOExceptions, wrap the exception so that
-        // we don't crash the entire app
-        catch (e: CloudflareBypassException) {
+        } catch (e: CloudflareBypassException) {
+            // Anything else reaches UncaughtExceptionInterceptor, which turns it into an IOException.
             throw IOException(context.stringResource(MR.strings.information_cloudflare_bypass_failure), e)
-        } catch (e: Exception) {
-            throw IOException(e)
         }
     }
 
@@ -60,62 +56,23 @@ public class CloudflareInterceptor(
         // We need to lock this thread until the WebView finds the challenge solution url, because
         // OkHttp doesn't support asynchronous interceptors.
         val latch = CountDownLatch(1)
-
         var webview: WebView? = null
-
-        var challengeFound = false
-        var cloudflareBypassed = false
-        var isWebViewOutdated = false
-
         val origRequestUrl = originalRequest.url.toString()
+        val watcher = ChallengeWatcher(origRequestUrl, oldCookie, latch)
         val headers = parseHeaders(originalRequest.headers)
 
         executor.execute {
-            webview = createWebView(originalRequest)
-
-            webview.webViewClient = object : WebViewClientCompat() {
-                override fun onPageFinished(view: WebView, url: String) {
-                    fun isCloudFlareBypassed(): Boolean = cookieManager.get(origRequestUrl.toHttpUrl())
-                        .firstOrNull { it.name == CLEARANCE_COOKIE }
-                        .let { it != null && it != oldCookie }
-
-                    if (isCloudFlareBypassed()) {
-                        cloudflareBypassed = true
-                        latch.countDown()
-                    }
-
-                    if (url == origRequestUrl && !challengeFound) {
-                        // The first request didn't return the challenge, abort.
-                        latch.countDown()
-                    }
-                }
-
-                override fun onReceivedErrorCompat(
-                    view: WebView,
-                    errorCode: Int,
-                    description: String?,
-                    failingUrl: String,
-                    isMainFrame: Boolean,
-                ) {
-                    if (isMainFrame) {
-                        if (errorCode in ERROR_CODES) {
-                            // Found the Cloudflare challenge page.
-                            challengeFound = true
-                        } else {
-                            // Unlock thread, the challenge wasn't found.
-                            latch.countDown()
-                        }
-                    }
-                }
-            }
-
-            webview.loadUrl(origRequestUrl, headers)
+            val created = createWebView(originalRequest)
+            created.webViewClient = watcher
+            webview = created
+            created.loadUrl(origRequestUrl, headers)
         }
 
         latch.awaitFor30Seconds()
 
+        var isWebViewOutdated = false
         executor.execute {
-            if (!cloudflareBypassed) {
+            if (!watcher.cloudflareBypassed) {
                 isWebViewOutdated = webview?.isOutdated() == true
             }
 
@@ -126,13 +83,58 @@ public class CloudflareInterceptor(
         }
 
         // Throw exception if we failed to bypass Cloudflare
-        if (!cloudflareBypassed) {
+        if (!watcher.cloudflareBypassed) {
             // Prompt user to update WebView if it seems too outdated
             if (isWebViewOutdated) {
                 context.toast(MR.strings.information_webview_outdated, Toast.LENGTH_LONG)
             }
 
             throw CloudflareBypassException()
+        }
+    }
+
+    // Watches the challenge page and releases the latch once the clearance cookie appears, or as
+    // soon as it is clear that no challenge was served.
+    private inner class ChallengeWatcher(
+        private val origRequestUrl: String,
+        private val oldCookie: Cookie?,
+        private val latch: CountDownLatch,
+    ) : WebViewClientCompat() {
+        var challengeFound = false
+        var cloudflareBypassed = false
+
+        override fun onPageFinished(view: WebView, url: String) {
+            if (isCloudFlareBypassed()) {
+                cloudflareBypassed = true
+                latch.countDown()
+            }
+
+            if (url == origRequestUrl && !challengeFound) {
+                // The first request didn't return the challenge, abort.
+                latch.countDown()
+            }
+        }
+
+        private fun isCloudFlareBypassed(): Boolean = cookieManager.get(origRequestUrl.toHttpUrl())
+            .firstOrNull { it.name == CLEARANCE_COOKIE }
+            .let { it != null && it != oldCookie }
+
+        override fun onReceivedErrorCompat(
+            view: WebView,
+            errorCode: Int,
+            description: String?,
+            failingUrl: String,
+            isMainFrame: Boolean,
+        ) {
+            if (isMainFrame) {
+                if (errorCode in ERROR_CODES) {
+                    // Found the Cloudflare challenge page.
+                    challengeFound = true
+                } else {
+                    // Unlock thread, the challenge wasn't found.
+                    latch.countDown()
+                }
+            }
         }
     }
 }

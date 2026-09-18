@@ -147,16 +147,10 @@ public fun OkHttpClient.newCachelessCallWithProgress(
 }
 
 /** Decodes the JSON body as [T] with the contextual [Json]. */
-context(_: Json)
-public inline fun <reified T> Response.parseAs(): T = decodeFromJsonResponse(serializer(), this)
-
-/** Decodes the JSON body of [response] with [deserializer] using the contextual [Json]. */
 context(json: Json)
-public fun <T> decodeFromJsonResponse(
-    deserializer: DeserializationStrategy<T>,
-    response: Response,
-): T {
-    return response.body.source().use {
-        json.decodeFromBufferedSource(deserializer, it)
-    }
-}
+public inline fun <reified T> Response.parseAs(): T = json.decodeFromResponse(serializer(), this)
+
+/** Decodes the JSON body of [response] with [deserializer]. */
+@PublishedApi
+internal fun <T> Json.decodeFromResponse(deserializer: DeserializationStrategy<T>, response: Response): T =
+    response.body.source().use { decodeFromBufferedSource(deserializer, it) }

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 internal class TallImageSplitCalculatorTest {
 
     @Test
-    fun `does not split when aspect ratio is tall but computed split count is one`() {
+    fun noSplitWhenCountIsOne() {
         assertFalse(
             TallImageSplitCalculator.shouldSplit(
                 imageWidth = 1024,
@@ -19,7 +19,7 @@ internal class TallImageSplitCalculatorTest {
     }
 
     @Test
-    fun `splits when aspect ratio is tall and computed split count is greater than one`() {
+    fun splitsWhenCountAboveOne() {
         assertTrue(
             TallImageSplitCalculator.shouldSplit(
                 imageWidth = 1024,
@@ -30,7 +30,7 @@ internal class TallImageSplitCalculatorTest {
     }
 
     @Test
-    fun `calculate part count rounds boundary correctly`() {
+    fun partCountRoundsBoundary() {
         assertEquals(1, TallImageSplitCalculator.calculatePartCount(imageHeight = 4384, optimalImageHeight = 4384))
         assertEquals(2, TallImageSplitCalculator.calculatePartCount(imageHeight = 4385, optimalImageHeight = 4384))
     }

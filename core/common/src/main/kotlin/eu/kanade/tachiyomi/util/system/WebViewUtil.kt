@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.AndroidRuntimeException
 import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -54,7 +55,7 @@ public object WebViewUtil {
             // May throw android.webkit.WebViewFactory$MissingWebViewPackageException if WebView
             // is not installed
             CookieManager.getInstance()
-        } catch (e: Throwable) {
+        } catch (e: AndroidRuntimeException) {
             logcat(LogPriority.ERROR, e)
             return false
         }

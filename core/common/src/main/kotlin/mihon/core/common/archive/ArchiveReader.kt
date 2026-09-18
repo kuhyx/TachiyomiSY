@@ -67,13 +67,10 @@ public class ArchiveReader(pfd: ParcelFileDescriptor) : Closeable {
     private fun checkEncryptionStatus() {
         val archive = ArchiveInputStream(address, size, false)
         try {
-            while (true) {
-                val entry = archive.getNextEntry() ?: break
-                if (entry.isEncrypted) {
-                    encrypted = true
-                    isPasswordIncorrect(entry.name)
-                    break
-                }
+            val encryptedEntry = generateSequence { archive.getNextEntry() }.firstOrNull { it.isEncrypted }
+            if (encryptedEntry != null) {
+                encrypted = true
+                isPasswordIncorrect(encryptedEntry.name)
             }
         } catch (e: ArchiveException) {
             archive.close()

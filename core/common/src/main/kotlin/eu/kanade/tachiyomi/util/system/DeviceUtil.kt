@@ -116,7 +116,7 @@ public object DeviceUtil {
         Class.forName("android.os.SystemProperties")
             .getDeclaredMethod("get", String::class.java)
             .invoke(null, key) as String
-    } catch (e: Exception) {
+    } catch (e: ReflectiveOperationException) {
         logcat(LogPriority.WARN, e) { "Unable to use SystemProperties.get()" }
         null
     }

@@ -5,7 +5,7 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
-import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
+import eu.kanade.tachiyomi.util.lang.compareNaturalIgnoreCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +41,7 @@ internal class ArchivePageLoader(private val reader: ArchiveReader) : PageLoader
             reader.useEntries { entries ->
                 entries
                     .filter { it.isFile && ImageUtil.isImage(it.name) { reader.getInputStream(it.name)!! } }
-                    .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
+                    .sortedWith { f1, f2 -> f1.name.compareNaturalIgnoreCase(f2.name) }
                     .forEach { entry ->
                         File(tmpDir, entry.name.substringAfterLast("/"))
                             .also { it.createNewFile() }
@@ -67,7 +67,7 @@ internal class ArchivePageLoader(private val reader: ArchiveReader) : PageLoader
         // SY <--
         entries
             .filter { it.isFile && ImageUtil.isImage(it.name) { reader.getInputStream(it.name)!! } }
-            .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
+            .sortedWith { f1, f2 -> f1.name.compareNaturalIgnoreCase(f2.name) }
             .mapIndexed { i, entry ->
                 // SY -->
                 val imageBytesDeferred: Deferred<ByteArray>? =

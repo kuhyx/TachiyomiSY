@@ -10,6 +10,7 @@ import logcat.LogPriority
 import okio.Buffer
 import okio.BufferedSource
 import tachiyomi.core.common.util.system.ImageUtil.SplitData
+import java.io.IOException
 import java.io.InputStream
 import java.util.Locale
 import kotlin.math.min
@@ -80,48 +81,80 @@ internal object TallImageSplitting {
         }
 
         val bitmapRegionDecoder = getBitmapRegionDecoder(imageSource.peek().inputStream())
-        if (bitmapRegionDecoder == null) {
+        return if (bitmapRegionDecoder == null) {
             logcat { "Failed to create new instance of BitmapRegionDecoder" }
-            return false
-        }
-
-        val options = extractImageOptions(imageSource).apply {
-            inJustDecodeBounds = false
-        }
-        val splitDataList = options.splitData
-
-        return try {
-            splitDataList.forEach { splitData ->
-                val splitImageName = splitImageName(filenamePrefix, splitData.index)
-                // Remove pre-existing split if exists (this split shouldn't exist under normal circumstances)
-                tmpDir.findFile(splitImageName)?.delete()
-
-                val splitFile = tmpDir.createFile(splitImageName)!!
-
-                val region = Rect(0, splitData.topOffset, splitData.splitWidth, splitData.bottomOffset)
-
-                splitFile.openOutputStream().use { outputStream ->
-                    val splitBitmap = bitmapRegionDecoder.decodeRegion(region, options)
-                    splitBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, outputStream)
-                    splitBitmap.recycle()
-                }
-                logcat {
-                    "Success: Split #${splitData.index + 1} with topOffset=${splitData.topOffset} " +
-                        "height=${splitData.splitHeight} bottomOffset=${splitData.bottomOffset}"
-                }
+            false
+        } else {
+            val options = extractImageOptions(imageSource).apply {
+                inJustDecodeBounds = false
             }
+            writeSplits(tmpDir, imageFile, filenamePrefix, bitmapRegionDecoder, options)
+        }
+    }
+
+    // Writes every split next to the original and deletes the original; on any failure the
+    // partial splits are removed and the original is kept.
+    private fun writeSplits(
+        tmpDir: UniFile,
+        imageFile: UniFile,
+        filenamePrefix: String,
+        decoder: BitmapRegionDecoder,
+        options: BitmapFactory.Options,
+    ): Boolean {
+        val splitDataList = options.splitData
+        return try {
+            splitDataList.forEach { splitData -> writeSplit(tmpDir, filenamePrefix, decoder, options, splitData) }
             imageFile.delete()
             true
-        } catch (e: Exception) {
-            // Image splits were not successfully saved so delete them and keep the original image
-            splitDataList
-                .map { splitImageName(filenamePrefix, it.index) }
-                .forEach { tmpDir.findFile(it)?.delete() }
-            logcat(LogPriority.ERROR, e)
-            false
+        } catch (e: IOException) {
+            discardSplits(tmpDir, filenamePrefix, splitDataList, e)
+        } catch (e: IllegalArgumentException) {
+            discardSplits(tmpDir, filenamePrefix, splitDataList, e)
+        } catch (e: IllegalStateException) {
+            discardSplits(tmpDir, filenamePrefix, splitDataList, e)
         } finally {
-            bitmapRegionDecoder.recycle()
+            decoder.recycle()
         }
+    }
+
+    private fun writeSplit(
+        tmpDir: UniFile,
+        filenamePrefix: String,
+        decoder: BitmapRegionDecoder,
+        options: BitmapFactory.Options,
+        splitData: ImageUtil.SplitData,
+    ) {
+        val splitImageName = splitImageName(filenamePrefix, splitData.index)
+        // Remove pre-existing split if exists (this split shouldn't exist under normal circumstances)
+        tmpDir.findFile(splitImageName)?.delete()
+
+        val splitFile = tmpDir.createFile(splitImageName) ?: throw IOException("Cannot create $splitImageName")
+
+        val region = Rect(0, splitData.topOffset, splitData.splitWidth, splitData.bottomOffset)
+
+        splitFile.openOutputStream().use { outputStream ->
+            val splitBitmap = decoder.decodeRegion(region, options) ?: throw IOException("Cannot decode $region")
+            splitBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, outputStream)
+            splitBitmap.recycle()
+        }
+        logcat {
+            "Success: Split #${splitData.index + 1} with topOffset=${splitData.topOffset} " +
+                "height=${splitData.splitHeight} bottomOffset=${splitData.bottomOffset}"
+        }
+    }
+
+    private fun discardSplits(
+        tmpDir: UniFile,
+        filenamePrefix: String,
+        splitDataList: List<ImageUtil.SplitData>,
+        e: Exception,
+    ): Boolean {
+        // Image splits were not successfully saved so delete them and keep the original image
+        splitDataList
+            .map { splitImageName(filenamePrefix, it.index) }
+            .forEach { tmpDir.findFile(it)?.delete() }
+        logcat(LogPriority.ERROR, e)
+        return false
     }
 
     fun splitImageName(filenamePrefix: String, index: Int) = "${filenamePrefix}__${"%03d".format(

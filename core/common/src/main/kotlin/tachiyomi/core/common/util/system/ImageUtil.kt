@@ -3,10 +3,7 @@ package tachiyomi.core.common.util.system
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.drawable.Drawable
-import androidx.annotation.ColorInt
-import com.hippo.unifile.UniFile
 import okio.BufferedSource
 import java.io.File
 import java.io.InputStream
@@ -16,8 +13,7 @@ import kotlin.math.max
  * Image helpers used by the reader, the downloader and the library. Every member keeps its
  * historical name; the work lives in the internal objects of this package, one concern each.
  */
-public object ImageUtil {
-
+public object ImageUtil : ImageUtilSplitting() {
     /** Largest dimension allowed for a hardware bitmap; the reader lowers it on GL errors. */
     public var hardwareBitmapThreshold: Int
         get() = HardwareBitmaps.hardwareBitmapThreshold
@@ -47,34 +43,7 @@ public object ImageUtil {
     public fun isAnimatedAndSupported(source: BufferedSource): Boolean =
         ImageTypeDetection.isAnimatedAndSupported(source)
 
-    /** True if the width is greater than the height, which we consider a double-page spread. */
-    public fun isWideImage(imageSource: BufferedSource): Boolean = ImageSplitting.isWideImage(imageSource)
-
-    /** Extract the [side] half of [imageSource], with [sidePadding] extra pixels past the middle. */
-    public fun splitInHalf(imageSource: BufferedSource, side: Side, sidePadding: Int): BufferedSource =
-        ImageSplitting.splitInHalf(imageSource, side, sidePadding)
-
-    /** [imageSource] rotated by [degrees]. */
-    public fun rotateImage(imageSource: BufferedSource, degrees: Float): BufferedSource =
-        ImageSplitting.rotateImage(imageSource, degrees)
-
-    /** Split the image into left and right parts, then merge them into a new vertically-aligned image. */
-    public fun splitAndMerge(imageSource: BufferedSource, upperSide: Side): BufferedSource =
-        ImageSplitting.splitAndMerge(imageSource, upperSide)
-
     // SY -->
-
-    /** The spread with a centre margin, scaled to [viewHeight], filled with the page background. */
-    public fun addHorizontalCenterMargin(
-        imageSource: BufferedSource,
-        viewHeight: Int,
-        backgroundContext: Context,
-    ): BufferedSource = ImageSplitting.addHorizontalCenterMargin(imageSource, viewHeight, backgroundContext)
-    // SY <--
-
-    /** Splits tall images to improve performance of reader; true when nothing was left to do or all parts landed. */
-    public fun splitTallImage(tmpDir: UniFile, imageFile: UniFile, filenamePrefix: String): Boolean =
-        TallImageSplitting.splitTallImage(tmpDir, imageFile, filenamePrefix)
 
     /** True when [bitmap] fits the hardware texture limit on a device that supports hardware bitmaps. */
     public fun canUseHardwareBitmap(bitmap: Bitmap): Boolean = HardwareBitmaps.canUseHardwareBitmap(bitmap)
@@ -93,18 +62,6 @@ public object ImageUtil {
     public fun addPaddingToImageExif(imageFile: File) {
         ImageExifPadding.addPaddingToImageExif(imageFile)
     }
-
-    /** Two pages side by side, [isLTR] deciding which goes left, with [centerMargin] of [background] between. */
-    public fun mergeBitmaps(
-        imageBitmap: Bitmap,
-        imageBitmap2: Bitmap,
-        isLTR: Boolean,
-        centerMargin: Int,
-        @ColorInt background: Int = Color.WHITE,
-        progressCallback: ((Int) -> Unit)? = null,
-    ): BufferedSource =
-        BitmapMerging.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, centerMargin, background, progressCallback)
-    // SY <--
 
     /**
      * A supported image format.

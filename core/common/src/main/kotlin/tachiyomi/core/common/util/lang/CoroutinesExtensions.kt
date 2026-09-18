@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -20,7 +19,7 @@ import kotlinx.coroutines.withContext
  */
 @DelicateCoroutinesApi
 public fun launchUI(block: suspend CoroutineScope.() -> Unit): Job =
-    GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, block)
+    AppScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, block)
 
 /**
  * Think twice before using this. This is a delicate API. It is easy to accidentally create resource or
@@ -32,7 +31,7 @@ public fun launchUI(block: suspend CoroutineScope.() -> Unit): Job =
  */
 @DelicateCoroutinesApi
 public fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
-    GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT, block)
+    AppScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT, block)
 
 /**
  * Think twice before using this. This is a delicate API. It is easy to accidentally create resource or
@@ -44,7 +43,7 @@ public fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
  */
 @DelicateCoroutinesApi
 public fun launchNow(block: suspend CoroutineScope.() -> Unit): Job =
-    GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED, block)
+    AppScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED, block)
 
 /** Launches [block] on the main dispatcher. */
 public fun CoroutineScope.launchUI(block: suspend CoroutineScope.() -> Unit): Job =

@@ -34,7 +34,7 @@ public fun String.truncateCenter(count: Int, replacement: String = "..."): Strin
 /**
  * Case-insensitive natural comparator for strings.
  */
-public fun String.compareToCaseInsensitiveNaturalOrder(other: String): Int {
+public fun String.compareNaturalIgnoreCase(other: String): Int {
     val comparator = CaseInsensitiveSimpleNaturalComparator.getInstance<String>()
     return comparator.compare(this, other)
 }

@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.network.interceptor
 
 import android.os.SystemClock
+import okhttp3.Call
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -75,44 +76,7 @@ internal class RateLimitInterceptor(
             else -> return chain.proceed(request)
         }
 
-        try {
-            fairLock.acquire()
-        } catch (e: InterruptedException) {
-            throw IOException(e)
-        }
-
-        val requestQueue = this.requestQueue
-        val timestamp: Long
-
-        try {
-            synchronized(requestQueue) {
-                while (requestQueue.size >= permits) { // queue is full, remove expired entries
-                    val periodStart = SystemClock.elapsedRealtime() - rateLimitMillis
-                    var hasRemovedExpired = false
-                    while (!requestQueue.isEmpty() && requestQueue.first <= periodStart) {
-                        requestQueue.removeFirst()
-                        hasRemovedExpired = true
-                    }
-                    if (call.isCanceled()) {
-                        throw IOException("Canceled")
-                    } else if (hasRemovedExpired) {
-                        break
-                    } else {
-                        try { // wait for the first entry to expire, or notified by cached response
-                            (requestQueue as Object).wait(requestQueue.first - periodStart)
-                        } catch (_: InterruptedException) {
-                            continue
-                        }
-                    }
-                }
-
-                // add request to queue
-                timestamp = SystemClock.elapsedRealtime()
-                requestQueue.addLast(timestamp)
-            }
-        } finally {
-            fairLock.release()
-        }
+        val timestamp = acquireSlot(call)
 
         val response = chain.proceed(request)
         if (response.networkResponse == null) { // response is cached, remove it from queue
@@ -125,5 +89,51 @@ internal class RateLimitInterceptor(
         }
 
         return response
+    }
+
+    private fun acquireSlot(call: Call): Long {
+        try {
+            fairLock.acquire()
+        } catch (e: InterruptedException) {
+            throw IOException(e)
+        }
+        try {
+            synchronized(requestQueue) {
+                waitForFreeSlot(call)
+                val timestamp = SystemClock.elapsedRealtime()
+                requestQueue.addLast(timestamp)
+                return timestamp
+            }
+        } finally {
+            fairLock.release()
+        }
+    }
+
+    // Blocks while the queue is full; returns as soon as an expired entry has been dropped.
+    private fun waitForFreeSlot(call: Call) {
+        while (requestQueue.size >= permits) {
+            val periodStart = SystemClock.elapsedRealtime() - rateLimitMillis
+            val removedExpired = dropExpiredEntries(periodStart)
+            if (call.isCanceled()) throw IOException("Canceled")
+            if (removedExpired) break
+            waitForFirstEntry(periodStart)
+        }
+    }
+
+    private fun dropExpiredEntries(periodStart: Long): Boolean {
+        var removed = false
+        while (!requestQueue.isEmpty() && requestQueue.first <= periodStart) {
+            requestQueue.removeFirst()
+            removed = true
+        }
+        return removed
+    }
+
+    private fun waitForFirstEntry(periodStart: Long) {
+        try { // wait for the first entry to expire, or notified by cached response
+            (requestQueue as Object).wait(requestQueue.first - periodStart)
+        } catch (_: InterruptedException) {
+            // Woken early: the caller re-checks the queue.
+        }
     }
 }

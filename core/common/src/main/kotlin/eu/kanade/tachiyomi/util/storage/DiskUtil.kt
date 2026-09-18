@@ -188,13 +188,14 @@ public object DiskUtil {
     }
 
     // Returns true if the given character is a valid filename character, false otherwise.
-    private fun isValidFatFilenameChar(c: Char): Boolean {
-        if (0x00.toChar() <= c && c <= 0x1f.toChar()) {
-            return false
-        }
-        return when (c) {
-            '"', '*', '/', ':', '<', '>', '?', '\\', '|', 0x7f.toChar() -> false
-            else -> true
-        }
+}
+
+private fun isValidFatFilenameChar(c: Char): Boolean {
+    if (0x00.toChar() <= c && c <= 0x1f.toChar()) {
+        return false
+    }
+    return when (c) {
+        '"', '*', '/', ':', '<', '>', '?', '\\', '|', 0x7f.toChar() -> false
+        else -> true
     }
 }

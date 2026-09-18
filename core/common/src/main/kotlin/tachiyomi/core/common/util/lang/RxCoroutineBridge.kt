@@ -6,7 +6,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -74,7 +73,7 @@ public fun <T> runAsObservable(
 ): Observable<T> {
     return Observable.create(
         { emitter ->
-            val job = GlobalScope.launch(Dispatchers.Unconfined, start = CoroutineStart.ATOMIC) {
+            val job = AppScope.launch(Dispatchers.Unconfined, start = CoroutineStart.ATOMIC) {
                 try {
                     emitter.onNext(block())
                     emitter.onCompleted()

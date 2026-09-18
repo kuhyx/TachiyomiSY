@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
-import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
+import eu.kanade.tachiyomi.util.lang.compareNaturalIgnoreCase
 import eu.kanade.tachiyomi.util.storage.EpubFile
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -393,7 +393,7 @@ actual class LocalSource(
                 }
             }
             .sortedWith { c1, c2 ->
-                c2.name.compareToCaseInsensitiveNaturalOrder(c1.name)
+                c2.name.compareNaturalIgnoreCase(c1.name)
             }
 
         // Copy the cover from the first chapter found if not available
@@ -433,7 +433,7 @@ actual class LocalSource(
                 is Format.Directory -> {
                     val entry = format.file.listFiles()
                         ?.sortedWith { f1, f2 ->
-                            f1.name.orEmpty().compareToCaseInsensitiveNaturalOrder(
+                            f1.name.orEmpty().compareNaturalIgnoreCase(
                                 f2.name.orEmpty(),
                             )
                         }
@@ -447,7 +447,7 @@ actual class LocalSource(
                     format.file.archiveReader(context).use { reader ->
                         val entry = reader.useEntries { entries ->
                             entries
-                                .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
+                                .sortedWith { f1, f2 -> f1.name.compareNaturalIgnoreCase(f2.name) }
                                 .find { it.isFile && ImageUtil.isImage(it.name) { reader.getInputStream(it.name)!! } }
                         }
 
