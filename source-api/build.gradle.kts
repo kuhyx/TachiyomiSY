@@ -8,7 +8,7 @@ plugins {
 
     alias(libs.plugins.kotlin.serialization)
 
-    id("com.github.ben-manes.versions")
+    id("io.github.ben-manes.versions")
 }
 
 kotlin {

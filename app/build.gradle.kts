@@ -16,7 +16,7 @@ plugins {
     alias(libs.plugins.androidx.baselineProfile)
     alias(libs.plugins.kotlin.serialization)
 
-    id("com.github.ben-manes.versions")
+    id("io.github.ben-manes.versions")
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Release")) {
