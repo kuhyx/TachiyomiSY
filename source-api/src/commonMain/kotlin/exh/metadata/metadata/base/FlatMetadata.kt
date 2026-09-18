@@ -23,9 +23,6 @@ public data class FlatMetadata(
     val titles: List<SearchTitle>,
 )
 
-/** Inflates the stored metadata into its concrete [T]. */
-public inline fun <reified T : RaisedSearchMetadata> FlatMetadata.raise(): T = raise(T::class)
-
 /** Inflates the stored metadata into an instance of [clazz], filling the base fields from this row. */
 @OptIn(InternalSerializationApi::class)
 public fun <T : RaisedSearchMetadata> FlatMetadata.raise(clazz: KClass<T>): T {

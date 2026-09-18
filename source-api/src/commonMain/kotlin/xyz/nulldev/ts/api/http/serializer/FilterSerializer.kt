@@ -46,8 +46,7 @@ public class FilterSerializer {
     public fun serialize(filter: Filter<Any?>): JsonObject {
         val serializer = serializers
             .filterIsInstance<Serializer<Filter<Any?>>>()
-            .firstOrNull { filter::class.isSubclassOf(it.clazz) }
-            ?: throw IllegalArgumentException("Cannot serialize this Filter object!")
+            .first { filter::class.isSubclassOf(it.clazz) }
         return serializer.let { serializer ->
             buildJsonObject {
                 with(serializer) { serialize(filter) }

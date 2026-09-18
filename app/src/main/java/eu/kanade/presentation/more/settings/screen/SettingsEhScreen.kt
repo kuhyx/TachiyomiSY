@@ -1167,7 +1167,7 @@ object SettingsEhScreen : SearchableSettings {
                         val allMeta = getExhFavoriteMangaWithMetadata.await()
                             .mapNotNull {
                                 getFlatMetadataById.await(it.id)
-                                    ?.raise<EHentaiSearchMetadata>()
+                                    ?.raise(EHentaiSearchMetadata::class)
                             }
 
                         fun metaInRelativeDuration(duration: Duration): Int {

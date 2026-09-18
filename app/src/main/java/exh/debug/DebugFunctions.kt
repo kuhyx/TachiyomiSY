@@ -69,7 +69,7 @@ object DebugFunctions {
     fun resetAgedFlagInEXHManga() {
         runBlocking {
             getExhFavoriteMangaWithMetadata.await().forEach { manga ->
-                val meta = getFlatMetadataById.await(manga.id)?.raise<EHentaiSearchMetadata>() ?: return@forEach
+                val meta = getFlatMetadataById.await(manga.id)?.raise(EHentaiSearchMetadata::class) ?: return@forEach
                 // remove age flag
                 meta.aged = false
                 insertFlatMetadata.await(meta)
@@ -110,7 +110,7 @@ object DebugFunctions {
     fun getEHMangaListWithAgedFlagInfo(): String {
         return runBlocking {
             getExhFavoriteMangaWithMetadata.await().map { manga ->
-                val meta = getFlatMetadataById.await(manga.id)?.raise<EHentaiSearchMetadata>() ?: return@map
+                val meta = getFlatMetadataById.await(manga.id)?.raise(EHentaiSearchMetadata::class) ?: return@map
                 "Aged: ${meta.aged}\t Title: ${manga.title}"
             }
         }.joinToString(",\n")
@@ -121,7 +121,7 @@ object DebugFunctions {
             getExhFavoriteMangaWithMetadata.await()
                 .count { manga ->
                     val meta = getFlatMetadataById.await(manga.id)
-                        ?.raise<EHentaiSearchMetadata>()
+                        ?.raise(EHentaiSearchMetadata::class)
                         ?: return@count false
                     meta.aged
                 }

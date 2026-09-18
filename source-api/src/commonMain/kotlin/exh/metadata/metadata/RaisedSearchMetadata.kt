@@ -73,7 +73,6 @@ public sealed class RaisedSearchMetadata {
     }
 
     private fun StringBuilder.appendNamespace(namespace: String?, tags: List<RaisedTag>) {
-        if (tags.isEmpty()) return
         if (namespace != null) {
             this += "▪ "
             this += namespace

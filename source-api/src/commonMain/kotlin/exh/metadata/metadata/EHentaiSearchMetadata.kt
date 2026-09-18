@@ -210,7 +210,7 @@ public class EHentaiSearchMetadata : RaisedSearchMetadata() {
                 } else {
                     it.split('/')
                 }
-                pathSegments.filterNot(String::isNullOrBlank)
+                pathSegments.filterNot(String::isBlank)
             }
 
         /** The gallery id segment of a gallery [url]. */

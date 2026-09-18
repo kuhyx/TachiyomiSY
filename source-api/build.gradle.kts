@@ -4,6 +4,7 @@ plugins {
     alias(mihonx.plugins.kotlin.multiplatform)
     alias(mihonx.plugins.spotless)
     alias(mihonx.plugins.lint)
+    alias(mihonx.plugins.coverage)
 
     alias(libs.plugins.kotlin.serialization)
 
@@ -22,7 +23,9 @@ kotlin {
         }
 
         // TODO(antsy): Remove when https://youtrack.jetbrains.com/issue/KT-83319 is resolved
-        withHostTest { }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
 
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -47,6 +50,13 @@ kotlin {
             dependencies {
                 implementation(projects.core.common)
                 api(libs.androidx.preference)
+            }
+        }
+        named("androidHostTest") {
+            dependencies {
+                implementation(libs.bundles.test)
+                implementation(libs.kotlinx.coroutines.test)
+                runtimeOnly(libs.junit.platform.launcher)
             }
         }
     }

@@ -109,7 +109,7 @@ class EHentaiUpdateWorker(private val context: Context, workerParams: WorkerPara
             val meta = getFlatMetadataById.await(manga.id)
                 ?: return@mapNotNull null
 
-            val raisedMeta = meta.raise<EHentaiSearchMetadata>()
+            val raisedMeta = meta.raise(EHentaiSearchMetadata::class)
 
             // Don't update galleries too frequently
             if (raisedMeta.aged ||
@@ -247,7 +247,7 @@ class EHentaiUpdateWorker(private val context: Context, workerParams: WorkerPara
             return result.newChapters to getChaptersByMangaId.await(manga.id)
         } catch (t: Throwable) {
             if (t is EHentai.GalleryNotFoundException) {
-                val meta = getFlatMetadataById.await(manga.id)?.raise<EHentaiSearchMetadata>()
+                val meta = getFlatMetadataById.await(manga.id)?.raise(EHentaiSearchMetadata::class)
                 if (meta != null) {
                     // Age dead galleries
                     logger.d("Aged %s - notfound", manga.id)
