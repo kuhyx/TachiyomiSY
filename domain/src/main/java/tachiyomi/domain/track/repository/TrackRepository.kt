@@ -3,25 +3,36 @@ package tachiyomi.domain.track.repository
 import kotlinx.coroutines.flow.Flow
 import tachiyomi.domain.track.model.Track
 
-interface TrackRepository {
+/** Reads and writes of the locally stored tracker links, one row per manga and tracker. */
+public interface TrackRepository {
 
-    suspend fun getTrackById(id: Long): Track?
+    /** The track with row id [id], or null. */
+    public suspend fun getTrackById(id: Long): Track?
 
     // SY -->
-    suspend fun getTracks(): List<Track>
 
-    suspend fun getTracksByMangaIds(mangaIds: List<Long>): List<Track>
+    /** Every track of every manga. */
+    public suspend fun getTracks(): List<Track>
+
+    /** The tracks of every manga in [mangaIds], in no particular order. */
+    public suspend fun getTracksByMangaIds(mangaIds: List<Long>): List<Track>
     // SY <--
 
-    suspend fun getTracksByMangaId(mangaId: Long): List<Track>
+    /** The tracks of manga [mangaId]. */
+    public suspend fun getTracksByMangaId(mangaId: Long): List<Track>
 
-    fun getTracksAsFlow(): Flow<List<Track>>
+    /** [getTracks] as a flow that re-emits on every change. */
+    public fun getTracksAsFlow(): Flow<List<Track>>
 
-    fun getTracksByMangaIdAsFlow(mangaId: Long): Flow<List<Track>>
+    /** [getTracksByMangaId] as a flow that re-emits on every change. */
+    public fun getTracksByMangaIdAsFlow(mangaId: Long): Flow<List<Track>>
 
-    suspend fun delete(mangaId: Long, trackerId: Long)
+    /** Deletes the track of manga [mangaId] on tracker [trackerId]. */
+    public suspend fun delete(mangaId: Long, trackerId: Long)
 
-    suspend fun insert(track: Track)
+    /** Writes [track], replacing an existing row of the same manga and tracker. */
+    public suspend fun insert(track: Track)
 
-    suspend fun insertAll(tracks: List<Track>)
+    /** [insert] for every entry of [tracks] in one transaction. */
+    public suspend fun insertAll(tracks: List<Track>)
 }

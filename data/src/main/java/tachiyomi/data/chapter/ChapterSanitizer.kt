@@ -1,14 +1,10 @@
 package tachiyomi.data.chapter
 
-object ChapterSanitizer {
+/** Cleans chapter names fetched from a source. */
+public object ChapterSanitizer {
 
-    fun String.sanitize(title: String): String {
-        return trim()
-            .removePrefix(title)
-            .trim(*CHAPTER_TRIM_CHARS)
-    }
-
-    private val CHAPTER_TRIM_CHARS = arrayOf(
+    // Whitespace and separators stripped from both ends once the manga title is gone.
+    private val CHAPTER_TRIM_CHARS = setOf(
         // Whitespace
         ' ',
         '\u0009',
@@ -42,5 +38,12 @@ object ChapterSanitizer {
         '_',
         ',',
         ':',
-    ).toCharArray()
+    )
+
+    /** This chapter name without the manga [title] prefix and any surrounding whitespace or separators. */
+    public fun String.sanitize(title: String): String {
+        return trim()
+            .removePrefix(title)
+            .trim { it in CHAPTER_TRIM_CHARS }
+    }
 }

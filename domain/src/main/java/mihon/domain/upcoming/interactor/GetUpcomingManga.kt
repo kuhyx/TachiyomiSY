@@ -5,7 +5,8 @@ import kotlinx.coroutines.flow.Flow
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.repository.MangaRepository
 
-class GetUpcomingManga(
+/** Lists library entries still expecting new chapters. */
+public class GetUpcomingManga(
     private val mangaRepository: MangaRepository,
 ) {
 
@@ -14,7 +15,6 @@ class GetUpcomingManga(
         SManga.PUBLISHING_FINISHED.toLong(),
     )
 
-    suspend fun subscribe(): Flow<List<Manga>> {
-        return mangaRepository.getUpcomingManga(includedStatuses)
-    }
+    /** Ongoing and publishing-finished favourites, as a flow that re-emits on every change. */
+    public suspend fun subscribe(): Flow<List<Manga>> = mangaRepository.getUpcomingManga(includedStatuses)
 }

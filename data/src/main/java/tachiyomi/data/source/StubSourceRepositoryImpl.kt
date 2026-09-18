@@ -7,7 +7,8 @@ import tachiyomi.data.subscribeToList
 import tachiyomi.domain.source.model.StubSource
 import tachiyomi.domain.source.repository.StubSourceRepository
 
-class StubSourceRepositoryImpl(
+/** [StubSourceRepository] on the SQLDelight `sources` table, which remembers uninstalled sources by id. */
+public class StubSourceRepositoryImpl(
     private val database: Database,
 ) : StubSourceRepository {
 

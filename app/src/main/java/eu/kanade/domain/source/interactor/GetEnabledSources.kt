@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import tachiyomi.domain.source.model.Pin
 import tachiyomi.domain.source.model.Pins
 import tachiyomi.domain.source.model.Source
+import tachiyomi.domain.source.model.contains
+import tachiyomi.domain.source.model.minus
 import tachiyomi.domain.source.repository.SourceRepository
 import tachiyomi.source.local.isLocal
 

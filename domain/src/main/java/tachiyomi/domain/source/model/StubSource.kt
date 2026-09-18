@@ -8,7 +8,11 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 
-class StubSource(
+/**
+ * Stand-in for a source whose extension is not installed: keeps the id, name and language so
+ * library entries can still be listed, and throws [SourceNotInstalledException] on every fetch.
+ */
+public class StubSource(
     override val id: Long,
     override val lang: String,
     override val name: String,
@@ -38,11 +42,12 @@ class StubSource(
     override fun toString(): String =
         if (!isInvalid) "$name (${lang.uppercase()})" else id.toString()
 
-    companion object {
-        fun from(source: Source): StubSource {
-            return StubSource(id = source.id, lang = source.lang, name = source.name)
-        }
+    /** Factory for stubs of existing sources. */
+    public companion object {
+        /** A stub carrying [source]'s id, language and name. */
+        public fun from(source: Source): StubSource = StubSource(id = source.id, lang = source.lang, name = source.name)
     }
 }
 
-class SourceNotInstalledException : Exception()
+/** Thrown by [StubSource] when a fetch is attempted on a source that is not installed. */
+public class SourceNotInstalledException : Exception()

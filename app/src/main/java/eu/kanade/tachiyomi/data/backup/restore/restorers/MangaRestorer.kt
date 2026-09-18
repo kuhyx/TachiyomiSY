@@ -13,11 +13,14 @@ import eu.kanade.tachiyomi.data.backup.models.BackupMergedMangaReference
 import eu.kanade.tachiyomi.data.backup.models.BackupTracking
 import exh.EXHMigrations
 import tachiyomi.data.Database
+import tachiyomi.data.awaitList
+import tachiyomi.data.awaitOneOrNull
 import tachiyomi.data.manga.MangaMapper
 import tachiyomi.data.manga.MergedMangaMapper
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.chapter.model.Chapter
+import tachiyomi.domain.chapter.model.copyFrom
 import tachiyomi.domain.manga.interactor.FetchInterval
 import tachiyomi.domain.manga.interactor.GetFlatMetadataById
 import tachiyomi.domain.manga.interactor.GetMangaByUrlAndSourceId
@@ -490,8 +493,8 @@ class MangaRestorer(
     ) {
         // Get merged manga references from file and from db
         val dbMergedMangaReferences =
-            database.mergedQueries.selectAll(MergedMangaMapper::map)
-                .awaitAsList()
+            database.mergedQueries.selectAll()
+                .awaitList(MergedMangaMapper::map)
 
         // Iterate over them
         backupMergedMangaReferences.forEach { backupMergedMangaReference ->
@@ -507,9 +510,8 @@ class MangaRestorer(
                 val mergedManga = database.mangasQueries.getMangaByUrlAndSource(
                     backupMergedMangaReference.mangaUrl,
                     backupMergedMangaReference.mangaSourceId,
-                    MangaMapper::mapManga,
                 )
-                    .awaitAsOneOrNull()
+                    .awaitOneOrNull(MangaMapper::mapManga)
                     ?: return@forEach
                 backupMergedMangaReference.getMergedMangaReference().run {
                     database.mergedQueries.insert(

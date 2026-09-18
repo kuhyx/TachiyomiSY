@@ -5,23 +5,28 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.track.model.Track
 import tachiyomi.domain.track.repository.TrackRepository
 
-class InsertTrack(
+/** Stores tracker links locally, replacing an existing link of the same manga and tracker. */
+public class InsertTrack(
     private val trackRepository: TrackRepository,
 ) {
 
-    suspend fun await(track: Track) {
+    /** Writes [track]. Store failures are logged and swallowed. */
+    public suspend fun await(track: Track) {
         try {
             trackRepository.insert(track)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
         }
     }
 
-    suspend fun awaitAll(tracks: List<Track>) {
+    /** Writes every entry of [tracks] in one transaction. Store failures are logged and swallowed. */
+    public suspend fun awaitAll(tracks: List<Track>) {
         try {
             trackRepository.insertAll(tracks)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
         }
     }
 }

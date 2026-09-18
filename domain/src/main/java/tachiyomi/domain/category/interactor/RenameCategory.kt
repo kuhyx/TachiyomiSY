@@ -7,11 +7,13 @@ import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.category.model.CategoryUpdate
 import tachiyomi.domain.category.repository.CategoryRepository
 
-class RenameCategory(
+/** Changes a category's display name. */
+public class RenameCategory(
     private val categoryRepository: CategoryRepository,
 ) {
 
-    suspend fun await(categoryId: Long, name: String) = withNonCancellableContext {
+    /** Renames the category to [name]; a store failure is logged and returned as [Result.InternalError]. */
+    public suspend fun await(categoryId: Long, name: String): Result = withNonCancellableContext {
         val update = CategoryUpdate(
             id = categoryId,
             name = name,
@@ -20,16 +22,26 @@ class RenameCategory(
         try {
             categoryRepository.updatePartial(update)
             Result.Success
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
-            Result.InternalError(e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
+            Result.InternalError(expected)
         }
     }
 
-    suspend fun await(category: Category, name: String) = await(category.id, name)
+    /** [await] by [Category.id]. */
+    public suspend fun await(category: Category, name: String): Result = await(category.id, name)
 
-    sealed interface Result {
-        data object Success : Result
-        data class InternalError(val error: Throwable) : Result
+    /** Outcome of [await]. */
+    public sealed interface Result {
+        /** The name was written. */
+        public data object Success : Result
+
+        /**
+         * The store threw.
+         *
+         * @property error What it threw.
+         */
+        public data class InternalError(val error: Throwable) : Result
     }
 }

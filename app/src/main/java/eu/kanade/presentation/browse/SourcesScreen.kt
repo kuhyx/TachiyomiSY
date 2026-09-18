@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreenModel.Listi
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import tachiyomi.domain.source.model.Pin
 import tachiyomi.domain.source.model.Source
+import tachiyomi.domain.source.model.contains
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.components.LabeledCheckbox

@@ -2,11 +2,11 @@ package tachiyomi.domain.source.interactor
 
 import tachiyomi.domain.source.repository.FeedSavedSearchRepository
 
-class CountFeedSavedSearchBySourceId(
+/** Counts the feed entries of one source (SY). */
+public class CountFeedSavedSearchBySourceId(
     private val feedSavedSearchRepository: FeedSavedSearchRepository,
 ) {
 
-    suspend fun await(sourceId: Long): Long {
-        return feedSavedSearchRepository.countBySourceId(sourceId)
-    }
+    /** Number of feed entries of source [sourceId]. */
+    public suspend fun await(sourceId: Long): Long = feedSavedSearchRepository.countBySourceId(sourceId)
 }

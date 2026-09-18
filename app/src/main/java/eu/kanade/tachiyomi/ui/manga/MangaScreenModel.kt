@@ -123,6 +123,9 @@ import tachiyomi.domain.manga.model.MangaWithChapterCount
 import tachiyomi.domain.manga.model.MergeMangaSettingsUpdate
 import tachiyomi.domain.manga.model.MergedMangaReference
 import tachiyomi.domain.manga.model.applyFilter
+import tachiyomi.domain.manga.model.bookmarkedFilter
+import tachiyomi.domain.manga.model.sortDescending
+import tachiyomi.domain.manga.model.unreadFilter
 import tachiyomi.domain.manga.repository.MangaRepository
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracks

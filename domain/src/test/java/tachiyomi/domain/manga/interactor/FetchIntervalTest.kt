@@ -16,11 +16,11 @@ import kotlin.time.toDuration
 import kotlin.time.toJavaDuration
 
 @Execution(ExecutionMode.CONCURRENT)
-class FetchIntervalTest {
+internal class FetchIntervalTest {
 
     private val testTime = ZonedDateTime.parse("2020-01-01T00:00:00Z")
     private val testZoneId = ZoneOffset.UTC
-    private var chapter = Chapter.create().copy(
+    private val chapter = Chapter.create().copy(
         dateFetch = testTime.toEpochSecond() * 1000,
         dateUpload = testTime.toEpochSecond() * 1000,
     )
@@ -28,7 +28,7 @@ class FetchIntervalTest {
     private val fetchInterval = FetchInterval(mockk())
 
     @Test
-    fun `returns default interval of 7 days when not enough distinct days`() {
+    fun `default 7 days, few days`() {
         val chaptersWithUploadDate = (1..50).map {
             chapterWithTime(chapter, 1.days)
         }
@@ -41,7 +41,7 @@ class FetchIntervalTest {
     }
 
     @Test
-    fun `returns interval based on more recent chapters`() {
+    fun `uses more recent chapters`() {
         val oldChapters = (1..5).map {
             chapterWithTime(chapter, (it * 7).days) // Would have interval of 7 days
         }
@@ -55,7 +55,7 @@ class FetchIntervalTest {
     }
 
     @Test
-    fun `returns interval based on smaller subset of recent chapters if very few chapters`() {
+    fun `uses subset for few chapters`() {
         val oldChapters = (1..3).map {
             chapterWithTime(chapter, (it * 7).days)
         }
@@ -70,7 +70,7 @@ class FetchIntervalTest {
     }
 
     @Test
-    fun `returns interval of 7 days when multiple chapters in 1 day`() {
+    fun `7 days for many in 1 day`() {
         val chapters = (1..10).map {
             chapterWithTime(chapter, 10.hours)
         }
@@ -78,7 +78,7 @@ class FetchIntervalTest {
     }
 
     @Test
-    fun `returns interval of 7 days when multiple chapters in 2 days`() {
+    fun `7 days for many in 2 days`() {
         val chapters = (1..2).map {
             chapterWithTime(chapter, 1.days)
         } + (1..5).map {
@@ -88,7 +88,7 @@ class FetchIntervalTest {
     }
 
     @Test
-    fun `returns interval of 1 day when chapters are released every 1 day`() {
+    fun `1 day when daily`() {
         val chapters = (1..20).map {
             chapterWithTime(chapter, it.days)
         }
@@ -96,7 +96,7 @@ class FetchIntervalTest {
     }
 
     @Test
-    fun `returns interval of 1 day when delta is less than 1 day`() {
+    fun `1 day when delta under 1 day`() {
         val chapters = (1..20).map {
             chapterWithTime(chapter, (15 * it).hours)
         }
@@ -104,7 +104,7 @@ class FetchIntervalTest {
     }
 
     @Test
-    fun `returns interval of 2 days when chapters are released every 2 days`() {
+    fun `2 days when every 2 days`() {
         val chapters = (1..20).map {
             chapterWithTime(chapter, (2 * it).days)
         }
@@ -112,7 +112,7 @@ class FetchIntervalTest {
     }
 
     @Test
-    fun `returns interval with floored value when interval is decimal`() {
+    fun `floors a decimal interval`() {
         val chaptersWithUploadDate = (1..5).map {
             chapterWithTime(chapter, (25 * it).hours)
         }
@@ -125,7 +125,7 @@ class FetchIntervalTest {
     }
 
     @Test
-    fun `returns interval of 2 days when chapters are released just below every 2 days`() {
+    fun `2 days when just under 2`() {
         val chapters = (1..20).map {
             chapterWithTime(chapter, (43 * it).hours)
         }

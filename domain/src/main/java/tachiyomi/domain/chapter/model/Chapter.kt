@@ -3,7 +3,26 @@ package tachiyomi.domain.chapter.model
 import kotlinx.serialization.json.JsonObject
 import mihon.core.common.extensions.EMPTY
 
-data class Chapter(
+/**
+ * A chapter row. [copyFrom] refreshes the source-reported fields from a newer fetch.
+ *
+ * @property id Row id; -1 until inserted.
+ * @property mangaId Id of the manga the chapter belongs to.
+ * @property read Whether the chapter has been read.
+ * @property bookmark Whether the chapter is bookmarked.
+ * @property lastPageRead Index of the last page read.
+ * @property dateFetch Epoch millis the chapter was first fetched.
+ * @property sourceOrder Position of the chapter in the source's listing.
+ * @property url Path of the chapter on its source.
+ * @property name Chapter title as reported by the source.
+ * @property dateUpload Epoch millis of the upload date the source reported; -1 when unknown.
+ * @property chapterNumber Parsed chapter number; negative when unrecognised.
+ * @property scanlator Scanlation group, or null when unknown.
+ * @property lastModifiedAt Epoch seconds of the last row change, for sync.
+ * @property version Sync version counter.
+ * @property memo Structured per-chapter data extensions may keep.
+ */
+public data class Chapter(
     val id: Long,
     val mangaId: Long,
     val read: Boolean,
@@ -20,21 +39,14 @@ data class Chapter(
     val version: Long,
     val memo: JsonObject,
 ) {
+    /** Whether [chapterNumber] is a real number rather than the unknown sentinel. */
     val isRecognizedNumber: Boolean
         get() = chapterNumber >= 0f
 
-    fun copyFrom(other: Chapter): Chapter {
-        return copy(
-            name = other.name,
-            url = other.url,
-            dateUpload = other.dateUpload,
-            chapterNumber = other.chapterNumber,
-            scanlator = other.scanlator?.ifBlank { null },
-        )
-    }
-
-    companion object {
-        fun create() = Chapter(
+    /** Factory of blank rows. */
+    public companion object {
+        /** A blank chapter with no id, no manga and an unrecognised number. */
+        public fun create(): Chapter = Chapter(
             id = -1,
             mangaId = -1,
             read = false,
@@ -53,3 +65,12 @@ data class Chapter(
         )
     }
 }
+
+/** This chapter with the source-reported fields of [other]: name, url, upload date, number and scanlator. */
+public fun Chapter.copyFrom(other: Chapter): Chapter = copy(
+    name = other.name,
+    url = other.url,
+    dateUpload = other.dateUpload,
+    chapterNumber = other.chapterNumber,
+    scanlator = other.scanlator?.ifBlank { null },
+)

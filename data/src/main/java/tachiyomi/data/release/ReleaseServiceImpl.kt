@@ -8,7 +8,8 @@ import kotlinx.serialization.json.Json
 import tachiyomi.domain.release.model.Release
 import tachiyomi.domain.release.service.ReleaseService
 
-class ReleaseServiceImpl(
+/** [ReleaseService] on the GitHub releases API; a network or parse failure throws. */
+public class ReleaseServiceImpl(
     private val networkService: NetworkHelper,
     private val json: Json,
 ) : ReleaseService {

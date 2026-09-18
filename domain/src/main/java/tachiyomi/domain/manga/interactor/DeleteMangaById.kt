@@ -2,11 +2,13 @@ package tachiyomi.domain.manga.interactor
 
 import tachiyomi.domain.manga.repository.MangaRepository
 
-class DeleteMangaById(
+/** Removes a manga row from the database. */
+public class DeleteMangaById(
     private val mangaRepository: MangaRepository,
 ) {
 
-    suspend fun await(id: Long) {
-        return mangaRepository.deleteManga(id)
+    /** Deletes the manga row [id]; failures propagate. */
+    public suspend fun await(id: Long) {
+        mangaRepository.deleteManga(id)
     }
 }

@@ -1,53 +1,54 @@
 package tachiyomi.data.track
 
-import app.cash.sqldelight.async.coroutines.awaitAsList
-import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import kotlinx.coroutines.flow.Flow
 import tachiyomi.data.Database
+import tachiyomi.data.awaitList
+import tachiyomi.data.awaitOneOrNull
 import tachiyomi.data.subscribeToList
 import tachiyomi.domain.track.model.Track
 import tachiyomi.domain.track.repository.TrackRepository
 
-class TrackRepositoryImpl(
+/** [TrackRepository] on the SQLDelight `manga_sync` table. */
+public class TrackRepositoryImpl(
     private val database: Database,
 ) : TrackRepository {
 
     override suspend fun getTrackById(id: Long): Track? {
         return database.manga_syncQueries
-            .getTrackById(id, TrackMapper::mapTrack)
-            .awaitAsOneOrNull()
+            .getTrackById(id)
+            .awaitOneOrNull(TrackMapper::mapTrack)
     }
 
     // SY -->
     override suspend fun getTracks(): List<Track> {
         return database.manga_syncQueries
-            .getTracks(TrackMapper::mapTrack)
-            .awaitAsList()
+            .getTracks()
+            .awaitList(TrackMapper::mapTrack)
     }
 
     override suspend fun getTracksByMangaIds(mangaIds: List<Long>): List<Track> {
         return database.manga_syncQueries
-            .getTracksByMangaIds(mangaIds, TrackMapper::mapTrack)
-            .awaitAsList()
+            .getTracksByMangaIds(mangaIds)
+            .awaitList(TrackMapper::mapTrack)
     }
     // SY <--
 
     override suspend fun getTracksByMangaId(mangaId: Long): List<Track> {
         return database.manga_syncQueries
-            .getTracksByMangaId(mangaId, TrackMapper::mapTrack)
-            .awaitAsList()
+            .getTracksByMangaId(mangaId)
+            .awaitList(TrackMapper::mapTrack)
     }
 
     override fun getTracksAsFlow(): Flow<List<Track>> {
         return database.manga_syncQueries
-            .getTracks(TrackMapper::mapTrack)
-            .subscribeToList()
+            .getTracks()
+            .subscribeToList(TrackMapper::mapTrack)
     }
 
     override fun getTracksByMangaIdAsFlow(mangaId: Long): Flow<List<Track>> {
         return database.manga_syncQueries
-            .getTracksByMangaId(mangaId, TrackMapper::mapTrack)
-            .subscribeToList()
+            .getTracksByMangaId(mangaId)
+            .subscribeToList(TrackMapper::mapTrack)
     }
 
     override suspend fun delete(mangaId: Long, trackerId: Long) {
@@ -58,14 +59,14 @@ class TrackRepositoryImpl(
     }
 
     override suspend fun insert(track: Track) {
-        insertValues(track)
+        insertValues(listOf(track))
     }
 
     override suspend fun insertAll(tracks: List<Track>) {
-        insertValues(*tracks.toTypedArray())
+        insertValues(tracks)
     }
 
-    private suspend fun insertValues(vararg tracks: Track) {
+    private suspend fun insertValues(tracks: List<Track>) {
         database.transaction {
             tracks.forEach { mangaTrack ->
                 database.manga_syncQueries.insert(

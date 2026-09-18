@@ -3,10 +3,14 @@ package tachiyomi.domain.source.repository
 import kotlinx.coroutines.flow.Flow
 import tachiyomi.domain.source.model.StubSource
 
-interface StubSourceRepository {
-    fun subscribeAll(): Flow<List<StubSource>>
+/** Persistence of the ids, names and languages of sources seen once but no longer installed. */
+public interface StubSourceRepository {
+    /** Every remembered stub, as a flow. */
+    public fun subscribeAll(): Flow<List<StubSource>>
 
-    suspend fun getStubSource(id: Long): StubSource?
+    /** The remembered stub with [id], or null when the source was never recorded. */
+    public suspend fun getStubSource(id: Long): StubSource?
 
-    suspend fun upsertStubSource(id: Long, lang: String, name: String)
+    /** Records or refreshes the [lang] and [name] remembered for source [id]. */
+    public suspend fun upsertStubSource(id: Long, lang: String, name: String)
 }

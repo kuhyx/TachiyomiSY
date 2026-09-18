@@ -7,7 +7,7 @@ import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
 
 @Execution(ExecutionMode.CONCURRENT)
-class LibraryFlagsTest {
+internal class LibraryFlagsTest {
 
     @Test
     fun `Check the amount of flags`() {
@@ -17,7 +17,7 @@ class LibraryFlagsTest {
     }
 
     @Test
-    fun `Test Flag plus operator (LibrarySort)`() {
+    fun `Flag plus with LibrarySort`() {
         val current = LibrarySort(LibrarySort.Type.LastRead, LibrarySort.Direction.Ascending)
         val new = LibrarySort(LibrarySort.Type.DateAdded, LibrarySort.Direction.Ascending)
         val flag = current + new
@@ -33,7 +33,7 @@ class LibraryFlagsTest {
     }
 
     @Test
-    fun `Test Flag plus operator with old flag as base`() {
+    fun `Flag plus with old flag base`() {
         val currentSort = LibrarySort(
             LibrarySort.Type.UnreadCount,
             LibrarySort.Direction.Descending,

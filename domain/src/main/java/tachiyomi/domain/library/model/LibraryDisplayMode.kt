@@ -1,27 +1,47 @@
 package tachiyomi.domain.library.model
 
-sealed interface LibraryDisplayMode {
+/** How the library grid lays out its entries, stored in preferences as the [serialize] name. */
+public sealed interface LibraryDisplayMode {
 
-    data object CompactGrid : LibraryDisplayMode
-    data object ComfortableGrid : LibraryDisplayMode
-    data object List : LibraryDisplayMode
-    data object CoverOnlyGrid : LibraryDisplayMode
+    /** Small covers with the title overlaid. */
+    public data object CompactGrid : LibraryDisplayMode
 
-    object Serializer {
-        fun deserialize(serialized: String): LibraryDisplayMode {
-            return LibraryDisplayMode.deserialize(serialized)
-        }
+    /** Covers with the title underneath. */
+    public data object ComfortableGrid : LibraryDisplayMode
 
-        fun serialize(value: LibraryDisplayMode): String {
-            return value.serialize()
-        }
+    /** One row per entry. */
+    public data object List : LibraryDisplayMode
+
+    /** Covers only, no title. */
+    public data object CoverOnlyGrid : LibraryDisplayMode
+
+    /** Adapter for `PreferenceStore.getObjectFromString`. */
+    public object Serializer {
+        /** See [LibraryDisplayMode.deserialize]. */
+        public fun deserialize(serialized: String): LibraryDisplayMode = LibraryDisplayMode.deserialize(serialized)
+
+        /** See [LibraryDisplayMode.serialize]. */
+        public fun serialize(value: LibraryDisplayMode): String = value.serialize()
     }
 
-    companion object {
-        val values by lazy { setOf(CompactGrid, ComfortableGrid, List, CoverOnlyGrid) }
-        val default = CompactGrid
+    /** The stored name, parsed back by [deserialize]. */
+    public fun serialize(): String = when (this) {
+        ComfortableGrid -> "COMFORTABLE_GRID"
+        CompactGrid -> "COMPACT_GRID"
+        CoverOnlyGrid -> "COVER_ONLY_GRID"
+        List -> "LIST"
+    }
 
-        fun deserialize(serialized: String): LibraryDisplayMode {
+    /** Every mode, the default, and the parser for the stored name. */
+    public companion object {
+        /** Every mode, in menu order. */
+        public val values: Set<LibraryDisplayMode> by lazy { setOf(CompactGrid, ComfortableGrid, List, CoverOnlyGrid) }
+
+        /** [CompactGrid]. */
+        public val default: LibraryDisplayMode = CompactGrid
+
+        /** Parses the [serialize] form; an unknown name yields [default]. */
+        public fun deserialize(serialized: String): LibraryDisplayMode {
             return when (serialized) {
                 "COMFORTABLE_GRID" -> ComfortableGrid
                 "COMPACT_GRID" -> CompactGrid
@@ -29,15 +49,6 @@ sealed interface LibraryDisplayMode {
                 "LIST" -> List
                 else -> default
             }
-        }
-    }
-
-    fun serialize(): String {
-        return when (this) {
-            ComfortableGrid -> "COMFORTABLE_GRID"
-            CompactGrid -> "COMPACT_GRID"
-            CoverOnlyGrid -> "COVER_ONLY_GRID"
-            List -> "LIST"
         }
     }
 }

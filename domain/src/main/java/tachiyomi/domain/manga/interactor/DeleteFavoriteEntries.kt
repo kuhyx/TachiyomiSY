@@ -2,11 +2,13 @@ package tachiyomi.domain.manga.interactor
 
 import tachiyomi.domain.manga.repository.FavoritesEntryRepository
 
-class DeleteFavoriteEntries(
+/** Clears the local E-Hentai favourites snapshot. */
+public class DeleteFavoriteEntries(
     private val favoriteEntryRepository: FavoritesEntryRepository,
 ) {
 
-    suspend fun await() {
-        return favoriteEntryRepository.deleteAll()
+    /** Deletes every snapshot entry; failures propagate. */
+    public suspend fun await() {
+        favoriteEntryRepository.deleteAll()
     }
 }

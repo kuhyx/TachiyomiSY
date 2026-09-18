@@ -1,33 +1,22 @@
 package tachiyomi.data.manga
 
+import tachiyomi.data.Merged
 import tachiyomi.domain.manga.model.MergedMangaReference
 
-object MergedMangaMapper {
-    fun map(
-        id: Long,
-        isInfoManga: Boolean,
-        getChapterUpdates: Boolean,
-        chapterSortMode: Long,
-        chapterPriority: Long,
-        downloadChapters: Boolean,
-        mergeId: Long,
-        mergeUrl: String,
-        mangaId: Long?,
-        mangaUrl: String,
-        mangaSourceId: Long,
-    ): MergedMangaReference {
-        return MergedMangaReference(
-            id = id,
-            isInfoManga = isInfoManga,
-            getChapterUpdates = getChapterUpdates,
-            chapterSortMode = chapterSortMode.toInt(),
-            chapterPriority = chapterPriority.toInt(),
-            downloadChapters = downloadChapters,
-            mergeId = mergeId,
-            mergeUrl = mergeUrl,
-            mangaId = mangaId,
-            mangaUrl = mangaUrl,
-            mangaSourceId = mangaSourceId,
-        )
-    }
+/** Domain models from the generated `merged` rows (SY). */
+public object MergedMangaMapper {
+    /** The [MergedMangaReference] of a `merged` row. */
+    public fun map(row: Merged): MergedMangaReference = MergedMangaReference(
+        id = row._id,
+        isInfoManga = row.info_manga,
+        getChapterUpdates = row.get_chapter_updates,
+        chapterSortMode = row.chapter_sort_mode.toInt(),
+        chapterPriority = row.chapter_priority.toInt(),
+        downloadChapters = row.download_chapters,
+        mergeId = row.merge_id,
+        mergeUrl = row.merge_url,
+        mangaId = row.manga_id,
+        mangaUrl = row.manga_url,
+        mangaSourceId = row.manga_source,
+    )
 }

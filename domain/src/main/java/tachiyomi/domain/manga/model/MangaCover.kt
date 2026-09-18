@@ -4,9 +4,15 @@ import tachiyomi.domain.manga.interactor.GetCustomMangaInfo
 import uy.kohesive.injekt.injectLazy
 
 /**
- * Contains the required data for MangaCoverFetcher
+ * What the cover fetcher needs to locate and cache a manga's cover.
+ *
+ * @property mangaId Row id of the manga.
+ * @property sourceId Id of the source the cover is fetched from.
+ * @property isMangaFavorite Whether the manga is in the library, which is when a custom cover may apply.
+ * @property ogUrl Cover url as reported by the source.
+ * @property lastModified Epoch millis of the last cover change, for cache keys.
  */
-data class MangaCover(
+public data class MangaCover(
     val mangaId: Long,
     val sourceId: Long,
     val isMangaFavorite: Boolean,
@@ -21,15 +27,19 @@ data class MangaCover(
     } else {
         null
     }
+
+    /** [ogUrl] unless the user set a custom cover for a favourite. */
     val url: String? = customThumbnailUrl ?: ogUrl
 
-    companion object {
+    /** Holds the lazily injected custom-info lookup shared by every cover. */
+    public companion object {
         private val getCustomMangaInfo: GetCustomMangaInfo by injectLazy()
     }
     // SY <--
 }
 
-fun Manga.asMangaCover(): MangaCover {
+/** The [MangaCover] the cover fetcher uses for this manga. */
+public fun Manga.asMangaCover(): MangaCover {
     return MangaCover(
         mangaId = id,
         sourceId = source,

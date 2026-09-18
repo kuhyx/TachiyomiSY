@@ -101,6 +101,9 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.GetMergedMangaById
 import tachiyomi.domain.manga.interactor.GetMergedReferencesById
 import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.model.bookmarkedFilterRaw
+import tachiyomi.domain.manga.model.downloadedFilterRaw
+import tachiyomi.domain.manga.model.unreadFilterRaw
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt

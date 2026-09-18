@@ -8,38 +8,33 @@ import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.manga.repository.MangaMetadataRepository
 
-class GetFlatMetadataById(
+/** Assembles a manga's search metadata, tags and titles into one [FlatMetadata]. */
+public class GetFlatMetadataById(
     private val mangaMetadataRepository: MangaMetadataRepository,
 ) : MetadataSource.GetFlatMetadataById {
 
     override suspend fun await(id: Long): FlatMetadata? {
         return try {
-            val meta = mangaMetadataRepository.getMetadataById(id)
-            return if (meta != null) {
+            mangaMetadataRepository.getMetadataById(id)?.let { meta ->
                 val tags = mangaMetadataRepository.getTagsById(id)
                 val titles = mangaMetadataRepository.getTitlesById(id)
-
                 FlatMetadata(meta, tags, titles)
-            } else {
-                null
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
             null
         }
     }
 
-    fun subscribe(id: Long): Flow<FlatMetadata?> {
+    /** The flat metadata of manga [id] as a flow; emits null while it has no metadata row. */
+    public fun subscribe(id: Long): Flow<FlatMetadata?> {
         return combine(
             mangaMetadataRepository.subscribeMetadataById(id),
             mangaMetadataRepository.subscribeTagsById(id),
             mangaMetadataRepository.subscribeTitlesById(id),
         ) { meta, tags, titles ->
-            if (meta != null) {
-                FlatMetadata(meta, tags, titles)
-            } else {
-                null
-            }
+            meta?.let { FlatMetadata(it, tags, titles) }
         }
     }
 }

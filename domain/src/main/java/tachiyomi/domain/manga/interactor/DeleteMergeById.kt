@@ -2,11 +2,13 @@ package tachiyomi.domain.manga.interactor
 
 import tachiyomi.domain.manga.repository.MangaMergeRepository
 
-class DeleteMergeById(
+/** Removes a single entry from a merged manga. */
+public class DeleteMergeById(
     private val mangaMergeRepository: MangaMergeRepository,
 ) {
 
-    suspend fun await(id: Long) {
-        return mangaMergeRepository.deleteById(id)
+    /** Deletes the reference row [id]; failures propagate. */
+    public suspend fun await(id: Long) {
+        mangaMergeRepository.deleteById(id)
     }
 }

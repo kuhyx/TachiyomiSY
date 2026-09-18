@@ -4,21 +4,32 @@ import tachiyomi.core.common.util.lang.withNonCancellableContext
 import tachiyomi.domain.category.model.CategoryUpdate
 import tachiyomi.domain.category.repository.CategoryRepository
 
-class UpdateCategory(
+/** Applies a [CategoryUpdate]. */
+public class UpdateCategory(
     private val categoryRepository: CategoryRepository,
 ) {
 
-    suspend fun await(payload: CategoryUpdate): Result = withNonCancellableContext {
+    /** Writes the non-null fields of [payload]; a store failure is returned as [Result.Error], not logged. */
+    public suspend fun await(payload: CategoryUpdate): Result = withNonCancellableContext {
         try {
             categoryRepository.updatePartial(payload)
             Result.Success
-        } catch (e: Exception) {
-            Result.Error(e)
+        } catch (expected: Exception) {
+            // Any failure of the store degrades to the fallback below.
+            Result.Error(expected)
         }
     }
 
-    sealed interface Result {
-        data object Success : Result
-        data class Error(val error: Exception) : Result
+    /** Outcome of [await]. */
+    public sealed interface Result {
+        /** The update was written. */
+        public data object Success : Result
+
+        /**
+         * The store threw.
+         *
+         * @property error What it threw.
+         */
+        public data class Error(val error: Exception) : Result
     }
 }

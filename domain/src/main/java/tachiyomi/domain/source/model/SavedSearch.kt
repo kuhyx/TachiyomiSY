@@ -1,6 +1,15 @@
 package tachiyomi.domain.source.model
 
-data class SavedSearch(
+/**
+ * A search the user saved on a source's browse screen: query text plus serialized filters (SY).
+ *
+ * @property id Row id; unique.
+ * @property source Id of the source the search runs on.
+ * @property name User-given name of the search.
+ * @property query Search text, or null when the search is filters only.
+ * @property filtersJson Filter state as a JSON array, or null when no filters were saved.
+ */
+public data class SavedSearch(
     // Tag identifier, unique
     val id: Long,
 

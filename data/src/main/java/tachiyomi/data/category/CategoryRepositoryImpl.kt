@@ -1,47 +1,49 @@
 package tachiyomi.data.category
 
-import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import kotlinx.coroutines.flow.Flow
 import tachiyomi.data.Database
+import tachiyomi.data.awaitList
+import tachiyomi.data.awaitOneOrNull
 import tachiyomi.data.category.CategoryMapper.mapCategory
 import tachiyomi.data.subscribeToList
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.category.model.CategoryUpdate
 import tachiyomi.domain.category.repository.CategoryRepository
 
-class CategoryRepositoryImpl(
+/** [CategoryRepository] on the SQLDelight `categories` table. */
+public class CategoryRepositoryImpl(
     private val database: Database,
 ) : CategoryRepository {
 
     override suspend fun get(id: Long): Category? {
         return database.categoriesQueries
-            .getCategory(id, ::mapCategory)
-            .awaitAsOneOrNull()
+            .getCategory(id)
+            .awaitOneOrNull(::mapCategory)
     }
 
     override suspend fun getAll(): List<Category> {
         return database.categoriesQueries
-            .getCategories(::mapCategory)
-            .awaitAsList()
+            .getCategories()
+            .awaitList(::mapCategory)
     }
 
     override fun getAllAsFlow(): Flow<List<Category>> {
         return database.categoriesQueries
-            .getCategories(::mapCategory)
-            .subscribeToList()
+            .getCategories()
+            .subscribeToList(::mapCategory)
     }
 
     override suspend fun getCategoriesByMangaId(mangaId: Long): List<Category> {
         return database.categoriesQueries
-            .getCategoriesByMangaId(mangaId, ::mapCategory)
-            .awaitAsList()
+            .getCategoriesByMangaId(mangaId)
+            .awaitList(::mapCategory)
     }
 
     override fun getCategoriesByMangaIdAsFlow(mangaId: Long): Flow<List<Category>> {
         return database.categoriesQueries
-            .getCategoriesByMangaId(mangaId, ::mapCategory)
-            .subscribeToList()
+            .getCategoriesByMangaId(mangaId)
+            .subscribeToList(::mapCategory)
     }
 
     // SY -->

@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -15,7 +16,12 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
 
-class StorageManager(
+/**
+ * The app's folders under the user-chosen storage directory. Follows the
+ * [StoragePreferences.baseStorageDirectory] preference: when it changes the
+ * subfolders are created in the new location and [changes] emits.
+ */
+public class StorageManager(
     private val context: Context,
     storagePreferences: StoragePreferences,
 ) {
@@ -25,7 +31,9 @@ class StorageManager(
     private var baseDir: UniFile? = getBaseDir(storagePreferences.baseStorageDirectory.get())
 
     private val _changes: Channel<Unit> = Channel(Channel.UNLIMITED)
-    val changes = _changes.receiveAsFlow()
+
+    /** Emits after the base directory moved and its subfolders were created; replays the last event. */
+    public val changes: SharedFlow<Unit> = _changes.receiveAsFlow()
         .shareIn(scope, SharingStarted.Lazily, 1)
 
     init {
@@ -51,22 +59,19 @@ class StorageManager(
             .takeIf { it?.exists() == true }
     }
 
-    fun getAutomaticBackupsDirectory(): UniFile? {
-        return baseDir?.createDirectory(AUTOMATIC_BACKUPS_PATH)
-    }
+    /** The `autobackup` folder, created on demand; null while the base directory does not exist. */
+    public fun getAutomaticBackupsDirectory(): UniFile? = baseDir?.createDirectory(AUTOMATIC_BACKUPS_PATH)
 
-    fun getDownloadsDirectory(): UniFile? {
-        return baseDir?.createDirectory(DOWNLOADS_PATH)
-    }
+    /** The `downloads` folder, created on demand; null while the base directory does not exist. */
+    public fun getDownloadsDirectory(): UniFile? = baseDir?.createDirectory(DOWNLOADS_PATH)
 
-    fun getLocalSourceDirectory(): UniFile? {
-        return baseDir?.createDirectory(LOCAL_SOURCE_PATH)
-    }
+    /** The `local` folder of the local source, created on demand; null while the base directory does not exist. */
+    public fun getLocalSourceDirectory(): UniFile? = baseDir?.createDirectory(LOCAL_SOURCE_PATH)
 
     // SY -->
-    fun getLogsDirectory(): UniFile? {
-        return baseDir?.createDirectory(LOGS_PATH)
-    }
+
+    /** The `logs` folder, created on demand; null while the base directory does not exist. */
+    public fun getLogsDirectory(): UniFile? = baseDir?.createDirectory(LOGS_PATH)
     // SY <--
 }
 

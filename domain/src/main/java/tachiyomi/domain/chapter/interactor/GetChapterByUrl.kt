@@ -5,15 +5,18 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.repository.ChapterRepository
 
-class GetChapterByUrl(
+/** Looks up chapters by url across all manga. */
+public class GetChapterByUrl(
     private val chapterRepository: ChapterRepository,
 ) {
 
-    suspend fun await(url: String): List<Chapter> {
+    /** Every chapter at [url]; logs and returns an empty list when the store fails. */
+    public suspend fun await(url: String): List<Chapter> {
         return try {
             chapterRepository.getChapterByUrl(url)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
             emptyList()
         }
     }

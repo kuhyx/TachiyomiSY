@@ -10,15 +10,19 @@ import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.repository.MangaRepository
 import kotlin.time.Duration.Companion.seconds
 
-class GetLibraryManga(
+/** Lists the library view: favourites with their chapter counts and categories. */
+public class GetLibraryManga(
     private val mangaRepository: MangaRepository,
 ) {
 
-    suspend fun await(): List<LibraryManga> {
-        return mangaRepository.getLibraryManga()
-    }
+    /** Every library entry. */
+    public suspend fun await(): List<LibraryManga> = mangaRepository.getLibraryManga()
 
-    fun subscribe(): Flow<List<LibraryManga>> {
+    /**
+     * [await] as a flow that re-emits on every change; retries a transient null-pointer failure
+     * after a short delay and logs any other error, ending the flow.
+     */
+    public fun subscribe(): Flow<List<LibraryManga>> {
         return mangaRepository.getLibraryMangaAsFlow()
             .retry {
                 if (it is NullPointerException) {
@@ -27,7 +31,8 @@ class GetLibraryManga(
                 } else {
                     false
                 }
-            }.catch {
+            }
+            .catch {
                 this@GetLibraryManga.logcat(LogPriority.ERROR, it)
             }
     }

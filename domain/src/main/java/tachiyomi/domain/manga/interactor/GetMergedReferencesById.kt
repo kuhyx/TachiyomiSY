@@ -6,20 +6,23 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.manga.model.MergedMangaReference
 import tachiyomi.domain.manga.repository.MangaMergeRepository
 
-class GetMergedReferencesById(
+/** Lists the entries ([MergedMangaReference]) that make up one merged manga. */
+public class GetMergedReferencesById(
     private val mangaMergeRepository: MangaMergeRepository,
 ) {
 
-    suspend fun await(id: Long): List<MergedMangaReference> {
+    /** The references of merge [id]; logs and returns an empty list when the store fails. */
+    public suspend fun await(id: Long): List<MergedMangaReference> {
         return try {
             mangaMergeRepository.getReferencesById(id)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
             emptyList()
         }
     }
 
-    suspend fun subscribe(id: Long): Flow<List<MergedMangaReference>> {
-        return mangaMergeRepository.subscribeReferencesById(id)
-    }
+    /** [await] as a flow that re-emits on every change. */
+    public suspend fun subscribe(id: Long): Flow<List<MergedMangaReference>> =
+        mangaMergeRepository.subscribeReferencesById(id)
 }

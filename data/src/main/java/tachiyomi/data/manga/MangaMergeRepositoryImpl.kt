@@ -1,89 +1,41 @@
 package tachiyomi.data.manga
 
-import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
-import kotlinx.coroutines.flow.Flow
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.data.Database
-import tachiyomi.data.subscribeToList
-import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MergeMangaSettingsUpdate
 import tachiyomi.domain.manga.model.MergedMangaReference
+import tachiyomi.domain.manga.repository.MangaMergeReadRepository
 import tachiyomi.domain.manga.repository.MangaMergeRepository
 
-class MangaMergeRepositoryImpl(
+/** [MangaMergeRepository] on the SQLDelight `merged` table (SY); reads are delegated. */
+public class MangaMergeRepositoryImpl(
     private val database: Database,
-) : MangaMergeRepository {
+) : MangaMergeRepository,
+    MangaMergeReadRepository by MangaMergeReadRepositoryImpl(database) {
 
-    override suspend fun getMergedManga(): List<Manga> {
-        return database.mergedQueries
-            .selectAllMergedMangas(MangaMapper::mapManga)
-            .awaitAsList()
-    }
-
-    override suspend fun subscribeMergedManga(): Flow<List<Manga>> {
-        return database.mergedQueries
-            .selectAllMergedMangas(MangaMapper::mapManga)
-            .subscribeToList()
-    }
-
-    override suspend fun getMergedMangaById(id: Long): List<Manga> {
-        return database.mergedQueries
-            .selectMergedMangasById(id, MangaMapper::mapManga)
-            .awaitAsList()
-    }
-
-    override suspend fun subscribeMergedMangaById(id: Long): Flow<List<Manga>> {
-        return database.mergedQueries
-            .selectMergedMangasById(id, MangaMapper::mapManga)
-            .subscribeToList()
-    }
-
-    override suspend fun getReferencesById(id: Long): List<MergedMangaReference> {
-        return database.mergedQueries
-            .selectByMergeId(id, MergedMangaMapper::map)
-            .awaitAsList()
-    }
-
-    override suspend fun subscribeReferencesById(id: Long): Flow<List<MergedMangaReference>> {
-        return database.mergedQueries
-            .selectByMergeId(id, MergedMangaMapper::map)
-            .subscribeToList()
-    }
-
-    override suspend fun updateSettings(update: MergeMangaSettingsUpdate): Boolean {
-        return try {
-            partialUpdate(update)
-            true
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
-            false
-        }
-    }
+    override suspend fun updateSettings(update: MergeMangaSettingsUpdate): Boolean = updateAllSettings(listOf(update))
 
     override suspend fun updateAllSettings(values: List<MergeMangaSettingsUpdate>): Boolean {
         return try {
-            partialUpdate(*values.toTypedArray())
-            true
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
-            false
-        }
-    }
-
-    private suspend fun partialUpdate(vararg values: MergeMangaSettingsUpdate) {
-        database.transaction {
-            values.forEach { value ->
-                database.mergedQueries.updateSettingsById(
-                    id = value.id,
-                    getChapterUpdates = value.getChapterUpdates,
-                    downloadChapters = value.downloadChapters,
-                    infoManga = value.isInfoManga,
-                    chapterPriority = value.chapterPriority?.toLong(),
-                    chapterSortMode = value.chapterSortMode?.toLong(),
-                )
+            database.transaction {
+                values.forEach { value ->
+                    database.mergedQueries.updateSettingsById(
+                        id = value.id,
+                        getChapterUpdates = value.getChapterUpdates,
+                        downloadChapters = value.downloadChapters,
+                        infoManga = value.isInfoManga,
+                        chapterPriority = value.chapterPriority?.toLong(),
+                        chapterSortMode = value.chapterSortMode?.toLong(),
+                    )
+                }
             }
+            true
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
+            false
         }
     }
 
@@ -124,18 +76,10 @@ class MangaMergeRepositoryImpl(
     }
 
     override suspend fun deleteById(id: Long) {
-        database.mergedQueries
-            .deleteById(id)
+        database.mergedQueries.deleteById(id)
     }
 
     override suspend fun deleteByMergeId(mergeId: Long) {
-        database.mergedQueries
-            .deleteByMergeId(mergeId)
-    }
-
-    override suspend fun getMergeMangaForDownloading(mergeId: Long): List<Manga> {
-        return database.mergedQueries
-            .selectMergedMangasForDownloadingById(mergeId, MangaMapper::mapManga)
-            .awaitAsList()
+        database.mergedQueries.deleteByMergeId(mergeId)
     }
 }

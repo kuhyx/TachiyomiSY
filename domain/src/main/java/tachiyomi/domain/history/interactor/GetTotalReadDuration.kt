@@ -2,11 +2,11 @@ package tachiyomi.domain.history.interactor
 
 import tachiyomi.domain.history.repository.HistoryRepository
 
-class GetTotalReadDuration(
+/** The time spent reading across the whole history, for the statistics screen. */
+public class GetTotalReadDuration(
     private val repository: HistoryRepository,
 ) {
 
-    suspend fun await(): Long {
-        return repository.getTotalReadDuration()
-    }
+    /** The sum of every history row's read duration in milliseconds; 0 when there is no history. */
+    public suspend fun await(): Long = repository.getTotalReadDuration()
 }

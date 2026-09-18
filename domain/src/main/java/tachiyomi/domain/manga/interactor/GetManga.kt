@@ -7,34 +7,35 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.repository.MangaRepository
 
-class GetManga(
+/** Looks up single manga by id or by source url. */
+public class GetManga(
     private val mangaRepository: MangaRepository,
 ) : MetadataSource.GetMangaId {
 
-    suspend fun await(id: Long): Manga? {
+    /** The manga with [id]; null when there is none or the store fails (logged). */
+    public suspend fun await(id: Long): Manga? {
         return try {
             mangaRepository.getMangaById(id)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
             null
         }
     }
 
-    suspend fun subscribe(id: Long): Flow<Manga> {
-        return mangaRepository.getMangaByIdAsFlow(id)
-    }
+    /** The manga with [id], as a flow that re-emits on every change. */
+    public suspend fun subscribe(id: Long): Flow<Manga> = mangaRepository.getMangaByIdAsFlow(id)
 
-    fun subscribe(url: String, sourceId: Long): Flow<Manga?> {
-        return mangaRepository.getMangaByUrlAndSourceIdAsFlow(url, sourceId)
-    }
+    /** The manga at [url] in source [sourceId], or null, as a flow that re-emits on every change. */
+    public fun subscribe(url: String, sourceId: Long): Flow<Manga?> =
+        mangaRepository.getMangaByUrlAndSourceIdAsFlow(url, sourceId)
 
     // SY -->
-    suspend fun await(url: String, sourceId: Long): Manga? {
-        return mangaRepository.getMangaByUrlAndSourceId(url, sourceId)
-    }
 
-    override suspend fun awaitId(url: String, sourceId: Long): Long? {
-        return await(url, sourceId)?.id
-    }
+    /** The manga at [url] in source [sourceId], or null. */
+    public suspend fun await(url: String, sourceId: Long): Manga? =
+        mangaRepository.getMangaByUrlAndSourceId(url, sourceId)
+
+    override suspend fun awaitId(url: String, sourceId: Long): Long? = await(url, sourceId)?.id
     // SY <--
 }

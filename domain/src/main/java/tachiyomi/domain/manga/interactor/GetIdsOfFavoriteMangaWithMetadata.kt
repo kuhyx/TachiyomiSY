@@ -2,11 +2,11 @@ package tachiyomi.domain.manga.interactor
 
 import tachiyomi.domain.manga.repository.MangaMetadataRepository
 
-class GetIdsOfFavoriteMangaWithMetadata(
+/** Lists which favourites already have search metadata stored. */
+public class GetIdsOfFavoriteMangaWithMetadata(
     private val mangaMetadataRepository: MangaMetadataRepository,
 ) {
 
-    suspend fun await(): List<Long> {
-        return mangaMetadataRepository.getIdsOfFavoriteMangaWithMetadata()
-    }
+    /** Ids of every favourite that has metadata. */
+    public suspend fun await(): List<Long> = mangaMetadataRepository.getFavoriteIdsWithMetadata()
 }

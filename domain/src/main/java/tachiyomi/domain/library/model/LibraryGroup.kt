@@ -4,15 +4,29 @@ import dev.icerock.moko.resources.StringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
-object LibraryGroup {
+/** The ways the library can be grouped (the `groupLibraryBy` preference) and their labels. */
+public object LibraryGroup {
 
-    const val BY_DEFAULT = 0
-    const val BY_SOURCE = 1
-    const val BY_STATUS = 2
-    const val BY_TRACK_STATUS = 3
-    const val UNGROUPED = 4
+    /** By category. */
+    public const val BY_DEFAULT: Int = 0
 
-    fun groupTypeStringRes(type: Int, hasCategories: Boolean = true): StringResource {
+    /** By source. */
+    public const val BY_SOURCE: Int = 1
+
+    /** By publishing status. */
+    public const val BY_STATUS: Int = 2
+
+    /** By tracker status. */
+    public const val BY_TRACK_STATUS: Int = 3
+
+    /** One flat list. */
+    public const val UNGROUPED: Int = 4
+
+    /**
+     * The tab label for grouping [type]; [BY_DEFAULT] reads "ungrouped" when the user has no
+     * categories ([hasCategories] false).
+     */
+    public fun groupTypeStringRes(type: Int, hasCategories: Boolean = true): StringResource {
         return when (type) {
             BY_STATUS -> MR.strings.status
             BY_SOURCE -> MR.strings.label_sources

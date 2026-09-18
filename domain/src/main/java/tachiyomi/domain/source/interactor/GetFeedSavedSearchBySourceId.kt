@@ -4,15 +4,15 @@ import kotlinx.coroutines.flow.Flow
 import tachiyomi.domain.source.model.FeedSavedSearch
 import tachiyomi.domain.source.repository.FeedSavedSearchRepository
 
-class GetFeedSavedSearchBySourceId(
+/** Reads the feed entries of one source (SY). */
+public class GetFeedSavedSearchBySourceId(
     private val feedSavedSearchRepository: FeedSavedSearchRepository,
 ) {
 
-    suspend fun await(sourceId: Long): List<FeedSavedSearch> {
-        return feedSavedSearchRepository.getBySourceId(sourceId)
-    }
+    /** Feed entries of source [sourceId]; empty when it has none. */
+    public suspend fun await(sourceId: Long): List<FeedSavedSearch> = feedSavedSearchRepository.getBySourceId(sourceId)
 
-    fun subscribe(sourceId: Long): Flow<List<FeedSavedSearch>> {
-        return feedSavedSearchRepository.getBySourceIdAsFlow(sourceId)
-    }
+    /** [await] as a flow that re-emits on every change. */
+    public fun subscribe(sourceId: Long): Flow<List<FeedSavedSearch>> =
+        feedSavedSearchRepository.getBySourceIdAsFlow(sourceId)
 }

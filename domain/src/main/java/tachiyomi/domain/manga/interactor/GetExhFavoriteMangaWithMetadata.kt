@@ -3,11 +3,11 @@ package tachiyomi.domain.manga.interactor
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.repository.MangaMetadataRepository
 
-class GetExhFavoriteMangaWithMetadata(
+/** Lists the E-Hentai favourites that have search metadata, for the favourites sync. */
+public class GetExhFavoriteMangaWithMetadata(
     private val mangaMetadataRepository: MangaMetadataRepository,
 ) {
 
-    suspend fun await(): List<Manga> {
-        return mangaMetadataRepository.getExhFavoriteMangaWithMetadata()
-    }
+    /** Favourites from the E-Hentai sources that have metadata. */
+    public suspend fun await(): List<Manga> = mangaMetadataRepository.getExhFavoritesWithMetadata()
 }

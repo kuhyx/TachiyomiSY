@@ -6,13 +6,18 @@ import tachiyomi.domain.manga.interactor.GetFavorites
 import tachiyomi.domain.manga.interactor.SetMangaChapterFlags
 import tachiyomi.domain.manga.model.Manga
 
-class SetMangaDefaultChapterFlags(
+/** Applies the library-wide default chapter filters, sort and display mode to manga. */
+public class SetMangaDefaultChapterFlags(
     private val libraryPreferences: LibraryPreferences,
     private val setMangaChapterFlags: SetMangaChapterFlags,
     private val getFavorites: GetFavorites,
 ) {
 
-    suspend fun await(manga: Manga) {
+    /**
+     * Overwrites [manga]'s chapter flags with the defaults from [LibraryPreferences]; not cancellable
+     * once started.
+     */
+    public suspend fun await(manga: Manga) {
         withNonCancellableContext {
             with(libraryPreferences) {
                 setMangaChapterFlags.awaitSetAllFlags(
@@ -28,7 +33,8 @@ class SetMangaDefaultChapterFlags(
         }
     }
 
-    suspend fun awaitAll() {
+    /** [await] for every favourite. */
+    public suspend fun awaitAll() {
         withNonCancellableContext {
             getFavorites.await().forEach { await(it) }
         }

@@ -2,13 +2,17 @@ package tachiyomi.domain.manga.interactor
 
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaUpdate
+import tachiyomi.domain.manga.model.sortDescending
+import tachiyomi.domain.manga.model.sorting
 import tachiyomi.domain.manga.repository.MangaRepository
 
-class SetMangaChapterFlags(
+/** Rewrites the chapter filter, sort and display bits of a manga's [Manga.chapterFlags]. */
+public class SetMangaChapterFlags(
     private val mangaRepository: MangaRepository,
 ) {
 
-    suspend fun awaitSetDownloadedFilter(manga: Manga, flag: Long): Boolean {
+    /** Sets [manga]'s downloaded filter to [flag]; true on success. */
+    public suspend fun awaitSetDownloadedFilter(manga: Manga, flag: Long): Boolean {
         return mangaRepository.update(
             MangaUpdate(
                 id = manga.id,
@@ -17,7 +21,8 @@ class SetMangaChapterFlags(
         )
     }
 
-    suspend fun awaitSetUnreadFilter(manga: Manga, flag: Long): Boolean {
+    /** Sets [manga]'s unread filter to [flag]; true on success. */
+    public suspend fun awaitSetUnreadFilter(manga: Manga, flag: Long): Boolean {
         return mangaRepository.update(
             MangaUpdate(
                 id = manga.id,
@@ -26,7 +31,8 @@ class SetMangaChapterFlags(
         )
     }
 
-    suspend fun awaitSetBookmarkFilter(manga: Manga, flag: Long): Boolean {
+    /** Sets [manga]'s bookmarked filter to [flag]; true on success. */
+    public suspend fun awaitSetBookmarkFilter(manga: Manga, flag: Long): Boolean {
         return mangaRepository.update(
             MangaUpdate(
                 id = manga.id,
@@ -35,7 +41,8 @@ class SetMangaChapterFlags(
         )
     }
 
-    suspend fun awaitSetDisplayMode(manga: Manga, flag: Long): Boolean {
+    /** Sets [manga]'s chapter display mode to [flag]; true on success. */
+    public suspend fun awaitSetDisplayMode(manga: Manga, flag: Long): Boolean {
         return mangaRepository.update(
             MangaUpdate(
                 id = manga.id,
@@ -44,7 +51,11 @@ class SetMangaChapterFlags(
         )
     }
 
-    suspend fun awaitSetSortingModeOrFlipOrder(manga: Manga, flag: Long): Boolean {
+    /**
+     * Sorts [manga] by [flag] ascending, or flips the direction when it already sorts by [flag];
+     * true on success.
+     */
+    public suspend fun awaitSetSortingModeOrFlipOrder(manga: Manga, flag: Long): Boolean {
         val newFlags = manga.chapterFlags.let {
             if (manga.sorting == flag) {
                 // Just flip the order
@@ -69,7 +80,8 @@ class SetMangaChapterFlags(
         )
     }
 
-    suspend fun awaitSetAllFlags(
+    /** Replaces every chapter flag of manga [mangaId] with the given values; true on success. */
+    public suspend fun awaitSetAllFlags(
         mangaId: Long,
         unreadFilter: Long,
         downloadedFilter: Long,
@@ -91,7 +103,5 @@ class SetMangaChapterFlags(
         )
     }
 
-    private fun Long.setFlag(flag: Long, mask: Long): Long {
-        return this and mask.inv() or (flag and mask)
-    }
+    private fun Long.setFlag(flag: Long, mask: Long): Long = this and mask.inv() or (flag and mask)
 }

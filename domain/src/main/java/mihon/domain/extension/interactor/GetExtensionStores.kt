@@ -4,10 +4,13 @@ import kotlinx.coroutines.flow.Flow
 import mihon.domain.extension.model.ExtensionStore
 import mihon.domain.extension.repository.ExtensionStoreRepository
 
-class GetExtensionStores(
+/** Lists the extension stores the user has added. */
+public class GetExtensionStores(
     private val repository: ExtensionStoreRepository,
 ) {
-    suspend fun get(): List<ExtensionStore> = repository.getAll()
+    /** Every store. */
+    public suspend fun get(): List<ExtensionStore> = repository.getAll()
 
-    fun subscribe(): Flow<List<ExtensionStore>> = repository.getAllAsFlow()
+    /** [get] as a flow that re-emits on every change. */
+    public fun subscribe(): Flow<List<ExtensionStore>> = repository.getAllAsFlow()
 }

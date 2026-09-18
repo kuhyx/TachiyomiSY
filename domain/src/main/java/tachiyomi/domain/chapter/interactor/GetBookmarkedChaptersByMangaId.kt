@@ -7,7 +7,8 @@ import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.repository.ChapterRepository
 import tachiyomi.domain.manga.interactor.GetManga
 
-class GetBookmarkedChaptersByMangaId(
+/** Lists the bookmarked chapters of one manga, merged manga included. */
+public class GetBookmarkedChaptersByMangaId(
     private val chapterRepository: ChapterRepository,
     // SY -->
     private val getManga: GetManga,
@@ -15,18 +16,26 @@ class GetBookmarkedChaptersByMangaId(
     // SY <--
 ) {
 
-    suspend fun await(mangaId: Long): List<Chapter> {
+    /** Bookmarked chapters of [mangaId]; empty when the manga is unknown or the store fails (logged). */
+    public suspend fun await(mangaId: Long): List<Chapter> {
         return try {
             // SY -->
-            val manga = getManga.await(mangaId) ?: return emptyList()
-            if (manga.source == MERGED_SOURCE_ID) {
-                return getMergedChaptersByMangaId.await(mangaId, applyScanlatorFilter = true)
-                    .filter { it.bookmark }
+            val manga = getManga.await(mangaId)
+            when {
+                manga == null -> {
+                    emptyList()
+                }
+                manga.source == MERGED_SOURCE_ID -> {
+                    getMergedChaptersByMangaId.await(mangaId, applyScanlatorFilter = true).filter { it.bookmark }
+                }
+                else -> {
+                    chapterRepository.getBookmarkedChaptersByMangaId(mangaId)
+                }
             }
             // SY <--
-            chapterRepository.getBookmarkedChaptersByMangaId(mangaId)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
             emptyList()
         }
     }

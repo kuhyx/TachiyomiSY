@@ -4,15 +4,14 @@ import kotlinx.coroutines.flow.Flow
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.repository.MangaRepository
 
-class GetFavorites(
+/** Lists the library's favourites, all of them or per source. */
+public class GetFavorites(
     private val mangaRepository: MangaRepository,
 ) {
 
-    suspend fun await(): List<Manga> {
-        return mangaRepository.getFavorites()
-    }
+    /** Every favourite. */
+    public suspend fun await(): List<Manga> = mangaRepository.getFavorites()
 
-    fun subscribe(sourceId: Long): Flow<List<Manga>> {
-        return mangaRepository.getFavoritesBySourceId(sourceId)
-    }
+    /** Favourites of source [sourceId], as a flow that re-emits on every change. */
+    public fun subscribe(sourceId: Long): Flow<List<Manga>> = mangaRepository.getFavoritesBySourceId(sourceId)
 }

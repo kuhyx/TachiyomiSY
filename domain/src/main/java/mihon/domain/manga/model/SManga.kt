@@ -3,7 +3,8 @@ package mihon.domain.manga.model
 import eu.kanade.tachiyomi.source.model.SManga
 import tachiyomi.domain.manga.model.Manga
 
-fun SManga.toDomainManga(sourceId: Long): Manga {
+/** A fresh [Manga] row of source [sourceId] carrying this source model's fields; the id is unset. */
+public fun SManga.toDomainManga(sourceId: Long): Manga {
     return Manga.create().copy(
         url = url,
         // SY -->

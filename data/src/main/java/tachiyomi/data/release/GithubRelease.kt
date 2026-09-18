@@ -6,9 +6,14 @@ import tachiyomi.domain.release.model.Release
 
 /**
  * Contains information about the latest release from GitHub.
+ *
+ * @property version The release tag name.
+ * @property info The release notes in GitHub Markdown.
+ * @property releaseLink Url of the release page.
+ * @property assets The files attached to the release.
  */
 @Serializable
-data class GithubRelease(
+public data class GithubRelease(
     @SerialName("tag_name") val version: String,
     @SerialName("body") val info: String,
     @SerialName("html_url") val releaseLink: String,
@@ -17,9 +22,11 @@ data class GithubRelease(
 
 /**
  * Assets class containing download url.
+ *
+ * @property downloadLink Direct download url of the asset.
  */
 @Serializable
-data class GitHubAssets(@SerialName("browser_download_url") val downloadLink: String)
+public data class GitHubAssets(@SerialName("browser_download_url") val downloadLink: String)
 
 /**
  * Regular expression that matches a mention to a valid GitHub username, like it's
@@ -31,12 +38,16 @@ data class GitHubAssets(@SerialName("browser_download_url") val downloadLink: St
  *
  * Reference: https://stackoverflow.com/a/30281147
  */
-val gitHubUsernameMentionRegex =
+public val gitHubUsernameMentionRegex: Regex =
     """\B@([a-z0-9](?:-(?=[a-z0-9])|[a-z0-9]){0,38}(?<=[a-z0-9]))""".toRegex(
         RegexOption.IGNORE_CASE,
     )
 
-val releaseMapper: (GithubRelease) -> Release = {
+/**
+ * The domain [Release] for a GitHub release, with `@user` mentions in the notes turned into profile
+ * links and the assets reduced to their download urls.
+ */
+public val releaseMapper: (GithubRelease) -> Release = {
     Release(
         it.version,
         it.info.replace(gitHubUsernameMentionRegex) { mention ->

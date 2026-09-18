@@ -5,9 +5,21 @@ import eu.kanade.tachiyomi.extension.model.Extension
 import kotlinx.serialization.Serializable
 import mihon.domain.extension.model.ExtensionStore
 
+/**
+ * One entry of a legacy store's `index.min.json` extension array.
+ *
+ * @property name Display name, usually prefixed with `Tachiyomi: `.
+ * @property pkg Android package name of the extension.
+ * @property apk File name of the APK under the store's `apk/` directory.
+ * @property lang Language code the extension serves, or `all`.
+ * @property code Version code of the APK.
+ * @property version Version name; its last dotted component is the extension-lib version.
+ * @property nsfw 1 when the extension is NSFW, 0 otherwise.
+ * @property sources The sources the extension ships, or null on old indexes.
+ */
 @SuppressLint("UnsafeOptInUsageError")
 @Serializable
-data class NetworkLegacyExtension(
+public data class NetworkLegacyExtension(
     val name: String,
     val pkg: String,
     val apk: String,
@@ -17,15 +29,27 @@ data class NetworkLegacyExtension(
     val nsfw: Int,
     val sources: List<Source>?,
 ) {
+    /**
+     * One source inside a legacy extension entry.
+     *
+     * @property id Source id.
+     * @property lang Language code of the source.
+     * @property name Display name of the source.
+     * @property baseUrl Home url of the source.
+     */
     @Serializable
-    data class Source(
+    public data class Source(
         val id: Long,
         val lang: String,
         val name: String,
         val baseUrl: String,
     )
 
-    fun toAvailableExtension(store: ExtensionStore, storeBaseUrl: String): Extension.Available {
+    /**
+     * The installable form of this entry for [store], with APK and icon urls built on [storeBaseUrl];
+     * an entry without sources gets one placeholder source with id 0.
+     */
+    public fun toAvailableExtension(store: ExtensionStore, storeBaseUrl: String): Extension.Available {
         return Extension.Available(
             name = name.substringAfter("Tachiyomi: "),
             pkgName = pkg,

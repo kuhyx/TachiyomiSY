@@ -2,11 +2,17 @@ package tachiyomi.domain.track.interactor
 
 import tachiyomi.domain.track.model.Track
 
-class IsTrackUnfollowed {
+/** Whether a track is an MDList entry the user has unfollowed, which the tracker UI hides. */
+public class IsTrackUnfollowed {
 
-    fun await(track: Track) =
+    /** True for an MDList track with the "unfollowed" status. */
+    public fun await(track: Track): Boolean = track.trackerId == MDLIST_TRACKER_ID && track.status == UNFOLLOWED_STATUS
+
+    private companion object {
         // TrackManager.MDLIST
-        track.trackerId == 60L &&
-            // FollowStatus.UNFOLLOWED
-            track.status == 0L
+        const val MDLIST_TRACKER_ID = 60L
+
+        // FollowStatus.UNFOLLOWED
+        const val UNFOLLOWED_STATUS = 0L
+    }
 }

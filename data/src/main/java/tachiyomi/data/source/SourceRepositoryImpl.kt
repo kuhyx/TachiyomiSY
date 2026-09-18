@@ -17,7 +17,11 @@ import tachiyomi.domain.source.repository.SourceRepository
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.source.model.Source as DomainSource
 
-class SourceRepositoryImpl(
+/**
+ * [SourceRepository] over the installed sources of [SourceManager] plus the `mangas` table for
+ * counts; browse paging sources are E-Hentai specific for EH-based sources (SY).
+ */
+public class SourceRepositoryImpl(
     private val sourceManager: SourceManager,
     private val database: Database,
 ) : SourceRepository {

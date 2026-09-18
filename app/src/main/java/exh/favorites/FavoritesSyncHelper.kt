@@ -40,6 +40,7 @@ import tachiyomi.domain.manga.interactor.GetLibraryManga
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.FavoriteEntry
 import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.model.getUrl
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt

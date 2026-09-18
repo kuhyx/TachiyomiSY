@@ -2,11 +2,13 @@ package tachiyomi.domain.chapter.interactor
 
 import tachiyomi.domain.chapter.repository.ChapterRepository
 
-class DeleteChapters(
+/** Deletes chapter rows by id. */
+public class DeleteChapters(
     private val chapterRepository: ChapterRepository,
 ) {
 
-    suspend fun await(chapters: List<Long>) {
+    /** Deletes the chapters whose ids are [chapters]. */
+    public suspend fun await(chapters: List<Long>) {
         chapterRepository.removeChaptersWithIds(chapters)
     }
 }

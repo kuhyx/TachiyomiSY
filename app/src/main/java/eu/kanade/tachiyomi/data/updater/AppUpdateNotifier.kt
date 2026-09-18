@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notify
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.domain.release.model.Release
+import tachiyomi.domain.release.model.getDownloadLink
 import tachiyomi.i18n.MR
 
 internal class AppUpdateNotifier(private val context: Context) {

@@ -3,15 +3,14 @@ package tachiyomi.domain.manga.interactor
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.repository.MangaRepository
 
-class NetworkToLocalManga(
+/** Turns manga fetched from a source into database rows, reusing rows that already exist. */
+public class NetworkToLocalManga(
     private val mangaRepository: MangaRepository,
 ) {
 
-    suspend operator fun invoke(manga: Manga): Manga {
-        return invoke(listOf(manga)).single()
-    }
+    /** The local row for [manga], inserted if it was not stored yet. */
+    public suspend operator fun invoke(manga: Manga): Manga = invoke(listOf(manga)).single()
 
-    suspend operator fun invoke(manga: List<Manga>): List<Manga> {
-        return mangaRepository.insertNetworkManga(manga)
-    }
+    /** The local rows for every manga in [manga], in the same order, inserting the ones not stored yet. */
+    public suspend operator fun invoke(manga: List<Manga>): List<Manga> = mangaRepository.insertNetworkManga(manga)
 }

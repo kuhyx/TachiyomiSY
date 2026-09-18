@@ -10,60 +10,82 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 private val mapper = { cursor: SqlCursor ->
+    val row = RowReader(cursor)
     LibraryView(
-        _id = cursor.getLong(0)!!,
-        source = cursor.getLong(1)!!,
-        url = cursor.getString(2)!!,
-        artist = cursor.getString(3),
-        author = cursor.getString(4),
-        description = cursor.getString(5),
-        genre = cursor.getString(6)?.let(StringListColumnAdapter::decode),
-        title = cursor.getString(7)!!,
-        status = cursor.getLong(8)!!,
-        thumbnail_url = cursor.getString(9),
-        favorite = cursor.getLong(10)!! == 1L,
-        last_update = cursor.getLong(11),
-        next_update = cursor.getLong(12),
-        initialized = cursor.getLong(13)!! == 1L,
-        viewer = cursor.getLong(14)!!,
-        chapter_flags = cursor.getLong(15)!!,
-        cover_last_modified = cursor.getLong(16)!!,
-        date_added = cursor.getLong(17)!!,
-        filtered_scanlators = null,
-        update_strategy = UpdateStrategyColumnAdapter.decode(cursor.getLong(19)!!),
-        calculate_interval = cursor.getLong(20)!!,
-        last_modified_at = cursor.getLong(21)!!,
-        favorite_modified_at = cursor.getLong(22),
-        version = cursor.getLong(23)!!,
-        is_syncing = cursor.getLong(24)!!,
-        notes = cursor.getString(25)!!,
-        memo = MemoColumnAdapter.decode(cursor.getBytes(26)!!),
-        totalCount = cursor.getLong(27)!!,
-        readCount = cursor.getDouble(28)!!,
-        latestUpload = cursor.getLong(29)!!,
-        chapterFetchedAt = cursor.getLong(30)!!,
-        lastRead = cursor.getLong(31)!!,
-        bookmarkCount = cursor.getDouble(32)!!,
-        categories = cursor.getString(33)!!,
+        _id = row.long(),
+        source = row.long(),
+        url = row.string(),
+        artist = row.stringOrNull(),
+        author = row.stringOrNull(),
+        description = row.stringOrNull(),
+        genre = row.stringOrNull()?.let(StringListColumnAdapter::decode),
+        title = row.string(),
+        status = row.long(),
+        thumbnail_url = row.stringOrNull(),
+        favorite = row.boolean(),
+        last_update = row.longOrNull(),
+        next_update = row.longOrNull(),
+        initialized = row.boolean(),
+        viewer = row.long(),
+        chapter_flags = row.long(),
+        cover_last_modified = row.long(),
+        date_added = row.long(),
+        filtered_scanlators = row.skipped(),
+        update_strategy = UpdateStrategyColumnAdapter.decode(row.long()),
+        calculate_interval = row.long(),
+        last_modified_at = row.long(),
+        favorite_modified_at = row.longOrNull(),
+        version = row.long(),
+        is_syncing = row.long(),
+        notes = row.string(),
+        memo = MemoColumnAdapter.decode(row.bytes()),
+        totalCount = row.long(),
+        readCount = row.double(),
+        latestUpload = row.long(),
+        chapterFetchedAt = row.long(),
+        lastRead = row.long(),
+        bookmarkCount = row.double(),
+        categories = row.string(),
     )
 }
 
-fun getLibraryQuery(condition: String = "M.favorite = 1"): LibraryQuery {
+/** The merged-aware library query on the injected driver; [condition] is the SQL filter on `mangas M`. */
+public fun getLibraryQuery(condition: String = DEFAULT_CONDITION): LibraryQuery {
     return LibraryQuery(
         Injekt.get<SqlDriver>(),
         condition,
     )
 }
 
-class LibraryQuery(
-    val driver: SqlDriver,
-    val condition: String = "M.favorite = 1",
+private const val DEFAULT_CONDITION = "M.favorite = 1"
+
+/**
+ * The library view across normal and merged sources (SY); the generated
+ * `libraryView` cannot express the merged half. Same columns as the view.
+ *
+ * @property driver The driver the query runs on.
+ * @property condition SQL predicate on the `mangas` row (`M`) selecting which manga to list; favourites by default.
+ */
+public class LibraryQuery(
+    public val driver: SqlDriver,
+    public val condition: String = DEFAULT_CONDITION,
 ) : ExecutableQuery<LibraryView>(mapper) {
 
     override fun <R> execute(mapper: (SqlCursor) -> QueryResult<R>): QueryResult<R> {
         return driver.executeQuery(
-            null,
-            """
+            identifier = null,
+            sql = librarySql(condition),
+            mapper = mapper,
+            parameters = 0,
+        )
+    }
+
+    override fun toString(): String = "LibraryQuery.sq:get"
+
+    private companion object {
+        // Both halves of the UNION select the same columns from `mangas M` joined to
+        // chapter aggregates C and categories MC; they differ in how C is keyed.
+        const val SELECT_COLUMNS = """
             SELECT
                 M.*,
                 coalesce(C.total, 0) AS totalCount,
@@ -74,9 +96,8 @@ class LibraryQuery(
                 coalesce(C.bookmarkCount, 0) AS bookmarkCount,
                 coalesce(MC.categories, '0') AS categories
             FROM mangas M
-            LEFT JOIN (
-                SELECT
-                    chapters.manga_id,
+        """
+        const val CHAPTER_AGGREGATES = """
                     count(*) AS total,
                     sum(read) AS readCount,
                     coalesce(max(chapters.date_upload), 0) AS latestUpload,
@@ -89,28 +110,27 @@ class LibraryQuery(
                 AND chapters.scanlator = excluded_scanlators.scanlator
                 LEFT JOIN history
                 ON chapters._id = history.chapter_id
-                WHERE excluded_scanlators.scanlator IS NULL
-                GROUP BY chapters.manga_id
-            ) AS C
-            ON M._id = C.manga_id
+        """
+        const val CATEGORIES_JOIN = """
             LEFT JOIN (
                 SELECT manga_id, group_concat(category_id) AS categories
                 FROM mangas_categories
                 GROUP BY manga_id
             ) AS MC
             ON MC.manga_id = M._id
-            WHERE $condition AND M.source <> $MERGED_SOURCE_ID
-            UNION
-            SELECT
-                M.*,
-                coalesce(C.total, 0) AS totalCount,
-                coalesce(C.readCount, 0) AS readCount,
-                coalesce(C.latestUpload, 0) AS latestUpload,
-                coalesce(C.fetchedAt, 0) AS chapterFetchedAt,
-                coalesce(C.lastRead, 0) AS lastRead,
-                coalesce(C.bookmarkCount, 0) AS bookmarkCount,
-                coalesce(MC.categories, '0') AS categories
-            FROM mangas M
+        """
+        const val NORMAL_JOINS = """
+            LEFT JOIN (
+                SELECT
+                    chapters.manga_id,
+                    $CHAPTER_AGGREGATES
+                WHERE excluded_scanlators.scanlator IS NULL
+                GROUP BY chapters.manga_id
+            ) AS C
+            ON M._id = C.manga_id
+            $CATEGORIES_JOIN
+        """
+        const val MERGED_JOINS = """
             LEFT JOIN (
                 SELECT merged.manga_id,merged.merge_id
                 FROM merged
@@ -120,36 +140,24 @@ class LibraryQuery(
             LEFT JOIN (
                 SELECT
                     ME.merge_id,
-                    count(*) AS total,
-                    sum(read) AS readCount,
-                    coalesce(max(chapters.date_upload), 0) AS latestUpload,
-                    coalesce(max(history.last_read), 0) AS lastRead,
-                    coalesce(max(chapters.date_fetch), 0) AS fetchedAt,
-                    sum(chapters.bookmark) AS bookmarkCount
-                FROM chapters
-                LEFT JOIN excluded_scanlators
-                ON chapters.manga_id = excluded_scanlators.manga_id
-                AND chapters.scanlator = excluded_scanlators.scanlator
-                LEFT JOIN history
-                ON chapters._id = history.chapter_id
+                    $CHAPTER_AGGREGATES
                 LEFT JOIN merged as ME
                 ON ME.manga_id = chapters.manga_id
                 WHERE excluded_scanlators.scanlator IS NULL
                 GROUP BY ME.merge_id
             ) AS C
             ON ME.merge_id = C.merge_id
-            LEFT JOIN (
-                SELECT manga_id, group_concat(category_id) AS categories
-                FROM mangas_categories
-                GROUP BY manga_id
-            ) AS MC
-            ON MC.manga_id = M._id
-            WHERE $condition AND M.source = $MERGED_SOURCE_ID;
-            """.trimIndent(),
-            mapper,
-            parameters = 0,
-        )
-    }
+            $CATEGORIES_JOIN
+        """
 
-    override fun toString(): String = "LibraryQuery.sq:get"
+        fun librarySql(condition: String): String = """
+            $SELECT_COLUMNS
+            $NORMAL_JOINS
+            WHERE $condition AND M.source <> $MERGED_SOURCE_ID
+            UNION
+            $SELECT_COLUMNS
+            $MERGED_JOINS
+            WHERE $condition AND M.source = $MERGED_SOURCE_ID;
+        """.trimIndent()
+    }
 }

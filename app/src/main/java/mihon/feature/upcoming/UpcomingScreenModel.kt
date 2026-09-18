@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mihon.domain.upcoming.interactor.GetUpcomingManga
 import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.model.expectedNextUpdate
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.time.LocalDate

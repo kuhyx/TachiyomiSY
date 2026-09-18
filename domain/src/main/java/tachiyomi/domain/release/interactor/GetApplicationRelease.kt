@@ -7,7 +7,8 @@ import tachiyomi.domain.release.service.ReleaseService
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class GetApplicationRelease(
+/** The app update check: asks GitHub for the latest release and compares it with the running build. */
+public class GetApplicationRelease(
     private val service: ReleaseService,
     private val preferenceStore: PreferenceStore,
 ) {
@@ -16,11 +17,15 @@ class GetApplicationRelease(
         preferenceStore.getLong(Preference.appStateKey("last_app_check"), 0)
     }
 
-    suspend fun await(arguments: Arguments): Result {
+    /**
+     * [Result.NewUpdate] when the latest release of the repository is newer than the running build,
+     * else [Result.NoNewUpdate]. Checks at most once every 3 days unless [Arguments.forceCheck] is
+     * set, answering [Result.NoNewUpdate] in between; a failed fetch throws.
+     */
+    public suspend fun await(arguments: Arguments): Result {
         val now = Instant.now()
 
-        // Limit checks to once every 3 days at most
-        val nextCheckTime = Instant.ofEpochMilli(lastChecked.get()).plus(3, ChronoUnit.DAYS)
+        val nextCheckTime = Instant.ofEpochMilli(lastChecked.get()).plus(CHECK_INTERVAL_DAYS, ChronoUnit.DAYS)
         if (!arguments.forceCheck && now.isBefore(nextCheckTime)) {
             return Result.NoNewUpdate
         }
@@ -34,10 +39,7 @@ class GetApplicationRelease(
         val isNewVersion =
             isNewVersion(arguments.isPreview, arguments.syDebugVersion, arguments.versionName, release.version)
         // SY <--
-        return when {
-            isNewVersion -> Result.NewUpdate(release)
-            else -> Result.NoNewUpdate
-        }
+        return if (isNewVersion) Result.NewUpdate(release) else Result.NoNewUpdate
     }
 
     // SY -->
@@ -73,7 +75,17 @@ class GetApplicationRelease(
     }
     // SY <--
 
-    data class Arguments(
+    /**
+     * What the check needs to know about the running build.
+     *
+     * @property isPreview Whether this is a preview build, compared by build number instead of version.
+     * @property commitCount Commit count the build was made from.
+     * @property versionName Version name of the build, such as `1.2.3`, compared for release builds.
+     * @property repository GitHub `owner/repo` whose latest release is fetched.
+     * @property syDebugVersion Build number of a preview build, such as `508`.
+     * @property forceCheck Whether to ask GitHub even when the last check was less than 3 days ago.
+     */
+    public data class Arguments(
         val isPreview: Boolean,
         val commitCount: Int,
         val versionName: String,
@@ -84,9 +96,24 @@ class GetApplicationRelease(
         val forceCheck: Boolean = false,
     )
 
-    sealed interface Result {
-        data class NewUpdate(val release: Release) : Result
-        data object NoNewUpdate : Result
-        data object OsTooOld : Result
+    /** The outcome of an update check. */
+    public sealed interface Result {
+        /**
+         * A newer release exists.
+         *
+         * @property release The release to offer.
+         */
+        public data class NewUpdate(val release: Release) : Result
+
+        /** The running build is current, or the check was skipped as too recent. */
+        public data object NoNewUpdate : Result
+
+        /** This Android version is no longer supported, so no update is offered. */
+        public data object OsTooOld : Result
+    }
+
+    private companion object {
+        // Limit checks to once every 3 days at most
+        const val CHECK_INTERVAL_DAYS = 3L
     }
 }

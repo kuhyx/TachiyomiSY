@@ -6,24 +6,29 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.source.model.FeedSavedSearch
 import tachiyomi.domain.source.repository.FeedSavedSearchRepository
 
-class InsertFeedSavedSearch(
+/** Adds entries to the feed (SY). */
+public class InsertFeedSavedSearch(
     private val feedSavedSearchRepository: FeedSavedSearchRepository,
 ) {
 
-    suspend fun await(feedSavedSearch: FeedSavedSearch): Long? {
+    /** Inserts [feedSavedSearch] and returns its id; logs and returns null when the store fails. */
+    public suspend fun await(feedSavedSearch: FeedSavedSearch): Long? {
         return try {
             feedSavedSearchRepository.insert(feedSavedSearch)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR) { e.asLog() }
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR) { expected.asLog() }
             null
         }
     }
 
-    suspend fun awaitAll(feedSavedSearch: List<FeedSavedSearch>) {
+    /** Inserts every entry of [feedSavedSearch] in one transaction; logs and inserts nothing when the store fails. */
+    public suspend fun awaitAll(feedSavedSearch: List<FeedSavedSearch>) {
         try {
             feedSavedSearchRepository.insertAll(feedSavedSearch)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR) { e.asLog() }
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR) { expected.asLog() }
         }
     }
 }

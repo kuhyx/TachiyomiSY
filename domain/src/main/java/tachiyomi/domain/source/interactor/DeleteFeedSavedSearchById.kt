@@ -2,11 +2,13 @@ package tachiyomi.domain.source.interactor
 
 import tachiyomi.domain.source.repository.FeedSavedSearchRepository
 
-class DeleteFeedSavedSearchById(
+/** Removes one entry from the feed (SY). */
+public class DeleteFeedSavedSearchById(
     private val feedSavedSearchRepository: FeedSavedSearchRepository,
 ) {
 
-    suspend fun await(feedSavedSearchId: Long) {
-        return feedSavedSearchRepository.delete(feedSavedSearchId)
+    /** Deletes the feed entry [feedSavedSearchId]; a store failure propagates. */
+    public suspend fun await(feedSavedSearchId: Long) {
+        feedSavedSearchRepository.delete(feedSavedSearchId)
     }
 }

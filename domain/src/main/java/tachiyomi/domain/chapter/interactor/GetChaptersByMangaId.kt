@@ -5,15 +5,21 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.repository.ChapterRepository
 
-class GetChaptersByMangaId(
+/** Lists the chapters of one manga. */
+public class GetChaptersByMangaId(
     private val chapterRepository: ChapterRepository,
 ) {
 
-    suspend fun await(mangaId: Long, applyScanlatorFilter: Boolean = false): List<Chapter> {
+    /**
+     * Chapters of [mangaId]; [applyScanlatorFilter] drops the manga's excluded scanlators.
+     * Logs and returns an empty list when the store fails.
+     */
+    public suspend fun await(mangaId: Long, applyScanlatorFilter: Boolean = false): List<Chapter> {
         return try {
             chapterRepository.getChapterByMangaId(mangaId, applyScanlatorFilter)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
             emptyList()
         }
     }

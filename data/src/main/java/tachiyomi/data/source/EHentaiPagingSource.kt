@@ -8,7 +8,11 @@ import exh.metadata.metadata.RaisedSearchMetadata
 import mihon.domain.manga.model.toDomainManga
 import tachiyomi.domain.manga.model.Manga
 
-abstract class EHentaiPagingSource(
+/**
+ * [BaseSourcePagingSource] for E-Hentai based sources (SY): pages carry their own next key and every
+ * manga is paired with its gallery metadata, without the url deduplication of the base class.
+ */
+public abstract class EHentaiPagingSource(
     override val source: Source,
 ) : BaseSourcePagingSource(source) {
 
@@ -31,24 +35,28 @@ abstract class EHentaiPagingSource(
     }
 }
 
-class EHentaiSearchPagingSource(
+/**
+ * Pages an E-Hentai based source's search results.
+ *
+ * @param source The source to search.
+ * @property query The search text.
+ * @property filters The search filters sent with the query.
+ */
+public class EHentaiSearchPagingSource(
     source: Source,
-    val query: String,
-    val filters: FilterList,
+    public val query: String,
+    public val filters: FilterList,
 ) : EHentaiPagingSource(source) {
-    override suspend fun requestNextPage(currentPage: Int): MangasPage {
-        return source.getSearchManga(currentPage, query, filters)
-    }
+    override suspend fun requestNextPage(currentPage: Int): MangasPage =
+        source.getSearchManga(currentPage, query, filters)
 }
 
-class EHentaiPopularPagingSource(source: Source) : EHentaiPagingSource(source) {
-    override suspend fun requestNextPage(currentPage: Int): MangasPage {
-        return source.getPopularManga(currentPage)
-    }
+/** Pages an E-Hentai based source's popular listing. */
+public class EHentaiPopularPagingSource(source: Source) : EHentaiPagingSource(source) {
+    override suspend fun requestNextPage(currentPage: Int): MangasPage = source.getPopularManga(currentPage)
 }
 
-class EHentaiLatestPagingSource(source: Source) : EHentaiPagingSource(source) {
-    override suspend fun requestNextPage(currentPage: Int): MangasPage {
-        return source.getLatestUpdates(currentPage)
-    }
+/** Pages an E-Hentai based source's latest-updates listing. */
+public class EHentaiLatestPagingSource(source: Source) : EHentaiPagingSource(source) {
+    override suspend fun requestNextPage(currentPage: Int): MangasPage = source.getLatestUpdates(currentPage)
 }

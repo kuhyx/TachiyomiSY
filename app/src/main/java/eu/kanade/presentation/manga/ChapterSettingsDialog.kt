@@ -33,6 +33,11 @@ import eu.kanade.presentation.components.TabbedDialog
 import eu.kanade.presentation.components.TabbedDialogPaddings
 import tachiyomi.core.common.preference.TriState
 import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.model.bookmarkedFilter
+import tachiyomi.domain.manga.model.displayMode
+import tachiyomi.domain.manga.model.sortDescending
+import tachiyomi.domain.manga.model.sorting
+import tachiyomi.domain.manga.model.unreadFilter
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.LabeledCheckbox
 import tachiyomi.presentation.core.components.RadioItem

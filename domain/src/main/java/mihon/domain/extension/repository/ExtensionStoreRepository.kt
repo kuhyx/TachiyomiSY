@@ -4,20 +4,29 @@ import eu.kanade.tachiyomi.extension.model.Extension
 import kotlinx.coroutines.flow.Flow
 import mihon.domain.extension.model.ExtensionStore
 
-interface ExtensionStoreRepository {
-    suspend fun insert(indexUrl: String): Result<Unit>
+/** Storage and network access for the user's extension stores, keyed by index url. */
+public interface ExtensionStoreRepository {
+    /** Fetches the store at [indexUrl] and upserts it; a failed fetch is the returned [Result]'s failure. */
+    public suspend fun insert(indexUrl: String): Result<Unit>
 
-    suspend fun insertFromPreference(indexUrl: String, name: String)
+    /** Upserts a placeholder store for [indexUrl] called [name], for migrating the old url preference. */
+    public suspend fun insertFromPreference(indexUrl: String, name: String)
 
-    suspend fun refreshAll()
+    /** Re-fetches every store's index; a store that fails is logged and left as it was. */
+    public suspend fun refreshAll()
 
-    suspend fun fetchExtensions(): List<Extension.Available>
+    /** Every extension every store offers; a store that fails is logged and skipped. */
+    public suspend fun fetchExtensions(): List<Extension.Available>
 
-    suspend fun getAll(): List<ExtensionStore>
+    /** Every store the user has added. */
+    public suspend fun getAll(): List<ExtensionStore>
 
-    fun getAllAsFlow(): Flow<List<ExtensionStore>>
+    /** [getAll] as a flow that re-emits on every change. */
+    public fun getAllAsFlow(): Flow<List<ExtensionStore>>
 
-    fun getCountAsFlow(): Flow<Long>
+    /** Number of stores, as a flow that re-emits on every change. */
+    public fun getCountAsFlow(): Flow<Long>
 
-    suspend fun remove(indexUrl: String)
+    /** Deletes the store at [indexUrl]. */
+    public suspend fun remove(indexUrl: String)
 }

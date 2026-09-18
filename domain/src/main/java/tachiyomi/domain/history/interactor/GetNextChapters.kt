@@ -10,7 +10,11 @@ import tachiyomi.domain.history.repository.HistoryRepository
 import tachiyomi.domain.manga.interactor.GetManga
 import kotlin.math.max
 
-class GetNextChapters(
+/**
+ * The chapters a reader should continue with, in the manga's own sort order, with the
+ * scanlator filter applied; merged manga read their chapters from every merged source.
+ */
+public class GetNextChapters(
     private val getChaptersByMangaId: GetChaptersByMangaId,
     // SY -->
     private val getMergedChaptersByMangaId: GetMergedChaptersByMangaId,
@@ -19,48 +23,50 @@ class GetNextChapters(
     private val historyRepository: HistoryRepository,
 ) {
 
-    suspend fun await(onlyUnread: Boolean = true): List<Chapter> {
+    /**
+     * The chapters after the most recently read chapter of any manga; empty when nothing
+     * was read yet. With [onlyUnread] the read ones are skipped.
+     */
+    public suspend fun await(onlyUnread: Boolean = true): List<Chapter> {
         val history = historyRepository.getLastHistory() ?: return emptyList()
         return await(history.mangaId, history.chapterId, onlyUnread)
     }
 
-    suspend fun await(mangaId: Long, onlyUnread: Boolean = true): List<Chapter> {
+    /**
+     * All chapters of manga [mangaId] in reading order, or only the unread ones with [onlyUnread];
+     * empty when the manga does not exist. An E-Hentai gallery counts as one chapter, so only its
+     * latest version is returned, and only while unread.
+     */
+    public suspend fun await(mangaId: Long, onlyUnread: Boolean = true): List<Chapter> {
         val manga = getManga.await(mangaId) ?: return emptyList()
-
         // SY -->
-        if (manga.source == MERGED_SOURCE_ID) {
-            val chapters = getMergedChaptersByMangaId.await(mangaId, applyScanlatorFilter = true)
-                .sortedWith(getChapterSort(manga, sortDescending = false))
-
-            return if (onlyUnread) {
-                chapters.filterNot { it.read }
-            } else {
+        val merged = manga.source == MERGED_SOURCE_ID
+        val chapters = if (merged) {
+            getMergedChaptersByMangaId.await(mangaId, applyScanlatorFilter = true)
+        } else {
+            getChaptersByMangaId.await(mangaId, applyScanlatorFilter = true)
+        }.sortedWith(getChapterSort(manga, sortDescending = false))
+        return when {
+            !onlyUnread -> {
                 chapters
             }
-        }
-        if (manga.isEhBasedManga()) {
-            val chapters = getChaptersByMangaId.await(mangaId, applyScanlatorFilter = true)
-                .sortedWith(getChapterSort(manga, sortDescending = false))
-
-            return if (onlyUnread) {
+            // An E-Hentai gallery is one chapter: only its last version counts, and only while unread.
+            !merged && manga.isEhBasedManga() -> {
                 chapters.takeLast(1).takeUnless { it.firstOrNull()?.read == true }.orEmpty()
-            } else {
-                chapters
+            }
+            else -> {
+                chapters.filterNot { it.read }
             }
         }
         // SY <--
-
-        val chapters = getChaptersByMangaId.await(mangaId, applyScanlatorFilter = true)
-            .sortedWith(getChapterSort(manga, sortDescending = false))
-
-        return if (onlyUnread) {
-            chapters.filterNot { it.read }
-        } else {
-            chapters
-        }
     }
 
-    suspend fun await(
+    /**
+     * The chapters of manga [mangaId] from chapter [fromChapterId] onwards. With [onlyUnread] the
+     * unread ones from that chapter on; otherwise [fromChapterId] itself is included only while it
+     * is not completely read. Empty when the manga does not exist.
+     */
+    public suspend fun await(
         mangaId: Long,
         fromChapterId: Long,
         onlyUnread: Boolean = true,

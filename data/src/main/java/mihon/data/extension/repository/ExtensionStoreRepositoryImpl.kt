@@ -15,13 +15,16 @@ import tachiyomi.data.Database
 import tachiyomi.data.subscribeToList
 import tachiyomi.data.subscribeToOne
 
-class ExtensionStoreRepositoryImpl(
+/**
+ * [ExtensionStoreRepository] on the SQLDelight `extension_store` table, fetching indexes and
+ * extension lists through [ExtensionStoreService]; every network failure is logged and yields
+ * an empty result.
+ */
+public class ExtensionStoreRepositoryImpl(
     private val service: ExtensionStoreService,
     private val database: Database,
 ) : ExtensionStoreRepository {
-    override suspend fun insert(indexUrl: String): Result<Unit> {
-        return service.fetch(indexUrl).mapCatching { upsert(it) }
-    }
+    override suspend fun insert(indexUrl: String): Result<Unit> = service.fetch(indexUrl).mapCatching { upsert(it) }
 
     override suspend fun insertFromPreference(indexUrl: String, name: String) {
         database.extension_storeQueries.upsert(
@@ -54,8 +57,9 @@ class ExtensionStoreRepositoryImpl(
                         }
                     }
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
         }
     }
 
@@ -87,19 +91,18 @@ class ExtensionStoreRepositoryImpl(
                     .awaitAll()
                     .flatMap { it.getOrDefault(emptyList()) }
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
             emptyList()
         }
     }
 
-    override suspend fun getAll(): List<ExtensionStore> {
-        return database.extension_storeQueries.getAll(::extensionStoreMapper).awaitAsList()
-    }
+    override suspend fun getAll(): List<ExtensionStore> =
+        database.extension_storeQueries.getAll(::extensionStoreMapper).awaitAsList()
 
-    override fun getAllAsFlow(): Flow<List<ExtensionStore>> {
-        return database.extension_storeQueries.getAll(::extensionStoreMapper).subscribeToList()
-    }
+    override fun getAllAsFlow(): Flow<List<ExtensionStore>> =
+        database.extension_storeQueries.getAll(::extensionStoreMapper).subscribeToList()
 
     override fun getCountAsFlow(): Flow<Long> {
         return database.extension_storeQueries

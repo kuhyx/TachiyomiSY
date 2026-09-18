@@ -22,6 +22,7 @@ import logcat.logcat
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.data.Chapters
 import tachiyomi.data.Database
+import tachiyomi.data.awaitList
 import tachiyomi.data.manga.MangaMapper.mapManga
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.manga.model.Manga
@@ -267,14 +268,14 @@ class SyncManager(
      */
     private suspend fun getAllMangaFromDB(): List<Manga> {
         return database.mangasQueries
-            .getAllManga(::mapManga)
-            .awaitAsList()
+            .getAllManga()
+            .awaitList(::mapManga)
     }
 
     private suspend fun getAllMangaThatNeedsSync(): List<Manga> {
         return database.mangasQueries
-            .getMangasWithFavoriteTimestamp(::mapManga)
-            .awaitAsList()
+            .getMangasWithFavoriteTimestamp()
+            .awaitList(::mapManga)
     }
 
     private suspend fun isMangaDifferent(localManga: Manga, remoteManga: BackupManga): Boolean {

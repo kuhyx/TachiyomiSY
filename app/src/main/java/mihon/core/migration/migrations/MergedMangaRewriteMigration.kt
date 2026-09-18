@@ -1,6 +1,5 @@
 package mihon.core.migration.migrations
 
-import app.cash.sqldelight.async.coroutines.awaitAsList
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.tachiyomi.source.Source
 import exh.source.MERGED_SOURCE_ID
@@ -11,6 +10,7 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.data.Database
+import tachiyomi.data.awaitList
 import tachiyomi.data.chapter.ChapterMapper
 import tachiyomi.domain.chapter.interactor.DeleteChapters
 import tachiyomi.domain.chapter.interactor.UpdateChapter
@@ -91,19 +91,13 @@ class MergedMangaRewriteMigration : Migration {
                     .distinct()
                 val chapters =
                     database.ehQueries
-                        .getChaptersByMangaIds(
-                            mergedMangas.map { it.id },
-                            ChapterMapper::mapChapter,
-                        )
-                        .awaitAsList()
+                        .getChaptersByMangaIds(mergedMangas.map { it.id })
+                        .awaitList(ChapterMapper::mapChapter)
 
                 val mergedMangaChapters =
                     database.ehQueries
-                        .getChaptersByMangaIds(
-                            loadedMangaList.map { it.manga.id },
-                            ChapterMapper::mapChapter,
-                        )
-                        .awaitAsList()
+                        .getChaptersByMangaIds(loadedMangaList.map { it.manga.id })
+                        .awaitList(ChapterMapper::mapChapter)
 
                 val mergedMangaChaptersMatched = mergedMangaChapters.mapNotNull { chapter ->
                     loadedMangaList.firstOrNull {

@@ -1,42 +1,26 @@
 package tachiyomi.data.chapter
 
-import kotlinx.serialization.json.JsonObject
+import tachiyomi.data.Chapters
 import tachiyomi.domain.chapter.model.Chapter
 
-object ChapterMapper {
-    fun mapChapter(
-        id: Long,
-        mangaId: Long,
-        url: String,
-        name: String,
-        scanlator: String?,
-        read: Boolean,
-        bookmark: Boolean,
-        lastPageRead: Long,
-        chapterNumber: Double,
-        sourceOrder: Long,
-        dateFetch: Long,
-        dateUpload: Long,
-        lastModifiedAt: Long,
-        version: Long,
-        @Suppress("UNUSED_PARAMETER")
-        isSyncing: Long,
-        memo: JsonObject,
-    ): Chapter = Chapter(
-        id = id,
-        mangaId = mangaId,
-        read = read,
-        bookmark = bookmark,
-        lastPageRead = lastPageRead,
-        dateFetch = dateFetch,
-        sourceOrder = sourceOrder,
-        url = url,
-        name = name,
-        dateUpload = dateUpload,
-        chapterNumber = chapterNumber,
-        scanlator = scanlator,
-        lastModifiedAt = lastModifiedAt,
-        version = version,
-        memo = memo,
+/** Domain models from the generated `chapters` rows. */
+public object ChapterMapper {
+    /** The [Chapter] of a `chapters` row. */
+    public fun mapChapter(row: Chapters): Chapter = Chapter(
+        id = row._id,
+        mangaId = row.manga_id,
+        read = row.read,
+        bookmark = row.bookmark,
+        lastPageRead = row.last_page_read,
+        dateFetch = row.date_fetch,
+        sourceOrder = row.source_order,
+        url = row.url,
+        name = row.name,
+        dateUpload = row.date_upload,
+        chapterNumber = row.chapter_number,
+        scanlator = row.scanlator,
+        lastModifiedAt = row.last_modified_at,
+        version = row.version,
+        memo = row.memo,
     )
 }

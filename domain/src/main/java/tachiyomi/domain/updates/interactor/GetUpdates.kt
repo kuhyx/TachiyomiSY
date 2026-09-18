@@ -2,29 +2,41 @@ package tachiyomi.domain.updates.interactor
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.retry
 import tachiyomi.domain.updates.model.UpdatesWithRelations
 import tachiyomi.domain.updates.repository.UpdatesRepository
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
 
-class GetUpdates(
+/**
+ * Reads of the updates feed: chapters of library manga uploaded recently, newest first,
+ * capped at 500 rows. Every read retries every 5 seconds for as long as the store throws a
+ * `NullPointerException`; any other failure propagates.
+ */
+public class GetUpdates(
     private val repository: UpdatesRepository,
 ) {
 
-    suspend fun await(read: Boolean, after: Long): List<UpdatesWithRelations> {
+    /** The feed entries with read state [read] uploaded after epoch millis [after]. */
+    public suspend fun await(read: Boolean, after: Long): List<UpdatesWithRelations> {
         // SY -->
-        return flow {
-            emit(repository.awaitWithRead(read, after, limit = 500))
+        while (true) {
+            try {
+                return repository.awaitWithRead(read, after, limit = LIMIT)
+            } catch (expected: NullPointerException) {
+                // The store is briefly unreadable while the app initialises; retry like the flows do.
+                delay(RETRY_DELAY)
+            }
         }
-            .catchNPE()
-            .first()
         // SY <--
     }
 
-    fun subscribe(
+    /**
+     * The feed entries uploaded after [instant] as a flow that re-emits on every change. Each of
+     * [unread], [started] and [bookmarked] keeps only matching entries, or does not filter when null;
+     * [hideExcludedScanlators] drops chapters from scanlators the manga excludes.
+     */
+    public fun subscribe(
         instant: Instant,
         unread: Boolean?,
         started: Boolean?,
@@ -33,7 +45,7 @@ class GetUpdates(
     ): Flow<List<UpdatesWithRelations>> {
         return repository.subscribeAll(
             instant.toEpochMilli(),
-            limit = 500,
+            limit = LIMIT,
             unread = unread,
             started = started,
             bookmarked = bookmarked,
@@ -44,8 +56,9 @@ class GetUpdates(
         // SY <--
     }
 
-    fun subscribe(read: Boolean, after: Long): Flow<List<UpdatesWithRelations>> {
-        return repository.subscribeWithRead(read, after, limit = 500)
+    /** [await] as a flow that re-emits on every change. */
+    public fun subscribe(read: Boolean, after: Long): Flow<List<UpdatesWithRelations>> {
+        return repository.subscribeWithRead(read, after, limit = LIMIT)
             // SY -->
             .catchNPE()
         // SY <--
@@ -54,11 +67,16 @@ class GetUpdates(
     // SY -->
     private fun <T> Flow<T>.catchNPE() = retry {
         if (it is NullPointerException) {
-            delay(5.seconds)
+            delay(RETRY_DELAY)
             true
         } else {
             false
         }
     }
     // SY <--
+
+    private companion object {
+        const val LIMIT = 500L
+        val RETRY_DELAY = 5.seconds
+    }
 }

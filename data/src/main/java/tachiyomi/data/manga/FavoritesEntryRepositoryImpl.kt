@@ -8,7 +8,8 @@ import tachiyomi.domain.manga.model.FavoriteEntry
 import tachiyomi.domain.manga.model.FavoriteEntryAlternative
 import tachiyomi.domain.manga.repository.FavoritesEntryRepository
 
-class FavoritesEntryRepositoryImpl(
+/** [FavoritesEntryRepository] on the SQLDelight `eh_favorites` table (SY). */
+public class FavoritesEntryRepositoryImpl(
     private val database: Database,
 ) : FavoritesEntryRepository {
     override suspend fun deleteAll() {
@@ -42,8 +43,9 @@ class FavoritesEntryRepositoryImpl(
                 gid = favoriteEntryAlternative.gid,
                 token = favoriteEntryAlternative.token,
             )
-        } catch (e: Exception) {
-            logcat(LogPriority.INFO, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.INFO, expected)
         }
     }
 

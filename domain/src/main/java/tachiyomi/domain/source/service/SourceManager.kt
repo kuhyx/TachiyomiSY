@@ -6,26 +6,36 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import tachiyomi.domain.source.model.StubSource
 
-interface SourceManager {
+/** Registry of the loaded sources: installed extensions, built-ins and stubs for missing ones. */
+public interface SourceManager {
 
-    val isInitialized: StateFlow<Boolean>
+    /** Whether the first extension scan has completed; lookups before that see an empty registry. */
+    public val isInitialized: StateFlow<Boolean>
 
-    val sources: Flow<List<Source>>
+    /** Every loaded source, re-emitted whenever an extension is installed, updated or removed. */
+    public val sources: Flow<List<Source>>
 
-    fun get(sourceKey: Long): Source?
+    /** The source with id [sourceKey], or null when no such source is loaded. */
+    public fun get(sourceKey: Long): Source?
 
-    fun getOrStub(sourceKey: Long): Source
+    /** The source with id [sourceKey], or a [StubSource] for it when it is not loaded. */
+    public fun getOrStub(sourceKey: Long): Source
 
-    fun getAll(): List<Source>
+    /** Every loaded source, stubs included. */
+    public fun getAll(): List<Source>
 
-    fun getOnlineSources(): List<HttpSource>
+    /** The loaded sources that fetch over HTTP. */
+    public fun getOnlineSources(): List<HttpSource>
 
     // SY -->
 
-    fun getVisibleOnlineSources(): List<HttpSource>
+    /** [getOnlineSources] minus the sources hidden by the blacklist. */
+    public fun getVisibleOnlineSources(): List<HttpSource>
 
-    fun getVisibleSources(): List<Source>
+    /** [getAll] minus the sources hidden by the blacklist. */
+    public fun getVisibleSources(): List<Source>
     // SY <--
 
-    fun getStubSources(): List<StubSource>
+    /** The stubs standing in for sources that are not installed. */
+    public fun getStubSources(): List<StubSource>
 }

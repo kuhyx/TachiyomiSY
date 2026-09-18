@@ -4,11 +4,11 @@ import kotlinx.coroutines.flow.Flow
 import tachiyomi.domain.source.model.SourceWithCount
 import tachiyomi.domain.source.repository.SourceRepository
 
-class GetSourcesWithNonLibraryManga(
+/** Lists the sources that still have manga outside the library, for the "clear database" screen. */
+public class GetSourcesWithNonLibraryManga(
     private val repository: SourceRepository,
 ) {
 
-    fun subscribe(): Flow<List<SourceWithCount>> {
-        return repository.getSourcesWithNonLibraryManga()
-    }
+    /** Each such source with its non-library manga count, as a flow that re-emits on every change. */
+    public fun subscribe(): Flow<List<SourceWithCount>> = repository.getSourcesWithNonLibraryManga()
 }

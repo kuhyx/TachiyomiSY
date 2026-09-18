@@ -3,11 +3,13 @@ package tachiyomi.domain.manga.interactor
 import tachiyomi.domain.manga.model.FavoriteEntryAlternative
 import tachiyomi.domain.manga.repository.FavoritesEntryRepository
 
-class InsertFavoriteEntryAlternative(
+/** Records that a newer E-Hentai gallery replaces a favourited one in the favourites snapshot. */
+public class InsertFavoriteEntryAlternative(
     private val favoriteEntryRepository: FavoritesEntryRepository,
 ) {
 
-    suspend fun await(entry: FavoriteEntryAlternative) {
-        return favoriteEntryRepository.addAlternative(entry)
+    /** Attaches [entry] to the snapshot entry it names; failures propagate. */
+    public suspend fun await(entry: FavoriteEntryAlternative) {
+        favoriteEntryRepository.addAlternative(entry)
     }
 }

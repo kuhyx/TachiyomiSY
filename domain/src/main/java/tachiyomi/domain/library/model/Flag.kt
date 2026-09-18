@@ -1,16 +1,22 @@
 package tachiyomi.domain.library.model
 
-interface Flag {
-    val flag: Long
+/** A value whose bits are OR-ed into a flags word. */
+public interface Flag {
+    /** The bits this flag sets. */
+    public val flag: Long
 }
 
-interface Mask {
-    val mask: Long
+/** A value that owns a range of bits in a flags word. */
+public interface Mask {
+    /** The bits this value may occupy; every other bit is left alone. */
+    public val mask: Long
 }
 
-interface FlagWithMask : Flag, Mask
+/** A flag that replaces the bits under its [mask] instead of OR-ing into them. */
+public interface FlagWithMask : Flag, Mask
 
-operator fun Long.contains(other: Flag): Boolean {
+/** Whether this flags word holds [other]: an exact match, or a match under the mask for a [Mask]. */
+public operator fun Long.contains(other: Flag): Boolean {
     return if (other is Mask) {
         other.flag == this and other.mask
     } else {
@@ -18,7 +24,8 @@ operator fun Long.contains(other: Flag): Boolean {
     }
 }
 
-operator fun Long.plus(other: Flag): Long {
+/** This flags word with [other] applied: OR-ed in, or replacing the bits under the mask for a [Mask]. */
+public operator fun Long.plus(other: Flag): Long {
     return if (other is Mask) {
         this and other.mask.inv() or (other.flag and other.mask)
     } else {
@@ -26,7 +33,8 @@ operator fun Long.plus(other: Flag): Long {
     }
 }
 
-operator fun Flag.plus(other: Flag): Long {
+/** [flag] with [other] applied: OR-ed in, or replacing the bits under the mask for a [Mask]. */
+public operator fun Flag.plus(other: Flag): Long {
     return if (other is Mask) {
         this.flag and other.mask.inv() or (other.flag and other.mask)
     } else {

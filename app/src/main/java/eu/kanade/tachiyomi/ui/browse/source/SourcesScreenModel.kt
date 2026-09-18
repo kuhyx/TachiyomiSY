@@ -30,6 +30,7 @@ import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.source.model.Pin
 import tachiyomi.domain.source.model.Source
+import tachiyomi.domain.source.model.contains
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.TreeMap

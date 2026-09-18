@@ -4,23 +4,20 @@ import kotlinx.coroutines.flow.Flow
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.category.repository.CategoryRepository
 
-class GetCategories(
+/** Reads categories, all of them or those of one manga. */
+public class GetCategories(
     private val categoryRepository: CategoryRepository,
 ) {
 
-    fun subscribe(): Flow<List<Category>> {
-        return categoryRepository.getAllAsFlow()
-    }
+    /** Every category in order, re-emitted on every change. */
+    public fun subscribe(): Flow<List<Category>> = categoryRepository.getAllAsFlow()
 
-    fun subscribe(mangaId: Long): Flow<List<Category>> {
-        return categoryRepository.getCategoriesByMangaIdAsFlow(mangaId)
-    }
+    /** The manga's categories in order, re-emitted on every change. */
+    public fun subscribe(mangaId: Long): Flow<List<Category>> = categoryRepository.getCategoriesByMangaIdAsFlow(mangaId)
 
-    suspend fun await(): List<Category> {
-        return categoryRepository.getAll()
-    }
+    /** Every category in order. */
+    public suspend fun await(): List<Category> = categoryRepository.getAll()
 
-    suspend fun await(mangaId: Long): List<Category> {
-        return categoryRepository.getCategoriesByMangaId(mangaId)
-    }
+    /** The manga's categories in order. */
+    public suspend fun await(mangaId: Long): List<Category> = categoryRepository.getCategoriesByMangaId(mangaId)
 }

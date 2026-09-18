@@ -7,6 +7,8 @@ import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.service.getChapterSort
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.applyFilter
+import tachiyomi.domain.manga.model.bookmarkedFilter
+import tachiyomi.domain.manga.model.unreadFilter
 import tachiyomi.source.local.isLocal
 
 /**

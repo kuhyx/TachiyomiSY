@@ -8,21 +8,29 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.model.Source
 import tachiyomi.domain.source.model.SourceWithCount
 
-typealias SourcePagingSource = PagingSource<Long, /*SY --> */ Pair<Manga, RaisedSearchMetadata?>/*SY <-- */>
+public typealias SourcePagingSource = PagingSource<Long, /*SY --> */ Pair<Manga, RaisedSearchMetadata?>/*SY <-- */>
 
-interface SourceRepository {
+/** The loaded sources as domain rows, plus the paged listings a source's browse screen shows. */
+public interface SourceRepository {
 
-    fun getSources(): Flow<List<Source>>
+    /** Every loaded source, as a flow that re-emits when the registry changes. */
+    public fun getSources(): Flow<List<Source>>
 
-    fun getOnlineSources(): Flow<List<Source>>
+    /** The loaded sources that fetch over HTTP, as a flow. */
+    public fun getOnlineSources(): Flow<List<Source>>
 
-    fun getSourcesWithFavoriteCount(): Flow<List<Pair<Source, Long>>>
+    /** Each source that has favourites paired with how many; stubs for uninstalled ones. */
+    public fun getSourcesWithFavoriteCount(): Flow<List<Pair<Source, Long>>>
 
-    fun getSourcesWithNonLibraryManga(): Flow<List<SourceWithCount>>
+    /** Each source that has manga outside the library paired with how many; stubs for uninstalled ones. */
+    public fun getSourcesWithNonLibraryManga(): Flow<List<SourceWithCount>>
 
-    fun search(sourceId: Long, query: String, filterList: FilterList): SourcePagingSource
+    /** Paged results of [query] with [filterList] on source [sourceId]. */
+    public fun search(sourceId: Long, query: String, filterList: FilterList): SourcePagingSource
 
-    fun getPopular(sourceId: Long): SourcePagingSource
+    /** Paged "popular" listing of source [sourceId]. */
+    public fun getPopular(sourceId: Long): SourcePagingSource
 
-    fun getLatest(sourceId: Long): SourcePagingSource
+    /** Paged "latest updates" listing of source [sourceId]. */
+    public fun getLatest(sourceId: Long): SourcePagingSource
 }

@@ -6,24 +6,29 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.source.model.SavedSearch
 import tachiyomi.domain.source.repository.SavedSearchRepository
 
-class InsertSavedSearch(
+/** Stores the user's saved searches (SY). */
+public class InsertSavedSearch(
     private val savedSearchRepository: SavedSearchRepository,
 ) {
 
-    suspend fun await(savedSearch: SavedSearch): Long? {
+    /** Inserts [savedSearch] and returns its id; logs and returns null when the store fails. */
+    public suspend fun await(savedSearch: SavedSearch): Long? {
         return try {
             savedSearchRepository.insert(savedSearch)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR) { e.asLog() }
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR) { expected.asLog() }
             null
         }
     }
 
-    suspend fun awaitAll(savedSearch: List<SavedSearch>) {
+    /** Inserts every entry of [savedSearch] in one transaction; logs and inserts nothing when the store fails. */
+    public suspend fun awaitAll(savedSearch: List<SavedSearch>) {
         try {
             savedSearchRepository.insertAll(savedSearch)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR) { e.asLog() }
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR) { expected.asLog() }
         }
     }
 }

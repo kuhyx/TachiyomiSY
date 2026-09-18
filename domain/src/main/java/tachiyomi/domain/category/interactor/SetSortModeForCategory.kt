@@ -9,12 +9,18 @@ import tachiyomi.domain.library.model.plus
 import tachiyomi.domain.library.service.LibraryPreferences
 import kotlin.random.Random
 
-class SetSortModeForCategory(
+/** Changes the library sort, per category or globally depending on the display-settings preferences. */
+public class SetSortModeForCategory(
     private val preferences: LibraryPreferences,
     private val categoryRepository: CategoryRepository,
 ) {
 
-    suspend fun await(categoryId: Long?, type: LibrarySort.Type, direction: LibrarySort.Direction) {
+    /**
+     * Writes the sort to the category's flags when per-category settings are on and the category
+     * exists; otherwise to the global preference and every category. When the library is grouped
+     * by anything but categories only the global preference changes. Store failures propagate.
+     */
+    public suspend fun await(categoryId: Long?, type: LibrarySort.Type, direction: LibrarySort.Direction) {
         // SY -->
         if (preferences.groupLibraryBy.get() != LibraryGroup.BY_DEFAULT) {
             preferences.sortingMode.set(LibrarySort(type, direction))
@@ -39,7 +45,8 @@ class SetSortModeForCategory(
         }
     }
 
-    suspend fun await(
+    /** [await] by [Category.id]; a null category means the global sort. */
+    public suspend fun await(
         category: Category?,
         type: LibrarySort.Type,
         direction: LibrarySort.Direction,

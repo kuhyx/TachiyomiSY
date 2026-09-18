@@ -7,10 +7,18 @@ import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOne
 import kotlin.properties.Delegates
 
+/**
+ * Offset-based [PagingSource] over a SQLDelight query that invalidates itself whenever the current
+ * page's query reports a change; a query failure becomes a paging error.
+ *
+ * @param RowType The row type the query maps to.
+ * @property countQuery Query for the total row count, used to compute the item placeholders.
+ * @property queryProvider Query for one page, given `(limit, offset)`.
+ */
 @Suppress("unused")
-class QueryPagingSource<RowType : Any>(
-    val countQuery: () -> Query<Long>,
-    val queryProvider: (Long, Long) -> Query<RowType>,
+public class QueryPagingSource<RowType : Any>(
+    public val countQuery: () -> Query<Long>,
+    public val queryProvider: (Long, Long) -> Query<RowType>,
 ) : PagingSource<Long, RowType>(), Query.Listener {
 
     override val jumpingSupported: Boolean = true
@@ -33,19 +41,15 @@ class QueryPagingSource<RowType : Any>(
             val loadSize = params.loadSize
             val count = countQuery().awaitAsOne()
 
-            val (offset, limit) = when (params) {
-                is LoadParams.Prepend -> key - loadSize to loadSize.toLong()
-                else -> key to loadSize.toLong()
-            }
+            val limit = loadSize.toLong()
+            val offset = if (params is LoadParams.Prepend) key - loadSize else key
 
             val data = queryProvider(limit, offset)
                 .also { currentQuery = it }
                 .awaitAsList()
 
-            val (prevKey, nextKey) = when (params) {
-                is LoadParams.Append -> (offset - loadSize to offset + loadSize)
-                else -> (offset to offset + loadSize)
-            }
+            val prevKey = if (params is LoadParams.Append) offset - loadSize else offset
+            val nextKey = offset + loadSize
 
             return LoadResult.Page(
                 data = data,
@@ -54,8 +58,9 @@ class QueryPagingSource<RowType : Any>(
                 itemsBefore = maxOf(0L, offset).toInt(),
                 itemsAfter = maxOf(0L, count - (offset + loadSize)).toInt(),
             )
-        } catch (e: Exception) {
-            return LoadResult.Error(throwable = e)
+        } catch (expected: Exception) {
+            // Any query failure becomes a paging error the UI shows.
+            return LoadResult.Error(throwable = expected)
         }
     }
 

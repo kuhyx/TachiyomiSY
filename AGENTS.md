@@ -42,7 +42,11 @@ the sync job execute. Add a gate there, never in a workflow alone.
   the module clean. Libraries do not re-lint their dependencies
   (`checkDependencies` is the app's job, last in the order). The
   compiler's explicit-API diagnostics are applied mechanically by
-  `scripts/explicit_api.py <gradle-log>`; return types stay manual.
+  `scripts/explicit_api.py <gradle-log>` (then `explicit_api_types.py` for the
+  derivable return types; the rest is manual), detekt's `ExpressionBodySyntax`
+  by `scripts/expression_body.py <detekt-log>`, and the consumer fallout of a
+  member moved to an extension by `scripts/import_extensions.py <gradle-log>`.
+  Each has a `_test.py` next to it (`python3 -m pytest scripts`).
 - Drop-in APK: `./gradlew assembleFoss -PsyReplaceUpstream`
   (reads `~/.android/release/key.properties`; output
   `app/build/outputs/apk/foss/app-universal-foss.apk`)

@@ -3,11 +3,18 @@ package tachiyomi.domain.updates.repository
 import kotlinx.coroutines.flow.Flow
 import tachiyomi.domain.updates.model.UpdatesWithRelations
 
-interface UpdatesRepository {
+/** Reads of the updates feed: chapters of library manga, newest upload first. */
+public interface UpdatesRepository {
 
-    suspend fun awaitWithRead(read: Boolean, after: Long, limit: Long): List<UpdatesWithRelations>
+    /** At most [limit] entries with read state [read] uploaded after epoch millis [after]. */
+    public suspend fun awaitWithRead(read: Boolean, after: Long, limit: Long): List<UpdatesWithRelations>
 
-    fun subscribeAll(
+    /**
+     * At most [limit] entries uploaded after epoch millis [after], as a flow that re-emits on every
+     * change. Each of [unread], [started] and [bookmarked] keeps only matching entries, or does not
+     * filter when null; [hideExcludedScanlators] drops chapters from scanlators the manga excludes.
+     */
+    public fun subscribeAll(
         after: Long,
         limit: Long,
         unread: Boolean?,
@@ -16,5 +23,6 @@ interface UpdatesRepository {
         hideExcludedScanlators: Boolean,
     ): Flow<List<UpdatesWithRelations>>
 
-    fun subscribeWithRead(read: Boolean, after: Long, limit: Long): Flow<List<UpdatesWithRelations>>
+    /** [awaitWithRead] as a flow that re-emits on every change. */
+    public fun subscribeWithRead(read: Boolean, after: Long, limit: Long): Flow<List<UpdatesWithRelations>>
 }

@@ -5,24 +5,29 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.repository.ChapterRepository
 
-class GetChapter(
+/** Looks up single chapters. */
+public class GetChapter(
     private val chapterRepository: ChapterRepository,
 ) {
 
-    suspend fun await(id: Long): Chapter? {
+    /** The chapter with [id]; null when there is none or the store fails (logged). */
+    public suspend fun await(id: Long): Chapter? {
         return try {
             chapterRepository.getChapterById(id)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
             null
         }
     }
 
-    suspend fun await(url: String, mangaId: Long): Chapter? {
+    /** The chapter at [url] of manga [mangaId]; null when there is none or the store fails (logged). */
+    public suspend fun await(url: String, mangaId: Long): Chapter? {
         return try {
             chapterRepository.getChapterByUrlAndMangaId(url, mangaId)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
             null
         }
     }

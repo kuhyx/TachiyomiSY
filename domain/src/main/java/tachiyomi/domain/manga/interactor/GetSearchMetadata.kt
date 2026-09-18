@@ -3,15 +3,14 @@ package tachiyomi.domain.manga.interactor
 import exh.metadata.sql.models.SearchMetadata
 import tachiyomi.domain.manga.repository.MangaMetadataRepository
 
-class GetSearchMetadata(
+/** Reads the search metadata that metadata-aware sources attach to manga. */
+public class GetSearchMetadata(
     private val mangaMetadataRepository: MangaMetadataRepository,
 ) {
 
-    suspend fun await(mangaId: Long): SearchMetadata? {
-        return mangaMetadataRepository.getMetadataById(mangaId)
-    }
+    /** The search metadata of manga [mangaId], or null when none is stored. */
+    public suspend fun await(mangaId: Long): SearchMetadata? = mangaMetadataRepository.getMetadataById(mangaId)
 
-    suspend fun await(): List<SearchMetadata> {
-        return mangaMetadataRepository.getSearchMetadata()
-    }
+    /** The search metadata of every manga that has any. */
+    public suspend fun await(): List<SearchMetadata> = mangaMetadataRepository.getSearchMetadata()
 }

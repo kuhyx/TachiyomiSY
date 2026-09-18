@@ -4,15 +4,18 @@ import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.manga.repository.MangaRepository
 
-class SetMangaCategories(
+/** Replaces the set of categories a manga belongs to. */
+public class SetMangaCategories(
     private val mangaRepository: MangaRepository,
 ) {
 
-    suspend fun await(mangaId: Long, categoryIds: List<Long>) {
+    /** Links the manga to exactly [categoryIds]; a store failure is logged and swallowed. */
+    public suspend fun await(mangaId: Long, categoryIds: List<Long>) {
         try {
             mangaRepository.setMangaCategories(mangaId, categoryIds)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
         }
     }
 }

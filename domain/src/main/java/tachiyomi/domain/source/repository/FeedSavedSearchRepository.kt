@@ -1,30 +1,19 @@
 package tachiyomi.domain.source.repository
 
-import kotlinx.coroutines.flow.Flow
 import tachiyomi.domain.source.model.FeedSavedSearch
-import tachiyomi.domain.source.model.SavedSearch
 
-interface FeedSavedSearchRepository {
+/**
+ * Persistence of feed entries (saved searches pinned to the feed tab, SY).
+ * Reads live in [FeedSavedSearchReadRepository]; the writes are here.
+ */
+public interface FeedSavedSearchRepository : FeedSavedSearchReadRepository {
 
-    suspend fun getGlobal(): List<FeedSavedSearch>
+    /** Deletes the feed entry [feedSavedSearchId]. */
+    public suspend fun delete(feedSavedSearchId: Long)
 
-    fun getGlobalAsFlow(): Flow<List<FeedSavedSearch>>
+    /** Inserts [feedSavedSearch] and returns its id, or null when the insert failed. */
+    public suspend fun insert(feedSavedSearch: FeedSavedSearch): Long?
 
-    suspend fun getGlobalFeedSavedSearch(): List<SavedSearch>
-
-    suspend fun countGlobal(): Long
-
-    suspend fun getBySourceId(sourceId: Long): List<FeedSavedSearch>
-
-    fun getBySourceIdAsFlow(sourceId: Long): Flow<List<FeedSavedSearch>>
-
-    suspend fun getBySourceIdFeedSavedSearch(sourceId: Long): List<SavedSearch>
-
-    suspend fun countBySourceId(sourceId: Long): Long
-
-    suspend fun delete(feedSavedSearchId: Long)
-
-    suspend fun insert(feedSavedSearch: FeedSavedSearch): Long?
-
-    suspend fun insertAll(feedSavedSearch: List<FeedSavedSearch>)
+    /** Inserts every entry of [feedSavedSearch] in one transaction. */
+    public suspend fun insertAll(feedSavedSearch: List<FeedSavedSearch>)
 }

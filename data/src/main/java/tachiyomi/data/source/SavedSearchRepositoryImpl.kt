@@ -1,34 +1,35 @@
 package tachiyomi.data.source
 
-import app.cash.sqldelight.async.coroutines.awaitAsList
 import app.cash.sqldelight.async.coroutines.awaitAsOne
-import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import kotlinx.coroutines.flow.Flow
 import tachiyomi.data.Database
+import tachiyomi.data.awaitList
+import tachiyomi.data.awaitOneOrNull
 import tachiyomi.data.subscribeToList
 import tachiyomi.domain.source.model.SavedSearch
 import tachiyomi.domain.source.repository.SavedSearchRepository
 
-class SavedSearchRepositoryImpl(
+/** [SavedSearchRepository] on the SQLDelight `saved_search` table (SY). */
+public class SavedSearchRepositoryImpl(
     private val database: Database,
 ) : SavedSearchRepository {
 
     override suspend fun getById(savedSearchId: Long): SavedSearch? {
         return database.saved_searchQueries
-            .selectById(savedSearchId, SavedSearchMapper::map)
-            .awaitAsOneOrNull()
+            .selectById(savedSearchId)
+            .awaitOneOrNull(SavedSearchMapper::map)
     }
 
     override suspend fun getBySourceId(sourceId: Long): List<SavedSearch> {
         return database.saved_searchQueries
-            .selectBySource(sourceId, SavedSearchMapper::map)
-            .awaitAsList()
+            .selectBySource(sourceId)
+            .awaitList(SavedSearchMapper::map)
     }
 
     override fun getBySourceIdAsFlow(sourceId: Long): Flow<List<SavedSearch>> {
         return database.saved_searchQueries
-            .selectBySource(sourceId, SavedSearchMapper::map)
-            .subscribeToList()
+            .selectBySource(sourceId)
+            .subscribeToList(SavedSearchMapper::map)
     }
 
     override suspend fun delete(savedSearchId: Long) {

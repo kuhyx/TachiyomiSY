@@ -2,10 +2,10 @@ package mihon.domain.extension.interactor
 
 import mihon.domain.extension.repository.ExtensionStoreRepository
 
-class AddExtensionStore(
+/** Adds an extension store by the url of its index. */
+public class AddExtensionStore(
     private val repository: ExtensionStoreRepository,
 ) {
-    suspend operator fun invoke(indexUrl: String): Result<Unit> {
-        return repository.insert(indexUrl)
-    }
+    /** Fetches and stores the store at [indexUrl]; a failed fetch is the returned [Result]'s failure. */
+    public suspend operator fun invoke(indexUrl: String): Result<Unit> = repository.insert(indexUrl)
 }

@@ -5,23 +5,31 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.chapter.model.ChapterUpdate
 import tachiyomi.domain.chapter.repository.ChapterRepository
 
-class UpdateChapter(
+/** Writes partial chapter updates to the store. */
+public class UpdateChapter(
     private val chapterRepository: ChapterRepository,
 ) {
 
-    suspend fun await(chapterUpdate: ChapterUpdate) {
+    /** Applies [chapterUpdate]; a failing store is logged and otherwise ignored. */
+    public suspend fun await(chapterUpdate: ChapterUpdate) {
         try {
             chapterRepository.update(chapterUpdate)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
         }
     }
 
-    suspend fun awaitAll(chapterUpdates: List<ChapterUpdate>) {
+    /**
+     * Applies every update in [chapterUpdates] in one transaction; a failing store is logged and
+     * otherwise ignored.
+     */
+    public suspend fun awaitAll(chapterUpdates: List<ChapterUpdate>) {
         try {
             chapterRepository.updateAll(chapterUpdates)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Any failure of the store is logged and reported as the fallback below.
+            logcat(LogPriority.ERROR, expected)
         }
     }
 }
