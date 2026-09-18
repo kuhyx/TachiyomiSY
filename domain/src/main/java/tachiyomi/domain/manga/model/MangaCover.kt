@@ -33,7 +33,7 @@ public data class MangaCover(
 
     /** Holds the lazily injected custom-info lookup shared by every cover. */
     public companion object {
-        private val getCustomMangaInfo: GetCustomMangaInfo by injectLazy()
+        internal val getCustomMangaInfo: GetCustomMangaInfo by injectLazy()
     }
     // SY <--
 }

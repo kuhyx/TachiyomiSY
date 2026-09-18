@@ -77,6 +77,6 @@ public class GetUpdates(
 
     private companion object {
         const val LIMIT = 500L
-        val RETRY_DELAY = 5.seconds
+        internal val RETRY_DELAY = 5.seconds
     }
 }

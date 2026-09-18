@@ -191,7 +191,7 @@ public data class Manga(
         public const val CHAPTER_DISPLAY_MASK: Long = 0x00100000L
 
         // SY -->
-        private val getCustomMangaInfo: GetCustomMangaInfo by injectLazy()
+        internal val getCustomMangaInfo: GetCustomMangaInfo by injectLazy()
         // SY <--
 
         /** An empty, not yet inserted manga. */

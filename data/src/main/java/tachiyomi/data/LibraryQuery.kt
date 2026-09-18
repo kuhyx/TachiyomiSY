@@ -150,7 +150,7 @@ public class LibraryQuery(
             $CATEGORIES_JOIN
         """
 
-        fun librarySql(condition: String): String = """
+        internal fun librarySql(condition: String): String = """
             $SELECT_COLUMNS
             $NORMAL_JOINS
             WHERE $condition AND M.source <> $MERGED_SOURCE_ID

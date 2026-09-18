@@ -35,7 +35,7 @@ public data class HistoryWithRelations(
 
     /** The custom-title lookup shared by every row. */
     public companion object {
-        private val customMangaManager: GetCustomMangaInfo by injectLazy()
+        internal val customMangaManager: GetCustomMangaInfo by injectLazy()
     }
     // SY <--
 }

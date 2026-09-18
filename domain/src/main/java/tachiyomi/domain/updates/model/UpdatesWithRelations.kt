@@ -42,7 +42,7 @@ public data class UpdatesWithRelations(
 
     /** The custom-title lookup shared by every row. */
     public companion object {
-        private val getCustomMangaInfo: GetCustomMangaInfo by injectLazy()
+        internal val getCustomMangaInfo: GetCustomMangaInfo by injectLazy()
     }
     // SY <--
 }

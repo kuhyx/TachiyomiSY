@@ -146,7 +146,7 @@ public class UpdatesQuery(
             LIMIT :limit;
         """
 
-        fun updatesSql(): String = """
+        internal fun updatesSql(): String = """
             SELECT *
             FROM (
                 -- Normal source
