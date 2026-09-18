@@ -1,6 +1,10 @@
 package eu.kanade.tachiyomi.util.system
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -58,12 +62,6 @@ internal class WebViewUtilTest {
     }
 
     @Test
-    fun versionIsUnknownBeforeOreo() {
-        ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", Build.VERSION_CODES.N_MR1)
-        WebViewUtil.getVersion(context) shouldBe "Unknown"
-    }
-
-    @Test
     fun supportFollowsTheSystemFeature() {
         val packageManager = shadowOf(context.packageManager)
         packageManager.setSystemFeature(PackageManager.FEATURE_WEBVIEW, true)
@@ -84,8 +82,19 @@ internal class WebViewUtilTest {
     }
 
     @Test
-    fun spoofFallsBackToAnyPackage() {
-        WebViewUtil.spoofedPackageName(context) shouldBe context.packageName
+    fun spoofFallsBackToALaunchableApp() {
+        val launcher = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        val activity = ActivityInfo().apply {
+            packageName = "org.example.launchable"
+            name = "org.example.launchable.Main"
+        }
+        shadowOf(context.packageManager).addOrUpdateActivity(activity)
+        shadowOf(context.packageManager).addIntentFilterForActivity(
+            ComponentName(activity.packageName, activity.name),
+            IntentFilter(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) },
+        )
+        context.packageManager.queryIntentActivities(launcher, 0).size shouldBe 1
+        WebViewUtil.spoofedPackageName(context) shouldBe "org.example.launchable"
     }
 
     @Test

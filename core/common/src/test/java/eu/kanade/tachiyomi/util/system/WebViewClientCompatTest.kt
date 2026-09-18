@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.util.system
 
 import android.content.Context
 import android.net.Uri
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -11,6 +12,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -150,5 +152,13 @@ internal class WebViewClientCompatTest {
             failingUrl = "u",
             isMainFrame = false,
         )
+    }
+
+    @Test
+    fun rendererGoneDestroysTheView() {
+        val view = mockk<WebView>(relaxed = true)
+        val detail = mockk<RenderProcessGoneDetail> { every { didCrash() } returns true }
+        RecordingClient().onRenderProcessGone(view, detail) shouldBe true
+        verify { view.destroy() }
     }
 }

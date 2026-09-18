@@ -1,16 +1,14 @@
 package eu.kanade.tachiyomi.util.system
 
-import android.os.Build
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.annotation.RequiresApi
 
 /** A [WebViewClient] that funnels the old and new callback overloads into one set of `*Compat` hooks. */
 @Suppress("OverridingDeprecatedMember")
-public abstract class WebViewClientCompat : WebViewClient() {
+public abstract class WebViewClientCompat : RendererSafeWebViewClient() {
 
     /** [WebViewClient.shouldOverrideUrlLoading] for either overload. */
     public open fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean = false
@@ -28,7 +26,6 @@ public abstract class WebViewClientCompat : WebViewClient() {
     ) {
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     final override fun shouldOverrideUrlLoading(
         view: WebView,
         request: WebResourceRequest,

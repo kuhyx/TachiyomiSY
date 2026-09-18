@@ -92,7 +92,7 @@ public class AndroidPreferenceStore(
     override fun getAll(): Map<String, *> = sharedPreferences.all ?: emptyMap<String, Any>()
 }
 
-private val SharedPreferences.keyFlow
+internal val SharedPreferences.keyFlow
     get() = callbackFlow {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key: String? ->
             trySend(

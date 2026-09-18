@@ -190,7 +190,7 @@ public object DiskUtil {
     // Returns true if the given character is a valid filename character, false otherwise.
 }
 
-private fun isValidFatFilenameChar(c: Char): Boolean {
+internal fun isValidFatFilenameChar(c: Char): Boolean {
     // Char is unsigned, so the only control range below is the low one.
     if (c <= 0x1f.toChar()) {
         return false

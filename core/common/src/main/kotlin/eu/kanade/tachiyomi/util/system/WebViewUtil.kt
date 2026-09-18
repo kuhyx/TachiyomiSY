@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.util.system
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.util.AndroidRuntimeException
 import android.webkit.CookieManager
 import android.webkit.WebSettings
@@ -39,14 +39,12 @@ public object WebViewUtil {
         .replace("Version/.* Chrome/".toRegex(), "Chrome/")
 
     /** The installed WebView's version name. */
-    public fun getVersion(context: Context): String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    public fun getVersion(context: Context): String {
         val webView = WebView.getCurrentWebViewPackage() ?: return "how did you get here?"
         val pm = context.packageManager
         val label = webView.applicationInfo!!.loadLabel(pm)
         val version = webView.versionName
-        "$label $version"
-    } else {
-        "Unknown"
+        return "$label $version"
     }
 
     /** True when a usable WebView is installed. */
@@ -71,9 +69,9 @@ public object WebViewUtil {
             .fold(
                 onSuccess = { it.packageName },
                 onFailure = {
-                    context.packageManager.getInstalledPackages(0)
-                        .random()
-                        .packageName
+                    // Any launchable app (the module manifest declares this query).
+                    val launcher = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+                    context.packageManager.queryIntentActivities(launcher, 0).random().activityInfo.packageName
                 },
             )
 }
@@ -115,7 +113,7 @@ private fun WebView.getWebViewMajorVersion(): Int {
 }
 
 // Based on https://stackoverflow.com/a/29218966
-private fun WebView.getDefaultUserAgentString(): String {
+internal fun WebView.getDefaultUserAgentString(): String {
     val originalUA: String = settings.userAgentString
 
     // Next call to getUserAgentString() will get us the default

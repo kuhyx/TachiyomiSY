@@ -96,7 +96,7 @@ public abstract class WebViewInterceptor(
 
 // Based on [IsRequestHeaderSafe] in
 // https://source.chromium.org/chromium/chromium/src/+/main:services/network/public/cpp/header_util.cc
-private fun isRequestHeaderSafe(rawName: String, rawValue: String): Boolean {
+internal fun isRequestHeaderSafe(rawName: String, rawValue: String): Boolean {
     val name = rawName.lowercase(Locale.ENGLISH)
     val value = rawValue.lowercase(Locale.ENGLISH)
     val unsafeName = name in unsafeHeaderNames || name.startsWith("proxy-")

@@ -37,7 +37,7 @@ internal object BitmapMerging {
 
         val maxHeight = max(height, height2)
 
-        val result = Bitmap.createBitmap(width + width2 + centerMargin, max(height, height2), Bitmap.Config.ARGB_8888)
+        val result = createBitmap(width + width2 + centerMargin, max(height, height2))
         val canvas = Canvas(result)
         canvas.drawColor(background)
         val upperPart = Rect(
