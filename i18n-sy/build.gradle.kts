@@ -4,6 +4,8 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 plugins {
     alias(mihonx.plugins.kotlin.multiplatform)
     alias(mihonx.plugins.spotless)
+    alias(mihonx.plugins.lint)
+    alias(mihonx.plugins.coverage)
 
     alias(libs.plugins.moko.resources)
     id("io.github.ben-manes.versions")
@@ -25,6 +27,18 @@ kotlin {
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                // moko-resources generates the resource accessors from strings.xml;
+                // there is no hand-written Kotlin in this module.
+                classes("tachiyomi.i18n.sy.SYMR", "tachiyomi.i18n.sy.SYMR$*")
+            }
+        }
     }
 }
 

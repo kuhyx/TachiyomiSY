@@ -11,13 +11,19 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * Records a Baseline Profile by walking the app's bottom-navigation tabs on a device
+ * (`./gradlew :app:generateBaselineProfile`); it never runs on the JVM.
+ */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class BaselineProfileGenerator {
+internal class BaselineProfileGenerator {
 
+    /** Collects the profile for [TARGET_PACKAGE_NAME] while [generate] drives the UI. */
     @get:Rule
-    val rule = BaselineProfileRule()
+    val rule: BaselineProfileRule = BaselineProfileRule()
 
+    /** Opens Updates, History, Browse > Extensions and More so their code paths land in the profile. */
     @Test
     fun generate() {
         rule.collect(TARGET_PACKAGE_NAME) {
@@ -42,5 +48,5 @@ class BaselineProfileGenerator {
 }
 
 private fun UiDevice.waitAndClick(by: BySelector) {
-    wait(Until.findObject(by), 60_000).click()
+    wait(Until.findObject(by), UI_WAIT_TIMEOUT_MS).click()
 }

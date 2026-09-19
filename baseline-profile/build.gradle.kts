@@ -2,6 +2,8 @@ import com.android.build.api.dsl.ManagedVirtualDevice
 
 plugins {
     alias(mihonx.plugins.android.test)
+    alias(mihonx.plugins.spotless)
+    alias(mihonx.plugins.lint)
     alias(libs.plugins.androidx.baselineProfile)
 }
 
