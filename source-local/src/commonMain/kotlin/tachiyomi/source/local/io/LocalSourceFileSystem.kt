@@ -2,13 +2,18 @@ package tachiyomi.source.local.io
 
 import com.hippo.unifile.UniFile
 
-expect class LocalSourceFileSystem {
+/** The local-source directory: one sub-folder per manga. */
+public expect class LocalSourceFileSystem {
 
-    fun getBaseDirectory(): UniFile?
+    /** The local-source directory, or `null` while no storage location is set. */
+    public fun getBaseDirectory(): UniFile?
 
-    fun getFilesInBaseDirectory(): List<UniFile>
+    /** Everything directly under the local-source directory. */
+    public fun getFilesInBaseDirectory(): List<UniFile>
 
-    fun getMangaDirectory(name: String): UniFile?
+    /** The folder of the manga called [name], or `null` when it is missing or not a folder. */
+    public fun getMangaDirectory(name: String): UniFile?
 
-    fun getFilesInMangaDirectory(name: String): List<UniFile>
+    /** Everything directly under the folder of the manga called [name]; empty when it is missing. */
+    public fun getFilesInMangaDirectory(name: String): List<UniFile>
 }

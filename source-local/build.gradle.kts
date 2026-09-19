@@ -3,6 +3,8 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 plugins {
     alias(mihonx.plugins.kotlin.multiplatform)
     alias(mihonx.plugins.spotless)
+    alias(mihonx.plugins.lint)
+    alias(mihonx.plugins.coverage)
 }
 
 kotlin {
@@ -10,7 +12,10 @@ kotlin {
         namespace = "tachiyomi.source.local"
 
         // TODO(antsy): Remove when https://youtrack.jetbrains.com/issue/KT-83319 is resolved
-        withHostTest { }
+        withHostTest {
+            // Robolectric: a Context for moko strings, UniFile over real temp dirs.
+            isIncludeAndroidResources = true
+        }
     }
 
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -34,6 +39,18 @@ kotlin {
                 implementation(projects.domain)
 
                 implementation(libs.bundles.serialization)
+            }
+        }
+        named("androidHostTest") {
+            dependencies {
+                implementation(libs.bundles.test)
+                implementation(libs.kotlinx.coroutines.test)
+                runtimeOnly(libs.junit.platform.launcher)
+                // Robolectric has no JUnit 5 runner: its tests are JUnit 4 classes run
+                // by the vintage engine next to the Jupiter ones.
+                implementation(libs.robolectric)
+                implementation(libs.junit4)
+                runtimeOnly(libs.junit.vintage)
             }
         }
     }
