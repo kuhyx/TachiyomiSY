@@ -139,14 +139,20 @@ gradle_gate() {
         : "${mem_g:=4}" "${cpu_pct:=20}"
         workers=$(( $(nproc) * cpu_pct / 100 ))
         (( workers < 2 )) && workers=2
+        # Every worker may be a Robolectric test JVM (~1 GiB each next to the
+        # daemon), so with six such modules 12 workers overran the 8 GiB cap
+        # (SIGTERM 143 on 2026-09-19 once source-local's suite joined); four
+        # keeps the peak under it.
+        (( workers > 4 )) && workers=4
         if (( mem_g >= 8 )); then
             # 8 GiB and up: parallel project execution, one worker per capped
-            # core, half the cap for the daemon heap (measured 2026-09-18).
+            # core, three eighths of the cap for the daemon heap (measured
+            # 2026-09-18 at half; lowered with the worker cap above).
             CAP_MEM="${mem_g}G" CAP_CPU_PCT="$cpu_pct" "$capped" \
                 "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint \
                 --max-workers="$workers" \
                 -Dorg.gradle.parallel=true \
-                -Dorg.gradle.jvmargs="-Xmx$((mem_g / 2))g -Dfile.encoding=UTF-8" \
+                -Dorg.gradle.jvmargs="-Xmx$((mem_g * 3 / 8))g -Dfile.encoding=UTF-8" \
                 -Dkotlin.daemon.jvm.options=-Xmx1024m
         else
             # Measured 2026-09-12: with the project's default -Xmx4g and
