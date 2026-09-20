@@ -12,6 +12,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import eu.kanade.tachiyomi.ui.reader.requestPreloadChapter
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderButton
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderTransitionView
 import eu.kanade.tachiyomi.util.system.dpToPx

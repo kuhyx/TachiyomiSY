@@ -60,8 +60,8 @@ internal fun ReaderActivity.setComposeOverlay(binding: ReaderActivityBinding) {
         val settingsScreenModel = remember {
             ReaderSettingsScreenModel(
                 readerState = viewModel.state,
-                onChangeReadingMode = viewModel::setMangaReadingMode,
-                onChangeOrientation = viewModel::setMangaOrientationType,
+                onChangeReadingMode = viewModel.viewerSettings::setMangaReadingMode,
+                onChangeOrientation = viewModel.viewerSettings::setMangaOrientationType,
             )
         }
 
@@ -135,11 +135,11 @@ internal fun ReaderActivity.setComposeOverlay(binding: ReaderActivityBinding) {
             is ReaderViewModel.Dialog.PageActions -> {
                 ReaderPageActionsDialog(
                     onDismissRequest = onDismissRequest,
-                    onSetAsCover = viewModel::setAsCover,
-                    onShare = viewModel::shareImage,
-                    onSave = viewModel::saveImage,
-                    onShareCombined = viewModel::shareImages,
-                    onSaveCombined = viewModel::saveImages,
+                    onSetAsCover = viewModel.images::setAsCover,
+                    onShare = viewModel.images::shareImage,
+                    onSave = viewModel.images::saveImage,
+                    onShareCombined = viewModel.images::shareImages,
+                    onSaveCombined = viewModel.images::saveImages,
                     hasExtraPage = (state.dialog as? ReaderViewModel.Dialog.PageActions)?.extraPage != null,
                 )
             }
@@ -250,10 +250,10 @@ internal fun ReaderActivity.AppBars(state: ReaderViewModel.State) {
 
     val cropBorderPaged by readerPreferences.cropBorders.collectAsState()
     val cropBorderWebtoon by readerPreferences.cropBordersWebtoon.collectAsState()
-    val isPagerType = ReadingMode.isPagerType(viewModel.getMangaReadingMode())
+    val isPagerType = ReadingMode.isPagerType(viewModel.viewerSettings.getMangaReadingMode())
 
     // SY -->
-    val readingMode = viewModel.getMangaReadingMode()
+    val readingMode = viewModel.viewerSettings.getMangaReadingMode()
     val isWebtoon = ReadingMode.WEBTOON.flagValue == readingMode
     val cropBorderContinuousVertical by readerPreferences.cropBordersContinuousVertical.collectAsState()
     val cropEnabled = if (isPagerType) {
@@ -271,7 +271,7 @@ internal fun ReaderActivity.AppBars(state: ReaderViewModel.State) {
 
     val verticalNavigatorModes by readerPreferences.verticalNavigator.collectAsState()
     val verticalNavigator = verticalNavigatorModes.contains(
-        ReadingMode.fromPreference(viewModel.getMangaReadingMode()),
+        ReadingMode.fromPreference(viewModel.viewerSettings.getMangaReadingMode()),
     )
     val verticalNavigatorOnLeft by readerPreferences.verticalNavigatorOnLeft.collectAsState()
 
@@ -316,16 +316,16 @@ internal fun ReaderActivity.AppBars(state: ReaderViewModel.State) {
         },
 
         readingMode = ReadingMode.fromPreference(
-            viewModel.getMangaReadingMode(resolveDefault = false),
+            viewModel.viewerSettings.getMangaReadingMode(resolveDefault = false),
         ),
         onClickReadingMode = viewModel::openReadingModeSelectDialog,
         orientation = ReaderOrientation.fromPreference(
-            viewModel.getMangaOrientation(resolveDefault = false),
+            viewModel.viewerSettings.getMangaOrientation(resolveDefault = false),
         ),
         onClickOrientation = viewModel::openOrientationSelectDialog,
         cropEnabled = cropEnabled,
         onClickCropBorder = {
-            val enabled = viewModel.toggleCropBorders()
+            val enabled = viewModel.viewerSettings.toggleCropBorders()
             menuToggleToast?.cancel()
             menuToggleToast = toast(if (enabled) MR.strings.on else MR.strings.off)
         },
@@ -346,7 +346,7 @@ internal fun ReaderActivity.AppBars(state: ReaderViewModel.State) {
         currentPageText = state.currentPageText,
         enabledButtons = readerBottomButtons,
         currentReadingMode = ReadingMode.fromPreference(
-            viewModel.getMangaReadingMode(resolveDefault = true),
+            viewModel.viewerSettings.getMangaReadingMode(resolveDefault = true),
         ),
         dualPageSplitEnabled = dualPageSplitPaged,
         doublePages = state.doublePages,
