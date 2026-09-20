@@ -121,61 +121,72 @@ internal class MigrationListScreenModel(
 
         for (manga in mangas) {
             if (!currentCoroutineContext().isActive) break
-            if (manga.manga.id !in state.value.mangaIds) continue
-            if (manga.searchResult.value != SearchResult.Searching) continue
-            if (!manga.migrationScope.isActive) continue
+            if (manga.isAwaitingSearch()) migrate(manga, sources, prioritizeByChapters, deepSearchMode)
+        }
+    }
 
-            val result = try {
-                manga.migrationScope.async {
-                    if (prioritizeByChapters) {
-                        val sourceSemaphore = Semaphore(MAX_CONCURRENT_SOURCES)
-                        sources.map { source ->
-                            async innerAsync@{
-                                sourceSemaphore.withPermit {
-                                    val result = searchSource(manga.manga, source, deepSearchMode)
-                                    if (result == null || result.second.chapterCount == 0) return@innerAsync null
-                                    result
-                                }
+    private fun MigratingManga.isAwaitingSearch(): Boolean =
+        manga.id in state.value.mangaIds &&
+            searchResult.value == SearchResult.Searching &&
+            migrationScope.isActive
+
+    // Searches the configured sources for [manga] and records the outcome on it.
+    private suspend fun migrate(
+        manga: MigratingManga,
+        sources: List<Source>,
+        prioritizeByChapters: Boolean,
+        deepSearchMode: Boolean,
+    ) {
+        val result = try {
+            manga.migrationScope.async {
+                if (prioritizeByChapters) {
+                    val sourceSemaphore = Semaphore(MAX_CONCURRENT_SOURCES)
+                    sources.map { source ->
+                        async innerAsync@{
+                            sourceSemaphore.withPermit {
+                                val result = searchSource(manga.manga, source, deepSearchMode)
+                                if (result == null || result.second.chapterCount == 0) return@innerAsync null
+                                result
                             }
                         }
-                            .mapNotNull { it.await() }
-                            .maxByOrNull { it.second.latestChapter ?: 0.0 }
-                    } else {
-                        sources.forEach { source ->
-                            val result = searchSource(manga.manga, source, deepSearchMode)
-                            if (result != null) return@async result
-                        }
-                        null
                     }
-                }
-                    .await()
-            } catch (_: CancellationException) {
-                continue
-            }
-
-            if (result != null && result.first.thumbnailUrl == null) {
-                try {
-                    updateMangaFromRemote(result.first, fetchDetails = true, manualFetch = true).getOrThrow().manga
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (_: Exception) {
+                        .mapNotNull { it.await() }
+                        .maxByOrNull { it.second.latestChapter ?: 0.0 }
+                } else {
+                    sources.forEach { source ->
+                        val result = searchSource(manga.manga, source, deepSearchMode)
+                        if (result != null) return@async result
+                    }
+                    null
                 }
             }
-
-            manga.searchResult.value = result?.first?.toSuccessSearchResult() ?: SearchResult.NotFound
-
-            if (result == null && hideUnmatched) {
-                removeManga(manga)
-            }
-            if (result != null &&
-                hideWithoutUpdates &&
-                (result.second.latestChapter ?: 0.0) <= (manga.latestChapter ?: 0.0)
-            ) {
-                removeManga(manga)
-            }
-
-            updateMigrationProgress()
+                .await()
+        } catch (_: CancellationException) {
+            return
         }
+
+        if (result != null && result.first.thumbnailUrl == null) {
+            try {
+                updateMangaFromRemote(result.first, fetchDetails = true, manualFetch = true).getOrThrow().manga
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+            }
+        }
+
+        manga.searchResult.value = result?.first?.toSuccessSearchResult() ?: SearchResult.NotFound
+
+        if (result == null && hideUnmatched) {
+            removeManga(manga)
+        }
+        if (result != null &&
+            hideWithoutUpdates &&
+            (result.second.latestChapter ?: 0.0) <= (manga.latestChapter ?: 0.0)
+        ) {
+            removeManga(manga)
+        }
+
+        updateMigrationProgress()
     }
 
     private suspend fun searchSource(
