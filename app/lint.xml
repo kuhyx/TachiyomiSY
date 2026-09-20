@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Android Lint carve-outs for the app module (2026-09-20, session 06). Every rule
+  in this file is on with warnings-as-errors and would fail the build; these are
+  the checks that no edit to this repository can satisfy, each with its reason.
+  A finding that a code change can fix never goes here.
+-->
+<lint>
+    <!-- Every Activity/Service/Application IS in the manifest. The check resolves
+         relative names against applicationId (eu.kanade.tachiyomi.sy) instead of
+         namespace (eu.kanade.tachiyomi), a documented false positive whenever the
+         two differ; the drop-in build cannot make them equal. -->
+    <issue id="Registered" severity="ignore" />
+
+    <!-- Live HTTP fetch of /.well-known/assetlinks.json on e-hentai.org, nhentai.net,
+         tsumino.com, mangadex.org...: third-party hosts that will never publish a
+         Digital Asset Links file for this app, and a network call inside a build
+         gate. AppLinkWarning (the offline half) stays on. -->
+    <issue id="AppLinksAutoVerify" severity="ignore" />
+
+    <!-- Dependency versions are gated by scripts/check_dependency_freshness.sh,
+         which has predicates (blocked_by) and expiry; lint's check has neither
+         and would contradict a justified allowlist entry forever. -->
+    <issue id="NewerVersionAvailable" severity="ignore" />
+
+    <!-- Ids referenced only through ViewBinding (binding.viewerContainer) are
+         reported unused: https://issuetracker.google.com/issues/233912817. The
+         ids that were genuinely unreferenced were deleted. -->
+    <issue id="UnusedIds" severity="ignore" />
+
+    <!-- Findings inside third-party jars pulled in by the Google Drive sync
+         client; nothing in this tree is the subject of the report. -->
+    <issue id="InvalidPackage">
+        <ignore regexp="org\.apache\.httpcomponents/httpclient/" />
+    </issue>
+    <issue id="TrustAllX509TrustManager">
+        <ignore regexp="com\.google\.http-client/google-http-client/" />
+    </issue>
+</lint>

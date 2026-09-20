@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="clean_up_downloads">
-        <item>@string/clean_orphaned_downloads</item>
-        <item>@string/clean_read_downloads</item>
-        <item>@string/clean_read_entries_not_in_library</item>
-    </string-array>
-
     <string-array name="md_follows_options">
         <item>@string/md_follows_unfollowed</item>
         <item>@string/reading</item>

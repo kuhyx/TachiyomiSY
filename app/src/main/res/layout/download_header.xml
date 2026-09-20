@@ -16,6 +16,7 @@
 
         <TextView
             android:id="@+id/title"
+            android:textIsSelectable="true"
             style="@style/TextAppearance.Tachiyomi.SectionHeader"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -36,7 +37,7 @@
             android:scaleType="center"
             app:srcCompat="@drawable/ic_drag_handle_24dp"
             app:tint="?android:attr/textColorHint"
-            tools:ignore="ContentDescription" />
+            android:contentDescription="@string/action_reorder" />
 
     </LinearLayout>
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,6 +14,7 @@
 
         <ImageView
             android:id="@+id/image"
+            android:importantForAccessibility="no"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:paddingStart="8dp"
@@ -24,21 +26,24 @@
 
         <TextView
             android:id="@+id/title"
+            android:textIsSelectable="false"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
             android:paddingStart="8dp"
-            android:text="Title"
+            android:paddingEnd="8dp"
             android:textAppearance="?attr/textAppearanceTitleSmall"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/reorder"
             app:layout_constraintStart_toEndOf="@+id/image"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Title" />
 
         <ImageView
             android:id="@+id/reorder"
+            android:contentDescription="@string/action_reorder"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:scaleType="center"

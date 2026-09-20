@@ -16,6 +16,7 @@
 
         <ImageView
             android:id="@+id/reorder"
+            android:contentDescription="@string/action_reorder"
             android:layout_width="56dp"
             android:layout_height="0dp"
             android:layout_alignParentStart="true"
@@ -39,6 +40,7 @@
 
             <ImageView
                 android:id="@+id/cover"
+                android:importantForAccessibility="no"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
@@ -61,6 +63,7 @@
 
                 <TextView
                     android:id="@+id/title"
+                    android:textIsSelectable="true"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
@@ -70,6 +73,7 @@
 
                 <TextView
                     android:id="@+id/subtitle"
+                    android:textIsSelectable="true"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"

@@ -184,6 +184,8 @@
 
     <!-- Library settings -->
     <string name="pref_sorting_settings">Sorting Settings</string>
+    <string name="action_reorder">Reorder</string>
+    <string name="download_pages_progress">%1$d/%2$d</string>
     <string name="pref_skip_pre_migration_summary">Use last saved pre-migration preferences and sources to mass migrate</string>
     <string name="library_group_updates">Library dynamic category updates</string>
     <string name="library_group_updates_global">Always launch global updates</string>
