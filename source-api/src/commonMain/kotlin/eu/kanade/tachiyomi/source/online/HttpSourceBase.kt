@@ -66,10 +66,10 @@ public abstract class HttpSourceBase : CatalogueSource {
     override val id: Long by lazy { generateId(name, lang, versionId) }
 
     /**
-     * Headers used for requests.
+     * Headers used for requests. Declared (lazily) on [HttpSource] itself, not here: see the
+     * note on that override.
      */
-    /* SY --> */
-    public open /* SY <-- */ val headers: Headers by lazy { headersBuilder().build() }
+    public abstract val headers: Headers
 
     /**
      * Default network client for doing requests.

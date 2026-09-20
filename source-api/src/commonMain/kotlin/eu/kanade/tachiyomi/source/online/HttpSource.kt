@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online
 
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import okhttp3.Headers
 import java.net.URI
 import java.net.URISyntaxException
 
@@ -13,6 +14,18 @@ import java.net.URISyntaxException
  * extensions see one class.
  */
 public abstract class HttpSource : HttpSourcePages() {
+
+    /**
+     * Headers used for requests.
+     *
+     * This must stay a `by lazy` property declared on this very class: Keiyoushi's `KeiSource`
+     * (extensions-lib 1.6) swaps the delegate through
+     * `HttpSource::class.java.getDeclaredField("headers$delegate")`, and `getDeclaredField` does
+     * not search superclasses. When the property lived on [HttpSourceBase] every lib-1.6
+     * extension failed to load with `NoSuchFieldException`.
+     */
+    /* SY --> */
+    public open /* SY <-- */ override val headers: Headers by lazy { headersBuilder().build() }
 
     /**
      * Assigns the url of the chapter without the scheme and domain. It saves some redundancy from

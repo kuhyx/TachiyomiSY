@@ -38,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -297,15 +296,16 @@ internal fun SearchToolbar(
                 }
             }
 
-            // Callers own the query as a String; the field's own state is bridged both ways.
+            // Callers own the query as a String; the field's own state is bridged both ways
+            // through SearchQueryBridge, which keeps the caller's stale echoes out of the field.
             val textFieldState = rememberTextFieldState(searchQuery)
-            val currentQuery by rememberUpdatedState(searchQuery)
+            val bridge = remember(textFieldState) { SearchQueryBridge(searchQuery) }
             LaunchedEffect(textFieldState) {
                 snapshotFlow { textFieldState.text.toString() }
-                    .collect { if (it != currentQuery) onChangeSearchQuery(it) }
+                    .collect { if (bridge.fieldChanged(it)) onChangeSearchQuery(it) }
             }
             LaunchedEffect(searchQuery) {
-                if (textFieldState.text.toString() != searchQuery) {
+                if (bridge.callerChanged(searchQuery)) {
                     textFieldState.setTextAndPlaceCursorAtEnd(searchQuery)
                 }
             }
