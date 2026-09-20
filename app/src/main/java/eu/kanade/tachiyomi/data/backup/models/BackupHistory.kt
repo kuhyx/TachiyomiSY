@@ -14,11 +14,11 @@ internal data class BackupHistory(
     @ProtoNumber(BACKUP_HISTORY_URL) var url: String,
     @ProtoNumber(BACKUP_HISTORY_LAST_READ) var lastRead: Long,
     @ProtoNumber(BACKUP_HISTORY_READ_DURATION) var readDuration: Long = 0,
-) {
-    fun getHistoryImpl(): History {
-        return History.create().copy(
-            readAt = Date(lastRead),
-            readDuration = readDuration,
-        )
-    }
+)
+
+internal fun BackupHistory.getHistoryImpl(): History {
+    return History.create().copy(
+        readAt = Date(lastRead),
+        readDuration = readDuration,
+    )
 }

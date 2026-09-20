@@ -18,6 +18,6 @@ internal data class MangaBakaOAuth(
     @SerialName("token_type")
     val tokenType: String,
     val scope: String,
-) {
-    fun isExpired(): Boolean = Clock.System.now().plus(1.minutes).epochSeconds > expiresAt
-}
+)
+
+internal fun MangaBakaOAuth.isExpired(): Boolean = Clock.System.now().plus(1.minutes).epochSeconds > expiresAt

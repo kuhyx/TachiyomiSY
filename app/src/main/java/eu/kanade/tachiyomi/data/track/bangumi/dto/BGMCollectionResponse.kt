@@ -17,9 +17,11 @@ internal data class BGMCollectionResponse(
     val subject: BGMSlimSubject? = null,
 ) {
     // Bangumi's collection types are numbered exactly like the tracker's status constants.
-    fun getStatus(): Long = type?.toLong()?.takeIf { it in Bangumi.PLAN_TO_READ..Bangumi.DROPPED }
-        ?: throw IllegalArgumentException("Unknown status: $type")
 }
+
+internal fun BGMCollectionResponse.getStatus(): Long =
+    type?.toLong()?.takeIf { it in Bangumi.PLAN_TO_READ..Bangumi.DROPPED }
+        ?: throw IllegalArgumentException("Unknown status: $type")
 
 @Serializable
 // Incomplete DTO with only our needed attributes

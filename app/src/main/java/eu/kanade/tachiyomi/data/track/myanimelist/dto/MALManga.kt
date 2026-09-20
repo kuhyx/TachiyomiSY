@@ -34,9 +34,9 @@ internal data class MALAuthor(
     val firstName: String,
     @SerialName("last_name")
     val lastName: String,
-) {
-    fun getFullName(): String? = "$firstName $lastName".trim().ifBlank { null }
-}
+)
+
+internal fun MALAuthor.getFullName(): String? = "$firstName $lastName".trim().ifBlank { null }
 
 @Serializable
 internal data class MALMangaCovers(

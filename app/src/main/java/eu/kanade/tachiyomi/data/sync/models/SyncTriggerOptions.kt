@@ -9,17 +9,6 @@ internal data class SyncTriggerOptions(
     val syncOnAppStart: Boolean = false,
     val syncOnAppResume: Boolean = false,
 ) {
-    fun asBooleanArray() = booleanArrayOf(
-        syncOnChapterRead,
-        syncOnChapterOpen,
-        syncOnAppStart,
-        syncOnAppResume,
-    )
-
-    fun anyEnabled() = syncOnChapterRead ||
-        syncOnChapterOpen ||
-        syncOnAppStart ||
-        syncOnAppResume
 
     companion object {
         val mainOptions = listOf(
@@ -60,3 +49,15 @@ internal data class SyncTriggerOptions(
         val enabled: (SyncTriggerOptions) -> Boolean = { true },
     )
 }
+
+internal fun SyncTriggerOptions.asBooleanArray() = booleanArrayOf(
+    syncOnChapterRead,
+    syncOnChapterOpen,
+    syncOnAppStart,
+    syncOnAppResume,
+)
+
+internal fun SyncTriggerOptions.anyEnabled() = syncOnChapterRead ||
+    syncOnChapterOpen ||
+    syncOnAppStart ||
+    syncOnAppResume

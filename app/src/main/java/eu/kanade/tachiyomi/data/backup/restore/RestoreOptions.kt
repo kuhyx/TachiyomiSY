@@ -15,25 +15,6 @@ internal data class RestoreOptions(
     // SY <--
 ) {
 
-    fun asBooleanArray() = booleanArrayOf(
-        libraryEntries,
-        categories,
-        appSettings,
-        extensionStores,
-        sourceSettings,
-        // SY -->
-        savedSearches,
-        // SY <--
-    )
-
-    fun canRestore() =
-        libraryEntries ||
-            categories ||
-            appSettings ||
-            extensionStores ||
-            sourceSettings /* SY --> */ ||
-            savedSearches /* SY <-- */
-
     companion object {
         val options = listOf(
             Entry(
@@ -88,3 +69,22 @@ internal data class RestoreOptions(
         val setter: (RestoreOptions, Boolean) -> RestoreOptions,
     )
 }
+
+internal fun RestoreOptions.asBooleanArray() = booleanArrayOf(
+    libraryEntries,
+    categories,
+    appSettings,
+    extensionStores,
+    sourceSettings,
+    // SY -->
+    savedSearches,
+    // SY <--
+)
+
+internal fun RestoreOptions.canRestore() =
+    libraryEntries ||
+        categories ||
+        appSettings ||
+        extensionStores ||
+        sourceSettings /* SY --> */ ||
+        savedSearches /* SY <-- */

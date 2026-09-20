@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.track.mangabaka
 
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaOAuth
+import eu.kanade.tachiyomi.data.track.mangabaka.dto.isExpired
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response

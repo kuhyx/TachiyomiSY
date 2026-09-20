@@ -30,27 +30,27 @@ internal data class MangaBakaItem(
     val type: String,
     val rating: Double?,
     val titles: List<MangaBakaItemTitle>?,
-) {
-    fun chooseBestTitle(): String {
-        // based on https://mangabaka.org/pages/announcements/15-titles-v2#finding-the-title-you-want
-        // extended with zh-Latn and zh
-        val bestTitlePerLanguage = TITLE_PRIORITIES.associateWith { lang ->
-            titles?.filter { it.language == lang }
-                ?.minByOrNull {
-                    when {
-                        it.isPrimary -> 0
-                        "official" in it.traits -> 1
-                        "native" in it.traits -> 2
-                        else -> OTHER_TITLE_RANK
-                    }
-                }
-        }
+)
 
-        return TITLE_PRIORITIES
-            .firstNotNullOfOrNull { bestTitlePerLanguage[it]?.title }
-            ?: titles?.firstOrNull()?.title
-            ?: "ID: $id - Could not find name! (report on the MangaBaka Discord)"
+internal fun MangaBakaItem.chooseBestTitle(): String {
+    // based on https://mangabaka.org/pages/announcements/15-titles-v2#finding-the-title-you-want
+    // extended with zh-Latn and zh
+    val bestTitlePerLanguage = TITLE_PRIORITIES.associateWith { lang ->
+        titles?.filter { it.language == lang }
+            ?.minByOrNull {
+                when {
+                    it.isPrimary -> 0
+                    "official" in it.traits -> 1
+                    "native" in it.traits -> 2
+                    else -> OTHER_TITLE_RANK
+                }
+            }
     }
+
+    return TITLE_PRIORITIES
+        .firstNotNullOfOrNull { bestTitlePerLanguage[it]?.title }
+        ?: titles?.firstOrNull()?.title
+        ?: "ID: $id - Could not find name! (report on the MangaBaka Discord)"
 }
 
 @Serializable

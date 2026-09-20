@@ -21,15 +21,15 @@ internal data class MangaBakaListEntry(
     @SerialName("progress_chapter")
     val progressChapter: Double?,
     val rating: Long?,
-) {
-    fun getStatus(): Long = when (state) {
-        "considering" -> MangaBaka.CONSIDERING
-        "completed" -> MangaBaka.COMPLETED
-        "dropped" -> MangaBaka.DROPPED
-        "paused" -> MangaBaka.PAUSED
-        "plan_to_read" -> MangaBaka.PLAN_TO_READ
-        "reading" -> MangaBaka.READING
-        "rereading" -> MangaBaka.REREADING
-        else -> throw IllegalArgumentException("Unknown status: $state")
-    }
+)
+
+internal fun MangaBakaListEntry.getStatus(): Long = when (state) {
+    "considering" -> MangaBaka.CONSIDERING
+    "completed" -> MangaBaka.COMPLETED
+    "dropped" -> MangaBaka.DROPPED
+    "paused" -> MangaBaka.PAUSED
+    "plan_to_read" -> MangaBaka.PLAN_TO_READ
+    "reading" -> MangaBaka.READING
+    "rereading" -> MangaBaka.REREADING
+    else -> throw IllegalArgumentException("Unknown status: $state")
 }

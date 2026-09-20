@@ -11,40 +11,40 @@ import kotlinx.serialization.Serializable
 internal data class KitsuListSearchResult(
     val data: List<KitsuListSearchItemData>,
     val included: List<KitsuListSearchItemIncluded> = emptyList(),
-) {
-    fun firstToTrack(): TrackSearch {
-        require(data.isNotEmpty()) { "Missing User data from Kitsu" }
-        require(included.isNotEmpty()) { "Missing Manga data from Kitsu" }
+)
 
-        val userData = data[0]
-        val userDataAttrs = userData.attributes
-        val manga = included[0].attributes
+internal fun KitsuListSearchResult.firstToTrack(): TrackSearch {
+    require(data.isNotEmpty()) { "Missing User data from Kitsu" }
+    require(included.isNotEmpty()) { "Missing Manga data from Kitsu" }
 
-        return TrackSearch.create(TrackerManager.KITSU).apply {
-            remoteId = included[0].id
-            libraryId = userData.id
-            title = manga.canonicalTitle
-            totalChapters = manga.chapterCount ?: 0
-            coverUrl = manga.posterImage?.original ?: ""
-            summary = manga.synopsis ?: ""
-            trackingUrl = KitsuApi.mangaUrl(remoteId)
-            publishingStatus = manga.status
-            publishingType = manga.mangaType ?: ""
-            startDate = userDataAttrs.startedAt ?: ""
-            startedReadingDate = KitsuDateHelper.parse(userDataAttrs.startedAt)
-            finishedReadingDate = KitsuDateHelper.parse(userDataAttrs.finishedAt)
-            status = when (userDataAttrs.status) {
-                "current" -> Kitsu.READING
-                "completed" -> Kitsu.COMPLETED
-                "on_hold" -> Kitsu.ON_HOLD
-                "dropped" -> Kitsu.DROPPED
-                "planned" -> Kitsu.PLAN_TO_READ
-                else -> error("Unknown status")
-            }
-            score = userDataAttrs.ratingTwenty?.let { it / 2.0 } ?: 0.0
-            lastChapterRead = userDataAttrs.progress.toDouble()
-            private = userDataAttrs.private
+    val userData = data[0]
+    val userDataAttrs = userData.attributes
+    val manga = included[0].attributes
+
+    return TrackSearch.create(TrackerManager.KITSU).apply {
+        remoteId = included[0].id
+        libraryId = userData.id
+        title = manga.canonicalTitle
+        totalChapters = manga.chapterCount ?: 0
+        coverUrl = manga.posterImage?.original ?: ""
+        summary = manga.synopsis ?: ""
+        trackingUrl = KitsuApi.mangaUrl(remoteId)
+        publishingStatus = manga.status
+        publishingType = manga.mangaType ?: ""
+        startDate = userDataAttrs.startedAt ?: ""
+        startedReadingDate = KitsuDateHelper.parse(userDataAttrs.startedAt)
+        finishedReadingDate = KitsuDateHelper.parse(userDataAttrs.finishedAt)
+        status = when (userDataAttrs.status) {
+            "current" -> Kitsu.READING
+            "completed" -> Kitsu.COMPLETED
+            "on_hold" -> Kitsu.ON_HOLD
+            "dropped" -> Kitsu.DROPPED
+            "planned" -> Kitsu.PLAN_TO_READ
+            else -> error("Unknown status")
         }
+        score = userDataAttrs.ratingTwenty?.let { it / 2.0 } ?: 0.0
+        lastChapterRead = userDataAttrs.progress.toDouble()
+        private = userDataAttrs.private
     }
 }
 

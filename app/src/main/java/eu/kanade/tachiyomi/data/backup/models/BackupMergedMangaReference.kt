@@ -26,22 +26,22 @@ internal data class BackupMergedMangaReference(
     @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_MERGE_URL) var mergeUrl: String,
     @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_MANGA_URL) var mangaUrl: String,
     @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_MANGA_SOURCE_ID) var mangaSourceId: Long,
-) {
-    fun getMergedMangaReference(): MergedMangaReference {
-        return MergedMangaReference(
-            isInfoManga = isInfoManga,
-            getChapterUpdates = getChapterUpdates,
-            chapterSortMode = chapterSortMode,
-            chapterPriority = chapterPriority,
-            downloadChapters = downloadChapters,
-            mergeUrl = mergeUrl,
-            mangaUrl = mangaUrl,
-            mangaSourceId = mangaSourceId,
-            mergeId = null,
-            mangaId = null,
-            id = -1,
-        )
-    }
+)
+
+internal fun BackupMergedMangaReference.getMergedMangaReference(): MergedMangaReference {
+    return MergedMangaReference(
+        isInfoManga = isInfoManga,
+        getChapterUpdates = getChapterUpdates,
+        chapterSortMode = chapterSortMode,
+        chapterPriority = chapterPriority,
+        downloadChapters = downloadChapters,
+        mergeUrl = mergeUrl,
+        mangaUrl = mangaUrl,
+        mangaSourceId = mangaSourceId,
+        mergeId = null,
+        mangaId = null,
+        id = -1,
+    )
 }
 
 internal val backupMergedMangaReferenceMapper =

@@ -41,31 +41,30 @@ internal data class BackupTracking(
     @ProtoNumber(BACKUP_TRACKING_FINISHED_READING_DATE) var finishedReadingDate: Long = 0,
     @ProtoNumber(BACKUP_TRACKING_PRIVATE) var private: Boolean = false,
     @ProtoNumber(BACKUP_TRACKING_MEDIA_ID) var mediaId: Long = 0,
-) {
+)
 
-    @Suppress("DEPRECATION")
-    fun getTrackImpl(): Track {
-        return Track(
-            id = -1,
-            mangaId = -1,
-            trackerId = this@BackupTracking.syncId.toLong(),
-            remoteId = if (this@BackupTracking.mediaIdInt != 0) {
-                this@BackupTracking.mediaIdInt.toLong()
-            } else {
-                this@BackupTracking.mediaId
-            },
-            libraryId = this@BackupTracking.libraryId,
-            title = this@BackupTracking.title,
-            lastChapterRead = this@BackupTracking.lastChapterRead.toDouble(),
-            totalChapters = this@BackupTracking.totalChapters.toLong(),
-            score = this@BackupTracking.score.toDouble(),
-            status = this@BackupTracking.status.toLong(),
-            startDate = this@BackupTracking.startedReadingDate,
-            finishDate = this@BackupTracking.finishedReadingDate,
-            remoteUrl = this@BackupTracking.trackingUrl,
-            private = this@BackupTracking.private,
-        )
-    }
+@Suppress("DEPRECATION")
+internal fun BackupTracking.getTrackImpl(): Track {
+    return Track(
+        id = -1,
+        mangaId = -1,
+        trackerId = this@getTrackImpl.syncId.toLong(),
+        remoteId = if (this@getTrackImpl.mediaIdInt != 0) {
+            this@getTrackImpl.mediaIdInt.toLong()
+        } else {
+            this@getTrackImpl.mediaId
+        },
+        libraryId = this@getTrackImpl.libraryId,
+        title = this@getTrackImpl.title,
+        lastChapterRead = this@getTrackImpl.lastChapterRead.toDouble(),
+        totalChapters = this@getTrackImpl.totalChapters.toLong(),
+        score = this@getTrackImpl.score.toDouble(),
+        status = this@getTrackImpl.status.toLong(),
+        startDate = this@getTrackImpl.startedReadingDate,
+        finishDate = this@getTrackImpl.finishedReadingDate,
+        remoteUrl = this@getTrackImpl.trackingUrl,
+        private = this@getTrackImpl.private,
+    )
 }
 
 internal val backupTrackMapper = {

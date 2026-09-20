@@ -21,26 +21,6 @@ internal data class BackupOptions(
     // SY <--
 ) {
 
-    fun asBooleanArray() = booleanArrayOf(
-        libraryEntries,
-        categories,
-        chapters,
-        tracking,
-        history,
-        readEntries,
-        appSettings,
-        extensionStores,
-        sourceSettings,
-        privateSettings,
-        // SY -->
-        customInfo,
-        savedSearches,
-        // SY <--
-    )
-
-    fun canCreate() =
-        libraryEntries || categories || appSettings || extensionStores || sourceSettings || savedSearches
-
     companion object {
         val libraryOptions = listOf(
             Entry(
@@ -141,3 +121,23 @@ internal data class BackupOptions(
         val enabled: (BackupOptions) -> Boolean = { true },
     )
 }
+
+internal fun BackupOptions.asBooleanArray() = booleanArrayOf(
+    libraryEntries,
+    categories,
+    chapters,
+    tracking,
+    history,
+    readEntries,
+    appSettings,
+    extensionStores,
+    sourceSettings,
+    privateSettings,
+    // SY -->
+    customInfo,
+    savedSearches,
+    // SY <--
+)
+
+internal fun BackupOptions.canCreate() =
+    libraryEntries || categories || appSettings || extensionStores || sourceSettings || savedSearches

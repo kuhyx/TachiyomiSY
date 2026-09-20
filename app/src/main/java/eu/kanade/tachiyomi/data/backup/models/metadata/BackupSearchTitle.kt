@@ -12,14 +12,6 @@ internal data class BackupSearchTitle(
     @ProtoNumber(BACKUP_SEARCH_TITLE_TITLE) var title: String,
     @ProtoNumber(BACKUP_SEARCH_TITLE_TYPE) var type: Int,
 ) {
-    fun getSearchTitle(mangaId: Long): SearchTitle {
-        return SearchTitle(
-            id = null,
-            mangaId = mangaId,
-            title = title,
-            type = type,
-        )
-    }
 
     companion object {
         fun copyFrom(searchTitle: SearchTitle): BackupSearchTitle {
@@ -29,4 +21,13 @@ internal data class BackupSearchTitle(
             )
         }
     }
+}
+
+internal fun BackupSearchTitle.getSearchTitle(mangaId: Long): SearchTitle {
+    return SearchTitle(
+        id = null,
+        mangaId = mangaId,
+        title = title,
+        type = type,
+    )
 }

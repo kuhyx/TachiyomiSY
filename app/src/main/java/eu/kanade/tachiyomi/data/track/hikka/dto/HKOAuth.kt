@@ -14,10 +14,10 @@ internal data class HKOAuth(
     val accessToken: String,
     val expiration: Long,
     val created: Long,
-) {
-    fun isExpired(): Boolean {
-        val currentTime = System.currentTimeMillis() / MILLIS_PER_SECOND
-        val buffer = EXPIRY_MARGIN_SECONDS
-        return currentTime >= expiration - buffer
-    }
+)
+
+internal fun HKOAuth.isExpired(): Boolean {
+    val currentTime = System.currentTimeMillis() / MILLIS_PER_SECOND
+    val buffer = EXPIRY_MARGIN_SECONDS
+    return currentTime >= expiration - buffer
 }

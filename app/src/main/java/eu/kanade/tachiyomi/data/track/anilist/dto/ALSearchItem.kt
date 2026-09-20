@@ -70,6 +70,6 @@ internal data class ALStaffName(
     val userPreferred: String? = null,
     val native: String? = null,
     val full: String? = null,
-) {
-    operator fun invoke(): String? = userPreferred ?: full ?: native
-}
+)
+
+internal operator fun ALStaffName.invoke(): String? = userPreferred ?: full ?: native

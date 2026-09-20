@@ -11,6 +11,10 @@ import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.BackupMergedMangaReference
 import eu.kanade.tachiyomi.data.backup.models.BackupTracking
+import eu.kanade.tachiyomi.data.backup.models.getFlatMetadata
+import eu.kanade.tachiyomi.data.backup.models.getHistoryImpl
+import eu.kanade.tachiyomi.data.backup.models.getMergedMangaReference
+import eu.kanade.tachiyomi.data.backup.models.getTrackImpl
 import exh.EXHMigrations
 import tachiyomi.data.Database
 import tachiyomi.data.awaitList

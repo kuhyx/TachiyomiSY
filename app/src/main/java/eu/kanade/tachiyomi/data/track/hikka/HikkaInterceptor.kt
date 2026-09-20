@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.track.hikka
 
 import eu.kanade.tachiyomi.data.track.hikka.dto.HKAuthTokenInfo
 import eu.kanade.tachiyomi.data.track.hikka.dto.HKOAuth
+import eu.kanade.tachiyomi.data.track.hikka.dto.isExpired
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response

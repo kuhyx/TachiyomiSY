@@ -16,15 +16,6 @@ internal data class BackupSearchMetadata(
     @ProtoNumber(BACKUP_SEARCH_METADATA_INDEXED_EXTRA) var indexedExtra: String? = null,
     @ProtoNumber(BACKUP_SEARCH_METADATA_EXTRA_VERSION) var extraVersion: Int,
 ) {
-    fun getSearchMetadata(mangaId: Long): SearchMetadata {
-        return SearchMetadata(
-            mangaId = mangaId,
-            uploader = uploader,
-            extra = extra,
-            indexedExtra = indexedExtra,
-            extraVersion = extraVersion,
-        )
-    }
 
     companion object {
         fun copyFrom(searchMetadata: SearchMetadata): BackupSearchMetadata {
@@ -36,4 +27,14 @@ internal data class BackupSearchMetadata(
             )
         }
     }
+}
+
+internal fun BackupSearchMetadata.getSearchMetadata(mangaId: Long): SearchMetadata {
+    return SearchMetadata(
+        mangaId = mangaId,
+        uploader = uploader,
+        extra = extra,
+        indexedExtra = indexedExtra,
+        extraVersion = extraVersion,
+    )
 }

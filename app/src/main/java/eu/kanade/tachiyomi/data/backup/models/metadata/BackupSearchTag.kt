@@ -14,15 +14,6 @@ internal data class BackupSearchTag(
     @ProtoNumber(BACKUP_SEARCH_TAG_NAME) var name: String,
     @ProtoNumber(BACKUP_SEARCH_TAG_TYPE) var type: Int,
 ) {
-    fun getSearchTag(mangaId: Long): SearchTag {
-        return SearchTag(
-            id = null,
-            mangaId = mangaId,
-            namespace = namespace,
-            name = name,
-            type = type,
-        )
-    }
 
     companion object {
         fun copyFrom(searchTag: SearchTag): BackupSearchTag {
@@ -33,4 +24,14 @@ internal data class BackupSearchTag(
             )
         }
     }
+}
+
+internal fun BackupSearchTag.getSearchTag(mangaId: Long): SearchTag {
+    return SearchTag(
+        id = null,
+        mangaId = mangaId,
+        namespace = namespace,
+        name = name,
+        type = type,
+    )
 }

@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuMangaMetadata
 import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuOAuth
 import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuSearchResult
 import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuUser
+import eu.kanade.tachiyomi.data.track.kitsu.dto.firstToTrack
 import eu.kanade.tachiyomi.data.track.model.TrackMangaMetadata
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.DELETE

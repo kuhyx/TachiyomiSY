@@ -3,6 +3,7 @@ package exh.md.network
 import eu.kanade.domain.track.service.TrackPreferences
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALOAuth
+import eu.kanade.tachiyomi.data.track.myanimelist.dto.isExpired
 import eu.kanade.tachiyomi.network.parseAs
 import exh.md.utils.MdUtil
 import exh.util.nullIfBlank

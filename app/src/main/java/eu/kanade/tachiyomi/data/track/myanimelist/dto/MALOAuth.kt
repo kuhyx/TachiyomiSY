@@ -22,9 +22,8 @@ internal data class MALOAuth(
     @SerialName("created_at")
     @EncodeDefault
     val createdAt: Long = System.currentTimeMillis() / MILLIS_PER_SECOND,
-) {
-    // Assumes expired a minute earlier
-    private val adjustedExpiresIn: Long = expiresIn - EXPIRY_MARGIN_SECONDS
+)
 
-    fun isExpired() = createdAt + adjustedExpiresIn < System.currentTimeMillis() / MILLIS_PER_SECOND
-}
+// Assumes expired a minute earlier
+internal fun MALOAuth.isExpired() =
+    createdAt + expiresIn - EXPIRY_MARGIN_SECONDS < System.currentTimeMillis() / MILLIS_PER_SECOND

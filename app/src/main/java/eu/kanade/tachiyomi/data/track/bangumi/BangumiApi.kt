@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.track.bangumi.dto.BGMSearchResult
 import eu.kanade.tachiyomi.data.track.bangumi.dto.BGMSubject
 import eu.kanade.tachiyomi.data.track.bangumi.dto.BGMUser
 import eu.kanade.tachiyomi.data.track.bangumi.dto.Infobox
+import eu.kanade.tachiyomi.data.track.bangumi.dto.getStatus
 import eu.kanade.tachiyomi.data.track.model.TrackMangaMetadata
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.GET
