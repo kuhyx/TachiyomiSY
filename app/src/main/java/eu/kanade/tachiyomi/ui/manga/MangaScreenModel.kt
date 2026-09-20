@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Immutable
@@ -12,25 +11,17 @@ import androidx.lifecycle.flowWithLifecycle
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import eu.kanade.core.preference.asState
-import eu.kanade.core.util.addOrRemove
 import eu.kanade.core.util.insertSeparators
 import eu.kanade.domain.chapter.interactor.GetAvailableScanlators
-import eu.kanade.domain.chapter.interactor.SetReadStatus
 import eu.kanade.domain.manga.interactor.GetExcludedScanlators
 import eu.kanade.domain.manga.interactor.GetPagePreviews
 import eu.kanade.domain.manga.interactor.SetExcludedScanlators
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.manga.model.PagePreview
 import eu.kanade.domain.manga.model.chaptersFiltered
-import eu.kanade.domain.manga.model.copyFrom
 import eu.kanade.domain.manga.model.downloadedFilter
 import eu.kanade.domain.manga.model.toSManga
 import eu.kanade.domain.source.service.SourcePreferences
-import eu.kanade.domain.track.interactor.AddTracks
-import eu.kanade.domain.track.interactor.RefreshTracks
-import eu.kanade.domain.track.interactor.TrackChapter
-import eu.kanade.domain.track.model.AutoTrackState
-import eu.kanade.domain.track.model.toDomainTrack
 import eu.kanade.domain.track.service.TrackPreferences
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.manga.DownloadAction
@@ -39,33 +30,25 @@ import eu.kanade.presentation.util.formattedMessage
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.track.EnhancedTracker
-import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.source.PagePreviewSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.getNameForMangaInfo
 import eu.kanade.tachiyomi.source.online.MetadataSource
-import eu.kanade.tachiyomi.source.online.all.MergedSource
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.util.chapter.getNextUnread
-import eu.kanade.tachiyomi.util.removeCovers
-import eu.kanade.tachiyomi.util.system.toast
 import exh.debug.DebugToggles
 import exh.eh.EHentaiUpdateHelper
 import exh.log.xLogD
-import exh.md.utils.FollowStatus
 import exh.metadata.metadata.RaisedSearchMetadata
 import exh.metadata.metadata.base.FlatMetadata
 import exh.metadata.metadata.base.raise
 import exh.source.MERGED_SOURCE_ID
 import exh.source.getMainSource
 import exh.source.isEhBasedManga
-import exh.source.mangaDexSourceIds
 import exh.util.nullIfEmpty
 import exh.util.trimOrNull
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -79,60 +62,38 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import logcat.LogPriority
-import mihon.domain.chapter.interactor.FilterChaptersForDownload
 import mihon.domain.source.interactor.UpdateMangaFromRemote
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.preference.CheckboxState
 import tachiyomi.core.common.preference.TriState
-import tachiyomi.core.common.preference.mapAsCheckboxState
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.launchNonCancellable
-import tachiyomi.core.common.util.lang.withNonCancellableContext
 import tachiyomi.core.common.util.lang.withUIContext
 import tachiyomi.core.common.util.system.logcat
-import tachiyomi.domain.category.interactor.GetCategories
-import tachiyomi.domain.category.interactor.SetMangaCategories
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.chapter.interactor.GetMergedChaptersByMangaId
 import tachiyomi.domain.chapter.interactor.SetMangaDefaultChapterFlags
-import tachiyomi.domain.chapter.interactor.UpdateChapter
 import tachiyomi.domain.chapter.model.Chapter
-import tachiyomi.domain.chapter.model.ChapterUpdate
 import tachiyomi.domain.chapter.model.NoChaptersException
 import tachiyomi.domain.chapter.service.calculateChapterGap
 import tachiyomi.domain.chapter.service.getChapterSort
 import tachiyomi.domain.library.service.LibraryPreferences
-import tachiyomi.domain.manga.interactor.DeleteByMergeId
-import tachiyomi.domain.manga.interactor.DeleteMangaById
-import tachiyomi.domain.manga.interactor.DeleteMergeById
-import tachiyomi.domain.manga.interactor.GetDuplicateLibraryManga
 import tachiyomi.domain.manga.interactor.GetFlatMetadataById
-import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.GetMangaWithChapters
 import tachiyomi.domain.manga.interactor.GetMergedMangaById
 import tachiyomi.domain.manga.interactor.GetMergedReferencesById
-import tachiyomi.domain.manga.interactor.InsertMergedReference
-import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.interactor.SetCustomMangaInfo
-import tachiyomi.domain.manga.interactor.SetMangaChapterFlags
-import tachiyomi.domain.manga.interactor.UpdateMergedSettings
 import tachiyomi.domain.manga.model.CustomMangaInfo
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.domain.manga.model.MangaWithChapterCount
-import tachiyomi.domain.manga.model.MergeMangaSettingsUpdate
 import tachiyomi.domain.manga.model.MergedMangaReference
 import tachiyomi.domain.manga.model.applyFilter
 import tachiyomi.domain.manga.model.bookmarkedFilter
 import tachiyomi.domain.manga.model.sortDescending
 import tachiyomi.domain.manga.model.unreadFilter
-import tachiyomi.domain.manga.repository.MangaRepository
 import tachiyomi.domain.source.service.SourceManager
-import tachiyomi.domain.track.interactor.GetTracks
-import tachiyomi.domain.track.interactor.InsertTrack
-import tachiyomi.domain.track.model.Track
 import tachiyomi.i18n.MR
-import tachiyomi.i18n.sy.SYMR
 import tachiyomi.source.local.LocalSource
 import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
@@ -150,48 +111,31 @@ internal class MangaScreenModel(
     trackPreferences: TrackPreferences = Injekt.get(),
     readerPreferences: ReaderPreferences = Injekt.get(),
     uiPreferences: UiPreferences = Injekt.get(),
-    private val trackerManager: TrackerManager = Injekt.get(),
-    private val trackChapter: TrackChapter = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val downloadCache: DownloadCache = Injekt.get(),
     private val getMangaAndChapters: GetMangaWithChapters = Injekt.get(),
     // SY -->
     private val sourceManager: SourceManager = Injekt.get(),
-    private val getManga: GetManga = Injekt.get(),
     private val getMergedChaptersByMangaId: GetMergedChaptersByMangaId = Injekt.get(),
     private val getMergedMangaById: GetMergedMangaById = Injekt.get(),
     private val getMergedReferencesById: GetMergedReferencesById = Injekt.get(),
-    private val insertMergedReference: InsertMergedReference = Injekt.get(),
-    private val updateMergedSettings: UpdateMergedSettings = Injekt.get(),
-    private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
-    private val deleteMangaById: DeleteMangaById = Injekt.get(),
-    private val deleteByMergeId: DeleteByMergeId = Injekt.get(),
-    private val deleteMergeById: DeleteMergeById = Injekt.get(),
     private val getFlatMetadata: GetFlatMetadataById = Injekt.get(),
     private val getPagePreviews: GetPagePreviews = Injekt.get(),
-    private val insertTrack: InsertTrack = Injekt.get(),
     private val setCustomMangaInfo: SetCustomMangaInfo = Injekt.get(),
     // SY <--
-    private val getDuplicateLibraryManga: GetDuplicateLibraryManga = Injekt.get(),
     private val getAvailableScanlators: GetAvailableScanlators = Injekt.get(),
     private val getExcludedScanlators: GetExcludedScanlators = Injekt.get(),
     private val setExcludedScanlators: SetExcludedScanlators = Injekt.get(),
-    private val setMangaChapterFlags: SetMangaChapterFlags = Injekt.get(),
     private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags = Injekt.get(),
-    private val setReadStatus: SetReadStatus = Injekt.get(),
-    private val updateChapter: UpdateChapter = Injekt.get(),
     private val updateManga: UpdateManga = Injekt.get(),
-    private val getCategories: GetCategories = Injekt.get(),
-    private val getTracks: GetTracks = Injekt.get(),
-    private val addTracks: AddTracks = Injekt.get(),
-    private val setMangaCategories: SetMangaCategories = Injekt.get(),
-    private val mangaRepository: MangaRepository = Injekt.get(),
-    private val filterChaptersForDownload: FilterChaptersForDownload = Injekt.get(),
     private val updateMangaFromRemote: UpdateMangaFromRemote = Injekt.get(),
     val snackbarHostState: SnackbarHostState = SnackbarHostState(),
+    // SY -->
+    private val merger: MangaMerger = MangaMerger(context),
+    // SY <--
 ) : StateScreenModel<MangaScreenModel.State>(State.Loading) {
 
-    private val successState: State.Success?
+    internal val successState: State.Success?
         get() = state.value as? State.Success
 
     val manga: Manga?
@@ -200,13 +144,13 @@ internal class MangaScreenModel(
     val source: Source?
         get() = successState?.source
 
-    private val isFavorited: Boolean
+    internal val isFavorited: Boolean
         get() = manga?.favorite ?: false
 
     private val allChapters: List<ChapterList.Item>?
         get() = successState?.chapters
 
-    private val filteredChapters: List<ChapterList.Item>?
+    internal val filteredChapters: List<ChapterList.Item>?
         get() = successState?.processedChapters
 
     val chapterSwipeStartAction = libraryPreferences.swipeToEndAction.get()
@@ -218,8 +162,12 @@ internal class MangaScreenModel(
     val isUpdateIntervalEnabled =
         LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in libraryPreferences.autoUpdateMangaRestrictions.get()
 
-    private val selectedPositions: Array<Int> = arrayOf(-1, -1) // first and last selected index in list
-    private val selectedChapterIds: HashSet<Long> = HashSet()
+    private val selection = ChapterSelection()
+    private val downloads = MangaDownloads(this, context, lifecycle)
+    private val library = MangaLibrary(this, mangaId, libraryPreferences)
+    private val chapterActions = MangaChapterActions(this, context, mangaId)
+    private val chapterSettings = MangaChapterSettings(this, context, libraryPreferences)
+    private val tracking = MangaTracking(this, lifecycle, mangaId)
 
     // EXH -->
     private val updateHelper: EHentaiUpdateHelper by injectLazy()
@@ -367,7 +315,7 @@ internal class MangaScreenModel(
                 }
         }
 
-        observeDownloads()
+        downloads.observe()
 
         screenModelScope.launchIO {
             val manga = getMangaAndChapters.awaitManga(mangaId)
@@ -380,16 +328,12 @@ internal class MangaScreenModel(
                         .map { sourceManager.getOrStub(it) },
                 )
             }
-            val chapters = (
-                if (manga.source ==
-                    MERGED_SOURCE_ID
-                ) {
-                    getMergedChaptersByMangaId.await(mangaId, applyScanlatorFilter = true)
-                } else {
-                    getMangaAndChapters.awaitChapters(mangaId, applyScanlatorFilter = true)
-                }
-                )
-                .toChapterListItems(manga, mergedData)
+            val rawChapters = if (manga.source == MERGED_SOURCE_ID) {
+                getMergedChaptersByMangaId.await(mangaId, applyScanlatorFilter = true)
+            } else {
+                getMangaAndChapters.awaitChapters(mangaId, applyScanlatorFilter = true)
+            }
+            val chapters = rawChapters.toChapterListItems(manga, mergedData)
             val meta = getFlatMetadata.await(mangaId)
             // SY <--
 
@@ -455,7 +399,7 @@ internal class MangaScreenModel(
     }
 
     // Helper function to update the UI state only if it's currently in success state.
-    private inline fun updateSuccessState(func: (State.Success) -> State.Success) {
+    internal fun updateSuccessState(func: (State.Success) -> State.Success) {
         mutableState.update {
             when (it) {
                 State.Loading -> it
@@ -494,7 +438,7 @@ internal class MangaScreenModel(
                     .getOrThrow()
 
                 if (manualFetch) {
-                    downloadNewChapters(update.newChapters)
+                    downloads.downloadNewChapters(update.newChapters)
                 }
             }
         } catch (_: CancellationException) {
@@ -588,176 +532,15 @@ internal class MangaScreenModel(
         }
     }
 
-    suspend fun smartSearchMerge(manga: Manga, originalMangaId: Long): Manga {
-        val originalManga = getManga.await(originalMangaId)
-            ?: throw IllegalArgumentException(context.stringResource(SYMR.strings.merge_unknown_entry, originalMangaId))
-        return if (originalManga.source == MERGED_SOURCE_ID) {
-            addToMergedManga(originalManga, manga)
-        } else {
-            mergeIntoNewManga(originalManga, manga)
-        }
-    }
-
-    // [originalManga] is already a merged entry: [manga] becomes one more of its parts.
-    private suspend fun addToMergedManga(originalManga: Manga, manga: Manga): Manga {
-        val originalMangaId = originalManga.id
-        val children = getMergedReferencesById.await(originalMangaId)
-        if (children.any { it.mangaSourceId == manga.source && it.mangaUrl == manga.url }) {
-            throw IllegalArgumentException(context.stringResource(SYMR.strings.merged_already))
-        }
-
-        val mangaReferences = mutableListOf(
-            MergedMangaReference(
-                id = -1,
-                isInfoManga = false,
-                getChapterUpdates = true,
-                chapterSortMode = 0,
-                chapterPriority = 0,
-                downloadChapters = true,
-                mergeId = originalManga.id,
-                mergeUrl = originalManga.url,
-                mangaId = manga.id,
-                mangaUrl = manga.url,
-                mangaSourceId = manga.source,
-            ),
-        )
-
-        if (children.isEmpty() || children.all { it.mangaSourceId != MERGED_SOURCE_ID }) {
-            mangaReferences += MergedMangaReference(
-                id = -1,
-                isInfoManga = false,
-                getChapterUpdates = false,
-                chapterSortMode = 0,
-                chapterPriority = -1,
-                downloadChapters = false,
-                mergeId = originalManga.id,
-                mergeUrl = originalManga.url,
-                mangaId = originalManga.id,
-                mangaUrl = originalManga.url,
-                mangaSourceId = MERGED_SOURCE_ID,
-            )
-        }
-
-        // todo
-        insertMergedReference.awaitAll(mangaReferences)
-
-        return originalManga
-    }
-
-    // Creates the merged entry that holds [originalManga] and [manga].
-    private suspend fun mergeIntoNewManga(originalManga: Manga, manga: Manga): Manga {
-        val originalMangaId = originalManga.id
-        if (manga.id == originalMangaId) {
-            throw IllegalArgumentException(context.stringResource(SYMR.strings.merged_already))
-        }
-        var mergedManga = Manga.create()
-            .copy(
-                url = originalManga.url,
-                ogTitle = originalManga.title,
-                source = MERGED_SOURCE_ID,
-            )
-            .copyFrom(originalManga.toSManga())
-            .copy(
-                favorite = true,
-                lastUpdate = originalManga.lastUpdate,
-                viewerFlags = originalManga.viewerFlags,
-                chapterFlags = originalManga.chapterFlags,
-                dateAdded = System.currentTimeMillis(),
-            )
-
-        var existingManga = getManga.await(mergedManga.url, mergedManga.source)
-        while (existingManga != null) {
-            if (existingManga.favorite) {
-                throw IllegalArgumentException(context.stringResource(SYMR.strings.merge_duplicate))
-            } else {
-                withNonCancellableContext {
-                    existingManga?.id?.let {
-                        deleteByMergeId.await(it)
-                        deleteMangaById.await(it)
-                    }
-                }
-            }
-            existingManga = getManga.await(mergedManga.url, mergedManga.source)
-        }
-
-        mergedManga = networkToLocalManga(mergedManga)
-
-        getCategories.await(originalMangaId)
-            .let {
-                setMangaCategories.await(mergedManga.id, it.map { it.id })
-            }
-
-        val originalMangaReference = MergedMangaReference(
-            id = -1,
-            isInfoManga = true,
-            getChapterUpdates = true,
-            chapterSortMode = 0,
-            chapterPriority = 0,
-            downloadChapters = true,
-            mergeId = mergedManga.id,
-            mergeUrl = mergedManga.url,
-            mangaId = originalManga.id,
-            mangaUrl = originalManga.url,
-            mangaSourceId = originalManga.source,
-        )
-
-        val newMangaReference = MergedMangaReference(
-            id = -1,
-            isInfoManga = false,
-            getChapterUpdates = true,
-            chapterSortMode = 0,
-            chapterPriority = 0,
-            downloadChapters = true,
-            mergeId = mergedManga.id,
-            mergeUrl = mergedManga.url,
-            mangaId = manga.id,
-            mangaUrl = manga.url,
-            mangaSourceId = manga.source,
-        )
-
-        val mergedMangaReference = MergedMangaReference(
-            id = -1,
-            isInfoManga = false,
-            getChapterUpdates = false,
-            chapterSortMode = 0,
-            chapterPriority = -1,
-            downloadChapters = false,
-            mergeId = mergedManga.id,
-            mergeUrl = mergedManga.url,
-            mangaId = mergedManga.id,
-            mangaUrl = mergedManga.url,
-            mangaSourceId = MERGED_SOURCE_ID,
-        )
-
-        insertMergedReference.awaitAll(listOf(originalMangaReference, newMangaReference, mergedMangaReference))
-
-        // Note that if the manga are merged in a different order, this won't trigger, but I don't care lol
-        return mergedManga
-    }
+    suspend fun smartSearchMerge(manga: Manga, originalMangaId: Long): Manga =
+        merger.smartSearchMerge(manga, originalMangaId)
 
     fun updateMergeSettings(mergedMangaReferences: List<MergedMangaReference>) {
-        screenModelScope.launchNonCancellable {
-            if (mergedMangaReferences.isNotEmpty()) {
-                updateMergedSettings.awaitAll(
-                    mergedMangaReferences.map {
-                        MergeMangaSettingsUpdate(
-                            id = it.id,
-                            isInfoManga = it.isInfoManga,
-                            getChapterUpdates = it.getChapterUpdates,
-                            chapterPriority = it.chapterPriority,
-                            downloadChapters = it.downloadChapters,
-                            chapterSortMode = it.chapterSortMode,
-                        )
-                    },
-                )
-            }
-        }
+        screenModelScope.launchNonCancellable { merger.updateMergeSettings(mergedMangaReferences) }
     }
 
     fun deleteMerge(reference: MergedMangaReference) {
-        screenModelScope.launchNonCancellable {
-            deleteMergeById.await(reference.id)
-        }
+        screenModelScope.launchNonCancellable { merger.deleteMerge(reference) }
     }
     // SY <--
 
@@ -767,14 +550,14 @@ internal class MangaScreenModel(
         toggleFavorite(
             onRemoved = {
                 screenModelScope.launch {
-                    if (hasDownloads()) {
+                    if (downloads.hasDownloads()) {
                         val result = snackbarHostState.showSnackbar(
                             message = context.stringResource(MR.strings.delete_downloads_for_manga),
                             actionLabel = context.stringResource(MR.strings.action_delete),
                             withDismissAction = true,
                         )
                         if (result == SnackbarResult.ActionPerformed) {
-                            deleteDownloads()
+                            downloads.deleteDownloads()
                         }
                     }
                 }
@@ -785,229 +568,29 @@ internal class MangaScreenModel(
     /**
      * Update favorite status of manga, (removes / adds) manga (to / from) library.
      */
-    fun toggleFavorite(
-        onRemoved: () -> Unit,
-        checkDuplicate: Boolean = true,
-    ) {
-        val state = successState ?: return
-        screenModelScope.launchIO {
-            val manga = state.manga
-
-            if (isFavorited) {
-                // Remove from library
-                if (updateManga.awaitUpdateFavorite(manga.id, false)) {
-                    // Remove covers and update last modified in db
-                    if (manga.removeCovers() != manga) {
-                        updateManga.awaitUpdateCoverLastModified(manga.id)
-                    }
-                    withUIContext { onRemoved() }
-                }
-            } else {
-                // Add to library
-                // First, check if duplicate exists if callback is provided
-                if (checkDuplicate) {
-                    val duplicates = getDuplicateLibraryManga(manga)
-
-                    if (duplicates.isNotEmpty()) {
-                        updateSuccessState { it.copy(dialog = Dialog.DuplicateManga(manga, duplicates)) }
-                        return@launchIO
-                    }
-                }
-
-                // Now check if user previously set categories, when available
-                val categories = getCategories()
-                val defaultCategoryId = libraryPreferences.defaultCategory.get().toLong()
-                val defaultCategory = categories.find { it.id == defaultCategoryId }
-                when {
-                    // Default category set
-                    defaultCategory != null -> {
-                        val result = updateManga.awaitUpdateFavorite(manga.id, true)
-                        if (!result) return@launchIO
-                        moveMangaToCategory(defaultCategory)
-                    }
-
-                    // Automatic 'Default' or no categories
-                    defaultCategoryId == 0L || categories.isEmpty() -> {
-                        val result = updateManga.awaitUpdateFavorite(manga.id, true)
-                        if (!result) return@launchIO
-                        moveMangaToCategory(null)
-                    }
-
-                    // Choose a category
-                    else -> {
-                        showChangeCategoryDialog()
-                    }
-                }
-
-                // Finally match with enhanced tracking when available
-                addTracks.bindEnhancedTrackers(manga, state.source)
-            }
-        }
+    fun toggleFavorite(onRemoved: () -> Unit, checkDuplicate: Boolean = true) {
+        library.toggleFavorite(onRemoved, checkDuplicate)
     }
 
     fun showChangeCategoryDialog() {
-        val manga = successState?.manga ?: return
-        screenModelScope.launch {
-            val categories = getCategories()
-            val selection = getMangaCategoryIds(manga)
-            updateSuccessState { successState ->
-                successState.copy(
-                    dialog = Dialog.ChangeCategory(
-                        manga = manga,
-                        initialSelection = categories.mapAsCheckboxState { it.id in selection },
-                    ),
-                )
-            }
-        }
+        library.showChangeCategoryDialog()
     }
 
     fun showSetFetchIntervalDialog() {
-        val manga = successState?.manga ?: return
-        updateSuccessState {
-            it.copy(dialog = Dialog.SetFetchInterval(manga))
-        }
+        library.showSetFetchIntervalDialog()
     }
 
     fun setFetchInterval(manga: Manga, interval: Int) {
-        screenModelScope.launchIO {
-            if (
-                updateManga.awaitUpdateFetchInterval(
-                    // Custom intervals are negative
-                    manga.copy(fetchInterval = -interval),
-                )
-            ) {
-                val updatedManga = mangaRepository.getMangaById(manga.id)
-                updateSuccessState { it.copy(manga = updatedManga) }
-            }
-        }
-    }
-
-    // Returns true if the manga has any downloads.
-    private fun hasDownloads(): Boolean {
-        val manga = successState?.manga ?: return false
-        return downloadManager.getDownloadCount(manga) > 0
-    }
-
-    // Deletes all the downloads for the manga.
-    private fun deleteDownloads() {
-        val state = successState ?: return
-        // SY -->
-        if (state.source is MergedSource) {
-            val mergedManga = state.mergedData?.manga?.map { it.value to sourceManager.getOrStub(it.value.source) }
-            mergedManga?.forEach { (manga, source) ->
-                downloadManager.deleteManga(manga, source)
-            }
-        } else {
-            /* SY <-- */ downloadManager.deleteManga(state.manga, state.source)
-        }
-    }
-
-    /**
-     * Get user categories.
-     *
-     * @return List of categories, not including the default category
-     */
-    suspend fun getCategories(): List<Category> = getCategories.await().filterNot { it.isSystemCategory }
-
-    // Gets the category id's the manga is in, if the manga is not in a category, returns the default id.
-    // @param manga the manga to get categories from.
-    // @return Array of category ids the manga is in, if none returns default id
-    private suspend fun getMangaCategoryIds(manga: Manga): List<Long> {
-        return getCategories.await(manga.id)
-            .map { it.id }
+        library.setFetchInterval(manga, interval)
     }
 
     fun addToLibraryInCategories(manga: Manga, categories: List<Long>) {
-        moveMangaToCategory(categories)
-        if (manga.favorite) return
-
-        screenModelScope.launchIO {
-            updateManga.awaitUpdateFavorite(manga.id, true)
-        }
-    }
-
-    // Move the given manga to categories.
-    // @param categories the selected categories.
-    private fun moveMangaToCategories(categories: List<Category>) {
-        val categoryIds = categories.map { it.id }
-        moveMangaToCategory(categoryIds)
-    }
-
-    private fun moveMangaToCategory(categoryIds: List<Long>) {
-        screenModelScope.launchIO {
-            setMangaCategories.await(mangaId, categoryIds)
-        }
-    }
-
-    // Move the given manga to the category.
-    // @param category the selected category, or null for default category.
-    private fun moveMangaToCategory(category: Category?) {
-        moveMangaToCategories(listOfNotNull(category))
+        library.addToLibraryInCategories(manga, categories)
     }
 
     // Manga info - end
 
     // Chapters list - start
-
-    private fun observeDownloads() {
-        // SY -->
-        val isMergedSource = source is MergedSource
-        val mergedIds = if (isMergedSource) successState?.mergedData?.manga?.keys.orEmpty() else emptySet()
-        // SY <--
-        screenModelScope.launchIO {
-            downloadManager.statusFlow()
-                .filter {
-                    /* SY --> */ if (isMergedSource) {
-                        it.manga.id in mergedIds
-                    } else {
-                        /* SY <-- */ it.manga.id ==
-                            successState?.manga?.id
-                    }
-                }
-                .catch { error -> logcat(LogPriority.ERROR, error) }
-                .flowWithLifecycle(lifecycle)
-                .collect {
-                    withUIContext {
-                        updateDownloadState(it)
-                    }
-                }
-        }
-
-        screenModelScope.launchIO {
-            downloadManager.progressFlow()
-                .filter {
-                    /* SY --> */ if (isMergedSource) {
-                        it.manga.id in mergedIds
-                    } else {
-                        /* SY <-- */ it.manga.id ==
-                            successState?.manga?.id
-                    }
-                }
-                .catch { error -> logcat(LogPriority.ERROR, error) }
-                .flowWithLifecycle(lifecycle)
-                .collect {
-                    withUIContext {
-                        updateDownloadState(it)
-                    }
-                }
-        }
-    }
-
-    private fun updateDownloadState(download: Download) {
-        updateSuccessState { successState ->
-            val modifiedIndex = successState.chapters.indexOfFirst { it.id == download.chapter.id }
-            if (modifiedIndex < 0) {
-                successState
-            } else {
-                val newChapters = successState.chapters.toMutableList().apply {
-                    val item = removeAt(modifiedIndex)
-                        .copy(downloadState = download.status, downloadProgress = download.progress)
-                    add(modifiedIndex, item)
-                }
-                successState.copy(chapters = newChapters)
-            }
-        }
-    }
 
     private fun List<Chapter>.toChapterListItems(
         manga: Manga,
@@ -1052,7 +635,7 @@ internal class MangaScreenModel(
                 chapter = chapter,
                 downloadState = downloadState,
                 downloadProgress = activeDownload?.progress ?: 0,
-                selected = chapter.id in selectedChapterIds,
+                selected = chapter.id in selection.selectedChapterIds,
                 // SY -->
                 sourceName = source?.getNameForMangaInfo(enabledLanguages = enabledLanguages),
                 showScanlator = !isExhManga,
@@ -1080,49 +663,6 @@ internal class MangaScreenModel(
     // SY <--
 
     /**
-     * @throws IllegalStateException if the swipe action is [LibraryPreferences.ChapterSwipeAction.Disabled]
-     */
-    fun chapterSwipe(chapterItem: ChapterList.Item, swipeAction: LibraryPreferences.ChapterSwipeAction) {
-        screenModelScope.launch {
-            executeChapterSwipeAction(chapterItem, swipeAction)
-        }
-    }
-
-    // @throws IllegalStateException if the swipe action is [LibraryPreferences.ChapterSwipeAction.Disabled]
-    private fun executeChapterSwipeAction(
-        chapterItem: ChapterList.Item,
-        swipeAction: LibraryPreferences.ChapterSwipeAction,
-    ) {
-        val chapter = chapterItem.chapter
-        when (swipeAction) {
-            LibraryPreferences.ChapterSwipeAction.ToggleRead -> {
-                markChaptersRead(listOf(chapter), !chapter.read)
-            }
-            LibraryPreferences.ChapterSwipeAction.ToggleBookmark -> {
-                bookmarkChapters(listOf(chapter), !chapter.bookmark)
-            }
-            LibraryPreferences.ChapterSwipeAction.Download -> {
-                val downloadAction: ChapterDownloadAction = when (chapterItem.downloadState) {
-                    Download.State.ERROR,
-                    Download.State.NOT_DOWNLOADED,
-                    -> ChapterDownloadAction.START_NOW
-                    Download.State.QUEUE,
-                    Download.State.DOWNLOADING,
-                    -> ChapterDownloadAction.CANCEL
-                    Download.State.DOWNLOADED -> ChapterDownloadAction.DELETE
-                }
-                runChapterDownloadActions(
-                    items = listOf(chapterItem),
-                    action = downloadAction,
-                )
-            }
-            LibraryPreferences.ChapterSwipeAction.Disabled -> {
-                error("A disabled swipe action cannot be performed")
-            }
-        }
-    }
-
-    /**
      * Returns the next unread chapter or null if everything is read.
      */
     fun getNextUnreadChapter(): Chapter? {
@@ -1130,14 +670,14 @@ internal class MangaScreenModel(
         return successState.chapters.getNextUnread(successState.manga)
     }
 
-    private fun getUnreadChapters(): List<Chapter> {
+    internal fun getUnreadChapters(): List<Chapter> {
         val chapterItems = if (skipFiltered) filteredChapters.orEmpty() else allChapters.orEmpty()
         return chapterItems
             .filter { (chapter, dlStatus) -> !chapter.read && dlStatus == Download.State.NOT_DOWNLOADED }
             .map { it.chapter }
     }
 
-    private fun getUnreadChaptersSorted(): List<Chapter> {
+    internal fun getUnreadChaptersSorted(): List<Chapter> {
         val manga = successState?.manga ?: return emptyList()
         val chaptersSorted = getUnreadChapters().sortedWith(getChapterSort(manga))
             // SY -->
@@ -1148,320 +688,67 @@ internal class MangaScreenModel(
         return if (manga.sortDescending()) chaptersSorted.reversed() else chaptersSorted
     }
 
-    private fun getBookmarkedChapters(): List<Chapter> {
+    internal fun getBookmarkedChapters(): List<Chapter> {
         val chapterItems = if (skipFiltered) filteredChapters.orEmpty() else allChapters.orEmpty()
         return chapterItems
             .filter { (chapter, dlStatus) -> chapter.bookmark && dlStatus == Download.State.NOT_DOWNLOADED }
             .map { it.chapter }
     }
 
-    private fun startDownload(
-        chapters: List<Chapter>,
-        startNow: Boolean,
-    ) {
-        val successState = successState ?: return
-
-        screenModelScope.launchNonCancellable {
-            if (startNow) {
-                val chapterId = chapters.singleOrNull()?.id ?: return@launchNonCancellable
-                downloadManager.startDownloadNow(chapterId)
-            } else {
-                downloadChapters(chapters)
-            }
-
-            if (!isFavorited && !successState.hasPromptedToAddBefore) {
-                updateSuccessState { state ->
-                    state.copy(hasPromptedToAddBefore = true)
-                }
-                val result = snackbarHostState.showSnackbar(
-                    message = context.stringResource(MR.strings.snack_add_to_library),
-                    actionLabel = context.stringResource(MR.strings.action_add),
-                    withDismissAction = true,
-                )
-                if (result == SnackbarResult.ActionPerformed && !isFavorited) {
-                    toggleFavorite()
-                }
-            }
-        }
-    }
-
-    fun runChapterDownloadActions(
-        items: List<ChapterList.Item>,
-        action: ChapterDownloadAction,
-    ) {
-        when (action) {
-            ChapterDownloadAction.START -> {
-                startDownload(items.map { it.chapter }, false)
-                if (items.any { it.downloadState == Download.State.ERROR }) {
-                    downloadManager.startDownloads()
-                }
-            }
-            ChapterDownloadAction.START_NOW -> {
-                val chapter = items.singleOrNull()?.chapter ?: return
-                startDownload(listOf(chapter), true)
-            }
-            ChapterDownloadAction.CANCEL -> {
-                val chapterId = items.singleOrNull()?.id ?: return
-                cancelDownload(chapterId)
-            }
-            ChapterDownloadAction.DELETE -> {
-                deleteChapters(items.map { it.chapter })
-            }
-        }
-    }
-
-    fun runDownloadAction(action: DownloadAction) {
-        val chaptersToDownload = when (action) {
-            DownloadAction.UNREAD_CHAPTERS -> getUnreadChapters()
-            DownloadAction.BOOKMARKED_CHAPTERS -> getBookmarkedChapters()
-            else -> getUnreadChaptersSorted().take(checkNotNull(action.nextChapters))
-        }
-        if (chaptersToDownload.isNotEmpty()) {
-            startDownload(chaptersToDownload, false)
-        }
-    }
-
-    private fun cancelDownload(chapterId: Long) {
-        val activeDownload = downloadManager.getQueuedDownloadOrNull(chapterId) ?: return
-        downloadManager.cancelQueuedDownloads(listOf(activeDownload))
-        updateDownloadState(activeDownload.apply { status = Download.State.NOT_DOWNLOADED })
+    fun chapterSwipe(chapterItem: ChapterList.Item, swipeAction: LibraryPreferences.ChapterSwipeAction) {
+        chapterActions.chapterSwipe(chapterItem, swipeAction)
     }
 
     fun markPreviousChapterRead(pointer: Chapter) {
-        val manga = successState?.manga ?: return
-        val chapters = filteredChapters.orEmpty().map { it.chapter }
-        val prevChapters = if (manga.sortDescending()) chapters.asReversed() else chapters
-        val pointerPos = prevChapters.indexOf(pointer)
-        if (pointerPos != -1) markChaptersRead(prevChapters.take(pointerPos), true)
+        chapterActions.markPreviousChapterRead(pointer)
     }
 
-    /**
-     * Mark the selected chapter list as read/unread.
-     * @param chapters the list of selected chapters.
-     * @param read whether to mark chapters as read or unread.
-     */
     fun markChaptersRead(chapters: List<Chapter>, read: Boolean) {
-        toggleAllSelection(false)
-        if (chapters.isEmpty()) return
-        screenModelScope.launchIO {
-            setReadStatus.await(
-                read = read,
-                chapters = chapters.toTypedArray(),
-            )
-
-            if (!read || successState?.hasLoggedInTrackers == false || autoTrackState == AutoTrackState.NEVER) {
-                return@launchIO
-            }
-
-            refreshTrackers()
-
-            val tracks = getTracks.await(mangaId)
-            val maxChapterNumber = chapters.maxOf { it.chapterNumber }
-            val shouldPromptTrackingUpdate = tracks.any { track -> maxChapterNumber > track.lastChapterRead }
-
-            if (!shouldPromptTrackingUpdate) return@launchIO
-            if (autoTrackState == AutoTrackState.ALWAYS) {
-                trackChapter.await(context, mangaId, maxChapterNumber)
-                withUIContext {
-                    context.toast(context.stringResource(MR.strings.trackers_updated_summary, maxChapterNumber.toInt()))
-                }
-                return@launchIO
-            }
-
-            val result = snackbarHostState.showSnackbar(
-                message = context.stringResource(MR.strings.confirm_tracker_update, maxChapterNumber.toInt()),
-                actionLabel = context.stringResource(MR.strings.action_ok),
-                duration = SnackbarDuration.Short,
-                withDismissAction = true,
-            )
-
-            if (result == SnackbarResult.ActionPerformed) {
-                trackChapter.await(context, mangaId, maxChapterNumber)
-            }
-        }
+        chapterActions.markChaptersRead(chapters, read)
     }
 
-    private suspend fun refreshTrackers(
-        refreshTracks: RefreshTracks = Injekt.get(),
-    ) {
-        refreshTracks.await(mangaId)
-            .filter { it.first != null }
-            .forEach { (track, e) ->
-                logcat(LogPriority.ERROR, e) {
-                    "Failed to refresh track data mangaId=$mangaId for service ${track!!.id}"
-                }
-                withUIContext {
-                    context.toast(
-                        context.stringResource(
-                            MR.strings.track_error,
-                            track!!.name,
-                            e.message ?: "",
-                        ),
-                    )
-                }
-            }
-    }
-
-    // Downloads the given list of chapters with the manager.
-    // @param chapters the list of chapters to download.
-    private fun downloadChapters(chapters: List<Chapter>) {
-        val state = successState ?: return
-        if (state.source is MergedSource) {
-            chapters.groupBy { it.mangaId }.forEach { map ->
-                val manga = state.mergedData?.manga?.get(map.key) ?: return@forEach
-                downloadManager.downloadChapters(manga, map.value)
-            }
-        } else {
-            /* SY <-- */
-            val manga = state.manga
-            downloadManager.downloadChapters(manga, chapters)
-        }
-        toggleAllSelection(false)
-    }
-
-    /**
-     * Bookmarks the given list of chapters.
-     * @param chapters the list of chapters to bookmark.
-     * @param bookmarked whether to bookmark or un-bookmark them.
-     */
     fun bookmarkChapters(chapters: List<Chapter>, bookmarked: Boolean) {
-        screenModelScope.launchIO {
-            chapters
-                .filterNot { it.bookmark == bookmarked }
-                .map { ChapterUpdate(id = it.id, bookmark = bookmarked) }
-                .let { updateChapter.awaitAll(it) }
-        }
-        toggleAllSelection(false)
+        chapterActions.bookmarkChapters(chapters, bookmarked)
     }
 
-    /**
-     * Deletes the given list of chapter.
-     *
-     * @param chapters the list of chapters to delete.
-     */
-    fun deleteChapters(chapters: List<Chapter>) {
-        screenModelScope.launchNonCancellable {
-            try {
-                successState?.let { state ->
-                    downloadManager.deleteChapters(
-                        chapters,
-                        state.manga,
-                        state.source,
-                    )
-                }
-            } catch (expected: Throwable) {
-                // Logged whatever the cause; the caller carries on.
-                logcat(LogPriority.ERROR, expected)
-            }
-        }
-    }
-
-    private fun downloadNewChapters(chapters: List<Chapter>) {
-        screenModelScope.launchNonCancellable {
-            val manga = successState?.manga
-            if (manga != null) {
-                val chaptersToDownload = filterChaptersForDownload.await(manga, chapters)
-
-                if (chaptersToDownload.isNotEmpty() /* SY --> */ && !manga.isEhBasedManga() /* SY <-- */) {
-                    downloadChapters(chaptersToDownload)
-                }
-            }
-        }
-    }
-
-    /**
-     * Sets the read filter and requests an UI update.
-     * @param state whether to display only unread chapters or all chapters.
-     */
     fun setUnreadFilter(state: TriState) {
-        val manga = successState?.manga ?: return
-
-        val flag = when (state) {
-            TriState.DISABLED -> Manga.SHOW_ALL
-            TriState.ENABLED_IS -> Manga.CHAPTER_SHOW_UNREAD
-            TriState.ENABLED_NOT -> Manga.CHAPTER_SHOW_READ
-        }
-        screenModelScope.launchNonCancellable {
-            setMangaChapterFlags.awaitSetUnreadFilter(manga, flag)
-        }
+        chapterSettings.setUnreadFilter(state)
     }
 
-    /**
-     * Sets the download filter and requests an UI update.
-     * @param state whether to display only downloaded chapters or all chapters.
-     */
     fun setDownloadedFilter(state: TriState) {
-        val manga = successState?.manga ?: return
-
-        val flag = when (state) {
-            TriState.DISABLED -> Manga.SHOW_ALL
-            TriState.ENABLED_IS -> Manga.CHAPTER_SHOW_DOWNLOADED
-            TriState.ENABLED_NOT -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
-        }
-
-        screenModelScope.launchNonCancellable {
-            setMangaChapterFlags.awaitSetDownloadedFilter(manga, flag)
-        }
+        chapterSettings.setDownloadedFilter(state)
     }
 
-    /**
-     * Sets the bookmark filter and requests an UI update.
-     * @param state whether to display only bookmarked chapters or all chapters.
-     */
     fun setBookmarkedFilter(state: TriState) {
-        val manga = successState?.manga ?: return
-
-        val flag = when (state) {
-            TriState.DISABLED -> Manga.SHOW_ALL
-            TriState.ENABLED_IS -> Manga.CHAPTER_SHOW_BOOKMARKED
-            TriState.ENABLED_NOT -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
-        }
-
-        screenModelScope.launchNonCancellable {
-            setMangaChapterFlags.awaitSetBookmarkFilter(manga, flag)
-        }
+        chapterSettings.setBookmarkedFilter(state)
     }
 
-    /**
-     * Sets the active display mode.
-     * @param mode the mode to set.
-     */
     fun setDisplayMode(mode: Long) {
-        val manga = successState?.manga ?: return
-
-        screenModelScope.launchNonCancellable {
-            setMangaChapterFlags.awaitSetDisplayMode(manga, mode)
-        }
+        chapterSettings.setDisplayMode(mode)
     }
 
-    /**
-     * Sets the sorting method and requests an UI update.
-     * @param sort the sorting mode.
-     */
     fun setSorting(sort: Long) {
-        val manga = successState?.manga ?: return
-
-        screenModelScope.launchNonCancellable {
-            setMangaChapterFlags.awaitSetSortingModeOrFlipOrder(manga, sort)
-        }
+        chapterSettings.setSorting(sort)
     }
 
     fun setCurrentSettingsAsDefault(applyToExisting: Boolean) {
-        val manga = successState?.manga ?: return
-        screenModelScope.launchNonCancellable {
-            libraryPreferences.setChapterSettingsDefault(manga)
-            if (applyToExisting) {
-                setMangaDefaultChapterFlags.awaitAll()
-            }
-            snackbarHostState.showSnackbar(message = context.stringResource(MR.strings.chapter_settings_updated))
-        }
+        chapterSettings.setCurrentSettingsAsDefault(applyToExisting)
     }
 
     fun resetToDefaultSettings() {
-        val manga = successState?.manga ?: return
-        screenModelScope.launchNonCancellable {
-            setMangaDefaultChapterFlags.await(manga)
-        }
+        chapterSettings.resetToDefaultSettings()
+    }
+
+    fun runChapterDownloadActions(items: List<ChapterList.Item>, action: ChapterDownloadAction) {
+        downloads.runChapterDownloadActions(items, action)
+    }
+
+    fun runDownloadAction(action: DownloadAction) {
+        downloads.runDownloadAction(action)
+    }
+
+    fun deleteChapters(chapters: List<Chapter>) {
+        downloads.deleteChapters(chapters)
     }
 
     fun toggleSelection(
@@ -1470,84 +757,20 @@ internal class MangaScreenModel(
         fromLongPress: Boolean = false,
     ) {
         updateSuccessState { successState ->
-            val newChapters = successState.processedChapters.toMutableList().apply {
-                val selectedIndex = successState.processedChapters.indexOfFirst { it.id == item.chapter.id }
-                if (!(selectedIndex < 0)) {
-                    val selectedItem = get(selectedIndex)
-                    if (selectedItem.selected != selected) {
-                        val firstSelection = none { it.selected }
-                        set(selectedIndex, selectedItem.copy(selected = selected))
-                        selectedChapterIds.addOrRemove(item.id, selected)
-
-                        if (selected && fromLongPress) {
-                            if (firstSelection) {
-                                selectedPositions[0] = selectedIndex
-                                selectedPositions[1] = selectedIndex
-                            } else {
-                                // Try to select the items in-between when possible
-                                val range: IntRange
-                                if (selectedIndex < selectedPositions[0]) {
-                                    range = selectedIndex + 1..<selectedPositions[0]
-                                    selectedPositions[0] = selectedIndex
-                                } else if (selectedIndex > selectedPositions[1]) {
-                                    range = (selectedPositions[1] + 1)..<selectedIndex
-                                    selectedPositions[1] = selectedIndex
-                                } else {
-                                    // Just select itself
-                                    range = IntRange.EMPTY
-                                }
-
-                                range.forEach {
-                                    val inbetweenItem = get(it)
-                                    if (!inbetweenItem.selected) {
-                                        selectedChapterIds.add(inbetweenItem.id)
-                                        set(it, inbetweenItem.copy(selected = true))
-                                    }
-                                }
-                            }
-                        } else if (!fromLongPress) {
-                            if (!selected) {
-                                if (selectedIndex == selectedPositions[0]) {
-                                    selectedPositions[0] = indexOfFirst { it.selected }
-                                } else if (selectedIndex == selectedPositions[1]) {
-                                    selectedPositions[1] = indexOfLast { it.selected }
-                                }
-                            } else {
-                                if (selectedIndex < selectedPositions[0]) {
-                                    selectedPositions[0] = selectedIndex
-                                } else if (selectedIndex > selectedPositions[1]) {
-                                    selectedPositions[1] = selectedIndex
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            successState.copy(chapters = newChapters)
+            val chapters = selection.toggle(successState.processedChapters, item, selected, fromLongPress)
+            successState.copy(chapters = chapters)
         }
     }
 
     fun toggleAllSelection(selected: Boolean) {
         updateSuccessState { successState ->
-            val newChapters = successState.chapters.map {
-                selectedChapterIds.addOrRemove(it.id, selected)
-                it.copy(selected = selected)
-            }
-            selectedPositions[0] = -1
-            selectedPositions[1] = -1
-            successState.copy(chapters = newChapters)
+            successState.copy(chapters = selection.setAll(successState.chapters, selected))
         }
     }
 
     fun invertSelection() {
         updateSuccessState { successState ->
-            val newChapters = successState.chapters.map {
-                selectedChapterIds.addOrRemove(it.id, !it.selected)
-                it.copy(selected = !it.selected)
-            }
-            selectedPositions[0] = -1
-            selectedPositions[1] = -1
-            successState.copy(chapters = newChapters)
+            successState.copy(chapters = selection.invert(successState.chapters))
         }
     }
 
@@ -1556,70 +779,8 @@ internal class MangaScreenModel(
     // Track sheet - start
 
     private fun observeTrackers() {
-        val state = successState
-        val manga = state?.manga ?: return
-
-        screenModelScope.launchIO {
-            combine(
-                getTracks.subscribe(manga.id)
-                    // SY -->
-                    .map { trackItems ->
-                        if (manga.source in mangaDexSourceIds ||
-                            state.mergedData?.manga?.values.orEmpty().any {
-                                it.source in mangaDexSourceIds
-                            }
-                        ) {
-                            val mdTrack = trackItems.firstOrNull { it.trackerId == TrackerManager.MDLIST }
-                            if (trackerManager.mdList.isLoggedIn && mdTrack == null) {
-                                trackItems + createMdListTrack()
-                            } else {
-                                trackItems
-                            }
-                        } else {
-                            trackItems
-                        }
-                    }
-                    // SY <--
-                    .catch { logcat(LogPriority.ERROR, it) },
-                trackerManager.loggedInTrackersFlow(),
-            ) { mangaTracks, loggedInTrackers ->
-                // Show only if the service supports this manga's source
-                val supportedTrackers = loggedInTrackers.filter { (it as? EnhancedTracker)?.accept(source!!) ?: true }
-                val supportedTrackerIds = supportedTrackers.map { it.id }.toHashSet()
-                val supportedTrackerTracks = mangaTracks.filter { it.trackerId in supportedTrackerIds }
-                // SY -->
-                val trackingCount = supportedTrackerTracks.count {
-                    (it.trackerId == TrackerManager.MDLIST && it.status != FollowStatus.UNFOLLOWED.long) ||
-                        it.trackerId != TrackerManager.MDLIST
-                }
-                trackingCount to supportedTrackers.isNotEmpty()
-                // SY <--
-            }
-                .flowWithLifecycle(lifecycle)
-                .distinctUntilChanged()
-                .collectLatest { (trackingCount, hasLoggedInTrackers) ->
-                    updateSuccessState {
-                        it.copy(
-                            trackingCount = trackingCount,
-                            hasLoggedInTrackers = hasLoggedInTrackers,
-                        )
-                    }
-                }
-        }
+        tracking.observe()
     }
-
-    // SY -->
-    private suspend fun createMdListTrack(): Track {
-        val state = successState!!
-        val mdManga = state.manga.takeIf { it.source in mangaDexSourceIds }
-            ?: state.mergedData?.manga?.values?.find { it.source in mangaDexSourceIds }
-            ?: throw IllegalArgumentException("Could not create initial track")
-        val track = trackerManager.mdList.createInitialTracker(state.manga, mdManga)
-            .toDomainTrack(false)!!
-        insertTrack.await(track)
-        return getTracks.await(mangaId).first { it.trackerId == trackerManager.mdList.id }
-    }
-    // SY <--
 
     // Track sheet - end
 
