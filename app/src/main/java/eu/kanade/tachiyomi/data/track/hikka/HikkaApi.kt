@@ -28,7 +28,14 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
+import java.net.HttpURLConnection
 import tachiyomi.domain.track.model.Track as DomainTrack
+
+private const val MAX_SCORE = 10
+private const val MILLIS_PER_SECOND = 1000L
+
+// A Hikka tracking URL is https://hikka.io/manga/<slug>; the slug is the fifth `/`-separated piece.
+private const val SLUG_URL_SEGMENT = 4
 
 internal class HikkaApi(
     private val trackId: Long,
@@ -76,7 +83,7 @@ internal class HikkaApi(
                     "score",
                     buildJsonArray {
                         add(0)
-                        add(10)
+                        add(MAX_SCORE)
                     },
                 )
                 put("query", query)
@@ -101,7 +108,7 @@ internal class HikkaApi(
 
     suspend fun getRead(track: Track): HKRead? {
         return withIOContext {
-            val slug = track.trackingUrl.split("/")[4]
+            val slug = track.trackingUrl.split("/")[SLUG_URL_SEGMENT]
             val url = "$BASE_API_URL/read/manga/$slug".toUri().buildUpon().build()
             with(json) {
                 try {
@@ -109,7 +116,7 @@ internal class HikkaApi(
                         .awaitSuccess()
                         .parseAs<HKRead>()
                 } catch (e: HttpException) {
-                    if (e.code == 404) {
+                    if (e.code == HttpURLConnection.HTTP_NOT_FOUND) {
                         null
                     } else {
                         throw e
@@ -121,7 +128,7 @@ internal class HikkaApi(
 
     suspend fun getManga(track: Track): TrackSearch {
         return withIOContext {
-            val slug = track.trackingUrl.split("/")[4]
+            val slug = track.trackingUrl.split("/")[SLUG_URL_SEGMENT]
             val url = "$BASE_API_URL/manga/$slug".toUri().buildUpon()
                 .build()
 
@@ -136,7 +143,7 @@ internal class HikkaApi(
 
     suspend fun deleteUserManga(track: DomainTrack) {
         return withIOContext {
-            val slug = track.remoteUrl.split("/")[4]
+            val slug = track.remoteUrl.split("/")[SLUG_URL_SEGMENT]
 
             val url = "$BASE_API_URL/read/manga/$slug".toUri().buildUpon()
                 .build()
@@ -148,7 +155,7 @@ internal class HikkaApi(
 
     suspend fun addUserManga(track: Track): Track {
         return withIOContext {
-            val slug = track.trackingUrl.split("/")[4]
+            val slug = track.trackingUrl.split("/")[SLUG_URL_SEGMENT]
 
             val url = "$BASE_API_URL/read/manga/$slug".toUri().buildUpon()
                 .build()
@@ -165,8 +172,8 @@ internal class HikkaApi(
                 put("rereads", rereads)
                 put("score", track.score.toInt())
                 put("status", track.toApiStatus())
-                put("start_date", if (track.startedReadingDate > 0L) track.startedReadingDate / 1000 else null)
-                put("end_date", if (track.finishedReadingDate > 0L) track.finishedReadingDate / 1000 else null)
+                put("start_date", if (track.startedReadingDate > 0L) track.startedReadingDate / MILLIS_PER_SECOND else null)
+                put("end_date", if (track.finishedReadingDate > 0L) track.finishedReadingDate / MILLIS_PER_SECOND else null)
             }
 
             with(json) {

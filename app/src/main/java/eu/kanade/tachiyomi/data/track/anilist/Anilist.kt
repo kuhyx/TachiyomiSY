@@ -14,6 +14,19 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+// AniList stores every score on a 100-point scale; these map the other display formats onto it.
+private const val TEN_POINT_MAX = 10
+private const val HUNDRED_POINT_MAX = 100
+private const val FIVE_STAR_MAX = 5
+private const val DECIMAL_STEPS_PER_POINT = 10f
+private const val POINTS_PER_TEN_POINT_STEP = 10.0
+private const val POINTS_PER_STAR = 20.0
+private const val STAR_OFFSET = 10.0
+private const val POINTS_PER_SMILEY = 25.0
+private const val SMILEY_OFFSET = 10.0
+private const val SAD_SMILEY_MAX = 35
+private const val NEUTRAL_SMILEY_MAX = 60
+
 internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker {
 
     companion object {
@@ -76,39 +89,39 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
     override fun getScoreList(): List<String> {
         return when (scorePreference.get()) {
             // 10 point
-            POINT_10 -> IntRange(0, 10).map(Int::toString)
+            POINT_10 -> IntRange(0, TEN_POINT_MAX).map(Int::toString)
             // 100 point
-            POINT_100 -> IntRange(0, 100).map(Int::toString)
+            POINT_100 -> IntRange(0, HUNDRED_POINT_MAX).map(Int::toString)
             // 5 stars
-            POINT_5 -> IntRange(0, 5).map { "$it ★" }
+            POINT_5 -> IntRange(0, FIVE_STAR_MAX).map { "$it ★" }
             // Smiley
             POINT_3 -> listOf("-", "😦", "😐", "😊")
             // 10 point decimal
-            POINT_10_DECIMAL -> IntRange(0, 100).map { (it / 10f).toString() }
+            POINT_10_DECIMAL -> IntRange(0, HUNDRED_POINT_MAX).map { (it / DECIMAL_STEPS_PER_POINT).toString() }
             else -> throw Exception("Unknown score type")
         }
     }
 
     override fun get10PointScore(track: DomainTrack): Double {
         // Score is stored in 100 point format
-        return track.score / 10.0
+        return track.score / POINTS_PER_TEN_POINT_STEP
     }
 
     override fun indexToScore(index: Int): Double {
         return when (scorePreference.get()) {
             // 10 point
-            POINT_10 -> index * 10.0
+            POINT_10 -> index * POINTS_PER_TEN_POINT_STEP
             // 100 point
             POINT_100 -> index.toDouble()
             // 5 stars
             POINT_5 -> when (index) {
                 0 -> 0.0
-                else -> index * 20.0 - 10.0
+                else -> index * POINTS_PER_STAR - STAR_OFFSET
             }
             // Smiley
             POINT_3 -> when (index) {
                 0 -> 0.0
-                else -> index * 25.0 + 10.0
+                else -> index * POINTS_PER_SMILEY + SMILEY_OFFSET
             }
             // 10 point decimal
             POINT_10_DECIMAL -> index.toDouble()
@@ -122,13 +135,13 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
         return when (scorePreference.get()) {
             POINT_5 -> when (score) {
                 0.0 -> "0 ★"
-                else -> "${((score + 10) / 20).toInt()} ★"
+                else -> "${((score + STAR_OFFSET) / POINTS_PER_STAR).toInt()} ★"
             }
 
             POINT_3 -> when {
                 score == 0.0 -> "0"
-                score <= 35 -> "😦"
-                score <= 60 -> "😐"
+                score <= SAD_SMILEY_MAX -> "😦"
+                score <= NEUTRAL_SMILEY_MAX -> "😐"
                 else -> "😊"
             }
 

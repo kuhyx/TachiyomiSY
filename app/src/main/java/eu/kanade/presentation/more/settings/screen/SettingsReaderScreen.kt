@@ -21,6 +21,21 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.text.NumberFormat
 
+// Preference values the reader settings offer.
+private const val DOUBLE_TAP_NORMAL_MS = 500
+private const val DOUBLE_TAP_FAST_MS = 250
+private const val AUTOMATIC_BACKGROUND = 3
+private const val PERCENT = 100f
+private const val PRELOAD_4_PAGES = 4
+private const val PRELOAD_6_PAGES = 6
+private const val PRELOAD_8_PAGES = 8
+private const val PRELOAD_10_PAGES = 10
+private const val PRELOAD_12_PAGES = 12
+private const val PRELOAD_14_PAGES = 14
+private const val PRELOAD_16_PAGES = 16
+private const val PRELOAD_20_PAGES = 20
+private const val READER_THREAD_CHOICES = 5
+
 internal object SettingsReaderScreen : SearchableSettings {
 
     @ReadOnlyComposable
@@ -42,8 +57,8 @@ internal object SettingsReaderScreen : SearchableSettings {
                 preference = readerPref.doubleTapAnimSpeed,
                 entries = mapOf(
                     1 to stringResource(MR.strings.double_tap_anim_speed_0),
-                    500 to stringResource(MR.strings.double_tap_anim_speed_normal),
-                    250 to stringResource(MR.strings.double_tap_anim_speed_fast),
+                    DOUBLE_TAP_NORMAL_MS to stringResource(MR.strings.double_tap_anim_speed_normal),
+                    DOUBLE_TAP_FAST_MS to stringResource(MR.strings.double_tap_anim_speed_fast),
                 ),
                 title = stringResource(MR.strings.pref_double_tap_anim_speed),
             ),
@@ -98,7 +113,7 @@ internal object SettingsReaderScreen : SearchableSettings {
                         1 to stringResource(MR.strings.black_background),
                         2 to stringResource(MR.strings.gray_background),
                         0 to stringResource(MR.strings.white_background),
-                        3 to stringResource(MR.strings.automatic_background),
+                        AUTOMATIC_BACKGROUND to stringResource(MR.strings.automatic_background),
                     ),
                     title = stringResource(MR.strings.pref_reader_theme),
                 ),
@@ -340,7 +355,7 @@ internal object SettingsReaderScreen : SearchableSettings {
                         it.WEBTOON_PADDING_MIN..it.WEBTOON_PADDING_MAX
                     },
                     title = stringResource(MR.strings.pref_webtoon_side_padding),
-                    valueString = numberFormat.format(webtoonSidePadding / 100f),
+                    valueString = numberFormat.format(webtoonSidePadding / PERCENT),
                     onValueChanged = { webtoonSidePaddingPref.set(it) },
                 ),
                 Preference.PreferenceItem.ListPreference(
@@ -495,21 +510,21 @@ internal object SettingsReaderScreen : SearchableSettings {
                     title = stringResource(SYMR.strings.reader_preload_amount),
                     subtitle = stringResource(SYMR.strings.reader_preload_amount_summary),
                     entries = mapOf(
-                        4 to stringResource(SYMR.strings.reader_preload_amount_4_pages),
-                        6 to stringResource(SYMR.strings.reader_preload_amount_6_pages),
-                        8 to stringResource(SYMR.strings.reader_preload_amount_8_pages),
-                        10 to stringResource(SYMR.strings.reader_preload_amount_10_pages),
-                        12 to stringResource(SYMR.strings.reader_preload_amount_12_pages),
-                        14 to stringResource(SYMR.strings.reader_preload_amount_14_pages),
-                        16 to stringResource(SYMR.strings.reader_preload_amount_16_pages),
-                        20 to stringResource(SYMR.strings.reader_preload_amount_20_pages),
+                        PRELOAD_4_PAGES to stringResource(SYMR.strings.reader_preload_amount_4_pages),
+                        PRELOAD_6_PAGES to stringResource(SYMR.strings.reader_preload_amount_6_pages),
+                        PRELOAD_8_PAGES to stringResource(SYMR.strings.reader_preload_amount_8_pages),
+                        PRELOAD_10_PAGES to stringResource(SYMR.strings.reader_preload_amount_10_pages),
+                        PRELOAD_12_PAGES to stringResource(SYMR.strings.reader_preload_amount_12_pages),
+                        PRELOAD_14_PAGES to stringResource(SYMR.strings.reader_preload_amount_14_pages),
+                        PRELOAD_16_PAGES to stringResource(SYMR.strings.reader_preload_amount_16_pages),
+                        PRELOAD_20_PAGES to stringResource(SYMR.strings.reader_preload_amount_20_pages),
                     ),
                 ),
                 Preference.PreferenceItem.ListPreference(
                     preference = readerPreferences.readerThreads,
                     title = stringResource(SYMR.strings.download_threads),
                     subtitle = stringResource(SYMR.strings.download_threads_summary),
-                    entries = List(5) { it }.associateWith { it.toString() },
+                    entries = List(READER_THREAD_CHOICES) { it }.associateWith { it.toString() },
                 ),
                 Preference.PreferenceItem.ListPreference(
                     preference = readerPreferences.cacheSize,

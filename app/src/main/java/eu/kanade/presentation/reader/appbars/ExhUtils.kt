@@ -42,6 +42,12 @@ import androidx.compose.ui.unit.sp
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
+// Proportions of the utility rows: label vs. control, and how much of the bar each row fills.
+private const val ROW_WIDTH_FRACTION = 0.9f
+private const val HALF_ROW_FRACTION = 0.5f
+private const val BUTTON_WIDTH_FRACTION = 0.75f
+private const val LABEL_WEIGHT = 3f
+
 @Composable
 internal fun ExhUtils(
     isVisible: Boolean,
@@ -69,13 +75,13 @@ internal fun ExhUtils(
             Column {
                 Row(
                     Modifier
-                        .fillMaxWidth(0.9f)
+                        .fillMaxWidth(ROW_WIDTH_FRACTION)
                         .height(IntrinsicSize.Min),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row(
                         Modifier
-                            .fillMaxWidth(0.5f)
+                            .fillMaxWidth(HALF_ROW_FRACTION)
                             .fillMaxHeight()
                             .padding(5.dp)
                             .clickable(enabled = isAutoScrollEnabled) { onToggleAutoscroll(!isAutoScroll) },
@@ -83,7 +89,7 @@ internal fun ExhUtils(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(
-                            Modifier.weight(3f),
+                            Modifier.weight(LABEL_WEIGHT),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(
@@ -92,7 +98,7 @@ internal fun ExhUtils(
                                 fontSize = 13.sp,
                                 fontFamily = FontFamily.SansSerif,
                                 style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier.fillMaxWidth(0.75f),
+                                modifier = Modifier.fillMaxWidth(BUTTON_WIDTH_FRACTION),
                                 textAlign = TextAlign.Center,
                             )
                         }
@@ -108,12 +114,12 @@ internal fun ExhUtils(
                         }
                     }
                     Row(
-                        Modifier.fillMaxWidth(0.9f).padding(5.dp),
+                        Modifier.fillMaxWidth(ROW_WIDTH_FRACTION).padding(5.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(
-                            Modifier.weight(3f),
+                            Modifier.weight(LABEL_WEIGHT),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             var autoScrollFrequencyState by remember {
@@ -133,7 +139,7 @@ internal fun ExhUtils(
                                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                                 ),
-                                modifier = Modifier.fillMaxWidth(0.75f),
+                                modifier = Modifier.fillMaxWidth(BUTTON_WIDTH_FRACTION),
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Decimal,
                                 ),
@@ -160,17 +166,17 @@ internal fun ExhUtils(
                     }
                 }
                 Row(
-                    Modifier.fillMaxWidth(0.9f),
+                    Modifier.fillMaxWidth(ROW_WIDTH_FRACTION),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row(
-                        Modifier.fillMaxWidth(0.5f).padding(5.dp),
+                        Modifier.fillMaxWidth(HALF_ROW_FRACTION).padding(5.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         TextButton(
                             onClick = onClickRetryAll,
-                            modifier = Modifier.weight(3f),
+                            modifier = Modifier.weight(LABEL_WEIGHT),
                         ) {
                             Text(
                                 text = stringResource(SYMR.strings.eh_retry_all),
@@ -192,13 +198,13 @@ internal fun ExhUtils(
                         }
                     }
                     Row(
-                        Modifier.fillMaxWidth(0.9f).padding(5.dp),
+                        Modifier.fillMaxWidth(ROW_WIDTH_FRACTION).padding(5.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         TextButton(
                             onClick = onClickBoostPage,
-                            modifier = Modifier.weight(3f),
+                            modifier = Modifier.weight(LABEL_WEIGHT),
                         ) {
                             Text(
                                 text = stringResource(SYMR.strings.eh_boost_page),

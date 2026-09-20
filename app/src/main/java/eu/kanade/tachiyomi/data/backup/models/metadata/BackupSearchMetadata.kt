@@ -4,12 +4,17 @@ import exh.metadata.sql.models.SearchMetadata
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
+private const val BACKUP_SEARCH_METADATA_UPLOADER = 1
+private const val BACKUP_SEARCH_METADATA_EXTRA = 2
+private const val BACKUP_SEARCH_METADATA_INDEXED_EXTRA = 3
+private const val BACKUP_SEARCH_METADATA_EXTRA_VERSION = 4
+
 @Serializable
 internal data class BackupSearchMetadata(
-    @ProtoNumber(1) var uploader: String? = null,
-    @ProtoNumber(2) var extra: String,
-    @ProtoNumber(3) var indexedExtra: String? = null,
-    @ProtoNumber(4) var extraVersion: Int,
+    @ProtoNumber(BACKUP_SEARCH_METADATA_UPLOADER) var uploader: String? = null,
+    @ProtoNumber(BACKUP_SEARCH_METADATA_EXTRA) var extra: String,
+    @ProtoNumber(BACKUP_SEARCH_METADATA_INDEXED_EXTRA) var indexedExtra: String? = null,
+    @ProtoNumber(BACKUP_SEARCH_METADATA_EXTRA_VERSION) var extraVersion: Int,
 ) {
     fun getSearchMetadata(mangaId: Long): SearchMetadata {
         return SearchMetadata(

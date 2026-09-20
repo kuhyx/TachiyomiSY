@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.network.jsonMime
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.sourceIdOf
 import eu.kanade.tachiyomi.source.sourcePreferences
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.addAll
@@ -21,7 +22,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.injectLazy
-import java.security.MessageDigest
 
 internal class SuwayomiApi(private val trackId: Long) {
 
@@ -182,11 +182,7 @@ internal class SuwayomiApi(private val trackId: Long) {
         return getTrackSearch(track.remoteId)
     }
 
-    private val sourceId by lazy {
-        val key = "tachidesk/en/1"
-        val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
-        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
-    }
+    private val sourceId by lazy { sourceIdOf(name = "Tachidesk", lang = "en", versionId = 1) }
 
     companion object {
         private val MangaFragment = """

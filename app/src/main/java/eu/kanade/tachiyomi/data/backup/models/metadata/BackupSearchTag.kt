@@ -4,11 +4,15 @@ import exh.metadata.sql.models.SearchTag
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
+private const val BACKUP_SEARCH_TAG_NAMESPACE = 1
+private const val BACKUP_SEARCH_TAG_NAME = 2
+private const val BACKUP_SEARCH_TAG_TYPE = 3
+
 @Serializable
 internal data class BackupSearchTag(
-    @ProtoNumber(1) var namespace: String? = null,
-    @ProtoNumber(2) var name: String,
-    @ProtoNumber(3) var type: Int,
+    @ProtoNumber(BACKUP_SEARCH_TAG_NAMESPACE) var namespace: String? = null,
+    @ProtoNumber(BACKUP_SEARCH_TAG_NAME) var name: String,
+    @ProtoNumber(BACKUP_SEARCH_TAG_TYPE) var type: Int,
 ) {
     fun getSearchTag(mangaId: Long): SearchTag {
         return SearchTag(

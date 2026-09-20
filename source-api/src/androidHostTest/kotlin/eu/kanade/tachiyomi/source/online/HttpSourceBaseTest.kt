@@ -40,6 +40,12 @@ internal class HttpSourceBaseTest {
     }
 
     @Test
+    fun sourceIdOfIsTheSameFormula() {
+        sourceIdOf("Other Name", "de", 3) shouldBe source.exposedGenerateId("Other Name", "de", 3)
+        sourceIdOf("E-Hentai", "en", 1) shouldBe 57_122_881_048_805_941L
+    }
+
+    @Test
     fun versionIdDefaultsToOne() {
         source.versionId shouldBe 1
     }

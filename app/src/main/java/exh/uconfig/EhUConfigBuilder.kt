@@ -170,20 +170,8 @@ internal object Entry {
 
     class Categories {
 
-        fun categoryConfigs(list: List<Boolean>): List<ConfigItem> {
-            return listOf(
-                GenreConfigItem("ct_doujinshi", list[0]),
-                GenreConfigItem("ct_manga", list[1]),
-                GenreConfigItem("ct_artistcg", list[2]),
-                GenreConfigItem("ct_gamecg", list[3]),
-                GenreConfigItem("ct_western", list[4]),
-                GenreConfigItem("ct_non-h", list[5]),
-                GenreConfigItem("ct_imageset", list[6]),
-                GenreConfigItem("ct_cosplay", list[7]),
-                GenreConfigItem("ct_asianporn", list[8]),
-                GenreConfigItem("ct_misc", list[9]),
-            )
-        }
+        fun categoryConfigs(list: List<Boolean>): List<ConfigItem> =
+            EhCategory.entries.map { GenreConfigItem(it.configKey, list[it.ordinal]) }
 
         private class GenreConfigItem(override val key: String, exclude: Boolean) : ConfigItem {
             override val value = if (exclude) "1" else "0"
@@ -197,26 +185,28 @@ internal object Entry {
 
         fun getLanguages(values: List<String>): List<ConfigItem> {
             val config = transformConfig(values)
-            return listOf(
-                Japanese(config[0]),
-                English(config[1]),
-                Chinese(config[2]),
-                Dutch(config[3]),
-                French(config[4]),
-                German(config[5]),
-                Hungarian(config[6]),
-                Italian(config[7]),
-                Korean(config[8]),
-                Polish(config[9]),
-                Portuguese(config[10]),
-                Russian(config[11]),
-                Spanish(config[12]),
-                Thai(config[13]),
-                Vietnamese(config[14]),
-                NotAvailable(config[15]),
-                Other(config[16]),
-            ).flatMap { it.configs }
+            return EhLanguage.entries.flatMap { languageOf.getValue(it)(config[it.ordinal]).configs }
         }
+
+        private val languageOf: Map<EhLanguage, (List<Boolean>) -> BaseLanguage> = mapOf(
+            EhLanguage.JAPANESE to ::Japanese,
+            EhLanguage.ENGLISH to ::English,
+            EhLanguage.CHINESE to ::Chinese,
+            EhLanguage.DUTCH to ::Dutch,
+            EhLanguage.FRENCH to ::French,
+            EhLanguage.GERMAN to ::German,
+            EhLanguage.HUNGARIAN to ::Hungarian,
+            EhLanguage.ITALIAN to ::Italian,
+            EhLanguage.KOREAN to ::Korean,
+            EhLanguage.POLISH to ::Polish,
+            EhLanguage.PORTUGUESE to ::Portuguese,
+            EhLanguage.RUSSIAN to ::Russian,
+            EhLanguage.SPANISH to ::Spanish,
+            EhLanguage.THAI to ::Thai,
+            EhLanguage.VIETNAMESE to ::Vietnamese,
+            EhLanguage.NOT_AVAILABLE to ::NotAvailable,
+            EhLanguage.OTHER to ::Other,
+        )
 
         private abstract class BaseLanguage(val values: List<Boolean>) {
             abstract val translatedKey: String

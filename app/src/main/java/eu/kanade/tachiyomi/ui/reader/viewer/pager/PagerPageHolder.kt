@@ -36,6 +36,17 @@ import kotlin.math.max
 /**
  * View of the ViewPager that contains a page of a chapter.
  */
+// Progress-bar milestones while a page is prepared, and the double-page layout metrics.
+private const val PROGRESS_DECODING = 95
+private const val PROGRESS_SPLITTING = 96
+private const val PROGRESS_MERGING = 97
+private const val PROGRESS_DONE = 100
+private const val STREAM_BUFFER_SIZE = 16
+private const val QUARTER_TURN_DEGREES = 90f
+private const val CENTER_MARGIN_PX = 96
+private const val HALF_CENTER_MARGIN_PX = 48
+private const val SPLIT_DELAY_MS = 100L
+
 @SuppressLint("ViewConstructor")
 internal class PagerPageHolder(
     readerThemedContext: Context,
@@ -153,7 +164,7 @@ internal class PagerPageHolder(
         if (extraPage == null) {
             progressIndicator?.setProgress(0)
         } else {
-            progressIndicator?.setProgress(95)
+            progressIndicator?.setProgress(PROGRESS_DECODING)
         }
 
         val streamFn = page.stream ?: return
@@ -161,11 +172,11 @@ internal class PagerPageHolder(
 
         try {
             val (source, isAnimated, background) = withIOContext {
-                streamFn().buffered(16).use { source ->
+                streamFn().buffered(STREAM_BUFFER_SIZE).use { source ->
                     // SY -->
                     if (extraPage != null) {
                         streamFn2?.invoke()
-                            ?.buffered(16)
+                            ?.buffered(STREAM_BUFFER_SIZE)
                     } else {
                         null
                     }.use { source2 ->
@@ -236,7 +247,7 @@ internal class PagerPageHolder(
     private fun rotateDualPage(imageSource: BufferedSource): BufferedSource {
         val isDoublePage = ImageUtil.isWideImage(imageSource)
         return if (isDoublePage) {
-            val rotation = if (viewer.config.dualPageRotateToFitInvert) -90f else 90f
+            val rotation = if (viewer.config.dualPageRotateToFitInvert) -QUARTER_TURN_DEGREES else QUARTER_TURN_DEGREES
             ImageUtil.rotateImage(imageSource, rotation)
         } else {
             imageSource
@@ -270,7 +281,7 @@ internal class PagerPageHolder(
             return imageSource
         }
 
-        scope.launch { progressIndicator?.setProgress(96) }
+        scope.launch { progressIndicator?.setProgress(PROGRESS_SPLITTING) }
         if (imageBitmap.height < imageBitmap.width) {
             imageSource2.close()
             page.fullPage = true
@@ -288,7 +299,7 @@ internal class PagerPageHolder(
             return imageSource
         }
 
-        scope.launch { progressIndicator?.setProgress(97) }
+        scope.launch { progressIndicator?.setProgress(PROGRESS_MERGING) }
         if (imageBitmap2.height < imageBitmap2.width) {
             imageSource2.close()
             extraPage?.fullPage = true
@@ -334,7 +345,7 @@ internal class PagerPageHolder(
         return if (viewer.config.centerMarginType and PagerConfig.CenterMarginType.DOUBLE_PAGE_CENTER_MARGIN > 0 &&
             !viewer.config.imageCropBorders
         ) {
-            96 / (this.height.coerceAtLeast(1) / max(height, height2).coerceAtLeast(1)).coerceAtLeast(1)
+            CENTER_MARGIN_PX / (this.height.coerceAtLeast(1) / max(height, height2).coerceAtLeast(1)).coerceAtLeast(1)
         } else {
             0
         }
@@ -342,7 +353,7 @@ internal class PagerPageHolder(
 
     private fun updateProgress(progress: Int) {
         scope.launch {
-            if (progress == 100) {
+            if (progress == PROGRESS_DONE) {
                 progressIndicator?.hide()
             } else {
                 progressIndicator?.setProgress(progress)
@@ -352,7 +363,7 @@ internal class PagerPageHolder(
 
     private fun splitDoublePages() {
         scope.launch {
-            delay(100)
+            delay(SPLIT_DELAY_MS)
             viewer.splitDoublePages(page)
             if (extraPage?.fullPage == true || page.fullPage) {
                 extraPage = null
@@ -381,7 +392,7 @@ internal class PagerPageHolder(
             viewer.config.doublePages &&
             !viewer.config.imageCropBorders
         ) {
-            48
+            HALF_CENTER_MARGIN_PX
         } else {
             0
         }

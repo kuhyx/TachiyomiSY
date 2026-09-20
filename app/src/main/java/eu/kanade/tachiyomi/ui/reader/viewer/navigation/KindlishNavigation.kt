@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.navigation
 
 import android.graphics.RectF
+import eu.kanade.tachiyomi.ui.reader.viewer.ONE_THIRD
+import eu.kanade.tachiyomi.ui.reader.viewer.TWO_THIRDS
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 
 /**
@@ -17,11 +19,11 @@ internal class KindlishNavigation : ViewerNavigation() {
 
     override var regionList: List<Region> = listOf(
         Region(
-            rectF = RectF(0.33f, 0.33f, 1f, 1f),
+            rectF = RectF(ONE_THIRD, ONE_THIRD, 1f, 1f),
             type = NavigationRegion.NEXT,
         ),
         Region(
-            rectF = RectF(0f, 0.33f, 0.33f, 1f),
+            rectF = RectF(0f, ONE_THIRD, ONE_THIRD, 1f),
             type = NavigationRegion.PREV,
         ),
     )

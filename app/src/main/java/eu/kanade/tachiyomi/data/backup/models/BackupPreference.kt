@@ -3,16 +3,21 @@ package eu.kanade.tachiyomi.data.backup.models
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
+private const val BACKUP_PREFERENCE_KEY = 1
+private const val BACKUP_PREFERENCE_VALUE = 2
+private const val BACKUP_SOURCE_PREFERENCES_SOURCE_KEY = 1
+private const val BACKUP_SOURCE_PREFERENCES_PREFS = 2
+
 @Serializable
 internal data class BackupPreference(
-    @ProtoNumber(1) val key: String,
-    @ProtoNumber(2) val value: PreferenceValue,
+    @ProtoNumber(BACKUP_PREFERENCE_KEY) val key: String,
+    @ProtoNumber(BACKUP_PREFERENCE_VALUE) val value: PreferenceValue,
 )
 
 @Serializable
 internal data class BackupSourcePreferences(
-    @ProtoNumber(1) val sourceKey: String,
-    @ProtoNumber(2) val prefs: List<BackupPreference>,
+    @ProtoNumber(BACKUP_SOURCE_PREFERENCES_SOURCE_KEY) val sourceKey: String,
+    @ProtoNumber(BACKUP_SOURCE_PREFERENCES_PREFS) val prefs: List<BackupPreference>,
 )
 
 @Serializable

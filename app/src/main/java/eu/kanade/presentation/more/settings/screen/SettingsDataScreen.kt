@@ -91,6 +91,21 @@ import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+// Interval choices, in the unit each preference stores.
+private const val SIX_HOURS = 6
+private const val TWELVE_HOURS = 12
+private const val ONE_DAY_HOURS = 24
+private const val TWO_DAYS_HOURS = 48
+private const val ONE_WEEK_HOURS = 168
+private const val HALF_HOUR_MINUTES = 30
+private const val ONE_HOUR_MINUTES = 60
+private const val THREE_HOURS_MINUTES = 180
+private const val SIX_HOURS_MINUTES = 360
+private const val TWELVE_HOURS_MINUTES = 720
+private const val ONE_DAY_MINUTES = 1440
+private const val TWO_DAYS_MINUTES = 2880
+private const val ONE_WEEK_MINUTES = 10_080
+
 internal object SettingsDataScreen : SearchableSettings {
 
     val restorePreferenceKeyString = MR.strings.label_backup
@@ -273,11 +288,11 @@ internal object SettingsDataScreen : SearchableSettings {
                     preference = backupPreferences.backupInterval,
                     entries = mapOf(
                         0 to stringResource(MR.strings.off),
-                        6 to stringResource(MR.strings.update_6hour),
-                        12 to stringResource(MR.strings.update_12hour),
-                        24 to stringResource(MR.strings.update_24hour),
-                        48 to stringResource(MR.strings.update_48hour),
-                        168 to stringResource(MR.strings.update_weekly),
+                        SIX_HOURS to stringResource(MR.strings.update_6hour),
+                        TWELVE_HOURS to stringResource(MR.strings.update_12hour),
+                        ONE_DAY_HOURS to stringResource(MR.strings.update_24hour),
+                        TWO_DAYS_HOURS to stringResource(MR.strings.update_48hour),
+                        ONE_WEEK_HOURS to stringResource(MR.strings.update_weekly),
                     ),
                     title = stringResource(MR.strings.pref_backup_interval),
                     onValueChanged = {
@@ -760,14 +775,14 @@ internal object SettingsDataScreen : SearchableSettings {
                     title = stringResource(SYMR.strings.pref_sync_interval),
                     entries = mapOf(
                         0 to stringResource(MR.strings.off),
-                        30 to stringResource(SYMR.strings.update_30min),
-                        60 to stringResource(SYMR.strings.update_1hour),
-                        180 to stringResource(SYMR.strings.update_3hour),
-                        360 to stringResource(MR.strings.update_6hour),
-                        720 to stringResource(MR.strings.update_12hour),
-                        1440 to stringResource(MR.strings.update_24hour),
-                        2880 to stringResource(MR.strings.update_48hour),
-                        10_080 to stringResource(MR.strings.update_weekly),
+                        HALF_HOUR_MINUTES to stringResource(SYMR.strings.update_30min),
+                        ONE_HOUR_MINUTES to stringResource(SYMR.strings.update_1hour),
+                        THREE_HOURS_MINUTES to stringResource(SYMR.strings.update_3hour),
+                        SIX_HOURS_MINUTES to stringResource(MR.strings.update_6hour),
+                        TWELVE_HOURS_MINUTES to stringResource(MR.strings.update_12hour),
+                        ONE_DAY_MINUTES to stringResource(MR.strings.update_24hour),
+                        TWO_DAYS_MINUTES to stringResource(MR.strings.update_48hour),
+                        ONE_WEEK_MINUTES to stringResource(MR.strings.update_weekly),
                     ),
                     onValueChanged = {
                         SyncDataJob.setupTask(context, it)

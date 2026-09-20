@@ -11,7 +11,6 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.security.MessageDigest
 
 /**
  * Identity and network layer of an [HttpSource]: id generation, headers, the OkHttp client and
@@ -118,13 +117,7 @@ public abstract class HttpSourceBase : CatalogueSource {
      * @return a unique ID for the source
      */
     @Suppress("MemberVisibilityCanBePrivate")
-    protected fun generateId(name: String, lang: String, versionId: Int): Long {
-        val key = "${name.lowercase()}/$lang/$versionId"
-        val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
-        return (0 until ID_BYTES)
-            .map { bytes[it].toLong() and BYTE_MASK shl BITS_PER_BYTE * (ID_BYTES - 1 - it) }
-            .reduce(Long::or) and Long.MAX_VALUE
-    }
+    protected fun generateId(name: String, lang: String, versionId: Int): Long = sourceIdOf(name, lang, versionId)
 
     /**
      * Headers builder for requests. Implementations can override this method for custom headers.
@@ -144,7 +137,3 @@ public abstract class HttpSourceBase : CatalogueSource {
     }
     // EXH <--
 }
-
-private const val ID_BYTES: Int = 8
-private const val BITS_PER_BYTE: Int = 8
-private const val BYTE_MASK: Long = 0xff

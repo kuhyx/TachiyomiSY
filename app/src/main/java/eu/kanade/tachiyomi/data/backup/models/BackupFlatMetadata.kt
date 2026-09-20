@@ -7,11 +7,15 @@ import exh.metadata.metadata.base.FlatMetadata
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
+private const val BACKUP_FLAT_METADATA_SEARCH_METADATA = 1
+private const val BACKUP_FLAT_METADATA_SEARCH_TAGS = 2
+private const val BACKUP_FLAT_METADATA_SEARCH_TITLES = 3
+
 @Serializable
 internal data class BackupFlatMetadata(
-    @ProtoNumber(1) var searchMetadata: BackupSearchMetadata,
-    @ProtoNumber(2) var searchTags: List<BackupSearchTag> = emptyList(),
-    @ProtoNumber(3) var searchTitles: List<BackupSearchTitle> = emptyList(),
+    @ProtoNumber(BACKUP_FLAT_METADATA_SEARCH_METADATA) var searchMetadata: BackupSearchMetadata,
+    @ProtoNumber(BACKUP_FLAT_METADATA_SEARCH_TAGS) var searchTags: List<BackupSearchTag> = emptyList(),
+    @ProtoNumber(BACKUP_FLAT_METADATA_SEARCH_TITLES) var searchTitles: List<BackupSearchTitle> = emptyList(),
 ) {
     fun getFlatMetadata(mangaId: Long): FlatMetadata {
         return FlatMetadata(

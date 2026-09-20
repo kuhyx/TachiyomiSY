@@ -89,11 +89,29 @@ import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.URLEncoder
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 // Follow-up: Consider gallery updating when doing tabbed browsing (https://github.com/kuhyx/TachiyomiSY/issues/20)
+// Positions inside e-hentai's gallery-list markup and its rating sprite.
+private const val BORDER_COLOR_START = 14
+private const val BORDER_COLOR_END = 17
+private const val COMPACT_RATING_INDEX = 3
+private const val COMPACT_UPLOADER_INDEX = 4
+private const val COMPACT_LENGTH_INDEX = 5
+private const val EXTENDED_DATE_INDEX = 8
+private const val EXTENDED_RATING_INDEX = 9
+private const val TOPLIST_LAST_PAGE = 200L
+private const val MAX_RATING = 5
+private const val STAR_SPRITE_WIDTH_PX = 16
+private const val HALF_STAR_SPRITE_OFFSET_PX = 21
+private const val HALF_STAR = 0.5
+private const val FIRST_GALLERY_YEAR = 2007
+private const val LAST_SEEK_YEAR = 2099
+private const val JPEG_QUALITY_LOSSLESS = 100
+
 internal class EHentai(
     override val id: Long,
     val exh: Boolean,
@@ -144,7 +162,7 @@ internal class EHentai(
 
             ParsedManga(
                 fav = FAVORITES_BORDER_HEX_COLORS.indexOf(
-                    favElement?.attr("style")?.substring(14, 17),
+                    favElement?.attr("style")?.substring(BORDER_COLOR_START, BORDER_COLOR_END),
                 ),
                 manga = SManga.create().apply {
                     // Get title
@@ -195,11 +213,11 @@ internal class EHentai(
 
                         datePosted = getDateTag(infoElements.getOrNull(2))
 
-                        averageRating = getRating(infoElements.getOrNull(3))
+                        averageRating = getRating(infoElements.getOrNull(COMPACT_RATING_INDEX))
 
-                        uploader = getUploader(infoElements.getOrNull(4))
+                        uploader = getUploader(infoElements.getOrNull(COMPACT_UPLOADER_INDEX))
 
-                        length = getPageCount(infoElements.getOrNull(5))
+                        length = getPageCount(infoElements.getOrNull(COMPACT_LENGTH_INDEX))
                     } else {
                         genre = getGenre(body.selectFirst(".gl1c div"))
 
@@ -208,9 +226,9 @@ internal class EHentai(
 
                         val infoList = info.select("div div")
 
-                        datePosted = getDateTag(infoList.getOrNull(8))
+                        datePosted = getDateTag(infoList.getOrNull(EXTENDED_DATE_INDEX))
 
-                        averageRating = getRating(infoList.getOrNull(9))
+                        averageRating = getRating(infoList.getOrNull(EXTENDED_RATING_INDEX))
 
                         val extraInfoList = extraInfo.select("div")
 
@@ -243,7 +261,7 @@ internal class EHentai(
                 .any { "next" in it.attr("href") }
         }
         val nextPage = if (parsedLocation?.pathSegments?.contains("toplist.php") == true) {
-            ((parsedLocation.queryParameter("p")?.toLong() ?: 0) + 2).takeIf { it <= 200 }
+            ((parsedLocation.queryParameter("p")?.toLong() ?: 0) + 2).takeIf { it <= TOPLIST_LAST_PAGE }
         } else if (hasNextPage) {
             parsedMangas.let { if (isReversed) it.first() else it.last() }
                 .manga
@@ -289,10 +307,10 @@ internal class EHentai(
                 .mapNotNull { it.groupValues.getOrNull(1)?.toIntOrNull() }
                 .toList()
             if (matches.size == 2) {
-                var rate = 5 - matches[0] / 16
-                if (matches[1] == 21) {
+                var rate = MAX_RATING - matches[0] / STAR_SPRITE_WIDTH_PX
+                if (matches[1] == HALF_STAR_SPRITE_OFFSET_PX) {
                     rate--
-                    rate + 0.5
+                    rate + HALF_STAR
                 } else {
                     rate.toDouble()
                 }
@@ -523,7 +541,7 @@ internal class EHentai(
                 (
                     MATCH_YEAR_REGEX.matches(jumpSeekValue) &&
                         jumpSeekValue.toIntOrNull()?.let {
-                            it in 2007..2099
+                            it in FIRST_GALLERY_YEAR..LAST_SEEK_YEAR
                         } == true
                     )
             ) {
@@ -620,7 +638,7 @@ internal class EHentai(
         } else {
             response.close()
 
-            if (response.code == 404) {
+            if (response.code == HttpURLConnection.HTTP_NOT_FOUND) {
                 throw GalleryNotFoundException(exception)
             } else {
                 throw Exception("HTTP error ${response.code}", exception)
@@ -923,11 +941,11 @@ internal class EHentai(
     }
 
     enum class ToplistOption(val humanName: String, val index: Int) {
-        NONE("None", 0),
-        ALL_TIME("All time", 11),
-        PAST_YEAR("Past year", 12),
-        PAST_MONTH("Past month", 13),
-        YESTERDAY("Yesterday", 15),
+        NONE("None", index = 0),
+        ALL_TIME("All time", index = 11),
+        PAST_YEAR("Past year", index = 12),
+        PAST_MONTH("Past month", index = 13),
+        YESTERDAY("Yesterday", index = 15),
         ;
 
         override fun toString(): String = humanName
@@ -943,16 +961,16 @@ internal class EHentai(
         Filter.Group<GenreOption>(
             "Genres",
             listOf(
-                GenreOption("Dōjinshi", 2),
-                GenreOption("Manga", 4),
-                GenreOption("Artist CG", 8),
-                GenreOption("Game CG", 16),
-                GenreOption("Western", 512),
-                GenreOption("Non-H", 256),
-                GenreOption("Image Set", 32),
-                GenreOption("Cosplay", 64),
-                GenreOption("Asian Porn", 128),
-                GenreOption("Misc", 1),
+                GenreOption("Dōjinshi", genreId = 2),
+                GenreOption("Manga", genreId = 4),
+                GenreOption("Artist CG", genreId = 8),
+                GenreOption("Game CG", genreId = 16),
+                GenreOption("Western", genreId = 512),
+                GenreOption("Non-H", genreId = 256),
+                GenreOption("Image Set", genreId = 32),
+                GenreOption("Cosplay", genreId = 64),
+                GenreOption("Asian Porn", genreId = 128),
+                GenreOption("Misc", genreId = 1),
             ),
         ),
         UriFilter {
@@ -1288,7 +1306,7 @@ internal class EHentai(
                                 0,
                                 thumbnailPreview.width.coerceAtMost(bitmap.width - thumbnailPreview.widthOffset),
                                 thumbnailPreview.height.coerceAtMost(bitmap.height),
-                            ).compress(Bitmap.CompressFormat.JPEG, 100, it)
+                            ).compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY_LOSSLESS, it)
                             it.toByteArray()
                         }
                         .toResponseBody("image/jpeg".toMediaType())

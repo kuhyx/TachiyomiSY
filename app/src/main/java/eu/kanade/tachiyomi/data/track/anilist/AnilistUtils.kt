@@ -5,6 +5,15 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+// AniList keeps scores on a 100-point scale; the star and smiley formats bucket it.
+private const val POINTS_PER_TEN_POINT_STEP = 10
+private const val ONE_STAR_MAX = 30
+private const val TWO_STARS_MAX = 50
+private const val THREE_STARS_MAX = 70
+private const val FOUR_STARS_MAX = 90
+private const val SAD_SMILEY_MAX = 35
+private const val NEUTRAL_SMILEY_MAX = 60
+
 internal fun Track.toApiStatus() = when (status) {
     Anilist.READING -> "CURRENT"
     Anilist.COMPLETED -> "COMPLETED"
@@ -19,26 +28,26 @@ private val preferences: TrackPreferences by injectLazy()
 
 internal fun DomainTrack.toApiScore(): String = when (preferences.anilistScoreType.get()) {
     // 10 point
-    "POINT_10" -> (score.toInt() / 10).toString()
+    "POINT_10" -> (score.toInt() / POINTS_PER_TEN_POINT_STEP).toString()
     // 100 point
     "POINT_100" -> score.toInt().toString()
     // 5 stars
     "POINT_5" -> when {
         score == 0.0 -> "0"
-        score < 30 -> "1"
-        score < 50 -> "2"
-        score < 70 -> "3"
-        score < 90 -> "4"
+        score < ONE_STAR_MAX -> "1"
+        score < TWO_STARS_MAX -> "2"
+        score < THREE_STARS_MAX -> "3"
+        score < FOUR_STARS_MAX -> "4"
         else -> "5"
     }
     // Smiley
     "POINT_3" -> when {
         score == 0.0 -> "0"
-        score <= 35 -> ":("
-        score <= 60 -> ":|"
+        score <= SAD_SMILEY_MAX -> ":("
+        score <= NEUTRAL_SMILEY_MAX -> ":|"
         else -> ":)"
     }
     // 10 point decimal
-    "POINT_10_DECIMAL" -> (score / 10).toString()
+    "POINT_10_DECIMAL" -> (score / POINTS_PER_TEN_POINT_STEP).toString()
     else -> throw NotImplementedError("Unknown score type")
 }

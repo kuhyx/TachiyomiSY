@@ -14,6 +14,12 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val MAX_SCORE = 100
+private const val STEP_SIZE_5 = 5
+private const val STEP_SIZE_10 = 10
+private const val STEP_SIZE_20 = 20
+private const val STEP_SIZE_25 = 25
+
 internal class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
 
     private val json: Json by injectLazy()
@@ -48,20 +54,17 @@ internal class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTrac
 
     override fun getCompletionStatus(): Long = COMPLETED
 
-    override fun getScoreList(): ImmutableList<String> {
-        return when (scorePreference.get()) {
-            // 1, 2, ..., 99, 100
-            STEP_1 -> IntRange(0, 100).map(Int::toString).toImmutableList()
-            // 5, 10, ..., 95, 100
-            STEP_5 -> IntRange(0, 100).step(5).map(Int::toString).toImmutableList()
-            // 10, 20, ..., 90, 100
-            STEP_10 -> IntRange(0, 100).step(10).map(Int::toString).toImmutableList()
-            // 20, 40, ..., 80, 100
-            STEP_20 -> IntRange(0, 100).step(20).map(Int::toString).toImmutableList()
-            // 25, 50, 75, 100
-            STEP_25 -> IntRange(0, 100).step(25).map(Int::toString).toImmutableList()
-            else -> throw Exception("Unknown score type")
-        }
+    // 0, step, 2 * step, ..., 100 for the user's rating step size.
+    override fun getScoreList(): ImmutableList<String> =
+        IntRange(0, MAX_SCORE).step(scoreStep()).map(Int::toString).toImmutableList()
+
+    private fun scoreStep(): Int = when (scorePreference.get()) {
+        STEP_1 -> 1
+        STEP_5 -> STEP_SIZE_5
+        STEP_10 -> STEP_SIZE_10
+        STEP_20 -> STEP_SIZE_20
+        STEP_25 -> STEP_SIZE_25
+        else -> error("Unknown score type")
     }
 
     override fun displayScore(track: DomainTrack): String = track.score.toInt().toString()
@@ -137,11 +140,11 @@ internal class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTrac
             val currentUser = api.getCurrentUser()
             val scoreType = when (currentUser.ratingSteps) {
                 1 -> STEP_1
-                5 -> STEP_5
-                10 -> STEP_10
-                20 -> STEP_20
-                25 -> STEP_25
-                else -> throw Exception("Unknown score step size ${currentUser.ratingSteps}")
+                STEP_SIZE_5 -> STEP_5
+                STEP_SIZE_10 -> STEP_10
+                STEP_SIZE_20 -> STEP_20
+                STEP_SIZE_25 -> STEP_25
+                else -> error("Unknown score step size ${currentUser.ratingSteps}")
             }
             scorePreference.set(scoreType)
             saveDisplayUsername(currentUser.nickname ?: currentUser.preferredUsername ?: currentUser.id)

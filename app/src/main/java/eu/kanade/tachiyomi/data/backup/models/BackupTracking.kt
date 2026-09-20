@@ -4,29 +4,43 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 import tachiyomi.domain.track.model.Track
 
+private const val BACKUP_TRACKING_SYNC_ID = 1
+private const val BACKUP_TRACKING_LIBRARY_ID = 2
+private const val BACKUP_TRACKING_MEDIA_ID_INT = 3
+private const val BACKUP_TRACKING_TRACKING_URL = 4
+private const val BACKUP_TRACKING_TITLE = 5
+private const val BACKUP_TRACKING_LAST_CHAPTER_READ = 6
+private const val BACKUP_TRACKING_TOTAL_CHAPTERS = 7
+private const val BACKUP_TRACKING_SCORE = 8
+private const val BACKUP_TRACKING_STATUS = 9
+private const val BACKUP_TRACKING_STARTED_READING_DATE = 10
+private const val BACKUP_TRACKING_FINISHED_READING_DATE = 11
+private const val BACKUP_TRACKING_PRIVATE = 12
+private const val BACKUP_TRACKING_MEDIA_ID = 100
+
 @Serializable
 internal data class BackupTracking(
     // in 1.x some of these values have different types or names
-    @ProtoNumber(1) var syncId: Int,
+    @ProtoNumber(BACKUP_TRACKING_SYNC_ID) var syncId: Int,
     // LibraryId is not null in 1.x
-    @ProtoNumber(2) var libraryId: Long,
+    @ProtoNumber(BACKUP_TRACKING_LIBRARY_ID) var libraryId: Long,
     @Deprecated("Use mediaId instead", level = DeprecationLevel.WARNING)
-    @ProtoNumber(3)
+    @ProtoNumber(BACKUP_TRACKING_MEDIA_ID_INT)
     var mediaIdInt: Int = 0,
     // trackingUrl is called mediaUrl in 1.x
-    @ProtoNumber(4) var trackingUrl: String = "",
-    @ProtoNumber(5) var title: String = "",
+    @ProtoNumber(BACKUP_TRACKING_TRACKING_URL) var trackingUrl: String = "",
+    @ProtoNumber(BACKUP_TRACKING_TITLE) var title: String = "",
     // lastChapterRead is called last read, and it has been changed to a float in 1.x
-    @ProtoNumber(6) var lastChapterRead: Float = 0F,
-    @ProtoNumber(7) var totalChapters: Int = 0,
-    @ProtoNumber(8) var score: Float = 0F,
-    @ProtoNumber(9) var status: Int = 0,
+    @ProtoNumber(BACKUP_TRACKING_LAST_CHAPTER_READ) var lastChapterRead: Float = 0F,
+    @ProtoNumber(BACKUP_TRACKING_TOTAL_CHAPTERS) var totalChapters: Int = 0,
+    @ProtoNumber(BACKUP_TRACKING_SCORE) var score: Float = 0F,
+    @ProtoNumber(BACKUP_TRACKING_STATUS) var status: Int = 0,
     // startedReadingDate is called startReadTime in 1.x
-    @ProtoNumber(10) var startedReadingDate: Long = 0,
+    @ProtoNumber(BACKUP_TRACKING_STARTED_READING_DATE) var startedReadingDate: Long = 0,
     // finishedReadingDate is called endReadTime in 1.x
-    @ProtoNumber(11) var finishedReadingDate: Long = 0,
-    @ProtoNumber(12) var private: Boolean = false,
-    @ProtoNumber(100) var mediaId: Long = 0,
+    @ProtoNumber(BACKUP_TRACKING_FINISHED_READING_DATE) var finishedReadingDate: Long = 0,
+    @ProtoNumber(BACKUP_TRACKING_PRIVATE) var private: Boolean = false,
+    @ProtoNumber(BACKUP_TRACKING_MEDIA_ID) var mediaId: Long = 0,
 ) {
 
     @Suppress("DEPRECATION")

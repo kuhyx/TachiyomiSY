@@ -4,10 +4,13 @@ import exh.metadata.sql.models.SearchTitle
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
+private const val BACKUP_SEARCH_TITLE_TITLE = 1
+private const val BACKUP_SEARCH_TITLE_TYPE = 2
+
 @Serializable
 internal data class BackupSearchTitle(
-    @ProtoNumber(1) var title: String,
-    @ProtoNumber(2) var type: Int,
+    @ProtoNumber(BACKUP_SEARCH_TITLE_TITLE) var title: String,
+    @ProtoNumber(BACKUP_SEARCH_TITLE_TYPE) var type: Int,
 ) {
     fun getSearchTitle(mangaId: Long): SearchTitle {
         return SearchTitle(

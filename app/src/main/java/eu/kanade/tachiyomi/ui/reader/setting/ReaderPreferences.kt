@@ -11,6 +11,12 @@ import tachiyomi.core.common.preference.getEnumSet
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
+// Preference defaults.
+private const val DEFAULT_DOUBLE_TAP_ANIM_MS = 500
+private const val DEFAULT_VERTICAL_NAVIGATOR_HEIGHT = 65
+private const val DEFAULT_AUTOSCROLL_SECONDS = 3f
+private const val DEFAULT_PRELOAD_PAGES = 10
+
 internal class ReaderPreferences(
     preferenceStore: PreferenceStore,
 ) {
@@ -31,7 +37,7 @@ internal class ReaderPreferences(
 
     val flashColor: Preference<FlashColor> = preferenceStore.getEnum("pref_reader_flash_mode", FlashColor.BLACK)
 
-    val doubleTapAnimSpeed: Preference<Int> = preferenceStore.getInt("pref_double_tap_anim_speed", 500)
+    val doubleTapAnimSpeed: Preference<Int> = preferenceStore.getInt("pref_double_tap_anim_speed", DEFAULT_DOUBLE_TAP_ANIM_MS)
 
     val showPageNumber: Preference<Boolean> = preferenceStore.getBoolean("pref_show_page_number_key", true)
 
@@ -47,7 +53,7 @@ internal class ReaderPreferences(
 
     val verticalNavigatorHeight: Preference<Int> = preferenceStore.getInt(
         "pref_vertical_navigator_height",
-        65,
+        DEFAULT_VERTICAL_NAVIGATOR_HEIGHT,
     )
 
     val showReadingMode: Preference<Boolean> = preferenceStore.getBoolean("pref_show_reading_mode", true)
@@ -205,13 +211,13 @@ internal class ReaderPreferences(
 
     val cacheSize: Preference<String> = preferenceStore.getString("eh_cache_size", "75")
 
-    val autoscrollInterval: Preference<Float> = preferenceStore.getFloat("eh_util_autoscroll_interval", 3f)
+    val autoscrollInterval: Preference<Float> = preferenceStore.getFloat("eh_util_autoscroll_interval", DEFAULT_AUTOSCROLL_SECONDS)
 
     val smoothAutoScroll: Preference<Boolean> = preferenceStore.getBoolean("smooth_auto_scroll", true)
 
     val preserveReadingPosition: Preference<Boolean> = preferenceStore.getBoolean("eh_preserve_reading_position", false)
 
-    val preloadSize: Preference<Int> = preferenceStore.getInt("eh_preload_size", 10)
+    val preloadSize: Preference<Int> = preferenceStore.getInt("eh_preload_size", DEFAULT_PRELOAD_PAGES)
 
     val useAutoWebtoon: Preference<Boolean> = preferenceStore.getBoolean("eh_use_auto_webtoon", true)
 
@@ -248,10 +254,10 @@ internal class ReaderPreferences(
     }
 
     enum class ReaderHideThreshold(val threshold: Int) {
-        HIGHEST(5),
-        HIGH(13),
-        LOW(31),
-        LOWEST(47),
+        HIGHEST(threshold = 5),
+        HIGH(threshold = 13),
+        LOW(threshold = 31),
+        LOWEST(threshold = 47),
     }
 
     object ArchiveReaderMode {

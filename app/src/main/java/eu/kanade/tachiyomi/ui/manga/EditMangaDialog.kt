@@ -60,6 +60,26 @@ import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+/** Spinner positions of the status picker; the first entry is "default" (keep the source's status). */
+private val STATUS_OPTIONS = listOf(
+    null,
+    SManga.ONGOING,
+    SManga.COMPLETED,
+    SManga.LICENSED,
+    SManga.PUBLISHING_FINISHED,
+    SManga.CANCELLED,
+    SManga.ON_HIATUS,
+)
+
+// Status codes older SY builds stored for the three statuses Mihon later numbered.
+private const val LEGACY_PUBLISHING_FINISHED = 61
+private const val LEGACY_CANCELLED = 62
+private const val LEGACY_ON_HIATUS = 63
+
+private const val DESCRIPTION_HINT_LENGTH = 20
+private const val THUMBNAIL_HINT_LENGTH = 40
+private const val EXTENSION_HINT_LENGTH = 6
+
 @Composable
 internal fun EditMangaDialog(
     manga: Manga,
@@ -96,17 +116,7 @@ internal fun EditMangaDialog(
                         binding.thumbnailUrl.text.toString(),
                         binding.mangaDescription.text.toString(),
                         binding.mangaGenresTags.getTextStrings(),
-                        binding.status.selectedItemPosition.let {
-                            when (it) {
-                                1 -> SManga.ONGOING
-                                2 -> SManga.COMPLETED
-                                3 -> SManga.LICENSED
-                                4 -> SManga.PUBLISHING_FINISHED
-                                5 -> SManga.CANCELLED
-                                6 -> SManga.ON_HIATUS
-                                else -> null
-                            }
-                        }?.toLong(),
+                        STATUS_OPTIONS.getOrNull(binding.status.selectedItemPosition)?.toLong(),
                     )
                     onDismissRequest()
                 },
@@ -212,18 +222,13 @@ private fun onViewCreated(manga: Manga, context: Context, binding: EditMangaDial
 
     binding.status.adapter = statusAdapter
     if (manga.status != manga.ogStatus) {
-        binding.status.setSelection(
-            when (manga.status.toInt()) {
-                SManga.UNKNOWN -> 0
-                SManga.ONGOING -> 1
-                SManga.COMPLETED -> 2
-                SManga.LICENSED -> 3
-                SManga.PUBLISHING_FINISHED, 61 -> 4
-                SManga.CANCELLED, 62 -> 5
-                SManga.ON_HIATUS, 63 -> 6
-                else -> 0
-            },
-        )
+        val status = when (manga.status.toInt()) {
+            LEGACY_PUBLISHING_FINISHED -> SManga.PUBLISHING_FINISHED
+            LEGACY_CANCELLED -> SManga.CANCELLED
+            LEGACY_ON_HIATUS -> SManga.ON_HIATUS
+            else -> manga.status.toInt()
+        }
+        binding.status.setSelection(STATUS_OPTIONS.indexOf(status).coerceAtLeast(0))
     }
 
     if (manga.isLocal()) {
@@ -262,13 +267,18 @@ private fun onViewCreated(manga: Manga, context: Context, binding: EditMangaDial
         binding.mangaDescription.hint =
             context.stringResource(
                 SYMR.strings.description_hint,
-                manga.ogDescription?.takeIf { it.isNotBlank() }?.replace("\n", " ")?.chop(20) ?: "",
+                manga.ogDescription?.takeIf { it.isNotBlank() }?.replace("\n", " ")?.chop(DESCRIPTION_HINT_LENGTH) ?: "",
             )
         binding.thumbnailUrl.hint =
             context.stringResource(
                 SYMR.strings.thumbnail_url_hint,
                 manga.ogThumbnailUrl?.let {
-                    it.chop(40) + if (it.length > 46) "." + it.substringAfterLast(".").chop(6) else ""
+                    it.chop(THUMBNAIL_HINT_LENGTH) +
+                        if (it.length > THUMBNAIL_HINT_LENGTH + EXTENSION_HINT_LENGTH) {
+                            "." + it.substringAfterLast(".").chop(EXTENSION_HINT_LENGTH)
+                        } else {
+                            ""
+                        }
                 } ?: "",
             )
     }

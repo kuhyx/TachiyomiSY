@@ -128,6 +128,18 @@ import uy.kohesive.injekt.api.get
 import java.io.ByteArrayOutputStream
 import kotlin.time.Duration.Companion.seconds
 
+// Reader theme preference values, the inverted-colours matrix offset and the brightness scale.
+private const val AUTOSCROLL_IDLE_POLL_MS = 100L
+private const val CHANNEL_MAX = 255f
+private const val GRAY_RED = 0x20
+private const val GRAY_GREEN = 0x21
+private const val GRAY_BLUE = 0x25
+private const val THEME_WHITE = 0
+private const val THEME_GRAY = 2
+private const val THEME_AUTOMATIC = 3
+private const val PERCENT = 100f
+private const val MIN_BRIGHTNESS = 0.01f
+
 internal class ReaderActivity : BaseActivity() {
 
     companion object {
@@ -723,7 +735,7 @@ internal class ReaderActivity : BaseActivity() {
                                 }
                                 delay(interval)
                             } else {
-                                delay(100)
+                                delay(AUTOSCROLL_IDLE_POLL_MS)
                             }
                         }
                     }
@@ -1220,9 +1232,9 @@ internal class ReaderActivity : BaseActivity() {
                             postConcat(
                                 ColorMatrix(
                                     floatArrayOf(
-                                        -1f, 0f, 0f, 0f, 255f,
-                                        0f, -1f, 0f, 0f, 255f,
-                                        0f, 0f, -1f, 0f, 255f,
+                                        -1f, 0f, 0f, 0f, CHANNEL_MAX,
+                                        0f, -1f, 0f, 0f, CHANNEL_MAX,
+                                        0f, 0f, -1f, 0f, CHANNEL_MAX,
                                         0f, 0f, 0f, 1f, 0f,
                                     ),
                                 ),
@@ -1233,7 +1245,7 @@ internal class ReaderActivity : BaseActivity() {
             }
         }
 
-        private val grayBackgroundColor = Color.rgb(0x20, 0x21, 0x25)
+        private val grayBackgroundColor = Color.rgb(GRAY_RED, GRAY_GREEN, GRAY_BLUE)
 
         /*
          * Initializes the reader subscriptions.
@@ -1243,9 +1255,9 @@ internal class ReaderActivity : BaseActivity() {
                 .onEach { theme ->
                     binding.readerContainer.setBackgroundColor(
                         when (theme) {
-                            0 -> Color.WHITE
-                            2 -> grayBackgroundColor
-                            3 -> automaticBackgroundColor()
+                            THEME_WHITE -> Color.WHITE
+                            THEME_GRAY -> grayBackgroundColor
+                            THEME_AUTOMATIC -> automaticBackgroundColor()
                             else -> Color.BLACK
                         },
                     )
@@ -1371,11 +1383,11 @@ internal class ReaderActivity : BaseActivity() {
             // Calculate and set reader brightness.
             val readerBrightness = when {
                 value > 0 -> {
-                    value / 100f
+                    value / PERCENT
                 }
 
                 value < 0 -> {
-                    0.01f
+                    MIN_BRIGHTNESS
                 }
 
                 else -> {

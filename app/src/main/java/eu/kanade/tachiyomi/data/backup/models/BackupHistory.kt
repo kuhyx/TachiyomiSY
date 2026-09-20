@@ -5,11 +5,15 @@ import kotlinx.serialization.protobuf.ProtoNumber
 import tachiyomi.domain.history.model.History
 import java.util.Date
 
+private const val BACKUP_HISTORY_URL = 1
+private const val BACKUP_HISTORY_LAST_READ = 2
+private const val BACKUP_HISTORY_READ_DURATION = 3
+
 @Serializable
 internal data class BackupHistory(
-    @ProtoNumber(1) var url: String,
-    @ProtoNumber(2) var lastRead: Long,
-    @ProtoNumber(3) var readDuration: Long = 0,
+    @ProtoNumber(BACKUP_HISTORY_URL) var url: String,
+    @ProtoNumber(BACKUP_HISTORY_LAST_READ) var lastRead: Long,
+    @ProtoNumber(BACKUP_HISTORY_READ_DURATION) var readDuration: Long = 0,
 ) {
     fun getHistoryImpl(): History {
         return History.create().copy(

@@ -12,9 +12,22 @@ import java.util.Date
 import java.util.Locale
 import kotlin.random.Random
 
+// Bounds of the random preview data.
+private const val PREVIEW_RESULTS = 30
+private const val TITLE_WORDS_MAX = 10
+private const val CHAPTERS_READ_MAX = 100
+private const val TOTAL_CHAPTERS_MIN = 100L
+private const val TOTAL_CHAPTERS_MAX = 1000L
+private const val SCORE_MAX = 10
+private const val DAYS_PER_YEAR = 365L
+private const val SUMMARY_WORDS_MAX = 40
+private const val NAMES_MAX = 3
+private const val NAME_WORDS_MIN = 3
+private const val NAME_WORDS_MAX = 5
+
 internal class TrackerSearchPreviewProvider : PreviewParameterProvider<@Composable () -> Unit> {
     private val fullPageWithSecondSelected = @Composable {
-        val items = someTrackSearches().take(30).toList()
+        val items = someTrackSearches().take(PREVIEW_RESULTS).toList()
         TrackerSearch(
             state = TextFieldState(initialText = "search text"),
             onDispatchQuery = {},
@@ -30,7 +43,7 @@ internal class TrackerSearchPreviewProvider : PreviewParameterProvider<@Composab
         TrackerSearch(
             state = TextFieldState(),
             onDispatchQuery = {},
-            queryResult = Result.success(someTrackSearches().take(30).toList()),
+            queryResult = Result.success(someTrackSearches().take(PREVIEW_RESULTS).toList()),
             selected = null,
             onSelectedChange = {},
             onConfirmSelection = {},
@@ -51,7 +64,7 @@ internal class TrackerSearchPreviewProvider : PreviewParameterProvider<@Composab
         )
     }
     private val fullPageWithPrivateTracking = @Composable {
-        val items = someTrackSearches().take(30).toList()
+        val items = someTrackSearches().take(PREVIEW_RESULTS).toList()
         TrackerSearch(
             state = TextFieldState(initialText = "search text"),
             onDispatchQuery = {},
@@ -84,17 +97,17 @@ internal class TrackerSearchPreviewProvider : PreviewParameterProvider<@Composab
         it.trackerId = Random.nextLong()
         it.remoteId = Random.nextLong()
         it.libraryId = Random.nextLong()
-        it.title = lorem((1..10).random()).joinToString()
-        it.lastChapterRead = (0..100).random().toDouble()
-        it.totalChapters = (100L..1000L).random()
-        it.score = (0..10).random().toDouble()
+        it.title = lorem((1..TITLE_WORDS_MAX).random()).joinToString()
+        it.lastChapterRead = (0..CHAPTERS_READ_MAX).random().toDouble()
+        it.totalChapters = (TOTAL_CHAPTERS_MIN..TOTAL_CHAPTERS_MAX).random()
+        it.score = (0..SCORE_MAX).random().toDouble()
         it.status = Random.nextLong()
         it.startedReadingDate = 0L
         it.finishedReadingDate = 0L
         it.trackingUrl = "https://example.com/tracker-example"
         it.coverUrl = "https://example.com/cover.png"
-        it.startDate = formatter.format(Date.from(Instant.now().minus((1L..365).random(), ChronoUnit.DAYS)))
-        it.summary = lorem((0..40).random()).joinToString()
+        it.startDate = formatter.format(Date.from(Instant.now().minus((1L..DAYS_PER_YEAR).random(), ChronoUnit.DAYS)))
+        it.summary = lorem((0..SUMMARY_WORDS_MAX).random()).joinToString()
         it.publishingStatus = if (Random.nextBoolean()) "Finished" else ""
         it.publishingType = if (Random.nextBoolean()) "Oneshot" else ""
         it.artists = randomNames()
@@ -102,7 +115,8 @@ internal class TrackerSearchPreviewProvider : PreviewParameterProvider<@Composab
         it
     }
 
-    private fun randomNames(): List<String> = (0..(0..3).random()).map { lorem((3..5).random()).joinToString() }
+    private fun randomNames(): List<String> =
+        (0..(0..NAMES_MAX).random()).map { lorem((NAME_WORDS_MIN..NAME_WORDS_MAX).random()).joinToString() }
 
     private fun lorem(words: Int): Sequence<String> =
         LoremIpsum(words).values

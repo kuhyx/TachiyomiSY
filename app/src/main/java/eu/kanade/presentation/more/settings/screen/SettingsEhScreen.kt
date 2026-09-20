@@ -53,6 +53,8 @@ import exh.eh.EHentaiUpdaterStats
 import exh.metadata.metadata.EHentaiSearchMetadata
 import exh.metadata.metadata.base.raise
 import exh.source.ExhPreferences
+import exh.uconfig.EhCategory
+import exh.uconfig.EhLanguage
 import exh.ui.login.EhLoginActivity
 import exh.util.nullIfBlank
 import kotlinx.serialization.json.Json
@@ -80,6 +82,16 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+
+// Batch-interval choices in hours, and the calendar units the relative-time formatter counts in.
+private const val THREE_HOURS = 3
+private const val SIX_HOURS = 6
+private const val TWELVE_HOURS = 12
+private const val ONE_DAY_HOURS = 24
+private const val TWO_DAYS_HOURS = 48
+private const val DAYS_PER_YEAR = 365
+private const val DAYS_PER_MONTH = 30
+private const val DAYS_PER_WEEK = 7
 
 internal object SettingsEhScreen : SearchableSettings {
 
@@ -456,23 +468,23 @@ internal object SettingsEhScreen : SearchableSettings {
 
         init {
             val settingsLanguages = preference.split("\n")
-            japanese = settingsLanguages[0].toRowState(true)
-            english = settingsLanguages[1].toRowState()
-            chinese = settingsLanguages[2].toRowState()
-            dutch = settingsLanguages[3].toRowState()
-            french = settingsLanguages[4].toRowState()
-            german = settingsLanguages[5].toRowState()
-            hungarian = settingsLanguages[6].toRowState()
-            italian = settingsLanguages[7].toRowState()
-            korean = settingsLanguages[8].toRowState()
-            polish = settingsLanguages[9].toRowState()
-            portuguese = settingsLanguages[10].toRowState()
-            russian = settingsLanguages[11].toRowState()
-            spanish = settingsLanguages[12].toRowState()
-            thai = settingsLanguages[13].toRowState()
-            vietnamese = settingsLanguages[14].toRowState()
-            notAvailable = settingsLanguages[15].toRowState()
-            other = settingsLanguages[16].toRowState()
+            japanese = settingsLanguages[EhLanguage.JAPANESE.ordinal].toRowState(true)
+            english = settingsLanguages[EhLanguage.ENGLISH.ordinal].toRowState()
+            chinese = settingsLanguages[EhLanguage.CHINESE.ordinal].toRowState()
+            dutch = settingsLanguages[EhLanguage.DUTCH.ordinal].toRowState()
+            french = settingsLanguages[EhLanguage.FRENCH.ordinal].toRowState()
+            german = settingsLanguages[EhLanguage.GERMAN.ordinal].toRowState()
+            hungarian = settingsLanguages[EhLanguage.HUNGARIAN.ordinal].toRowState()
+            italian = settingsLanguages[EhLanguage.ITALIAN.ordinal].toRowState()
+            korean = settingsLanguages[EhLanguage.KOREAN.ordinal].toRowState()
+            polish = settingsLanguages[EhLanguage.POLISH.ordinal].toRowState()
+            portuguese = settingsLanguages[EhLanguage.PORTUGUESE.ordinal].toRowState()
+            russian = settingsLanguages[EhLanguage.RUSSIAN.ordinal].toRowState()
+            spanish = settingsLanguages[EhLanguage.SPANISH.ordinal].toRowState()
+            thai = settingsLanguages[EhLanguage.THAI.ordinal].toRowState()
+            vietnamese = settingsLanguages[EhLanguage.VIETNAMESE.ordinal].toRowState()
+            notAvailable = settingsLanguages[EhLanguage.NOT_AVAILABLE.ordinal].toRowState()
+            other = settingsLanguages[EhLanguage.OTHER.ordinal].toRowState()
         }
 
         fun toPreference() = listOf(
@@ -631,16 +643,16 @@ internal object SettingsEhScreen : SearchableSettings {
         preference: String,
     ) {
         private val enabledCategories = preference.split(",").map { !it.toBoolean() }
-        var doujinshi by mutableStateOf(enabledCategories[0])
-        var manga by mutableStateOf(enabledCategories[1])
-        var artistCg by mutableStateOf(enabledCategories[2])
-        var gameCg by mutableStateOf(enabledCategories[3])
-        var western by mutableStateOf(enabledCategories[4])
-        var nonH by mutableStateOf(enabledCategories[5])
-        var imageSet by mutableStateOf(enabledCategories[6])
-        var cosplay by mutableStateOf(enabledCategories[7])
-        var asianPorn by mutableStateOf(enabledCategories[8])
-        var misc by mutableStateOf(enabledCategories[9])
+        var doujinshi by mutableStateOf(enabledCategories[EhCategory.DOUJINSHI.ordinal])
+        var manga by mutableStateOf(enabledCategories[EhCategory.MANGA.ordinal])
+        var artistCg by mutableStateOf(enabledCategories[EhCategory.ARTIST_CG.ordinal])
+        var gameCg by mutableStateOf(enabledCategories[EhCategory.GAME_CG.ordinal])
+        var western by mutableStateOf(enabledCategories[EhCategory.WESTERN.ordinal])
+        var nonH by mutableStateOf(enabledCategories[EhCategory.NON_H.ordinal])
+        var imageSet by mutableStateOf(enabledCategories[EhCategory.IMAGE_SET.ordinal])
+        var cosplay by mutableStateOf(enabledCategories[EhCategory.COSPLAY.ordinal])
+        var asianPorn by mutableStateOf(enabledCategories[EhCategory.ASIAN_PORN.ordinal])
+        var misc by mutableStateOf(enabledCategories[EhCategory.MISC.ordinal])
 
         fun toPreference() = listOf(
             doujinshi,
@@ -955,11 +967,11 @@ internal object SettingsEhScreen : SearchableSettings {
                 0 to stringResource(SYMR.strings.time_between_batches_never),
                 1 to stringResource(SYMR.strings.time_between_batches_1_hour),
                 2 to stringResource(SYMR.strings.time_between_batches_2_hours),
-                3 to stringResource(SYMR.strings.time_between_batches_3_hours),
-                6 to stringResource(SYMR.strings.time_between_batches_6_hours),
-                12 to stringResource(SYMR.strings.time_between_batches_12_hours),
-                24 to stringResource(SYMR.strings.time_between_batches_24_hours),
-                48 to stringResource(SYMR.strings.time_between_batches_48_hours),
+                THREE_HOURS to stringResource(SYMR.strings.time_between_batches_3_hours),
+                SIX_HOURS to stringResource(SYMR.strings.time_between_batches_6_hours),
+                TWELVE_HOURS to stringResource(SYMR.strings.time_between_batches_12_hours),
+                ONE_DAY_HOURS to stringResource(SYMR.strings.time_between_batches_24_hours),
+                TWO_DAYS_HOURS to stringResource(SYMR.strings.time_between_batches_48_hours),
             ),
             onValueChanged = { interval ->
                 EHentaiUpdateWorker.scheduleBackground(context, prefInterval = interval)
@@ -1054,23 +1066,23 @@ internal object SettingsEhScreen : SearchableSettings {
         val relativeTime = RelativeTime()
         while (period > 0.milliseconds) {
             when {
-                period >= 365.days -> {
-                    (period.inWholeDays / 365).let {
+                period >= DAYS_PER_YEAR.days -> {
+                    (period.inWholeDays / DAYS_PER_YEAR).let {
                         relativeTime.years = it
-                        period -= (it * 365).days
+                        period -= (it * DAYS_PER_YEAR).days
                     }
                     continue
                 }
-                period >= 30.days -> {
-                    (period.inWholeDays / 30).let {
+                period >= DAYS_PER_MONTH.days -> {
+                    (period.inWholeDays / DAYS_PER_MONTH).let {
                         relativeTime.months = it
-                        period -= (it * 30).days
+                        period -= (it * DAYS_PER_MONTH).days
                     }
                 }
-                period >= 7.days -> {
-                    (period.inWholeDays / 7).let {
+                period >= DAYS_PER_WEEK.days -> {
+                    (period.inWholeDays / DAYS_PER_WEEK).let {
                         relativeTime.weeks = it
-                        period -= (it * 7).days
+                        period -= (it * DAYS_PER_WEEK).days
                     }
                 }
                 period >= 1.days -> {

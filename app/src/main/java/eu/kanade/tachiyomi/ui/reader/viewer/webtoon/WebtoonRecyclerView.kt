@@ -145,7 +145,7 @@ internal class WebtoonRecyclerView @JvmOverloads constructor(
     fun zoomFling(velocityX: Int, velocityY: Int): Boolean {
         if (currentScale <= 1f) return false
 
-        val distanceTimeFactor = 0.4f
+        val distanceTimeFactor = FLING_DISTANCE_TIME_FACTOR
         val animatorSet = AnimatorSet()
 
         if (velocityX != 0) {
@@ -163,7 +163,7 @@ internal class WebtoonRecyclerView @JvmOverloads constructor(
             animatorSet.play(translationYAnimator)
         }
 
-        animatorSet.duration = 400
+        animatorSet.duration = FLING_ANIMATION_MS
         animatorSet.interpolator = DecelerateInterpolator()
         animatorSet.start()
 
@@ -281,13 +281,13 @@ internal class WebtoonRecyclerView @JvmOverloads constructor(
             when (action) {
                 MotionEvent.ACTION_DOWN -> {
                     scrollPointerId = ev.getPointerId(0)
-                    downX = (ev.x + 0.5f).toInt()
-                    downY = (ev.y + 0.5f).toInt()
+                    downX = ev.x.roundToPixel()
+                    downY = ev.y.roundToPixel()
                 }
                 MotionEvent.ACTION_POINTER_DOWN -> {
                     scrollPointerId = ev.getPointerId(actionIndex)
-                    downX = (ev.getX(actionIndex) + 0.5f).toInt()
-                    downY = (ev.getY(actionIndex) + 0.5f).toInt()
+                    downX = ev.getX(actionIndex).roundToPixel()
+                    downY = ev.getY(actionIndex).roundToPixel()
                 }
                 MotionEvent.ACTION_MOVE -> {
                     if (isDoubleTapping && isQuickScaling) {
@@ -299,8 +299,8 @@ internal class WebtoonRecyclerView @JvmOverloads constructor(
                         return false
                     }
 
-                    val x = (ev.getX(index) + 0.5f).toInt()
-                    val y = (ev.getY(index) + 0.5f).toInt()
+                    val x = ev.getX(index).roundToPixel()
+                    val y = ev.getY(index).roundToPixel()
                     var dx = x - downX
                     var dy = if (atFirstPosition || atLastPosition) y - downY else 0
 
@@ -353,6 +353,11 @@ internal class WebtoonRecyclerView @JvmOverloads constructor(
 }
 
 private const val ANIMATOR_DURATION_TIME = 200
+private const val FLING_ANIMATION_MS = 400L
+private const val FLING_DISTANCE_TIME_FACTOR = 0.4f
+
+// Rounds a touch coordinate to the nearest pixel.
+private fun Float.roundToPixel(): Int = (this + 0.5f).toInt()
 private const val MIN_RATE = 0.5f
 private const val DEFAULT_RATE = 1f
 private const val MAX_SCALE_RATE = 3f

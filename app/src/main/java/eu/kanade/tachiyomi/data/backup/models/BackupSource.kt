@@ -3,8 +3,11 @@ package eu.kanade.tachiyomi.data.backup.models
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
+private const val BACKUP_SOURCE_NAME = 1
+private const val BACKUP_SOURCE_SOURCE_ID = 2
+
 @Serializable
 internal data class BackupSource(
-    @ProtoNumber(1) var name: String = "",
-    @ProtoNumber(2) var sourceId: Long,
+    @ProtoNumber(BACKUP_SOURCE_NAME) var name: String = "",
+    @ProtoNumber(BACKUP_SOURCE_SOURCE_ID) var sourceId: Long,
 )
