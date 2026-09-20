@@ -62,18 +62,17 @@ internal fun ExtensionStoresScreen(
                 MR.strings.extensionStoresScreen_emptyLabel,
                 modifier = Modifier.padding(paddingValues),
             )
-            return@Scaffold
+        } else {
+            ExtensionStoresContent(
+                repos = state.stores,
+                lazyListState = lazyListState,
+                paddingValues = paddingValues + topSmallPaddingValues +
+                    PaddingValues(horizontal = MaterialTheme.padding.medium),
+                onCopy = onCopy,
+                onOpenWebsite = onOpenWebsite,
+                onOpenDiscord = onOpenDiscord,
+                onClickDelete = onClickDelete,
+            )
         }
-
-        ExtensionStoresContent(
-            repos = state.stores,
-            lazyListState = lazyListState,
-            paddingValues = paddingValues + topSmallPaddingValues +
-                PaddingValues(horizontal = MaterialTheme.padding.medium),
-            onCopy = onCopy,
-            onOpenWebsite = onOpenWebsite,
-            onOpenDiscord = onOpenDiscord,
-            onClickDelete = onClickDelete,
-        )
     }
 }

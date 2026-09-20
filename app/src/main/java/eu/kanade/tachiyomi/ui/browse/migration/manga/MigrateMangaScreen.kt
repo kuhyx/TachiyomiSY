@@ -100,16 +100,15 @@ internal data class MigrateMangaScreen(
                     stringRes = MR.strings.empty_screen,
                     modifier = Modifier.padding(contentPadding),
                 )
-                return@Scaffold
+            } else {
+                MigrateMangaContent(
+                    lazyListState = lazyListState,
+                    contentPadding = contentPadding,
+                    state = state,
+                    onClickItem = screenModel::toggleSelection,
+                    onClickCover = { navigator.push(MangaScreen(it.id)) },
+                )
             }
-
-            MigrateMangaContent(
-                lazyListState = lazyListState,
-                contentPadding = contentPadding,
-                state = state,
-                onClickItem = screenModel::toggleSelection,
-                onClickCover = { navigator.push(MangaScreen(it.id)) },
-            )
         }
 
         LaunchedEffect(Unit) {

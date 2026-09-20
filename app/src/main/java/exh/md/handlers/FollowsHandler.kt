@@ -35,14 +35,14 @@ internal class FollowsHandler(
             val follows = service.userFollowList(MdUtil.mangaLimit * page)
 
             if (follows.data.isEmpty()) {
-                return@withIOContext MetadataMangasPage(emptyList(), false, emptyList())
+                MetadataMangasPage(emptyList(), false, emptyList())
+            } else {
+                val hasMoreResults = follows.limit + follows.offset under follows.total
+                val statusListResponse = service.readingStatusAllManga()
+                val results = followsParseMangaPage(follows.data, statusListResponse.statuses)
+
+                MetadataMangasPage(results.map { it.first }, hasMoreResults, results.map { it.second })
             }
-
-            val hasMoreResults = follows.limit + follows.offset under follows.total
-            val statusListResponse = service.readingStatusAllManga()
-            val results = followsParseMangaPage(follows.data, statusListResponse.statuses)
-
-            MetadataMangasPage(results.map { it.first }, hasMoreResults, results.map { it.second })
         }
     }
 

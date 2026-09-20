@@ -236,51 +236,50 @@ internal object DownloadQueueScreen : Screen() {
                     stringRes = MR.strings.information_no_downloads,
                     modifier = Modifier.padding(contentPadding),
                 )
-                return@Scaffold
-            }
+            } else {
+                val density = LocalDensity.current
+                val layoutDirection = LocalLayoutDirection.current
+                val left = with(density) { contentPadding.calculateLeftPadding(layoutDirection).toPx().roundToInt() }
+                val top = with(density) { contentPadding.calculateTopPadding().toPx().roundToInt() }
+                val right = with(density) { contentPadding.calculateRightPadding(layoutDirection).toPx().roundToInt() }
+                val bottom = with(density) { contentPadding.calculateBottomPadding().toPx().roundToInt() }
 
-            val density = LocalDensity.current
-            val layoutDirection = LocalLayoutDirection.current
-            val left = with(density) { contentPadding.calculateLeftPadding(layoutDirection).toPx().roundToInt() }
-            val top = with(density) { contentPadding.calculateTopPadding().toPx().roundToInt() }
-            val right = with(density) { contentPadding.calculateRightPadding(layoutDirection).toPx().roundToInt() }
-            val bottom = with(density) { contentPadding.calculateBottomPadding().toPx().roundToInt() }
+                Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
+                    AndroidView(
+                        modifier = Modifier.fillMaxWidth(),
+                        factory = { context ->
+                            val binding = DownloadListBinding.inflate(LayoutInflater.from(context))
+                            screenModel.controllerBinding = binding
+                            screenModel.adapter = DownloadAdapter(screenModel.listener)
+                            binding.root.adapter = screenModel.adapter
+                            screenModel.adapter?.isHandleDragEnabled = true
+                            binding.root.layoutManager = LinearLayoutManager(context)
 
-            Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
-                AndroidView(
-                    modifier = Modifier.fillMaxWidth(),
-                    factory = { context ->
-                        val binding = DownloadListBinding.inflate(LayoutInflater.from(context))
-                        screenModel.controllerBinding = binding
-                        screenModel.adapter = DownloadAdapter(screenModel.listener)
-                        binding.root.adapter = screenModel.adapter
-                        screenModel.adapter?.isHandleDragEnabled = true
-                        binding.root.layoutManager = LinearLayoutManager(context)
+                            ViewCompat.setNestedScrollingEnabled(binding.root, true)
 
-                        ViewCompat.setNestedScrollingEnabled(binding.root, true)
+                            scope.launchUI {
+                                screenModel.getDownloadStatusFlow()
+                                    .collect(screenModel::onStatusChange)
+                            }
+                            scope.launchUI {
+                                screenModel.getDownloadProgressFlow()
+                                    .collect(screenModel::onUpdateDownloadedPages)
+                            }
 
-                        scope.launchUI {
-                            screenModel.getDownloadStatusFlow()
-                                .collect(screenModel::onStatusChange)
-                        }
-                        scope.launchUI {
-                            screenModel.getDownloadProgressFlow()
-                                .collect(screenModel::onUpdateDownloadedPages)
-                        }
+                            binding.root
+                        },
+                        update = { view ->
+                            view.updatePadding(
+                                left = left,
+                                top = top,
+                                right = right,
+                                bottom = bottom,
+                            )
 
-                        binding.root
-                    },
-                    update = { view ->
-                        view.updatePadding(
-                            left = left,
-                            top = top,
-                            right = right,
-                            bottom = bottom,
-                        )
-
-                        screenModel.adapter?.updateDataSet(downloadList)
-                    },
-                )
+                            screenModel.adapter?.updateDataSet(downloadList)
+                        },
+                    )
+                }
             }
         }
     }

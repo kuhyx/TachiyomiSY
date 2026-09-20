@@ -59,17 +59,16 @@ internal fun CategoryScreen(
                 stringRes = MR.strings.information_empty_category,
                 modifier = Modifier.padding(paddingValues),
             )
-            return@Scaffold
+        } else {
+            CategoryContent(
+                categories = state.categories,
+                lazyListState = lazyListState,
+                paddingValues = paddingValues,
+                onClickRename = onClickRename,
+                onClickDelete = onClickDelete,
+                onChangeOrder = onChangeOrder,
+            )
         }
-
-        CategoryContent(
-            categories = state.categories,
-            lazyListState = lazyListState,
-            paddingValues = paddingValues,
-            onClickRename = onClickRename,
-            onClickDelete = onClickDelete,
-            onChangeOrder = onChangeOrder,
-        )
     }
 }
 

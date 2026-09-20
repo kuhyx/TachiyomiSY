@@ -516,18 +516,20 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                                     progressCount,
                                     manga,
                                 ) {
-                                    val source = sourceManager.get(manga.source) ?: return@withUpdateNotification
-                                    try {
-                                        updateMangaFromRemote(
-                                            source,
-                                            manga,
-                                            fetchDetails = true,
-                                            fetchChapters = false,
-                                            manualFetch = true,
-                                        ).getOrThrow()
-                                    } catch (expected: Throwable) {
-                                        // Ignore errors and continue
-                                        logcat(LogPriority.ERROR, expected)
+                                    val source = sourceManager.get(manga.source)
+                                    if (source != null) {
+                                        try {
+                                            updateMangaFromRemote(
+                                                source,
+                                                manga,
+                                                fetchDetails = true,
+                                                fetchChapters = false,
+                                                manualFetch = true,
+                                            ).getOrThrow()
+                                        } catch (expected: Throwable) {
+                                            // Ignore errors and continue
+                                            logcat(LogPriority.ERROR, expected)
+                                        }
                                     }
                                 }
                             }

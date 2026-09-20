@@ -42,49 +42,49 @@ internal class PagePreviewScreenModel(
                 mutableState.update {
                     PagePreviewState.Error(Exception("No chapters found"))
                 }
-                return@launchIO
-            }
-            val source = sourceManager.getOrStub(manga.source)
-            page
-                .onEach { page ->
-                    when (
-                        val previews = getPagePreviews.await(manga, source, page)
-                    ) {
-                        is GetPagePreviews.Result.Error -> mutableState.update {
-                            PagePreviewState.Error(previews.error)
-                        }
-                        is GetPagePreviews.Result.Success -> mutableState.update {
-                            when (it) {
-                                PagePreviewState.Loading, is PagePreviewState.Error -> {
-                                    PagePreviewState.Success(
-                                        page,
-                                        previews.pagePreviews,
-                                        previews.hasNextPage,
-                                        previews.pageCount,
-                                        manga,
-                                        chapter,
-                                        source,
-                                    )
-                                }
-                                is PagePreviewState.Success -> {
-                                    it.copy(
-                                        page = page,
-                                        pagePreviews = previews.pagePreviews,
-                                        hasNextPage = previews.hasNextPage,
-                                        pageCount = previews.pageCount,
-                                    )
+            } else {
+                val source = sourceManager.getOrStub(manga.source)
+                page
+                    .onEach { page ->
+                        when (
+                            val previews = getPagePreviews.await(manga, source, page)
+                        ) {
+                            is GetPagePreviews.Result.Error -> mutableState.update {
+                                PagePreviewState.Error(previews.error)
+                            }
+                            is GetPagePreviews.Result.Success -> mutableState.update {
+                                when (it) {
+                                    PagePreviewState.Loading, is PagePreviewState.Error -> {
+                                        PagePreviewState.Success(
+                                            page,
+                                            previews.pagePreviews,
+                                            previews.hasNextPage,
+                                            previews.pageCount,
+                                            manga,
+                                            chapter,
+                                            source,
+                                        )
+                                    }
+                                    is PagePreviewState.Success -> {
+                                        it.copy(
+                                            page = page,
+                                            pagePreviews = previews.pagePreviews,
+                                            hasNextPage = previews.hasNextPage,
+                                            pageCount = previews.pageCount,
+                                        )
+                                    }
                                 }
                             }
+                            GetPagePreviews.Result.Unused -> Unit
                         }
-                        GetPagePreviews.Result.Unused -> Unit
                     }
-                }
-                .catch { e ->
-                    mutableState.update {
-                        PagePreviewState.Error(e)
+                    .catch { e ->
+                        mutableState.update {
+                            PagePreviewState.Error(e)
+                        }
                     }
-                }
-                .collect()
+                    .collect()
+            }
         }
     }
 

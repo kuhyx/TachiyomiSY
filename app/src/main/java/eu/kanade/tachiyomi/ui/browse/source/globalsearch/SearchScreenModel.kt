@@ -145,27 +145,25 @@ internal abstract class SearchScreenModel(
         searchJob = ioCoroutineScope.launch {
             sources.map { source ->
                 async {
-                    if (state.value.items[source] !is SearchItemResult.Loading) {
-                        return@async
-                    }
+                    if (!(state.value.items[source] !is SearchItemResult.Loading)) {
+                        try {
+                            val page = withContext(coroutineDispatcher) {
+                                source.getSearchManga(1, query, source.getFilterList())
+                            }
 
-                    try {
-                        val page = withContext(coroutineDispatcher) {
-                            source.getSearchManga(1, query, source.getFilterList())
-                        }
+                            val titles = page.mangas
+                                .map { it.toDomainManga(source.id) }
+                                .distinctBy { it.url }
+                                .let { networkToLocalManga(it) }
 
-                        val titles = page.mangas
-                            .map { it.toDomainManga(source.id) }
-                            .distinctBy { it.url }
-                            .let { networkToLocalManga(it) }
-
-                        if (isActive) {
-                            updateItem(source, SearchItemResult.Success(titles))
-                        }
-                    } catch (expected: Exception) {
-                        // Any failure ends here and the fallback below applies.
-                        if (isActive) {
-                            updateItem(source, SearchItemResult.Error(expected))
+                            if (isActive) {
+                                updateItem(source, SearchItemResult.Success(titles))
+                            }
+                        } catch (expected: Exception) {
+                            // Any failure ends here and the fallback below applies.
+                            if (isActive) {
+                                updateItem(source, SearchItemResult.Error(expected))
+                            }
                         }
                     }
                 }

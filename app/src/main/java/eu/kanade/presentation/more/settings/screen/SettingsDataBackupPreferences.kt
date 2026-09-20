@@ -92,10 +92,9 @@ internal fun getBackupAndRestoreGroup(backupPreferences: BackupPreferences): Pre
     ) {
         if (it == null) {
             context.toast(MR.strings.file_null_uri_error)
-            return@rememberLauncherForActivityResult
+        } else {
+            navigator.push(RestoreBackupScreen(it.toString()))
         }
-
-        navigator.push(RestoreBackupScreen(it.toString()))
     }
 
     return Preference.PreferenceGroup(

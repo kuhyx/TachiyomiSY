@@ -119,15 +119,15 @@ internal suspend fun MangaRestorer.restoreTracking(manga: Manga, backupTracks: L
 
             if (track.forComparison() == dbTrack.forComparison()) {
                 // Same state; skip
-                return@mapNotNull null
+                null
+            } else {
+                // Update to an existing track
+                dbTrack.copy(
+                    remoteId = track.remoteId,
+                    libraryId = track.libraryId,
+                    lastChapterRead = max(dbTrack.lastChapterRead, track.lastChapterRead),
+                )
             }
-
-            // Update to an existing track
-            dbTrack.copy(
-                remoteId = track.remoteId,
-                libraryId = track.libraryId,
-                lastChapterRead = max(dbTrack.lastChapterRead, track.lastChapterRead),
-            )
         }
         .partition { it.id > 0 }
 

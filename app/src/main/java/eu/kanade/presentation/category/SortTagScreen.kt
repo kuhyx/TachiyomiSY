@@ -48,17 +48,16 @@ internal fun SortTagScreen(
                 SYMR.strings.information_empty_tags,
                 modifier = Modifier.padding(paddingValues),
             )
-            return@Scaffold
+        } else {
+            SortTagContent(
+                tags = state.tags,
+                lazyListState = lazyListState,
+                paddingValues = paddingValues + topSmallPaddingValues +
+                    PaddingValues(horizontal = MaterialTheme.padding.medium),
+                onClickDelete = onClickDelete,
+                onMoveUp = onClickMoveUp,
+                onMoveDown = onClickMoveDown,
+            )
         }
-
-        SortTagContent(
-            tags = state.tags,
-            lazyListState = lazyListState,
-            paddingValues = paddingValues + topSmallPaddingValues +
-                PaddingValues(horizontal = MaterialTheme.padding.medium),
-            onClickDelete = onClickDelete,
-            onMoveUp = onClickMoveUp,
-            onMoveDown = onClickMoveDown,
-        )
     }
 }

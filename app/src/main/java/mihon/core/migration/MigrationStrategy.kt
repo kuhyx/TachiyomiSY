@@ -17,16 +17,16 @@ internal class DefaultMigrationStrategy(
 
     override operator fun invoke(migrations: List<Migration>): Deferred<Boolean> = with(scope) {
         if (migrations.isEmpty()) {
-            return@with CompletableDeferred(false)
+            CompletableDeferred(false)
+        } else {
+            val chain = migrationJobFactory.create(migrations)
+
+            launch {
+                if (chain.await()) migrationCompletedListener()
+            }.start()
+
+            chain
         }
-
-        val chain = migrationJobFactory.create(migrations)
-
-        launch {
-            if (chain.await()) migrationCompletedListener()
-        }.start()
-
-        chain
     }
 }
 

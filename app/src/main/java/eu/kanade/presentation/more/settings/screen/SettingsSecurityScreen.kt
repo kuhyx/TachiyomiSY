@@ -332,9 +332,10 @@ internal object SettingsSecurityScreen : SearchableSettings {
                     onKeyboardAction = { onReturnPassword(password.text.toString()) },
                     modifier = Modifier.onKeyEvent {
                         if (it.key == Key.Enter) {
-                            return@onKeyEvent true
+                            true
+                        } else {
+                            false
                         }
-                        false
                     },
                     textObfuscationMode = if (passwordVisibility) {
                         TextObfuscationMode.Visible

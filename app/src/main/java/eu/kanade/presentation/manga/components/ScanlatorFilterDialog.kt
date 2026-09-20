@@ -49,53 +49,53 @@ internal fun ScanlatorFilterDialog(
         text = textFunc@{
             if (sortedAvailableScanlators.isEmpty()) {
                 Text(text = stringResource(MR.strings.no_scanlators_found))
-                return@textFunc
-            }
-            Box {
-                val state = rememberLazyListState()
-                LazyColumn(state = state) {
-                    sortedAvailableScanlators.forEach { scanlator ->
-                        item {
-                            val isExcluded = mutableExcludedScanlators.contains(scanlator)
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .clickable {
-                                        if (isExcluded) {
-                                            mutableExcludedScanlators.remove(scanlator)
-                                        } else {
-                                            mutableExcludedScanlators.add(scanlator)
+            } else {
+                Box {
+                    val state = rememberLazyListState()
+                    LazyColumn(state = state) {
+                        sortedAvailableScanlators.forEach { scanlator ->
+                            item {
+                                val isExcluded = mutableExcludedScanlators.contains(scanlator)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .clickable {
+                                            if (isExcluded) {
+                                                mutableExcludedScanlators.remove(scanlator)
+                                            } else {
+                                                mutableExcludedScanlators.add(scanlator)
+                                            }
                                         }
-                                    }
-                                    .minimumInteractiveComponentSize()
-                                    .clip(MaterialTheme.shapes.small)
-                                    .fillMaxWidth()
-                                    .padding(horizontal = MaterialTheme.padding.small),
-                            ) {
-                                Icon(
-                                    imageVector = if (isExcluded) {
-                                        Icons.Rounded.DisabledByDefault
-                                    } else {
-                                        Icons.Rounded.CheckBoxOutlineBlank
-                                    },
-                                    tint = if (isExcluded) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        LocalContentColor.current
-                                    },
-                                    contentDescription = null,
-                                )
-                                Text(
-                                    text = scanlator,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(start = 24.dp),
-                                )
+                                        .minimumInteractiveComponentSize()
+                                        .clip(MaterialTheme.shapes.small)
+                                        .fillMaxWidth()
+                                        .padding(horizontal = MaterialTheme.padding.small),
+                                ) {
+                                    Icon(
+                                        imageVector = if (isExcluded) {
+                                            Icons.Rounded.DisabledByDefault
+                                        } else {
+                                            Icons.Rounded.CheckBoxOutlineBlank
+                                        },
+                                        tint = if (isExcluded) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            LocalContentColor.current
+                                        },
+                                        contentDescription = null,
+                                    )
+                                    Text(
+                                        text = scanlator,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(start = 24.dp),
+                                    )
+                                }
                             }
                         }
                     }
+                    if (state.canScrollBackward) HorizontalDivider(modifier = Modifier.align(Alignment.TopCenter))
+                    if (state.canScrollForward) HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
                 }
-                if (state.canScrollBackward) HorizontalDivider(modifier = Modifier.align(Alignment.TopCenter))
-                if (state.canScrollForward) HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
             }
         },
         properties = DialogProperties(

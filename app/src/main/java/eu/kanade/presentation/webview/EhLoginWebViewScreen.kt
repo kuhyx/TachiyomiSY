@@ -102,106 +102,104 @@ internal fun EhLoginWebViewScreen(
         },
     ) { contentPadding ->
 
-        if (loading) {
-            return@Scaffold
-        }
-
-        val webClient = remember {
-            object : AccompanistWebViewClient() {
-                override fun onPageFinished(view: WebView, url: String?) {
-                    super.onPageFinished(view, url)
-                    onPageFinished(view, url ?: return)
-                }
-            }
-        }
-        var showAdvancedOptions by rememberSaveable {
-            mutableStateOf(false)
-        }
-
-        Box(Modifier.padding(contentPadding)) {
-            Box {
-                WebView(
-                    state = state,
-                    navigator = navigator,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 48.dp),
-                    onCreated = { webView ->
-                        webView.setDefaultSettings()
-
-                        // Debug mode (chrome://inspect/#devices)
-                        if (BuildConfig.DEBUG &&
-                            0 != webView.context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
-                        ) {
-                            WebView.setWebContentsDebuggingEnabled(true)
-                        }
-                    },
-                    client = webClient,
-                )
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .align(Alignment.BottomCenter),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Button(onClick = onUp, Modifier.weight(HALF)) {
-                        Text(text = stringResource(MR.strings.action_cancel))
-                    }
-                    Button(onClick = { showAdvancedOptions = true }, Modifier.weight(HALF)) {
-                        Text(text = stringResource(MR.strings.pref_category_advanced))
+        if (!loading) {
+            val webClient = remember {
+                object : AccompanistWebViewClient() {
+                    override fun onPageFinished(view: WebView, url: String?) {
+                        super.onPageFinished(view, url)
+                        onPageFinished(view, url ?: return)
                     }
                 }
             }
-            if (showAdvancedOptions) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(Color(color = 0xb5000000)),
-                ) {
-                    Dialog(onDismissRequest = { showAdvancedOptions = false }) {
-                        fun loadUrl(url: String) {
-                            state.content = WebContent.Url(url)
+            var showAdvancedOptions by rememberSaveable {
+                mutableStateOf(false)
+            }
+
+            Box(Modifier.padding(contentPadding)) {
+                Box {
+                    WebView(
+                        state = state,
+                        navigator = navigator,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 48.dp),
+                        onCreated = { webView ->
+                            webView.setDefaultSettings()
+
+                            // Debug mode (chrome://inspect/#devices)
+                            if (BuildConfig.DEBUG &&
+                                0 != webView.context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
+                            ) {
+                                WebView.setWebContentsDebuggingEnabled(true)
+                            }
+                        },
+                        client = webClient,
+                    )
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .align(Alignment.BottomCenter),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Button(onClick = onUp, Modifier.weight(HALF)) {
+                            Text(text = stringResource(MR.strings.action_cancel))
                         }
-                        Column(Modifier.fillMaxWidth(ADVANCED_OPTIONS_WIDTH)) {
-                            Button(
-                                onClick = {
-                                    onClickRecheckLoginStatus(::loadUrl)
-                                    showAdvancedOptions = false
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(text = stringResource(SYMR.strings.recheck_login_status))
+                        Button(onClick = { showAdvancedOptions = true }, Modifier.weight(HALF)) {
+                            Text(text = stringResource(MR.strings.pref_category_advanced))
+                        }
+                    }
+                }
+                if (showAdvancedOptions) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .background(Color(color = 0xb5000000)),
+                    ) {
+                        Dialog(onDismissRequest = { showAdvancedOptions = false }) {
+                            fun loadUrl(url: String) {
+                                state.content = WebContent.Url(url)
                             }
-                            Button(
-                                onClick = {
-                                    onClickAlternateLoginPage(::loadUrl)
-                                    showAdvancedOptions = false
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(text = stringResource(SYMR.strings.alternative_login_page))
-                            }
-                            Button(
-                                onClick = {
-                                    onClickSkipPageRestyling(::loadUrl)
-                                    showAdvancedOptions = false
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(text = stringResource(SYMR.strings.skip_page_restyling))
-                            }
-                            Button(
-                                onClick = {
-                                    onClickCustomIgneousCookie()
-                                    showAdvancedOptions = false
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(text = stringResource(SYMR.strings.custom_igneous_cookie))
-                            }
-                            Button(onClick = { showAdvancedOptions = false }, Modifier.fillMaxWidth()) {
-                                Text(text = stringResource(MR.strings.action_cancel))
+                            Column(Modifier.fillMaxWidth(ADVANCED_OPTIONS_WIDTH)) {
+                                Button(
+                                    onClick = {
+                                        onClickRecheckLoginStatus(::loadUrl)
+                                        showAdvancedOptions = false
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Text(text = stringResource(SYMR.strings.recheck_login_status))
+                                }
+                                Button(
+                                    onClick = {
+                                        onClickAlternateLoginPage(::loadUrl)
+                                        showAdvancedOptions = false
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Text(text = stringResource(SYMR.strings.alternative_login_page))
+                                }
+                                Button(
+                                    onClick = {
+                                        onClickSkipPageRestyling(::loadUrl)
+                                        showAdvancedOptions = false
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Text(text = stringResource(SYMR.strings.skip_page_restyling))
+                                }
+                                Button(
+                                    onClick = {
+                                        onClickCustomIgneousCookie()
+                                        showAdvancedOptions = false
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Text(text = stringResource(SYMR.strings.custom_igneous_cookie))
+                                }
+                                Button(onClick = { showAdvancedOptions = false }, Modifier.fillMaxWidth()) {
+                                    Text(text = stringResource(MR.strings.action_cancel))
+                                }
                             }
                         }
                     }

@@ -52,10 +52,9 @@ internal class BiometricTimesScreenModel(
             // Do not allow duplicate categories.
             if (timeRangeConflicts(timeRange)) {
                 _events.send(BiometricTimesEvent.TimeConflicts)
-                return@launchIO
+            } else {
+                preferences.authenticatorTimeRanges += timeRange.toPreferenceString()
             }
-
-            preferences.authenticatorTimeRanges += timeRange.toPreferenceString()
         }
     }
 

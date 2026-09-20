@@ -137,19 +137,18 @@ internal fun ExtensionDetailsScreen(
                 MR.strings.empty_screen,
                 modifier = Modifier.padding(paddingValues),
             )
-            return@Scaffold
+        } else {
+            ExtensionDetails(
+                contentPadding = paddingValues,
+                extension = state.extension,
+                sources = state.sources,
+                incognitoMode = state.isIncognito,
+                onClickSourcePreferences = onClickSourcePreferences,
+                onClickUninstall = onClickUninstall,
+                onClickSource = onClickSource,
+                onClickIncognito = onClickIncognito,
+            )
         }
-
-        ExtensionDetails(
-            contentPadding = paddingValues,
-            extension = state.extension,
-            sources = state.sources,
-            incognitoMode = state.isIncognito,
-            onClickSourcePreferences = onClickSourcePreferences,
-            onClickUninstall = onClickUninstall,
-            onClickSource = onClickSource,
-            onClickIncognito = onClickIncognito,
-        )
     }
 }
 

@@ -98,95 +98,95 @@ internal fun MangaToolbar(
                                 onClick = onInvertSelection,
                             ),
                         )
-                        return@buildList
-                    }
-                    if (onClickDownload != null) {
+                    } else {
+                        if (onClickDownload != null) {
+                            add(
+                                AppBar.Action(
+                                    title = stringResource(MR.strings.manga_download),
+                                    icon = Icons.Outlined.Download,
+                                    onClick = { downloadExpanded = !downloadExpanded },
+                                ),
+                            )
+                        }
                         add(
                             AppBar.Action(
-                                title = stringResource(MR.strings.manga_download),
-                                icon = Icons.Outlined.Download,
-                                onClick = { downloadExpanded = !downloadExpanded },
+                                title = stringResource(MR.strings.action_filter),
+                                icon = Icons.Outlined.FilterList,
+                                iconTint = filterTint,
+                                onClick = onClickFilter,
                             ),
                         )
-                    }
-                    add(
-                        AppBar.Action(
-                            title = stringResource(MR.strings.action_filter),
-                            icon = Icons.Outlined.FilterList,
-                            iconTint = filterTint,
-                            onClick = onClickFilter,
-                        ),
-                    )
-                    add(
-                        AppBar.OverflowAction(
-                            title = stringResource(MR.strings.action_webview_refresh),
-                            onClick = onClickRefresh,
-                        ),
-                    )
-                    if (onClickEditCategory != null) {
                         add(
                             AppBar.OverflowAction(
-                                title = stringResource(MR.strings.action_edit_categories),
-                                onClick = onClickEditCategory,
+                                title = stringResource(MR.strings.action_webview_refresh),
+                                onClick = onClickRefresh,
                             ),
                         )
-                    }
-                    if (onClickMigrate != null) {
+                        if (onClickEditCategory != null) {
+                            add(
+                                AppBar.OverflowAction(
+                                    title = stringResource(MR.strings.action_edit_categories),
+                                    onClick = onClickEditCategory,
+                                ),
+                            )
+                        }
+                        if (onClickMigrate != null) {
+                            add(
+                                AppBar.OverflowAction(
+                                    title = stringResource(MR.strings.action_migrate),
+                                    onClick = onClickMigrate,
+                                ),
+                            )
+                        }
+                        if (onClickShare != null) {
+                            add(
+                                AppBar.OverflowAction(
+                                    title = stringResource(MR.strings.action_share),
+                                    onClick = onClickShare,
+                                ),
+                            )
+                        }
                         add(
                             AppBar.OverflowAction(
-                                title = stringResource(MR.strings.action_migrate),
-                                onClick = onClickMigrate,
+                                title = stringResource(MR.strings.action_notes),
+                                onClick = onClickEditNotes,
                             ),
                         )
+                        // SY -->
+                        if (onClickMerge != null) {
+                            add(
+                                AppBar.OverflowAction(
+                                    title = stringResource(SYMR.strings.merge),
+                                    onClick = onClickMerge,
+                                ),
+                            )
+                        }
+                        if (onClickEditInfo != null) {
+                            add(
+                                AppBar.OverflowAction(
+                                    title = stringResource(SYMR.strings.action_edit_info),
+                                    onClick = onClickEditInfo,
+                                ),
+                            )
+                        }
+                        if (onClickRecommend != null) {
+                            add(
+                                AppBar.OverflowAction(
+                                    title = stringResource(SYMR.strings.az_recommends),
+                                    onClick = onClickRecommend,
+                                ),
+                            )
+                        }
+                        if (onClickMergedSettings != null) {
+                            add(
+                                AppBar.OverflowAction(
+                                    title = stringResource(SYMR.strings.merge_settings),
+                                    onClick = onClickMergedSettings,
+                                ),
+                            )
+                        }
+                        // SY <--
                     }
-                    if (onClickShare != null) {
-                        add(
-                            AppBar.OverflowAction(
-                                title = stringResource(MR.strings.action_share),
-                                onClick = onClickShare,
-                            ),
-                        )
-                    }
-                    add(
-                        AppBar.OverflowAction(
-                            title = stringResource(MR.strings.action_notes),
-                            onClick = onClickEditNotes,
-                        ),
-                    )
-                    // SY -->
-                    if (onClickMerge != null) {
-                        add(
-                            AppBar.OverflowAction(
-                                title = stringResource(SYMR.strings.merge),
-                                onClick = onClickMerge,
-                            ),
-                        )
-                    }
-                    if (onClickEditInfo != null) {
-                        add(
-                            AppBar.OverflowAction(
-                                title = stringResource(SYMR.strings.action_edit_info),
-                                onClick = onClickEditInfo,
-                            ),
-                        )
-                    }
-                    if (onClickRecommend != null) {
-                        add(
-                            AppBar.OverflowAction(
-                                title = stringResource(SYMR.strings.az_recommends),
-                                onClick = onClickRecommend,
-                            ),
-                        )
-                    }
-                    if (onClickMergedSettings != null) {
-                        add(
-                            AppBar.OverflowAction(
-                                title = stringResource(SYMR.strings.merge_settings),
-                                onClick = onClickMergedSettings,
-                            ),
-                        )
-                    }
-                    // SY <--
                 },
             )
         },

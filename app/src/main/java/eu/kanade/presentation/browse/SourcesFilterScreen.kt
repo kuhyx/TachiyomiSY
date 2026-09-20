@@ -46,17 +46,17 @@ internal fun SourcesFilterScreen(
                 stringRes = MR.strings.source_filter_empty_screen,
                 modifier = Modifier.padding(contentPadding),
             )
-            return@Scaffold
+        } else {
+            SourcesFilterContent(
+                contentPadding = contentPadding,
+                state = state,
+                onClickLanguage = onClickLanguage,
+                onClickSource = onClickSource,
+                // SY -->
+                onClickSources = onClickSources,
+                // SY <--
+            )
         }
-        SourcesFilterContent(
-            contentPadding = contentPadding,
-            state = state,
-            onClickLanguage = onClickLanguage,
-            onClickSource = onClickSource,
-            // SY -->
-            onClickSources = onClickSources,
-            // SY <--
-        )
     }
 }
 

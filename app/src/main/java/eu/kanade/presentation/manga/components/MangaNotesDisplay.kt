@@ -37,11 +37,10 @@ internal fun MangaNotesDisplay(
 
         if (!contentUpdatedOnce) {
             contentUpdatedOnce = true
-            return@LaunchedEffect
+        } else {
+            alpha.snapTo(targetValue = 0f)
+            alpha.animateTo(targetValue = 1f, animationSpec = FADE_TIME)
         }
-
-        alpha.snapTo(targetValue = 0f)
-        alpha.animateTo(targetValue = 1f, animationSpec = FADE_TIME)
     }
     LaunchedEffect(Unit) {
         richTextState.config.unorderedListIndent = UNORDERED_LIST_INDENT

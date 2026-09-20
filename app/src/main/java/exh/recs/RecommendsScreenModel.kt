@@ -67,34 +67,32 @@ internal open class RecommendsScreenModel(
 
             recommendationSources.map { recSource ->
                 async {
-                    if (state.value.items[recSource] !is RecommendationItemResult.Loading) {
-                        return@async
-                    }
-
-                    try {
-                        val page = withContext(coroutineDispatcher) {
-                            recSource.requestNextPage(1)
-                        }
-
-                        val titles = page.mangas.map {
-                            val recSourceId = recSource.associatedSourceId
-                            if (recSourceId != null) {
-                                // If the recommendation is associated with a source, resolve it
-                                networkToLocalManga(it.toDomainManga(recSourceId))
-                            } else {
-                                // Otherwise, skip this step. The user will be prompted to choose a source via
-                                // SmartSearch
-                                it.toDomainManga(-1)
+                    if (!(state.value.items[recSource] !is RecommendationItemResult.Loading)) {
+                        try {
+                            val page = withContext(coroutineDispatcher) {
+                                recSource.requestNextPage(1)
                             }
-                        }
 
-                        if (isActive) {
-                            updateItem(recSource, RecommendationItemResult.Success(titles))
-                        }
-                    } catch (expected: Exception) {
-                        // Any failure ends here and the fallback below applies.
-                        if (isActive) {
-                            updateItem(recSource, RecommendationItemResult.Error(expected))
+                            val titles = page.mangas.map {
+                                val recSourceId = recSource.associatedSourceId
+                                if (recSourceId != null) {
+                                    // If the recommendation is associated with a source, resolve it
+                                    networkToLocalManga(it.toDomainManga(recSourceId))
+                                } else {
+                                    // Otherwise, skip this step. The user will be prompted to choose a source via
+                                    // SmartSearch
+                                    it.toDomainManga(-1)
+                                }
+                            }
+
+                            if (isActive) {
+                                updateItem(recSource, RecommendationItemResult.Success(titles))
+                            }
+                        } catch (expected: Exception) {
+                            // Any failure ends here and the fallback below applies.
+                            if (isActive) {
+                                updateItem(recSource, RecommendationItemResult.Error(expected))
+                            }
                         }
                     }
                 }

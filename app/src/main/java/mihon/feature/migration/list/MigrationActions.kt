@@ -39,11 +39,10 @@ internal fun MigrationListScreenModel.useMangaForMigration(current: Long, target
         if (result == null) {
             migratingManga.searchResult.value = SearchResult.NotFound
             withUIContext { onMissingChapters() }
-            return@launchIO
+        } else {
+            migratingManga.searchResult.value = result.toSuccessSearchResult()
+            updateMigrationProgress()
         }
-
-        migratingManga.searchResult.value = result.toSuccessSearchResult()
-        updateMigrationProgress()
     }
 }
 

@@ -36,13 +36,13 @@ internal fun ExtensionFilterScreen(
                 stringRes = MR.strings.empty_screen,
                 modifier = Modifier.padding(contentPadding),
             )
-            return@Scaffold
+        } else {
+            ExtensionFilterContent(
+                contentPadding = contentPadding,
+                state = state,
+                onClickLang = onClickToggle,
+            )
         }
-        ExtensionFilterContent(
-            contentPadding = contentPadding,
-            state = state,
-            onClickLang = onClickToggle,
-        )
     }
 }
 

@@ -43,15 +43,15 @@ internal suspend fun HistoryScreenModel.getMangaCategoryIds(manga: Manga): List<
 
 internal fun HistoryScreenModel.addFavorite(mangaId: Long) {
     screenModelScope.launchIO {
-        val manga = getManga.await(mangaId) ?: return@launchIO
-
-        val duplicates = getDuplicateLibraryManga(manga)
-        if (duplicates.isNotEmpty()) {
-            updateState { it.copy(dialog = Dialog.DuplicateManga(manga, duplicates)) }
-            return@launchIO
+        val manga = getManga.await(mangaId)
+        if (manga != null) {
+            val duplicates = getDuplicateLibraryManga(manga)
+            if (duplicates.isNotEmpty()) {
+                updateState { it.copy(dialog = Dialog.DuplicateManga(manga, duplicates)) }
+            } else {
+                addFavorite(manga)
+            }
         }
-
-        addFavorite(manga)
     }
 }
 

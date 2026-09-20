@@ -48,16 +48,15 @@ internal fun SourceCategoryScreen(
                 SYMR.strings.no_source_categories,
                 modifier = Modifier.padding(paddingValues),
             )
-            return@Scaffold
+        } else {
+            SourceCategoryContent(
+                categories = state.categories,
+                lazyListState = lazyListState,
+                paddingValues = paddingValues + topSmallPaddingValues +
+                    PaddingValues(horizontal = MaterialTheme.padding.medium),
+                onClickRename = onClickRename,
+                onClickDelete = onClickDelete,
+            )
         }
-
-        SourceCategoryContent(
-            categories = state.categories,
-            lazyListState = lazyListState,
-            paddingValues = paddingValues + topSmallPaddingValues +
-                PaddingValues(horizontal = MaterialTheme.padding.medium),
-            onClickRename = onClickRename,
-            onClickDelete = onClickDelete,
-        )
     }
 }

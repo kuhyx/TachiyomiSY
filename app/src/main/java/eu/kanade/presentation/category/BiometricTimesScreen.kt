@@ -47,15 +47,14 @@ internal fun BiometricTimesScreen(
                 SYMR.strings.biometric_lock_times_empty,
                 modifier = Modifier.padding(paddingValues),
             )
-            return@Scaffold
+        } else {
+            BiometricTimesContent(
+                timeRanges = state.timeRanges,
+                lazyListState = lazyListState,
+                paddingValues = paddingValues + topSmallPaddingValues +
+                    PaddingValues(horizontal = MaterialTheme.padding.medium),
+                onClickDelete = onClickDelete,
+            )
         }
-
-        BiometricTimesContent(
-            timeRanges = state.timeRanges,
-            lazyListState = lazyListState,
-            paddingValues = paddingValues + topSmallPaddingValues +
-                PaddingValues(horizontal = MaterialTheme.padding.medium),
-            onClickDelete = onClickDelete,
-        )
     }
 }

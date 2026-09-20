@@ -61,21 +61,20 @@ internal fun DisplayRefreshHost(
     LaunchedEffect(currentDisplayRefresh) {
         if (!currentDisplayRefresh) {
             currentColor = null
-            return@LaunchedEffect
-        }
-
-        val refreshDurationHalf = refreshDuration.milliseconds / 2
-        currentColor = if (flashMode == ReaderPreferences.FlashColor.BLACK) {
-            Color.Black
         } else {
-            Color.White
+            val refreshDurationHalf = refreshDuration.milliseconds / 2
+            currentColor = if (flashMode == ReaderPreferences.FlashColor.BLACK) {
+                Color.Black
+            } else {
+                Color.White
+            }
+            delay(refreshDurationHalf)
+            if (flashMode == ReaderPreferences.FlashColor.WHITE_BLACK) {
+                currentColor = Color.Black
+            }
+            delay(refreshDurationHalf)
+            hostState.currentDisplayRefresh = false
         }
-        delay(refreshDurationHalf)
-        if (flashMode == ReaderPreferences.FlashColor.WHITE_BLACK) {
-            currentColor = Color.Black
-        }
-        delay(refreshDurationHalf)
-        hostState.currentDisplayRefresh = false
     }
 
     LaunchedEffect(flashInterval) {
