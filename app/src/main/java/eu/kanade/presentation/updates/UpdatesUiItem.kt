@@ -123,9 +123,10 @@ internal fun LazyListScope.updatesUiItems(
                         onUpdateSelected(updatesItem, !updatesItem.selected, true)
                     },
                     onClick = {
-                        when {
-                            selectionMode -> onUpdateSelected(updatesItem, !updatesItem.selected, false)
-                            else -> onClickUpdate(updatesItem)
+                        if (selectionMode) {
+                            onUpdateSelected(updatesItem, !updatesItem.selected, false)
+                        } else {
+                            onClickUpdate(updatesItem)
                         }
                     },
                     onClickCover = { onClickCover(updatesItem) }.takeIf { !selectionMode },

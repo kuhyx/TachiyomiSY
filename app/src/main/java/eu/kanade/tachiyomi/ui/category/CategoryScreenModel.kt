@@ -46,36 +46,36 @@ internal class CategoryScreenModel(
 
     fun createCategory(name: String) {
         screenModelScope.launch {
-            when (createCategoryWithName.await(name)) {
-                is CreateCategoryWithName.Result.InternalError -> _events.send(CategoryEvent.InternalError)
-                else -> {}
+            if (createCategoryWithName.await(name) is CreateCategoryWithName.Result.InternalError) {
+                _events.send(CategoryEvent.InternalError)
+            } else {
             }
         }
     }
 
     fun deleteCategory(categoryId: Long) {
         screenModelScope.launch {
-            when (deleteCategory.await(categoryId = categoryId)) {
-                is DeleteCategory.Result.InternalError -> _events.send(CategoryEvent.InternalError)
-                else -> {}
+            if (deleteCategory.await(categoryId = categoryId) is DeleteCategory.Result.InternalError) {
+                _events.send(CategoryEvent.InternalError)
+            } else {
             }
         }
     }
 
     fun changeOrder(category: Category, newIndex: Int) {
         screenModelScope.launch {
-            when (reorderCategory.await(category, newIndex)) {
-                is ReorderCategory.Result.InternalError -> _events.send(CategoryEvent.InternalError)
-                else -> {}
+            if (reorderCategory.await(category, newIndex) is ReorderCategory.Result.InternalError) {
+                _events.send(CategoryEvent.InternalError)
+            } else {
             }
         }
     }
 
     fun renameCategory(category: Category, name: String) {
         screenModelScope.launch {
-            when (renameCategory.await(category, name)) {
-                is RenameCategory.Result.InternalError -> _events.send(CategoryEvent.InternalError)
-                else -> {}
+            if (renameCategory.await(category, name) is RenameCategory.Result.InternalError) {
+                _events.send(CategoryEvent.InternalError)
+            } else {
             }
         }
     }

@@ -88,9 +88,10 @@ internal fun BrowseSourceContent(
     if (mangaList.itemCount == 0) {
         EmptyScreen(
             modifier = Modifier.padding(contentPadding),
-            message = when (errorState) {
-                is LoadState.Error -> getErrorMessage(errorState)
-                else -> stringResource(MR.strings.no_results_found)
+            message = if (errorState is LoadState.Error) {
+                getErrorMessage(errorState)
+            } else {
+                stringResource(MR.strings.no_results_found)
             },
             actions = if (source is LocalSource /* SY --> */ && onLocalSourceHelpClick != null /* SY <-- */) {
                 listOf(
@@ -108,23 +109,19 @@ internal fun BrowseSourceContent(
                         onClick = mangaList::refresh,
                     ),
                     // SY -->
-                    if (onWebViewClick != null) {
+                    onWebViewClick?.let {
                         EmptyScreenAction(
                             stringRes = MR.strings.action_open_in_web_view,
                             icon = Icons.Outlined.Public,
-                            onClick = onWebViewClick,
+                            onClick = it,
                         )
-                    } else {
-                        null
                     },
-                    if (onHelpClick != null) {
+                    onHelpClick?.let {
                         EmptyScreenAction(
                             stringRes = MR.strings.label_help,
                             icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                            onClick = onHelpClick,
+                            onClick = it,
                         )
-                    } else {
-                        null
                     },
                     // SY <--
                 )

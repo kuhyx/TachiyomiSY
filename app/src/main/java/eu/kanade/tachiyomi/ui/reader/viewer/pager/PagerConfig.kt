@@ -199,9 +199,10 @@ internal class PagerConfig(
         }
 
     override fun defaultNavigation(): ViewerNavigation {
-        return when (viewer) {
-            is VerticalPagerViewer -> LNavigation()
-            else -> RightAndLeftNavigation()
+        return if (viewer is VerticalPagerViewer) {
+            LNavigation()
+        } else {
+            RightAndLeftNavigation()
         }
     }
 

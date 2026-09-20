@@ -1026,10 +1026,8 @@ private fun LazyListScope.sharedChapterItems(
                             onChapterClicked = onChapterClicked,
                         )
                     },
-                    onDownloadClick = if (onDownloadChapter != null) {
-                        { onDownloadChapter(listOf(item), it) }
-                    } else {
-                        null
+                    onDownloadClick = onDownloadChapter?.let { download ->
+                        { action: ChapterDownloadAction -> download(listOf(item), action) }
                     },
                     onChapterSwipe = {
                         onChapterSwipe(item, it)

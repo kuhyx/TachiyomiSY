@@ -193,11 +193,7 @@ internal class EHentaiUpdateHelper(context: Context) {
                     it.readAt?.time ?: 0
                 }
                 ?.takeIf { it.chapterId != chapter.id && it.readAt != null }
-            if (newHistory != null) {
-                HistoryUpdate(chapter.id, newHistory.readAt!!, newHistory.readDuration)
-            } else {
-                null
-            }
+            newHistory?.let { HistoryUpdate(chapter.id, it.readAt!!, it.readDuration) }
         }
         val currentChapterIds = currentChapters.map { it.id }
         val historyToDelete = chainsAsHistory.filterNot { it.chapterId in currentChapterIds }
@@ -269,15 +265,16 @@ internal class EHentaiUpdateHelper(context: Context) {
                     val name = "v${index + 1}: " + chapter.name.substringAfter(" ")
                     val chapterNumber = index + 1.0
                     val sourceOrder = chapters.lastIndex - index.toLong()
-                    when (chapter.id) {
-                        -1L -> newChapters.add(
+                    if (chapter.id == -1L) {
+                        newChapters.add(
                             chapter.copy(
                                 name = name,
                                 chapterNumber = chapterNumber,
                                 sourceOrder = sourceOrder,
                             ),
                         )
-                        else -> updates.add(
+                    } else {
+                        updates.add(
                             ChapterUpdate(
                                 id = chapter.id,
                                 name = name.takeUnless { chapter.name == it },

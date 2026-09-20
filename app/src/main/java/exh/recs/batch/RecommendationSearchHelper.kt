@@ -164,9 +164,10 @@ internal class RecommendationSearchHelper(val context: Context) {
                 )
             }
 
-            status.value = when {
-                rankedMap.isNotEmpty() -> SearchStatus.Finished.WithResults(rankedMap)
-                else -> SearchStatus.Finished.WithoutResults
+            status.value = if (rankedMap.isNotEmpty()) {
+                SearchStatus.Finished.WithResults(rankedMap)
+            } else {
+                SearchStatus.Finished.WithoutResults
             }
         } catch (_: CancellationException) {
         } catch (e: Exception) {

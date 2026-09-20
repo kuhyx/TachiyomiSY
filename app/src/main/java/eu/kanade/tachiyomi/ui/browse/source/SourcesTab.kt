@@ -49,19 +49,16 @@ internal fun Screen.sourcesTab(
                 onClick = { navigator.push(GlobalSearchScreen(smartSearchConfig?.origTitle ?: "")) },
             ),
         ).let {
-            when (smartSearchConfig) {
-                null -> {
-                    it.plus(
-                        AppBar.Action(
-                            title = stringResource(MR.strings.action_filter),
-                            icon = Icons.Outlined.FilterList,
-                            onClick = { navigator.push(SourcesFilterScreen()) },
-                        ),
-                    )
-                }
-                else -> {
-                    it
-                }
+            if (smartSearchConfig == null) {
+                it.plus(
+                    AppBar.Action(
+                        title = stringResource(MR.strings.action_filter),
+                        icon = Icons.Outlined.FilterList,
+                        onClick = { navigator.push(SourcesFilterScreen()) },
+                    ),
+                )
+            } else {
+                it
             }
         },
         // SY <--

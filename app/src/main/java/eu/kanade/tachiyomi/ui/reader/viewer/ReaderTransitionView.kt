@@ -28,24 +28,22 @@ internal class ReaderTransitionView @JvmOverloads constructor(context: Context, 
     }
 
     fun bind(transition: ChapterTransition, downloadManager: DownloadManager, manga: Manga?) {
-        data = if (manga != null) {
+        data = manga?.let { current ->
             Data(
                 transition = transition,
                 currChapterDownloaded = transition.from.pageLoader?.isLocal == true,
-                goingToChapterDownloaded = manga.isLocal() ||
+                goingToChapterDownloaded = current.isLocal() ||
                     transition.to?.chapter?.let { goingToChapter ->
                         downloadManager.isChapterDownloaded(
                             chapterName = goingToChapter.name,
                             chapterScanlator = goingToChapter.scanlator,
                             chapterUrl = goingToChapter.url,
-                            mangaTitle = /* SY --> */ manga.ogTitle, /* SY <-- */
-                            sourceId = manga.source,
+                            mangaTitle = /* SY --> */ current.ogTitle, /* SY <-- */
+                            sourceId = current.source,
                             skipCache = true,
                         )
                     } ?: false,
             )
-        } else {
-            null
         }
     }
 

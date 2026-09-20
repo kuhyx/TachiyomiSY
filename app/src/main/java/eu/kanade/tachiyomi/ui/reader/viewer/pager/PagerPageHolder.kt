@@ -172,12 +172,7 @@ internal class PagerPageHolder(
             val (source, isAnimated, background) = withIOContext {
                 streamFn().buffered(STREAM_BUFFER_SIZE).use { source ->
                     // SY -->
-                    if (extraPage != null) {
-                        streamFn2?.invoke()
-                            ?.buffered(STREAM_BUFFER_SIZE)
-                    } else {
-                        null
-                    }.use { source2 ->
+                    extraPage?.let { streamFn2?.invoke()?.buffered(STREAM_BUFFER_SIZE) }.use { source2 ->
                         val itemSource = if (viewer.config.dualPageSplit) {
                             process(item.first, Buffer().readFrom(source))
                         } else {
@@ -441,15 +436,13 @@ internal class PagerPageHolder(
 
         val imageUrl = page.imageUrl
         errorLayout?.actionOpenInWebView?.isVisible = imageUrl != null
-        if (imageUrl != null) {
-            if (imageUrl.startsWith("http", true)) {
-                errorLayout?.actionOpenInWebView?.viewer = viewer
-                errorLayout?.actionOpenInWebView?.setOnClickListener {
-                    val sourceId = viewer.activity.viewModel.manga?.source
+        if (imageUrl != null && imageUrl.startsWith("http", true)) {
+            errorLayout?.actionOpenInWebView?.viewer = viewer
+            errorLayout?.actionOpenInWebView?.setOnClickListener {
+                val sourceId = viewer.activity.viewModel.manga?.source
 
-                    val intent = WebViewActivity.newIntent(context, imageUrl, sourceId)
-                    context.startActivity(intent)
-                }
+                val intent = WebViewActivity.newIntent(context, imageUrl, sourceId)
+                context.startActivity(intent)
             }
         }
 

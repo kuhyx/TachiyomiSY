@@ -133,11 +133,9 @@ internal class ImageSaver(
             arrayOf(normalizedPath, filename),
             null,
         ).use { cursor ->
-            if (cursor != null && cursor.count >= 1) {
-                if (cursor.moveToFirst()) {
-                    val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
-                    return ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-                }
+            if (cursor != null && cursor.count >= 1 && cursor.moveToFirst()) {
+                val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
+                return ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
             }
         }
 

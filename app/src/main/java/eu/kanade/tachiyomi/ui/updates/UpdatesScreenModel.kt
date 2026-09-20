@@ -469,10 +469,10 @@ internal class UpdatesScreenModel(
                 .insertSeparators { before, after ->
                     val beforeDate = before?.item?.update?.dateFetch?.toLocalDate()
                     val afterDate = after?.item?.update?.dateFetch?.toLocalDate()
-                    when {
-                        beforeDate != afterDate && afterDate != null -> UpdatesUiModel.Header(afterDate)
-                        // Return null to avoid adding a separator between two items.
-                        else -> null
+                    if (beforeDate != afterDate && afterDate != null) {
+                        UpdatesUiModel.Header(afterDate)
+                    } else {
+                        null
                     }
                 }
         }

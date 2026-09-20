@@ -19,25 +19,22 @@ internal suspend fun UrlImportableSource.urlImportFetchSearchMangaSuspend(
     query: String,
     fail: suspend () -> MangasPage,
 ): MangasPage =
-    when {
-        query.startsWith("http://") || query.startsWith("https://") -> {
-            val res = galleryAdder.addGallery(
-                context = context,
-                url = query,
-                fav = false,
-                forceSource = this,
-            )
+    if (query.startsWith("http://") || query.startsWith("https://")) {
+        val res = galleryAdder.addGallery(
+            context = context,
+            url = query,
+            fav = false,
+            forceSource = this,
+        )
 
-            MangasPage(
-                if (res is GalleryAddEvent.Success) {
-                    listOf(res.manga.toSManga())
-                } else {
-                    emptyList()
-                },
-                false,
-            )
-        }
-        else -> {
-            fail()
-        }
+        MangasPage(
+            if (res is GalleryAddEvent.Success) {
+                listOf(res.manga.toSManga())
+            } else {
+                emptyList()
+            },
+            false,
+        )
+    } else {
+        fail()
     }

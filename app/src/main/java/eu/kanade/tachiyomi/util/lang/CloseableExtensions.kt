@@ -17,9 +17,10 @@ internal inline fun <T : Closeable?> Array<T>.use(block: () -> Unit) {
         blockException = e
         throw e
     } finally {
-        when (blockException) {
-            null -> forEach { it?.close() }
-            else -> forEach {
+        if (blockException == null) {
+            forEach { it?.close() }
+        } else {
+            forEach {
                 try {
                     it?.close()
                 } catch (closeException: Throwable) {

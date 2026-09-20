@@ -512,12 +512,8 @@ internal class MangaScreenModel(
 
     // SY -->
     private fun raiseMetadata(flatMetadata: FlatMetadata?, source: Source): RaisedSearchMetadata? {
-        return if (flatMetadata != null) {
-            val metaClass = source.getMainSource<MetadataSource<*, *>>()?.metaClass
-            if (metaClass != null) flatMetadata.raise(metaClass) else null
-        } else {
-            null
-        }
+        val metaClass = source.getMainSource<MetadataSource<*, *>>()?.metaClass ?: return null
+        return flatMetadata?.raise(metaClass)
     }
 
     fun updateMangaInfo(
@@ -1552,13 +1548,10 @@ internal class MangaScreenModel(
                             }
                         ) {
                             val mdTrack = trackItems.firstOrNull { it.trackerId == TrackerManager.MDLIST }
-                            when {
-                                trackerManager.mdList.isLoggedIn && mdTrack == null -> {
-                                    trackItems + createMdListTrack()
-                                }
-                                else -> {
-                                    trackItems
-                                }
+                            if (trackerManager.mdList.isLoggedIn && mdTrack == null) {
+                                trackItems + createMdListTrack()
+                            } else {
+                                trackItems
                             }
                         } else {
                             trackItems

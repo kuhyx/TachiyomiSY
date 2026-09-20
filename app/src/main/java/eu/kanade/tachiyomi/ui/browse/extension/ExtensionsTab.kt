@@ -58,16 +58,13 @@ internal fun extensionsTab(
                 contentPadding = contentPadding,
                 searchQuery = state.searchQuery,
                 onLongClickItem = { extension ->
-                    when (extension) {
-                        is Extension.Available -> {
-                            extensionsScreenModel.installExtension(extension)
-                        }
-                        else -> {
-                            if (context.isPackageInstalled(extension.pkgName)) {
-                                extensionsScreenModel.uninstallExtension(extension)
-                            } else {
-                                privateExtensionToUninstall = extension
-                            }
+                    if (extension is Extension.Available) {
+                        extensionsScreenModel.installExtension(extension)
+                    } else {
+                        if (context.isPackageInstalled(extension.pkgName)) {
+                            extensionsScreenModel.uninstallExtension(extension)
+                        } else {
+                            privateExtensionToUninstall = extension
                         }
                     }
                 },

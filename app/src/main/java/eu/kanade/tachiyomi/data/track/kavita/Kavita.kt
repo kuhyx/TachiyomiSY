@@ -56,13 +56,11 @@ internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
     override fun displayScore(track: DomainTrack): String = ""
 
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
-        if (track.status != COMPLETED) {
-            if (didReadChapter) {
-                if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
-                    track.status = COMPLETED
-                } else {
-                    track.status = READING
-                }
+        if (track.status != COMPLETED && didReadChapter) {
+            if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
+                track.status = COMPLETED
+            } else {
+                track.status = READING
             }
         }
         return api.updateProgress(track)

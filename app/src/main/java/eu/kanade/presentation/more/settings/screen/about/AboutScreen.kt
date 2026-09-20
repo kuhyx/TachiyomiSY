@@ -75,7 +75,7 @@ internal object AboutScreen : Screen() {
             topBar = { scrollBehavior ->
                 AppBar(
                     title = stringResource(MR.strings.pref_category_about),
-                    navigateUp = if (handleBack != null) handleBack::invoke else null,
+                    navigateUp = handleBack?.let { it::invoke },
                     scrollBehavior = scrollBehavior,
                 )
             },

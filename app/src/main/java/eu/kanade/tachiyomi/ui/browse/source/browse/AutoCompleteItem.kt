@@ -146,16 +146,8 @@ internal fun AutoCompleteTextField(
                 value = it
                 expanded = true // todo remove if focus bug is fixed
             },
-            label = if (label != null) {
-                { Text(label) }
-            } else {
-                null
-            },
-            placeholder = if (placeholder != null) {
-                { Text(placeholder) }
-            } else {
-                null
-            },
+            label = label?.let { text -> { Text(text) } },
+            placeholder = placeholder?.let { text -> { Text(text) } },
             modifier = Modifier
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                 .fillMaxWidth()

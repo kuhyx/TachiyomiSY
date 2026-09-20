@@ -196,12 +196,7 @@ internal fun MangaActionRow(
 
     // Follow-up: show something better when using custom interval (https://github.com/kuhyx/TachiyomiSY/issues/12)
     val nextUpdateDays = remember(nextUpdate) {
-        return@remember if (nextUpdate != null) {
-            val now = Instant.now()
-            now.until(nextUpdate, ChronoUnit.DAYS).toInt().coerceAtLeast(0)
-        } else {
-            null
-        }
+        return@remember nextUpdate?.let { Instant.now().until(it, ChronoUnit.DAYS).toInt().coerceAtLeast(0) }
     }
 
     Row(modifier = modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp)) {

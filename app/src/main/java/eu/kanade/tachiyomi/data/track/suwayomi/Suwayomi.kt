@@ -46,13 +46,11 @@ internal class Suwayomi(id: Long) : BaseTracker(id, "Suwayomi"), EnhancedTracker
     override fun displayScore(track: DomainTrack): String = ""
 
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
-        if (track.status != COMPLETED) {
-            if (didReadChapter) {
-                if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
-                    track.status = COMPLETED
-                } else {
-                    track.status = READING
-                }
+        if (track.status != COMPLETED && didReadChapter) {
+            if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
+                track.status = COMPLETED
+            } else {
+                track.status = READING
             }
         }
 

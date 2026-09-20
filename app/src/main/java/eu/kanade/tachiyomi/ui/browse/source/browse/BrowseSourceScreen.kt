@@ -106,9 +106,10 @@ internal data class BrowseSourceScreen(
 
         val navigator = LocalNavigator.currentOrThrow
         val navigateUp: () -> Unit = {
-            when {
-                !state.isUserQuery && state.toolbarQuery != null -> screenModel.setToolbarQuery(null)
-                else -> navigator.pop()
+            if (!state.isUserQuery && state.toolbarQuery != null) {
+                screenModel.setToolbarQuery(null)
+            } else {
+                navigator.pop()
             }
         }
 

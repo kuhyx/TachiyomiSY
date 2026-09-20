@@ -108,22 +108,16 @@ internal class GalleryAdder(
                 null
             }
 
-            val cleanedChapterUrl = if (realChapterUrl != null) {
+            val cleanedChapterUrl = realChapterUrl?.let {
                 try {
-                    source.cleanChapterUrl(realChapterUrl)
+                    source.cleanChapterUrl(it)
                 } catch (e: Exception) {
                     logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_clean_error), e)
                     null
                 }
-            } else {
-                null
             }
 
-            val chapterMangaUrl = if (realChapterUrl != null) {
-                source.mapChapterUrlToMangaUrl(realChapterUrl.toUri())
-            } else {
-                null
-            }
+            val chapterMangaUrl = realChapterUrl?.let { source.mapChapterUrlToMangaUrl(it.toUri()) }
 
             // Map URL to manga URL
             val realMangaUrl = try {

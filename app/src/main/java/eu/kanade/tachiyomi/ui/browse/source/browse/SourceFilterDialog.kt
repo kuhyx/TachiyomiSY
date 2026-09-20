@@ -190,7 +190,7 @@ private fun FilterItem(filter: Filter<*>, onUpdate: () -> Unit/* SY --> */, star
                             ?.takeIf { index == filter.state?.index }
                         SortItem(
                             label = item,
-                            sortDescending = if (sortAscending != null) !sortAscending else null,
+                            sortDescending = sortAscending?.let { !it },
                             onClick = {
                                 val ascending = if (index == filter.state?.index) {
                                     !filter.state!!.ascending

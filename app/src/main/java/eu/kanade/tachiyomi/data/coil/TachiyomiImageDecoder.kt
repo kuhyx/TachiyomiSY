@@ -32,12 +32,12 @@ internal class TachiyomiImageDecoder(private val resources: ImageSource, private
     override suspend fun decode(): DecodeResult {
         // SY -->
         var coverStream: BufferedInputStream? = null
-        if (resources.sourceOrNull()?.peek()?.use { CbzCrypto.detectCoverImageArchive(it.inputStream()) } == true) {
-            if (resources.source().peek().use { ImageUtil.findImageType(it.inputStream()) == null }) {
-                coverStream = UniFile.fromFile(resources.file().toFile())
-                    ?.archiveReader(context = context)
-                    ?.getCoverStream()
-            }
+        val isCoverArchive =
+            resources.sourceOrNull()?.peek()?.use { CbzCrypto.detectCoverImageArchive(it.inputStream()) } == true
+        if (isCoverArchive && resources.source().peek().use { ImageUtil.findImageType(it.inputStream()) == null }) {
+            coverStream = UniFile.fromFile(resources.file().toFile())
+                ?.archiveReader(context = context)
+                ?.getCoverStream()
         }
         val decoder = resources.sourceOrNull()?.use {
             coverStream.use { coverStream ->

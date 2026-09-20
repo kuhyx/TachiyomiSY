@@ -131,11 +131,9 @@ internal fun WebViewScreenContent(
                 if (url.startsWith("intent://")) return true
 
                 // Only open valid web urls
-                if (url.startsWith("http") || url.startsWith("https")) {
-                    if (url != view?.url) {
-                        view?.loadUrl(url, headers)
-                        return true
-                    }
+                if ((url.startsWith("http") || url.startsWith("https")) && url != view?.url) {
+                    view?.loadUrl(url, headers)
+                    return true
                 }
 
                 return false

@@ -291,34 +291,23 @@ internal class EHentai(
 
     private fun getDateTag(element: Element?): Long? {
         val text = element?.text()?.nullIfBlank()
-        return if (text != null) {
-            println(text)
-            val date = ZonedDateTime.parse(text, MetadataUtil.EX_DATE_FORMAT.withZone(ZoneOffset.UTC))
-            date?.toInstant()?.toEpochMilli()
-        } else {
-            null
+        return text?.let {
+            ZonedDateTime.parse(it, MetadataUtil.EX_DATE_FORMAT.withZone(ZoneOffset.UTC))?.toInstant()?.toEpochMilli()
         }
     }
 
     private fun getRating(element: Element?): Double? {
         val ratingStyle = element?.attr("style")?.nullIfBlank()
-        return if (ratingStyle != null) {
-            val matches = RATING_REGEX.findAll(ratingStyle)
-                .mapNotNull { it.groupValues.getOrNull(1)?.toIntOrNull() }
-                .toList()
-            if (matches.size == 2) {
-                var rate = MAX_RATING - matches[0] / STAR_SPRITE_WIDTH_PX
-                if (matches[1] == HALF_STAR_SPRITE_OFFSET_PX) {
-                    rate--
-                    rate + HALF_STAR
-                } else {
-                    rate.toDouble()
-                }
-            } else {
-                null
-            }
+        val matches = ratingStyle?.let { style ->
+            RATING_REGEX.findAll(style).mapNotNull { it.groupValues.getOrNull(1)?.toIntOrNull() }.toList()
+        }
+        if (matches == null || matches.size != 2) return null
+        var rate = MAX_RATING - matches[0] / STAR_SPRITE_WIDTH_PX
+        return if (matches[1] == HALF_STAR_SPRITE_OFFSET_PX) {
+            rate--
+            rate + HALF_STAR
         } else {
-            null
+            rate.toDouble()
         }
     }
 
@@ -326,11 +315,7 @@ internal class EHentai(
 
     private fun getPageCount(element: Element?): Int? {
         val pageCount = element?.text()?.trimOrNull()
-        return if (pageCount != null) {
-            PAGE_COUNT_REGEX.find(pageCount)?.value?.toIntOrNull()
-        } else {
-            null
-        }
+        return pageCount?.let { PAGE_COUNT_REGEX.find(it)?.value?.toIntOrNull() }
     }
 
     // Parse a list of galleries.

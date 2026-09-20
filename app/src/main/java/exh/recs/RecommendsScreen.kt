@@ -45,17 +45,19 @@ internal class RecommendsScreen(private val args: Args) : Screen() {
 
         val onClickItem = { manga: Manga ->
             navigator.push(
-                when (manga.source) {
-                    -1L -> SourcesScreen(SourcesScreen.SmartSearchConfig(manga.ogTitle))
-                    else -> MangaScreen(manga.id, true)
+                if (manga.source == -1L) {
+                    SourcesScreen(SourcesScreen.SmartSearchConfig(manga.ogTitle))
+                } else {
+                    MangaScreen(manga.id, true)
                 },
             )
         }
 
         val onLongClickItem = { manga: Manga ->
-            when (manga.source) {
-                -1L -> WebViewActivity.newIntent(context, manga.url, title = manga.title).let(context::startActivity)
-                else -> onClickItem(manga)
+            if (manga.source == -1L) {
+                WebViewActivity.newIntent(context, manga.url, title = manga.title).let(context::startActivity)
+            } else {
+                onClickItem(manga)
             }
         }
 

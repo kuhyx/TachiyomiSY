@@ -46,9 +46,10 @@ internal class MangaDexSimilarPagingSource(
                     relatedPage.mangasMetadata + similarPage.mangasMetadata,
                 )
             } catch (e: HttpException) {
-                when (e.code) {
-                    HttpURLConnection.HTTP_NOT_FOUND -> throw NoResultsException()
-                    else -> throw e
+                if (e.code == HttpURLConnection.HTTP_NOT_FOUND) {
+                    throw NoResultsException()
+                } else {
+                    throw e
                 }
             }
         }

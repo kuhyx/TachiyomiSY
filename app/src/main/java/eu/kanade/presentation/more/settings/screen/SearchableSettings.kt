@@ -27,7 +27,7 @@ internal interface SearchableSettings : Screen {
         val handleBack = LocalBackPress.current
         PreferenceScaffold(
             titleRes = getTitleRes(),
-            onBackPressed = if (handleBack != null) handleBack::invoke else null,
+            onBackPressed = handleBack?.let { it::invoke },
             actions = { AppBarAction() },
             itemsProvider = { getPreferences() },
         )

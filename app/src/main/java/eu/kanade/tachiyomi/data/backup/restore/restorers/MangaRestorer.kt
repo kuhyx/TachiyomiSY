@@ -390,13 +390,8 @@ internal class MangaRestorer(
                     .getChapterByUrl(history.url)
                     .awaitAsList()
                     .find { it.manga_id == manga.id }
-                return@mapNotNull if (chapter == null) {
-                    // Chapter doesn't exist; skip
-                    null
-                } else {
-                    // New history entry
-                    item.copy(chapterId = chapter._id)
-                }
+                // No chapter means the entry is skipped; otherwise it becomes a new history entry.
+                return@mapNotNull chapter?.let { item.copy(chapterId = it._id) }
             }
 
             // Update history entry

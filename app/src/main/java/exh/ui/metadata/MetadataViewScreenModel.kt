@@ -38,9 +38,11 @@ internal class MetadataViewScreenModel(
                 return@launchIO
             }
 
-            mutableState.value = when (val flatMetadata = getFlatMetadataById.await(mangaId)) {
-                null -> MetadataViewState.MetadataNotFound
-                else -> MetadataViewState.Success(flatMetadata.raise(metadataSource.metaClass))
+            val flatMetadata = getFlatMetadataById.await(mangaId)
+            mutableState.value = if (flatMetadata == null) {
+                MetadataViewState.MetadataNotFound
+            } else {
+                MetadataViewState.Success(flatMetadata.raise(metadataSource.metaClass))
             }
         }
     }

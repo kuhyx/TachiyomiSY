@@ -48,14 +48,15 @@ internal fun LibraryToolbar(
     searchQuery: String?,
     onSearchQueryChange: (String?) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?,
-) = when {
-    selectedCount > 0 -> LibrarySelectionToolbar(
+) = if (selectedCount > 0) {
+    LibrarySelectionToolbar(
         selectedCount = selectedCount,
         onClickUnselectAll = onClickUnselectAll,
         onClickSelectAll = onClickSelectAll,
         onClickInvertSelection = onClickInvertSelection,
     )
-    else -> LibraryRegularToolbar(
+} else {
+    LibraryRegularToolbar(
         title = title,
         hasFilters = hasActiveFilters,
         searchQuery = searchQuery,

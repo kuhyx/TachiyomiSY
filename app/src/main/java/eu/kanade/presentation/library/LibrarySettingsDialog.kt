@@ -259,13 +259,14 @@ private fun ColumnScope.SortPage(
             sortDescending = sortDescending.takeIf { sortingMode == mode },
             onClick = {
                 val isTogglingDirection = sortingMode == mode
-                val direction = when {
-                    isTogglingDirection -> if (sortDescending) {
+                val direction = if (isTogglingDirection) {
+                    if (sortDescending) {
                         LibrarySort.Direction.Ascending
                     } else {
                         LibrarySort.Direction.Descending
                     }
-                    else -> if (sortDescending) {
+                } else {
+                    if (sortDescending) {
                         LibrarySort.Direction.Descending
                     } else {
                         LibrarySort.Direction.Ascending

@@ -220,10 +220,7 @@ internal class DownloadProvider(
     ): List<String> {
         val sanitizedChapterName = sanitizeChapterName(chapterName)
         val chapterNameV1 = DiskUtil.buildValidFilename(
-            when {
-                !chapterScanlator.isNullOrBlank() -> "${chapterScanlator}_$sanitizedChapterName"
-                else -> sanitizedChapterName
-            },
+            if (chapterScanlator.isNullOrBlank()) sanitizedChapterName else "${chapterScanlator}_$sanitizedChapterName",
         )
 
         // Get the filename that would be generated if the user were

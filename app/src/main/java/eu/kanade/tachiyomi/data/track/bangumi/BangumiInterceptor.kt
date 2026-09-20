@@ -46,15 +46,13 @@ internal class BangumiInterceptor(private val bangumi: Bangumi) : Interceptor {
     }
 
     fun newAuth(oauth: BGMOAuth?) {
-        this.oauth = if (oauth == null) {
-            null
-        } else {
+        this.oauth = oauth?.let {
             BGMOAuth(
-                oauth.accessToken,
-                oauth.tokenType,
+                it.accessToken,
+                it.tokenType,
                 System.currentTimeMillis() / MILLIS_PER_SECOND,
-                oauth.expiresIn,
-                oauth.refreshToken,
+                it.expiresIn,
+                it.refreshToken,
                 this.oauth?.userId,
             )
         }

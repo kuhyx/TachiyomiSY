@@ -72,9 +72,10 @@ internal class UiPreferences(
     // SY <--
 
     companion object {
-        fun dateFormat(format: String): DateTimeFormatter = when (format) {
-            "" -> DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
-            else -> DateTimeFormatter.ofPattern(format, Locale.getDefault())
+        fun dateFormat(format: String): DateTimeFormatter = if (format == "") {
+            DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
+        } else {
+            DateTimeFormatter.ofPattern(format, Locale.getDefault())
         }
     }
 }

@@ -50,9 +50,10 @@ internal class NHentai(delegate: HttpSource, val context: Context) :
     }
 
     private val preferredTitle: Int
-        get() = when (sourcePreferences.getString(TITLE_PREF, "full")) {
-            "full" -> NHentaiSearchMetadata.TITLE_TYPE_ENGLISH
-            else -> NHentaiSearchMetadata.TITLE_TYPE_SHORT
+        get() = if (sourcePreferences.getString(TITLE_PREF, "full") == "full") {
+            NHentaiSearchMetadata.TITLE_TYPE_ENGLISH
+        } else {
+            NHentaiSearchMetadata.TITLE_TYPE_SHORT
         }
 
     // Support direct URL importing

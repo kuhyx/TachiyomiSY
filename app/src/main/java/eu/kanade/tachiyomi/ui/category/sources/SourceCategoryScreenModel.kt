@@ -48,9 +48,9 @@ internal class SourceCategoryScreenModel(
      */
     fun createCategory(name: String) {
         screenModelScope.launchIO {
-            when (createSourceCategory.await(name)) {
-                is CreateSourceCategory.Result.InvalidName -> _events.send(SourceCategoryEvent.InvalidName)
-                else -> {}
+            if (createSourceCategory.await(name) is CreateSourceCategory.Result.InvalidName) {
+                _events.send(SourceCategoryEvent.InvalidName)
+            } else {
             }
         }
     }
@@ -74,9 +74,9 @@ internal class SourceCategoryScreenModel(
      */
     fun renameCategory(categoryOld: String, categoryNew: String) {
         screenModelScope.launchIO {
-            when (renameSourceCategory.await(categoryOld, categoryNew)) {
-                is CreateSourceCategory.Result.InvalidName -> _events.send(SourceCategoryEvent.InvalidName)
-                else -> {}
+            if (renameSourceCategory.await(categoryOld, categoryNew) is CreateSourceCategory.Result.InvalidName) {
+                _events.send(SourceCategoryEvent.InvalidName)
+            } else {
             }
         }
     }

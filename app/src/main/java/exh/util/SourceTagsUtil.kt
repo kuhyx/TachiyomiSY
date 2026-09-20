@@ -18,33 +18,27 @@ internal object SourceTagsUtil {
         tag: String? = null,
         fullTag: String? = null,
     ): String? {
-        return if (
-            sourceId == EXH_SOURCE_ID ||
+        val supported = sourceId == EXH_SOURCE_ID ||
             sourceId == EH_SOURCE_ID ||
             sourceId in nHentaiSourceIds ||
             sourceId in mangaDexSourceIds ||
             sourceId == PURURIN_SOURCE_ID ||
             sourceId == TSUMINO_SOURCE_ID ||
             sourceId in lanraragiSourceIds
-        ) {
-            val parsed = when {
-                fullTag != null -> parseTag(fullTag)
-                namespace != null && tag != null -> RaisedTag(namespace, tag, TAG_TYPE_DEFAULT)
-                else -> null
-            }
-            if (parsed?.namespace != null) {
-                when (sourceId) {
-                    in nHentaiSourceIds -> wrapTagNHentai(parsed.namespace!!, parsed.name.substringBefore('|').trim())
-                    in mangaDexSourceIds -> parsed.name
-                    PURURIN_SOURCE_ID -> parsed.name.substringBefore('|').trim()
-                    TSUMINO_SOURCE_ID -> wrapTagTsumino(parsed.namespace!!, parsed.name.substringBefore('|').trim())
-                    else -> wrapTag(parsed.namespace!!, parsed.name.substringBefore('|').trim())
-                }
-            } else {
-                null
-            }
-        } else {
-            null
+        if (!supported) return null
+        val parsed = when {
+            fullTag != null -> parseTag(fullTag)
+            namespace != null && tag != null -> RaisedTag(namespace, tag, TAG_TYPE_DEFAULT)
+            else -> null
+        } ?: return null
+        val parsedNamespace = parsed.namespace ?: return null
+        val name = parsed.name.substringBefore('|').trim()
+        return when (sourceId) {
+            in nHentaiSourceIds -> wrapTagNHentai(parsedNamespace, name)
+            in mangaDexSourceIds -> parsed.name
+            PURURIN_SOURCE_ID -> name
+            TSUMINO_SOURCE_ID -> wrapTagTsumino(parsedNamespace, name)
+            else -> wrapTag(parsedNamespace, name)
         }
     }
 

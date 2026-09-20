@@ -34,9 +34,9 @@ internal class AppUpdateChecker {
                 ),
             )
 
-            when (result) {
-                is GetApplicationRelease.Result.NewUpdate -> AppUpdateNotifier(context).promptUpdate(result.release)
-                else -> {}
+            if (result is GetApplicationRelease.Result.NewUpdate) {
+                AppUpdateNotifier(context).promptUpdate(result.release)
+            } else {
             }
 
             result

@@ -43,9 +43,9 @@ internal class SortTagScreenModel(
 
     fun createTag(name: String) {
         screenModelScope.launchIO {
-            when (createSortTag.await(name)) {
-                is CreateSortTag.Result.TagExists -> _events.send(SortTagEvent.TagExists)
-                else -> {}
+            if (createSortTag.await(name) is CreateSortTag.Result.TagExists) {
+                _events.send(SortTagEvent.TagExists)
+            } else {
             }
         }
     }
@@ -58,18 +58,18 @@ internal class SortTagScreenModel(
 
     fun moveUp(tag: String, index: Int) {
         screenModelScope.launchIO {
-            when (reorderSortTag.await(tag, index - 1)) {
-                is ReorderSortTag.Result.InternalError -> _events.send(SortTagEvent.InternalError)
-                else -> {}
+            if (reorderSortTag.await(tag, index - 1) is ReorderSortTag.Result.InternalError) {
+                _events.send(SortTagEvent.InternalError)
+            } else {
             }
         }
     }
 
     fun moveDown(tag: String, index: Int) {
         screenModelScope.launchIO {
-            when (reorderSortTag.await(tag, index + 1)) {
-                is ReorderSortTag.Result.InternalError -> _events.send(SortTagEvent.InternalError)
-                else -> {}
+            if (reorderSortTag.await(tag, index + 1) is ReorderSortTag.Result.InternalError) {
+                _events.send(SortTagEvent.InternalError)
+            } else {
             }
         }
     }

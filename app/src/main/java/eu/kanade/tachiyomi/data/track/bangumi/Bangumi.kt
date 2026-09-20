@@ -29,13 +29,11 @@ internal class Bangumi(id: Long) : BaseTracker(id, "Bangumi") {
     private suspend fun add(track: Track): Track = api.addLibManga(track)
 
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
-        if (track.status != COMPLETED) {
-            if (didReadChapter) {
-                if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
-                    track.status = COMPLETED
-                } else {
-                    track.status = READING
-                }
+        if (track.status != COMPLETED && didReadChapter) {
+            if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
+                track.status = COMPLETED
+            } else {
+                track.status = READING
             }
         }
 

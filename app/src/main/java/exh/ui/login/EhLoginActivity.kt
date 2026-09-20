@@ -115,8 +115,8 @@ internal class EhLoginActivity : BaseActivity() {
                 }
                 // Check login result
 
-                if (parsedUrl.getQueryParameter("code")?.toInt() != 0) {
-                    if (checkLoginCookies(url)) view.loadUrl("https://exhentai.org/")
+                if (parsedUrl.getQueryParameter("code")?.toInt() != 0 && checkLoginCookies(url)) {
+                    view.loadUrl("https://exhentai.org/")
                 }
             }
         } else if (parsedUrl.host.equals("exhentai.org", ignoreCase = true)) {

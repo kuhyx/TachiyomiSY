@@ -504,12 +504,12 @@ internal class LibraryScreenModel(
         val trackerScores by lazy {
             val trackerMap = trackerManager.getAll(loggedInTrackerIds).associateBy { e -> e.id }
             trackMap.mapValues { entry ->
-                when {
-                    entry.value.isEmpty() -> null
-                    else ->
-                        entry.value
-                            .mapNotNull { trackerMap[it.trackerId]?.get10PointScore(it) }
-                            .average()
+                if (entry.value.isEmpty()) {
+                    null
+                } else {
+                    entry.value
+                        .mapNotNull { trackerMap[it.trackerId]?.get10PointScore(it) }
+                        .average()
                 }
             }
         }
@@ -737,9 +737,10 @@ internal class LibraryScreenModel(
      * Queues the amount specified of unread chapters from the list of selected manga.
      */
     fun performDownloadAction(action: DownloadAction) {
-        when (action) {
-            DownloadAction.BOOKMARKED_CHAPTERS -> downloadBookmarkedChapters()
-            else -> downloadNextChapters(action.nextChapters)
+        if (action == DownloadAction.BOOKMARKED_CHAPTERS) {
+            downloadBookmarkedChapters()
+        } else {
+            downloadNextChapters(action.nextChapters)
         }
         clearSelection()
     }

@@ -60,16 +60,14 @@ internal fun TextPreferenceWidget(
         } else {
             null
         },
-        icon = if (icon != null) {
+        icon = icon?.let { vector ->
             {
                 Icon(
-                    imageVector = icon,
+                    imageVector = vector,
                     tint = iconTint,
                     contentDescription = null,
                 )
             }
-        } else {
-            null
         },
         onClick = onPreferenceClick,
         widget = widget,

@@ -39,9 +39,10 @@ internal class MoveLibrarySortingSettingsMigration : Migration {
 
             val newSortingMode = LEGACY_SORTING_MODES.getOrElse(oldSortingMode) { "ALPHABETICAL" }
 
-            val newSortingDirection = when (oldSortingDirection) {
-                true -> "ASCENDING"
-                else -> "DESCENDING"
+            val newSortingDirection = if (oldSortingDirection == true) {
+                "ASCENDING"
+            } else {
+                "DESCENDING"
             }
 
             prefs.edit(commit = true) {

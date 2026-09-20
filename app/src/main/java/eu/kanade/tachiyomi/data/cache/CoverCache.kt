@@ -76,9 +76,7 @@ internal class CoverCache(private val context: Context) {
             if (it.exists() && it.delete()) ++deleted
         }
 
-        if (deleteCustomCover) {
-            if (deleteCustomCover(manga.id)) ++deleted
-        }
+        if (deleteCustomCover && deleteCustomCover(manga.id)) ++deleted
 
         return deleted
     }

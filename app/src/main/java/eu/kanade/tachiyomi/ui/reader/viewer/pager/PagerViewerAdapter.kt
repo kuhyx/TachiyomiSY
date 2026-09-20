@@ -332,22 +332,19 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
             else -> oldCurrent?.first ?: return
         }
 
-        val index = when {
-            newPage is ChapterTransition && joinedItems.none { it.first == newPage || it.second == newPage } -> {
-                val filteredPages = joinedItems.filter {
-                    it.first is ReaderPage &&
-                        (it.first as ReaderPage).chapter == newPage.to
-                }
-                val page = if (newPage is ChapterTransition.Next) {
-                    filteredPages.minByOrNull { (it.first as ReaderPage).index }?.first
-                } else {
-                    filteredPages.maxByOrNull { (it.first as ReaderPage).index }?.first
-                }
-                joinedItems.indexOfFirst { it.first == page || it.second == page }
+        val index = if (newPage is ChapterTransition && joinedItems.none { it.first == newPage || it.second == newPage }) {
+            val filteredPages = joinedItems.filter {
+                it.first is ReaderPage &&
+                    (it.first as ReaderPage).chapter == newPage.to
             }
-            else -> {
-                joinedItems.indexOfFirst { it.first == newPage || it.second == newPage }
+            val page = if (newPage is ChapterTransition.Next) {
+                filteredPages.minByOrNull { (it.first as ReaderPage).index }?.first
+            } else {
+                filteredPages.maxByOrNull { (it.first as ReaderPage).index }?.first
             }
+            joinedItems.indexOfFirst { it.first == page || it.second == page }
+        } else {
+            joinedItems.indexOfFirst { it.first == newPage || it.second == newPage }
         }
 
         viewer.pager.setCurrentItem(index, false)

@@ -84,10 +84,10 @@ internal class HistoryScreenModel(
             .insertSeparators { before, after ->
                 val beforeDate = before?.item?.readAt?.time?.toLocalDate()
                 val afterDate = after?.item?.readAt?.time?.toLocalDate()
-                when {
-                    beforeDate != afterDate && afterDate != null -> HistoryUiModel.Header(afterDate)
-                    // Return null to avoid adding a separator between two items.
-                    else -> null
+                if (beforeDate != afterDate && afterDate != null) {
+                    HistoryUiModel.Header(afterDate)
+                } else {
+                    null
                 }
             }
     }

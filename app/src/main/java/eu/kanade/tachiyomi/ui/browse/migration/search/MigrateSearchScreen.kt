@@ -47,26 +47,24 @@ internal class MigrateSearchScreen(private val mangaId: Long) : Screen() {
             onLongClickItem = { navigator.push(MangaScreen(it.id, true)) },
         )
 
-        when (val dialog = state.dialog) {
-            is SearchScreenModel.Dialog.Migrate -> {
-                MigrateMangaDialog(
-                    current = dialog.current,
-                    target = dialog.target,
-                    // Initiated from the context of [dialog.current] so we show [dialog.target].
-                    onClickTitle = { navigator.push(MangaScreen(dialog.target.id, true)) },
-                    onDismissRequest = { screenModel.clearDialog() },
-                    onComplete = {
-                        if (navigator.lastItem is MangaScreen) {
-                            val lastItem = navigator.lastItem
-                            navigator.popUntil { navigator.items.contains(lastItem) }
-                            navigator.push(MangaScreen(dialog.target.id))
-                        } else {
-                            navigator.replace(MangaScreen(dialog.target.id))
-                        }
-                    },
-                )
-            }
-            else -> {}
+        val dialog = state.dialog
+        if (dialog is SearchScreenModel.Dialog.Migrate) {
+            MigrateMangaDialog(
+                current = dialog.current,
+                target = dialog.target,
+                // Initiated from the context of [dialog.current] so we show [dialog.target].
+                onClickTitle = { navigator.push(MangaScreen(dialog.target.id, true)) },
+                onDismissRequest = { screenModel.clearDialog() },
+                onComplete = {
+                    if (navigator.lastItem is MangaScreen) {
+                        val lastItem = navigator.lastItem
+                        navigator.popUntil { navigator.items.contains(lastItem) }
+                        navigator.push(MangaScreen(dialog.target.id))
+                    } else {
+                        navigator.replace(MangaScreen(dialog.target.id))
+                    }
+                },
+            )
         }
     }
 }

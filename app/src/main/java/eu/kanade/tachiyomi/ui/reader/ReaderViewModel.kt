@@ -216,44 +216,41 @@ internal class ReaderViewModel @JvmOverloads constructor(
         val selectedChapter = chapters.find { it.id == chapterId }
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
-        val chaptersForReader = when {
-            readerPreferences.skipRead.get() || readerPreferences.skipFiltered.get() -> {
-                val filteredChapters = chapters.filterNot {
-                    when {
-                        readerPreferences.skipRead.get() && it.read -> {
-                            true
-                        }
-                        readerPreferences.skipFiltered.get() -> {
-                            (manga.unreadFilterRaw == Manga.CHAPTER_SHOW_READ && !it.read) ||
-                                (manga.unreadFilterRaw == Manga.CHAPTER_SHOW_UNREAD && it.read) ||
-                                // SY -->
-                                (
-                                    manga.downloadedFilterRaw == Manga.CHAPTER_SHOW_DOWNLOADED &&
-                                        !isChapterDownloaded(it)
-                                    ) ||
-                                (
-                                    manga.downloadedFilterRaw == Manga.CHAPTER_SHOW_NOT_DOWNLOADED &&
-                                        isChapterDownloaded(it)
-                                    ) ||
-                                // SY <--
-                                (manga.bookmarkedFilterRaw == Manga.CHAPTER_SHOW_BOOKMARKED && !it.bookmark) ||
-                                (manga.bookmarkedFilterRaw == Manga.CHAPTER_SHOW_NOT_BOOKMARKED && it.bookmark)
-                        }
-                        else -> {
-                            false
-                        }
+        val chaptersForReader = if (readerPreferences.skipRead.get() || readerPreferences.skipFiltered.get()) {
+            val filteredChapters = chapters.filterNot {
+                when {
+                    readerPreferences.skipRead.get() && it.read -> {
+                        true
+                    }
+                    readerPreferences.skipFiltered.get() -> {
+                        (manga.unreadFilterRaw == Manga.CHAPTER_SHOW_READ && !it.read) ||
+                            (manga.unreadFilterRaw == Manga.CHAPTER_SHOW_UNREAD && it.read) ||
+                            // SY -->
+                            (
+                                manga.downloadedFilterRaw == Manga.CHAPTER_SHOW_DOWNLOADED &&
+                                    !isChapterDownloaded(it)
+                                ) ||
+                            (
+                                manga.downloadedFilterRaw == Manga.CHAPTER_SHOW_NOT_DOWNLOADED &&
+                                    isChapterDownloaded(it)
+                                ) ||
+                            // SY <--
+                            (manga.bookmarkedFilterRaw == Manga.CHAPTER_SHOW_BOOKMARKED && !it.bookmark) ||
+                            (manga.bookmarkedFilterRaw == Manga.CHAPTER_SHOW_NOT_BOOKMARKED && it.bookmark)
+                    }
+                    else -> {
+                        false
                     }
                 }
+            }
 
-                if (filteredChapters.any { it.id == chapterId }) {
-                    filteredChapters
-                } else {
-                    filteredChapters + listOf(selectedChapter)
-                }
+            if (filteredChapters.any { it.id == chapterId }) {
+                filteredChapters
+            } else {
+                filteredChapters + listOf(selectedChapter)
             }
-            else -> {
-                chapters
-            }
+        } else {
+            chapters
         }
 
         chaptersForReader
@@ -354,11 +351,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
                     sourceManager.isInitialized.first { it }
                     val source = sourceManager.getOrStub(manga.source)
                     val metadataSource = source.getMainSource<MetadataSource<*, *>>()
-                    val metadata = if (metadataSource != null) {
-                        getFlatMetadataById.await(mangaId)?.raise(metadataSource.metaClass)
-                    } else {
-                        null
-                    }
+                    val metadata = metadataSource?.let { getFlatMetadataById.await(mangaId)?.raise(it.metaClass) }
                     val mergedReferences = if (source is MergedSource) {
                         runBlocking {
                             getMergedReferencesById.await(manga.id)
@@ -914,9 +907,10 @@ internal class ReaderViewModel @JvmOverloads constructor(
     fun getMangaOrientation(resolveDefault: Boolean = true): Int {
         val default = readerPreferences.defaultOrientationType.get()
         val orientation = ReaderOrientation.fromPreference(manga?.readerOrientation?.toInt())
-        return when {
-            resolveDefault && orientation == ReaderOrientation.DEFAULT -> default
-            else -> manga?.readerOrientation?.toInt() ?: default
+        return if (resolveDefault && orientation == ReaderOrientation.DEFAULT) {
+            default
+        } else {
+            manga?.readerOrientation?.toInt() ?: default
         }
     }
 

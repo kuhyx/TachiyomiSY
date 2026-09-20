@@ -134,15 +134,12 @@ internal class PagePreviewFetcher(
     }
 
     private fun getCacheControl(): CacheControl {
-        return when {
-            options.networkCachePolicy.readEnabled -> {
-                // don't take up okhttp cache
-                CACHE_CONTROL_NO_STORE
-            }
-            else -> {
-                // This causes the request to fail with a 504 Unsatisfiable Request.
-                CACHE_CONTROL_NO_NETWORK_NO_CACHE
-            }
+        return if (options.networkCachePolicy.readEnabled) {
+            // don't take up okhttp cache
+            CACHE_CONTROL_NO_STORE
+        } else {
+            // This causes the request to fail with a 504 Unsatisfiable Request.
+            CACHE_CONTROL_NO_NETWORK_NO_CACHE
         }
     }
 

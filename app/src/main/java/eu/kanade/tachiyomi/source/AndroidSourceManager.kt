@@ -133,15 +133,9 @@ internal class AndroidSourceManager(
         val factories = DELEGATED_SOURCES.entries
             .filter { it.value.factory }
             .map { it.value.originalSourceQualifiedClassName }
-        val delegate = if (sourceQName != null) {
-            val matched = factories.find { sourceQName.startsWith(it) }
-            if (matched != null) {
-                DELEGATED_SOURCES[matched]
-            } else {
-                DELEGATED_SOURCES[sourceQName]
-            }
-        } else {
-            null
+        val delegate = sourceQName?.let { qualifiedName ->
+            val matched = factories.find { qualifiedName.startsWith(it) }
+            DELEGATED_SOURCES[matched ?: qualifiedName]
         }
         val newSource = if (this is HttpSource && delegate != null) {
             xLogD("Delegating source: %s -> %s!", sourceQName, delegate.newSourceClass.qualifiedName)
