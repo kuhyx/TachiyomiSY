@@ -104,13 +104,13 @@ internal class MemAutoFlushingLookupTable<T>(
     private fun tryWrite() {
         val id = ++writeCounter
         flushed = false
-        launch {
+        suspend fun work() {
             delay(debounceTimeMs)
-            if (id != writeCounter) return@launch
+            if (id != writeCounter) return
 
             mutex.withLock {
                 // Second check inside of mutex to prevent dupe writes
-                if (id != writeCounter) return@launch
+                if (id != writeCounter) return
                 withContext(NonCancellable) {
                     writeSynchronously()
 
@@ -119,6 +119,7 @@ internal class MemAutoFlushingLookupTable<T>(
                 }
             }
         }
+        launch { work() }
     }
 
     private fun writeSynchronously() {

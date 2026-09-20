@@ -247,7 +247,7 @@ internal data class TrackInfoDialogHomeScreen(
 
         // SY -->
         fun newSearch(navigator: Navigator, item: TrackItem, mangaTitle: String) {
-            screenModelScope.launchNonCancellable {
+            suspend fun work() {
                 if (trackPreferences.resolveUsingSourceMetadata.get()) {
                     // Check if the tracker id is contained in the metadata
                     val result = getTrackerIdFromMetadata(item.tracker.id)
@@ -261,7 +261,7 @@ internal data class TrackInfoDialogHomeScreen(
 
                         if (success) {
                             // Return on success
-                            return@launchNonCancellable
+                            return
                         }
                     }
                 }
@@ -276,6 +276,7 @@ internal data class TrackInfoDialogHomeScreen(
                     ),
                 )
             }
+            screenModelScope.launchNonCancellable { work() }
         }
 
         suspend fun getTrackerIdFromMetadata(trackerId: Long): String? {

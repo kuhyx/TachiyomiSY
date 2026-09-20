@@ -33,7 +33,7 @@ internal fun UpdatesScreenModel.updateDownloadState(download: Download) {
 
 internal fun UpdatesScreenModel.downloadChapters(items: List<UpdatesItem>, action: ChapterDownloadAction) {
     if (items.isEmpty()) return
-    screenModelScope.launch {
+    suspend fun work() {
         when (action) {
             ChapterDownloadAction.START -> {
                 downloadChapters(items)
@@ -42,11 +42,11 @@ internal fun UpdatesScreenModel.downloadChapters(items: List<UpdatesItem>, actio
                 }
             }
             ChapterDownloadAction.START_NOW -> {
-                val chapterId = items.singleOrNull()?.update?.chapterId ?: return@launch
+                val chapterId = items.singleOrNull()?.update?.chapterId ?: return
                 startDownloadingNow(chapterId)
             }
             ChapterDownloadAction.CANCEL -> {
-                val chapterId = items.singleOrNull()?.update?.chapterId ?: return@launch
+                val chapterId = items.singleOrNull()?.update?.chapterId ?: return
                 cancelDownload(chapterId)
             }
             ChapterDownloadAction.DELETE -> {
@@ -55,6 +55,7 @@ internal fun UpdatesScreenModel.downloadChapters(items: List<UpdatesItem>, actio
         }
         toggleAllSelection(false)
     }
+    screenModelScope.launch { work() }
 }
 
 internal fun UpdatesScreenModel.startDownloadingNow(chapterId: Long) {

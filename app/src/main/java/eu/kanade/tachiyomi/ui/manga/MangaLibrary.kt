@@ -42,7 +42,7 @@ internal class MangaLibrary(
         checkDuplicate: Boolean = true,
     ) {
         val state = model.successState ?: return
-        model.screenModelScope.launchIO {
+        suspend fun work() {
             val manga = state.manga
 
             if (model.isFavorited) {
@@ -62,7 +62,7 @@ internal class MangaLibrary(
 
                     if (duplicates.isNotEmpty()) {
                         model.updateSuccessState { it.copy(dialog = Dialog.DuplicateManga(manga, duplicates)) }
-                        return@launchIO
+                        return
                     }
                 }
 
@@ -74,14 +74,14 @@ internal class MangaLibrary(
                     // Default category set
                     defaultCategory != null -> {
                         val result = updateManga.awaitUpdateFavorite(manga.id, true)
-                        if (!result) return@launchIO
+                        if (!result) return
                         moveMangaToCategory(defaultCategory)
                     }
 
                     // Automatic 'Default' or no categories
                     defaultCategoryId == 0L || categories.isEmpty() -> {
                         val result = updateManga.awaitUpdateFavorite(manga.id, true)
-                        if (!result) return@launchIO
+                        if (!result) return
                         moveMangaToCategory(null)
                     }
 
@@ -95,6 +95,7 @@ internal class MangaLibrary(
                 addTracks.bindEnhancedTrackers(manga, state.source)
             }
         }
+        model.screenModelScope.launchIO { work() }
     }
 
     fun showChangeCategoryDialog() {

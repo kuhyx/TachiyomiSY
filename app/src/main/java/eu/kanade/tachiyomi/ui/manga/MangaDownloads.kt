@@ -134,9 +134,9 @@ internal class MangaDownloads(
     ) {
         val successState = model.successState ?: return
 
-        model.screenModelScope.launchNonCancellable {
+        suspend fun work() {
             if (startNow) {
-                val chapterId = chapters.singleOrNull()?.id ?: return@launchNonCancellable
+                val chapterId = chapters.singleOrNull()?.id ?: return
                 downloadManager.startDownloadNow(chapterId)
             } else {
                 downloadChapters(chapters)
@@ -156,6 +156,7 @@ internal class MangaDownloads(
                 }
             }
         }
+        model.screenModelScope.launchNonCancellable { work() }
     }
 
     fun runChapterDownloadActions(
