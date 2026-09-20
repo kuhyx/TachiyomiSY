@@ -151,7 +151,5 @@ internal sealed interface RecommendationItemResult {
             get() = result.isEmpty()
     }
 
-    fun isVisible(onlyShowHasResults: Boolean): Boolean {
-        return !onlyShowHasResults || (this is Success && !this.isEmpty)
-    }
+    fun isVisible(onlyShowHasResults: Boolean): Boolean = !onlyShowHasResults || (this is Success && !this.isEmpty)
 }

@@ -12,13 +12,9 @@ internal class AutoCompleteAdapter(context: Context, resource: Int, var objects:
     private val mOriginalValues: List<String> = objects
     private var mFilter: ListFilter? = null
 
-    override fun getCount(): Int {
-        return objects.size
-    }
+    override fun getCount(): Int = objects.size
 
-    override fun getItem(position: Int): String {
-        return objects[position]
-    }
+    override fun getItem(position: Int): String = objects[position]
 
     override fun getFilter(): Filter {
         if (mFilter == null) {

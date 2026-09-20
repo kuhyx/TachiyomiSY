@@ -27,9 +27,8 @@ internal class GetExhSavedSearch(
         return withIOContext { loadSearch(search, getFilterList) }
     }
 
-    suspend fun await(sourceId: Long, getFilterList: () -> FilterList): List<EXHSavedSearch> {
-        return withIOContext { loadSearches(getSavedSearchBySourceId.await(sourceId), getFilterList) }
-    }
+    suspend fun await(sourceId: Long, getFilterList: () -> FilterList): List<EXHSavedSearch> =
+        withIOContext { loadSearches(getSavedSearchBySourceId.await(sourceId), getFilterList) }
 
     fun subscribe(sourceId: Long, getFilterList: () -> FilterList): Flow<List<EXHSavedSearch>> {
         return getSavedSearchBySourceId.subscribe(sourceId)
@@ -37,9 +36,8 @@ internal class GetExhSavedSearch(
             .flowOn(Dispatchers.IO)
     }
 
-    private fun loadSearches(searches: List<SavedSearch>, getFilterList: () -> FilterList): List<EXHSavedSearch> {
-        return searches.map { loadSearch(it, getFilterList) }
-    }
+    private fun loadSearches(searches: List<SavedSearch>, getFilterList: () -> FilterList): List<EXHSavedSearch> =
+        searches.map { loadSearch(it, getFilterList) }
 
     private fun loadSearch(search: SavedSearch, getFilterList: () -> FilterList): EXHSavedSearch {
         val filters = getFilters(search.filtersJson)

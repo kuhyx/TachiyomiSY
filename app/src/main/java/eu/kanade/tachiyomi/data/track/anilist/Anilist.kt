@@ -55,9 +55,7 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
 
     override fun getLogo() = R.drawable.brand_anilist
 
-    override fun getStatusList(): List<Long> {
-        return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ, REREADING)
-    }
+    override fun getStatusList(): List<Long> = listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ, REREADING)
 
     override fun getStatus(status: Long): StringResource? = when (status) {
         READING -> MR.strings.reading
@@ -138,9 +136,7 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
         }
     }
 
-    private suspend fun add(track: Track): Track {
-        return api.addLibManga(track)
-    }
+    private suspend fun add(track: Track): Track = api.addLibManga(track)
 
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         // If user was using API v1 fetch library_id
@@ -196,9 +192,7 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
         }
     }
 
-    override suspend fun search(query: String): List<TrackSearch> {
-        return api.search(query)
-    }
+    override suspend fun search(query: String): List<TrackSearch> = api.search(query)
 
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.getLibManga(track, getUsername().toInt())
@@ -229,14 +223,10 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
         interceptor.setAuth(null)
     }
 
-    override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? {
-        return api.getMangaMetadata(track)
-    }
+    override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? = api.getMangaMetadata(track)
 
     // SY -->
-    override suspend fun searchById(id: String): TrackSearch {
-        return api.searchById(id)
-    }
+    override suspend fun searchById(id: String): TrackSearch = api.searchById(id)
     // SY <--
 
     fun saveOAuth(alOAuth: ALOAuth?) {

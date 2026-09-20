@@ -704,9 +704,8 @@ internal class Downloader(
     /**
      * Returns true if all the queued downloads are in DOWNLOADED or ERROR state.
      */
-    private fun areAllDownloadsFinished(): Boolean {
-        return queueState.value.none { it.status.value <= Download.State.DOWNLOADING.value }
-    }
+    private fun areAllDownloadsFinished(): Boolean =
+        queueState.value.none { it.status.value <= Download.State.DOWNLOADING.value }
 
     private fun addAllToQueue(downloads: List<Download>) {
         _queueState.update {

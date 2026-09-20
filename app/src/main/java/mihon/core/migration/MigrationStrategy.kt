@@ -32,16 +32,13 @@ internal class DefaultMigrationStrategy(
 
 internal class InitialMigrationStrategy(private val strategy: DefaultMigrationStrategy) : MigrationStrategy {
 
-    override operator fun invoke(migrations: List<Migration>): Deferred<Boolean> {
-        return strategy(migrations.filter { it.isAlways })
-    }
+    override operator fun invoke(migrations: List<Migration>): Deferred<Boolean> =
+        strategy(migrations.filter { it.isAlways })
 }
 
 internal class NoopMigrationStrategy(val state: Boolean) : MigrationStrategy {
 
-    override fun invoke(migrations: List<Migration>): Deferred<Boolean> {
-        return CompletableDeferred(state)
-    }
+    override fun invoke(migrations: List<Migration>): Deferred<Boolean> = CompletableDeferred(state)
 }
 
 internal class VersionRangeMigrationStrategy(
@@ -49,7 +46,6 @@ internal class VersionRangeMigrationStrategy(
     private val strategy: DefaultMigrationStrategy,
 ) : MigrationStrategy {
 
-    override operator fun invoke(migrations: List<Migration>): Deferred<Boolean> {
-        return strategy(migrations.filter { it.isAlways || it.version.toInt() in versions })
-    }
+    override operator fun invoke(migrations: List<Migration>): Deferred<Boolean> =
+        strategy(migrations.filter { it.isAlways || it.version.toInt() in versions })
 }

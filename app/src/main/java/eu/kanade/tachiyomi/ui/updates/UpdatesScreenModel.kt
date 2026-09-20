@@ -508,8 +508,6 @@ internal data class UpdatesItem(
     val selected: Boolean = false,
 ) {
     // SY -->
-    fun isEhBasedUpdate(): Boolean {
-        return update.sourceId == EH_SOURCE_ID || update.sourceId == EXH_SOURCE_ID
-    }
+    fun isEhBasedUpdate(): Boolean = update.sourceId == EH_SOURCE_ID || update.sourceId == EXH_SOURCE_ID
     // SY <--
 }

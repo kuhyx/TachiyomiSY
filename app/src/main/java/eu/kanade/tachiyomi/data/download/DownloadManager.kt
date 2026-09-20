@@ -105,9 +105,7 @@ internal class DownloadManager(
      *
      * @param chapterId the chapter to check.
      */
-    fun getQueuedDownloadOrNull(chapterId: Long): Download? {
-        return queueState.value.find { it.chapter.id == chapterId }
-    }
+    fun getQueuedDownloadOrNull(chapterId: Long): Download? = queueState.value.find { it.chapter.id == chapterId }
 
     fun startDownloadNow(chapterId: Long) {
         val existingDownload = getQueuedDownloadOrNull(chapterId)
@@ -207,18 +205,14 @@ internal class DownloadManager(
     /**
      * Returns the amount of downloaded chapters.
      */
-    fun getDownloadCount(): Int {
-        return cache.getTotalDownloadCount()
-    }
+    fun getDownloadCount(): Int = cache.getTotalDownloadCount()
 
     /**
      * Returns the amount of downloaded chapters for a manga.
      *
      * @param manga the manga to check.
      */
-    fun getDownloadCount(manga: Manga): Int {
-        return cache.getDownloadCount(manga)
-    }
+    fun getDownloadCount(manga: Manga): Int = cache.getDownloadCount(manga)
 
     fun cancelQueuedDownloads(downloads: List<Download>) {
         removeFromDownloadQueue(downloads.map { it.chapter })
@@ -297,9 +291,7 @@ internal class DownloadManager(
     /**
      * return the list of all manga folders
      */
-    fun getMangaFolders(source: Source): List<UniFile> {
-        return provider.findSourceDir(source)?.listFiles()?.toList().orEmpty()
-    }
+    fun getMangaFolders(source: Source): List<UniFile> = provider.findSourceDir(source)?.listFiles()?.toList().orEmpty()
 
     /**
      * Deletes the directories of chapters that were read or have no match

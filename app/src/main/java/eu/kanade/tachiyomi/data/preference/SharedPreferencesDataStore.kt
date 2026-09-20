@@ -6,9 +6,7 @@ import androidx.preference.PreferenceDataStore
 
 internal class SharedPreferencesDataStore(private val prefs: SharedPreferences) : PreferenceDataStore() {
 
-    override fun getBoolean(key: String?, defValue: Boolean): Boolean {
-        return prefs.getBoolean(key, defValue)
-    }
+    override fun getBoolean(key: String?, defValue: Boolean): Boolean = prefs.getBoolean(key, defValue)
 
     override fun putBoolean(key: String?, value: Boolean) {
         prefs.edit {
@@ -16,9 +14,7 @@ internal class SharedPreferencesDataStore(private val prefs: SharedPreferences) 
         }
     }
 
-    override fun getInt(key: String?, defValue: Int): Int {
-        return prefs.getInt(key, defValue)
-    }
+    override fun getInt(key: String?, defValue: Int): Int = prefs.getInt(key, defValue)
 
     override fun putInt(key: String?, value: Int) {
         prefs.edit {
@@ -26,9 +22,7 @@ internal class SharedPreferencesDataStore(private val prefs: SharedPreferences) 
         }
     }
 
-    override fun getLong(key: String?, defValue: Long): Long {
-        return prefs.getLong(key, defValue)
-    }
+    override fun getLong(key: String?, defValue: Long): Long = prefs.getLong(key, defValue)
 
     override fun putLong(key: String?, value: Long) {
         prefs.edit {
@@ -36,9 +30,7 @@ internal class SharedPreferencesDataStore(private val prefs: SharedPreferences) 
         }
     }
 
-    override fun getFloat(key: String?, defValue: Float): Float {
-        return prefs.getFloat(key, defValue)
-    }
+    override fun getFloat(key: String?, defValue: Float): Float = prefs.getFloat(key, defValue)
 
     override fun putFloat(key: String?, value: Float) {
         prefs.edit {
@@ -46,9 +38,7 @@ internal class SharedPreferencesDataStore(private val prefs: SharedPreferences) 
         }
     }
 
-    override fun getString(key: String?, defValue: String?): String? {
-        return prefs.getString(key, defValue)
-    }
+    override fun getString(key: String?, defValue: String?): String? = prefs.getString(key, defValue)
 
     override fun putString(key: String?, value: String?) {
         prefs.edit {
@@ -56,9 +46,8 @@ internal class SharedPreferencesDataStore(private val prefs: SharedPreferences) 
         }
     }
 
-    override fun getStringSet(key: String?, defValues: MutableSet<String>?): MutableSet<String>? {
-        return prefs.getStringSet(key, defValues)
-    }
+    override fun getStringSet(key: String?, defValues: MutableSet<String>?): MutableSet<String>? =
+        prefs.getStringSet(key, defValues)
 
     override fun putStringSet(key: String?, values: MutableSet<String>?) {
         prefs.edit {

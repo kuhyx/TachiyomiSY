@@ -26,78 +26,78 @@ import androidx.compose.ui.graphics.Color
 internal object CatppuccinColorScheme : BaseColorScheme() {
 
     override val darkScheme = darkColorScheme(
-        primary = Color(0xFFCBA6F7),
-        onPrimary = Color(0xFF11111B),
-        primaryContainer = Color(0xFFCBA6F7),
-        onPrimaryContainer = Color(0xFF11111B),
-        secondary = Color(0xFFB4BEFE), // Unread badge
-        onSecondary = Color(0xFF11111B), // Unread badge text
-        secondaryContainer = Color(0xFF313244), // Navigation bar selector pill & progress indicator (remaining)
-        onSecondaryContainer = Color(0xFFCBA6F7), // Navigation bar selector icon
-        tertiary = Color(0xFFA6E3A1), // Volume and brightness bars, Downloaded badge
-        onTertiary = Color(0xFF11111B), // Downloaded badge text
-        tertiaryContainer = Color(0xFF1E1E2E),
-        onTertiaryContainer = Color(0xFFCDD6F4),
-        error = Color(0xFFF38BA8),
-        onError = Color(0xFF11111B),
-        errorContainer = Color(0xFFFF0558),
-        onErrorContainer = Color(0xFFEF9FB4),
-        background = Color(0xFF181825),
-        onBackground = Color(0xFFCDD6F4),
-        surface = Color(0xFF181825),
-        onSurface = Color(0xFFCDD6F4),
-        surfaceVariant = Color(0xFF1E1E2E), // Navigation bar background (ThemePrefWidget)
-        onSurfaceVariant = Color(0xFFCDD6F4), // Button (unselected)
-        outline = Color(0xFFCBA6F7),
-        outlineVariant = Color(0xFF585B70), // Outlines for buttons
-        scrim = Color(0xFF11111B),
-        inverseSurface = Color(0xFFEFF1F5), // Snackbar or whatever they called
-        inverseOnSurface = Color(0xFF4C4F69), // Snackbar text
-        inversePrimary = Color(0xFF8839EF), // Snackbar accent
-        surfaceDim = Color(0xFF181825),
-        surfaceBright = Color(0xFF313244),
-        surfaceContainerLowest = Color(0xFF181825),
-        surfaceContainerLow = Color(0xFF1E1E2E), // Repo cards
-        surfaceContainer = Color(0xFF1E1E2E),
-        surfaceContainerHigh = Color(0xFF1E1E2E), // Filter menu
-        surfaceContainerHighest = Color(0xFF313244), // Untoggleg button bg
+        primary = Color(color = 0xFFCBA6F7),
+        onPrimary = Color(color = 0xFF11111B),
+        primaryContainer = Color(color = 0xFFCBA6F7),
+        onPrimaryContainer = Color(color = 0xFF11111B),
+        secondary = Color(color = 0xFFB4BEFE), // Unread badge
+        onSecondary = Color(color = 0xFF11111B), // Unread badge text
+        secondaryContainer = Color(color = 0xFF313244), // Navigation bar selector pill & progress indicator (remaining)
+        onSecondaryContainer = Color(color = 0xFFCBA6F7), // Navigation bar selector icon
+        tertiary = Color(color = 0xFFA6E3A1), // Volume and brightness bars, Downloaded badge
+        onTertiary = Color(color = 0xFF11111B), // Downloaded badge text
+        tertiaryContainer = Color(color = 0xFF1E1E2E),
+        onTertiaryContainer = Color(color = 0xFFCDD6F4),
+        error = Color(color = 0xFFF38BA8),
+        onError = Color(color = 0xFF11111B),
+        errorContainer = Color(color = 0xFFFF0558),
+        onErrorContainer = Color(color = 0xFFEF9FB4),
+        background = Color(color = 0xFF181825),
+        onBackground = Color(color = 0xFFCDD6F4),
+        surface = Color(color = 0xFF181825),
+        onSurface = Color(color = 0xFFCDD6F4),
+        surfaceVariant = Color(color = 0xFF1E1E2E), // Navigation bar background (ThemePrefWidget)
+        onSurfaceVariant = Color(color = 0xFFCDD6F4), // Button (unselected)
+        outline = Color(color = 0xFFCBA6F7),
+        outlineVariant = Color(color = 0xFF585B70), // Outlines for buttons
+        scrim = Color(color = 0xFF11111B),
+        inverseSurface = Color(color = 0xFFEFF1F5), // Snackbar or whatever they called
+        inverseOnSurface = Color(color = 0xFF4C4F69), // Snackbar text
+        inversePrimary = Color(color = 0xFF8839EF), // Snackbar accent
+        surfaceDim = Color(color = 0xFF181825),
+        surfaceBright = Color(color = 0xFF313244),
+        surfaceContainerLowest = Color(color = 0xFF181825),
+        surfaceContainerLow = Color(color = 0xFF1E1E2E), // Repo cards
+        surfaceContainer = Color(color = 0xFF1E1E2E),
+        surfaceContainerHigh = Color(color = 0xFF1E1E2E), // Filter menu
+        surfaceContainerHighest = Color(color = 0xFF313244), // Untoggleg button bg
     )
 
     override val lightScheme = lightColorScheme(
-        primary = Color(0xFF8839EF),
-        onPrimary = Color(0xFFDCE0E8),
-        primaryContainer = Color(0xFF8839EF),
-        onPrimaryContainer = Color(0xFFDCE0E8),
-        secondary = Color(0xFF7287FD), // Unread badge
-        onSecondary = Color(0xFFDCE0E8), // Unread badge text
-        secondaryContainer = Color(0xFFCDD0DA), // Navigation bar selector pill & progress indicator (remaining)
-        onSecondaryContainer = Color(0xFF8839EF), // Navigation bar selector icon
-        tertiary = Color(0xFF40A02B), // Volume and brightness bars, Downloaded badge
-        onTertiary = Color(0xFFDCE0E8), // Downloaded badge text
-        tertiaryContainer = Color(0xFFEFF1F5),
-        onTertiaryContainer = Color(0xFF4C4F69),
-        error = Color(0xFFD20F39),
-        onError = Color(0xFFDCE0E8),
-        errorContainer = Color(0xFF68001C),
-        onErrorContainer = Color(0xFFD61C41),
-        background = Color(0xFFE6E9EF),
-        onBackground = Color(0xFF4C4F69),
-        surface = Color(0xFFE6E9EF),
-        onSurface = Color(0xFF4C4F69),
-        surfaceVariant = Color(0xFFEFF1F5), // Navigation bar background (ThemePrefWidget)
-        onSurfaceVariant = Color(0xFF4C4F69), // Button (unselected)
-        outline = Color(0xFF8839EF),
-        outlineVariant = Color(0xFFACB0BE), // Outlines for buttons
-        scrim = Color(0xFFDCE0E8),
-        inverseSurface = Color(0xFF1E1E2E), // Snackbar
-        inverseOnSurface = Color(0xFFCDD6F4), // Snackbar text
-        inversePrimary = Color(0xFFCBA6F7), // Snackbar accent
-        surfaceDim = Color(0xFFE6E9EF),
-        surfaceBright = Color(0xFFCDD0DA),
-        surfaceContainerLowest = Color(0xFFE6E9EF),
-        surfaceContainerLow = Color(0xFFEFF1F5), // Repo cards
-        surfaceContainer = Color(0xFFEFF1F5), // Navigation bar background
-        surfaceContainerHigh = Color(0xFFEFF1F5), // Filter menu
-        surfaceContainerHighest = Color(0xFFCDD0DA), // Untoggleg bg
+        primary = Color(color = 0xFF8839EF),
+        onPrimary = Color(color = 0xFFDCE0E8),
+        primaryContainer = Color(color = 0xFF8839EF),
+        onPrimaryContainer = Color(color = 0xFFDCE0E8),
+        secondary = Color(color = 0xFF7287FD), // Unread badge
+        onSecondary = Color(color = 0xFFDCE0E8), // Unread badge text
+        secondaryContainer = Color(color = 0xFFCDD0DA), // Navigation bar selector pill & progress indicator (remaining)
+        onSecondaryContainer = Color(color = 0xFF8839EF), // Navigation bar selector icon
+        tertiary = Color(color = 0xFF40A02B), // Volume and brightness bars, Downloaded badge
+        onTertiary = Color(color = 0xFFDCE0E8), // Downloaded badge text
+        tertiaryContainer = Color(color = 0xFFEFF1F5),
+        onTertiaryContainer = Color(color = 0xFF4C4F69),
+        error = Color(color = 0xFFD20F39),
+        onError = Color(color = 0xFFDCE0E8),
+        errorContainer = Color(color = 0xFF68001C),
+        onErrorContainer = Color(color = 0xFFD61C41),
+        background = Color(color = 0xFFE6E9EF),
+        onBackground = Color(color = 0xFF4C4F69),
+        surface = Color(color = 0xFFE6E9EF),
+        onSurface = Color(color = 0xFF4C4F69),
+        surfaceVariant = Color(color = 0xFFEFF1F5), // Navigation bar background (ThemePrefWidget)
+        onSurfaceVariant = Color(color = 0xFF4C4F69), // Button (unselected)
+        outline = Color(color = 0xFF8839EF),
+        outlineVariant = Color(color = 0xFFACB0BE), // Outlines for buttons
+        scrim = Color(color = 0xFFDCE0E8),
+        inverseSurface = Color(color = 0xFF1E1E2E), // Snackbar
+        inverseOnSurface = Color(color = 0xFFCDD6F4), // Snackbar text
+        inversePrimary = Color(color = 0xFFCBA6F7), // Snackbar accent
+        surfaceDim = Color(color = 0xFFE6E9EF),
+        surfaceBright = Color(color = 0xFFCDD0DA),
+        surfaceContainerLowest = Color(color = 0xFFE6E9EF),
+        surfaceContainerLow = Color(color = 0xFFEFF1F5), // Repo cards
+        surfaceContainer = Color(color = 0xFFEFF1F5), // Navigation bar background
+        surfaceContainerHigh = Color(color = 0xFFEFF1F5), // Filter menu
+        surfaceContainerHighest = Color(color = 0xFFCDD0DA), // Untoggleg bg
     )
 }

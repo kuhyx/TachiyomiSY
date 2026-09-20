@@ -18,9 +18,7 @@ private const val TABLET_UI_MIN_SCREEN_WIDTH_PORTRAIT_DP = 700
 // make sure icons on the nav rail fit
 private const val TABLET_UI_MIN_SCREEN_WIDTH_LANDSCAPE_DP = 600
 
-internal fun Configuration.isTabletUi(): Boolean {
-    return smallestScreenWidthDp >= TABLET_UI_REQUIRED_SCREEN_WIDTH_DP
-}
+internal fun Configuration.isTabletUi(): Boolean = smallestScreenWidthDp >= TABLET_UI_REQUIRED_SCREEN_WIDTH_DP
 
 // Follow-up: move the logic to `isTabletUi()` when main activity is rewritten in Compose
 // https://github.com/kuhyx/TachiyomiSY/issues/23
@@ -52,27 +50,23 @@ internal fun Context.prepareTabletUiContext(): Context {
 /**
  * Returns true if current context is in night mode
  */
-internal fun Context.isNightMode(): Boolean {
-    return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-}
+internal fun Context.isNightMode(): Boolean =
+    resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
 /**
  * Checks whether if the device has a display cutout (i.e. notch, camera cutout, etc.).
  *
  * Only works on Android 9+.
  */
-internal fun Activity.hasDisplayCutout(): Boolean {
-    return window.decorView.hasDisplayCutout()
-}
+internal fun Activity.hasDisplayCutout(): Boolean = window.decorView.hasDisplayCutout()
 
 /**
  * Checks whether if the device has a display cutout (i.e. notch, camera cutout, etc.).
  *
  * Only works on Android 9+.
  */
-internal fun View.hasDisplayCutout(): Boolean {
-    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && rootWindowInsets?.displayCutout != null
-}
+internal fun View.hasDisplayCutout(): Boolean =
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && rootWindowInsets?.displayCutout != null
 
 /**
  * Gets system's config_navBarNeedsScrim boolean flag added in Android 10, defaults to true.

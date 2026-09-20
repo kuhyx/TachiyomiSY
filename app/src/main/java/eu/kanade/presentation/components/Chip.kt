@@ -424,9 +424,8 @@ internal class ChipColors internal constructor(
      * @param enabled whether the chip is enabled
      */
     @Composable
-    internal fun containerColor(enabled: Boolean): State<Color> {
-        return rememberUpdatedState(if (enabled) containerColor else disabledContainerColor)
-    }
+    internal fun containerColor(enabled: Boolean): State<Color> =
+        rememberUpdatedState(if (enabled) containerColor else disabledContainerColor)
 
     /**
      * Represents the label color for this chip, depending on [enabled].
@@ -434,9 +433,8 @@ internal class ChipColors internal constructor(
      * @param enabled whether the chip is enabled
      */
     @Composable
-    internal fun labelColor(enabled: Boolean): State<Color> {
-        return rememberUpdatedState(if (enabled) labelColor else disabledLabelColor)
-    }
+    internal fun labelColor(enabled: Boolean): State<Color> =
+        rememberUpdatedState(if (enabled) labelColor else disabledLabelColor)
 
     /**
      * Represents the leading icon's content color for this chip, depending on [enabled].

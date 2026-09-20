@@ -21,9 +21,7 @@ internal fun LocalDateTime.toDateTimestampString(dateTimeFormatter: DateTimeForm
     return "$date $time"
 }
 
-internal fun Date.toTimestampString(): String {
-    return DateFormat.getTimeInstance(DateFormat.SHORT).format(this)
-}
+internal fun Date.toTimestampString(): String = DateFormat.getTimeInstance(DateFormat.SHORT).format(this)
 
 internal fun Long.convertEpochMillisZone(
     from: ZoneId,
@@ -35,13 +33,9 @@ internal fun Long.convertEpochMillisZone(
         .toEpochMilli()
 }
 
-internal fun Long.toLocalDate(): LocalDate {
-    return LocalDate.ofInstant(Instant.ofEpochMilli(this), ZoneId.systemDefault())
-}
+internal fun Long.toLocalDate(): LocalDate = LocalDate.ofInstant(Instant.ofEpochMilli(this), ZoneId.systemDefault())
 
-internal fun Instant.toLocalDate(zoneId: ZoneId = ZoneId.systemDefault()): LocalDate {
-    return LocalDate.ofInstant(this, zoneId)
-}
+internal fun Instant.toLocalDate(zoneId: ZoneId = ZoneId.systemDefault()): LocalDate = LocalDate.ofInstant(this, zoneId)
 
 internal fun LocalDate.toRelativeString(
     context: Context,

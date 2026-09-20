@@ -33,9 +33,7 @@ internal class ExtensionApi {
         preferenceStore.getLong(Preference.appStateKey("last_ext_check"), 0)
     }
 
-    suspend fun findExtensions(): List<Extension.Available> {
-        return withIOContext { repository.fetchExtensions() }
-    }
+    suspend fun findExtensions(): List<Extension.Available> = withIOContext { repository.fetchExtensions() }
 
     suspend fun checkForUpdates(
         context: Context,

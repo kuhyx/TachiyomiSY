@@ -40,9 +40,8 @@ internal class ComikeyHandler(cloudflareClient: OkHttpClient, userAgent: String)
         return url.trimEnd('/').substringAfterLast('/').toInt()
     }
 
-    private fun pageListRequest(mangaId: Int, chapterGuid: String): Request {
-        return GET("$apiUrl/comics/$mangaId/read?format=json&content=EPI-$chapterGuid", headers)
-    }
+    private fun pageListRequest(mangaId: Int, chapterGuid: String): Request =
+        GET("$apiUrl/comics/$mangaId/read?format=json&content=EPI-$chapterGuid", headers)
 
     private fun getActualPageList(response: Response): Request? {
         val element = Json.parseToJsonElement(response.body.string()).jsonObject

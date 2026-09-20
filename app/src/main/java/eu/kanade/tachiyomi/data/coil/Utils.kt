@@ -10,13 +10,11 @@ import coil3.size.Size
 import coil3.size.isOriginal
 import coil3.size.pxOrElse
 
-internal inline fun Size.widthPx(scale: Scale, original: () -> Int): Int {
-    return if (isOriginal) original() else width.toPx(scale)
-}
+internal inline fun Size.widthPx(scale: Scale, original: () -> Int): Int =
+    if (isOriginal) original() else width.toPx(scale)
 
-internal inline fun Size.heightPx(scale: Scale, original: () -> Int): Int {
-    return if (isOriginal) original() else height.toPx(scale)
-}
+internal inline fun Size.heightPx(scale: Scale, original: () -> Int): Int =
+    if (isOriginal) original() else height.toPx(scale)
 
 internal fun Dimension.toPx(scale: Scale): Int = pxOrElse {
     when (scale) {

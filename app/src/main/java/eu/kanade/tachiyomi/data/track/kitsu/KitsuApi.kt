@@ -332,9 +332,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
         private const val VND_API_JSON = "application/vnd.api+json"
         private val VND_JSON_MEDIA_TYPE = VND_API_JSON.toMediaType()
 
-        fun mangaUrl(remoteId: Long): String {
-            return BASE_MANGA_URL + remoteId
-        }
+        fun mangaUrl(remoteId: Long): String = BASE_MANGA_URL + remoteId
 
         fun refreshTokenRequest(token: String) = POST(
             LOGIN_URL,

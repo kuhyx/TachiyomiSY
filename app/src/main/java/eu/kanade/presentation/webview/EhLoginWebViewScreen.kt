@@ -152,7 +152,7 @@ internal fun EhLoginWebViewScreen(
                 Box(
                     Modifier
                         .fillMaxSize()
-                        .background(Color(0xb5000000)),
+                        .background(Color(color = 0xb5000000)),
                 ) {
                     Dialog(onDismissRequest = { showAdvancedOptions = false }) {
                         fun loadUrl(url: String) {

@@ -8,9 +8,7 @@ internal class GetAvailableScanlators(
     private val repository: ChapterRepository,
 ) {
 
-    private fun List<String>.cleanupAvailableScanlators(): Set<String> {
-        return mapNotNull { it.ifBlank { null } }.toSet()
-    }
+    private fun List<String>.cleanupAvailableScanlators(): Set<String> = mapNotNull { it.ifBlank { null } }.toSet()
 
     suspend fun await(mangaId: Long): Set<String> {
         return repository.getScanlatorsByMangaId(mangaId)

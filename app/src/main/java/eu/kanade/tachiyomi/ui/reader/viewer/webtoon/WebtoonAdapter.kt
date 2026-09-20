@@ -81,9 +81,7 @@ internal class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<
     /**
      * Returns the amount of items of the adapter.
      */
-    override fun getItemCount(): Int {
-        return items.size
-    }
+    override fun getItemCount(): Int = items.size
 
     /**
      * Returns the view type for the item at the given [position].
@@ -155,23 +153,17 @@ internal class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<
         /**
          * Returns true if the contents of the items are the same.
          */
-        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return true
-        }
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean = true
 
         /**
          * Returns the size of the old list.
          */
-        override fun getOldListSize(): Int {
-            return oldItems.size
-        }
+        override fun getOldListSize(): Int = oldItems.size
 
         /**
          * Returns the size of the new list.
          */
-        override fun getNewListSize(): Int {
-            return newItems.size
-        }
+        override fun getNewListSize(): Int = newItems.size
     }
 }
 

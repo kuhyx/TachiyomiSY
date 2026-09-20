@@ -37,9 +37,7 @@ internal abstract class ViewerNavigation {
     protected abstract var regionList: List<Region>
 
     /** Returns regions with applied inversion. */
-    fun getRegions(): List<Region> {
-        return regionList.map { it.invert(invertMode) }
-    }
+    fun getRegions(): List<Region> = regionList.map { it.invert(invertMode) }
 
     fun getAction(pos: PointF): NavigationRegion {
         val x = pos.x

@@ -46,9 +46,7 @@ internal sealed class SourceFeedUI {
             @ReadOnlyComposable
             get() = stringResource(MR.strings.latest)
 
-        override fun withResults(results: List<Manga>?): SourceFeedUI {
-            return copy(results = results)
-        }
+        override fun withResults(results: List<Manga>?): SourceFeedUI = copy(results = results)
     }
     data class Browse(override val results: List<Manga>?) : SourceFeedUI() {
         override val id: Long = -2
@@ -57,9 +55,7 @@ internal sealed class SourceFeedUI {
             @ReadOnlyComposable
             get() = stringResource(MR.strings.browse)
 
-        override fun withResults(results: List<Manga>?): SourceFeedUI {
-            return copy(results = results)
-        }
+        override fun withResults(results: List<Manga>?): SourceFeedUI = copy(results = results)
     }
     data class SourceSavedSearch(
         val feed: FeedSavedSearch,
@@ -74,9 +70,7 @@ internal sealed class SourceFeedUI {
             @ReadOnlyComposable
             get() = savedSearch.name
 
-        override fun withResults(results: List<Manga>?): SourceFeedUI {
-            return copy(results = results)
-        }
+        override fun withResults(results: List<Manga>?): SourceFeedUI = copy(results = results)
     }
 }
 

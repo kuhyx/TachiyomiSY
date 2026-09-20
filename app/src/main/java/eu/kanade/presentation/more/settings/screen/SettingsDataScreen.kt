@@ -567,9 +567,8 @@ internal object SettingsDataScreen : SearchableSettings {
     }
 
     @Composable
-    private fun getAdditionalPreferences(syncPreferences: SyncPreferences): List<Preference> {
-        return listOf(getSyncNowPref(), getAutomaticSyncGroup(syncPreferences))
-    }
+    private fun getAdditionalPreferences(syncPreferences: SyncPreferences): List<Preference> =
+        listOf(getSyncNowPref(), getAutomaticSyncGroup(syncPreferences))
 
     @Composable
     private fun getGoogleDrivePreferences(): List<Preference> {

@@ -19,9 +19,7 @@ internal fun Manga.isLewd(): Boolean {
         genre.orEmpty().any { tag -> isHentaiTag(tag) }
 }
 
-private fun isNonHentaiTag(tag: String): Boolean {
-    return tag.contains("non-h", true)
-}
+private fun isNonHentaiTag(tag: String): Boolean = tag.contains("non-h", true)
 
 private fun isHentaiTag(tag: String): Boolean {
     return tag.contains("hentai", true) ||

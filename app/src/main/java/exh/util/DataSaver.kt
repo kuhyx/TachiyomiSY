@@ -16,9 +16,7 @@ internal interface DataSaver {
 
     companion object {
         val NoOp = object : DataSaver {
-            override fun compress(imageUrl: String): String {
-                return imageUrl
-            }
+            override fun compress(imageUrl: String): String = imageUrl
         }
 
         suspend fun HttpSource.getImage(page: Page, existingSize: Long = 0L, dataSaver: DataSaver): Response {

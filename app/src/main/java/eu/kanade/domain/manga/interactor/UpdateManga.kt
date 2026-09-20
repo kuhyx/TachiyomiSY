@@ -12,13 +12,9 @@ internal class UpdateManga(
     private val fetchInterval: FetchInterval,
 ) {
 
-    suspend fun await(mangaUpdate: MangaUpdate): Boolean {
-        return mangaRepository.update(mangaUpdate)
-    }
+    suspend fun await(mangaUpdate: MangaUpdate): Boolean = mangaRepository.update(mangaUpdate)
 
-    suspend fun awaitAll(mangaUpdates: List<MangaUpdate>): Boolean {
-        return mangaRepository.updateAll(mangaUpdates)
-    }
+    suspend fun awaitAll(mangaUpdates: List<MangaUpdate>): Boolean = mangaRepository.updateAll(mangaUpdates)
 
     suspend fun awaitUpdateFetchInterval(
         manga: Manga,
@@ -30,13 +26,11 @@ internal class UpdateManga(
         )
     }
 
-    suspend fun awaitUpdateLastUpdate(mangaId: Long): Boolean {
-        return mangaRepository.update(MangaUpdate(id = mangaId, lastUpdate = Instant.now().toEpochMilli()))
-    }
+    suspend fun awaitUpdateLastUpdate(mangaId: Long): Boolean =
+        mangaRepository.update(MangaUpdate(id = mangaId, lastUpdate = Instant.now().toEpochMilli()))
 
-    suspend fun awaitUpdateCoverLastModified(mangaId: Long): Boolean {
-        return mangaRepository.update(MangaUpdate(id = mangaId, coverLastModified = Instant.now().toEpochMilli()))
-    }
+    suspend fun awaitUpdateCoverLastModified(mangaId: Long): Boolean =
+        mangaRepository.update(MangaUpdate(id = mangaId, coverLastModified = Instant.now().toEpochMilli()))
 
     suspend fun awaitUpdateFavorite(mangaId: Long, favorite: Boolean): Boolean {
         val dateAdded = when (favorite) {

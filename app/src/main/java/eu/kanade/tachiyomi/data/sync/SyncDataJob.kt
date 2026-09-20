@@ -72,9 +72,7 @@ internal class SyncDataJob(private val context: Context, workerParams: WorkerPar
         private const val TAG_AUTO = "$TAG_JOB:auto"
         const val TAG_MANUAL = "$TAG_JOB:manual"
 
-        fun isRunning(context: Context): Boolean {
-            return context.workManager.isRunning(TAG_JOB)
-        }
+        fun isRunning(context: Context): Boolean = context.workManager.isRunning(TAG_JOB)
 
         fun setupTask(context: Context, prefInterval: Int? = null) {
             val syncPreferences = Injekt.get<SyncPreferences>()

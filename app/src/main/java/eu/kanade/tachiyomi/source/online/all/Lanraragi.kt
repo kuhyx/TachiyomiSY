@@ -43,17 +43,11 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
     override fun newMetaInstance() = LanraragiSearchMetadata()
     override val lang = delegate.lang
 
-    private fun getApiUriBuilder(path: String): Uri.Builder {
-        return LanraragiSearchMetadata.getApiUriBuilder(baseUrl, path)
-    }
+    private fun getApiUriBuilder(path: String): Uri.Builder = LanraragiSearchMetadata.getApiUriBuilder(baseUrl, path)
 
-    private fun getReaderId(url: String): String {
-        return READER_ID_REGEX.find(url)?.groupValues?.get(1) ?: ""
-    }
+    private fun getReaderId(url: String): String = READER_ID_REGEX.find(url)?.groupValues?.get(1) ?: ""
 
-    private fun getThumbnailId(url: String): String {
-        return THUMBNAIL_ID_REGEX.find(url)?.groupValues?.get(1) ?: ""
-    }
+    private fun getThumbnailId(url: String): String = THUMBNAIL_ID_REGEX.find(url)?.groupValues?.get(1) ?: ""
 
     // Helper
     private suspend fun getRandomID(query: String): String {

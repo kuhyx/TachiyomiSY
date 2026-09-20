@@ -197,9 +197,7 @@ internal class WebtoonViewer(
     /**
      * Returns the view this viewer uses.
      */
-    override fun getView(): View {
-        return frame
-    }
+    override fun getView(): View = frame
 
     /**
      * Destroys this viewer. Called when leaving the reader or swapping viewers.
@@ -385,9 +383,7 @@ internal class WebtoonViewer(
      * Called from the containing activity when a generic motion [event] is received. It should
      * return true if the event was handled, false otherwise.
      */
-    override fun handleGenericMotionEvent(event: MotionEvent): Boolean {
-        return false
-    }
+    override fun handleGenericMotionEvent(event: MotionEvent): Boolean = false
 
     /**
      * Notifies adapter of changes around the current page to trigger a relayout in the recycler.

@@ -70,9 +70,7 @@ internal class BackupRestoreJob(private val context: Context, workerParams: Work
     }
 
     companion object {
-        fun isRunning(context: Context): Boolean {
-            return context.workManager.isRunning(TAG)
-        }
+        fun isRunning(context: Context): Boolean = context.workManager.isRunning(TAG)
 
         fun start(
             context: Context,

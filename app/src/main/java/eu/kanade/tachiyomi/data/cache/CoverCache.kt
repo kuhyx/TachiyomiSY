@@ -47,9 +47,8 @@ internal class CoverCache(private val context: Context) {
      * @param mangaId the manga id.
      * @return cover image.
      */
-    fun getCustomCoverFile(mangaId: Long?): File {
-        return File(customCoverCacheDir, DiskUtil.hashKeyForDisk(mangaId.toString()))
-    }
+    fun getCustomCoverFile(mangaId: Long?): File =
+        File(customCoverCacheDir, DiskUtil.hashKeyForDisk(mangaId.toString()))
 
     /**
      * Saves the given stream as the manga's custom cover to cache.

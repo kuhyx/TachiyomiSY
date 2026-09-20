@@ -7,6 +7,4 @@ import eu.kanade.tachiyomi.util.system.isTabletUi
 
 @Composable
 @ReadOnlyComposable
-internal fun isTabletUi(): Boolean {
-    return LocalConfiguration.current.isTabletUi()
-}
+internal fun isTabletUi(): Boolean = LocalConfiguration.current.isTabletUi()

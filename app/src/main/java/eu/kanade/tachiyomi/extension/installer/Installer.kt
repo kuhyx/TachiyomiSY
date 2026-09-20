@@ -69,9 +69,7 @@ internal abstract class Installer(private val service: Service) {
      *
      * @return true if this entry can be removed from queue.
      */
-    open fun cancelEntry(entry: Entry): Boolean {
-        return true
-    }
+    open fun cancelEntry(entry: Entry): Boolean = true
 
     /**
      * Tells the queue to continue processing the next entry and updates the install step

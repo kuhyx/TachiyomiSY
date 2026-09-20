@@ -8,7 +8,6 @@ internal class GetSourceCategories(
     private val preferences: SourcePreferences,
 ) {
 
-    fun subscribe(): Flow<List<String>> {
-        return preferences.sourcesTabCategories.changes().map { it.sortedWith(String.CASE_INSENSITIVE_ORDER) }
-    }
+    fun subscribe(): Flow<List<String>> =
+        preferences.sourcesTabCategories.changes().map { it.sortedWith(String.CASE_INSENSITIVE_ORDER) }
 }

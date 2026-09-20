@@ -45,8 +45,6 @@ import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.presentation.util.LocalBackPress
 import eu.kanade.presentation.util.Screen
 import exh.assets.EhAssets
-import exh.assets.ehassets.EhLogo
-import exh.assets.ehassets.MangadexLogo
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.components.material.Scaffold

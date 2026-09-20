@@ -90,7 +90,5 @@ internal class HBrowse(delegate: HttpSource, val context: Context) :
         "hbrowse.com",
     )
 
-    override suspend fun mapUrlToMangaUrl(uri: Uri): String? {
-        return uri.pathSegments.firstOrNull()?.let { "/$it/c00001/" }
-    }
+    override suspend fun mapUrlToMangaUrl(uri: Uri): String? = uri.pathSegments.firstOrNull()?.let { "/$it/c00001/" }
 }

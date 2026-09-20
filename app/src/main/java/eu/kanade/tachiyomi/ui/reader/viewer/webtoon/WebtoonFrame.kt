@@ -93,9 +93,7 @@ internal class WebtoonFrame(context: Context) : FrameLayout(context) {
      * Fling listener used to delegate events to the recycler view.
      */
     inner class FlingListener : GestureDetector.SimpleOnGestureListener() {
-        override fun onDown(e: MotionEvent): Boolean {
-            return true
-        }
+        override fun onDown(e: MotionEvent): Boolean = true
 
         override fun onFling(
             e1: MotionEvent?,

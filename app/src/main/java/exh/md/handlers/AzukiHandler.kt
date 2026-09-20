@@ -27,9 +27,7 @@ internal class AzukiHandler(currentClient: OkHttpClient, userAgent: String) {
         return pageListParse(client.newCall(request).awaitSuccess())
     }
 
-    private fun pageListRequest(chapterId: String): Request {
-        return GET("$apiUrl/chapter/$chapterId/pages/v0", headers)
-    }
+    private fun pageListRequest(chapterId: String): Request = GET("$apiUrl/chapter/$chapterId/pages/v0", headers)
 
     fun pageListParse(response: Response): List<Page> {
         return Json.parseToJsonElement(response.body.string())

@@ -409,9 +409,8 @@ private data class TrackStatusSelectorScreen(
         private val tracker: Tracker,
     ) : StateScreenModel<Model.State>(State(track.status)) {
 
-        fun getSelections(): Map<Long, StringResource?> {
-            return tracker.getStatusList().associateWith { tracker.getStatus(it) }
-        }
+        fun getSelections(): Map<Long, StringResource?> =
+            tracker.getStatusList().associateWith { tracker.getStatus(it) }
 
         fun setSelection(selection: Long) {
             mutableState.update { it.copy(selection = selection) }
@@ -522,9 +521,7 @@ private data class TrackScoreSelectorScreen(
         private val tracker: Tracker,
     ) : StateScreenModel<Model.State>(State(tracker.displayScore(track))) {
 
-        fun getSelections(): List<String> {
-            return tracker.getScoreList()
-        }
+        fun getSelections(): List<String> = tracker.getScoreList()
 
         fun setSelection(selection: String) {
             mutableState.update { it.copy(selection = selection) }

@@ -14,9 +14,7 @@ internal interface EnhancedTracker {
     /**
      * This tracker will only work with the sources that are accepted by this filter function.
      */
-    fun accept(source: Source): Boolean {
-        return source::class.qualifiedName in getAcceptedSources()
-    }
+    fun accept(source: Source): Boolean = source::class.qualifiedName in getAcceptedSources()
 
     /**
      * Fully qualified source classes that this tracker is compatible with.

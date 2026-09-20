@@ -29,7 +29,5 @@ internal sealed class ChapterTransition : ReaderItem {
         return result
     }
 
-    override fun toString(): String {
-        return "${javaClass.simpleName}(from=${from.chapter.url}, to=${to?.chapter?.url})"
-    }
+    override fun toString(): String = "${javaClass.simpleName}(from=${from.chapter.url}, to=${to?.chapter?.url})"
 }

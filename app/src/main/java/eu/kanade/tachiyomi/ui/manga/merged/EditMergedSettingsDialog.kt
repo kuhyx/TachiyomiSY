@@ -214,6 +214,4 @@ internal fun EditMergedSettingsDialog(
     )
 }
 
-private fun Pair<Manga?, MergedMangaReference>.toModel(): EditMergedMangaItem {
-    return EditMergedMangaItem(first, second)
-}
+private fun Pair<Manga?, MergedMangaReference>.toModel(): EditMergedMangaItem = EditMergedMangaItem(first, second)

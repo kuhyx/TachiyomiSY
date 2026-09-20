@@ -50,9 +50,7 @@ internal class PagePreviewFetcher(
     private val diskCacheKey: String
         get() = diskCacheKeyLazy.value
 
-    override suspend fun fetch(): FetchResult {
-        return httpLoader()
-    }
+    override suspend fun fetch(): FetchResult = httpLoader()
 
     private fun fileLoader(file: File): FetchResult {
         return SourceFetchResult(
@@ -203,9 +201,8 @@ internal class PagePreviewFetcher(
         writeToCache(input)
     }
 
-    private fun readFromDiskCache(): DiskCache.Snapshot? {
-        return if (options.diskCachePolicy.readEnabled) imageLoader.diskCache?.openSnapshot(diskCacheKey) else null
-    }
+    private fun readFromDiskCache(): DiskCache.Snapshot? =
+        if (options.diskCachePolicy.readEnabled) imageLoader.diskCache?.openSnapshot(diskCacheKey) else null
 
     private fun writeToDiskCache(
         response: Response,

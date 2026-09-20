@@ -304,9 +304,7 @@ internal class EHentai(
         }
     }
 
-    private fun getUploader(element: Element?): String? {
-        return element?.select("a")?.text()?.trimOrNull()
-    }
+    private fun getUploader(element: Element?): String? = element?.select("a")?.text()?.trimOrNull()
 
     private fun getPageCount(element: Element?): Int? {
         val pageCount = element?.text()?.trimOrNull()
@@ -457,18 +455,14 @@ internal class EHentai(
         ).sortedBy(Pair<Int, String>::first).map { it.second }
     }
 
-    private fun chapterPageRequest(np: String): Request {
-        return exGet(url = np, additionalHeaders = headers)
-    }
+    private fun chapterPageRequest(np: String): Request = exGet(url = np, additionalHeaders = headers)
 
     private fun nextPageUrl(element: Element): String? = element.select("a[onclick=return false]").last()?.let {
         return if (it.text() == ">") it.attr("href") else null
     }
 
     @Deprecated(HELPER_DEPRECATION)
-    override fun popularMangaRequest(page: Int): Request {
-        return exGet("$baseUrl/popular")
-    }
+    override fun popularMangaRequest(page: Int): Request = exGet("$baseUrl/popular")
 
     private fun <T : MangasPage> T.checkValid(): MangasPage =
         if (exh && mangas.isEmpty() && exhPreferences.igneousVal.get().equals("mystery", true)) {
@@ -482,16 +476,12 @@ internal class EHentai(
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getLatestUpdates"))
     override fun fetchLatestUpdates(page: Int): Observable<MangasPage> = runAsObservable { getLatestUpdates(page) }
 
-    override suspend fun getLatestUpdates(page: Int): MangasPage {
-        return super<HttpSource>.getLatestUpdates(page).checkValid()
-    }
+    override suspend fun getLatestUpdates(page: Int): MangasPage = super<HttpSource>.getLatestUpdates(page).checkValid()
 
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getPopularManga"))
     override fun fetchPopularManga(page: Int): Observable<MangasPage> = runAsObservable { getPopularManga(page) }
 
-    override suspend fun getPopularManga(page: Int): MangasPage {
-        return super<HttpSource>.getPopularManga(page).checkValid()
-    }
+    override suspend fun getPopularManga(page: Int): MangasPage = super<HttpSource>.getPopularManga(page).checkValid()
 
     // Support direct URL importing
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getSearchManga"))
@@ -930,9 +920,7 @@ internal class EHentai(
         YESTERDAY("Yesterday", 15),
         ;
 
-        override fun toString(): String {
-            return humanName
-        }
+        override fun toString(): String = humanName
     }
 
     class ToplistOptions : Filter.Select<ToplistOption>(
@@ -1115,9 +1103,7 @@ internal class EHentai(
         }
     }
 
-    override fun cleanMangaUrl(url: String): String {
-        return EHentaiSearchMetadata.normalizeUrl(super.cleanMangaUrl(url))
-    }
+    override fun cleanMangaUrl(url: String): String = EHentaiSearchMetadata.normalizeUrl(super.cleanMangaUrl(url))
 
     private fun getGalleryUrlFromPage(uri: Uri): String {
         val lastSplit = uri.pathSegments.last().split("-")

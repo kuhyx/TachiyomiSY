@@ -339,9 +339,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
     /**
      * Whether this presenter is initialized yet.
      */
-    fun needsInit(): Boolean {
-        return manga == null
-    }
+    fun needsInit(): Boolean = manga == null
 
     /**
      * Initializes this presenter with the given [mangaId] and [initialChapterId]. This method will
@@ -823,9 +821,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
     /**
      * Returns the currently active chapter.
      */
-    private fun getCurrentChapter(): ReaderChapter? {
-        return state.value.currentChapter
-    }
+    private fun getCurrentChapter(): ReaderChapter? = state.value.currentChapter
 
     fun getSource() = manga?.source?.let { sourceManager.getOrStub(it) } as? HttpSource
 

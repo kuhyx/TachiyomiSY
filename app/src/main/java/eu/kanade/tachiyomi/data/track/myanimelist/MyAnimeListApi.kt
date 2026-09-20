@@ -281,9 +281,7 @@ internal class MyAnimeListApi(
         }
     }
 
-    private fun parseDate(isoDate: String): Long {
-        return SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(isoDate)?.time ?: 0L
-    }
+    private fun parseDate(isoDate: String): Long = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(isoDate)?.time ?: 0L
 
     private fun convertToIsoDate(epochTime: Long): String? {
         if (epochTime == 0L) {

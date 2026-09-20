@@ -148,9 +148,7 @@ internal open class FeedScreenModel(
         }
     }
 
-    private suspend fun hasTooManyFeeds(): Boolean {
-        return countFeedSavedSearchGlobal.await() > 10
-    }
+    private suspend fun hasTooManyFeeds(): Boolean = countFeedSavedSearchGlobal.await() > 10
 
     fun getEnabledSources(): List<Source> {
         val languages = sourcePreferences.enabledLanguages.get()
@@ -166,9 +164,7 @@ internal open class FeedScreenModel(
         return list.sortedBy { it.id.toString() !in pinnedSources }
     }
 
-    suspend fun getSourceSavedSearches(sourceId: Long): List<SavedSearch> {
-        return getSavedSearchBySourceId.await(sourceId)
-    }
+    suspend fun getSourceSavedSearches(sourceId: Long): List<SavedSearch> = getSavedSearchBySourceId.await(sourceId)
 
     fun createFeed(source: Source, savedSearch: SavedSearch?) {
         screenModelScope.launchNonCancellable {

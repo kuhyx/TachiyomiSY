@@ -150,13 +150,9 @@ internal class MemAutoFlushingLookupTable<T>(
         tryWrite()
     }
 
-    suspend fun get(key: Int): T? {
-        return mutex.withLock { table.get(key) }
-    }
+    suspend fun get(key: Int): T? = mutex.withLock { table.get(key) }
 
-    suspend fun size(): Int {
-        return mutex.withLock { table.size() }
-    }
+    suspend fun size(): Int = mutex.withLock { table.size() }
 
     /**
      * Closes this resource, relinquishing any underlying resources.

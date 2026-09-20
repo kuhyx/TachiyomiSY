@@ -184,9 +184,8 @@ internal object ExtensionLoader {
         return loadExtension(context, extensionPackage)
     }
 
-    fun getExtensionPackageInfoFromPkgName(context: Context, pkgName: String): PackageInfo? {
-        return getExtensionInfoFromPkgName(context, pkgName)?.packageInfo
-    }
+    fun getExtensionPackageInfoFromPkgName(context: Context, pkgName: String): PackageInfo? =
+        getExtensionInfoFromPkgName(context, pkgName)?.packageInfo
 
     private fun getExtensionInfoFromPkgName(context: Context, pkgName: String): ExtensionInfo? {
         val privateExtensionFile = File(getPrivateExtensionDir(context), "$pkgName.$PRIVATE_EXTENSION_EXTENSION")
@@ -359,9 +358,8 @@ internal object ExtensionLoader {
      *
      * @param pkgInfo The package info of the application.
      */
-    private fun isPackageAnExtension(pkgInfo: PackageInfo): Boolean {
-        return pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
-    }
+    private fun isPackageAnExtension(pkgInfo: PackageInfo): Boolean =
+        pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
 
     /**
      * Returns the signatures of the package or null if it's not signed.

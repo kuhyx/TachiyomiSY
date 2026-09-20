@@ -18,64 +18,64 @@ import androidx.compose.ui.graphics.Color
 internal object YotsubaColorScheme : BaseColorScheme() {
 
     override val darkScheme = darkColorScheme(
-        primary = Color(0xFFFFB59D),
-        onPrimary = Color(0xFF5F1600),
-        primaryContainer = Color(0xFF862200),
-        onPrimaryContainer = Color(0xFFFFDBCF),
-        inversePrimary = Color(0xFFAE3200),
-        secondary = Color(0xFFFFB59D), // Unread badge
-        onSecondary = Color(0xFF5F1600), // Unread badge text
-        secondaryContainer = Color(0xFF862200), // Navigation bar selector pill & progress indicator (remaining)
-        onSecondaryContainer = Color(0xFFFFDBCF), // Navigation bar selector icon
-        tertiary = Color(0xFFD7C68D), // Downloaded badge
-        onTertiary = Color(0xFF3A2F05), // Downloaded badge text
-        tertiaryContainer = Color(0xFF524619),
-        onTertiaryContainer = Color(0xFFF5E2A7),
-        background = Color(0xFF211A18),
-        onBackground = Color(0xFFEDE0DD),
-        surface = Color(0xFF211A18),
-        onSurface = Color(0xFFEDE0DD),
-        surfaceVariant = Color(0xFF332723), // Navigation bar background (ThemePrefWidget)
-        onSurfaceVariant = Color(0xFFD8C2BC),
-        surfaceTint = Color(0xFFFFB59D),
-        inverseSurface = Color(0xFFEDE0DD),
-        inverseOnSurface = Color(0xFF211A18),
-        outline = Color(0xFFA08C87),
-        surfaceContainerLowest = Color(0xFF2E221F),
-        surfaceContainerLow = Color(0xFF312521),
-        surfaceContainer = Color(0xFF332723), // Navigation bar background
-        surfaceContainerHigh = Color(0xFF413531),
-        surfaceContainerHighest = Color(0xFF4C403D),
+        primary = Color(color = 0xFFFFB59D),
+        onPrimary = Color(color = 0xFF5F1600),
+        primaryContainer = Color(color = 0xFF862200),
+        onPrimaryContainer = Color(color = 0xFFFFDBCF),
+        inversePrimary = Color(color = 0xFFAE3200),
+        secondary = Color(color = 0xFFFFB59D), // Unread badge
+        onSecondary = Color(color = 0xFF5F1600), // Unread badge text
+        secondaryContainer = Color(color = 0xFF862200), // Navigation bar selector pill & progress indicator (remaining)
+        onSecondaryContainer = Color(color = 0xFFFFDBCF), // Navigation bar selector icon
+        tertiary = Color(color = 0xFFD7C68D), // Downloaded badge
+        onTertiary = Color(color = 0xFF3A2F05), // Downloaded badge text
+        tertiaryContainer = Color(color = 0xFF524619),
+        onTertiaryContainer = Color(color = 0xFFF5E2A7),
+        background = Color(color = 0xFF211A18),
+        onBackground = Color(color = 0xFFEDE0DD),
+        surface = Color(color = 0xFF211A18),
+        onSurface = Color(color = 0xFFEDE0DD),
+        surfaceVariant = Color(color = 0xFF332723), // Navigation bar background (ThemePrefWidget)
+        onSurfaceVariant = Color(color = 0xFFD8C2BC),
+        surfaceTint = Color(color = 0xFFFFB59D),
+        inverseSurface = Color(color = 0xFFEDE0DD),
+        inverseOnSurface = Color(color = 0xFF211A18),
+        outline = Color(color = 0xFFA08C87),
+        surfaceContainerLowest = Color(color = 0xFF2E221F),
+        surfaceContainerLow = Color(color = 0xFF312521),
+        surfaceContainer = Color(color = 0xFF332723), // Navigation bar background
+        surfaceContainerHigh = Color(color = 0xFF413531),
+        surfaceContainerHighest = Color(color = 0xFF4C403D),
     )
 
     override val lightScheme = lightColorScheme(
-        primary = Color(0xFFAE3200),
-        onPrimary = Color(0xFFFFFFFF),
-        primaryContainer = Color(0xFFFFDBCF),
-        onPrimaryContainer = Color(0xFF3B0A00),
-        inversePrimary = Color(0xFFFFB59D),
-        secondary = Color(0xFFAE3200), // Unread badge
-        onSecondary = Color(0xFFFFFFFF), // Unread badge text
-        secondaryContainer = Color(0xFFEBCDC2), // Navigation bar selector pill & progress indicator (remaining)
-        onSecondaryContainer = Color(0xFF3B0A00), // Navigation bar selector icon
-        tertiary = Color(0xFF6B5E2F), // Downloaded badge
-        onTertiary = Color(0xFFFFFFFF), // Downloaded badge text
-        tertiaryContainer = Color(0xFFF5E2A7),
-        onTertiaryContainer = Color(0xFF231B00),
-        background = Color(0xFFFCFCFC),
-        onBackground = Color(0xFF211A18),
-        surface = Color(0xFFFCFCFC),
-        onSurface = Color(0xFF211A18),
-        surfaceVariant = Color(0xFFF6EBE7), // Navigation bar background (ThemePrefWidget)
-        onSurfaceVariant = Color(0xFF53433F),
-        surfaceTint = Color(0xFFAE3200),
-        inverseSurface = Color(0xFF362F2D),
-        inverseOnSurface = Color(0xFFFBEEEB),
-        outline = Color(0xFF85736E),
-        surfaceContainerLowest = Color(0xFFECE3E0),
-        surfaceContainerLow = Color(0xFFF1E7E4),
-        surfaceContainer = Color(0xFFF6EBE7), // Navigation bar background
-        surfaceContainerHigh = Color(0xFFFAF4F2),
-        surfaceContainerHighest = Color(0xFFFBF6F4),
+        primary = Color(color = 0xFFAE3200),
+        onPrimary = Color(color = 0xFFFFFFFF),
+        primaryContainer = Color(color = 0xFFFFDBCF),
+        onPrimaryContainer = Color(color = 0xFF3B0A00),
+        inversePrimary = Color(color = 0xFFFFB59D),
+        secondary = Color(color = 0xFFAE3200), // Unread badge
+        onSecondary = Color(color = 0xFFFFFFFF), // Unread badge text
+        secondaryContainer = Color(color = 0xFFEBCDC2), // Navigation bar selector pill & progress indicator (remaining)
+        onSecondaryContainer = Color(color = 0xFF3B0A00), // Navigation bar selector icon
+        tertiary = Color(color = 0xFF6B5E2F), // Downloaded badge
+        onTertiary = Color(color = 0xFFFFFFFF), // Downloaded badge text
+        tertiaryContainer = Color(color = 0xFFF5E2A7),
+        onTertiaryContainer = Color(color = 0xFF231B00),
+        background = Color(color = 0xFFFCFCFC),
+        onBackground = Color(color = 0xFF211A18),
+        surface = Color(color = 0xFFFCFCFC),
+        onSurface = Color(color = 0xFF211A18),
+        surfaceVariant = Color(color = 0xFFF6EBE7), // Navigation bar background (ThemePrefWidget)
+        onSurfaceVariant = Color(color = 0xFF53433F),
+        surfaceTint = Color(color = 0xFFAE3200),
+        inverseSurface = Color(color = 0xFF362F2D),
+        inverseOnSurface = Color(color = 0xFFFBEEEB),
+        outline = Color(color = 0xFF85736E),
+        surfaceContainerLowest = Color(color = 0xFFECE3E0),
+        surfaceContainerLow = Color(color = 0xFFF1E7E4),
+        surfaceContainer = Color(color = 0xFFF6EBE7), // Navigation bar background
+        surfaceContainerHigh = Color(color = 0xFFFAF4F2),
+        surfaceContainerHighest = Color(color = 0xFFFBF6F4),
     )
 }

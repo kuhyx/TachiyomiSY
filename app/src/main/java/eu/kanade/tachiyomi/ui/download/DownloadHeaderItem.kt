@@ -13,9 +13,7 @@ internal data class DownloadHeaderItem(
     val size: Int,
 ) : AbstractExpandableHeaderItem<DownloadHeaderHolder, DownloadItem>() {
 
-    override fun getLayoutRes(): Int {
-        return R.layout.download_header
-    }
+    override fun getLayoutRes(): Int = R.layout.download_header
 
     override fun createViewHolder(
         view: View,

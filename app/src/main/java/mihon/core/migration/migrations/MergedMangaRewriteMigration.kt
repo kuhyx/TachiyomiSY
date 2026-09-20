@@ -155,9 +155,7 @@ internal class MergedMangaRewriteMigration : Migration {
         }
     }
 
-    private fun readMangaConfig(manga: Manga): MangaConfig? {
-        return MangaConfig.readFromUrl(manga.url)
-    }
+    private fun readMangaConfig(manga: Manga): MangaConfig? = MangaConfig.readFromUrl(manga.url)
 
     @Serializable
     private data class MangaSource(

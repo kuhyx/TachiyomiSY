@@ -39,9 +39,7 @@ internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), Deletable
 
     override fun getLogo() = R.drawable.brand_myanimelist
 
-    override fun getStatusList(): List<Long> {
-        return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ, REREADING)
-    }
+    override fun getStatusList(): List<Long> = listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ, REREADING)
 
     override fun getStatus(status: Long): StringResource? = when (status) {
         READING -> MR.strings.reading
@@ -61,13 +59,9 @@ internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), Deletable
 
     override fun getScoreList(): List<String> = SCORE_LIST
 
-    override fun displayScore(track: DomainTrack): String {
-        return track.score.toInt().toString()
-    }
+    override fun displayScore(track: DomainTrack): String = track.score.toInt().toString()
 
-    private suspend fun add(track: Track): Track {
-        return api.updateItem(track)
-    }
+    private suspend fun add(track: Track): Track = api.updateItem(track)
 
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         if (track.status != COMPLETED) {
@@ -127,9 +121,7 @@ internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), Deletable
         return api.search(query)
     }
 
-    override suspend fun refresh(track: Track): Track {
-        return api.findListItem(track) ?: add(track)
-    }
+    override suspend fun refresh(track: Track): Track = api.findListItem(track) ?: add(track)
 
     override suspend fun login(username: String, password: String) = login(password)
 
@@ -151,19 +143,13 @@ internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), Deletable
         interceptor.setAuth(null)
     }
 
-    override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? {
-        return api.getMangaMetadata(track)
-    }
+    override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? = api.getMangaMetadata(track)
 
     // SY -->
-    override suspend fun searchById(id: String): TrackSearch {
-        return api.getMangaDetails(id.toInt())
-    }
+    override suspend fun searchById(id: String): TrackSearch = api.getMangaDetails(id.toInt())
     // SY <--
 
-    fun getIfAuthExpired(): Boolean {
-        return trackPreferences.trackAuthExpired(this).get()
-    }
+    fun getIfAuthExpired(): Boolean = trackPreferences.trackAuthExpired(this).get()
 
     fun setAuthExpired() {
         trackPreferences.trackAuthExpired(this).set(true)

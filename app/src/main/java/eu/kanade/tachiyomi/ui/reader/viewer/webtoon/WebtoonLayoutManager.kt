@@ -23,9 +23,7 @@ internal class WebtoonLayoutManager(context: Context, private val extraLayoutSpa
      * Returns the custom extra layout space.
      */
     @Deprecated("Deprecated in Java")
-    override fun getExtraLayoutSpace(state: RecyclerView.State): Int {
-        return extraLayoutSpace
-    }
+    override fun getExtraLayoutSpace(state: RecyclerView.State): Int = extraLayoutSpace
 
     /**
      * Returns the position of the last item whose end side is visible on screen.

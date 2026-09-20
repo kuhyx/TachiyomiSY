@@ -139,9 +139,7 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
     /**
      * Returns the amount of items of the adapter.
      */
-    override fun getCount(): Int {
-        return joinedItems.size
-    }
+    override fun getCount(): Int = joinedItems.size
 
     /**
      * Creates a new view for the item at the given [position].

@@ -26,13 +26,9 @@ internal class PreferenceMutableState<T>(
             preference.set(value)
         }
 
-    override fun component1(): T {
-        return state.value
-    }
+    override fun component1(): T = state.value
 
-    override fun component2(): (T) -> Unit {
-        return preference::set
-    }
+    override fun component2(): (T) -> Unit = preference::set
 }
 
 internal fun <T> Preference<T>.asState(scope: CoroutineScope) = PreferenceMutableState(this, scope)

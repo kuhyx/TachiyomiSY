@@ -12,13 +12,9 @@ import tachiyomi.domain.manga.model.MergedMangaReference
 
 internal class EditMergedMangaItem(val mergedManga: Manga?, val mergedMangaReference: MergedMangaReference) : AbstractFlexibleItem<EditMergedMangaHolder>() {
 
-    override fun getLayoutRes(): Int {
-        return R.layout.edit_merged_settings_item
-    }
+    override fun getLayoutRes(): Int = R.layout.edit_merged_settings_item
 
-    override fun isDraggable(): Boolean {
-        return true
-    }
+    override fun isDraggable(): Boolean = true
 
     lateinit var binding: EditMergedSettingsItemBinding
 
@@ -36,9 +32,7 @@ internal class EditMergedMangaItem(val mergedManga: Manga?, val mergedMangaRefer
         holder.bind(this)
     }
 
-    override fun hashCode(): Int {
-        return mergedMangaReference.id.hashCode()
-    }
+    override fun hashCode(): Int = mergedMangaReference.id.hashCode()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

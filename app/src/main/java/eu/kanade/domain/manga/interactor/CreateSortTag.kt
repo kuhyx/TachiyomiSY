@@ -30,9 +30,7 @@ internal class CreateSortTag(
     /**
      * Returns true if a tag with the given name already exists.
      */
-    private fun tagExists(name: String): Boolean {
-        return getSortTag.await().any { it.equals(name) }
-    }
+    private fun tagExists(name: String): Boolean = getSortTag.await().any { it.equals(name) }
 
     companion object {
         fun encodeTag(index: Int, tag: String) = "$index|${tag.trim()}"

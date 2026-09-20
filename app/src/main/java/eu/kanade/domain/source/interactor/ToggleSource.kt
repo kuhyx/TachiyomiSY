@@ -25,7 +25,5 @@ internal class ToggleSource(
         }
     }
 
-    private fun isEnabled(sourceId: Long): Boolean {
-        return sourceId.toString() in preferences.disabledSources.get()
-    }
+    private fun isEnabled(sourceId: Long): Boolean = sourceId.toString() in preferences.disabledSources.get()
 }

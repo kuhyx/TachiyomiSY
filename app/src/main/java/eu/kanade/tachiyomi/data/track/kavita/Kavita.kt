@@ -65,9 +65,7 @@ internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
         return api.updateProgress(track)
     }
 
-    override suspend fun bind(track: Track, hasReadChapters: Boolean): Track {
-        return track
-    }
+    override suspend fun bind(track: Track, hasReadChapters: Boolean): Track = track
 
     override suspend fun search(query: String): List<TrackSearch> {
         TODO("Not yet implemented: search")

@@ -100,9 +100,7 @@ internal open class SourceFeedScreenModel(
         mutableState.update { it.copy(filters = filters) }
     }
 
-    private suspend fun hasTooManyFeeds(): Boolean {
-        return countFeedSavedSearchBySourceId.await(source.id) > 10
-    }
+    private suspend fun hasTooManyFeeds(): Boolean = countFeedSavedSearchBySourceId.await(source.id) > 10
 
     fun createFeed(savedSearchId: Long) {
         screenModelScope.launchNonCancellable {

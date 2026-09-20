@@ -82,9 +82,8 @@ internal class ChapterLoader(
     /**
      * Checks [chapter] to be loaded based on present pages and loader in addition to state.
      */
-    private fun chapterIsReady(chapter: ReaderChapter): Boolean {
-        return chapter.state is ReaderChapter.State.Loaded && chapter.pageLoader != null
-    }
+    private fun chapterIsReady(chapter: ReaderChapter): Boolean =
+        chapter.state is ReaderChapter.State.Loaded && chapter.pageLoader != null
 
     /**
      * Returns the page loader to use for this [chapter].

@@ -167,9 +167,8 @@ internal class EnhancedFilePrinter internal constructor(
         }
 
         companion object {
-            operator fun invoke(folder: UniFile, block: Builder.() -> Unit): EnhancedFilePrinter {
-                return Builder(folder).apply(block).build()
-            }
+            operator fun invoke(folder: UniFile, block: Builder.() -> Unit): EnhancedFilePrinter =
+                Builder(folder).apply(block).build()
         }
     }
 

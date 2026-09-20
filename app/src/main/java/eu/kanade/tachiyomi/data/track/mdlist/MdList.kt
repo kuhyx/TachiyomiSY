@@ -29,13 +29,9 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
 
     val interceptor = MangaDexAuthInterceptor(trackPreferences, this)
 
-    override fun getLogo(): Int {
-        return R.drawable.brand_mangadex
-    }
+    override fun getLogo(): Int = R.drawable.brand_mangadex
 
-    override fun getStatusList(): List<Long> {
-        return FollowStatus.entries.map { it.long }
-    }
+    override fun getStatusList(): List<Long> = FollowStatus.entries.map { it.long }
 
     override fun getStatus(status: Long): StringResource? = when (status) {
         0L -> SYMR.strings.md_follows_unfollowed

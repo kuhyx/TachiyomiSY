@@ -68,9 +68,7 @@ internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
 
     override fun getScoreList(): ImmutableList<String> = SCORE_LIST
 
-    override fun displayScore(track: DomainTrack): String {
-        return track.score.toInt().toString()
-    }
+    override fun displayScore(track: DomainTrack): String = track.score.toInt().toString()
 
     override suspend fun update(
         track: Track,

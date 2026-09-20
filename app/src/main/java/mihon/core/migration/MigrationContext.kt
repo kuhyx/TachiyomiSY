@@ -7,7 +7,5 @@ internal class MigrationContext(
     val previousVersion: Int,
 ) {
 
-    inline fun <reified T> get(): T? {
-        return Injekt.getInstanceOrNull(T::class.java)
-    }
+    inline fun <reified T> get(): T? = Injekt.getInstanceOrNull(T::class.java)
 }

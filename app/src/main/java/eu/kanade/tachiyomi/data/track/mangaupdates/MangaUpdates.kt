@@ -42,9 +42,8 @@ internal class MangaUpdates(id: Long) : BaseTracker(id, "MangaUpdates"), Deletab
 
     override fun getLogo(): Int = R.drawable.brand_mangaupdates
 
-    override fun getStatusList(): List<Long> {
-        return listOf(READING_LIST, COMPLETE_LIST, ON_HOLD_LIST, UNFINISHED_LIST, WISH_LIST)
-    }
+    override fun getStatusList(): List<Long> =
+        listOf(READING_LIST, COMPLETE_LIST, ON_HOLD_LIST, UNFINISHED_LIST, WISH_LIST)
 
     override fun getStatus(status: Long): StringResource? = when (status) {
         READING_LIST -> MR.strings.reading_list
@@ -152,7 +151,5 @@ internal class MangaUpdates(id: Long) : BaseTracker(id, "MangaUpdates"), Deletab
     }
     // SY <--
 
-    fun restoreSession(): String? {
-        return trackPreferences.trackPassword(this).get().ifBlank { null }
-    }
+    fun restoreSession(): String? = trackPreferences.trackPassword(this).get().ifBlank { null }
 }

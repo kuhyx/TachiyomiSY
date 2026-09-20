@@ -56,9 +56,7 @@ internal class MdUtil {
         val markdownItalicBoldRegex = "\\*+\\s*([^*]*)\\s*\\*+".toRegex()
         val markdownItalicRegex = "_+\\s*([^_]*)\\s*_+".toRegex()
 
-        fun buildMangaUrl(mangaUuid: String): String {
-            return "/manga/$mangaUuid"
-        }
+        fun buildMangaUrl(mangaUuid: String): String = "/manga/$mangaUuid"
 
         // Get the ID from the manga url
         fun getMangaId(url: String): String = url.trimEnd('/').substringAfterLast("/")
@@ -74,9 +72,7 @@ internal class MdUtil {
                 .trim()
         }
 
-        fun getScanlatorString(scanlators: Set<String>): String {
-            return scanlators.sorted().joinToString(scanlatorSeparator)
-        }
+        fun getScanlatorString(scanlators: Set<String>): String = scanlators.sorted().joinToString(scanlatorSeparator)
 
         val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
             .apply { timeZone = TimeZone.getTimeZone("UTC") }
@@ -143,9 +139,7 @@ internal class MdUtil {
             return titleMap[lang] ?: altTitleMaps.firstNotNullOfOrNull { it[lang] }
         }
 
-        fun cdnCoverUrl(dexId: String, fileName: String): String {
-            return "$cdnUrl/covers/$dexId/$fileName"
-        }
+        fun cdnCoverUrl(dexId: String, fileName: String): String = "$cdnUrl/covers/$dexId/$fileName"
 
         fun saveOAuth(preferences: TrackPreferences, mdList: MdList, oAuth: MALOAuth?) {
             if (oAuth == null) {
@@ -184,9 +178,7 @@ internal class MdUtil {
             return POST(MdApi.baseAuthUrl + MdApi.token, body = formBody, headers = headers)
         }
 
-        fun getPkceChallengeCode(): String {
-            return codeVerifier ?: PkceUtil.generateCodeVerifier().also { codeVerifier = it }
-        }
+        fun getPkceChallengeCode(): String = codeVerifier ?: PkceUtil.generateCodeVerifier().also { codeVerifier = it }
 
         fun getEnabledMangaDex(
             sourcePreferences: SourcePreferences = Injekt.get(),

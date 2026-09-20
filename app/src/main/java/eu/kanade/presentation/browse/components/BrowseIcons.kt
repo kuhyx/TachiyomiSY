@@ -90,7 +90,7 @@ internal fun ExtensionIcon(
             AsyncImage(
                 model = extension.iconUrl,
                 contentDescription = null,
-                placeholder = ColorPainter(Color(0x1F888888)),
+                placeholder = ColorPainter(Color(color = 0x1F888888)),
                 error = rememberResourceBitmapPainter(id = R.drawable.cover_error),
                 modifier = modifier
                     .clip(MaterialTheme.shapes.extraSmall),

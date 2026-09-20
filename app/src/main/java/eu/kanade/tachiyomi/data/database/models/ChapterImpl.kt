@@ -46,7 +46,5 @@ internal class ChapterImpl : Chapter {
         return id == chapter.id
     }
 
-    override fun hashCode(): Int {
-        return url.hashCode() + id.hashCode()
-    }
+    override fun hashCode(): Int = url.hashCode() + id.hashCode()
 }

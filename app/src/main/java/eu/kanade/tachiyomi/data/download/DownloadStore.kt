@@ -82,9 +82,7 @@ internal class DownloadStore(
      *
      * @param download the download.
      */
-    private fun getKey(download: Download): String {
-        return download.chapter.id.toString()
-    }
+    private fun getKey(download: Download): String = download.chapter.id.toString()
 
     /**
      * Returns the list of downloads to restore. It should be called in a background thread.

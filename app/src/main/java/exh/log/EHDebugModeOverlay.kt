@@ -54,7 +54,7 @@ internal fun DebugModeOverlay() {
                         .only(WindowInsetsSides.Bottom.plus(WindowInsetsSides.Start)),
                 )
                 .align(Alignment.BottomStart)
-                .background(Color(0x7F000000))
+                .background(Color(color = 0x7F000000))
                 .padding(4.dp),
         ) {
             FpsDebugModeOverlay()

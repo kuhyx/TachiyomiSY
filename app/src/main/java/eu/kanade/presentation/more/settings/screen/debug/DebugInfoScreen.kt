@@ -109,9 +109,7 @@ internal class DebugInfoScreen : Screen() {
 
     @Composable
     @ReadOnlyComposable
-    private fun getWebViewVersion(): String {
-        return WebViewUtil.getVersion(LocalContext.current)
-    }
+    private fun getWebViewVersion(): String = WebViewUtil.getVersion(LocalContext.current)
 
     @Composable
     private fun getProfileVerifierPreference(): Preference.PreferenceItem.TextPreference {

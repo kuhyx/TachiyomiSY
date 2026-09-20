@@ -22,7 +22,6 @@ internal object InternalResourceHelper {
      * @return 0 if not available
      */
     @SuppressLint("DiscouragedApi")
-    private fun getResourceId(resName: String, type: String): Int {
-        return Resources.getSystem().getIdentifier(resName, type, "android")
-    }
+    private fun getResourceId(resName: String, type: String): Int =
+        Resources.getSystem().getIdentifier(resName, type, "android")
 }

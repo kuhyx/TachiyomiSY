@@ -27,9 +27,7 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
         .addInterceptor(interceptor)
         .build()
 
-    fun getApiFromUrl(url: String): String {
-        return url.split("/api/").first() + "/api"
-    }
+    fun getApiFromUrl(url: String): String = url.split("/api/").first() + "/api"
 
     /*
      * Uses url to compare against each source APIURL's to get the correct custom source preference.
@@ -79,14 +77,11 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
         return null
     }
 
-    private fun getApiVolumesUrl(url: String): String {
-        return "${getApiFromUrl(url)}/Series/volumes?seriesId=${getIdFromUrl(url)}"
-    }
+    private fun getApiVolumesUrl(url: String): String =
+        "${getApiFromUrl(url)}/Series/volumes?seriesId=${getIdFromUrl(url)}"
 
     /* Strips serie id from URL */
-    private fun getIdFromUrl(url: String): Int {
-        return url.substringAfterLast("/").toInt()
-    }
+    private fun getIdFromUrl(url: String): Int = url.substringAfterLast("/").toInt()
 
     /*
      * Returns total chapters in the series.

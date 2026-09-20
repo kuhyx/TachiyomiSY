@@ -136,9 +136,7 @@ internal abstract class SyncService(
             "Starting merge. Local list size: ${localMangaListSafe.size}, Remote list size: ${remoteMangaListSafe.size}"
         }
 
-        fun mangaCompositeKey(manga: BackupManga): String {
-            return "${manga.source}|${manga.url}"
-        }
+        fun mangaCompositeKey(manga: BackupManga): String = "${manga.source}|${manga.url}"
 
         // Create maps using composite keys
         val localMangaMap = localMangaListSafe.associateBy { mangaCompositeKey(it) }
@@ -270,9 +268,7 @@ internal abstract class SyncService(
             return remoteChapters // If not syncing chapters, keep remote untouched
         }
 
-        fun chapterCompositeKey(chapter: BackupChapter): String {
-            return chapter.url
-        }
+        fun chapterCompositeKey(chapter: BackupChapter): String = chapter.url
 
         val localChapterMap = localChapters.associateBy { chapterCompositeKey(it) }
         val remoteChapterMap = remoteChapters.associateBy { chapterCompositeKey(it) }
@@ -587,9 +583,7 @@ internal abstract class SyncService(
         val logTag = "MergeSavedSearches"
 
         // Define a function to create a composite key from a BackupSavedSearch
-        fun searchCompositeKey(search: BackupSavedSearch): String {
-            return "${search.name}|${search.source}"
-        }
+        fun searchCompositeKey(search: BackupSavedSearch): String = "${search.name}|${search.source}"
 
         // Create maps using the composite key
         val localSearchMap = localSearches?.associateBy { searchCompositeKey(it) } ?: emptyMap()

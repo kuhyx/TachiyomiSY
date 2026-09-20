@@ -59,9 +59,7 @@ internal class Suwayomi(id: Long) : BaseTracker(id, "Suwayomi"), EnhancedTracker
         return api.updateProgress(track, getPrefTrackerDelete())
     }
 
-    override suspend fun bind(track: Track, hasReadChapters: Boolean): Track {
-        return track
-    }
+    override suspend fun bind(track: Track, hasReadChapters: Boolean): Track = track
 
     override suspend fun search(query: String): List<TrackSearch> {
         TODO("Not yet implemented")

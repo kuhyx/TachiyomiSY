@@ -258,9 +258,8 @@ private object SimpleMarkdownFlavourDescriptor : CommonMarkFlavourDescriptor() {
 }
 
 private object SimpleMarkdownProcessFactory : MarkerProcessorFactory {
-    override fun createMarkerProcessor(productionHolder: ProductionHolder): MarkerProcessor<*> {
-        return SimpleMarkdownMarkerProcessor(productionHolder, CommonMarkdownConstraints.BASE)
-    }
+    override fun createMarkerProcessor(productionHolder: ProductionHolder): MarkerProcessor<*> =
+        SimpleMarkdownMarkerProcessor(productionHolder, CommonMarkdownConstraints.BASE)
 }
 
 /**
@@ -282,9 +281,7 @@ private class SimpleMarkdownMarkerProcessor(
         GitHubTableMarkerProvider(),
     )
 
-    override fun getMarkerBlockProviders(): List<MarkerBlockProvider<StateInfo>> {
-        return markerBlockProviders
-    }
+    override fun getMarkerBlockProviders(): List<MarkerBlockProvider<StateInfo>> = markerBlockProviders
 }
 
 internal val DISALLOWED_MARKDOWN_TYPES = arrayOf(HTML_TAG)

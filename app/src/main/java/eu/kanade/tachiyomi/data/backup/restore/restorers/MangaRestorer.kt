@@ -113,9 +113,8 @@ internal class MangaRestorer(
         }
     }
 
-    private suspend fun findExistingManga(backupManga: BackupManga): Manga? {
-        return getMangaByUrlAndSourceId.await(backupManga.url, backupManga.source)
-    }
+    private suspend fun findExistingManga(backupManga: BackupManga): Manga? =
+        getMangaByUrlAndSourceId.await(backupManga.url, backupManga.source)
 
     private suspend fun restoreExistingManga(manga: Manga, dbManga: Manga): Manga {
         return if (manga.version > dbManga.version) {

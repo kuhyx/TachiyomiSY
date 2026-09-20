@@ -92,9 +92,7 @@ internal class HistoryScreenModel(
             }
     }
 
-    suspend fun getNextChapter(): Chapter? {
-        return withIOContext { getNextChapters.await(onlyUnread = false).firstOrNull() }
-    }
+    suspend fun getNextChapter(): Chapter? = withIOContext { getNextChapters.await(onlyUnread = false).firstOrNull() }
 
     fun getNextChapterForManga(mangaId: Long, chapterId: Long) {
         screenModelScope.launchIO {
@@ -140,9 +138,7 @@ internal class HistoryScreenModel(
      *
      * @return List of categories, not including the default category
      */
-    suspend fun getCategories(): List<Category> {
-        return getCategories.await().filterNot { it.isSystemCategory }
-    }
+    suspend fun getCategories(): List<Category> = getCategories.await().filterNot { it.isSystemCategory }
 
     private fun moveMangaToCategory(mangaId: Long, categories: Category?) {
         val categoryIds = listOfNotNull(categories).map { it.id }

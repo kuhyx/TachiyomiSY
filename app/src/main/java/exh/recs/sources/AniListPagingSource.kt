@@ -40,9 +40,8 @@ internal class AniListPagingSource(manga: Manga) : TrackerRecommendationPagingSo
         }
     }
 
-    private fun languageContains(obj: JsonObject, language: String, search: String): Boolean {
-        return obj["title"]?.jsonObject?.get(language)?.jsonPrimitive?.contentOrNull?.contains(search, true) == true
-    }
+    private fun languageContains(obj: JsonObject, language: String, search: String): Boolean =
+        obj["title"]?.jsonObject?.get(language)?.jsonPrimitive?.contentOrNull?.contains(search, true) == true
 
     private fun getTitle(obj: JsonObject): String {
         val titleObj = obj["title"]!!.jsonObject

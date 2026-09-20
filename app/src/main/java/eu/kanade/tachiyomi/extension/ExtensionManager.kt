@@ -167,9 +167,8 @@ internal class ExtensionManager(
         }
     }
 
-    private fun Extension.isBlacklisted(blacklistEnabled: Boolean = preferences.enableSourceBlacklist.get()): Boolean {
-        return pkgName in BlacklistedSources.BLACKLISTED_EXTENSIONS && blacklistEnabled
-    }
+    private fun Extension.isBlacklisted(blacklistEnabled: Boolean = preferences.enableSourceBlacklist.get()): Boolean =
+        pkgName in BlacklistedSources.BLACKLISTED_EXTENSIONS && blacklistEnabled
     // EXH <--
 
     /**
@@ -273,9 +272,8 @@ internal class ExtensionManager(
      *
      * @param extension The extension to be installed.
      */
-    fun installExtension(extension: Extension.Available): Flow<InstallStep> {
-        return installer.downloadAndInstall(extension.apkUrl, extension)
-    }
+    fun installExtension(extension: Extension.Available): Flow<InstallStep> =
+        installer.downloadAndInstall(extension.apkUrl, extension)
 
     /**
      * Returns a flow of the installation process for the given extension. It will complete
@@ -434,7 +432,6 @@ internal class ExtensionManager(
 
     private operator fun <T : Extension> Map<String, T>.plus(extension: T) = plus(extension.pkgName to extension)
 
-    private fun <T : Extension> StateFlow<Map<String, T>>.mapExtensions(scope: CoroutineScope): StateFlow<List<T>> {
-        return map { it.values.toList() }.stateIn(scope, SharingStarted.Lazily, value.values.toList())
-    }
+    private fun <T : Extension> StateFlow<Map<String, T>>.mapExtensions(scope: CoroutineScope): StateFlow<List<T>> =
+        map { it.values.toList() }.stateIn(scope, SharingStarted.Lazily, value.values.toList())
 }

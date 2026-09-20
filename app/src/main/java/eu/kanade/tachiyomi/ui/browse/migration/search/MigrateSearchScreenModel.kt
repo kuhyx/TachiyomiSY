@@ -41,7 +41,5 @@ internal class MigrateSearchScreenModel(
         }
     }
 
-    override fun getEnabledSources(): List<Source> {
-        return migrationSources.mapNotNull { sourceManager.get(it) }
-    }
+    override fun getEnabledSources(): List<Source> = migrationSources.mapNotNull { sourceManager.get(it) }
 }

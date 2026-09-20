@@ -33,9 +33,8 @@ internal fun Uri.toShareIntent(context: Context, type: String = "image/*", messa
     }
 }
 
-internal inline fun <reified T> Intent.getParcelableExtraCompat(name: String): T? {
-    return IntentCompat.getParcelableExtra(this, name, T::class.java)
-}
+internal inline fun <reified T> Intent.getParcelableExtraCompat(name: String): T? =
+    IntentCompat.getParcelableExtra(this, name, T::class.java)
 
 internal inline fun <reified T : Serializable> Intent.getSerializableExtraCompat(name: String): T? {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

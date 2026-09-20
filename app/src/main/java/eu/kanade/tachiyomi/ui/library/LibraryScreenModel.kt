@@ -991,9 +991,8 @@ internal class LibraryScreenModel(
         }
     }
 
-    fun getDisplayMode(): PreferenceMutableState<LibraryDisplayMode> {
-        return libraryPreferences.displayMode.asState(screenModelScope)
-    }
+    fun getDisplayMode(): PreferenceMutableState<LibraryDisplayMode> =
+        libraryPreferences.displayMode.asState(screenModelScope)
 
     fun getColumnsForOrientation(isLandscape: Boolean): PreferenceMutableState<Int> {
         return (if (isLandscape) libraryPreferences.landscapeColumns else libraryPreferences.portraitColumns)
@@ -1329,9 +1328,7 @@ internal class LibraryScreenModel(
 // SY -->
 
     /** Returns first unread chapter of a manga */
-    suspend fun getFirstUnread(manga: Manga): Chapter? {
-        return getNextChapters.await(manga.id).firstOrNull()
-    }
+    suspend fun getFirstUnread(manga: Manga): Chapter? = getNextChapters.await(manga.id).firstOrNull()
 
     private fun List<LibraryItem>.getGroupedMangaItems(
         groupType: Int,
@@ -1550,13 +1547,11 @@ internal class LibraryScreenModel(
             return getItemsForCategory(category)
         }
 
-        fun getItemsForCategory(category: Category): List<LibraryItem> {
-            return groupedFavorites[category].orEmpty().mapNotNull { libraryData.favoritesById[it] }
-        }
+        fun getItemsForCategory(category: Category): List<LibraryItem> =
+            groupedFavorites[category].orEmpty().mapNotNull { libraryData.favoritesById[it] }
 
-        fun getItemCountForCategory(category: Category): Int? {
-            return if (showMangaCount || !searchQuery.isNullOrEmpty()) groupedFavorites[category]?.size else null
-        }
+        fun getItemCountForCategory(category: Category): Int? =
+            if (showMangaCount || !searchQuery.isNullOrEmpty()) groupedFavorites[category]?.size else null
 
         fun getToolbarTitle(
             defaultTitle: String,

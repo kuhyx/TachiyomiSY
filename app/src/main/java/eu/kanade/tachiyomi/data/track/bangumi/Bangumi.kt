@@ -24,13 +24,9 @@ internal class Bangumi(id: Long) : BaseTracker(id, "Bangumi") {
 
     override fun getScoreList(): List<String> = SCORE_LIST
 
-    override fun displayScore(track: DomainTrack): String {
-        return track.score.toInt().toString()
-    }
+    override fun displayScore(track: DomainTrack): String = track.score.toInt().toString()
 
-    private suspend fun add(track: Track): Track {
-        return api.addLibManga(track)
-    }
+    private suspend fun add(track: Track): Track = api.addLibManga(track)
 
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         if (track.status != COMPLETED) {
@@ -67,13 +63,9 @@ internal class Bangumi(id: Long) : BaseTracker(id, "Bangumi") {
         }
     }
 
-    override suspend fun search(query: String): List<TrackSearch> {
-        return api.search(query)
-    }
+    override suspend fun search(query: String): List<TrackSearch> = api.search(query)
 
-    override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? {
-        return api.getMangaMetadata(track)
-    }
+    override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? = api.getMangaMetadata(track)
 
     override suspend fun refresh(track: Track): Track {
         val remoteStatusTrack = api.statusLibManga(track, getUsername()) ?: throw Exception("Could not find manga")
@@ -83,9 +75,7 @@ internal class Bangumi(id: Long) : BaseTracker(id, "Bangumi") {
 
     override fun getLogo() = R.drawable.brand_bangumi
 
-    override fun getStatusList(): List<Long> {
-        return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ)
-    }
+    override fun getStatusList(): List<Long> = listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ)
 
     override fun getStatus(status: Long): StringResource? = when (status) {
         READING -> MR.strings.reading

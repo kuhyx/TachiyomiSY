@@ -229,8 +229,8 @@ internal fun BrowseSourceEHentaiListItem(
                         spaceBetween = 2.dp,
                         hideInactiveStars = false,
                         style = RatingBarStyle.Fill(
-                            activeColor = Color(0xFF005ED7),
-                            inActiveColor = Color(0xE1E2ECFF),
+                            activeColor = Color(color = 0xFF005ED7),
+                            inActiveColor = Color(color = 0xE1E2ECFF),
                         ),
                         painterEmpty = null,
                         painterFilled = null,

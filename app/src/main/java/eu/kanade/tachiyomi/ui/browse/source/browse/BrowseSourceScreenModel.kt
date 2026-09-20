@@ -363,9 +363,8 @@ internal open class BrowseSourceScreenModel(
     }
 
     // SY -->
-    open fun createSourcePagingSource(query: String, filters: FilterList): SourcePagingSource {
-        return getRemoteManga(sourceId, query, filters)
-    }
+    open fun createSourcePagingSource(query: String, filters: FilterList): SourcePagingSource =
+        getRemoteManga(sourceId, query, filters)
     // SY <--
 
     /**
@@ -380,9 +379,8 @@ internal open class BrowseSourceScreenModel(
             .orEmpty()
     }
 
-    suspend fun getDuplicateLibraryManga(manga: Manga): List<MangaWithChapterCount> {
-        return getDuplicateLibraryManga.invoke(manga)
-    }
+    suspend fun getDuplicateLibraryManga(manga: Manga): List<MangaWithChapterCount> =
+        getDuplicateLibraryManga.invoke(manga)
 
     private fun moveMangaToCategories(manga: Manga, vararg categories: Category) {
         moveMangaToCategories(manga, categories.filter { it.id != 0L }.map { it.id })

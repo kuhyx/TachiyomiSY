@@ -81,17 +81,14 @@ internal object DownloadQueueScreen : Screen() {
                     return scrollBehavior.nestedScrollConnection.onPreScroll(available, source)
                 }
 
-                override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                    return scrollBehavior.nestedScrollConnection.onPostScroll(consumed, available, source)
-                }
+                override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
+                    scrollBehavior.nestedScrollConnection.onPostScroll(consumed, available, source)
 
-                override suspend fun onPreFling(available: Velocity): Velocity {
-                    return scrollBehavior.nestedScrollConnection.onPreFling(available)
-                }
+                override suspend fun onPreFling(available: Velocity): Velocity =
+                    scrollBehavior.nestedScrollConnection.onPreFling(available)
 
-                override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                    return scrollBehavior.nestedScrollConnection.onPostFling(consumed, available)
-                }
+                override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity =
+                    scrollBehavior.nestedScrollConnection.onPostFling(consumed, available)
             }
         }
 

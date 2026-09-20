@@ -26,17 +26,12 @@ internal data class TimeRange(private val startTime: Duration, private val endTi
         return format.format(startDate) + " - " + format.format(endDate)
     }
 
-    fun toPreferenceString(): String {
-        return "${startTime.inWholeMinutes},${endTime.inWholeMinutes}"
-    }
+    fun toPreferenceString(): String = "${startTime.inWholeMinutes},${endTime.inWholeMinutes}"
 
-    fun conflictsWith(other: TimeRange): Boolean {
-        return startTime in other.startTime..other.endTime || endTime in other.startTime..other.endTime
-    }
+    fun conflictsWith(other: TimeRange): Boolean =
+        startTime in other.startTime..other.endTime || endTime in other.startTime..other.endTime
 
-    operator fun contains(other: Duration): Boolean {
-        return other in startTime..endTime
-    }
+    operator fun contains(other: Duration): Boolean = other in startTime..endTime
 
     companion object {
         fun fromPreferenceString(timeRange: String): TimeRange? {

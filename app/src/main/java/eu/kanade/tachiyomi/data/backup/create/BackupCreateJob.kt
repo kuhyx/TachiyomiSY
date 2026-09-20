@@ -83,9 +83,7 @@ internal class BackupCreateJob(private val context: Context, workerParams: Worke
     }
 
     companion object {
-        fun isManualJobRunning(context: Context): Boolean {
-            return context.workManager.isRunning(TAG_MANUAL)
-        }
+        fun isManualJobRunning(context: Context): Boolean = context.workManager.isRunning(TAG_MANUAL)
 
         fun setupTask(context: Context, prefInterval: Int? = null) {
             val backupPreferences = Injekt.get<BackupPreferences>()

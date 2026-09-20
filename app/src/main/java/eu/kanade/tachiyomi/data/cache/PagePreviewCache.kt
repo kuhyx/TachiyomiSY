@@ -212,7 +212,6 @@ internal class PagePreviewCache(private val context: Context) {
         }
     }
 
-    private fun getKey(manga: Manga, chapterIds: List<Long>, page: Int): String {
-        return "${manga.id}_${chapterIds.joinToString(separator = "-")}_$page"
-    }
+    private fun getKey(manga: Manga, chapterIds: List<Long>, page: Int): String =
+        "${manga.id}_${chapterIds.joinToString(separator = "-")}_$page"
 }

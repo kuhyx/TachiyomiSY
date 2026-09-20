@@ -9,7 +9,5 @@ import tachiyomi.data.source.BaseSourcePagingSource
  */
 internal class MangaDexFollowsPagingSource(val mangadex: MangaDex) : BaseSourcePagingSource(mangadex) {
 
-    override suspend fun requestNextPage(currentPage: Int): MangasPage {
-        return mangadex.fetchFollows(currentPage)
-    }
+    override suspend fun requestNextPage(currentPage: Int): MangasPage = mangadex.fetchFollows(currentPage)
 }

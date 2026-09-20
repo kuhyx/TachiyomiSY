@@ -176,9 +176,7 @@ internal class AndroidSourceManager(
         // EXH <--
     }
 
-    override fun get(sourceKey: Long): Source? {
-        return sourcesMapFlow.value[sourceKey]
-    }
+    override fun get(sourceKey: Long): Source? = sourcesMapFlow.value[sourceKey]
 
     override fun getOrStub(sourceKey: Long): Source {
         return sourcesMapFlow.value[sourceKey] ?: stubSourcesMap.getOrPut(sourceKey) {

@@ -898,9 +898,7 @@ internal class MangaScreenModel(
      *
      * @return List of categories, not including the default category
      */
-    suspend fun getCategories(): List<Category> {
-        return getCategories.await().filterNot { it.isSystemCategory }
-    }
+    suspend fun getCategories(): List<Category> = getCategories.await().filterNot { it.isSystemCategory }
 
     /**
      * Gets the category id's the manga is in, if the manga is not in a category, returns the default id.

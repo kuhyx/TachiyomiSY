@@ -201,18 +201,15 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
     )
 
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
-    override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
-        return mangaHandler.fetchChapterListObservable(manga, blockedGroups(), blockedUploaders())
-    }
+    override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> =
+        mangaHandler.fetchChapterListObservable(manga, blockedGroups(), blockedUploaders())
 
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getPageList"))
-    override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-        return runAsObservable { pageHandler.fetchPageList(chapter, usePort443Only(), dataSaver(), delegate) }
-    }
+    override fun fetchPageList(chapter: SChapter): Observable<List<Page>> =
+        runAsObservable { pageHandler.fetchPageList(chapter, usePort443Only(), dataSaver(), delegate) }
 
-    override suspend fun getPageList(chapter: SChapter): List<Page> {
-        return pageHandler.fetchPageList(chapter, usePort443Only(), dataSaver(), delegate)
-    }
+    override suspend fun getPageList(chapter: SChapter): List<Page> =
+        pageHandler.fetchPageList(chapter, usePort443Only(), dataSaver(), delegate)
 
     override suspend fun getImage(page: Page, existingSize: Long): Response {
         val call = pageHandler.getImageCall(page, existingSize)
@@ -255,64 +252,40 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
 
     override val twoFactorAuth = LoginSource.AuthSupport.NOT_SUPPORTED
 
-    override fun isLogged(): Boolean {
-        return mdList.isLoggedIn
-    }
+    override fun isLogged(): Boolean = mdList.isLoggedIn
 
-    override fun getUsername(): String {
-        return mdList.getUsername()
-    }
+    override fun getUsername(): String = mdList.getUsername()
 
-    override fun getPassword(): String {
-        return mdList.getPassword()
-    }
+    override fun getPassword(): String = mdList.getPassword()
 
-    override suspend fun login(authCode: String): Boolean {
-        return loginHelper.login(authCode)
-    }
+    override suspend fun login(authCode: String): Boolean = loginHelper.login(authCode)
 
-    override suspend fun logout(): Boolean {
-        return loginHelper.logout()
-    }
+    override suspend fun logout(): Boolean = loginHelper.logout()
 
     // FollowsSource methods
-    override suspend fun fetchFollows(page: Int): MangasPage {
-        return followsHandler.fetchFollows(page)
-    }
+    override suspend fun fetchFollows(page: Int): MangasPage = followsHandler.fetchFollows(page)
 
-    override suspend fun fetchAllFollows(): List<Pair<SManga, MangaDexSearchMetadata>> {
-        return followsHandler.fetchAllFollows()
-    }
+    override suspend fun fetchAllFollows(): List<Pair<SManga, MangaDexSearchMetadata>> =
+        followsHandler.fetchAllFollows()
 
-    suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
-        return followsHandler.updateFollowStatus(mangaID, followStatus)
-    }
+    suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean =
+        followsHandler.updateFollowStatus(mangaID, followStatus)
 
-    suspend fun fetchTrackingInfo(url: String): Track {
-        return followsHandler.fetchTrackingInfo(url)
-    }
+    suspend fun fetchTrackingInfo(url: String): Track = followsHandler.fetchTrackingInfo(url)
 
     // Tracker methods
     /*suspend fun updateReadingProgress(track: Track): Boolean {
         return followsHandler.updateReadingProgress(track)
     }*/
 
-    suspend fun updateRating(track: Track): Boolean {
-        return followsHandler.updateRating(track)
-    }
+    suspend fun updateRating(track: Track): Boolean = followsHandler.updateRating(track)
 
     // RandomMangaSource method
-    override suspend fun fetchRandomMangaUrl(): String {
-        return mangaHandler.fetchRandomMangaId()
-    }
+    override suspend fun fetchRandomMangaUrl(): String = mangaHandler.fetchRandomMangaId()
 
-    suspend fun getMangaSimilar(manga: SManga): MetadataMangasPage {
-        return similarHandler.getSimilar(manga)
-    }
+    suspend fun getMangaSimilar(manga: SManga): MetadataMangasPage = similarHandler.getSimilar(manga)
 
-    suspend fun getMangaRelated(manga: SManga): MetadataMangasPage {
-        return similarHandler.getRelated(manga)
-    }
+    suspend fun getMangaRelated(manga: SManga): MetadataMangasPage = similarHandler.getRelated(manga)
 
     suspend fun getMangaMetadata(track: Track): SManga {
         return mangaHandler.getMangaMetadata(
@@ -328,48 +301,30 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
 
     companion object {
         private const val dataSaverPref = "dataSaverV5"
-        fun getDataSaverPreferenceKey(dexLang: String): String {
-            return "${dataSaverPref}_$dexLang"
-        }
+        fun getDataSaverPreferenceKey(dexLang: String): String = "${dataSaverPref}_$dexLang"
 
         private const val standardHttpsPortPref = "usePort443"
-        fun getStandardHttpsPreferenceKey(dexLang: String): String {
-            return "${standardHttpsPortPref}_$dexLang"
-        }
+        fun getStandardHttpsPreferenceKey(dexLang: String): String = "${standardHttpsPortPref}_$dexLang"
 
         private const val blockedGroupsPref = "blockedGroups"
-        fun getBlockedGroupsPrefKey(dexLang: String): String {
-            return "${blockedGroupsPref}_$dexLang"
-        }
+        fun getBlockedGroupsPrefKey(dexLang: String): String = "${blockedGroupsPref}_$dexLang"
 
         private const val blockedUploaderPref = "blockedUploader"
-        fun getBlockedUploaderPrefKey(dexLang: String): String {
-            return "${blockedUploaderPref}_$dexLang"
-        }
+        fun getBlockedUploaderPrefKey(dexLang: String): String = "${blockedUploaderPref}_$dexLang"
 
         private const val coverQualityPref = "thumbnailQuality"
-        fun getCoverQualityPrefKey(dexLang: String): String {
-            return "${coverQualityPref}_$dexLang"
-        }
+        fun getCoverQualityPrefKey(dexLang: String): String = "${coverQualityPref}_$dexLang"
 
         private const val tryUsingFirstVolumeCoverPref = "tryUsingFirstVolumeCover"
-        fun getTryUsingFirstVolumeCoverKey(dexLang: String): String {
-            return "${tryUsingFirstVolumeCoverPref}_$dexLang"
-        }
+        fun getTryUsingFirstVolumeCoverKey(dexLang: String): String = "${tryUsingFirstVolumeCoverPref}_$dexLang"
 
         private const val altTitlesInDescPref = "altTitlesInDesc"
-        fun getAltTitlesInDescKey(dexLang: String): String {
-            return "${altTitlesInDescPref}_$dexLang"
-        }
+        fun getAltTitlesInDescKey(dexLang: String): String = "${altTitlesInDescPref}_$dexLang"
 
         private const val finalChapterInDescPref = "finalChapterInDesc"
-        fun getFinalChapterInDescPrefKey(dexLang: String): String {
-            return "${finalChapterInDescPref}_$dexLang"
-        }
+        fun getFinalChapterInDescPrefKey(dexLang: String): String = "${finalChapterInDescPref}_$dexLang"
 
         private const val preferExtensionLangTitlePref = "preferExtensionLangTitle"
-        fun getPreferExtensionLangTitlePrefKey(dexLang: String): String {
-            return "${preferExtensionLangTitlePref}_$dexLang"
-        }
+        fun getPreferExtensionLangTitlePrefKey(dexLang: String): String = "${preferExtensionLangTitlePref}_$dexLang"
     }
 }

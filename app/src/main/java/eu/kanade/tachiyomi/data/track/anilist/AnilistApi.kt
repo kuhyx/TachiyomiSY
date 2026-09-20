@@ -282,13 +282,11 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
         }
     }
 
-    suspend fun getLibManga(track: Track, userId: Int): Track {
-        return findLibManga(track, userId) ?: throw Exception("Could not find manga")
-    }
+    suspend fun getLibManga(track: Track, userId: Int): Track =
+        findLibManga(track, userId) ?: throw Exception("Could not find manga")
 
-    fun createOAuth(token: String): ALOAuth {
-        return ALOAuth(token, "Bearer", System.currentTimeMillis() + 31536000000, 31536000000)
-    }
+    fun createOAuth(token: String): ALOAuth =
+        ALOAuth(token, "Bearer", System.currentTimeMillis() + 31536000000, 31536000000)
 
     suspend fun getCurrentUser(): ALUserViewerData {
         return withIOContext {
@@ -460,9 +458,7 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
         private const val BASE_URL = "https://anilist.co/api/v2/"
         private const val BASE_MANGA_URL = "https://anilist.co/manga/"
 
-        fun mangaUrl(mediaId: Long): String {
-            return BASE_MANGA_URL + mediaId
-        }
+        fun mangaUrl(mediaId: Long): String = BASE_MANGA_URL + mediaId
 
         fun authUrl(): Uri = "${BASE_URL}oauth/authorize".toUri().buildUpon()
             .appendQueryParameter("client_id", CLIENT_ID)

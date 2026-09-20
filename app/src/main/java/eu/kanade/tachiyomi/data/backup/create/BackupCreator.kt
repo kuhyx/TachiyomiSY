@@ -145,9 +145,7 @@ internal class BackupCreator(
         return mangaBackupCreator(mangas, options)
     }
 
-    fun backupSources(mangas: List<BackupManga>): List<BackupSource> {
-        return sourcesBackupCreator(mangas)
-    }
+    fun backupSources(mangas: List<BackupManga>): List<BackupSource> = sourcesBackupCreator(mangas)
 
     fun backupAppPreferences(options: BackupOptions): List<BackupPreference> {
         if (!options.appSettings) return emptyList()

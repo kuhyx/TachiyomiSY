@@ -11,6 +11,4 @@ internal fun Track.toApiStatus() = when (status) {
     else -> throw Exception("Unknown status")
 }
 
-internal fun Track.toApiScore(): String? {
-    return if (score > 0) (score * 2).toInt().toString() else null
-}
+internal fun Track.toApiScore(): String? = if (score > 0) (score * 2).toInt().toString() else null

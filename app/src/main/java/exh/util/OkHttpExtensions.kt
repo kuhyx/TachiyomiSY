@@ -43,9 +43,7 @@ internal fun Call.asObservableWithAsyncStacktrace(): Observable<Pair<Exception, 
                 }
             }
 
-            override fun isUnsubscribed(): Boolean {
-                return call.isCanceled()
-            }
+            override fun isUnsubscribed(): Boolean = call.isCanceled()
         }
 
         subscriber.add(requestArbiter)

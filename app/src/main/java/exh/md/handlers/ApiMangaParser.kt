@@ -237,9 +237,8 @@ internal class ApiMangaParser(
             }
     }
 
-    fun chapterParseForMangaId(chapterDto: ChapterDto): String? {
-        return chapterDto.data.relationships.find { it.type.equals("manga", true) }?.id
-    }
+    fun chapterParseForMangaId(chapterDto: ChapterDto): String? =
+        chapterDto.data.relationships.find { it.type.equals("manga", true) }?.id
 
     fun StringBuilder.appends(string: String): StringBuilder = append("$string ")
 

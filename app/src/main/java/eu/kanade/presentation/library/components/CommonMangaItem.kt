@@ -131,7 +131,7 @@ private fun BoxScope.CoverTextOverlay(
             .background(
                 Brush.verticalGradient(
                     0f to Color.Transparent,
-                    1f to Color(0xAA000000),
+                    1f to Color(color = 0xAA000000),
                 ),
             )
             .fillMaxHeight(0.33f)

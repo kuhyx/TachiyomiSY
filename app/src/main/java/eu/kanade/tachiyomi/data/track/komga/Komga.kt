@@ -63,9 +63,7 @@ internal class Komga(id: Long) : BaseTracker(id, "Komga"), EnhancedTracker {
         return api.updateProgress(track)
     }
 
-    override suspend fun bind(track: Track, hasReadChapters: Boolean): Track {
-        return track
-    }
+    override suspend fun bind(track: Track, hasReadChapters: Boolean): Track = track
 
     override suspend fun search(query: String): List<TrackSearch> {
         TODO("Not yet implemented: search")

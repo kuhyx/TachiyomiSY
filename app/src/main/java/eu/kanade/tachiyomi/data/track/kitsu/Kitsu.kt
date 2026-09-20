@@ -36,9 +36,7 @@ internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
 
     override fun getLogo() = R.drawable.brand_kitsu
 
-    override fun getStatusList(): List<Long> {
-        return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ)
-    }
+    override fun getStatusList(): List<Long> = listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ)
 
     override fun getStatus(status: Long): StringResource? = when (status) {
         READING -> MR.strings.reading
@@ -60,18 +58,14 @@ internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
         return (listOf("0") + IntRange(2, 20).map { df.format(it / 2f) })
     }
 
-    override fun indexToScore(index: Int): Double {
-        return if (index > 0) (index + 1) / 2.0 else 0.0
-    }
+    override fun indexToScore(index: Int): Double = if (index > 0) (index + 1) / 2.0 else 0.0
 
     override fun displayScore(track: DomainTrack): String {
         val df = DecimalFormat("0.#")
         return df.format(track.score)
     }
 
-    private suspend fun add(track: Track): Track {
-        return api.addLibManga(track, getUserId())
-    }
+    private suspend fun add(track: Track): Track = api.addLibManga(track, getUserId())
 
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         if (track.status != COMPLETED) {
@@ -114,9 +108,7 @@ internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
         }
     }
 
-    override suspend fun search(query: String): List<TrackSearch> {
-        return api.search(query)
-    }
+    override suspend fun search(query: String): List<TrackSearch> = api.search(query)
 
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.getLibManga(track)
@@ -138,13 +130,9 @@ internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
         interceptor.newAuth(null)
     }
 
-    override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata {
-        return api.getMangaMetadata(track)
-    }
+    override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata = api.getMangaMetadata(track)
 
-    private fun getUserId(): String {
-        return getPassword()
-    }
+    private fun getUserId(): String = getPassword()
 
     fun saveToken(oauth: KitsuOAuth?) {
         trackPreferences.trackToken(this).set(json.encodeToString(oauth))

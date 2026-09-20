@@ -83,9 +83,8 @@ internal fun Manga.copyFrom(other: SManga): Manga {
     )
 }
 
-internal fun Manga.hasCustomCover(coverCache: CoverCache = Injekt.get()): Boolean {
-    return coverCache.getCustomCoverFile(id).exists()
-}
+internal fun Manga.hasCustomCover(coverCache: CoverCache = Injekt.get()): Boolean =
+    coverCache.getCustomCoverFile(id).exists()
 
 /**
  * Creates a ComicInfo instance based on the manga and chapter metadata.

@@ -78,9 +78,7 @@ internal class DownloadProvider(
      *
      * @param source the source to query.
      */
-    fun findSourceDir(source: Source): UniFile? {
-        return downloadsDir?.findFile(getSourceDirName(source))
-    }
+    fun findSourceDir(source: Source): UniFile? = downloadsDir?.findFile(getSourceDirName(source))
 
     /**
      * Returns the download directory for a manga if it exists.

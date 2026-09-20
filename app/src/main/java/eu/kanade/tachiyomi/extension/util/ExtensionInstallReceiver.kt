@@ -83,9 +83,7 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
      *
      * @param intent The intent that triggered the event.
      */
-    private fun isReplacing(intent: Intent): Boolean {
-        return intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-    }
+    private fun isReplacing(intent: Intent): Boolean = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
 
     /**
      * Returns the extension triggered by the given intent.
@@ -105,9 +103,7 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
     /**
      * Returns the package name of the installed, updated or removed application.
      */
-    private fun getPackageNameFromIntent(intent: Intent?): String? {
-        return intent?.data?.encodedSchemeSpecificPart
-    }
+    private fun getPackageNameFromIntent(intent: Intent?): String? = intent?.data?.encodedSchemeSpecificPart
 
     /**
      * Listener that receives extension installation events.

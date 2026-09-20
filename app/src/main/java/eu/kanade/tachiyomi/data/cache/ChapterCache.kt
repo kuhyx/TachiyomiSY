@@ -231,9 +231,7 @@ internal class ChapterCache(
         }
     }
 
-    private fun getKey(chapter: Chapter): String {
-        return "${chapter.mangaId}${chapter.url}"
-    }
+    private fun getKey(chapter: Chapter): String = "${chapter.mangaId}${chapter.url}"
 }
 
 /** Application cache version.  */

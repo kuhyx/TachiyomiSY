@@ -53,9 +53,7 @@ internal class SyncPreferences(
         return uniqueID
     }
 
-    fun isSyncEnabled(): Boolean {
-        return syncService.get() != 0
-    }
+    fun isSyncEnabled(): Boolean = syncService.get() != 0
 
     fun getSyncSettings(): SyncSettings {
         return SyncSettings(

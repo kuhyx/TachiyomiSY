@@ -28,9 +28,8 @@ internal class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTrac
 
     override fun getLogo(): Int = R.drawable.brand_mangabaka
 
-    override fun getStatusList(): List<Long> {
-        return listOf(READING, COMPLETED, PAUSED, DROPPED, PLAN_TO_READ, REREADING, CONSIDERING)
-    }
+    override fun getStatusList(): List<Long> =
+        listOf(READING, COMPLETED, PAUSED, DROPPED, PLAN_TO_READ, REREADING, CONSIDERING)
 
     override fun getStatus(status: Long): StringResource? = when (status) {
         CONSIDERING -> MR.strings.considering
