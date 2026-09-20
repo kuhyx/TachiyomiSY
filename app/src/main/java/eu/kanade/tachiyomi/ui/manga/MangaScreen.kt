@@ -358,10 +358,6 @@ internal class MangaScreen(
         }
     }
 
-    // SY -->
-
-    // SY <--
-
     @OptIn(DelicateCoroutinesApi::class)
     private fun mergeWithAnother(
         navigator: Navigator,

@@ -420,10 +420,6 @@ internal class LibraryScreenModel(
         // SY <--
     }
 
-// SY -->
-
-// SY <--
-
     @Immutable
     internal data class ItemPreferences(
         val downloadBadge: Boolean,

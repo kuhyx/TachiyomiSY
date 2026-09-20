@@ -1,8 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
-import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.Event
-
 import androidx.lifecycle.viewModelScope
+import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.Event
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -147,9 +146,6 @@ internal suspend fun ReaderViewModel.preload(chapter: ReaderChapter) {
     eventChannel.trySend(Event.ReloadViewerChapters)
 }
 
-/**
- * Saves the chapter last read history if incognito mode isn't on.
- */
 /**
  * Called from the activity to load and set the next chapter as active.
  */

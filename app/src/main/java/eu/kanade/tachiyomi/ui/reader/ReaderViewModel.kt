@@ -450,19 +450,6 @@ internal class ReaderViewModel @JvmOverloads constructor(
 
     // SY <--
 
-    // SY -->
-    // SY <--
-
-    // SY <--
-
-    /**
-     * Saves the image of the selected page on the pictures directory and notifies the UI of the result.
-     * There's also a notification to allow sharing the image somewhere else or deleting it.
-     */
-    // SY -->
-    // SY <--
-
-    // SY -->
     // SY <--
 
     enum class SetAsCoverResult {
