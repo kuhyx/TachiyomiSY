@@ -26,10 +26,10 @@ internal fun GlobalSearchScreen(
     onSearch: (String) -> Unit,
     onChangeSearchFilter: (SourceFilter) -> Unit,
     onToggleResults: () -> Unit,
-    getManga: @Composable (Manga) -> State<Manga>,
     onClickSource: (Source) -> Unit,
     onClickItem: (Manga) -> Unit,
     onLongClickItem: (Manga) -> Unit,
+    getManga: @Composable (Manga) -> State<Manga>,
 ) {
     Scaffold(
         topBar = { scrollBehavior ->
@@ -64,11 +64,11 @@ internal fun GlobalSearchScreen(
 internal fun GlobalSearchContent(
     items: Map<Source, SearchItemResult>,
     contentPadding: PaddingValues,
-    getManga: @Composable (Manga) -> State<Manga>,
     onClickSource: (Source) -> Unit,
     onClickItem: (Manga) -> Unit,
     onLongClickItem: (Manga) -> Unit,
     fromSourceId: Long? = null,
+    getManga: @Composable (Manga) -> State<Manga>,
 ) {
     LazyColumn(
         contentPadding = contentPadding,

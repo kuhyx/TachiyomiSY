@@ -22,7 +22,7 @@ internal class SourcesBackupCreator(
     }
 }
 
-private fun Source.toBackupSource() =
+internal fun Source.toBackupSource() =
     BackupSource(
         name = this.name,
         sourceId = this.id,

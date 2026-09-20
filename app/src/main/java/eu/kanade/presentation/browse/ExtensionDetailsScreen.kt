@@ -362,7 +362,7 @@ private fun DetailsHeader(
             title = stringResource(MR.strings.pref_incognito_mode),
             subtitle = stringResource(MR.strings.pref_incognito_mode_extension_summary),
             icon = ImageVector.vectorResource(R.drawable.ic_glasses_24dp),
-            widget = {
+            content = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -436,7 +436,7 @@ private fun SourceSwitchPreference(
         } else {
             LocaleHelper.getSourceDisplayName(source.source.lang, context)
         },
-        widget = {
+        content = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {

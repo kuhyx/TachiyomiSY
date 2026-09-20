@@ -3,6 +3,7 @@ package mihon.feature.migration.list.models
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import tachiyomi.domain.manga.model.Manga
 import kotlin.coroutines.CoroutineContext
@@ -17,6 +18,11 @@ internal class MigratingManga(
     val migrationScope = CoroutineScope(parentContext + SupervisorJob() + Dispatchers.Default)
 
     val searchResult = MutableStateFlow<SearchResult>(SearchResult.Searching)
+
+    /** Stops any search or migration still running for this entry. */
+    fun cancelMigration() {
+        migrationScope.cancel()
+    }
 
     sealed interface SearchResult {
         data object Searching : SearchResult

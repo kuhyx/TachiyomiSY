@@ -35,10 +35,10 @@ internal fun GlobalSearchResultItem(
     subtitle: String?,
     // SY <--
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     // SY -->
     onLongClick: (() -> Unit)? = null,
     // SY <--
-    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     Column(modifier = modifier) {

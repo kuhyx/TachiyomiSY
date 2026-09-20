@@ -715,7 +715,7 @@ internal object SettingsDataScreen : SearchableSettings {
                     },
                     icon = null,
                     value = values,
-                    widget = {
+                    content = {
                         IconButton(
                             onClick = { qrScanLauncher.launch(scanOptions) },
                             modifier = Modifier.padding(start = TrailingWidgetBuffer),

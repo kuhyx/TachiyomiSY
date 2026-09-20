@@ -328,7 +328,7 @@ internal class ExtensionManager(
 
     // Registers the given extension in this and the source managers.
     // @param extension The extension to be registered.
-    private fun registerNewExtension(extension: Extension.Installed) {
+    internal fun registerNewExtension(extension: Extension.Installed) {
         // SY -->
         if (extension.isBlacklisted()) {
             xLogD("Removing blacklisted extension: (name: String, pkgName: %s)!", extension.name, extension.pkgName)
@@ -342,7 +342,7 @@ internal class ExtensionManager(
     // Registers the given updated extension in this and the source managers previously removing
     // the outdated ones.
     // @param extension The extension to be registered.
-    private fun registerUpdatedExtension(extension: Extension.Installed) {
+    internal fun registerUpdatedExtension(extension: Extension.Installed) {
         // SY -->
         if (extension.isBlacklisted()) {
             xLogD("Removing blacklisted extension: (name: %s, pkgName: %s)!", extension.name, extension.pkgName)
@@ -356,7 +356,7 @@ internal class ExtensionManager(
     // Unregisters the extension in this and the source managers given its package name. Note this
     // method is called for every uninstalled application in the system.
     // @param pkgName The package name of the uninstalled application.
-    private fun unregisterExtension(pkgName: String) {
+    internal fun unregisterExtension(pkgName: String) {
         installedExtensionMapFlow.value -= pkgName
         untrustedExtensionMapFlow.value -= pkgName
     }
@@ -390,7 +390,7 @@ internal class ExtensionManager(
     }
 
     // Extension method to set the update field of an installed extension.
-    private fun Extension.Installed.withUpdateCheck(): Extension.Installed {
+    internal fun Extension.Installed.withUpdateCheck(): Extension.Installed {
         return if (updateExists()) {
             copy(hasUpdate = true)
         } else {
@@ -406,7 +406,7 @@ internal class ExtensionManager(
         return availableExt.versionCode > versionCode || availableExt.libVersion > libVersion
     }
 
-    private fun updatePendingUpdatesCount() {
+    internal fun updatePendingUpdatesCount() {
         val pendingUpdateCount = installedExtensionMapFlow.value.values.count { it.hasUpdate }
         preferences.extensionUpdatesCount.set(pendingUpdateCount)
         if (pendingUpdateCount == 0) {

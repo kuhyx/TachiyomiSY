@@ -99,14 +99,14 @@ internal class SourcePreferencesScreen(val sourceId: Long) : Screen() {
                     fragmentManager.commit { commit(view.id) }
                     initialized = true
                 } else {
-                    fragmentManager.onContainerAvailable(view)
+                    fragmentManager.invokeOnContainerAvailable(view)
                 }
             },
         )
     }
 
     // Access to package-private method in FragmentManager through reflection.
-    private fun FragmentManager.onContainerAvailable(view: FragmentContainerView) {
+    private fun FragmentManager.invokeOnContainerAvailable(view: FragmentContainerView) {
         val method = FragmentManager::class.java.getDeclaredMethod(
             "onContainerAvailable",
             FragmentContainerView::class.java,

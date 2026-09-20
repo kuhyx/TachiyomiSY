@@ -31,7 +31,7 @@ internal class ShizukuInstaller(private val service: Service) : Installer(servic
 
     private var shellInterface: IShellInterface? = null
 
-    private val shizukuArgs by lazy {
+    internal val shizukuArgs by lazy {
         Shizuku.UserServiceArgs(
             ComponentName(service, ShellInterface::class.java),
         )

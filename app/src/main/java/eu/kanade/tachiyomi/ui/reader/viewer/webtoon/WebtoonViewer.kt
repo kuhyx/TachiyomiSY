@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.graphics.PointF
-import android.os.Build
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -37,8 +36,10 @@ private const val SCROLL_DISTANCE_NUMERATOR = 3
 private const val SCROLL_DISTANCE_DENOMINATOR = 4
 private const val PRELOAD_PAGES_BEFORE_END = 5
 private const val REFRESH_RADIUS = 3
-private const val DEFAULT_CACHE_SIZE = 2
-private const val DOUBLED_CACHE_SIZE = 4
+
+// Double the default cache size to reduce rebinds/recycles incurred by the extra layout space on
+// scroll direction changes.
+private const val RECYCLER_VIEW_CACHE_SIZE = 4
 
 internal class WebtoonViewer(
     val activity: ReaderActivity,
@@ -397,7 +398,3 @@ internal class WebtoonViewer(
         )
     }
 }
-
-// Double the cache size to reduce rebinds/recycles incurred by the extra layout space on scroll direction changes
-private val RECYCLER_VIEW_CACHE_SIZE =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DOUBLED_CACHE_SIZE else DEFAULT_CACHE_SIZE

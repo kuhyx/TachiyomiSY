@@ -231,4 +231,4 @@ internal class HikkaApi(
 }
 
 // Hikka takes epoch seconds and null for "unset"; the app stores 0 for unset.
-private fun Long.toApiSeconds(): Long? = if (this > 0L) this / MILLIS_PER_SECOND else null
+internal fun Long.toApiSeconds(): Long? = if (this > 0L) this / MILLIS_PER_SECOND else null

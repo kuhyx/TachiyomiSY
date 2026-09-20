@@ -174,7 +174,7 @@ internal class SettingsDebugScreen : Screen() {
                         } else {
                             null
                         },
-                        widget = {
+                        content = {
                             Switch(
                                 checked = state,
                                 onCheckedChange = null,

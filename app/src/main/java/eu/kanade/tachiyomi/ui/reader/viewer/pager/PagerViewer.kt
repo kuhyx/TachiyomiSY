@@ -62,7 +62,7 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
 
     // Whether the view pager is currently in idle mode. It sets the awaiting chapters if setting
     // this field to true.
-    private var isIdle = true
+    internal var isIdle = true
         set(value) {
             field = value
             if (value) {

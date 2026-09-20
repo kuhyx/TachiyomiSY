@@ -31,8 +31,8 @@ internal fun EditTextPreferenceWidget(
     subtitle: String?,
     icon: ImageVector?,
     value: String,
-    widget: @Composable (() -> Unit)? = null,
     onConfirm: suspend (String) -> Boolean,
+    content: @Composable (() -> Unit)? = null,
 ) {
     var isDialogShown by remember { mutableStateOf(false) }
 
@@ -40,7 +40,7 @@ internal fun EditTextPreferenceWidget(
         title = title,
         subtitle = subtitle?.format(value),
         icon = icon,
-        widget = widget,
+        content = content,
         onPreferenceClick = { isDialogShown = true },
     )
 

@@ -21,7 +21,7 @@ import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -133,7 +133,7 @@ internal fun PagePreviewPageDialog(
     onPageSelected: (Int) -> Unit,
 ) {
     var page by remember(currentPage) {
-        mutableStateOf(currentPage.toFloat())
+        mutableFloatStateOf(currentPage.toFloat())
     }
     // The thumb follows `page` so the snap animation below moves it too.
     val sliderState = key(pageCount) {

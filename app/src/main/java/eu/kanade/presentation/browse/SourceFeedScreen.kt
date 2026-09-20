@@ -86,12 +86,12 @@ internal fun SourceFeedScreen(
 internal fun SourceFeedList(
     items: List<SourceFeedUI>,
     paddingValues: PaddingValues,
-    getMangaState: @Composable ((Manga) -> State<Manga>),
     onClickBrowse: () -> Unit,
     onClickLatest: () -> Unit,
     onClickSavedSearch: (SavedSearch) -> Unit,
     onClickDelete: (FeedSavedSearch) -> Unit,
     onClickManga: (Manga) -> Unit,
+    getMangaState: @Composable ((Manga) -> State<Manga>),
 ) {
     ScrollbarLazyColumn(
         contentPadding = paddingValues + topSmallPaddingValues,
@@ -132,8 +132,8 @@ internal fun SourceFeedList(
 @Composable
 internal fun SourceFeedItem(
     item: SourceFeedUI,
-    getMangaState: @Composable ((Manga) -> State<Manga>),
     onClickManga: (Manga) -> Unit,
+    getMangaState: @Composable ((Manga) -> State<Manga>),
 ) {
     val results = item.results
     when {

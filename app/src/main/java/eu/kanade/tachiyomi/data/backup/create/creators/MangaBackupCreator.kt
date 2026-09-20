@@ -122,7 +122,7 @@ internal class MangaBackupCreator(
     }
 }
 
-private fun Manga.toBackupManga(/* SY --> */customMangaInfo: CustomMangaInfo?/* SY <-- */) =
+internal fun Manga.toBackupManga(/* SY --> */customMangaInfo: CustomMangaInfo?/* SY <-- */) =
     BackupManga(
         url = this.url,
         // SY -->

@@ -155,7 +155,7 @@ internal class SettingsSearchScreen : Screen() {
 }
 
 @Composable
-private fun SearchResult(
+internal fun SearchResult(
     searchKey: String,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
@@ -311,7 +311,7 @@ private data class SettingsData(
     val contents: List<Preference>,
 )
 
-private data class SearchResultItem(
+internal data class SearchResultItem(
     val route: VoyagerScreen,
     val title: String,
     val breadcrumbs: String,

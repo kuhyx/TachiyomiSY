@@ -36,7 +36,7 @@ internal class WebtoonFrame(context: Context) : FrameLayout(context) {
         }
 
     // Recycler view added in this frame.
-    private val recycler: WebtoonRecyclerView?
+    internal val recycler: WebtoonRecyclerView?
         get() = getChildAt(0) as? WebtoonRecyclerView
 
     /**

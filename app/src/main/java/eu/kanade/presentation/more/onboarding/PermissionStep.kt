@@ -47,8 +47,8 @@ internal class PermissionStep : OnboardingStep {
 
     private val privacyPreferences: PrivacyPreferences by injectLazy()
 
-    private var notificationGranted by mutableStateOf(false)
-    private var batteryGranted by mutableStateOf(false)
+    internal var notificationGranted by mutableStateOf(false)
+    internal var batteryGranted by mutableStateOf(false)
 
     override val isComplete: Boolean = true
 

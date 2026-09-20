@@ -24,10 +24,10 @@ internal fun RecommendsScreen(
     title: String,
     state: RecommendsScreenModel.State,
     navigateUp: () -> Unit,
-    getManga: @Composable (Manga) -> State<Manga>,
     onClickSource: (RecommendationPagingSource) -> Unit,
     onClickItem: (Manga) -> Unit,
     onLongClickItem: (Manga) -> Unit,
+    getManga: @Composable (Manga) -> State<Manga>,
 ) {
     Scaffold(
         topBar = { scrollBehavior ->
@@ -53,10 +53,10 @@ internal fun RecommendsScreen(
 internal fun RecommendsContent(
     items: Map<RecommendationPagingSource, RecommendationItemResult>,
     contentPadding: PaddingValues,
-    getManga: @Composable (Manga) -> State<Manga>,
     onClickSource: (RecommendationPagingSource) -> Unit,
     onClickItem: (Manga) -> Unit,
     onLongClickItem: (Manga) -> Unit,
+    getManga: @Composable (Manga) -> State<Manga>,
 ) {
     LazyColumn(
         contentPadding = contentPadding,

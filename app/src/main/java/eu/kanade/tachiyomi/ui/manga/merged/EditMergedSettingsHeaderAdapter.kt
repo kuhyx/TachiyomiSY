@@ -29,7 +29,7 @@ internal class EditMergedSettingsHeaderAdapter(
     adapter: EditMergedMangaAdapter,
 ) : RecyclerView.Adapter<EditMergedSettingsHeaderAdapter.HeaderViewHolder>() {
 
-    private val sourceManager: SourceManager by injectLazy()
+    internal val sourceManager: SourceManager by injectLazy()
 
     val editMergedMangaItemSortingListener: SortingListener = adapter
 

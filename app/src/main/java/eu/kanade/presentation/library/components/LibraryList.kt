@@ -53,7 +53,7 @@ internal fun LibraryList(
                     ogUrl = manga.thumbnailUrl,
                     lastModified = manga.coverLastModified,
                 ),
-                badge = {
+                content = {
                     DownloadsBadge(count = libraryItem.badges.downloadCount)
                     UnreadBadge(count = libraryItem.badges.unreadCount)
                     LanguageBadge(

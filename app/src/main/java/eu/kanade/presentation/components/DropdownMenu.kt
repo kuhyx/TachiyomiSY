@@ -53,13 +53,13 @@ internal fun DropdownMenu(
 
 @Composable
 internal fun RadioMenuItem(
-    text: @Composable () -> Unit,
     isChecked: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
+    content: @Composable () -> Unit,
 ) {
     DropdownMenuItem(
-        text = text,
+        text = content,
         onClick = onClick,
         trailingIcon = {
             if (isChecked) {

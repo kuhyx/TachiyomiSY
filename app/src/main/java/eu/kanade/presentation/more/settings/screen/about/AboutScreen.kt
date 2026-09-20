@@ -102,7 +102,7 @@ internal object AboutScreen : Screen() {
                     item {
                         TextPreferenceWidget(
                             title = stringResource(MR.strings.check_for_updates),
-                            widget = {
+                            content = {
                                 AnimatedVisibility(visible = isCheckingUpdates) {
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(28.dp),

@@ -191,7 +191,7 @@ private fun ExtensionContent(
                         ExtensionHeader(
                             textRes = header.textRes,
                             modifier = Modifier.animateItemFastScroll(),
-                            action = action,
+                            content = action,
                         )
                     }
                     is ExtensionUiModel.Header.Text -> {
@@ -504,12 +504,12 @@ private fun ExtensionItemActions(
 private fun ExtensionHeader(
     textRes: StringResource,
     modifier: Modifier = Modifier,
-    action: @Composable RowScope.() -> Unit = {},
+    content: @Composable RowScope.() -> Unit = {},
 ) {
     ExtensionHeader(
         text = stringResource(textRes),
         modifier = modifier,
-        action = action,
+        content = content,
     )
 }
 
@@ -517,7 +517,7 @@ private fun ExtensionHeader(
 private fun ExtensionHeader(
     text: String,
     modifier: Modifier = Modifier,
-    action: @Composable RowScope.() -> Unit = {},
+    content: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
         modifier = modifier.padding(horizontal = MaterialTheme.padding.medium),
@@ -530,7 +530,7 @@ private fun ExtensionHeader(
                 .weight(1f),
             style = MaterialTheme.typography.header,
         )
-        action()
+        content()
     }
 }
 

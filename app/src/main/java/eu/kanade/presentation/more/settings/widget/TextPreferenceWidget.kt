@@ -27,8 +27,8 @@ internal fun TextPreferenceWidget(
     subtitle: CharSequence? = null,
     icon: ImageVector? = null,
     iconTint: Color = MaterialTheme.colorScheme.primary,
-    widget: @Composable (() -> Unit)? = null,
     onPreferenceClick: (() -> Unit)? = null,
+    content: @Composable (() -> Unit)? = null,
 ) {
     BasePreferenceWidget(
         modifier = modifier,
@@ -70,7 +70,7 @@ internal fun TextPreferenceWidget(
             }
         },
         onClick = onPreferenceClick,
-        widget = widget,
+        widget = content,
     )
 }
 

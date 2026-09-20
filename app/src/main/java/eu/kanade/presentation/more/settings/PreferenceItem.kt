@@ -150,7 +150,7 @@ internal fun PreferenceItem(
                     title = item.title,
                     subtitle = item.subtitle,
                     icon = item.icon,
-                    widget = item.widget,
+                    content = item.widget,
                     onPreferenceClick = item.onClick,
                 )
             }

@@ -35,6 +35,6 @@ internal enum class DebugToggles(val default: Boolean) {
     fun asPref(scope: CoroutineScope) = PreferenceMutableState(preferenceStore.getBoolean(prefKey, default), scope)
 
     companion object {
-        private val preferenceStore: PreferenceStore by injectLazy()
+        internal val preferenceStore: PreferenceStore by injectLazy()
     }
 }

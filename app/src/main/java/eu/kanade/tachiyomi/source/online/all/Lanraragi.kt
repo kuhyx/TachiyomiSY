@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.all
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
@@ -63,7 +64,7 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
 
     private suspend fun customMangaDetailsRequest(manga: SManga): Request {
         val id = if (manga.url.startsWith("/api/search/random")) {
-            getRandomID(Uri.parse(manga.url).encodedQuery.toString())
+            getRandomID(manga.url.toUri().encodedQuery.toString())
         } else {
             getReaderId(manga.url)
         }

@@ -100,7 +100,7 @@ private const val IMAGE_DECODE_THREADS = 3
 
 internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factory {
 
-    private val basePreferences: BasePreferences by injectLazy()
+    internal val basePreferences: BasePreferences by injectLazy()
     private val privacyPreferences: PrivacyPreferences by injectLazy()
     private val networkPreferences: NetworkPreferences by injectLazy()
 
@@ -289,19 +289,16 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
     }
 
     override fun getPackageName(): String {
-        // This causes freezes in Android 6/7 for some reason
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            try {
-                // Override the value passed as X-Requested-With in WebView requests
-                val stackTrace = Looper.getMainLooper().thread.stackTrace
-                val isChromiumCall = stackTrace.any { trace ->
-                    trace.className.lowercase() in setOf("org.chromium.base.buildinfo", "org.chromium.base.apkinfo") &&
-                        trace.methodName.lowercase() in setOf("getall", "getpackagename", "<init>")
-                }
-
-                if (isChromiumCall) return WebViewUtil.spoofedPackageName(applicationContext)
-            } catch (_: Exception) {
+        try {
+            // Override the value passed as X-Requested-With in WebView requests
+            val stackTrace = Looper.getMainLooper().thread.stackTrace
+            val isChromiumCall = stackTrace.any { trace ->
+                trace.className.lowercase() in setOf("org.chromium.base.buildinfo", "org.chromium.base.apkinfo") &&
+                    trace.methodName.lowercase() in setOf("getall", "getpackagename", "<init>")
             }
+
+            if (isChromiumCall) return WebViewUtil.spoofedPackageName(applicationContext)
+        } catch (_: Exception) {
         }
 
         return super.getPackageName()

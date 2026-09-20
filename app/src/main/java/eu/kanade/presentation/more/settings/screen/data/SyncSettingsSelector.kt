@@ -105,7 +105,7 @@ private class SyncSettingsSelectorModel(
     data class State(
         val options: BackupOptions = BackupOptions(),
     ) companion object {
-        private fun syncOptionsToBackupOptions(syncSettings: SyncSettings): BackupOptions {
+        internal fun syncOptionsToBackupOptions(syncSettings: SyncSettings): BackupOptions {
             return BackupOptions(
                 libraryEntries = syncSettings.libraryEntries,
                 categories = syncSettings.categories,
@@ -125,7 +125,7 @@ private class SyncSettingsSelectorModel(
             )
         }
 
-        private fun backupOptionsToSyncOptions(backupOptions: BackupOptions): SyncSettings {
+        internal fun backupOptionsToSyncOptions(backupOptions: BackupOptions): SyncSettings {
             return SyncSettings(
                 libraryEntries = backupOptions.libraryEntries,
                 categories = backupOptions.categories,

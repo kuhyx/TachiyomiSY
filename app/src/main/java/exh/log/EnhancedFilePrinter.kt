@@ -56,16 +56,14 @@ internal class EnhancedFilePrinter internal constructor(
     }
 
     // Do the real job of writing log to file.
-    private fun doPrintln(timeMillis: Long, logLevel: Int, tag: String, msg: String) {
+    internal fun doPrintln(timeMillis: Long, logLevel: Int, tag: String, msg: String) {
         val lastFileName = writer.lastFileName
         if (fileNameGenerator.isFileNameChangeable) {
             val newFileName = fileNameGenerator.generateFileName(logLevel, System.currentTimeMillis())
             require(
                 !(
                     newFileName == null ||
-                        newFileName.trim {
-                            it <= ' '
-                        }.isEmpty()
+                        newFileName.trim().isEmpty()
                     ),
             ) { "File name should not be empty." }
             if (newFileName != lastFileName) {

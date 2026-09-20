@@ -44,9 +44,9 @@ internal fun <T> TriStateListDialog(
     items: List<T>,
     initialChecked: List<T>,
     initialInversed: List<T>,
-    itemLabel: @Composable (T) -> String,
     onDismissRequest: () -> Unit,
     onValueChanged: (newIncluded: List<T>, newExcluded: List<T>) -> Unit,
+    itemLabel: @Composable (T) -> String,
 ) {
     val selected = remember {
         items

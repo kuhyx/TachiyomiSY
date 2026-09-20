@@ -66,13 +66,18 @@ internal class WebtoonRecyclerView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(e: MotionEvent): Boolean {
-        if (e.actionMasked == MotionEvent.ACTION_DOWN) {
-            tapDuringManualScroll = isManuallyScrolling
+        when (e.actionMasked) {
+            MotionEvent.ACTION_DOWN -> tapDuringManualScroll = isManuallyScrolling
+            MotionEvent.ACTION_UP -> performClick()
         }
 
         detector.onTouchEvent(e)
         return super.onTouchEvent(e)
     }
+
+    // Taps are detected by the gesture detector; this only keeps accessibility services' click
+    // action routed through the standard path.
+    override fun performClick(): Boolean = super.performClick()
 
     override fun onScrolled(dx: Int, dy: Int) {
         super.onScrolled(dx, dy)
@@ -111,7 +116,7 @@ internal class WebtoonRecyclerView @JvmOverloads constructor(
         return positionY.coerceIn(-maxPositionY, maxPositionY)
     }
 
-    private fun zoom(
+    internal fun zoom(
         fromRate: Float,
         toRate: Float,
         fromX: Float,
@@ -170,7 +175,7 @@ internal class WebtoonRecyclerView @JvmOverloads constructor(
         return true
     }
 
-    private fun zoomScrollBy(dx: Int, dy: Int) {
+    internal fun zoomScrollBy(dx: Int, dy: Int) {
         if (dx != 0) {
             x = getPositionX(x + dx)
         }
@@ -357,7 +362,7 @@ private const val FLING_ANIMATION_MS = 400L
 private const val FLING_DISTANCE_TIME_FACTOR = 0.4f
 
 // Rounds a touch coordinate to the nearest pixel.
-private fun Float.roundToPixel(): Int = (this + HALF).toInt()
+internal fun Float.roundToPixel(): Int = (this + HALF).toInt()
 private const val HALF = 0.5f
 private const val MIN_RATE = 0.5f
 private const val DEFAULT_RATE = 1f

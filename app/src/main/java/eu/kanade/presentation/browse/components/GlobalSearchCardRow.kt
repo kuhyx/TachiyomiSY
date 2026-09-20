@@ -26,9 +26,9 @@ import tachiyomi.presentation.core.i18n.stringResource
 @Composable
 internal fun GlobalSearchCardRow(
     titles: List<Manga>,
-    getManga: @Composable (Manga) -> State<Manga>,
     onClick: (Manga) -> Unit,
     onLongClick: (Manga) -> Unit,
+    getManga: @Composable (Manga) -> State<Manga>,
 ) {
     if (titles.isEmpty()) {
         EmptyResultItem()

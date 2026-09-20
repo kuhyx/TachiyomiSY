@@ -18,6 +18,7 @@ import tachiyomi.core.common.i18n.pluralStringResource
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
+import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -48,7 +49,7 @@ internal fun NHentaiDescription(state: State.Success, openMetadataViewer: () -> 
 
             meta.favoritesCount?.let {
                 if (it != 0L) {
-                    binding.favorites.text = it.toString()
+                    binding.favorites.text = NumberFormat.getIntegerInstance().format(it)
                     binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
                 }
             }

@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -84,13 +84,12 @@ private fun BrowseSourceListItem(
             lastModified = manga.coverLastModified,
         ),
         coverAlpha = if (manga.favorite) CommonMangaItemDefaults.BrowseFavoriteCoverAlpha else 1f,
-        badge = {
+        content = {
             InLibraryBadge(enabled = manga.favorite)
             // SY -->
             if (metadata is MangaDexSearchMetadata) {
                 metadata.followStatus?.let { followStatus ->
-                    val text = LocalContext.current
-                        .resources
+                    val text = LocalResources.current
                         .let {
                             remember {
                                 it.getStringArray(R.array.md_follows_options)

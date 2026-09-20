@@ -153,4 +153,4 @@ internal class EditMergedSettingsState(
     }
 }
 
-private fun Pair<Manga?, MergedMangaReference>.toModel(): EditMergedMangaItem = EditMergedMangaItem(first, second)
+internal fun Pair<Manga?, MergedMangaReference>.toModel(): EditMergedMangaItem = EditMergedMangaItem(first, second)

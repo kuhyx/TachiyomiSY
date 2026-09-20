@@ -320,10 +320,10 @@ internal fun MangaListItem(
     title: String,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    badge: @Composable (RowScope.() -> Unit),
     isSelected: Boolean = false,
     coverAlpha: Float = 1f,
     onClickContinueReading: (() -> Unit)? = null,
+    content: @Composable (RowScope.() -> Unit),
 ) {
     Row(
         modifier = Modifier
@@ -351,7 +351,7 @@ internal fun MangaListItem(
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyMedium,
         )
-        BadgeGroup(content = badge)
+        BadgeGroup(content = content)
         if (onClickContinueReading != null) {
             ContinueReadingButton(
                 size = ContinueReadingButtonSizeSmall,

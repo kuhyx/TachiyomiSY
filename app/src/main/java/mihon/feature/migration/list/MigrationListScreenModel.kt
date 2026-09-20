@@ -11,7 +11,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -343,7 +342,7 @@ internal class MigrationListScreenModel(
             val item = items.find { it.manga.id == mangaId }
             if (item != null) {
                 removeManga(item)
-                item.migrationScope.cancel()
+                item.cancelMigration()
                 updateMigrationProgress()
             }
         }
@@ -356,7 +355,7 @@ internal class MigrationListScreenModel(
     override fun onDispose() {
         super.onDispose()
         items.forEach {
-            it.migrationScope.cancel()
+            it.cancelMigration()
         }
     }
 

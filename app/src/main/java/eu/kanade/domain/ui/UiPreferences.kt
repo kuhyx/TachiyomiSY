@@ -1,6 +1,5 @@
 package eu.kanade.domain.ui
 
-import android.os.Build
 import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.domain.ui.model.TabletUiMode
 import eu.kanade.domain.ui.model.ThemeMode
@@ -21,11 +20,7 @@ internal class UiPreferences(
 
     val themeMode = preferenceStore.getEnum(
         "pref_theme_mode_key",
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ThemeMode.SYSTEM
-        } else {
-            ThemeMode.LIGHT
-        },
+        ThemeMode.SYSTEM,
     )
 
     val appTheme: Preference<AppTheme> = preferenceStore.getEnum(

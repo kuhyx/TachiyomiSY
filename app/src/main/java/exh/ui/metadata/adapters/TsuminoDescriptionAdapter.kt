@@ -17,6 +17,7 @@ import tachiyomi.core.common.i18n.pluralStringResource
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
+import java.text.NumberFormat
 import java.util.Date
 import kotlin.math.round
 
@@ -41,7 +42,7 @@ internal fun TsuminoDescription(state: State.Success, openMetadataViewer: () -> 
                 it.second
             } ?: meta.category ?: context.stringResource(MR.strings.unknown)
 
-            binding.favorites.text = (meta.favorites ?: 0).toString()
+            binding.favorites.text = NumberFormat.getIntegerInstance().format(meta.favorites ?: 0)
             binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
 
             binding.whenPosted.text = TsuminoSearchMetadata.TSUMINO_DATE_FORMAT.format(Date(meta.uploadDate ?: 0))

@@ -126,8 +126,8 @@ internal fun FeedScreen(
 @Composable
 internal fun FeedItem(
     item: FeedItemUI,
-    getMangaState: @Composable ((Manga) -> State<Manga>),
     onClickManga: (Manga) -> Unit,
+    getMangaState: @Composable ((Manga) -> State<Manga>),
 ) {
     when {
         item.results == null -> {

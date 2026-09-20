@@ -54,17 +54,17 @@ private const val FLEX_MINUTES = 10L
 internal class EHentaiUpdateWorker(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
     private val exhPreferences: ExhPreferences by injectLazy()
-    private val libraryPreferences: LibraryPreferences by injectLazy()
+    internal val libraryPreferences: LibraryPreferences by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
-    private val updateHelper: EHentaiUpdateHelper by injectLazy()
-    private val logger: Logger by lazy { xLog() }
+    internal val updateHelper: EHentaiUpdateHelper by injectLazy()
+    internal val logger: Logger by lazy { xLog() }
     private val updateMangaFromRemote: UpdateMangaFromRemote by injectLazy()
     private val getChaptersByMangaId: GetChaptersByMangaId by injectLazy()
     private val getFlatMetadataById: GetFlatMetadataById by injectLazy()
     private val insertFlatMetadata: InsertFlatMetadata by injectLazy()
     private val getExhFavoriteMangaWithMetadata: GetExhFavoriteMangaWithMetadata by injectLazy()
 
-    private val updateNotifier by lazy { EHentaiUpdateNotifier(context) }
+    internal val updateNotifier by lazy { EHentaiUpdateNotifier(context) }
     private val libraryUpdateNotifier by lazy { LibraryUpdateNotifier(context) }
 
     override suspend fun doWork(): Result {
@@ -244,7 +244,7 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
     }
 
     // New, current
-    private suspend fun updateEntryAndGetChapters(manga: Manga): Pair<List<Chapter>, List<Chapter>> {
+    internal suspend fun updateEntryAndGetChapters(manga: Manga): Pair<List<Chapter>, List<Chapter>> {
         val source = ehSourceOf(manga)
         try {
             val result = updateMangaFromRemote(

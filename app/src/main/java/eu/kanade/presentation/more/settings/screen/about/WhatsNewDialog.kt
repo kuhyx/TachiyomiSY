@@ -17,7 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -52,14 +52,14 @@ internal fun WhatsNewDialog(onDismissRequest: () -> Unit) {
         },
         text = {
             Column {
-                val context = LocalContext.current
+                val resources = LocalResources.current
                 // The DI graph's versioned instance: the companion's decodeFromReader is deprecated.
                 val xml = remember { Injekt.get<XML>() }
                 val changelog by produceState<List<DisplayChangelog>?>(initialValue = null) {
                     value = withIOContext {
                         xml.decodeFromReader<Changelog>(
                             AndroidXmlReader(
-                                context.resources.openRawResource(
+                                resources.openRawResource(
                                     if (isPreviewBuildType) R.raw.changelog_debug else R.raw.changelog_release,
                                 ).bufferedReader(),
                             ),

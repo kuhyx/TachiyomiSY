@@ -160,12 +160,8 @@ internal val Context.hasMiuiPackageInstaller get() = isPackageInstalled("com.miu
 internal val Context.isShizukuInstalled get() = isPackageInstalled("moe.shizuku.privileged.api") || Sui.isSui()
 
 internal fun Context.launchInstallPermissionRequest() {
-    val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-            data = "package:$packageName".toUri()
-        }
-    } else {
-        Intent(Settings.ACTION_SECURITY_SETTINGS)
+    val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+        data = "package:$packageName".toUri()
     }
     startActivity(intent)
 }

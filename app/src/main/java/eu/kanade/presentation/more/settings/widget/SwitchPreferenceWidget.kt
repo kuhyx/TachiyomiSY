@@ -26,7 +26,7 @@ internal fun SwitchPreferenceWidget(
         title = title,
         subtitle = subtitle,
         icon = icon,
-        widget = {
+        content = {
             Switch(
                 checked = checked,
                 onCheckedChange = null,

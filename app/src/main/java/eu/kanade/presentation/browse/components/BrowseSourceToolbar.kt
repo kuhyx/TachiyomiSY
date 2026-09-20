@@ -122,25 +122,31 @@ internal fun BrowseSourceToolbar(
                 onDismissRequest = { selectingDisplayMode = false },
             ) {
                 RadioMenuItem(
-                    text = { Text(text = stringResource(MR.strings.action_display_comfortable_grid)) },
                     isChecked = displayMode == LibraryDisplayMode.ComfortableGrid,
+                    onClick = {
+                        selectingDisplayMode = false
+                        onDisplayModeChange(LibraryDisplayMode.ComfortableGrid)
+                    },
                 ) {
-                    selectingDisplayMode = false
-                    onDisplayModeChange(LibraryDisplayMode.ComfortableGrid)
+                    Text(text = stringResource(MR.strings.action_display_comfortable_grid))
                 }
                 RadioMenuItem(
-                    text = { Text(text = stringResource(MR.strings.action_display_grid)) },
                     isChecked = displayMode == LibraryDisplayMode.CompactGrid,
+                    onClick = {
+                        selectingDisplayMode = false
+                        onDisplayModeChange(LibraryDisplayMode.CompactGrid)
+                    },
                 ) {
-                    selectingDisplayMode = false
-                    onDisplayModeChange(LibraryDisplayMode.CompactGrid)
+                    Text(text = stringResource(MR.strings.action_display_grid))
                 }
                 RadioMenuItem(
-                    text = { Text(text = stringResource(MR.strings.action_display_list)) },
                     isChecked = displayMode == LibraryDisplayMode.List,
+                    onClick = {
+                        selectingDisplayMode = false
+                        onDisplayModeChange(LibraryDisplayMode.List)
+                    },
                 ) {
-                    selectingDisplayMode = false
-                    onDisplayModeChange(LibraryDisplayMode.List)
+                    Text(text = stringResource(MR.strings.action_display_list))
                 }
             }
         },

@@ -18,6 +18,7 @@ import tachiyomi.core.common.i18n.pluralStringResource
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
+import java.text.NumberFormat
 
 @Composable
 internal fun EHentaiDescription(state: State.Success, openMetadataViewer: () -> Unit, search: (String) -> Unit) {
@@ -47,7 +48,7 @@ internal fun EHentaiDescription(state: State.Success, openMetadataViewer: () -> 
                     meta.visible ?: context.stringResource(MR.strings.unknown),
                 )
 
-            binding.favorites.text = (meta.favorites ?: 0).toString()
+            binding.favorites.text = NumberFormat.getIntegerInstance().format(meta.favorites ?: 0)
             binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
 
             binding.uploader.text = meta.uploader ?: context.stringResource(MR.strings.unknown)

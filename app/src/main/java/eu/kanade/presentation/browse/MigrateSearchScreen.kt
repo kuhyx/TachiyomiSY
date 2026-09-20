@@ -18,10 +18,10 @@ internal fun MigrateSearchScreen(
     onSearch: (String) -> Unit,
     onChangeSearchFilter: (SourceFilter) -> Unit,
     onToggleResults: () -> Unit,
-    getManga: @Composable (Manga) -> State<Manga>,
     onClickSource: (Source) -> Unit,
     onClickItem: (Manga) -> Unit,
     onLongClickItem: (Manga) -> Unit,
+    getManga: @Composable (Manga) -> State<Manga>,
 ) {
     Scaffold(
         topBar = { scrollBehavior ->

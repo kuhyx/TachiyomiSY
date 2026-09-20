@@ -7,6 +7,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadItemBinding
 import eu.kanade.tachiyomi.util.view.popupMenu
+import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.i18n.sy.SYMR
 
 // Class used to hold the data of a download.
 // All the elements from the layout file "download_item" are available in this class.
@@ -70,7 +72,8 @@ internal class DownloadHolder(private val view: View, val adapter: DownloadAdapt
     fun notifyDownloadedPages() {
         val download = download ?: return
         val pages = download.pages ?: return
-        binding.downloadProgressText.text = "${download.downloadedImages}/${pages.size}"
+        binding.downloadProgressText.text =
+            itemView.context.stringResource(SYMR.strings.download_pages_progress, download.downloadedImages, pages.size)
     }
 
     override fun onItemReleased(position: Int) {

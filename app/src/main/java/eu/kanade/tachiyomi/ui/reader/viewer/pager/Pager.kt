@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.GestureDetectorWithLongTap
  * events in order to work with child views that need to disable touch events on this parent. The
  * pager can also be declared to be vertical by creating it with [isHorizontal] to false.
  */
-internal open class Pager(
+internal open class Pager @JvmOverloads constructor(
     context: Context,
     isHorizontal: Boolean = true,
 ) : DirectionalViewPager(context, isHorizontal) {
@@ -89,6 +89,7 @@ internal open class Pager(
      * [requestDisallowInterceptTouchEvent].
      */
     override fun onTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.actionMasked == MotionEvent.ACTION_UP) performClick()
         return try {
             super.onTouchEvent(ev)
         } catch (_: NullPointerException) {
@@ -99,6 +100,10 @@ internal open class Pager(
             false
         }
     }
+
+    // Taps are detected by the gesture detector; this only keeps accessibility services' click
+    // action routed through the standard path.
+    override fun performClick(): Boolean = super.performClick()
 
     /**
      * Executes the given key event when this pager has focus. Just do nothing because the reader

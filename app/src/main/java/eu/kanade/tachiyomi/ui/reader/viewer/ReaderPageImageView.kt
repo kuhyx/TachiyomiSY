@@ -122,7 +122,7 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
         }
     }
 
-    private fun SubsamplingScaleImageView.landscapeZoom(forward: Boolean) {
+    internal fun SubsamplingScaleImageView.landscapeZoom(forward: Boolean) {
         val config = config
         val zoomsLandscape =
             config != null && config.landscapeZoom && config.minimumScaleType == SCALE_TYPE_CENTER_INSIDE
@@ -253,7 +253,7 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
         addView(pageView, MATCH_PARENT, MATCH_PARENT)
     }
 
-    private fun SubsamplingScaleImageView.setupZoom(config: Config?) {
+    internal fun SubsamplingScaleImageView.setupZoom(config: Config?) {
         // 5x zoom
         maxScale = scale * MAX_ZOOM_SCALE
         setDoubleTapZoomScale(scale * 2)
