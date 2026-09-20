@@ -265,6 +265,11 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
         }
     }
 
+    fun requiresWifiConnection(exhPreferences: ExhPreferences): Boolean {
+        val restrictions = exhPreferences.exhAutoUpdateRequirements.get()
+        return DEVICE_ONLY_ON_WIFI in restrictions
+    }
+
     companion object {
         private const val MAX_UPDATE_FAILURES = 5
 
@@ -315,11 +320,6 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
         fun cancelBackground(context: Context) {
             context.workManager.cancelAllWorkByTag(TAG)
         }
-    }
-
-    fun requiresWifiConnection(exhPreferences: ExhPreferences): Boolean {
-        val restrictions = exhPreferences.exhAutoUpdateRequirements.get()
-        return DEVICE_ONLY_ON_WIFI in restrictions
     }
 }
 

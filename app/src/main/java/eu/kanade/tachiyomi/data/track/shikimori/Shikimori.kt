@@ -15,18 +15,6 @@ import tachiyomi.domain.track.model.Track as DomainTrack
 
 internal class Shikimori(id: Long) : BaseTracker(id, "Shikimori"), DeletableTracker {
 
-    companion object {
-        const val READING = 1L
-        const val COMPLETED = 2L
-        const val ON_HOLD = 3L
-        const val DROPPED = 4L
-        const val PLAN_TO_READ = 5L
-        const val REREADING = 6L
-
-        private val SCORE_LIST = IntRange(0, 10)
-            .map(Int::toString)
-    }
-
     private val json: Json by injectLazy()
 
     private val interceptor by lazy { ShikimoriInterceptor(this) }
@@ -138,5 +126,17 @@ internal class Shikimori(id: Long) : BaseTracker(id, "Shikimori"), DeletableTrac
         super.logout()
         trackPreferences.trackToken(this).delete()
         interceptor.newAuth(null)
+    }
+
+    companion object {
+        const val READING = 1L
+        const val COMPLETED = 2L
+        const val ON_HOLD = 3L
+        const val DROPPED = 4L
+        const val PLAN_TO_READ = 5L
+        const val REREADING = 6L
+
+        private val SCORE_LIST = IntRange(0, 10)
+            .map(Int::toString)
     }
 }

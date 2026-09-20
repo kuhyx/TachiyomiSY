@@ -26,8 +26,14 @@ internal class HBrowse(delegate: HttpSource, val context: Context) :
     UrlImportableSource,
     NamespaceSource {
     override val metaClass = HBrowseSearchMetadata::class
-    override fun newMetaInstance() = HBrowseSearchMetadata()
     override val lang = "en"
+
+    override val matchingHosts = listOf(
+        "www.hbrowse.com",
+        "hbrowse.com",
+    )
+
+    override fun newMetaInstance() = HBrowseSearchMetadata()
 
     // Support direct URL importing
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getSearchManga"))
@@ -88,11 +94,6 @@ internal class HBrowse(delegate: HttpSource, val context: Context) :
                 }
         }
     }
-
-    override val matchingHosts = listOf(
-        "www.hbrowse.com",
-        "hbrowse.com",
-    )
 
     override suspend fun mapUrlToMangaUrl(uri: Uri): String? = uri.pathSegments.firstOrNull()?.let { "/$it/c00001/" }
 }

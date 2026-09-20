@@ -12,6 +12,21 @@ internal class TrackPreferences(
     private val preferenceStore: PreferenceStore,
 ) {
 
+    val anilistScoreType: Preference<String> = preferenceStore.getString("anilist_score_type", Anilist.POINT_10)
+    val mangabakaScoreType: Preference<String> = preferenceStore.getString("mangabaka_score_type", MangaBaka.STEP_1)
+    val autoUpdateTrack: Preference<Boolean> = preferenceStore.getBoolean("pref_auto_update_manga_sync_key", true)
+
+    val autoUpdateTrackOnMarkRead: Preference<AutoTrackState> = preferenceStore.getEnum(
+        "pref_auto_update_manga_on_mark_read",
+        AutoTrackState.ALWAYS,
+    )
+
+    // SY -->
+    val resolveUsingSourceMetadata: Preference<Boolean> = preferenceStore.getBoolean(
+        "pref_resolve_using_source_metadata_key",
+        true,
+    )
+
     fun trackUsername(tracker: Tracker) = preferenceStore.getString(
         Preference.privateKey("pref_mangasync_username_${tracker.id}"),
         "",
@@ -40,21 +55,5 @@ internal class TrackPreferences(
 
     fun trackToken(tracker: Tracker) = preferenceStore.getString(Preference.privateKey("track_token_${tracker.id}"), "")
 
-    val anilistScoreType: Preference<String> = preferenceStore.getString("anilist_score_type", Anilist.POINT_10)
-
-    val mangabakaScoreType: Preference<String> = preferenceStore.getString("mangabaka_score_type", MangaBaka.STEP_1)
-
-    val autoUpdateTrack: Preference<Boolean> = preferenceStore.getBoolean("pref_auto_update_manga_sync_key", true)
-
-    val autoUpdateTrackOnMarkRead: Preference<AutoTrackState> = preferenceStore.getEnum(
-        "pref_auto_update_manga_on_mark_read",
-        AutoTrackState.ALWAYS,
-    )
-
-    // SY -->
-    val resolveUsingSourceMetadata: Preference<Boolean> = preferenceStore.getBoolean(
-        "pref_resolve_using_source_metadata_key",
-        true,
-    )
     // SY <--
 }

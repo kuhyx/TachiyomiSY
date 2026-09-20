@@ -345,6 +345,8 @@ internal class LibraryScreenModel(
         // SY <--
     }
 
+    private var lastSelectionCategory: Long? = null
+
     private fun List<LibraryItem>.applyFilters(
         trackMap: Map<Long, List<Track>>,
         trackingFilter: Map<Long, TriState>,
@@ -1192,8 +1194,6 @@ internal class LibraryScreenModel(
         }
     }
 // SY <--
-
-    private var lastSelectionCategory: Long? = null
 
     fun clearSelection() {
         lastSelectionCategory = null

@@ -176,6 +176,11 @@ internal class PagerConfig(
         // SY <--
     }
 
+    override var navigator: ViewerNavigation = defaultNavigation()
+        set(value) {
+            field = value.also { it.invertMode = this.tappingInverted }
+        }
+
     private fun zoomTypeFromPreference(value: Int) {
         imageZoomType = when (value) {
             // Auto
@@ -192,11 +197,6 @@ internal class PagerConfig(
             else -> ReaderPageImageView.ZoomStartPosition.CENTER
         }
     }
-
-    override var navigator: ViewerNavigation = defaultNavigation()
-        set(value) {
-            field = value.also { it.invertMode = this.tappingInverted }
-        }
 
     override fun defaultNavigation(): ViewerNavigation {
         return if (viewer is VerticalPagerViewer) {

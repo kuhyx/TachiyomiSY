@@ -67,6 +67,15 @@ internal class PackageInstallerInstaller(private val service: Service) : Install
     // Always ready
     override var ready = true
 
+    init {
+        ContextCompat.registerReceiver(
+            service,
+            packageActionReceiver,
+            IntentFilter(INSTALL_ACTION),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+    }
+
     override fun processEntry(entry: Entry) {
         super.processEntry(entry)
         activeSession = null
@@ -125,15 +134,6 @@ internal class PackageInstallerInstaller(private val service: Service) : Install
     override fun onDestroy() {
         service.unregisterReceiver(packageActionReceiver)
         super.onDestroy()
-    }
-
-    init {
-        ContextCompat.registerReceiver(
-            service,
-            packageActionReceiver,
-            IntentFilter(INSTALL_ACTION),
-            ContextCompat.RECEIVER_NOT_EXPORTED,
-        )
     }
 }
 

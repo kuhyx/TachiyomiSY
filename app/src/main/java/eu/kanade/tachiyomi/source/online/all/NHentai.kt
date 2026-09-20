@@ -42,7 +42,6 @@ internal class NHentai(delegate: HttpSource, val context: Context) :
     NamespaceSource,
     PagePreviewSource {
     override val metaClass = NHentaiSearchMetadata::class
-    override fun newMetaInstance() = NHentaiSearchMetadata()
     override val lang = delegate.lang
 
     private val sourcePreferences: SharedPreferences by lazy {
@@ -55,6 +54,17 @@ internal class NHentai(delegate: HttpSource, val context: Context) :
         } else {
             NHentaiSearchMetadata.TITLE_TYPE_SHORT
         }
+
+    override val matchingHosts = listOf(
+        "nhentai.net",
+    )
+
+    var nhConfig: JsonConfig? = null
+
+    val thumbServer
+        get() = nhConfig?.thumbServers?.random()
+
+    override fun newMetaInstance() = NHentaiSearchMetadata()
 
     // Support direct URL importing
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getSearchManga"))
@@ -172,10 +182,6 @@ internal class NHentai(delegate: HttpSource, val context: Context) :
         val count: Long? = null,
     )
 
-    override val matchingHosts = listOf(
-        "nhentai.net",
-    )
-
     override suspend fun mapUrlToMangaUrl(uri: Uri): String? {
         if (uri.pathSegments.firstOrNull()?.lowercase() != "g") {
             return null
@@ -202,7 +208,6 @@ internal class NHentai(delegate: HttpSource, val context: Context) :
         )
     }
 
-    var nhConfig: JsonConfig? = null
     suspend fun getNhConfig() {
         try {
             val response =
@@ -216,9 +221,6 @@ internal class NHentai(delegate: HttpSource, val context: Context) :
             )
         }
     }
-
-    val thumbServer
-        get() = nhConfig?.thumbServers?.random()
 
     override suspend fun fetchPreviewImage(page: PagePreviewInfo, cacheControl: CacheControl?): Response {
         return client.newCachelessCallWithProgress(

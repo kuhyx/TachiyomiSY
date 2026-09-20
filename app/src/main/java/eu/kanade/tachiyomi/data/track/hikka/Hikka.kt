@@ -18,19 +18,6 @@ private const val MILLIS_PER_SECOND = 1000L
 
 internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
 
-    companion object {
-        const val READING = 0L
-        const val COMPLETED = 1L
-        const val ON_HOLD = 2L
-        const val DROPPED = 3L
-        const val PLAN_TO_READ = 4L
-        const val REREADING = 5L
-
-        private val SCORE_LIST = IntRange(0, 10)
-            .map(Int::toString)
-            .toImmutableList()
-    }
-
     private val json: Json by injectLazy()
 
     private val interceptor by lazy { HikkaInterceptor(this) }
@@ -166,5 +153,18 @@ internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
         } catch (_: Exception) {
             null
         }
+    }
+
+    companion object {
+        const val READING = 0L
+        const val COMPLETED = 1L
+        const val ON_HOLD = 2L
+        const val DROPPED = 3L
+        const val PLAN_TO_READ = 4L
+        const val REREADING = 5L
+
+        private val SCORE_LIST = IntRange(0, 10)
+            .map(Int::toString)
+            .toImmutableList()
     }
 }

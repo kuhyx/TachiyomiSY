@@ -132,6 +132,9 @@ internal class DownloadQueueScreenModel(
         }
     }
 
+    val isDownloaderRunning = downloadManager.isDownloaderRunning
+        .stateIn(screenModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), false)
+
     override fun onDispose() {
         for (job in progressJobs.values) {
             job.cancel()
@@ -139,9 +142,6 @@ internal class DownloadQueueScreenModel(
         progressJobs.clear()
         adapter = null
     }
-
-    val isDownloaderRunning = downloadManager.isDownloaderRunning
-        .stateIn(screenModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), false)
 
     fun getDownloadStatusFlow() = downloadManager.statusFlow()
     fun getDownloadProgressFlow() = downloadManager.progressFlow()

@@ -14,6 +14,8 @@ internal object LibraryExporter {
         val includeArtist: Boolean,
     )
 
+    private val escapeRequired = listOf("\r", "\n", "\"", ",")
+
     suspend fun exportToCsv(
         context: Context,
         uri: Uri,
@@ -29,8 +31,6 @@ internal object LibraryExporter {
             onExportComplete()
         }
     }
-
-    private val escapeRequired = listOf("\r", "\n", "\"", ",")
 
     private fun generateCsvData(favorites: List<Manga>, options: ExportOptions): String {
         val columnSize = listOf(

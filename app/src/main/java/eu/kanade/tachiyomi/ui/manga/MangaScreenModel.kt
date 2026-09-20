@@ -242,16 +242,6 @@ internal class MangaScreenModel(
             this(pair.first, pair.second, flatMetadata)
     }
 
-    // Helper function to update the UI state only if it's currently in success state.
-    private inline fun updateSuccessState(func: (State.Success) -> State.Success) {
-        mutableState.update {
-            when (it) {
-                State.Loading -> it
-                is State.Success -> func(it)
-            }
-        }
-    }
-
     init {
         screenModelScope.launchIO {
             getMangaAndChapters.subscribe(mangaId, applyScanlatorFilter = true)
@@ -458,6 +448,16 @@ internal class MangaScreenModel(
 
             // Initial loading finished
             updateSuccessState { it.copy(isRefreshingData = false) }
+        }
+    }
+
+    // Helper function to update the UI state only if it's currently in success state.
+    private inline fun updateSuccessState(func: (State.Success) -> State.Success) {
+        mutableState.update {
+            when (it) {
+                State.Loading -> it
+                is State.Success -> func(it)
+            }
         }
     }
 

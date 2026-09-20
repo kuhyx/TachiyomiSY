@@ -26,10 +26,6 @@ import tachiyomi.presentation.core.i18n.stringResource
 
 internal class BackupSchemaScreen : Screen() {
 
-    companion object {
-        const val TITLE = "Backup file schema"
-    }
-
     @Composable
     override fun Content() {
         val context = LocalContext.current
@@ -68,5 +64,9 @@ internal class BackupSchemaScreen : Screen() {
                 fontFamily = FontFamily.Monospace,
             )
         }
+    }
+
+    companion object {
+        const val TITLE = "Backup file schema"
     }
 }

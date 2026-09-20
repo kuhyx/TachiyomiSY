@@ -28,17 +28,6 @@ private const val BYTES_PER_MEBIBYTE = 1024L * 1024L
 
 internal class PagePreviewCache(private val context: Context) {
 
-    companion object {
-        /** Name of cache directory.  */
-        const val PARAMETER_CACHE_DIRECTORY = "page_preview_disk_cache"
-
-        /** Application cache version.  */
-        const val PARAMETER_APP_VERSION = 1
-
-        /** The number of values per cache entry. Must be positive.  */
-        const val PARAMETER_VALUE_COUNT = 1
-    }
-
     // Google Json class used for parsing JSON files.
     private val json: Json by injectLazy()
 
@@ -207,4 +196,15 @@ internal class PagePreviewCache(private val context: Context) {
 
     private fun getKey(manga: Manga, chapterIds: List<Long>, page: Int): String =
         "${manga.id}_${chapterIds.joinToString(separator = "-")}_$page"
+
+    companion object {
+        /** Name of cache directory.  */
+        const val PARAMETER_CACHE_DIRECTORY = "page_preview_disk_cache"
+
+        /** Application cache version.  */
+        const val PARAMETER_APP_VERSION = 1
+
+        /** The number of values per cache entry. Must be positive.  */
+        const val PARAMETER_VALUE_COUNT = 1
+    }
 }

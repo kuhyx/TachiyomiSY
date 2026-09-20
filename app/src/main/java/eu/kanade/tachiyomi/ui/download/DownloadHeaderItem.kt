@@ -13,6 +13,12 @@ internal data class DownloadHeaderItem(
     val size: Int,
 ) : AbstractExpandableHeaderItem<DownloadHeaderHolder, DownloadItem>() {
 
+    init {
+        isHidden = false
+        isExpanded = true
+        isSelectable = false
+    }
+
     override fun getLayoutRes(): Int = R.layout.download_header
 
     override fun createViewHolder(
@@ -52,11 +58,5 @@ internal data class DownloadHeaderItem(
         result = 31 * result + size
         result = 31 * result + subItems.hashCode()
         return result
-    }
-
-    init {
-        isHidden = false
-        isExpanded = true
-        isSelectable = false
     }
 }

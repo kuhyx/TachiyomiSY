@@ -23,6 +23,9 @@ internal interface Tracker {
 
     val supportsPrivateTracking: Boolean
 
+    val isLoggedIn: Boolean
+    val isLoggedInFlow: Flow<Boolean>
+
     @DrawableRes
     fun getLogo(): Int
 
@@ -57,10 +60,6 @@ internal interface Tracker {
 
     @CallSuper
     fun logout()
-
-    val isLoggedIn: Boolean
-
-    val isLoggedInFlow: Flow<Boolean>
 
     fun getUsername(): String
 

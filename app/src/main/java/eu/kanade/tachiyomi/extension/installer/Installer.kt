@@ -40,6 +40,11 @@ internal abstract class Installer(private val service: Service) {
      */
     abstract var ready: Boolean
 
+    init {
+        val filter = IntentFilter(ACTION_CANCEL_QUEUE)
+        LocalBroadcastManager.getInstance(service).registerReceiver(cancelReceiver, filter)
+    }
+
     /**
      * Add an item to install queue.
      *
@@ -143,11 +148,6 @@ internal abstract class Installer(private val service: Service) {
      * @param uri Uri of APK to install
      */
     data class Entry(val downloadId: Long, val uri: Uri)
-
-    init {
-        val filter = IntentFilter(ACTION_CANCEL_QUEUE)
-        LocalBroadcastManager.getInstance(service).registerReceiver(cancelReceiver, filter)
-    }
 
     companion object {
         private const val ACTION_CANCEL_QUEUE = "Installer.action.CANCEL_QUEUE"

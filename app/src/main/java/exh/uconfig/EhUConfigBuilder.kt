@@ -179,15 +179,6 @@ internal object Entry {
     }
 
     class LanguageSystem {
-        private fun transformConfig(values: List<String>) = values.map { pref ->
-            pref.split("*").map { it.toBoolean() }
-        }
-
-        fun getLanguages(values: List<String>): List<ConfigItem> {
-            val config = transformConfig(values)
-            return EhLanguage.entries.flatMap { languageOf.getValue(it)(config[it.ordinal]).configs }
-        }
-
         private val languageOf: Map<EhLanguage, (List<Boolean>) -> BaseLanguage> = mapOf(
             EhLanguage.JAPANESE to ::Japanese,
             EhLanguage.ENGLISH to ::English,
@@ -207,6 +198,15 @@ internal object Entry {
             EhLanguage.NOT_AVAILABLE to ::NotAvailable,
             EhLanguage.OTHER to ::Other,
         )
+
+        private fun transformConfig(values: List<String>) = values.map { pref ->
+            pref.split("*").map { it.toBoolean() }
+        }
+
+        fun getLanguages(values: List<String>): List<ConfigItem> {
+            val config = transformConfig(values)
+            return EhLanguage.entries.flatMap { languageOf.getValue(it)(config[it.ordinal]).configs }
+        }
 
         private abstract class BaseLanguage(val values: List<Boolean>) {
             abstract val translatedKey: String

@@ -50,6 +50,8 @@ internal object DebugFunctions {
     private val getSearchMetadata: GetSearchMetadata by injectLazy()
     private val getAllManga: GetAllManga by injectLazy()
 
+    private val throttleManager = ThrottleManager()
+
     fun forceUpgradeMigration(): Boolean {
         val migrationContext = MigrationContext(dryrun = false, 0)
         val migrationJobFactory = MigrationJobFactory(migrationContext, Migrator.scope)
@@ -76,7 +78,6 @@ internal object DebugFunctions {
             }
         }
     }
-    private val throttleManager = ThrottleManager()
 
     fun getDelegatedSourceList(): String = AndroidSourceManager.currentDelegatedSources.map {
         it.value.sourceName + " : " + it.value.sourceId + " : " + it.value.factory

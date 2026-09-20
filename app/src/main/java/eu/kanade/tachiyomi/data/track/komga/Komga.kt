@@ -15,12 +15,6 @@ import tachiyomi.domain.track.model.Track as DomainTrack
 
 internal class Komga(id: Long) : BaseTracker(id, "Komga"), EnhancedTracker {
 
-    companion object {
-        const val UNREAD = 1L
-        const val READING = 2L
-        const val COMPLETED = 3L
-    }
-
     override val client: OkHttpClient =
         networkService.client.newBuilder()
             .dns(Dns.SYSTEM) // don't use DNS over HTTPS as it breaks IP addressing
@@ -102,4 +96,10 @@ internal class Komga(id: Long) : BaseTracker(id, "Komga"), EnhancedTracker {
         } else {
             null
         }
+
+    companion object {
+        const val UNREAD = 1L
+        const val READING = 2L
+        const val COMPLETED = 3L
+    }
 }

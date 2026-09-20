@@ -15,11 +15,11 @@ internal class EditMergedMangaItem(
     val mergedMangaReference: MergedMangaReference,
 ) : AbstractFlexibleItem<EditMergedMangaHolder>() {
 
+    lateinit var binding: EditMergedSettingsItemBinding
+
     override fun getLayoutRes(): Int = R.layout.edit_merged_settings_item
 
     override fun isDraggable(): Boolean = true
-
-    lateinit var binding: EditMergedSettingsItemBinding
 
     override fun createViewHolder(
         view: View,

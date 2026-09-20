@@ -24,17 +24,6 @@ internal class ExtensionStoresScreenModel(
     private val extensionManager: ExtensionManager = Injekt.get(),
 ) : StateScreenModel<ExtensionStoreScreenState>(ExtensionStoreScreenState.Loading) {
 
-    private inline fun updateSuccessState(
-        func: (ExtensionStoreScreenState.Success) -> ExtensionStoreScreenState.Success,
-    ) {
-        mutableState.update {
-            when (it) {
-                ExtensionStoreScreenState.Loading -> it
-                is ExtensionStoreScreenState.Success -> func(it)
-            }
-        }
-    }
-
     init {
         screenModelScope.launchIO {
             getExtensionStores.subscribe()
@@ -46,6 +35,17 @@ internal class ExtensionStoresScreenModel(
                         }
                     }
                 }
+        }
+    }
+
+    private inline fun updateSuccessState(
+        func: (ExtensionStoreScreenState.Success) -> ExtensionStoreScreenState.Success,
+    ) {
+        mutableState.update {
+            when (it) {
+                ExtensionStoreScreenState.Loading -> it
+                is ExtensionStoreScreenState.Success -> func(it)
+            }
         }
     }
 

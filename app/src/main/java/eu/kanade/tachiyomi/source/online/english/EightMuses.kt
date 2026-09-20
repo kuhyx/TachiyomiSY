@@ -29,8 +29,15 @@ internal class EightMuses(delegate: HttpSource, val context: Context) :
     UrlImportableSource,
     NamespaceSource {
     override val metaClass = EightMusesSearchMetadata::class
-    override fun newMetaInstance() = EightMusesSearchMetadata()
     override val lang = "en"
+
+    override val matchingHosts = listOf(
+        "www.8muses.com",
+        "comics.8muses.com",
+        "8muses.com",
+    )
+
+    override fun newMetaInstance() = EightMusesSearchMetadata()
 
     // Support direct URL importing
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getSearchManga"))
@@ -103,12 +110,6 @@ internal class EightMuses(delegate: HttpSource, val context: Context) :
             }
         }
     }
-
-    override val matchingHosts = listOf(
-        "www.8muses.com",
-        "comics.8muses.com",
-        "8muses.com",
-    )
 
     override suspend fun mapUrlToMangaUrl(uri: Uri): String {
         var path = uri.pathSegments.drop(2)

@@ -89,6 +89,12 @@ internal data object LibraryTab : Tab {
             )
         }
 
+    // For invoking search from other screen
+    private val queryEvent = Channel<String>()
+
+    // For opening settings sheet in LibraryController
+    private val requestSettingsSheetEvent = Channel<Unit>()
+
     override suspend fun onReselect(navigator: Navigator) {
         requestOpenSettingsSheet()
     }
@@ -419,11 +425,7 @@ internal data object LibraryTab : Tab {
         }
     }
 
-    // For invoking search from other screen
-    private val queryEvent = Channel<String>()
     suspend fun search(query: String) = queryEvent.send(query)
 
-    // For opening settings sheet in LibraryController
-    private val requestSettingsSheetEvent = Channel<Unit>()
     private suspend fun requestOpenSettingsSheet() = requestSettingsSheetEvent.send(Unit)
 }

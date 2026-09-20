@@ -33,6 +33,10 @@ import java.util.Locale
 internal class EhLoginActivity : BaseActivity() {
     private val exhPreferences: ExhPreferences by injectLazy()
 
+    init {
+        registerSecureActivity(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             overrideActivityTransition(
@@ -195,10 +199,6 @@ internal class EhLoginActivity : BaseActivity() {
             @Suppress("DEPRECATION")
             overridePendingTransition(R.anim.shared_axis_x_pop_enter, R.anim.shared_axis_x_pop_exit)
         }
-    }
-
-    init {
-        registerSecureActivity(this)
     }
 
     companion object {

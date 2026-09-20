@@ -17,15 +17,6 @@ internal class Suwayomi(id: Long) : BaseTracker(id, "Suwayomi"), EnhancedTracker
 
     override fun getLogo() = R.drawable.brand_suwayomi
 
-    companion object {
-        const val UNREAD = 1L
-        const val READING = 2L
-        const val COMPLETED = 3L
-
-        private const val TRACKER_DELETE_KEY = "Tracker Delete"
-        private const val TRACKER_DELETE_DEFAULT = false
-    }
-
     override fun getStatusList(): List<Long> = listOf(UNREAD, READING, COMPLETED)
 
     override fun getStatus(status: Long): StringResource? = when (status) {
@@ -103,5 +94,14 @@ internal class Suwayomi(id: Long) : BaseTracker(id, "Suwayomi"), EnhancedTracker
     private fun getPrefTrackerDelete(): Boolean {
         val preferences = api.sourcePreferences()
         return preferences.getBoolean(TRACKER_DELETE_KEY, TRACKER_DELETE_DEFAULT)
+    }
+
+    companion object {
+        const val UNREAD = 1L
+        const val READING = 2L
+        const val COMPLETED = 3L
+
+        private const val TRACKER_DELETE_KEY = "Tracker Delete"
+        private const val TRACKER_DELETE_DEFAULT = false
     }
 }

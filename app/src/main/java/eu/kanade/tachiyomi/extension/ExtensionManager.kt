@@ -85,6 +85,8 @@ internal class ExtensionManager(
 
     private var subLanguagesEnabledOnFirstRun = preferences.enabledLanguages.isSet()
 
+    private var availableExtensionsSourcesData: Map<Long, StubSource> = emptyMap()
+
     fun getExtensionPackage(sourceId: Long): String? {
         return installedExtensionsFlow.value.find { extension ->
             extension.sources.any { it.id == sourceId }
@@ -120,8 +122,6 @@ internal class ExtensionManager(
         }
         // SY <--
     }
-
-    private var availableExtensionsSourcesData: Map<Long, StubSource> = emptyMap()
 
     private fun setupAvailableExtensionsSourcesDataMap(extensions: List<Extension.Available>) {
         if (extensions.isEmpty()) return

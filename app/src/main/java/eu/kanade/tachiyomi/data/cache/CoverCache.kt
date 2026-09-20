@@ -17,11 +17,6 @@ import java.io.InputStream
  */
 internal class CoverCache(private val context: Context) {
 
-    companion object {
-        private const val COVERS_DIR = "covers"
-        private const val CUSTOM_COVERS_DIR = "covers/custom"
-    }
-
     // Cache directory used for cache management.
     private val cacheDir = getCacheDir(COVERS_DIR)
 
@@ -96,5 +91,10 @@ internal class CoverCache(private val context: Context) {
     private fun getCacheDir(dir: String): File {
         return context.getExternalFilesDir(dir)
             ?: File(context.filesDir, dir).apply { mkdirs() }
+    }
+
+    companion object {
+        private const val COVERS_DIR = "covers"
+        private const val CUSTOM_COVERS_DIR = "covers/custom"
     }
 }

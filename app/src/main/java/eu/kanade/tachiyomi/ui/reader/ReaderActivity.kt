@@ -142,30 +142,6 @@ private const val MIN_BRIGHTNESS = 0.01f
 
 internal class ReaderActivity : BaseActivity() {
 
-    companion object {
-
-        fun newIntent(
-            context: Context,
-            mangaId: Long?,
-            chapterId: Long?,
-            /* SY --> */
-            page: Int? = null, /* SY <-- */
-        ): Intent {
-            return Intent(context, ReaderActivity::class.java).apply {
-                putExtra("manga", mangaId)
-                putExtra("chapter", chapterId)
-                // SY -->
-                putExtra("page", page)
-                // SY <--
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            }
-        }
-
-        const val SHIFT_DOUBLE_PAGES = "shiftingDoublePages"
-        const val SHIFTED_PAGE_INDEX = "shiftedPageIndex"
-        const val SHIFTED_CHAP_INDEX = "shiftedChapterIndex"
-    }
-
     private val readerPreferences = Injekt.get<ReaderPreferences>()
     private val preferences = Injekt.get<BasePreferences>()
 
@@ -1219,30 +1195,6 @@ internal class ReaderActivity : BaseActivity() {
      */
     private inner class ReaderConfig {
 
-        private fun getCombinedPaint(grayscale: Boolean, invertedColors: Boolean): Paint {
-            return Paint().apply {
-                colorFilter = ColorMatrixColorFilter(
-                    ColorMatrix().apply {
-                        if (grayscale) {
-                            setSaturation(0f)
-                        }
-                        if (invertedColors) {
-                            postConcat(
-                                ColorMatrix(
-                                    floatArrayOf(
-                                        -1f, 0f, 0f, 0f, CHANNEL_MAX,
-                                        0f, -1f, 0f, 0f, CHANNEL_MAX,
-                                        0f, 0f, -1f, 0f, CHANNEL_MAX,
-                                        0f, 0f, 0f, 1f, 0f,
-                                    ),
-                                ),
-                            )
-                        }
-                    },
-                )
-            }
-        }
-
         private val grayBackgroundColor = Color.rgb(GRAY_RED, GRAY_GREEN, GRAY_BLUE)
 
         /*
@@ -1326,6 +1278,30 @@ internal class ReaderActivity : BaseActivity() {
             // SY <--
         }
 
+        private fun getCombinedPaint(grayscale: Boolean, invertedColors: Boolean): Paint {
+            return Paint().apply {
+                colorFilter = ColorMatrixColorFilter(
+                    ColorMatrix().apply {
+                        if (grayscale) {
+                            setSaturation(0f)
+                        }
+                        if (invertedColors) {
+                            postConcat(
+                                ColorMatrix(
+                                    floatArrayOf(
+                                        -1f, 0f, 0f, 0f, CHANNEL_MAX,
+                                        0f, -1f, 0f, 0f, CHANNEL_MAX,
+                                        0f, 0f, -1f, 0f, CHANNEL_MAX,
+                                        0f, 0f, 0f, 1f, 0f,
+                                    ),
+                                ),
+                            )
+                        }
+                    },
+                )
+            }
+        }
+
         // Picks background color for [ReaderActivity] based on light/dark theme preference.
         private fun automaticBackgroundColor(): Int {
             return if (baseContext.isNightMode()) {
@@ -1400,6 +1376,30 @@ internal class ReaderActivity : BaseActivity() {
         private fun setLayerPaint(grayscale: Boolean, invertedColors: Boolean) {
             val paint = if (grayscale || invertedColors) getCombinedPaint(grayscale, invertedColors) else null
             binding.viewerContainer.setLayerType(LAYER_TYPE_HARDWARE, paint)
+        }
+    }
+
+    companion object {
+
+        const val SHIFT_DOUBLE_PAGES = "shiftingDoublePages"
+        const val SHIFTED_PAGE_INDEX = "shiftedPageIndex"
+        const val SHIFTED_CHAP_INDEX = "shiftedChapterIndex"
+
+        fun newIntent(
+            context: Context,
+            mangaId: Long?,
+            chapterId: Long?,
+            /* SY --> */
+            page: Int? = null, /* SY <-- */
+        ): Intent {
+            return Intent(context, ReaderActivity::class.java).apply {
+                putExtra("manga", mangaId)
+                putExtra("chapter", chapterId)
+                // SY -->
+                putExtra("page", page)
+                // SY <--
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
         }
     }
 }

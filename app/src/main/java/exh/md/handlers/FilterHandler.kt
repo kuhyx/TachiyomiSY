@@ -5,6 +5,12 @@ import eu.kanade.tachiyomi.source.model.FilterList
 import java.util.Locale
 
 internal class FilterHandler {
+    val sortableList = listOf(
+        Pair("Number of follows", ""),
+        Pair("Created at", "createdAt"),
+        Pair("Updated at", "updatedAt"),
+    )
+
     internal fun getMDFilterList(): FilterList {
         val filters = mutableListOf(
             OriginalLanguageList(getOriginalLanguage()),
@@ -155,12 +161,6 @@ internal class FilterHandler {
 
     private class TagExclusionMode :
         Filter.Select<String>("Excluded tags mode", arrayOf("And", "Or"), 1)
-
-    val sortableList = listOf(
-        Pair("Number of follows", ""),
-        Pair("Created at", "createdAt"),
-        Pair("Updated at", "updatedAt"),
-    )
 
     class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(0, false))
 

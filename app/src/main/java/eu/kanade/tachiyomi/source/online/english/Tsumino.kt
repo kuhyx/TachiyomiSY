@@ -31,8 +31,14 @@ internal class Tsumino(delegate: HttpSource, val context: Context) :
     UrlImportableSource,
     NamespaceSource {
     override val metaClass = TsuminoSearchMetadata::class
-    override fun newMetaInstance() = TsuminoSearchMetadata()
     override val lang = "en"
+
+    override val matchingHosts = listOf(
+        "www.tsumino.com",
+        "tsumino.com",
+    )
+
+    override fun newMetaInstance() = TsuminoSearchMetadata()
 
     // Support direct URL importing
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getSearchManga"))
@@ -136,11 +142,6 @@ internal class Tsumino(delegate: HttpSource, val context: Context) :
             }
         }
     }
-
-    override val matchingHosts = listOf(
-        "www.tsumino.com",
-        "tsumino.com",
-    )
 
     companion object {
         val TM_DATE_FORMAT = SimpleDateFormat("yyyy MMM dd", Locale.US)

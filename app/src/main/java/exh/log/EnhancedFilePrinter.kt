@@ -37,6 +37,15 @@ internal class EnhancedFilePrinter internal constructor(
     @Volatile
     private var worker: Worker? = null
 
+    private val maxTimeMillis = 7.days.inWholeMilliseconds
+
+    init {
+        writer = Writer()
+        if (USE_WORKER) {
+            worker = Worker()
+        }
+    }
+
     override fun println(logLevel: Int, tag: String, msg: String) {
         val timeMillis = System.currentTimeMillis()
         if (USE_WORKER) {
@@ -78,7 +87,6 @@ internal class EnhancedFilePrinter internal constructor(
         writer.appendLog(flattenedLog)
     }
 
-    private val maxTimeMillis = 7.days.inWholeMilliseconds
     private fun shouldClean(file: UniFile): Boolean {
         val currentTimeMillis = System.currentTimeMillis()
         val lastModified = file.lastModified()
@@ -315,12 +323,5 @@ internal class EnhancedFilePrinter internal constructor(
     companion object {
         // Use worker, write logs asynchronously.
         private const val USE_WORKER = true
-    }
-
-    init {
-        writer = Writer()
-        if (USE_WORKER) {
-            worker = Worker()
-        }
     }
 }

@@ -88,57 +88,58 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
         .addInterceptor(mdList.interceptor)
         .build()
 
-    private fun dataSaver() = sourcePreferences.getBoolean(getDataSaverPreferenceKey(mdLang.lang), false)
-    private fun usePort443Only() = sourcePreferences.getBoolean(getStandardHttpsPreferenceKey(mdLang.lang), false)
-    private fun blockedGroups() = sourcePreferences.getString(getBlockedGroupsPrefKey(mdLang.lang), "").orEmpty()
-    private fun blockedUploaders() = sourcePreferences.getString(getBlockedUploaderPrefKey(mdLang.lang), "").orEmpty()
-    private fun coverQuality() = sourcePreferences.getString(getCoverQualityPrefKey(mdLang.lang), "").orEmpty()
-    private fun tryUsingFirstVolumeCover() =
-        sourcePreferences.getBoolean(getTryUsingFirstVolumeCoverKey(mdLang.lang), false)
-    private fun altTitlesInDesc() = sourcePreferences.getBoolean(getAltTitlesInDescKey(mdLang.lang), false)
-    private fun finalChapterInDesc() = sourcePreferences.getBoolean(getFinalChapterInDescPrefKey(mdLang.lang), false)
-    private fun preferExtensionLangTitle() =
-        sourcePreferences.getBoolean(getPreferExtensionLangTitlePrefKey(mdLang.extLang), true)
-
     private val mangadexService by lazy {
         MangaDexService(client, headers)
     }
+
     private val mangadexAuthService by lazy {
         MangaDexAuthService(baseHttpClient, headers)
     }
+
     private val similarService by lazy {
         SimilarService(client)
     }
+
     private val apiMangaParser by lazy {
         ApiMangaParser(mdLang.lang)
     }
+
     private val followsHandler by lazy {
         FollowsHandler(mdLang.lang, mangadexAuthService)
     }
+
     private val mangaHandler by lazy {
         MangaHandler(mdLang.lang, mangadexService, apiMangaParser)
     }
+
     private val similarHandler by lazy {
         SimilarHandler(mdLang.lang, mangadexService, similarService)
     }
+
     private val mangaPlusHandler by lazy {
         MangaPlusHandler(network.client)
     }
+
     private val comikeyHandler by lazy {
         ComikeyHandler(network.client, network.defaultUserAgentProvider())
     }
+
     private val bilibiliHandler by lazy {
         BilibiliHandler(network.client)
     }
+
     private val azukHandler by lazy {
         AzukiHandler(network.client, network.defaultUserAgentProvider())
     }
+
     private val mangaHotHandler by lazy {
         MangaHotHandler(network.client, network.defaultUserAgentProvider())
     }
+
     private val namicomiHandler by lazy {
         NamicomiHandler(network.client, network.defaultUserAgentProvider())
     }
+
     private val pageHandler by lazy {
         PageHandler(
             mangadexService,
@@ -150,6 +151,26 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
             namicomiHandler,
         )
     }
+
+    // MetadataSource methods
+    override val metaClass: KClass<MangaDexSearchMetadata> = MangaDexSearchMetadata::class
+
+    // LoginSource methods
+    override val requiresLogin: Boolean = false
+
+    override val twoFactorAuth = LoginSource.AuthSupport.NOT_SUPPORTED
+
+    private fun dataSaver() = sourcePreferences.getBoolean(getDataSaverPreferenceKey(mdLang.lang), false)
+    private fun usePort443Only() = sourcePreferences.getBoolean(getStandardHttpsPreferenceKey(mdLang.lang), false)
+    private fun blockedGroups() = sourcePreferences.getString(getBlockedGroupsPrefKey(mdLang.lang), "").orEmpty()
+    private fun blockedUploaders() = sourcePreferences.getString(getBlockedUploaderPrefKey(mdLang.lang), "").orEmpty()
+    private fun coverQuality() = sourcePreferences.getString(getCoverQualityPrefKey(mdLang.lang), "").orEmpty()
+    private fun tryUsingFirstVolumeCover() =
+        sourcePreferences.getBoolean(getTryUsingFirstVolumeCoverKey(mdLang.lang), false)
+    private fun altTitlesInDesc() = sourcePreferences.getBoolean(getAltTitlesInDescKey(mdLang.lang), false)
+    private fun finalChapterInDesc() = sourcePreferences.getBoolean(getFinalChapterInDescPrefKey(mdLang.lang), false)
+    private fun preferExtensionLangTitle() =
+        sourcePreferences.getBoolean(getPreferExtensionLangTitlePrefKey(mdLang.extLang), true)
 
     // UrlImportableSource methods
     override suspend fun mapUrlToMangaUrl(uri: Uri): String? {
@@ -225,9 +246,6 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
         }
     }
 
-    // MetadataSource methods
-    override val metaClass: KClass<MangaDexSearchMetadata> = MangaDexSearchMetadata::class
-
     override fun newMetaInstance() = MangaDexSearchMetadata()
 
     override suspend fun parseIntoMetadata(
@@ -246,11 +264,6 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
             preferExtensionLangTitle(),
         )
     }
-
-    // LoginSource methods
-    override val requiresLogin: Boolean = false
-
-    override val twoFactorAuth = LoginSource.AuthSupport.NOT_SUPPORTED
 
     override fun isLogged(): Boolean = mdList.isLoggedIn
 
@@ -301,30 +314,31 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
 
     companion object {
         private const val dataSaverPref = "dataSaverV5"
+        private const val standardHttpsPortPref = "usePort443"
+        private const val blockedGroupsPref = "blockedGroups"
+        private const val blockedUploaderPref = "blockedUploader"
+        private const val coverQualityPref = "thumbnailQuality"
+        private const val tryUsingFirstVolumeCoverPref = "tryUsingFirstVolumeCover"
+        private const val altTitlesInDescPref = "altTitlesInDesc"
+        private const val finalChapterInDescPref = "finalChapterInDesc"
+        private const val preferExtensionLangTitlePref = "preferExtensionLangTitle"
+
         fun getDataSaverPreferenceKey(dexLang: String): String = "${dataSaverPref}_$dexLang"
 
-        private const val standardHttpsPortPref = "usePort443"
         fun getStandardHttpsPreferenceKey(dexLang: String): String = "${standardHttpsPortPref}_$dexLang"
 
-        private const val blockedGroupsPref = "blockedGroups"
         fun getBlockedGroupsPrefKey(dexLang: String): String = "${blockedGroupsPref}_$dexLang"
 
-        private const val blockedUploaderPref = "blockedUploader"
         fun getBlockedUploaderPrefKey(dexLang: String): String = "${blockedUploaderPref}_$dexLang"
 
-        private const val coverQualityPref = "thumbnailQuality"
         fun getCoverQualityPrefKey(dexLang: String): String = "${coverQualityPref}_$dexLang"
 
-        private const val tryUsingFirstVolumeCoverPref = "tryUsingFirstVolumeCover"
         fun getTryUsingFirstVolumeCoverKey(dexLang: String): String = "${tryUsingFirstVolumeCoverPref}_$dexLang"
 
-        private const val altTitlesInDescPref = "altTitlesInDesc"
         fun getAltTitlesInDescKey(dexLang: String): String = "${altTitlesInDescPref}_$dexLang"
 
-        private const val finalChapterInDescPref = "finalChapterInDesc"
         fun getFinalChapterInDescPrefKey(dexLang: String): String = "${finalChapterInDescPref}_$dexLang"
 
-        private const val preferExtensionLangTitlePref = "preferExtensionLangTitle"
         fun getPreferExtensionLangTitlePrefKey(dexLang: String): String = "${preferExtensionLangTitlePref}_$dexLang"
     }
 }

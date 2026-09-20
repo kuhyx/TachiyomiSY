@@ -144,6 +144,8 @@ internal class MainActivity : BaseActivity() {
     private var firstPaint = false
     private val iuuQueue = LinkedList<() -> Unit>()
 
+    private var runExhConfigureDialog by mutableStateOf(false)
+
     private fun initWhenIdle(task: () -> Unit) {
         // Avoid sync issues by enforcing main thread
         check(Looper.myLooper() == Looper.getMainLooper()) { "Can only be called on main thread!" }
@@ -155,7 +157,6 @@ internal class MainActivity : BaseActivity() {
         }
     }
 
-    private var runExhConfigureDialog by mutableStateOf(false)
     // SY <--
 
     override fun onCreate(savedInstanceState: Bundle?) {

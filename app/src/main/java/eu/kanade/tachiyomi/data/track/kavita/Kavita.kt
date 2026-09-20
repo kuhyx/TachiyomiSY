@@ -21,12 +21,6 @@ private const val KAVITA_SOURCES = 3
 
 internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
 
-    companion object {
-        const val UNREAD = 1L
-        const val READING = 2L
-        const val COMPLETED = 3L
-    }
-
     var authentications: OAuth? = null
 
     private val interceptor by lazy { KavitaInterceptor(this) }
@@ -132,5 +126,11 @@ internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
             authentication.jwtToken = token
         }
         authentications = oauth
+    }
+
+    companion object {
+        const val UNREAD = 1L
+        const val READING = 2L
+        const val COMPLETED = 3L
     }
 }

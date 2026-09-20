@@ -45,6 +45,14 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
     json,
     syncPreferences,
 ) {
+    private val appName = context.stringResource(MR.strings.app_name)
+
+    private val remoteFileName = "${appName}_sync.proto.gz"
+
+    private val googleDriveService = GoogleDriveService(context)
+
+    private val protoBuf: ProtoBuf = Injekt.get()
+
     constructor(context: Context) : this(
         context,
         Json {
@@ -60,14 +68,6 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
         SUCCESS,
         ERROR,
     }
-
-    private val appName = context.stringResource(MR.strings.app_name)
-
-    private val remoteFileName = "${appName}_sync.proto.gz"
-
-    private val googleDriveService = GoogleDriveService(context)
-
-    private val protoBuf: ProtoBuf = Injekt.get()
 
     override suspend fun doSync(syncData: SyncData): Backup? {
         beforeSync()
@@ -249,9 +249,6 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
 
 internal class GoogleDriveService(private val context: Context) {
     var driveService: Drive? = null
-    companion object {
-        const val REDIRECT_URI = "eu.kanade.google.oauth:/oauth2redirect"
-    }
     private val syncPreferences = Injekt.get<SyncPreferences>()
 
     init {
@@ -442,5 +439,9 @@ internal class GoogleDriveService(private val context: Context) {
                 onFailure(e.localizedMessage ?: "Unknown error")
             }
         }
+    }
+
+    companion object {
+        const val REDIRECT_URI = "eu.kanade.google.oauth:/oauth2redirect"
     }
 }

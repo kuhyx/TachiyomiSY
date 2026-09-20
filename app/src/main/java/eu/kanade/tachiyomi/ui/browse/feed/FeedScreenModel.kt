@@ -93,6 +93,8 @@ internal open class FeedScreenModel(
             .launchIn(screenModelScope)
     }
 
+    private val filterSerializer = FilterSerializer()
+
     fun init() {
         pushed = false
         screenModelScope.launchIO {
@@ -251,8 +253,6 @@ internal open class FeedScreenModel(
             }.awaitAll()
         }
     }
-
-    private val filterSerializer = FilterSerializer()
 
     private fun getFilterList(savedSearch: SavedSearch, source: Source): FilterList {
         val filters = savedSearch.filtersJson ?: return FilterList()

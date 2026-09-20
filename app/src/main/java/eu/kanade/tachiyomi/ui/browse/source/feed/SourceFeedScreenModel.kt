@@ -97,6 +97,8 @@ internal open class SourceFeedScreenModel(
             .launchIn(screenModelScope)
     }
 
+    private val filterSerializer = FilterSerializer()
+
     fun setFilters(filters: FilterList) {
         mutableState.update { it.copy(filters = filters) }
     }
@@ -169,8 +171,6 @@ internal open class SourceFeedScreenModel(
             }.awaitAll()
         }
     }
-
-    private val filterSerializer = FilterSerializer()
 
     private fun getFilterList(savedSearch: SavedSearch, source: Source): FilterList {
         val filters = savedSearch.filtersJson ?: return FilterList()

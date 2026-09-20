@@ -119,6 +119,8 @@ internal class DownloadCache(
             .launchIn(scope)
     }
 
+    private var updateDiskCacheJob: Job? = null
+
     /**
      * Returns true if the chapter is downloaded.
      *
@@ -451,7 +453,6 @@ internal class DownloadCache(
         updateDiskCache()
     }
 
-    private var updateDiskCacheJob: Job? = null
     private fun updateDiskCache() {
         updateDiskCacheJob?.cancel()
         updateDiskCacheJob = scope.launchIO {

@@ -37,6 +37,10 @@ internal class Pururin(delegate: HttpSource, val context: Context) :
      * The class of the metadata used by this source.
      */
     override val metaClass = PururinSearchMetadata::class
+    override val matchingHosts = listOf(
+        "pururin.me",
+    )
+
     override fun newMetaInstance() = PururinSearchMetadata()
 
     // Support direct URL importing
@@ -116,10 +120,6 @@ internal class Pururin(delegate: HttpSource, val context: Context) :
             }
         }
     }
-
-    override val matchingHosts = listOf(
-        "pururin.me",
-    )
 
     override suspend fun mapUrlToMangaUrl(uri: Uri): String =
         "${PururinSearchMetadata.BASE_URL}/gallery/${uri.pathSegments.getOrNull(1)}/${uri.lastPathSegment}"

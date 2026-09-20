@@ -16,8 +16,6 @@ internal class ExtensionInstallerPreference(
 
     private val basePref = preferenceStore.getEnum(key(), defaultValue())
 
-    override fun key() = "extension_installer"
-
     val entries get() = ExtensionInstaller.entries.run {
         if (context.hasMiuiPackageInstaller) {
             filter { it != ExtensionInstaller.PACKAGEINSTALLER }
@@ -25,6 +23,8 @@ internal class ExtensionInstallerPreference(
             toList()
         }
     }
+
+    override fun key() = "extension_installer"
 
     override fun defaultValue() = if (context.hasMiuiPackageInstaller) {
         ExtensionInstaller.LEGACY

@@ -59,12 +59,12 @@ internal class DownloadManager(
     val queueState
         get() = downloader.queueState
 
+    val isDownloaderRunning
+        get() = DownloadJob.isRunningFlow(context)
+
     // For use by DownloadService only
     fun downloaderStart() = downloader.start()
     fun downloaderStop(reason: String? = null) = downloader.stop(reason)
-
-    val isDownloaderRunning
-        get() = DownloadJob.isRunningFlow(context)
 
     /**
      * Tells the downloader to begin downloads.

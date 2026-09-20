@@ -13,6 +13,10 @@ import tachiyomi.domain.manga.model.Manga
 
 internal class MangaDexFollowsScreenModel(sourceId: Long) : BrowseSourceScreenModel(sourceId, null) {
 
+    init {
+        mutableState.update { it.copy(filterable = false) }
+    }
+
     override fun createSourcePagingSource(query: String, filters: FilterList): BaseSourcePagingSource =
         MangaDexFollowsPagingSource(source.getMainSource() as MangaDex)
 
@@ -20,8 +24,4 @@ internal class MangaDexFollowsScreenModel(sourceId: Long) : BrowseSourceScreenMo
         metadata: RaisedSearchMetadata?,
     ): Flow<Pair<Manga, RaisedSearchMetadata?>> =
         map { it to metadata }
-
-    init {
-        mutableState.update { it.copy(filterable = false) }
-    }
 }

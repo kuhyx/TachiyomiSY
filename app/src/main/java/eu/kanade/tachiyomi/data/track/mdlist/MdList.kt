@@ -20,14 +20,12 @@ import tachiyomi.domain.track.model.Track as DomainTrack
 
 internal class MdList(id: Long) : BaseTracker(id, "MDList") {
 
-    companion object {
-        private val SCORE_LIST = IntRange(0, 10)
-            .map(Int::toString)
-    }
-
     private val mdex by lazy { MdUtil.getEnabledMangaDex() }
 
     val interceptor = MangaDexAuthInterceptor(trackPreferences, this)
+
+    override val isLoggedIn: Boolean
+        get() = trackPreferences.trackToken(this).get().isNotEmpty()
 
     override fun getLogo(): Int = R.drawable.brand_mangadex
 
@@ -165,10 +163,12 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
         }
     }
 
-    override val isLoggedIn: Boolean
-        get() = trackPreferences.trackToken(this).get().isNotEmpty()
-
     class MangaDexNotFoundException : Exception("Mangadex not enabled")
+
+    companion object {
+        private val SCORE_LIST = IntRange(0, 10)
+            .map(Int::toString)
+    }
 }
 
 private val STATUS_LABELS = mapOf(

@@ -43,8 +43,9 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
     NamespaceSource,
     PagePreviewSource {
     override val metaClass = LanraragiSearchMetadata::class
-    override fun newMetaInstance() = LanraragiSearchMetadata()
     override val lang = delegate.lang
+
+    override fun newMetaInstance() = LanraragiSearchMetadata()
 
     private fun getApiUriBuilder(path: String): Uri.Builder = LanraragiSearchMetadata.getApiUriBuilder(baseUrl, path)
 

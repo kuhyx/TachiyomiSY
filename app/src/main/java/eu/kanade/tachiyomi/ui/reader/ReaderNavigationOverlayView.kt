@@ -25,6 +25,22 @@ internal class ReaderNavigationOverlayView(context: Context, attributeSet: Attri
 
     private var navigation: ViewerNavigation? = null
 
+    private val regionPaint = Paint()
+
+    private val textPaint = Paint().apply {
+        textAlign = Paint.Align.CENTER
+        color = Color.WHITE
+        textSize = LABEL_TEXT_SIZE
+    }
+
+    private val textBorderPaint = Paint().apply {
+        textAlign = Paint.Align.CENTER
+        color = Color.BLACK
+        textSize = LABEL_TEXT_SIZE
+        style = Paint.Style.STROKE
+        strokeWidth = LABEL_STROKE_WIDTH
+    }
+
     fun setNavigation(navigation: ViewerNavigation, showOnStart: Boolean) {
         val firstLaunch = this.navigation == null
         this.navigation = navigation
@@ -44,22 +60,6 @@ internal class ReaderNavigationOverlayView(context: Context, attributeSet: Attri
                 viewPropertyAnimator = null
             }
         viewPropertyAnimator?.start()
-    }
-
-    private val regionPaint = Paint()
-
-    private val textPaint = Paint().apply {
-        textAlign = Paint.Align.CENTER
-        color = Color.WHITE
-        textSize = LABEL_TEXT_SIZE
-    }
-
-    private val textBorderPaint = Paint().apply {
-        textAlign = Paint.Align.CENTER
-        color = Color.BLACK
-        textSize = LABEL_TEXT_SIZE
-        style = Paint.Style.STROKE
-        strokeWidth = LABEL_STROKE_WIDTH
     }
 
     override fun onDraw(canvas: Canvas) {

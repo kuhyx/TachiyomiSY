@@ -12,6 +12,10 @@ import exh.source.nHentaiSourceIds
 import java.util.Locale
 
 internal object SourceTagsUtil {
+    private const val TAG_TYPE_EXCLUDE = 69 // why not
+    private const val TAG_TYPE_DEFAULT = 1
+    private val spaceRegex = "\\s".toRegex()
+
     fun getWrappedTag(
         sourceId: Long?,
         namespace: String? = null,
@@ -82,8 +86,6 @@ internal object SourceTagsUtil {
         if (tag.startsWith("-")) TAG_TYPE_EXCLUDE else TAG_TYPE_DEFAULT,
     )
 
-    private const val TAG_TYPE_EXCLUDE = 69 // why not
-
     enum class GenreColor(val color: Int) {
         DOUJINSHI_COLOR("#f44336"),
         MANGA_COLOR("#ff9800"),
@@ -117,8 +119,4 @@ internal object SourceTagsUtil {
         "dutch" -> Locale.forLanguageTag("nl")
         else -> null
     }
-
-    private const val TAG_TYPE_DEFAULT = 1
-
-    private val spaceRegex = "\\s".toRegex()
 }

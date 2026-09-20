@@ -144,6 +144,38 @@ internal class EHentai(
      */
     data class ParsedManga(val fav: Int, val manga: SManga, val metadata: EHentaiSearchMetadata)
 
+    override val client = network.client.newBuilder()
+        .cookieJar(CookieJar.NO_COOKIES)
+        .addInterceptor { chain ->
+            val newReq = chain
+                .request()
+                .newBuilder()
+                .removeHeader("Cookie")
+                .addHeader("Cookie", cookiesHeader())
+                .build()
+
+            chain.proceed(newReq)
+        }
+        .addInterceptor(ThumbnailPreviewInterceptor())
+        .build()
+
+    override val name = if (exh) {
+        "ExHentai"
+    } else {
+        "E-Hentai"
+    }
+
+    override val matchingHosts: List<String> = if (exh) {
+        listOf(
+            "exhentai.org",
+        )
+    } else {
+        listOf(
+            "g.e-hentai.org",
+            "e-hentai.org",
+        )
+    }
+
     private fun extendedGenericMangaParse(doc: Document) = with(doc) {
         // Parse mangas (supports compact + extended layout)
         val parsedMangas = select(".itg > tbody > tr").filter { element ->
@@ -887,21 +919,6 @@ internal class EHentai(
         .appendQueryParameter(param, value)
         .toString()
 
-    override val client = network.client.newBuilder()
-        .cookieJar(CookieJar.NO_COOKIES)
-        .addInterceptor { chain ->
-            val newReq = chain
-                .request()
-                .newBuilder()
-                .removeHeader("Cookie")
-                .addHeader("Cookie", cookiesHeader())
-                .build()
-
-            chain.proceed(newReq)
-        }
-        .addInterceptor(ThumbnailPreviewInterceptor())
-        .build()
-
     // Filters
     override fun getFilterList(): FilterList {
         return FilterList(
@@ -1081,26 +1098,9 @@ internal class EHentai(
 
     class JumpSeekFilter : Filter.Text("Jump/Seek")
 
-    override val name = if (exh) {
-        "ExHentai"
-    } else {
-        "E-Hentai"
-    }
-
     class GalleryNotFoundException(cause: Throwable) : RuntimeException("Gallery not found!", cause)
 
     // === URL IMPORT STUFF
-
-    override val matchingHosts: List<String> = if (exh) {
-        listOf(
-            "exhentai.org",
-        )
-    } else {
-        listOf(
-            "g.e-hentai.org",
-            "e-hentai.org",
-        )
-    }
 
     override suspend fun mapUrlToMangaUrl(uri: Uri): String? {
         return when (uri.pathSegments.firstOrNull()) {

@@ -54,6 +54,11 @@ internal object MdUtil {
     val markdownItalicBoldRegex = """\*+\s*([^*]*)\s*\*+""".toRegex()
     val markdownItalicRegex = "_+\\s*([^_]*)\\s*_+".toRegex()
 
+    val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
+        .apply { timeZone = TimeZone.getTimeZone("UTC") }
+
+    private var codeVerifier: String? = null
+
     fun buildMangaUrl(mangaUuid: String): String = "/manga/$mangaUuid"
 
     // Get the ID from the manga url
@@ -71,9 +76,6 @@ internal object MdUtil {
     }
 
     fun getScanlatorString(scanlators: Set<String>): String = scanlators.sorted().joinToString(scanlatorSeparator)
-
-    val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
-        .apply { timeZone = TimeZone.getTimeZone("UTC") }
 
     fun parseDate(dateAsString: String): Long =
         dateFormatter.parse(dateAsString)?.time ?: 0
@@ -155,8 +157,6 @@ internal object MdUtil {
             null
         }
     }
-
-    private var codeVerifier: String? = null
 
     fun refreshTokenRequest(oauth: MALOAuth): Request {
         val formBody = FormBody.Builder()

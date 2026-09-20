@@ -432,22 +432,6 @@ internal object SettingsEhScreen : SearchableSettings {
             Enabled("true"),
             Disabled("false"),
         }
-        private fun String.toRowState(disableFirst: Boolean = false) = split("*")
-            .map {
-                if (it.toBoolean()) {
-                    ColumnState.Enabled
-                } else {
-                    ColumnState.Disabled
-                }
-            }
-            .let {
-                if (disableFirst) {
-                    RowState(ColumnState.Unavailable, it[1], it[2])
-                } else {
-                    RowState(it[0], it[1], it[2])
-                }
-            }
-
         val japanese: RowState
         val english: RowState
         val chinese: RowState
@@ -486,6 +470,22 @@ internal object SettingsEhScreen : SearchableSettings {
             notAvailable = settingsLanguages[EhLanguage.NOT_AVAILABLE.ordinal].toRowState()
             other = settingsLanguages[EhLanguage.OTHER.ordinal].toRowState()
         }
+
+        private fun String.toRowState(disableFirst: Boolean = false) = split("*")
+            .map {
+                if (it.toBoolean()) {
+                    ColumnState.Enabled
+                } else {
+                    ColumnState.Disabled
+                }
+            }
+            .let {
+                if (disableFirst) {
+                    RowState(ColumnState.Unavailable, it[1], it[2])
+                } else {
+                    RowState(it[0], it[1], it[2])
+                }
+            }
 
         fun toPreference() = listOf(
             japanese,

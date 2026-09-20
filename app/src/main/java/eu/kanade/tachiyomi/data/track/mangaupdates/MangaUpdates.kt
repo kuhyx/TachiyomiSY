@@ -19,25 +19,6 @@ private const val BASE_36 = 36
 
 internal class MangaUpdates(id: Long) : BaseTracker(id, "MangaUpdates"), DeletableTracker {
 
-    companion object {
-        const val READING_LIST = 0L
-        const val WISH_LIST = 1L
-        const val COMPLETE_LIST = 2L
-        const val UNFINISHED_LIST = 3L
-        const val ON_HOLD_LIST = 4L
-
-        private val SCORE_LIST = (0..10)
-            .flatMap { decimal ->
-                when (decimal) {
-                    0 -> listOf("-")
-                    10 -> listOf("10.0")
-                    else -> (0..9).map { fraction ->
-                        "$decimal.$fraction"
-                    }
-                }
-            }
-    }
-
     private val interceptor by lazy { MangaUpdatesInterceptor(this) }
 
     private val api by lazy { MangaUpdatesApi(interceptor, client) }
@@ -155,4 +136,23 @@ internal class MangaUpdates(id: Long) : BaseTracker(id, "MangaUpdates"), Deletab
     // SY <--
 
     fun restoreSession(): String? = trackPreferences.trackPassword(this).get().ifBlank { null }
+
+    companion object {
+        const val READING_LIST = 0L
+        const val WISH_LIST = 1L
+        const val COMPLETE_LIST = 2L
+        const val UNFINISHED_LIST = 3L
+        const val ON_HOLD_LIST = 4L
+
+        private val SCORE_LIST = (0..10)
+            .flatMap { decimal ->
+                when (decimal) {
+                    0 -> listOf("-")
+                    10 -> listOf("10.0")
+                    else -> (0..9).map { fraction ->
+                        "$decimal.$fraction"
+                    }
+                }
+            }
+    }
 }

@@ -249,18 +249,19 @@ private class PriorityPage(
     val page: ReaderPage,
     val priority: Int,
 ) : Comparable<PriorityPage> {
-    companion object {
-        private val idGenerator = AtomicInt(0)
-
-        const val RETRY = 2
-        const val DEFAULT = 1
-        const val ADJACENT = 0
-    }
 
     private val identifier = idGenerator.incrementAndFetch()
 
     override fun compareTo(other: PriorityPage): Int {
         val p = other.priority.compareTo(priority)
         return if (p != 0) p else identifier.compareTo(other.identifier)
+    }
+
+    companion object {
+        private val idGenerator = AtomicInt(0)
+
+        const val RETRY = 2
+        const val DEFAULT = 1
+        const val ADJACENT = 0
     }
 }

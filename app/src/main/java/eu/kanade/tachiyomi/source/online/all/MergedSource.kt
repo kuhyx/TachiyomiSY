@@ -44,6 +44,10 @@ internal class MergedSource : UnsupportedHelpersHttpSource() {
 
     override val baseUrl = ""
 
+    override val lang = "all"
+    override val supportsLatest = false
+    override val name = "MergedSource"
+
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
     override fun fetchChapterList(manga: SManga) = throw UnsupportedOperationException()
     override suspend fun getImage(page: Page, existingSize: Long): Response = throw UnsupportedOperationException()
@@ -181,8 +185,4 @@ internal class MergedSource : UnsupportedHelpersHttpSource() {
     }
 
     data class LoadedMangaSource(val source: Source, val manga: Manga?, val reference: MergedMangaReference)
-
-    override val lang = "all"
-    override val supportsLatest = false
-    override val name = "MergedSource"
 }

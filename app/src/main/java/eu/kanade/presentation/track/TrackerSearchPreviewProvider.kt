@@ -83,13 +83,13 @@ internal class TrackerSearchPreviewProvider : PreviewParameterProvider<@Composab
         fullPageWithPrivateTracking,
     )
 
+    private val formatter: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
     private fun someTrackSearches(): Sequence<TrackSearch> = sequence {
         while (true) {
             yield(randTrackSearch())
         }
     }
-
-    private val formatter: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     private fun randTrackSearch() = TrackSearch().let {
         it.id = Random.nextLong()

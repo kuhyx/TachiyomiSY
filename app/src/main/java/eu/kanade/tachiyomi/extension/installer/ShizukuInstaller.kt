@@ -87,6 +87,21 @@ internal class ShizukuInstaller(private val service: Service) : Installer(servic
         }
     }
 
+    override var ready = false
+
+    init {
+        Shizuku.addBinderDeadListener(shizukuDeadListener)
+
+        ContextCompat.registerReceiver(
+            service,
+            receiver,
+            IntentFilter(ACTION_INSTALL_RESULT),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+
+        initShizuku()
+    }
+
     fun initShizuku() {
         if (ready) return
         if (!Shizuku.pingBinder()) {
@@ -103,8 +118,6 @@ internal class ShizukuInstaller(private val service: Service) : Installer(servic
             Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
         }
     }
-
-    override var ready = false
 
     override fun processEntry(entry: Entry) {
         super.processEntry(entry)
@@ -136,19 +149,6 @@ internal class ShizukuInstaller(private val service: Service) : Installer(servic
         logcat { "ShizukuInstaller destroy" }
         scope.cancel()
         super.onDestroy()
-    }
-
-    init {
-        Shizuku.addBinderDeadListener(shizukuDeadListener)
-
-        ContextCompat.registerReceiver(
-            service,
-            receiver,
-            IntentFilter(ACTION_INSTALL_RESULT),
-            ContextCompat.RECEIVER_NOT_EXPORTED,
-        )
-
-        initShizuku()
     }
 }
 

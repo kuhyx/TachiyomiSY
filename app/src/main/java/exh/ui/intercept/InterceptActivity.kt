@@ -51,6 +51,12 @@ internal class InterceptActivity : BaseActivity() {
 
     private val status: MutableStateFlow<InterceptResult> = MutableStateFlow(InterceptResult.Idle)
 
+    private val galleryAdder = GalleryAdder()
+
+    init {
+        registerSecureActivity(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             overrideActivityTransition(
@@ -179,8 +185,6 @@ internal class InterceptActivity : BaseActivity() {
         }
     }
 
-    private val galleryAdder = GalleryAdder()
-
     suspend fun loadGallery(gallery: String) {
         // Do not load gallery if already loading
         if (status.value is InterceptResult.Idle) {
@@ -211,10 +215,6 @@ internal class InterceptActivity : BaseActivity() {
             is GalleryAddEvent.Success -> InterceptResult.Success(result.manga.id, result.manga, result.chapter)
             is GalleryAddEvent.Fail -> InterceptResult.Failure(result.logMessage)
         }
-    }
-
-    init {
-        registerSecureActivity(this)
     }
 }
 

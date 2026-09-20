@@ -29,21 +29,6 @@ private const val NEUTRAL_SMILEY_MAX = 60
 
 internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker {
 
-    companion object {
-        const val READING = 1L
-        const val COMPLETED = 2L
-        const val ON_HOLD = 3L
-        const val DROPPED = 4L
-        const val PLAN_TO_READ = 5L
-        const val REREADING = 6L
-
-        const val POINT_100 = "POINT_100"
-        const val POINT_10 = "POINT_10"
-        const val POINT_10_DECIMAL = "POINT_10_DECIMAL"
-        const val POINT_5 = "POINT_5"
-        const val POINT_3 = "POINT_3"
-    }
-
     private val json: Json by injectLazy()
 
     private val interceptor by lazy { AnilistInterceptor(this, getPassword()) }
@@ -253,5 +238,20 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
         } catch (e: Exception) {
             null
         }
+    }
+
+    companion object {
+        const val READING = 1L
+        const val COMPLETED = 2L
+        const val ON_HOLD = 3L
+        const val DROPPED = 4L
+        const val PLAN_TO_READ = 5L
+        const val REREADING = 6L
+
+        const val POINT_100 = "POINT_100"
+        const val POINT_10 = "POINT_10"
+        const val POINT_10_DECIMAL = "POINT_10_DECIMAL"
+        const val POINT_5 = "POINT_5"
+        const val POINT_3 = "POINT_3"
     }
 }

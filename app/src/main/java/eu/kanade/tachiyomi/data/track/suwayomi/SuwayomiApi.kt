@@ -36,6 +36,8 @@ internal class SuwayomiApi(private val trackId: Long) {
     private val baseUrl: String by lazy { source.baseUrl.trimEnd('/') }
     private val apiUrl: String by lazy { "$baseUrl/api/graphql" }
 
+    private val sourceId by lazy { sourceIdOf(name = "Tachidesk", lang = "en", versionId = 1) }
+
     fun sourcePreferences(): SharedPreferences = configurableSource.sourcePreferences()
 
     suspend fun getTrackSearch(mangaId: Long): TrackSearch = withIOContext {
@@ -183,8 +185,6 @@ internal class SuwayomiApi(private val trackId: Long) {
 
         return getTrackSearch(track.remoteId)
     }
-
-    private val sourceId by lazy { sourceIdOf(name = "Tachidesk", lang = "en", versionId = 1) }
 
     companion object {
         private val MangaFragment = """

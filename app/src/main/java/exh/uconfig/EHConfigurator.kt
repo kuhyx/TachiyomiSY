@@ -29,6 +29,8 @@ internal class EHConfigurator(val context: Context) {
         .maybeInjectEHLogger()
         .build()
 
+    private val EHentai.uconfigUrl get() = baseUrl + UCONFIG_URL
+
     private fun EHentai.requestWithCreds(sp: Int = 1) = Request.Builder()
         .addHeader("Cookie", cookiesHeader(sp))
 
@@ -51,8 +53,6 @@ internal class EHConfigurator(val context: Context) {
                 .build(),
         )
             .awaitSuccess()
-
-    private val EHentai.uconfigUrl get() = baseUrl + UCONFIG_URL
 
     suspend fun configureAll() {
         val ehSource = sourceManager.get(EH_SOURCE_ID) as EHentai

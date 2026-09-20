@@ -31,15 +31,6 @@ internal open class Pager(
     // SY -->
     var isRestoring = false
 
-    override fun onRestoreInstanceState(state: Parcelable?) {
-        isRestoring = true
-        val currentItem = currentItem
-        super.onRestoreInstanceState(state)
-        setCurrentItem(currentItem, false)
-        isRestoring = false
-    }
-    // SY <--
-
     // Gesture listener that implements tap and long tap events.
     private val gestureListener = object : GestureDetectorWithLongTap.Listener() {
         override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
@@ -60,6 +51,15 @@ internal open class Pager(
 
     // Whether the gesture detector is currently enabled.
     private var isGestureDetectorEnabled = true
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        isRestoring = true
+        val currentItem = currentItem
+        super.onRestoreInstanceState(state)
+        setCurrentItem(currentItem, false)
+        isRestoring = false
+    }
+    // SY <--
 
     /**
      * Dispatches a touch event.

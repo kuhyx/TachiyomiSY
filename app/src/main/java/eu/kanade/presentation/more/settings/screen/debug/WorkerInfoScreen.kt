@@ -47,10 +47,6 @@ import java.time.ZoneId
 
 internal class WorkerInfoScreen : Screen() {
 
-    companion object {
-        const val TITLE = "Worker info"
-    }
-
     @Composable
     override fun Content() {
         val context = LocalContext.current
@@ -165,5 +161,9 @@ internal class WorkerInfoScreen : Screen() {
                 }
             }
         }
+    }
+
+    companion object {
+        const val TITLE = "Worker info"
     }
 }

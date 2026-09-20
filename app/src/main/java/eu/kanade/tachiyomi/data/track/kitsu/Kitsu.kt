@@ -20,14 +20,6 @@ private const val HALF_STARS_PER_STAR = 2f
 
 internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
 
-    companion object {
-        const val READING = 1L
-        const val COMPLETED = 2L
-        const val ON_HOLD = 3L
-        const val DROPPED = 4L
-        const val PLAN_TO_READ = 5L
-    }
-
     override val supportsReadingDates: Boolean = true
 
     override val supportsPrivateTracking: Boolean = true
@@ -146,5 +138,13 @@ internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
         } catch (_: Exception) {
             null
         }
+    }
+
+    companion object {
+        const val READING = 1L
+        const val COMPLETED = 2L
+        const val ON_HOLD = 3L
+        const val DROPPED = 4L
+        const val PLAN_TO_READ = 5L
     }
 }

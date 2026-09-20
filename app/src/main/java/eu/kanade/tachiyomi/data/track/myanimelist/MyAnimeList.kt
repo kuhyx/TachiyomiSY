@@ -15,21 +15,6 @@ import tachiyomi.domain.track.model.Track as DomainTrack
 
 internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), DeletableTracker {
 
-    companion object {
-        const val READING = 1L
-        const val COMPLETED = 2L
-        const val ON_HOLD = 3L
-        const val DROPPED = 4L
-        const val PLAN_TO_READ = 6L
-        const val REREADING = 7L
-
-        private const val SEARCH_ID_PREFIX = "id:"
-        private const val SEARCH_LIST_PREFIX = "my:"
-
-        private val SCORE_LIST = IntRange(0, 10)
-            .map(Int::toString)
-    }
-
     private val json: Json by injectLazy()
 
     private val interceptor by lazy { MyAnimeListInterceptor(this) }
@@ -163,5 +148,20 @@ internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), Deletable
         } catch (e: Exception) {
             null
         }
+    }
+
+    companion object {
+        const val READING = 1L
+        const val COMPLETED = 2L
+        const val ON_HOLD = 3L
+        const val DROPPED = 4L
+        const val PLAN_TO_READ = 6L
+        const val REREADING = 7L
+
+        private const val SEARCH_ID_PREFIX = "id:"
+        private const val SEARCH_LIST_PREFIX = "my:"
+
+        private val SCORE_LIST = IntRange(0, 10)
+            .map(Int::toString)
     }
 }

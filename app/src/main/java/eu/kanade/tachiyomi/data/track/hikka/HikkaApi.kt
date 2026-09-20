@@ -42,6 +42,9 @@ internal class HikkaApi(
     private val client: OkHttpClient,
     interceptor: HikkaInterceptor,
 ) {
+    private val json: Json by injectLazy()
+    private val authClient = client.newBuilder().addInterceptor(interceptor).build()
+
     suspend fun getCurrentUser(): HKUser {
         return withIOContext {
             val request = Request.Builder()
@@ -186,9 +189,6 @@ internal class HikkaApi(
     }
 
     suspend fun updateUserManga(track: Track): Track = addUserManga(track)
-
-    private val json: Json by injectLazy()
-    private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
     companion object {
         const val BASE_API_URL = "https://api.hikka.io"

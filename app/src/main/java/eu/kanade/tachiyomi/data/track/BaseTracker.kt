@@ -41,16 +41,6 @@ internal abstract class BaseTracker(
 
     override val supportsPrivateTracking: Boolean = false
 
-    // Follow-up: Store all scores as 10 point in the future maybe? (https://github.com/kuhyx/TachiyomiSY/issues/17)
-    override fun get10PointScore(track: DomainTrack): Double = track.score
-
-    override fun indexToScore(index: Int): Double = index.toDouble()
-
-    @CallSuper
-    override fun logout() {
-        trackPreferences.setCredentials(this, "", "")
-    }
-
     override val isLoggedIn: Boolean
         get() = getUsername().isNotEmpty() &&
             getPassword().isNotEmpty()
@@ -62,6 +52,16 @@ internal abstract class BaseTracker(
         ) { username, password ->
             username.isNotEmpty() && password.isNotEmpty()
         }
+    }
+
+    // Follow-up: Store all scores as 10 point in the future maybe? (https://github.com/kuhyx/TachiyomiSY/issues/17)
+    override fun get10PointScore(track: DomainTrack): Double = track.score
+
+    override fun indexToScore(index: Int): Double = index.toDouble()
+
+    @CallSuper
+    override fun logout() {
+        trackPreferences.setCredentials(this, "", "")
     }
 
     override fun getUsername() = trackPreferences.trackUsername(this).get()

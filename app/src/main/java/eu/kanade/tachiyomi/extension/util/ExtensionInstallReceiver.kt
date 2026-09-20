@@ -25,10 +25,6 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
 
     val scope = CoroutineScope(SupervisorJob())
 
-    fun register(context: Context) {
-        ContextCompat.registerReceiver(context, this, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
-    }
-
     private val filter = IntentFilter().apply {
         addAction(Intent.ACTION_PACKAGE_ADDED)
         addAction(Intent.ACTION_PACKAGE_REPLACED)
@@ -37,6 +33,10 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
         addAction(ACTION_EXTENSION_REPLACED)
         addAction(ACTION_EXTENSION_REMOVED)
         addDataScheme("package")
+    }
+
+    fun register(context: Context) {
+        ContextCompat.registerReceiver(context, this, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
     /**
