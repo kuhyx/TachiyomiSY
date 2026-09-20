@@ -146,7 +146,7 @@ internal fun Context.isPackageInstalled(packageName: String): Boolean {
     return try {
         packageManager.getApplicationInfo(packageName, 0)
         true
-    } catch (e: PackageManager.NameNotFoundException) {
+    } catch (_: PackageManager.NameNotFoundException) {
         false
     }
 }

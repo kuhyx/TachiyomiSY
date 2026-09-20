@@ -8,7 +8,7 @@ internal fun Track.toApiStatus() = when (status) {
     Kitsu.ON_HOLD -> "on_hold"
     Kitsu.DROPPED -> "dropped"
     Kitsu.PLAN_TO_READ -> "planned"
-    else -> throw Exception("Unknown status")
+    else -> error("Unknown status")
 }
 
 internal fun Track.toApiScore(): String? = if (score > 0) (score * 2).toInt().toString() else null

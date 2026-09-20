@@ -236,12 +236,7 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
 
     // New, current
     private suspend fun updateEntryAndGetChapters(manga: Manga): Pair<List<Chapter>, List<Chapter>> {
-        val source = sourceManager.get(manga.source) as? EHentai
-            ?: throw GalleryNotUpdatedException(
-                false,
-                IllegalStateException("Missing EH-based source (${manga.source})!"),
-            )
-
+        val source = ehSourceOf(manga)
         try {
             val result = updateMangaFromRemote(
                 source,
@@ -251,20 +246,24 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
                 manualFetch = false,
             ).getOrThrow()
             return result.newChapters to getChaptersByMangaId.await(manga.id)
+        } catch (notFound: EHentai.GalleryNotFoundException) {
+            ageDeadGallery(manga)
+            throw GalleryNotUpdatedException(false, notFound)
         } catch (expected: Throwable) {
-            // Logged whatever the cause; the caller carries on.
-            if (expected is EHentai.GalleryNotFoundException) {
-                val meta = getFlatMetadataById.await(manga.id)?.raise(EHentaiSearchMetadata::class)
-                if (meta != null) {
-                    // Age dead galleries
-                    logger.d("Aged %s - notfound", manga.id)
-                    meta.aged = true
-                    insertFlatMetadata.await(meta)
-                }
-                throw GalleryNotUpdatedException(false, expected)
-            }
+            // Wrapped whatever the cause; the worker decides whether to retry.
             throw GalleryNotUpdatedException(true, expected)
         }
+    }
+
+    private fun ehSourceOf(manga: Manga): EHentai = sourceManager.get(manga.source) as? EHentai
+        ?: throw GalleryNotUpdatedException(false, IllegalStateException("Missing EH-based source (${manga.source})!"))
+
+    // A gallery the site no longer has is marked aged so the updater stops asking for it.
+    private suspend fun ageDeadGallery(manga: Manga) {
+        val meta = getFlatMetadataById.await(manga.id)?.raise(EHentaiSearchMetadata::class) ?: return
+        logger.d("Aged %s - notfound", manga.id)
+        meta.aged = true
+        insertFlatMetadata.await(meta)
     }
 
     fun requiresWifiConnection(exhPreferences: ExhPreferences): Boolean {

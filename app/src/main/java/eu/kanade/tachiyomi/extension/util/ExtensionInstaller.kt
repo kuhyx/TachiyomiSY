@@ -26,6 +26,7 @@ import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import java.io.IOException
 
 /**
  * The installer which installs, updates and uninstalls the extensions.
@@ -65,7 +66,7 @@ internal class ExtensionInstaller(
                 val response = httpClient.newCall(request).execute()
 
                 if (!response.isSuccessful) {
-                    throw Exception("Failed to download extension")
+                    throw IOException("Failed to download extension")
                 }
                 response.body.byteStream().use { input ->
                     tmpFile.outputStream().use { output ->
@@ -75,14 +76,12 @@ internal class ExtensionInstaller(
 
                 step.value = InstallStep.Installing
                 installApk(downloadId, tmpFile)
+            } catch (_: InterruptedException) {
+                // Canceled
             } catch (expected: Exception) {
                 // Logged whatever the cause; the caller carries on.
-                if (expected is InterruptedException) {
-                    // Canceled
-                } else {
-                    logcat(LogPriority.ERROR, expected)
-                    step.value = InstallStep.Error
-                }
+                logcat(LogPriority.ERROR, expected)
+                step.value = InstallStep.Error
             }
         }
 

@@ -248,7 +248,7 @@ internal data class TrackInfoDialogHomeScreen(
             screenModelScope.launchNonCancellable {
                 val manga = Injekt.get<GetManga>().await(mangaId) ?: return@launchNonCancellable
                 try {
-                    val matchResult = item.tracker.match(manga) ?: throw Exception()
+                    val matchResult = item.tracker.match(manga) ?: error("No match for ${manga.title}")
                     item.tracker.register(matchResult, mangaId)
                 } catch (_: Exception) {
                     withUIContext { Injekt.get<Application>().toast(MR.strings.error_no_match) }

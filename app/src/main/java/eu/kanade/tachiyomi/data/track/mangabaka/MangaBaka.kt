@@ -124,7 +124,7 @@ internal class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTrac
     }
 
     override suspend fun refresh(track: Track): Track {
-        val remoteTrack = api.findLibManga(track) ?: throw Exception("Could not find manga")
+        val remoteTrack = api.findLibManga(track) ?: throw NoSuchElementException("Could not find manga")
         track.copyPersonalFrom(remoteTrack)
         track.remoteId = remoteTrack.remoteId
         track.title = remoteTrack.title

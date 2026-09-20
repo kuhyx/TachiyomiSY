@@ -37,22 +37,7 @@ internal fun File.copyAndSetReadOnlyTo(
     if (!this.exists()) {
         throw NoSuchFileException(file = this, reason = "The source file doesn't exist.")
     }
-
-    if (target.exists()) {
-        if (!overwrite) {
-            throw FileAlreadyExistsException(
-                file = this,
-                other = target,
-                reason = "The destination file already exists.",
-            )
-        } else if (!target.delete()) {
-            throw FileAlreadyExistsException(
-                file = this,
-                other = target,
-                reason = "Tried to overwrite the destination, but failed to delete it.",
-            )
-        }
-    }
+    clearTarget(target, overwrite)
 
     if (this.isDirectory) {
         if (!target.mkdirs()) {
@@ -72,4 +57,19 @@ internal fun File.copyAndSetReadOnlyTo(
     }
 
     return target
+}
+
+// Removes an existing [target] when [overwrite] allows it; otherwise the copy cannot proceed.
+private fun File.clearTarget(target: File, overwrite: Boolean) {
+    if (!target.exists()) return
+    if (!overwrite) {
+        throw FileAlreadyExistsException(file = this, other = target, reason = "The destination file already exists.")
+    }
+    if (!target.delete()) {
+        throw FileAlreadyExistsException(
+            file = this,
+            other = target,
+            reason = "Tried to overwrite the destination, but failed to delete it.",
+        )
+    }
 }

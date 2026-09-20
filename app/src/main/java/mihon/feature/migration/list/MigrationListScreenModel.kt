@@ -294,9 +294,10 @@ internal class MigrationListScreenModel(
                                 // SY <--
                             )
                         }
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
                     } catch (expected: Exception) {
                         // Logged whatever the cause; the caller carries on.
-                        if (expected is CancellationException) throw expected
                         logcat(LogPriority.WARN, throwable = expected)
                     }
                     mutableState.update {

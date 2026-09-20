@@ -39,7 +39,7 @@ internal data class KitsuListSearchResult(
                 "on_hold" -> Kitsu.ON_HOLD
                 "dropped" -> Kitsu.DROPPED
                 "planned" -> Kitsu.PLAN_TO_READ
-                else -> throw Exception("Unknown status")
+                else -> error("Unknown status")
             }
             score = userDataAttrs.ratingTwenty?.let { it / 2.0 } ?: 0.0
             lastChapterRead = userDataAttrs.progress.toDouble()

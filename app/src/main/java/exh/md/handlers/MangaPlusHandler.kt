@@ -16,6 +16,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import uy.kohesive.injekt.injectLazy
+import java.io.IOException
 import java.util.UUID
 
 private const val HEX_RADIX = 16
@@ -67,7 +68,7 @@ internal class MangaPlusHandler(currentClient: OkHttpClient) {
         val result = json.decodeFromString<MangaPlusResponse>(response.body.string())
 
         if (result.success == null) {
-            throw Exception("error getting images")
+            throw IOException("error getting images")
         }
 
         val referer = response.request.header("Referer")!!

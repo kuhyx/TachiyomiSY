@@ -176,15 +176,13 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                     // SY <--
                 }
                 Result.success()
+            } catch (_: CancellationException) {
+                // Assume success although cancelled
+                Result.success()
             } catch (expected: Exception) {
                 // Logged whatever the cause; the caller carries on.
-                if (expected is CancellationException) {
-                    // Assume success although cancelled
-                    Result.success()
-                } else {
-                    logcat(LogPriority.ERROR, expected)
-                    Result.failure()
-                }
+                logcat(LogPriority.ERROR, expected)
+                Result.failure()
             } finally {
                 notifier.cancelProgressNotification()
             }
@@ -372,9 +370,10 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                                                 val track = mdList.createInitialTracker(manga)
                                                 insertTrack.await(mdList.refresh(track).toDomainTrack(false)!!)
                                             }
+                                        } catch (cancelled: CancellationException) {
+                                            throw cancelled
                                         } catch (expected: Exception) {
                                             // Logged whatever the cause; the caller carries on.
-                                            if (expected is CancellationException) throw expected
                                             xLogE("Error adding initial track for ${manga.title}", expected)
                                         }
                                     }

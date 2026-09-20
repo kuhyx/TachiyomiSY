@@ -31,6 +31,7 @@ import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.IOException
 
 /**
  * This class is used to manage chapter downloads in the application. It must be instantiated once
@@ -169,7 +170,7 @@ internal class DownloadManager(
             .filter { it.isFile && ImageUtil.isImage(it.name) { it.openInputStream() } }
 
         if (files.isEmpty()) {
-            throw Exception(context.stringResource(MR.strings.page_list_empty_error))
+            throw IOException(context.stringResource(MR.strings.page_list_empty_error))
         }
 
         return files.sortedBy { it.name }

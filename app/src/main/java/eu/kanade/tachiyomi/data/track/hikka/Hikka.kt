@@ -110,7 +110,7 @@ internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
         track.copyPersonalFrom(remoteTrack)
         track.totalChapters = remoteTrack.totalChapters
 
-        val readContent = api.getRead(track) ?: throw Exception("Could not find manga")
+        val readContent = api.getRead(track) ?: throw NoSuchElementException("Could not find manga")
 
         track.score = readContent.score.toDouble()
         track.lastChapterRead = readContent.chapters.toDouble()

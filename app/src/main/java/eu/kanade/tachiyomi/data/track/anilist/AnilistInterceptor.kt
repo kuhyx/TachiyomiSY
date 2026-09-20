@@ -21,7 +21,7 @@ internal class AnilistInterceptor(val anilist: Anilist, private var token: Strin
         val originalRequest = chain.request()
 
         if (token.isNullOrEmpty()) {
-            throw Exception("Not authenticated with Anilist")
+            throw IOException("Not authenticated with Anilist")
         }
         if (oauth == null) {
             oauth = anilist.loadOAuth()

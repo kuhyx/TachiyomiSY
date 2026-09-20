@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
+import java.io.IOException
 
 internal class KitsuInterceptor(private val kitsu: Kitsu) : Interceptor {
 
@@ -18,7 +19,7 @@ internal class KitsuInterceptor(private val kitsu: Kitsu) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
-        val currAuth = oauth ?: throw Exception("Not authenticated with Kitsu")
+        val currAuth = oauth ?: throw IOException("Not authenticated with Kitsu")
 
         val refreshToken = currAuth.refreshToken!!
 

@@ -6,6 +6,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
+import java.io.IOException
 
 internal class HikkaInterceptor(private val hikka: Hikka) : Interceptor {
     private val json: Json by injectLazy()
@@ -14,14 +15,14 @@ internal class HikkaInterceptor(private val hikka: Hikka) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
-        val currAuth = oauth ?: throw Exception("Hikka: You are not authorized")
+        val currAuth = oauth ?: throw IOException("Hikka: You are not authorized")
 
         if (currAuth.isExpired()) {
             val refreshTokenResponse = chain.proceed(HikkaApi.refreshTokenRequest(currAuth.accessToken))
             if (!refreshTokenResponse.isSuccessful) {
                 refreshTokenResponse.close()
                 hikka.logout()
-                throw Exception("Hikka: The token is expired")
+                throw IOException("Hikka: The token is expired")
             } else {
                 refreshTokenResponse.close()
             }
@@ -29,7 +30,7 @@ internal class HikkaInterceptor(private val hikka: Hikka) : Interceptor {
             val authTokenInfoResponse = chain.proceed(HikkaApi.authTokenInfo(currAuth.accessToken))
             if (!authTokenInfoResponse.isSuccessful) {
                 authTokenInfoResponse.close()
-                throw Exception("Hikka: Auth token info failed")
+                throw IOException("Hikka: Auth token info failed")
             }
 
             val authTokenInfo = json.decodeFromString<HKAuthTokenInfo>(authTokenInfoResponse.body.string())

@@ -19,6 +19,7 @@ import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.MR
 import tachiyomi.source.local.LocalSource
 import tachiyomi.source.local.io.Format
+import java.io.IOException
 
 /**
  * Loader used to retrieve the [PageLoader] for a given chapter.
@@ -57,7 +58,7 @@ internal class ChapterLoader(
                     .onEach { it.chapter = chapter }
 
                 if (pages.isEmpty()) {
-                    throw Exception(context.stringResource(MR.strings.page_list_empty_error))
+                    throw IOException(context.stringResource(MR.strings.page_list_empty_error))
                 }
 
                 // If the chapter is partially read, set the starting page to the last the user read

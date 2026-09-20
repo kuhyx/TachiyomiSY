@@ -28,6 +28,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import java.io.File
+import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
 private const val PERCENT = 100
@@ -104,19 +105,18 @@ internal class AppUpdateDownloadJob(private val context: Context, workerParams: 
                 response.body.source().saveTo(apkFile)
             } else {
                 response.close()
-                throw Exception("Unsuccessful response")
+                throw IOException("Unsuccessful response")
             }
             notifier.cancel()
             notifier.promptInstall(apkFile.getUriCompat(context))
-        } catch (expected: Exception) {
-            // Any failure ends here and the fallback below applies.
-            val shouldCancel = expected is CancellationException ||
-                (expected is StreamResetException && expected.errorCode == ErrorCode.CANCEL)
-            if (shouldCancel) {
-                notifier.cancel()
-            } else {
-                notifier.onDownloadError(url)
-            }
+        } catch (_: CancellationException) {
+            notifier.cancel()
+        } catch (reset: StreamResetException) {
+            // A cancelled stream is the user backing out; anything else is a real download error.
+            if (reset.errorCode == ErrorCode.CANCEL) notifier.cancel() else notifier.onDownloadError(url)
+        } catch (_: Exception) {
+            // Any other failure ends the download with the error notification.
+            notifier.onDownloadError(url)
         }
     }
 

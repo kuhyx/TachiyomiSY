@@ -290,7 +290,7 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
     }
 
     suspend fun getLibManga(track: Track, userId: Int): Track =
-        findLibManga(track, userId) ?: throw Exception("Could not find manga")
+        findLibManga(track, userId) ?: throw NoSuchElementException("Could not find manga")
 
     fun createOAuth(token: String): ALOAuth =
         ALOAuth(token, "Bearer", System.currentTimeMillis() + YEAR_MILLIS, YEAR_MILLIS)

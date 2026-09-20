@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
+import java.io.IOException
 
 private const val MILLIS_PER_SECOND = 1000L
 
@@ -20,7 +21,7 @@ internal class BangumiInterceptor(private val bangumi: Bangumi) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
-        var currAuth: BGMOAuth = oauth ?: throw Exception("Not authenticated with Bangumi")
+        var currAuth: BGMOAuth = oauth ?: throw IOException("Not authenticated with Bangumi")
 
         if (currAuth.isExpired()) {
             val response = chain.proceed(BangumiApi.refreshTokenRequest(currAuth.refreshToken!!))

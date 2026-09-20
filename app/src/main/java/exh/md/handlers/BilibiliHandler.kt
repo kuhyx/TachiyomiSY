@@ -47,7 +47,7 @@ internal class BilibiliHandler(currentClient: OkHttpClient) {
             val chapters = getChapterList(mangaUrl)
             val chapter = chapters
                 .find { it.chapter_number == chapterNumber.toFloatOrNull() }
-                ?: throw Exception("Unknown chapter $chapterNumber")
+                ?: throw NoSuchElementException("Unknown chapter $chapterNumber")
             chapter.url
         }
 

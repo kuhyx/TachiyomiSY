@@ -5,6 +5,8 @@ import com.elvishew.xlog.printer.Printer
 import com.elvishew.xlog.printer.file.backup.BackupStrategy
 import com.elvishew.xlog.printer.file.naming.FileNameGenerator
 import com.hippo.unifile.UniFile
+import logcat.LogPriority
+import tachiyomi.core.common.util.system.logcat
 import java.io.BufferedWriter
 import java.io.IOException
 import java.util.concurrent.BlockingQueue
@@ -198,8 +200,8 @@ internal class EnhancedFilePrinter internal constructor(
         fun enqueue(log: LogItem) {
             try {
                 logs.put(log)
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
+            } catch (interrupted: InterruptedException) {
+                logcat(LogPriority.WARN, interrupted) { "Log queue interrupted" }
             }
         }
 
@@ -228,8 +230,8 @@ internal class EnhancedFilePrinter internal constructor(
                 while (logs.take().also { log = it } != null) {
                     doPrintln(log.timeMillis, log.level, log.tag, log.msg)
                 }
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
+            } catch (interrupted: InterruptedException) {
+                logcat(LogPriority.WARN, interrupted) { "Log writer interrupted" }
                 synchronized(this) { started = false }
             }
         }
@@ -277,8 +279,8 @@ internal class EnhancedFilePrinter internal constructor(
                 this.file = file
                 true
             } catch (expected: Exception) {
-                // Any failure ends here and the fallback below applies.
-                expected.printStackTrace()
+                // Logged whatever the cause; the printer reports that it could not open the file.
+                logcat(LogPriority.ERROR, expected) { "Could not open the log file" }
                 false
             }
         }
@@ -292,8 +294,8 @@ internal class EnhancedFilePrinter internal constructor(
             if (bufferedWriter != null) {
                 try {
                     bufferedWriter?.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
+                } catch (failed: IOException) {
+                    logcat(LogPriority.ERROR, failed) { "Could not close the log file" }
                     return false
                 } finally {
                     bufferedWriter = null
@@ -316,7 +318,8 @@ internal class EnhancedFilePrinter internal constructor(
                 bufferedWriter.write(flattenedLog)
                 bufferedWriter.newLine()
                 bufferedWriter.flush()
-            } catch (e: IOException) {
+            } catch (_: IOException) {
+                // A failed write is dropped: the printer must never throw back into the logger.
             }
         }
     }

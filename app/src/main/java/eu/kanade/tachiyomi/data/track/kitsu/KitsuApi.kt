@@ -209,7 +209,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
                         if (it.data.isNotEmpty() && it.included.isNotEmpty()) {
                             it.firstToTrack()
                         } else {
-                            throw Exception("Could not find manga")
+                            throw NoSuchElementException("Could not find manga")
                         }
                     }
             }

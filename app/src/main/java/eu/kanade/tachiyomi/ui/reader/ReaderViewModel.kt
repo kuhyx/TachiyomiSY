@@ -409,11 +409,10 @@ internal class ReaderViewModel @JvmOverloads constructor(
                     // Unlikely but okay
                     Result.success(false)
                 }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (expected: Throwable) {
                 // Rethrown (or wrapped) whatever the cause.
-                if (expected is CancellationException) {
-                    throw expected
-                }
                 Result.failure(expected)
             }
         }
@@ -481,11 +480,10 @@ internal class ReaderViewModel @JvmOverloads constructor(
 
             try {
                 loadChapter(loader, chapter)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (expected: Throwable) {
                 // Logged whatever the cause; the caller carries on.
-                if (expected is CancellationException) {
-                    throw expected
-                }
                 logcat(LogPriority.ERROR, expected)
             }
         }
@@ -509,11 +507,10 @@ internal class ReaderViewModel @JvmOverloads constructor(
             withIOContext {
                 loadChapter(loader, chapter)
             }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (expected: Throwable) {
             // Logged whatever the cause; the caller carries on.
-            if (expected is CancellationException) {
-                throw expected
-            }
             logcat(LogPriority.ERROR, expected)
         } finally {
             mutableState.update { it.copy(isLoadingAdjacentChapter = false) }
@@ -553,11 +550,10 @@ internal class ReaderViewModel @JvmOverloads constructor(
         try {
             logcat { "Preloading ${chapter.chapter.url}" }
             loader.loadChapter(chapter)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (expected: Throwable) {
             // Rethrown (or wrapped) whatever the cause.
-            if (expected is CancellationException) {
-                throw expected
-            }
             return
         }
         eventChannel.trySend(Event.ReloadViewerChapters)
@@ -1141,9 +1137,9 @@ internal class ReaderViewModel @JvmOverloads constructor(
         manga: Manga,
     ): Uri {
         val stream1 = page1.stream!!
-        ImageUtil.findImageType(stream1) ?: throw Exception("Not an image")
+        ImageUtil.findImageType(stream1) ?: throw IllegalArgumentException("Not an image")
         val stream2 = page2.stream!!
-        ImageUtil.findImageType(stream2) ?: throw Exception("Not an image")
+        ImageUtil.findImageType(stream2) ?: throw IllegalArgumentException("Not an image")
         val imageBitmap = ImageDecoder.newInstance(stream1())?.decode()!!
         val imageBitmap2 = ImageDecoder.newInstance(stream2())?.decode()!!
 

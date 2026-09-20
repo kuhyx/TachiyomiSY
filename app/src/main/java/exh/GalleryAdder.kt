@@ -180,13 +180,12 @@ internal class GalleryAdder(
             } else {
                 GalleryAddEvent.Success(url, manga, context)
             }
+        } catch (notFound: EHentai.GalleryNotFoundException) {
+            logger.w(context.stringResource(SYMR.strings.gallery_adder_could_not_add_gallery, url), notFound)
+            return GalleryAddEvent.Fail.NotFound(url, context)
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.
             logger.w(context.stringResource(SYMR.strings.gallery_adder_could_not_add_gallery, url), expected)
-
-            if (expected is EHentai.GalleryNotFoundException) {
-                return GalleryAddEvent.Fail.NotFound(url, context)
-            }
 
             return GalleryAddEvent.Fail.Error(
                 url,
@@ -203,11 +202,10 @@ internal class GalleryAdder(
             if (result == null) {
                 try {
                     result = block()
+                } catch (notFound: EHentai.GalleryNotFoundException) {
+                    throw notFound
                 } catch (expected: Exception) {
-                    // Rethrown (or wrapped) whatever the cause.
-                    if (expected is EHentai.GalleryNotFoundException) {
-                        throw expected
-                    }
+                    // Remembered for the last attempt; a later success discards it.
                     lastError = expected
                 }
             }

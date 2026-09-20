@@ -83,7 +83,7 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
             POINT_3 -> listOf("-", "😦", "😐", "😊")
             // 10 point decimal
             POINT_10_DECIMAL -> IntRange(0, HUNDRED_POINT_MAX).map { (it / DECIMAL_STEPS_PER_POINT).toString() }
-            else -> throw Exception("Unknown score type")
+            else -> error("Unknown score type")
         }
     }
 
@@ -112,7 +112,7 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
             }
             // 10 point decimal
             POINT_10_DECIMAL -> index.toDouble()
-            else -> throw Exception("Unknown score type")
+            else -> error("Unknown score type")
         }
     }
 
@@ -143,7 +143,7 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
         // If user was using API v1 fetch libraryId
         if (track.libraryId == null || track.libraryId!! == 0L) {
             val libManga = api.findLibManga(track, getUsername().toInt())
-                ?: throw Exception("$track not found on user library")
+                ?: throw NoSuchElementException("$track not found on user library")
             track.libraryId = libManga.libraryId
         }
 

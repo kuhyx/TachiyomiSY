@@ -12,6 +12,7 @@ import okhttp3.Dns
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.injectLazy
@@ -42,28 +43,7 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
             body = "{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()),
         )
         try {
-            with(json) {
-                client.newCall(request).execute().use {
-                    when (it.code) {
-                        HttpURLConnection.HTTP_OK -> {
-                            return it.parseAs<AuthenticationDto>().token
-                        }
-                        HttpURLConnection.HTTP_UNAUTHORIZED -> {
-                            logcat(LogPriority.WARN) {
-                                "Unauthorized / API key not valid: API URL: $apiUrl, empty API key: ${apiKey.isEmpty()}"
-                            }
-                            throw IOException("Unauthorized / api key not valid")
-                        }
-                        HttpURLConnection.HTTP_INTERNAL_ERROR -> {
-                            logcat(
-                                LogPriority.WARN,
-                            ) { "Error fetching JWT token. API URL: $apiUrl, empty API key: ${apiKey.isEmpty()}" }
-                            throw IOException("Error fetching JWT token")
-                        }
-                        else -> {}
-                    }
-                }
-            }
+            client.newCall(request).execute().use { return readToken(it, apiUrl, apiKey) }
             // Not sure which one to catch
         } catch (_: SocketTimeoutException) {
             logcat(LogPriority.WARN) {
@@ -77,8 +57,22 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
             }
             throw IOException(expected)
         }
+    }
 
-        return null
+    // The token on 200; 401 and 500 are the server saying the key is wrong or it is broken.
+    private fun readToken(response: Response, apiUrl: String, apiKey: String): String? = when (response.code) {
+        HttpURLConnection.HTTP_OK -> with(json) { response.parseAs<AuthenticationDto>().token }
+        HttpURLConnection.HTTP_UNAUTHORIZED -> {
+            logcat(LogPriority.WARN) {
+                "Unauthorized / API key not valid: API URL: $apiUrl, empty API key: ${apiKey.isEmpty()}"
+            }
+            throw IOException("Unauthorized / api key not valid")
+        }
+        HttpURLConnection.HTTP_INTERNAL_ERROR -> {
+            logcat(LogPriority.WARN) { "Error fetching JWT token. API URL: $apiUrl, empty API key: ${apiKey.isEmpty()}" }
+            throw IOException("Error fetching JWT token")
+        }
+        else -> null
     }
 
     private fun getApiVolumesUrl(url: String): String =

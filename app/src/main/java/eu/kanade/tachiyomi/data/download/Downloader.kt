@@ -66,6 +66,7 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
@@ -251,9 +252,10 @@ internal class Downloader(
             if (areAllDownloadsFinished()) {
                 stop()
             }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (expected: Throwable) {
             // Logged whatever the cause; the caller carries on.
-            if (expected is CancellationException) throw expected
             logcat(LogPriority.ERROR, expected)
             notifier.onError(expected.message)
             stop()
@@ -362,7 +364,7 @@ internal class Downloader(
                 val pages = download.source.getPageList(download.chapter.toSChapter())
 
                 if (pages.isEmpty()) {
-                    throw Exception(context.stringResource(MR.strings.page_list_empty_error))
+                    throw IOException(context.stringResource(MR.strings.page_list_empty_error))
                 }
                 // Don't trust index from source
                 val reIndexedPages = pages.mapIndexed { index, page -> Page(index, page.url, page.imageUrl, page.uri) }
@@ -427,9 +429,10 @@ internal class Downloader(
             DiskUtil.createNoMediaFile(tmpDir, context)
 
             download.status = Download.State.DOWNLOADED
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (expected: Throwable) {
             // Logged whatever the cause; the caller carries on.
-            if (expected is CancellationException) throw expected
             // If the page list threw, it will resume here
             logcat(LogPriority.ERROR, expected)
             download.status = Download.State.ERROR
@@ -471,9 +474,10 @@ internal class Downloader(
             page.uri = file.uri
             page.progress = PROGRESS_DONE
             page.status = Page.State.Ready
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (expected: Throwable) {
             // Rethrown (or wrapped) whatever the cause.
-            if (expected is CancellationException) throw expected
             // Mark this page as error and allow to download the remaining
             page.progress = 0
             page.status = Page.State.Error(expected)

@@ -57,7 +57,7 @@ internal class PageHandler(
                         chapterResponse.data.attributes.externalUrl,
                         dataSaver = dataSaver,
                     )
-                    else -> throw Exception("${chapter.scanlator} not supported")
+                    else -> throw IllegalArgumentException("${chapter.scanlator} not supported")
                 }
             } else {
                 val atHomeRequestUrl = if (usePort443Only) {

@@ -101,12 +101,11 @@ internal class SyncYomiSyncService(
             }
 
             return finalSyncData.backup
+        } catch (cancelled: CancellationException) {
+            reportSyncEvent(SyncEventStatus.SYNC_CANCELLED, cancelled.message)
+            throw cancelled
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.
-            if (expected is CancellationException) {
-                reportSyncEvent(SyncEventStatus.SYNC_CANCELLED, expected.message)
-                throw expected
-            }
             logcat(LogPriority.ERROR) { "Error syncing: ${expected.message}" }
             notifier.showSyncError(expected.message)
             reportSyncEvent(SyncEventStatus.SYNC_ERROR, expected.message)

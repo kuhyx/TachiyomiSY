@@ -59,15 +59,13 @@ internal class MetadataUpdateJob(private val context: Context, workerParams: Wor
             try {
                 updateMetadata()
                 Result.success()
+            } catch (_: CancellationException) {
+                // Assume success although cancelled
+                Result.success()
             } catch (expected: Exception) {
                 // Logged whatever the cause; the caller carries on.
-                if (expected is CancellationException) {
-                    // Assume success although cancelled
-                    Result.success()
-                } else {
-                    logcat(LogPriority.ERROR, expected)
-                    Result.failure()
-                }
+                logcat(LogPriority.ERROR, expected)
+                Result.failure()
             } finally {
                 notifier.cancelProgressNotification()
             }

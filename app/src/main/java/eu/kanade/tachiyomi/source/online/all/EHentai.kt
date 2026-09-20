@@ -277,7 +277,7 @@ internal class EHentai(
                 },
             )
         }.ifEmpty {
-            selectFirst(".searchwarn")?.let { throw Exception(it.text()) }
+            selectFirst(".searchwarn")?.let { throw IOException(it.text()) }
             emptyList()
         }
 
@@ -499,7 +499,7 @@ internal class EHentai(
 
     private fun <T : MangasPage> T.checkValid(): MangasPage =
         if (exh && mangas.isEmpty() && exhPreferences.igneousVal.get().equals("mystery", true)) {
-            throw Exception(
+            throw IOException(
                 "Invalid igneous cookie, try re-logging or finding a correct one to input in the login menu",
             )
         } else {
@@ -658,7 +658,7 @@ internal class EHentai(
             if (response.code == HttpURLConnection.HTTP_NOT_FOUND) {
                 throw GalleryNotFoundException(exception)
             } else {
-                throw Exception("HTTP error ${response.code}", exception)
+                throw IOException("HTTP error ${response.code}", exception)
             }
         }
     }
@@ -822,7 +822,7 @@ internal class EHentai(
                 page.url = addParam(page.url, "nl", it.substring(it.indexOf('\'') + 1 until it.lastIndexOf('\'')))
             }
             if (currentImage == "https://ehgt.org/g/509.gif") {
-                throw Exception("Exceeded page quota")
+                throw IOException("Exceeded page quota")
             }
             return currentImage
         }

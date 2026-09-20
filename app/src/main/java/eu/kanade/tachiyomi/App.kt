@@ -112,8 +112,8 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
         try {
             FirebaseConfig.init(applicationContext)
         } catch (expected: Exception) {
-            // Any failure ends here and the fallback below applies.
-            expected.printStackTrace()
+            // Firebase is optional: a failed init is logged and the app runs without it.
+            logcat(LogPriority.ERROR, expected) { "Firebase init failed" }
         }
 
         GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)

@@ -148,9 +148,10 @@ internal class MergedSource : UnsupportedHelpersHttpSource() {
                                     } else {
                                         emptyList()
                                     }
+                                } catch (cancelled: CancellationException) {
+                                    throw cancelled
                                 } catch (expected: Exception) {
                                     // Rethrown (or wrapped) whatever the cause.
-                                    if (expected is CancellationException) throw expected
                                     exception = expected
                                     emptyList()
                                 }

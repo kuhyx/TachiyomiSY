@@ -113,7 +113,7 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
 
     private fun pullSyncData(): SyncData? {
         val drive = googleDriveService.driveService
-            ?: throw Exception(context.stringResource(SYMR.strings.google_drive_not_signed_in))
+            ?: error(context.stringResource(SYMR.strings.google_drive_not_signed_in))
 
         val fileList = getAppDataFileList(drive)
         if (fileList.isEmpty()) {
@@ -136,13 +136,13 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.
             logcat(LogPriority.ERROR, throwable = expected) { "Error downloading file" }
-            throw Exception("Failed to download sync data: ${expected.message}", expected)
+            throw IOException("Failed to download sync data: ${expected.message}", expected)
         }
     }
 
     private suspend fun pushSyncData(syncData: SyncData) {
         val drive = googleDriveService.driveService
-            ?: throw Exception(context.stringResource(SYMR.strings.google_drive_not_signed_in))
+            ?: error(context.stringResource(SYMR.strings.google_drive_not_signed_in))
 
         val fileList = getAppDataFileList(drive)
         val backup = syncData.backup ?: return
@@ -324,7 +324,7 @@ internal class GoogleDriveService(private val context: Context) {
         val credential = googleCredential(jsonFactory, secrets)
 
         if (refreshToken == "") {
-            throw Exception(context.stringResource(SYMR.strings.google_drive_not_signed_in))
+            error(context.stringResource(SYMR.strings.google_drive_not_signed_in))
         }
 
         credential.refreshToken = refreshToken

@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
+import java.io.IOException
 
 internal class ShikimoriInterceptor(private val shikimori: Shikimori) : Interceptor {
 
@@ -18,7 +19,7 @@ internal class ShikimoriInterceptor(private val shikimori: Shikimori) : Intercep
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
-        val currAuth = oauth ?: throw Exception("Not authenticated with Shikimori")
+        val currAuth = oauth ?: throw IOException("Not authenticated with Shikimori")
 
         val refreshToken = currAuth.refreshToken!!
 

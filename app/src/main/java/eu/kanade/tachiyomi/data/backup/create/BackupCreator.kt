@@ -63,62 +63,8 @@ internal class BackupCreator(
     suspend fun backup(uri: Uri, options: BackupOptions): String {
         var file: UniFile? = null
         try {
-            file = if (isAutoBackup) {
-                // Get dir of file and create
-                val dir = UniFile.fromUri(context, uri)
-
-                // Delete older backups
-                dir?.listFiles { _, filename -> FILENAME_REGEX.matches(filename) }
-                    .orEmpty()
-                    .sortedByDescending { it.name }
-                    .drop(MAX_AUTO_BACKUPS - 1)
-                    .forEach { it.delete() }
-
-                // Create new file to place backup
-                dir?.createFile(getFilename())
-            } else {
-                UniFile.fromUri(context, uri)
-            }
-
-            if (file == null || !file.isFile) {
-                throw IllegalStateException(context.stringResource(MR.strings.create_backup_file_error))
-            }
-
-            val nonFavoriteManga = if (options.readEntries) mangaRepository.getReadMangaNotInLibrary() else emptyList()
-            // SY -->
-            val mergedManga = getMergedManga.await()
-            // SY <--
-            val backupManga =
-                backupMangas(getFavorites.await() + nonFavoriteManga /* SY --> */ + mergedManga /* SY <-- */, options)
-
-            val backup = Backup(
-                backupManga = backupManga,
-                backupCategories = backupCategories(options),
-                backupSources = backupSources(backupManga),
-                backupPreferences = backupAppPreferences(options),
-                backupExtensionStores = backupExtensionStores(options),
-                backupSourcePreferences = backupSourcePreferences(options),
-                // SY -->
-                backupSavedSearches = backupSavedSearches(options),
-                // SY <--
-            )
-
-            val byteArray = parser.encodeToByteArray(Backup.serializer(), backup)
-            if (byteArray.isEmpty()) {
-                throw IllegalStateException(context.stringResource(MR.strings.empty_backup_error))
-            }
-
-            file.openOutputStream()
-                .also {
-                    // Force overwrite old file
-                    (it as? FileOutputStream)?.channel?.truncate(0)
-                }
-                .sink()
-                .gzip()
-                .buffer()
-                .use {
-                    it.write(byteArray)
-                }
+            file = createBackupFile(uri)
+            writeBackup(file, encodeBackup(options))
             val fileUri = file.uri
 
             // Make sure it's a valid backup file
@@ -130,11 +76,71 @@ internal class BackupCreator(
 
             return fileUri.toString()
         } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
+            // Logged and rethrown whatever the cause; a half-written file is removed first.
             logcat(LogPriority.ERROR, expected)
             file?.delete()
             throw expected
         }
+    }
+
+    // The target file: for automatic backups a fresh file in the directory, keeping the newest MAX_AUTO_BACKUPS.
+    private fun createBackupFile(uri: Uri): UniFile {
+        val file = if (isAutoBackup) {
+            val dir = UniFile.fromUri(context, uri)
+            dir?.listFiles { _, filename -> FILENAME_REGEX.matches(filename) }
+                .orEmpty()
+                .sortedByDescending { it.name }
+                .drop(MAX_AUTO_BACKUPS - 1)
+                .forEach { it.delete() }
+            dir?.createFile(getFilename())
+        } else {
+            UniFile.fromUri(context, uri)
+        }
+        if (file == null || !file.isFile) {
+            error(context.stringResource(MR.strings.create_backup_file_error))
+        }
+        return file
+    }
+
+    private suspend fun encodeBackup(options: BackupOptions): ByteArray {
+        val nonFavoriteManga = if (options.readEntries) mangaRepository.getReadMangaNotInLibrary() else emptyList()
+        // SY -->
+        val mergedManga = getMergedManga.await()
+        // SY <--
+        val backupManga =
+            backupMangas(getFavorites.await() + nonFavoriteManga /* SY --> */ + mergedManga /* SY <-- */, options)
+
+        val backup = Backup(
+            backupManga = backupManga,
+            backupCategories = backupCategories(options),
+            backupSources = backupSources(backupManga),
+            backupPreferences = backupAppPreferences(options),
+            backupExtensionStores = backupExtensionStores(options),
+            backupSourcePreferences = backupSourcePreferences(options),
+            // SY -->
+            backupSavedSearches = backupSavedSearches(options),
+            // SY <--
+        )
+
+        val byteArray = parser.encodeToByteArray(Backup.serializer(), backup)
+        if (byteArray.isEmpty()) {
+            error(context.stringResource(MR.strings.empty_backup_error))
+        }
+        return byteArray
+    }
+
+    private fun writeBackup(file: UniFile, byteArray: ByteArray) {
+        file.openOutputStream()
+            .also {
+                // Force overwrite old file
+                (it as? FileOutputStream)?.channel?.truncate(0)
+            }
+            .sink()
+            .gzip()
+            .buffer()
+            .use {
+                it.write(byteArray)
+            }
     }
 
     suspend fun backupCategories(options: BackupOptions): List<BackupCategory> {

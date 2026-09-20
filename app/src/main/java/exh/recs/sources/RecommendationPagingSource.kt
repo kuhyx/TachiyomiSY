@@ -104,11 +104,12 @@ internal abstract class TrackerRecommendationPagingSource(
             logcat { name + " > Results: " + results.size }
 
             results.ifEmpty { throw NoResultsException() }
+        } catch (noResults: NoResultsException) {
+            // 'No results' is not logged: it happens frequently and is expected.
+            throw noResults
         } catch (expected: Exception) {
-            // 'No results' should not be logged as it happens frequently and is expected
-            if (expected !is NoResultsException) {
-                logcat(LogPriority.ERROR, expected) { name }
-            }
+            // Logged, then rethrown whatever the cause.
+            logcat(LogPriority.ERROR, expected) { name }
             throw expected
         }
 

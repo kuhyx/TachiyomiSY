@@ -528,10 +528,10 @@ internal class MangaScreen(
                 navigator.pop()
                 navigator replace MangaScreen(mergedManga.id, true)
                 context.toast(SYMR.strings.entry_merged)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (expected: Exception) {
                 // Rethrown (or wrapped) whatever the cause.
-                if (expected is CancellationException) throw expected
-
                 context.toast(context.stringResource(SYMR.strings.failed_merge, expected.message.orEmpty()))
             }
         }

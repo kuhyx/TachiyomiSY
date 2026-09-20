@@ -299,7 +299,7 @@ internal object ExtensionLoader {
                     when (val obj = Class.forName(it, false, classLoader).getDeclaredConstructor().newInstance()) {
                         is Source -> listOf(obj)
                         is SourceFactory -> obj.createSources()
-                        else -> throw Exception("Unknown source class type: ${obj.javaClass}")
+                        else -> error("Unknown source class type: ${obj.javaClass}")
                     }
                 } catch (expected: Throwable) {
                     // Logged whatever the cause; the caller carries on.
