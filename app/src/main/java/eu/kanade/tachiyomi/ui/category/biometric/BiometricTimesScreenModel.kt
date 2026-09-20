@@ -74,9 +74,7 @@ internal class BiometricTimesScreenModel(
         }
     }
 
-    /**
-     * Returns true if a category with the given name already exists.
-     */
+    // Returns true if a category with the given name already exists.
     private fun timeRangeConflicts(timeRange: TimeRange): Boolean {
         val state = state.value as? BiometricTimesScreenState.Success ?: return false
         return state.timeRanges.any { timeRange.conflictsWith(it.timeRange) }

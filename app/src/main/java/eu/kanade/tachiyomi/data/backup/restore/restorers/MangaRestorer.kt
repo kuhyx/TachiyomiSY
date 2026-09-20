@@ -282,11 +282,8 @@ internal class MangaRestorer(
         }
     }
 
-    /**
-     * Inserts manga and returns id
-     *
-     * @return id of [Manga], null if not found
-     */
+    // Inserts manga and returns id.
+    // @return id of [Manga], null if not found
     private suspend fun insertManga(manga: Manga): Long {
         return database.mangasQueries.insertReturningId(
             source = manga.source,
@@ -346,12 +343,9 @@ internal class MangaRestorer(
         return manga
     }
 
-    /**
-     * Restores the categories a manga is in.
-     *
-     * @param manga the manga whose categories have to be restored.
-     * @param categories the categories to restore.
-     */
+    // Restores the categories a manga is in.
+    // @param manga the manga whose categories have to be restored.
+    // @param categories the categories to restore.
     private suspend fun restoreCategories(
         manga: Manga,
         categories: List<Long>,
@@ -480,12 +474,9 @@ internal class MangaRestorer(
 
     // SY -->
 
-    /**
-     * Restore the categories from Json
-     *
-     * @param manga the merge manga for the references
-     * @param backupMergedMangaReferences the list of backup manga references for the merged manga
-     */
+    // Restore the categories from Json.
+    // @param manga the merge manga for the references
+    // @param backupMergedMangaReferences the list of backup manga references for the merged manga
     private suspend fun restoreMergedMangaReferencesForManga(
         mergeMangaId: Long,
         backupMergedMangaReferences: List<BackupMergedMangaReference>,
@@ -567,12 +558,9 @@ internal class MangaRestorer(
 
     private fun Track.forComparison() = this.copy(id = 0L, mangaId = 0L)
 
-    /**
-     * Restores the excluded scanlators for the manga.
-     *
-     * @param manga the manga whose excluded scanlators have to be restored.
-     * @param excludedScanlators the excluded scanlators to restore.
-     */
+    // Restores the excluded scanlators for the manga.
+    // @param manga the manga whose excluded scanlators have to be restored.
+    // @param excludedScanlators the excluded scanlators to restore.
     private suspend fun restoreExcludedScanlators(manga: Manga, excludedScanlators: List<String>) {
         if (excludedScanlators.isEmpty()) return
         val existingExcludedScanlators = database.excluded_scanlatorsQueries

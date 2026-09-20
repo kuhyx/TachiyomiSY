@@ -31,9 +31,7 @@ internal class EnhancedFilePrinter internal constructor(
     private val backupStrategy: BackupStrategy,
     private val flattener: Flattener,
 ) : Printer {
-    /**
-     * Log writer.
-     */
+    // Log writer.
     private val writer: Writer
 
     @Volatile
@@ -52,9 +50,7 @@ internal class EnhancedFilePrinter internal constructor(
         }
     }
 
-    /**
-     * Do the real job of writing log to file.
-     */
+    // Do the real job of writing log to file.
     private fun doPrintln(timeMillis: Long, logLevel: Int, tag: String, msg: String) {
         val lastFileName = writer.lastFileName
         if (fileNameGenerator.isFileNameChangeable) {
@@ -89,9 +85,8 @@ internal class EnhancedFilePrinter internal constructor(
         return currentTimeMillis - lastModified > maxTimeMillis
     }
 
-    /**
-     * Clean log files if should clean follow strategy
-     */
+    // Clean log files if should clean follow strategy
+    // . */
     private fun cleanLogFilesIfNecessary() {
         folder.listFiles().orEmpty()
             .asSequence()
@@ -319,9 +314,7 @@ internal class EnhancedFilePrinter internal constructor(
     }
 
     companion object {
-        /**
-         * Use worker, write logs asynchronously.
-         */
+        // Use worker, write logs asynchronously.
         private const val USE_WORKER = true
     }
 

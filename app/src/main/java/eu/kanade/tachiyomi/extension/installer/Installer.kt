@@ -120,11 +120,8 @@ internal abstract class Installer(private val service: Service) {
 
     protected fun getActiveEntry(): Entry? = waitingInstall.load()
 
-    /**
-     * Cancels queue for the provided download ID if exists.
-     *
-     * @param downloadId Download ID as known by [ExtensionManager]
-     */
+    // Cancels queue for the provided download ID if exists.
+    // @param downloadId Download ID as known by [ExtensionManager]
     private fun cancelQueue(downloadId: Long) {
         val waitingInstall = this.waitingInstall.load()
         val toCancel = queue.find { it.downloadId == downloadId } ?: waitingInstall ?: return

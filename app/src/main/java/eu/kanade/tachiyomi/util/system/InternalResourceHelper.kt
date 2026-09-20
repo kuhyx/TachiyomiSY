@@ -15,12 +15,10 @@ internal object InternalResourceHelper {
         }
     }
 
-    /**
-     * Get resource id from system resources
-     * @param resName resource name to get
-     * @param type resource type of [resName] to get
-     * @return 0 if not available
-     */
+    // Get resource id from system resources.
+    // @param resName resource name to get
+    // @param type resource type of [resName] to get
+    // @return 0 if not available
     @SuppressLint("DiscouragedApi")
     private fun getResourceId(resName: String, type: String): Int =
         Resources.getSystem().getIdentifier(resName, type, "android")

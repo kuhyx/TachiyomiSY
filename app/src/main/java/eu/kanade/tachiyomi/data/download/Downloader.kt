@@ -90,20 +90,14 @@ internal class Downloader(
     // SY <--
 ) {
 
-    /**
-     * Store for persisting downloads across restarts.
-     */
+    // Store for persisting downloads across restarts.
     private val store = DownloadStore(context)
 
-    /**
-     * Queue where active downloads are kept.
-     */
+    // Queue where active downloads are kept.
     private val _queueState = MutableStateFlow<List<Download>>(emptyList())
     val queueState = _queueState.asStateFlow()
 
-    /**
-     * Notifier for the downloader state and progress.
-     */
+    // Notifier for the downloader state and progress.
     private val notifier by lazy { DownloadNotifier(context) }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -117,7 +111,7 @@ internal class Downloader(
 
     /**
      * Whether the downloader is paused
-     */
+. */
     @Volatile
     var isPaused: Boolean = false
 
@@ -176,7 +170,7 @@ internal class Downloader(
 
     /**
      * Pauses the downloader
-     */
+. */
     fun pause() {
         cancelDownloaderJob()
         queueState.value
@@ -195,9 +189,7 @@ internal class Downloader(
         notifier.dismissProgress()
     }
 
-    /**
-     * Prepares the subscriptions to start downloading.
-     */
+    // Prepares the subscriptions to start downloading.
     private fun launchDownloaderJob() {
         if (isRunning) return
 
@@ -266,9 +258,7 @@ internal class Downloader(
         }
     }
 
-    /**
-     * Destroys the downloader subscriptions.
-     */
+    // Destroys the downloader subscriptions.
     private fun cancelDownloaderJob() {
         downloaderJob?.cancel()
         downloaderJob = null
@@ -334,11 +324,8 @@ internal class Downloader(
         }
     }
 
-    /**
-     * Downloads a chapter.
-     *
-     * @param download the chapter to be downloaded.
-     */
+    // Downloads a chapter.
+    // @param download the chapter to be downloaded.
     private suspend fun downloadChapter(download: Download) {
         val mangaDir =
             provider.getMangaDir(/* SY --> */ download.manga.ogTitle /* SY <-- */, download.source).getOrElse { e ->
@@ -446,13 +433,10 @@ internal class Downloader(
         }
     }
 
-    /**
-     * Gets the image from the filesystem if it exists or downloads it otherwise.
-     *
-     * @param page the page to download.
-     * @param download the download of the page.
-     * @param tmpDir the temporary directory of the download.
-     */
+    // Gets the image from the filesystem if it exists or downloads it otherwise.
+    // @param page the page to download.
+    // @param download the download of the page.
+    // @param tmpDir the temporary directory of the download.
     private suspend fun getOrDownloadImage(page: Page, download: Download, tmpDir: UniFile, dataSaver: DataSaver) {
         // If the image URL is empty, do nothing
         if (page.imageUrl == null) {
@@ -492,14 +476,11 @@ internal class Downloader(
         }
     }
 
-    /**
-     * Downloads the image from network to a file in tmpDir.
-     *
-     * @param page the page to download.
-     * @param source the source of the page.
-     * @param tmpDir the temporary directory of the download.
-     * @param filename the filename of the image.
-     */
+    // Downloads the image from network to a file in tmpDir.
+    // @param page the page to download.
+    // @param source the source of the page.
+    // @param tmpDir the temporary directory of the download.
+    // @param filename the filename of the image.
     private suspend fun downloadImage(
         page: Page,
         source: HttpSource,
@@ -547,13 +528,10 @@ internal class Downloader(
             .first()
     }
 
-    /**
-     * Copies the image from cache to file in tmpDir.
-     *
-     * @param cacheFile the file from cache.
-     * @param tmpDir the temporary directory of the download.
-     * @param filename the filename of the image.
-     */
+    // Copies the image from cache to file in tmpDir.
+    // @param cacheFile the file from cache.
+    // @param tmpDir the temporary directory of the download.
+    // @param filename the filename of the image.
     private fun copyImageFromCache(cacheFile: File, tmpDir: UniFile, filename: String): UniFile {
         // Delete temp file if it exists
         tmpDir.findFile("$filename.tmp")?.delete()
@@ -569,13 +547,10 @@ internal class Downloader(
         return tmpFile
     }
 
-    /**
-     * Returns the extension of the downloaded image from the network response, or if it's null,
-     * analyze the file. If everything fails, assume it's a jpg.
-     *
-     * @param response the network response of the image.
-     * @param file the file where the image is already downloaded.
-     */
+    // Returns the extension of the downloaded image from the network response, or if it's null,
+    // analyze the file. If everything fails, assume it's a jpg.
+    // @param response the network response of the image.
+    // @param file the file where the image is already downloaded.
     private fun getImageExtension(response: Response, file: UniFile): String {
         val mime = response.body.contentType()?.run { if (type == "image") "image/$subtype" else null }
         return ImageUtil.getExtensionFromMimeType(mime) { file.openInputStream() }
@@ -602,12 +577,9 @@ internal class Downloader(
         }
     }
 
-    /**
-     * Checks if the download was successful.
-     *
-     * @param download the download to check.
-     * @param tmpDir the directory where the download is currently stored.
-     */
+    // Checks if the download was successful.
+    // @param download the download to check.
+    // @param tmpDir the directory where the download is currently stored.
     private fun isDownloadSuccessful(
         download: Download,
         tmpDir: UniFile,
@@ -634,21 +606,16 @@ internal class Downloader(
         return downloadedImagesCount == downloadPageCount
     }
 
-    /**
-     * Checks if the file name matches a downloaded page image.
-     *
-     * @param fileName Name of the file to check
-     * @param pagePrefix Expected page prefix (e.g., "001")
-     */
+    // Checks if the file name matches a downloaded page image.
+    // @param fileName Name of the file to check
+    // @param pagePrefix Expected page prefix (e.g., "001")
     private fun isDownloadedPageImage(fileName: String, pagePrefix: String): Boolean =
         !fileName.endsWith(".tmp") && (
             fileName.startsWith("$pagePrefix.") ||
                 fileName.startsWith("${pagePrefix}__001.")
             )
 
-    /**
-     * Archive the chapter pages as a CBZ.
-     */
+    // Archive the chapter pages as a CBZ.
     private fun archiveChapter(
         mangaDir: UniFile,
         dirname: String,
@@ -668,9 +635,7 @@ internal class Downloader(
         tmpDir.delete()
     }
 
-    /**
-     * Creates a ComicInfo.xml file inside the given directory.
-     */
+    // Creates a ComicInfo.xml file inside the given directory.
     private suspend fun createComicInfoFile(
         dir: UniFile,
         manga: Manga,
@@ -701,9 +666,7 @@ internal class Downloader(
         }
     }
 
-    /**
-     * Returns true if all the queued downloads are in DOWNLOADED or ERROR state.
-     */
+    // Returns true if all the queued downloads are in DOWNLOADED or ERROR state.
     private fun areAllDownloadsFinished(): Boolean =
         queueState.value.none { it.status.value <= Download.State.DOWNLOADING.value }
 

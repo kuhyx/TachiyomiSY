@@ -22,7 +22,7 @@ internal fun <T : R, R : Any> List<T>.insertSeparators(
 
 /**
  * Similar to [eu.kanade.core.util.insertSeparators] but iterates from last to first element
- */
+. */
 internal fun <T : R, R : Any> List<T>.insertSeparatorsReversed(
     generator: (before: T?, after: T?) -> R?,
 ): List<R> {

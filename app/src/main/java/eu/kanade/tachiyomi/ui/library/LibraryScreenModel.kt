@@ -681,11 +681,8 @@ internal class LibraryScreenModel(
         }
     }
 
-    /**
-     * Flow of tracking filter preferences
-     *
-     * @return map of track id with the filter value
-     */
+    // Flow of tracking filter preferences.
+    // @return map of track id with the filter value
     private fun getTrackingFiltersFlow(): Flow<Map<Long, TriState>> {
         return trackerManager.loggedInTrackersFlow().flatMapLatest { loggedInTrackers ->
             if (loggedInTrackers.isEmpty()) {
@@ -699,11 +696,8 @@ internal class LibraryScreenModel(
         }
     }
 
-    /**
-     * Returns the common categories for the given list of manga.
-     *
-     * @param mangas the list of manga.
-     */
+    // Returns the common categories for the given list of manga.
+    // @param mangas the list of manga.
     private suspend fun getCommonCategories(mangas: List<Manga>): Collection<Category> {
         if (mangas.isEmpty()) return emptyList()
         return mangas
@@ -722,11 +716,8 @@ internal class LibraryScreenModel(
         // SY <--
     }
 
-    /**
-     * Returns the mix (non-common) categories for the given list of manga.
-     *
-     * @param mangas the list of manga.
-     */
+    // Returns the mix (non-common) categories for the given list of manga.
+    // @param mangas the list of manga.
     private suspend fun getMixCategories(mangas: List<Manga>): Collection<Category> {
         if (mangas.isEmpty()) return emptyList()
         val mangaCategories = mangas.map { getCategories.await(it.id).toSet() }
@@ -736,7 +727,7 @@ internal class LibraryScreenModel(
 
     /**
      * Queues the amount specified of unread chapters from the list of selected manga
-     */
+. */
     fun performDownloadAction(action: DownloadAction) {
         when (action) {
             DownloadAction.NEXT_1_CHAPTER -> downloadNextChapters(1)
@@ -1211,7 +1202,7 @@ internal class LibraryScreenModel(
     /**
      * Selects all mangas between and including the given manga and the last pressed manga from the
      * same category as the given manga
-     */
+. */
     fun toggleRangeSelection(category: Category, manga: LibraryManga) {
         mutableState.update { state ->
             val newSelection = state.selection.mutate { list ->
@@ -1327,7 +1318,7 @@ internal class LibraryScreenModel(
 
 // SY -->
 
-    /** Returns first unread chapter of a manga */
+    /** Returns first unread chapter of a manga. */
     suspend fun getFirstUnread(manga: Manga): Chapter? = getNextChapters.await(manga.id).firstOrNull()
 
     private fun List<LibraryItem>.getGroupedMangaItems(

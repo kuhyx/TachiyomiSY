@@ -39,9 +39,7 @@ internal class DownloadQueueScreenModel(
      */
     var adapter: DownloadAdapter? = null
 
-    /**
-     * Map of jobs for active downloads.
-     */
+    // Map of jobs for active downloads.
     private val progressJobs = mutableMapOf<Download, Job>()
 
     val listener = object : DownloadAdapter.DownloadItemListener {
@@ -61,7 +59,7 @@ internal class DownloadQueueScreenModel(
         }
 
         /**
-         * Called when the menu item of a download is pressed
+         * Called when the menu item of a download is pressed.
          *
          * @param position The position of the item
          * @param menuItem The menu Item pressed
@@ -205,11 +203,8 @@ internal class DownloadQueueScreenModel(
         }
     }
 
-    /**
-     * Observe the progress of a download and notify the view.
-     *
-     * @param download the download to observe its progress.
-     */
+    // Observe the progress of a download and notify the view.
+    // @param download the download to observe its progress.
     private fun launchProgressJob(download: Download) {
         val job = screenModelScope.launch {
             while (download.pages == null) {
@@ -231,20 +226,14 @@ internal class DownloadQueueScreenModel(
         progressJobs[download] = job
     }
 
-    /**
-     * Unsubscribes the given download from the progress subscriptions.
-     *
-     * @param download the download to unsubscribe.
-     */
+    // Unsubscribes the given download from the progress subscriptions.
+    // @param download the download to unsubscribe.
     private fun cancelProgressJob(download: Download) {
         progressJobs.remove(download)?.cancel()
     }
 
-    /**
-     * Called when the progress of a download changes.
-     *
-     * @param download the download whose progress has changed.
-     */
+    // Called when the progress of a download changes.
+    // @param download the download whose progress has changed.
     private fun onUpdateProgress(download: Download) {
         getHolder(download)?.notifyProgress()
     }
@@ -258,12 +247,9 @@ internal class DownloadQueueScreenModel(
         getHolder(download)?.notifyDownloadedPages()
     }
 
-    /**
-     * Returns the holder for the given download.
-     *
-     * @param download the download to find.
-     * @return the holder of the download or null if it's not bound.
-     */
+    // Returns the holder for the given download.
+    // @param download the download to find.
+    // @return the holder of the download or null if it's not bound.
     private fun getHolder(download: Download): DownloadHolder? =
         controllerBinding.root.findViewHolderForItemId(download.chapter.id) as? DownloadHolder
 }

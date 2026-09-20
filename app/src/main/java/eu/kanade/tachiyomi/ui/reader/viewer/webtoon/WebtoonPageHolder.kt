@@ -46,38 +46,26 @@ internal class WebtoonPageHolder(
     viewer: WebtoonViewer,
 ) : WebtoonBaseHolder(frame, viewer) {
 
-    /**
-     * Loading progress bar to indicate the current progress.
-     */
+    // Loading progress bar to indicate the current progress.
     private val progressIndicator = createProgressIndicator()
 
-    /**
-     * Progress bar container. Needed to keep a minimum height size of the holder, otherwise the
-     * adapter would create more views to fill the screen, which is not wanted.
-     */
+    // Progress bar container. Needed to keep a minimum height size of the holder, otherwise the
+    // adapter would create more views to fill the screen, which is not wanted.
     private lateinit var progressContainer: ViewGroup
 
-    /**
-     * Error layout to show when the image fails to load.
-     */
+    // Error layout to show when the image fails to load.
     private var errorLayout: ReaderErrorBinding? = null
 
-    /**
-     * Getter to retrieve the height of the recycler view.
-     */
+    // Getter to retrieve the height of the recycler view.
     private val parentHeight
         get() = viewer.recycler.height
 
-    /**
-     * Page of a chapter.
-     */
+    // Page of a chapter.
     private var page: ReaderPage? = null
 
     private val scope = MainScope()
 
-    /**
-     * Job for loading the page.
-     */
+    // Job for loading the page.
     private var loadJob: Job? = null
 
     init {
@@ -123,13 +111,10 @@ internal class WebtoonPageHolder(
         progressContainer.isVisible = true
     }
 
-    /**
-     * Loads the page and processes changes to the page's status.
-     *
-     * Returns immediately if there is no page or the page has no PageLoader.
-     * Otherwise, this function does not return. It will continue to process status changes until
-     * the Job is cancelled.
-     */
+    // Loads the page and processes changes to the page's status.
+    // Returns immediately if there is no page or the page has no PageLoader.
+    // Otherwise, this function does not return. It will continue to process status changes until
+    // the Job is cancelled.
     private suspend fun loadPageAndProcessStatus() {
         val page = page ?: return
         val loader = page.chapter.pageLoader ?: return
@@ -154,36 +139,29 @@ internal class WebtoonPageHolder(
         }
     }
 
-    /**
-     * Called when the page is queued.
-     */
+    // Called when the page is queued.
     private fun setQueued() {
         progressContainer.isVisible = true
         progressIndicator.show()
         removeErrorLayout()
     }
 
-    /**
-     * Called when the page is loading.
-     */
+    // Called when the page is loading.
     private fun setLoading() {
         progressContainer.isVisible = true
         progressIndicator.show()
         removeErrorLayout()
     }
 
-    /**
-     * Called when the page is downloading
-     */
+    // Called when the page is downloading
+    // . */
     private fun setDownloading() {
         progressContainer.isVisible = true
         progressIndicator.show()
         removeErrorLayout()
     }
 
-    /**
-     * Called when the page is ready.
-     */
+    // Called when the page is ready.
     private suspend fun setImage() {
         progressIndicator.setProgress(0)
 
@@ -243,25 +221,19 @@ internal class WebtoonPageHolder(
         }
     }
 
-    /**
-     * Called when the page has an error.
-     */
+    // Called when the page has an error.
     private fun setError(error: Throwable?) {
         progressContainer.isVisible = false
         initErrorLayout(error)
     }
 
-    /**
-     * Called when the image is decoded and going to be displayed.
-     */
+    // Called when the image is decoded and going to be displayed.
     private fun onImageDecoded() {
         progressContainer.isVisible = false
         removeErrorLayout()
     }
 
-    /**
-     * Creates a new progress bar.
-     */
+    // Creates a new progress bar.
     private fun createProgressIndicator(): ReaderProgressIndicator {
         progressContainer = FrameLayout(context)
         frame.addView(progressContainer, MATCH_PARENT, parentHeight)
@@ -275,9 +247,7 @@ internal class WebtoonPageHolder(
         return progress
     }
 
-    /**
-     * Initializes a button to retry pages.
-     */
+    // Initializes a button to retry pages.
     private fun initErrorLayout(error: Throwable?): ReaderErrorBinding {
         if (errorLayout == null) {
             errorLayout = ReaderErrorBinding.inflate(LayoutInflater.from(context), frame, true)
@@ -306,9 +276,7 @@ internal class WebtoonPageHolder(
         return errorLayout!!
     }
 
-    /**
-     * Removes the decode error layout from the holder, if found.
-     */
+    // Removes the decode error layout from the holder, if found.
     private fun removeErrorLayout() {
         errorLayout?.let {
             frame.removeView(it.root)

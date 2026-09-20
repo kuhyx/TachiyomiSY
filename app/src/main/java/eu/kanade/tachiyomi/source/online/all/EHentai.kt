@@ -123,7 +123,7 @@ internal class EHentai(
 
     /**
      * Gallery list entry
-     */
+. */
     data class ParsedManga(val fav: Int, val manga: SManga, val metadata: EHentaiSearchMetadata)
 
     private fun extendedGenericMangaParse(doc: Document) = with(doc) {
@@ -315,9 +315,8 @@ internal class EHentai(
         }
     }
 
-    /**
-     * Parse a list of galleries
-     */
+    // Parse a list of galleries
+    // . */
     private fun genericMangaParse(
         response: Response,
     ) = extendedGenericMangaParse(response.asJsoup()).let { (parsedManga, nextPage) ->
@@ -596,7 +595,7 @@ internal class EHentai(
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getMangaDetails"))
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> = runAsObservable { getMangaDetails(manga) }
 
-    /** The gallery page, as HttpSource's deprecated `mangaDetailsRequest` default builds it. */
+    // The gallery page, as HttpSource's deprecated `mangaDetailsRequest` default builds it.
     private fun galleryRequest(manga: SManga): Request = GET(baseUrl + manga.url, headers)
 
     suspend fun getMangaDetails(manga: SManga): SManga {
@@ -632,7 +631,7 @@ internal class EHentai(
 
     /**
      * Parse gallery page to metadata model
-     */
+. */
     @Deprecated(HELPER_DEPRECATION)
     override fun mangaDetailsParse(response: Response) = throw UnsupportedOperationException()
 
@@ -1194,9 +1193,8 @@ internal class EHentai(
             .awaitSuccess()
     }
 
-    /**
-     * Parse normal previews with regular expressions
-     */
+    // Parse normal previews with regular expressions
+    // . */
     private fun parseNormalPreview(element: Element): EHentaiThumbnailPreview {
         val imgElement = element.selectFirst("img")
         val index = imgElement?.attr("alt")?.toInt()

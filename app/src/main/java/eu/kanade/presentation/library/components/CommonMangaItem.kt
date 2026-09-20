@@ -117,9 +117,8 @@ internal fun MangaCompactGridItem(
     }
 }
 
-/**
- * Title overlay for [MangaCompactGridItem]
- */
+// Title overlay for [MangaCompactGridItem]
+// . */
 @Composable
 private fun BoxScope.CoverTextOverlay(
     title: String,
@@ -227,9 +226,7 @@ internal fun MangaComfortableGridItem(
     }
 }
 
-/**
- * Common cover layout to add contents to be drawn on top of the cover.
- */
+// Common cover layout to add contents to be drawn on top of the cover.
 @Composable
 private fun MangaGridCover(
     modifier: Modifier = Modifier,
@@ -285,9 +282,7 @@ private fun GridItemTitle(
     )
 }
 
-/**
- * Wrapper for grid items to handle selection state, click and long click.
- */
+// Wrapper for grid items to handle selection state, click and long click.
 @Composable
 private fun GridItemSelectable(
     isSelected: Boolean,
@@ -317,9 +312,7 @@ private fun GridItemSelectable(
     }
 }
 
-/**
- * @see GridItemSelectable
- */
+// @see GridItemSelectable
 private fun Modifier.selectedOutline(
     isSelected: Boolean,
     color: Color,

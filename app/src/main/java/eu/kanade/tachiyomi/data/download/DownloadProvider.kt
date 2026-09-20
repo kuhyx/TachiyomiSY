@@ -131,7 +131,7 @@ internal class DownloadProvider(
     // SY -->
 
     /**
-     * Returns a list of all files in manga directory
+     * Returns a list of all files in manga directory.
      *
      * @param chapters the chapters to query.
      * @param manga the manga of the chapter.
@@ -202,15 +202,12 @@ internal class DownloadProvider(
         return dirName
     }
 
-    /**
-     * Returns list of names that might have been previously used as
-     * the directory name for a chapter.
-     * Add to this list if naming pattern ever changes.
-     *
-     * @param chapterName the name of the chapter to query.
-     * @param chapterScanlator scanlator of the chapter to query.
-     * @param chapterUrl url of the chapter to query.
-     */
+    // Returns list of names that might have been previously used as
+    // the directory name for a chapter.
+    // Add to this list if naming pattern ever changes.
+    // @param chapterName the name of the chapter to query.
+    // @param chapterScanlator scanlator of the chapter to query.
+    // @param chapterUrl url of the chapter to query.
     private fun getLegacyChapterDirNames(
         chapterName: String,
         chapterScanlator: String?,
@@ -245,11 +242,8 @@ internal class DownloadProvider(
         }
     }
 
-    /**
-     * Return the new name for the chapter (in case it's empty or blank)
-     *
-     * @param chapterName the name of the chapter
-     */
+    // Return the new name for the chapter (in case it's empty or blank).
+    // @param chapterName the name of the chapter
     private fun sanitizeChapterName(chapterName: String): String {
         return chapterName.ifBlank {
             "Chapter"

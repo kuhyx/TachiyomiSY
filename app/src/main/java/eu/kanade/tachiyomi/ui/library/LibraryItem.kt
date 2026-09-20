@@ -18,7 +18,7 @@ internal data class LibraryItem(
     val id: Long = libraryManga.id
 
     /**
-     * Checks if a query matches the manga
+     * Checks if a query matches the manga.
      *
      * @param constraint the query to check.
      * @return true if the manga matches the query, false otherwise.
@@ -40,14 +40,11 @@ internal data class LibraryItem(
             }
     }
 
-    /**
-     * Checks a predicate on a negatable constraint. If the constraint starts with a minus character,
-     * the minus is stripped and the result of the predicate is inverted.
-     *
-     * @param constraint the argument to the predicate. Inverts the predicate if it starts with '-'.
-     * @param predicate the check to be run against the constraint.
-     * @return !predicate(x) if constraint = "-x", otherwise predicate(constraint)
-     */
+    // Checks a predicate on a negatable constraint. If the constraint starts with a minus character,
+    // the minus is stripped and the result of the predicate is inverted.
+    // @param constraint the argument to the predicate. Inverts the predicate if it starts with '-'.
+    // @param predicate the check to be run against the constraint.
+    // @return !predicate(x) if constraint = "-x", otherwise predicate(constraint)
     private fun checkNegatableConstraint(
         constraint: String,
         predicate: (String) -> Boolean,

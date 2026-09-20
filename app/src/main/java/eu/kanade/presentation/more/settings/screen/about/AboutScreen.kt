@@ -220,9 +220,7 @@ internal object AboutScreen : Screen() {
         // SY <--
     }
 
-    /**
-     * Checks version and shows a user prompt if an update is available.
-     */
+    // Checks version and shows a user prompt if an update is available.
     private suspend fun checkVersion(
         context: Context,
         onAvailableUpdate: (GetApplicationRelease.Result.NewUpdate) -> Unit,

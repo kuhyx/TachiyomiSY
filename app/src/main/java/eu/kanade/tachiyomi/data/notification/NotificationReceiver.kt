@@ -117,42 +117,30 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    /**
-     * Dismiss the notification
-     *
-     * @param notificationId the id of the notification
-     */
+    // Dismiss the notification.
+    // @param notificationId the id of the notification
     private fun dismissNotification(context: Context, notificationId: Int) {
         context.cancelNotification(notificationId)
     }
 
-    /**
-     * Called to start share intent to share image
-     *
-     * @param context context of application
-     * @param uri path of file
-     */
+    // Called to start share intent to share image.
+    // @param context context of application
+    // @param uri path of file
     private fun shareImage(context: Context, uri: Uri) {
         context.startActivity(uri.toShareIntent(context))
     }
 
-    /**
-     * Called to start share intent to share backup file
-     *
-     * @param context context of application
-     * @param path path of file
-     */
+    // Called to start share intent to share backup file.
+    // @param context context of application
+    // @param path path of file
     private fun shareFile(context: Context, uri: Uri, fileMimeType: String) {
         context.startActivity(uri.toShareIntent(context, fileMimeType))
     }
 
-    /**
-     * Starts reader activity
-     *
-     * @param context context of application
-     * @param mangaId id of manga
-     * @param chapterId id of chapter
-     */
+    // Starts reader activity.
+    // @param context context of application
+    // @param mangaId id of manga
+    // @param chapterId id of chapter
     private fun openChapter(context: Context, mangaId: Long, chapterId: Long) {
         val manga = runBlocking { getManga.await(mangaId) }
         val chapter = runBlocking { getChapter.await(chapterId) }
@@ -166,20 +154,14 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    /**
-     * Method called when user wants to stop a backup restore job.
-     *
-     * @param context context of application
-     */
+    // Method called when user wants to stop a backup restore job.
+    // @param context context of application
     private fun cancelRestore(context: Context) {
         BackupRestoreJob.stop(context)
     }
 
-    /**
-     * Method called when user wants to stop a library update
-     *
-     * @param context context of application
-     */
+    // Method called when user wants to stop a library update.
+    // @param context context of application
     private fun cancelLibraryUpdate(context: Context) {
         LibraryUpdateJob.stop(context)
     }
@@ -193,21 +175,15 @@ internal class NotificationReceiver : BroadcastReceiver() {
         AppUpdateDownloadJob.stop(context)
     }
 
-    /**
-     * Method called when user wants to stop a backup restore job.
-     *
-     * @param context context of application
-     */
+    // Method called when user wants to stop a backup restore job.
+    // @param context context of application
     private fun cancelSync(context: Context) {
         SyncDataJob.stop(context)
     }
 
-    /**
-     * Method called when user wants to mark manga chapters as read
-     *
-     * @param chapterUrls URLs of chapter to mark as read
-     * @param mangaId id of manga
-     */
+    // Method called when user wants to mark manga chapters as read.
+    // @param chapterUrls URLs of chapter to mark as read
+    // @param mangaId id of manga
     private fun markAsRead(chapterUrls: Array<String>, mangaId: Long) {
         val downloadPreferences: DownloadPreferences = Injekt.get()
         val sourceManager: SourceManager = Injekt.get()
@@ -231,12 +207,9 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    /**
-     * Method called when user wants to download chapters
-     *
-     * @param chapterUrls URLs of chapter to download
-     * @param mangaId id of manga
-     */
+    // Method called when user wants to download chapters.
+    // @param chapterUrls URLs of chapter to download
+    // @param mangaId id of manga
     private fun downloadChapters(chapterUrls: Array<String>, mangaId: Long) {
         launchIO {
             val manga = getManga.await(mangaId) ?: return@launchIO
@@ -281,7 +254,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         private const val EXTRA_CHAPTER_URL = "$ID.$NAME.EXTRA_CHAPTER_URL"
 
         /**
-         * Returns a [PendingIntent] that resumes the download of a chapter
+         * Returns a [PendingIntent] that resumes the download of a chapter.
          *
          * @param context context of application
          * @return [PendingIntent]
@@ -299,7 +272,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that pauses the download queue
+         * Returns [PendingIntent] that pauses the download queue.
          *
          * @param context context of application
          * @return [PendingIntent]
@@ -317,7 +290,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns a [PendingIntent] that clears the download queue
+         * Returns a [PendingIntent] that clears the download queue.
          *
          * @param context context of application
          * @return [PendingIntent]
@@ -335,7 +308,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that starts a service which dismissed the notification
+         * Returns [PendingIntent] that starts a service which dismissed the notification.
          *
          * @param context context of application
          * @param notificationId id of notification
@@ -355,7 +328,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that starts a service which dismissed the notification
+         * Returns [PendingIntent] that starts a service which dismissed the notification.
          *
          * @param context context of application
          * @param notificationId id of notification
@@ -393,7 +366,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that starts a share activity
+         * Returns [PendingIntent] that starts a share activity.
          *
          * @param context context of application
          * @param uri location path of file
@@ -452,7 +425,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that marks a chapter as read and deletes it if preferred
+         * Returns [PendingIntent] that marks a chapter as read and deletes it if preferred.
          *
          * @param context context of application
          * @param manga manga of chapter
@@ -479,7 +452,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that downloads chapters
+         * Returns [PendingIntent] that downloads chapters.
          *
          * @param context context of application
          * @param manga manga of chapter
@@ -506,7 +479,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that opens the manga info controller
+         * Returns [PendingIntent] that opens the manga info controller.
          *
          * @param context context of application
          * @param mangaId id of the entry to open
@@ -526,7 +499,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that starts a service which stops the library update
+         * Returns [PendingIntent] that starts a service which stops the library update.
          *
          * @param context context of application
          * @return [PendingIntent]
@@ -621,7 +594,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that opens the error log file in an external viewer
+         * Returns [PendingIntent] that opens the error log file in an external viewer.
          *
          * @param context context of application
          * @param uri uri of error log file

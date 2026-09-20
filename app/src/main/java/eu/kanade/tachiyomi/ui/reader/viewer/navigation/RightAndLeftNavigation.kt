@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
  * +---+---+---+
  * | N | M | P |   N: Move Left
  * +---+---+---+
- */
+. */
 internal class RightAndLeftNavigation : ViewerNavigation() {
 
     override var regionList: List<Region> = listOf(

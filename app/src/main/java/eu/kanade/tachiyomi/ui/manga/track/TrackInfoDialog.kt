@@ -202,9 +202,8 @@ internal data class TrackInfoDialogHomeScreen(
         }
     }
 
-    /**
-     * Opens registered tracker url in browser
-     */
+    // Opens registered tracker url in browser
+    // . */
     private fun openTrackerInBrowser(context: Context, trackItem: TrackItem) {
         val url = trackItem.track?.remoteUrl ?: return
         if (url.isNotBlank()) {

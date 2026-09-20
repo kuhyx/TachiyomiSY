@@ -42,7 +42,7 @@ internal class ChapterCache(
     // --> EH
     private val scope = CoroutineScope(Job() + Dispatchers.Main)
 
-    /** Cache class used for cache management.  */
+    // Cache class used for cache management.
     private var diskCache = setupDiskCache(readerPreferences.cacheSize.get().toLong())
 
     init {
@@ -58,14 +58,10 @@ internal class ChapterCache(
     }
     // <-- EH
 
-    /**
-     * Returns directory of cache.
-     */
+    // Returns directory of cache.
     private val cacheDir: File = diskCache.directory
 
-    /**
-     * Returns real size of directory.
-     */
+    // Returns real size of directory.
     private val realSize: Long
         get() = DiskUtil.getDirectorySize(cacheDir)
 
@@ -208,12 +204,9 @@ internal class ChapterCache(
         return deletedFiles
     }
 
-    /**
-     * Remove file from cache.
-     *
-     * @param file name of file "md5.0".
-     * @return status of deletion for the file.
-     */
+    // Remove file from cache.
+    // @param file name of file "md5.0".
+    // @return status of deletion for the file.
     private fun removeFileFromCache(file: String): Boolean {
         // Make sure we don't delete the journal file (keeps track of cache)
         if (file == "journal" || file.startsWith("journal.")) {
@@ -234,11 +227,11 @@ internal class ChapterCache(
     private fun getKey(chapter: Chapter): String = "${chapter.mangaId}${chapter.url}"
 }
 
-/** Application cache version.  */
+// Application cache version.
 private const val PARAMETER_APP_VERSION = 1
 
-/** The number of values per cache entry. Must be positive.  */
+// The number of values per cache entry. Must be positive.
 private const val PARAMETER_VALUE_COUNT = 1
 
-/** The maximum number of bytes this cache should use to store.  */
+// The maximum number of bytes this cache should use to store.
 private const val PARAMETER_CACHE_SIZE = 100L * 1024 * 1024

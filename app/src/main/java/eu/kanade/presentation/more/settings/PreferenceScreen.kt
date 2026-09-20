@@ -18,7 +18,7 @@ import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Preference Screen composable which contains a list of [Preference] items
+ * Preference Screen composable which contains a list of [Preference] items.
  * @param items [Preference] items which should be displayed on the preference screen. An item can be a single [PreferenceItem] or a group ([Preference.PreferenceGroup])
  * @param modifier [Modifier] to be applied to the preferenceScreen layout
  */

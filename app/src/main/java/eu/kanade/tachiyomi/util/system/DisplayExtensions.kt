@@ -49,7 +49,7 @@ internal fun Context.prepareTabletUiContext(): Context {
 
 /**
  * Returns true if current context is in night mode
- */
+. */
 internal fun Context.isNightMode(): Boolean =
     resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 

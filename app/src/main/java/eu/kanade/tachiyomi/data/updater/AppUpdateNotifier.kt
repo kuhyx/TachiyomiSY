@@ -22,11 +22,8 @@ internal class AppUpdateNotifier(private val context: Context) {
 
     private val notificationBuilder = context.notificationBuilder(Notifications.CHANNEL_APP_UPDATE)
 
-    /**
-     * Call to show notification.
-     *
-     * @param id id of the notification channel.
-     */
+    // Call to show notification.
+    // @param id id of the notification channel.
     private fun NotificationCompat.Builder.show(id: Int = Notifications.ID_APP_UPDATER) {
         context.notify(id, build())
     }
@@ -141,7 +138,7 @@ internal class AppUpdateNotifier(private val context: Context) {
     }
 
     /**
-     * Call when apk download throws a error
+     * Call when apk download throws a error.
      *
      * @param url web location of apk to download.
      */

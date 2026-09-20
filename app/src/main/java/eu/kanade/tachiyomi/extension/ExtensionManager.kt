@@ -57,14 +57,10 @@ internal class ExtensionManager(
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
 
-    /**
-     * API where all the available extensions can be found.
-     */
+    // API where all the available extensions can be found.
     private val api = ExtensionApi()
 
-    /**
-     * The installer which installs, updates and uninstalls the extensions.
-     */
+    // The installer which installs, updates and uninstalls the extensions.
     private val installer by lazy { ExtensionInstaller(context) }
 
     private val iconMap = mutableMapOf<String, Drawable>()
@@ -136,9 +132,7 @@ internal class ExtensionManager(
 
     fun getSourceData(id: Long) = availableExtensionsSourcesData[id]
 
-    /**
-     * Loads and registers the installed extensions.
-     */
+    // Loads and registers the installed extensions.
     private fun initExtensions() {
         val extensions = ExtensionLoader.loadExtensions(context)
 
@@ -190,15 +184,12 @@ internal class ExtensionManager(
         setupAvailableExtensionsSourcesDataMap(extensions)
     }
 
-    /**
-     * Enables the additional sub-languages in the app first run. This addresses
-     * the issue where users still need to enable some specific languages even when
-     * the device language is inside that major group. As an example, if a user
-     * has a zh device language, the app will also enable zh-Hans and zh-Hant.
-     *
-     * If the user have already changed the enabledLanguages preference value once,
-     * the new languages will not be added to respect the user enabled choices.
-     */
+    // Enables the additional sub-languages in the app first run. This addresses
+    // the issue where users still need to enable some specific languages even when
+    // the device language is inside that major group. As an example, if a user
+    // has a zh device language, the app will also enable zh-Hans and zh-Hant.
+    // If the user have already changed the enabledLanguages preference value once,
+    // the new languages will not be added to respect the user enabled choices.
     private fun enableAdditionalSubLanguages(extensions: List<Extension.Available>) {
         if (subLanguagesEnabledOnFirstRun || extensions.isEmpty()) {
             return
@@ -220,11 +211,8 @@ internal class ExtensionManager(
         subLanguagesEnabledOnFirstRun = true
     }
 
-    /**
-     * Sets the update field of the installed extensions with the given [availableExtensions].
-     *
-     * @param availableExtensions The list of extensions given by the [api].
-     */
+    // Sets the update field of the installed extensions with the given [availableExtensions].
+    // @param availableExtensions The list of extensions given by the [api].
     private fun updatedInstalledExtensionsStatuses(availableExtensions: List<Extension.Available>) {
         if (availableExtensions.isEmpty()) {
             preferences.extensionUpdatesCount.set(0)
@@ -331,11 +319,8 @@ internal class ExtensionManager(
             ?.let { registerNewExtension(it.extension) }
     }
 
-    /**
-     * Registers the given extension in this and the source managers.
-     *
-     * @param extension The extension to be registered.
-     */
+    // Registers the given extension in this and the source managers.
+    // @param extension The extension to be registered.
     private fun registerNewExtension(extension: Extension.Installed) {
         // SY -->
         if (extension.isBlacklisted()) {
@@ -347,12 +332,9 @@ internal class ExtensionManager(
         installedExtensionMapFlow.value += extension
     }
 
-    /**
-     * Registers the given updated extension in this and the source managers previously removing
-     * the outdated ones.
-     *
-     * @param extension The extension to be registered.
-     */
+    // Registers the given updated extension in this and the source managers previously removing
+    // the outdated ones.
+    // @param extension The extension to be registered.
     private fun registerUpdatedExtension(extension: Extension.Installed) {
         // SY -->
         if (extension.isBlacklisted()) {
@@ -364,12 +346,9 @@ internal class ExtensionManager(
         installedExtensionMapFlow.value += extension
     }
 
-    /**
-     * Unregisters the extension in this and the source managers given its package name. Note this
-     * method is called for every uninstalled application in the system.
-     *
-     * @param pkgName The package name of the uninstalled application.
-     */
+    // Unregisters the extension in this and the source managers given its package name. Note this
+    // method is called for every uninstalled application in the system.
+    // @param pkgName The package name of the uninstalled application.
     private fun unregisterExtension(pkgName: String) {
         installedExtensionMapFlow.value -= pkgName
         untrustedExtensionMapFlow.value -= pkgName
@@ -403,9 +382,7 @@ internal class ExtensionManager(
         }
     }
 
-    /**
-     * Extension method to set the update field of an installed extension.
-     */
+    // Extension method to set the update field of an installed extension.
     private fun Extension.Installed.withUpdateCheck(): Extension.Installed {
         return if (updateExists()) {
             copy(hasUpdate = true)

@@ -25,10 +25,9 @@ internal class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<
 
     var currentChapter: ReaderChapter? = null
 
-    /**
-     * Context that has been wrapped to use the correct theme values based on the
-     * current app theme and reader background color
-     */
+    // Context that has been wrapped to use the correct theme values based on the
+    // current app theme and reader background color
+    // . */
     private var readerThemedContext = viewer.activity.createReaderThemeContext()
 
     /**
@@ -167,12 +166,8 @@ internal class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<
     }
 }
 
-/**
- * View holder type of a chapter page view.
- */
+// View holder type of a chapter page view.
 private const val PAGE_VIEW = 0
 
-/**
- * View holder type of a chapter transition view.
- */
+// View holder type of a chapter transition view.
 private const val TRANSITION_VIEW = 1

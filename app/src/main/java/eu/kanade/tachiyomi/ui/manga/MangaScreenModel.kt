@@ -242,9 +242,8 @@ internal class MangaScreenModel(
             this(pair.first, pair.second, flatMetadata)
     }
 
-    /**
-     * Helper function to update the UI state only if it's currently in success state
-     */
+    // Helper function to update the UI state only if it's currently in success state
+    // . */
     private inline fun updateSuccessState(func: (State.Success) -> State.Success) {
         mutableState.update {
             when (it) {
@@ -869,17 +868,13 @@ internal class MangaScreenModel(
         }
     }
 
-    /**
-     * Returns true if the manga has any downloads.
-     */
+    // Returns true if the manga has any downloads.
     private fun hasDownloads(): Boolean {
         val manga = successState?.manga ?: return false
         return downloadManager.getDownloadCount(manga) > 0
     }
 
-    /**
-     * Deletes all the downloads for the manga.
-     */
+    // Deletes all the downloads for the manga.
     private fun deleteDownloads() {
         val state = successState ?: return
         // SY -->
@@ -900,12 +895,9 @@ internal class MangaScreenModel(
      */
     suspend fun getCategories(): List<Category> = getCategories.await().filterNot { it.isSystemCategory }
 
-    /**
-     * Gets the category id's the manga is in, if the manga is not in a category, returns the default id.
-     *
-     * @param manga the manga to get categories from.
-     * @return Array of category ids the manga is in, if none returns default id
-     */
+    // Gets the category id's the manga is in, if the manga is not in a category, returns the default id.
+    // @param manga the manga to get categories from.
+    // @return Array of category ids the manga is in, if none returns default id
     private suspend fun getMangaCategoryIds(manga: Manga): List<Long> {
         return getCategories.await(manga.id)
             .map { it.id }
@@ -920,11 +912,8 @@ internal class MangaScreenModel(
         }
     }
 
-    /**
-     * Move the given manga to categories.
-     *
-     * @param categories the selected categories.
-     */
+    // Move the given manga to categories.
+    // @param categories the selected categories.
     private fun moveMangaToCategories(categories: List<Category>) {
         val categoryIds = categories.map { it.id }
         moveMangaToCategory(categoryIds)
@@ -936,11 +925,8 @@ internal class MangaScreenModel(
         }
     }
 
-    /**
-     * Move the given manga to the category.
-     *
-     * @param category the selected category, or null for default category.
-     */
+    // Move the given manga to the category.
+    // @param category the selected category, or null for default category.
     private fun moveMangaToCategory(category: Category?) {
         moveMangaToCategories(listOfNotNull(category))
     }
@@ -1086,9 +1072,7 @@ internal class MangaScreenModel(
         }
     }
 
-    /**
-     * @throws IllegalStateException if the swipe action is [LibraryPreferences.ChapterSwipeAction.Disabled]
-     */
+    // @throws IllegalStateException if the swipe action is [LibraryPreferences.ChapterSwipeAction.Disabled]
     private fun executeChapterSwipeAction(
         chapterItem: ChapterList.Item,
         swipeAction: LibraryPreferences.ChapterSwipeAction,
@@ -1303,10 +1287,8 @@ internal class MangaScreenModel(
             }
     }
 
-    /**
-     * Downloads the given list of chapters with the manager.
-     * @param chapters the list of chapters to download.
-     */
+    // Downloads the given list of chapters with the manager.
+    // @param chapters the list of chapters to download.
     private fun downloadChapters(chapters: List<Chapter>) {
         val state = successState ?: return
         if (state.source is MergedSource) {
@@ -1769,10 +1751,8 @@ internal class MangaScreenModel(
             val filterActive: Boolean
                 get() = scanlatorFilterActive || manga.chaptersFiltered()
 
-            /**
-             * Applies the view filters to the list of chapters obtained from the database.
-             * @return an observable of the list of chapters filtered and sorted.
-             */
+            // Applies the view filters to the list of chapters obtained from the database.
+            // @return an observable of the list of chapters filtered and sorted.
             private fun List<ChapterList.Item>.applyFilters(manga: Manga): Sequence<ChapterList.Item> {
                 val isLocalManga = manga.isLocal()
                 val unreadFilter = manga.unreadFilter

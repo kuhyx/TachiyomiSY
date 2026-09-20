@@ -26,14 +26,12 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
     var joinedItems: MutableList<Pair<ReaderItem, ReaderItem?>> = mutableListOf()
         private set
 
-    /**
-     * Single list of items
-     */
+    // Single list of items
+    // . */
     private var subItems: MutableList<ReaderItem> = mutableListOf()
 
-    /**
-     * Holds preprocessed items so they don't get removed when changing chapter
-     */
+    // Holds preprocessed items so they don't get removed when changing chapter
+    // . */
     private var preprocessed: MutableMap<Int, InsertPage> = mutableMapOf()
 
     var nextTransition: ChapterTransition.Next? = null
@@ -43,18 +41,17 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
 
     // SY -->
 
-    /** Page used to start the shifted pages */
+    /** Page used to start the shifted pages. */
     var pageToShift: ReaderPage? = null
 
-    /** Varibles used to check if config of the pages have changed */
+    // Varibles used to check if config of the pages have changed.
     private var shifted = viewer.config.shiftDoublePage
     private var doubledUp = viewer.config.doublePages
     // SY <--
 
-    /**
-     * Context that has been wrapped to use the correct theme values based on the
-     * current app theme and reader background color
-     */
+    // Context that has been wrapped to use the correct theme values based on the
+    // current app theme and reader background color
+    // . */
     private var readerThemedContext = viewer.activity.createReaderThemeContext()
 
     /**

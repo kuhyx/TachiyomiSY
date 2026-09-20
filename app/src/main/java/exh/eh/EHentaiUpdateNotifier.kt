@@ -29,9 +29,7 @@ internal class EHentaiUpdateNotifier(private val context: Context) {
         maximumFractionDigits = 0
     }
 
-    /**
-     * Bitmap of the app for notifications.
-     */
+    // Bitmap of the app for notifications.
     private val notificationBitmap by lazy {
         BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
     }

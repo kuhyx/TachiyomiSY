@@ -40,9 +40,7 @@ internal open class Pager(
     }
     // SY <--
 
-    /**
-     * Gesture listener that implements tap and long tap events.
-     */
+    // Gesture listener that implements tap and long tap events.
     private val gestureListener = object : GestureDetectorWithLongTap.Listener() {
         override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
             tapListener?.invoke(ev)
@@ -57,14 +55,10 @@ internal open class Pager(
         }
     }
 
-    /**
-     * Gesture detector which handles motion events.
-     */
+    // Gesture detector which handles motion events.
     private val gestureDetector = GestureDetectorWithLongTap(context, gestureListener)
 
-    /**
-     * Whether the gesture detector is currently enabled.
-     */
+    // Whether the gesture detector is currently enabled.
     private var isGestureDetectorEnabled = true
 
     /**

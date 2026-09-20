@@ -83,12 +83,9 @@ internal class MangaCoverScreenModel(
         }
     }
 
-    /**
-     * Save manga cover Bitmap to picture or temporary share directory.
-     *
-     * @param context The context for building and executing the ImageRequest
-     * @return the uri to saved file
-     */
+    // Save manga cover Bitmap to picture or temporary share directory.
+    // @param context The context for building and executing the ImageRequest
+    // @return the uri to saved file
     private suspend fun saveCoverInternal(context: Context, temp: Boolean): Uri? {
         val manga = state.value ?: return null
         val req = ImageRequest.Builder(context)

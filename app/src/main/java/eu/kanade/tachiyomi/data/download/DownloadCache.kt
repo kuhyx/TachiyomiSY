@@ -76,15 +76,11 @@ internal class DownloadCache(
         .onStart { emit(Unit) }
         .shareIn(scope, SharingStarted.Lazily, 1)
 
-    /**
-     * The interval after which this cache should be invalidated. 1 hour shouldn't cause major
-     * issues, as the cache is only used for UI feedback.
-     */
+    // The interval after which this cache should be invalidated. 1 hour shouldn't cause major
+    // issues, as the cache is only used for UI feedback.
     private val renewInterval = 1.hours.inWholeMilliseconds
 
-    /**
-     * The last time the cache was refreshed.
-     */
+    // The last time the cache was refreshed.
     private var lastRenew = 0L
     private var renewalJob: Job? = null
 
@@ -360,9 +356,7 @@ internal class DownloadCache(
         renewCache()
     }
 
-    /**
-     * Renews the downloads cache.
-     */
+    // Renews the downloads cache.
     private fun renewCache() {
         // Avoid renewing cache if in the process nor too often
         if (lastRenew + renewInterval >= System.currentTimeMillis() || renewalJob?.isActive == true) {

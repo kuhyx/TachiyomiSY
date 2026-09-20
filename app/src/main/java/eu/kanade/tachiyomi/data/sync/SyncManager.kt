@@ -261,11 +261,8 @@ internal class SyncManager(
         }
     }
 
-    /**
-     * Retrieves all manga from the local database.
-     *
-     * @return a list of all manga stored in the database
-     */
+    // Retrieves all manga from the local database.
+    // @return a list of all manga stored in the database
     private suspend fun getAllMangaFromDB(): List<Manga> {
         return database.mangasQueries
             .getAllManga()
@@ -317,13 +314,11 @@ internal class SyncManager(
         return false
     }
 
-    /**
-     * Filters the favorite and non-favorite manga from the backup and checks
-     * if the favorite manga is different from the local database.
-     * @param backup the Backup object containing the backup data.
-     * @return a Pair of lists, where the first list contains different favorite manga
-     * and the second list contains non-favorite manga.
-     */
+    // Filters the favorite and non-favorite manga from the backup and checks
+    // if the favorite manga is different from the local database.
+    // @param backup the Backup object containing the backup data.
+    // @return a Pair of lists, where the first list contains different favorite manga
+    // and the second list contains non-favorite manga.
     private suspend fun filterFavoritesAndNonFavorites(backup: Backup): Pair<List<BackupManga>, List<BackupManga>> {
         val favorites = mutableListOf<BackupManga>()
         val nonFavorites = mutableListOf<BackupManga>()
@@ -369,10 +364,8 @@ internal class SyncManager(
         return Pair(favorites, nonFavorites)
     }
 
-    /**
-     * Updates the non-favorite manga in the local database with their favorite status from the backup.
-     * @param nonFavorites the list of non-favorite BackupManga objects from the backup.
-     */
+    // Updates the non-favorite manga in the local database with their favorite status from the backup.
+    // @param nonFavorites the list of non-favorite BackupManga objects from the backup.
     private suspend fun updateNonFavorites(nonFavorites: List<BackupManga>) {
         val localMangaList = getAllMangaFromDB()
 

@@ -77,9 +77,7 @@ internal class SourcePreferencesScreen(val sourceId: Long) : Screen() {
         }
     }
 
-    /**
-     * From https://stackoverflow.com/questions/60520145/fragment-container-in-jetpack-compose/70817794#70817794
-     */
+    // From https://stackoverflow.com/questions/60520145/fragment-container-in-jetpack-compose/70817794#70817794
     @Composable
     private fun FragmentContainer(
         fragmentManager: FragmentManager,
@@ -107,7 +105,7 @@ internal class SourcePreferencesScreen(val sourceId: Long) : Screen() {
         )
     }
 
-    /** Access to package-private method in FragmentManager through reflection */
+    // Access to package-private method in FragmentManager through reflection.
     private fun FragmentManager.onContainerAvailable(view: FragmentContainerView) {
         val method = FragmentManager::class.java.getDeclaredMethod(
             "onContainerAvailable",

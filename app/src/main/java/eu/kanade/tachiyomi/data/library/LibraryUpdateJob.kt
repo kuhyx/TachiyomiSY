@@ -198,11 +198,8 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
         )
     }
 
-    /**
-     * Adds list of manga to be updated.
-     *
-     * @param categoryId the ID of the category to update, or -1 if no category specified.
-     */
+    // Adds list of manga to be updated.
+    // @param categoryId the ID of the category to update, or -1 if no category specified.
     private suspend fun addMangaToQueue(categoryId: Long, group: Int, groupExtra: String?) {
         val libraryManga = getLibraryManga.await()
         // SY -->
@@ -321,14 +318,11 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
         }
     }
 
-    /**
-     * Method that updates manga in [mangaToUpdate]. It's called in a background thread, so it's safe
-     * to do heavy operations or network calls here.
-     * For each manga it calls [updateManga] and updates the notification showing the current
-     * progress.
-     *
-     * @return an observable delivering the progress of each update.
-     */
+    // Method that updates manga in [mangaToUpdate]. It's called in a background thread, so it's safe
+    // to do heavy operations or network calls here.
+    // For each manga it calls [updateManga] and updates the notification showing the current
+    // progress.
+    // @return an observable delivering the progress of each update.
     private suspend fun updateChapterList() {
         val semaphore = Semaphore(5)
         val progressCount = AtomicInt(0)
@@ -465,12 +459,9 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
         downloadManager.downloadChapters(manga, chapters, false)
     }
 
-    /**
-     * Updates the chapters for the given manga and adds them to the database.
-     *
-     * @param manga the manga to update.
-     * @return a pair of the inserted and removed chapters.
-     */
+    // Updates the chapters for the given manga and adds them to the database.
+    // @param manga the manga to update.
+    // @return a pair of the inserted and removed chapters.
     private suspend fun updateManga(manga: Manga, fetchWindow: Pair<Long, Long>): List<Chapter> {
         val source = sourceManager.getOrStub(manga.source)
 
@@ -532,9 +523,8 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
 
     // SY -->
 
-    /**
-     * filter all follows from Mangadex and only add reading or rereading manga to library
-     */
+    // filter all follows from Mangadex and only add reading or rereading manga to library
+    // . */
     private suspend fun syncFollows() = coroutineScope {
         val preferences = Injekt.get<SourcePreferences>()
         var count = 0
@@ -587,9 +577,8 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
         notifier.cancelProgressNotification()
     }
 
-    /**
-     * Method that updates the all mangas which are not tracked as "reading" on mangadex
-     */
+    // Method that updates the all mangas which are not tracked as "reading" on mangadex
+    // . */
     private suspend fun pushFavorites() = coroutineScope {
         var count = 0
         val listManga = getFavorites.await().filter { it.source in mangaDexSourceIds }
@@ -651,9 +640,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
         )
     }
 
-    /**
-     * Writes basic file of update errors to cache dir.
-     */
+    // Writes basic file of update errors to cache dir.
     private fun writeErrorFile(errors: List<Pair<Manga, String?>>): File {
         try {
             if (errors.isNotEmpty()) {
@@ -702,14 +689,10 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
 
         private const val ERROR_LOG_HELP_URL = "https://mihon.app/docs/guides/troubleshooting/"
 
-        /**
-         * Key for category to update.
-         */
+        // Key for category to update.
         private const val KEY_CATEGORY = "category"
 
-        /**
-         * Key that defines what should be updated.
-         */
+        // Key that defines what should be updated.
         private const val KEY_TARGET = "target"
 
         // SY -->

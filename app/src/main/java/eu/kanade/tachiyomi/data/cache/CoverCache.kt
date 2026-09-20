@@ -22,9 +22,7 @@ internal class CoverCache(private val context: Context) {
         private const val CUSTOM_COVERS_DIR = "covers/custom"
     }
 
-    /**
-     * Cache directory used for cache management.
-     */
+    // Cache directory used for cache management.
     private val cacheDir = getCacheDir(COVERS_DIR)
 
     private val customCoverCacheDir = getCacheDir(CUSTOM_COVERS_DIR)
@@ -86,7 +84,7 @@ internal class CoverCache(private val context: Context) {
     }
 
     /**
-     * Delete custom cover of the manga from the cache
+     * Delete custom cover of the manga from the cache.
      *
      * @param mangaId the manga id.
      * @return whether the cover was deleted.

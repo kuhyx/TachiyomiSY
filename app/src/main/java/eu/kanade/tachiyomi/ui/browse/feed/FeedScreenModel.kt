@@ -50,7 +50,7 @@ import tachiyomi.domain.manga.model.Manga as DomainManga
 
 /**
  * Presenter of [feedTab]
- */
+. */
 internal open class FeedScreenModel(
     val sourceManager: SourceManager = Injekt.get(),
     val sourcePreferences: SourcePreferences = Injekt.get(),
@@ -192,9 +192,8 @@ internal open class FeedScreenModel(
             .map { it to savedSearches[it.savedSearch] }
     }
 
-    /**
-     * Creates a catalogue search item
-     */
+    // Creates a catalogue search item
+    // . */
     private fun createCatalogueSearchItem(
         feed: FeedSavedSearch,
         savedSearch: SavedSearch?,
@@ -215,9 +214,7 @@ internal open class FeedScreenModel(
         )
     }
 
-    /**
-     * Initiates get manga per feed.
-     */
+    // Initiates get manga per feed.
     private fun getFeed(feedSavedSearch: List<FeedItemUI>) {
         screenModelScope.launch {
             feedSavedSearch.map { itemUI ->

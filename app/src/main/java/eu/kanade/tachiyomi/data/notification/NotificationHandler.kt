@@ -11,7 +11,7 @@ import tachiyomi.core.common.Constants
 
 /**
  * Class that manages [PendingIntent] of activity's
- */
+. */
 internal object NotificationHandler {
     /**
      * Returns [PendingIntent] that starts a download activity.
@@ -32,7 +32,7 @@ internal object NotificationHandler {
     }
 
     /**
-     * Returns [PendingIntent] that starts a gallery activity
+     * Returns [PendingIntent] that starts a gallery activity.
      *
      * @param context context of application
      * @param file file containing image
@@ -51,7 +51,7 @@ internal object NotificationHandler {
     }
 
     /**
-     * Returns [PendingIntent] that prompts user with apk install intent
+     * Returns [PendingIntent] that prompts user with apk install intent.
      *
      * @param context context
      * @param uri uri of apk that is installed

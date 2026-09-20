@@ -35,7 +35,7 @@ internal class Pururin(delegate: HttpSource, val context: Context) :
 
     /**
      * The class of the metadata used by this source
-     */
+. */
     override val metaClass = PururinSearchMetadata::class
     override fun newMetaInstance() = PururinSearchMetadata()
 

@@ -412,11 +412,8 @@ internal class MangaScreen(
         }
     }
 
-    /**
-     * Perform a search using the provided query.
-     *
-     * @param query the search query to the parent controller
-     */
+    // Perform a search using the provided query.
+    // @param query the search query to the parent controller
     private suspend fun performSearch(navigator: Navigator, query: String, global: Boolean) {
         if (global) {
             navigator.push(GlobalSearchScreen(query))
@@ -445,11 +442,8 @@ internal class MangaScreen(
         }
     }
 
-    /**
-     * Performs a genre search using the provided genre name.
-     *
-     * @param genreName the search genre to the parent controller
-     */
+    // Performs a genre search using the provided genre name.
+    // @param genreName the search genre to the parent controller
     private suspend fun performGenreSearch(navigator: Navigator, genreName: String, source: Source) {
         if (navigator.size < 2) {
             return
@@ -464,9 +458,8 @@ internal class MangaScreen(
         }
     }
 
-    /**
-     * Copy Manga URL to Clipboard
-     */
+    // Copy Manga URL to Clipboard
+    // . */
     private fun copyMangaUrl(context: Context, manga_: Manga?, source_: Source?) {
         val manga = manga_ ?: return
         val source = source_ as? HttpSource ?: return

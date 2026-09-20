@@ -690,12 +690,8 @@ internal class ChipElevation internal constructor(
     }
 }
 
-/**
- * The padding between the elements in the chip.
- */
+// The padding between the elements in the chip.
 private val HorizontalElementsPadding = 8.dp
 
-/**
- * Returns the [PaddingValues] for the suggestion chip.
- */
+// Returns the [PaddingValues] for the suggestion chip.
 private val SuggestionChipPadding = PaddingValues(horizontal = HorizontalElementsPadding)

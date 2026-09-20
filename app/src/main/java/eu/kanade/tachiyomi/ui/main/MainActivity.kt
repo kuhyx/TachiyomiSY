@@ -415,12 +415,9 @@ internal class MainActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Sets custom splash screen exit animation on devices prior to Android 12.
-     *
-     * When custom animation is used, status and navigation bar color will be set to transparent and will be restored
-     * after the animation is finished.
-     */
+    // Sets custom splash screen exit animation on devices prior to Android 12.
+    // When custom animation is used, status and navigation bar color will be set to transparent and will be restored
+    // after the animation is finished.
     @Suppress("Deprecation")
     private fun setSplashScreenExitAnimation(splashScreen: SplashScreen?) {
         val root = findViewById<View>(android.R.id.content)

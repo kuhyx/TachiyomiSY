@@ -31,9 +31,8 @@ internal class ApiMangaParser(
 
     val metaClass = MangaDexSearchMetadata::class
 
-    /**
-     * Use reflection to create a new instance of metadata
-     */
+    // Use reflection to create a new instance of metadata
+    // . */
     private fun newMetaInstance() = MangaDexSearchMetadata()
 
     suspend fun parseToManga(

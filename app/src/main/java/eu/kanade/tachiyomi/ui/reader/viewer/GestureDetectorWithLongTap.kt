@@ -27,9 +27,7 @@ internal open class GestureDetectorWithLongTap(
     private var lastUp = 0L
     private var lastDownEvent: MotionEvent? = null
 
-    /**
-     * Runnable to execute when a long tap is confirmed.
-     */
+    // Runnable to execute when a long tap is confirmed.
     private val longTapFn = Runnable { listener.onLongTapConfirmed(lastDownEvent!!) }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
@@ -64,7 +62,7 @@ internal open class GestureDetectorWithLongTap(
 
     /**
      * Custom listener to also include a long tap confirmed
-     */
+. */
     open class Listener : SimpleOnGestureListener() {
         /**
          * Notified when a long tap occurs with the initial on down [ev] that triggered it.

@@ -78,19 +78,13 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
         }
     }
 
-    /**
-     * Returns true if this package is performing an update.
-     *
-     * @param intent The intent that triggered the event.
-     */
+    // Returns true if this package is performing an update.
+    // @param intent The intent that triggered the event.
     private fun isReplacing(intent: Intent): Boolean = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
 
-    /**
-     * Returns the extension triggered by the given intent.
-     *
-     * @param context The application context.
-     * @param intent The intent containing the package name of the extension.
-     */
+    // Returns the extension triggered by the given intent.
+    // @param context The application context.
+    // @param intent The intent containing the package name of the extension.
     private suspend fun getExtensionFromIntent(context: Context, intent: Intent?): LoadResult {
         val pkgName = getPackageNameFromIntent(intent)
         if (pkgName == null) {
@@ -100,9 +94,7 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
         return ExtensionLoader.loadExtensionFromPkgName(context, pkgName)
     }
 
-    /**
-     * Returns the package name of the installed, updated or removed application.
-     */
+    // Returns the package name of the installed, updated or removed application.
     private fun getPackageNameFromIntent(intent: Intent?): String? = intent?.data?.encodedSchemeSpecificPart
 
     /**

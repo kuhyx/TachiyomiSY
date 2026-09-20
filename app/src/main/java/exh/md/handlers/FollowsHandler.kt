@@ -24,7 +24,7 @@ internal class FollowsHandler(
 
     /**
      * fetch follows page
-     */
+. */
     suspend fun fetchFollows(page: Int): MetadataMangasPage {
         return withIOContext {
             val follows = service.userFollowList(MdUtil.mangaLimit * page)
@@ -41,10 +41,9 @@ internal class FollowsHandler(
         }
     }
 
-    /**
-     * Parse follows api to manga page
-     * used when multiple follows
-     */
+    // Parse follows api to manga page
+    // used when multiple follows
+    // . */
     private fun followsParseMangaPage(
         response: List<MangaDataDto>,
         statuses: Map<String, String?>,
@@ -64,7 +63,7 @@ internal class FollowsHandler(
 
     /**
      * Change the status of a manga
-     */
+. */
     suspend fun updateFollowStatus(mangaId: String, followStatus: FollowStatus): Boolean {
         return withIOContext {
             val status = when (followStatus == FollowStatus.UNFOLLOWED) {
@@ -128,7 +127,7 @@ internal class FollowsHandler(
 
     /**
      * fetch all manga from all possible pages
-     */
+. */
     suspend fun fetchAllFollows(): List<Pair<SManga, MangaDexSearchMetadata>> {
         return withIOContext {
             val results = async {

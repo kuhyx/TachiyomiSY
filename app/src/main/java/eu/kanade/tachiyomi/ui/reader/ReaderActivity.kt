@@ -166,9 +166,7 @@ internal class ReaderActivity : BaseActivity() {
     private val sourceManager = Injekt.get<SourceManager>()
     // SY <--
 
-    /**
-     * Configuration at reader level, like background color or forced orientation.
-     */
+    // Configuration at reader level, like background color or forced orientation.
     private var config: ReaderConfig? = null
 
     private var menuToggleToast: Toast? = null
@@ -839,9 +837,7 @@ internal class ReaderActivity : BaseActivity() {
     }
 // EXH <--
 
-    /**
-     * Sets the visibility of the menu according to [visible].
-     */
+    // Sets the visibility of the menu according to [visible].
     private fun setMenuVisibility(visible: Boolean) {
         viewModel.showMenus(visible)
         if (visible) {
@@ -851,9 +847,7 @@ internal class ReaderActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Called from the presenter when a manga is ready. Used to instantiate the appropriate viewer.
-     */
+    // Called from the presenter when a manga is ready. Used to instantiate the appropriate viewer.
     private fun updateViewer() {
         val prevViewer = viewModel.state.value.viewer
         val newViewer = ReadingMode.toViewer(viewModel.getMangaReadingMode(), this)
@@ -950,11 +944,9 @@ internal class ReaderActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Called from the presenter whenever a new [viewerChapters] have been set. It delegates the
-     * method to the current viewer, but also set the subtitle on the toolbar, and
-     * hides or disables the reader prev/next buttons if there's a prev or next chapter
-     */
+    // Called from the presenter whenever a new [viewerChapters] have been set. It delegates the
+    // method to the current viewer, but also set the subtitle on the toolbar, and
+    // hides or disables the reader prev/next buttons if there's a prev or next chapter
     @SuppressLint("RestrictedApi")
     private fun setChapters(viewerChapters: ViewerChapters) {
         binding.readerContainer.removeView(loadingIndicator)
@@ -989,22 +981,18 @@ internal class ReaderActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Called from the presenter if the initial load couldn't load the pages of the chapter. In
-     * this case the activity is closed and a toast is shown to the user.
-     */
+    // Called from the presenter if the initial load couldn't load the pages of the chapter. In
+    // this case the activity is closed and a toast is shown to the user.
     private fun setInitialChapterError(error: Throwable) {
         logcat(LogPriority.ERROR, error)
         finish()
         toast(error.message)
     }
 
-    /**
-     * Called from the presenter whenever it's loading the next or previous chapter. It shows or
-     * dismisses a non-cancellable dialog to prevent user interaction according to the value of
-     * [show]. This is only used when the next/previous buttons on the toolbar are clicked; the
-     * other cases are handled with chapter transitions on the viewers and chapter preloading.
-     */
+    // Called from the presenter whenever it's loading the next or previous chapter. It shows or
+    // dismisses a non-cancellable dialog to prevent user interaction according to the value of
+    // [show]. This is only used when the next/previous buttons on the toolbar are clicked; the
+    // other cases are handled with chapter transitions on the viewers and chapter preloading.
     private fun setProgressDialog(show: Boolean) {
         if (show) {
             viewModel.showLoadingDialog()
@@ -1013,10 +1001,8 @@ internal class ReaderActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Moves the viewer to the given page [index]. It does nothing if the viewer is null or the
-     * page is not found.
-     */
+    // Moves the viewer to the given page [index]. It does nothing if the viewer is null or the
+    // page is not found.
     private fun moveToPageIndex(index: Int) {
         val viewer = viewModel.state.value.viewer ?: return
         val currentChapter = viewModel.state.value.currentChapter ?: return
@@ -1024,10 +1010,8 @@ internal class ReaderActivity : BaseActivity() {
         viewer.moveToPage(page)
     }
 
-    /**
-     * Tells the presenter to load the next chapter and mark it as active. The progress dialog
-     * should be automatically shown.
-     */
+    // Tells the presenter to load the next chapter and mark it as active. The progress dialog
+    // should be automatically shown.
     private fun loadNextChapter() {
         lifecycleScope.launch {
             viewModel.loadNextChapter()
@@ -1035,10 +1019,8 @@ internal class ReaderActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Tells the presenter to load the previous chapter and mark it as active. The progress dialog
-     * should be automatically shown.
-     */
+    // Tells the presenter to load the previous chapter and mark it as active. The progress dialog
+    // should be automatically shown.
     private fun loadPreviousChapter() {
         lifecycleScope.launch {
             viewModel.loadPreviousChapter()
@@ -1151,10 +1133,8 @@ internal class ReaderActivity : BaseActivity() {
         clipboardManager.setPrimaryClip(clipData)
     }
 
-    /**
-     * Called from the presenter when a page is saved or fails. It shows a message or logs the
-     * event depending on the [result].
-     */
+    // Called from the presenter when a page is saved or fails. It shows a message or logs the
+    // event depending on the [result].
     private fun onSaveImageResult(result: ReaderViewModel.SaveImageResult) {
         when (result) {
             is ReaderViewModel.SaveImageResult.Success -> {
@@ -1167,10 +1147,8 @@ internal class ReaderActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Called from the presenter when a page is set as cover or fails. It shows a different message
-     * depending on the [result].
-     */
+    // Called from the presenter when a page is set as cover or fails. It shows a different message
+    // depending on the [result].
     private fun onSetAsCoverResult(result: ReaderViewModel.SetAsCoverResult) {
         toast(
             when (result) {
@@ -1181,9 +1159,7 @@ internal class ReaderActivity : BaseActivity() {
         )
     }
 
-    /**
-     * Forces the user preferred [orientation] on the activity.
-     */
+    // Forces the user preferred [orientation] on the activity.
     private fun setOrientation(orientation: Int) {
         val newOrientation = ReaderOrientation.fromPreference(orientation)
         if (newOrientation.flag != requestedOrientation) {
@@ -1191,9 +1167,7 @@ internal class ReaderActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Updates viewer inset depending on fullscreen reader preferences.
-     */
+    // Updates viewer inset depending on fullscreen reader preferences.
     private fun updateViewerInset(fullscreen: Boolean, drawUnderCutout: Boolean) {
         if (!::binding.isInitialized) return
         val view = binding.viewerContainer
@@ -1332,9 +1306,8 @@ internal class ReaderActivity : BaseActivity() {
             // SY <--
         }
 
-        /**
-         * Picks background color for [ReaderActivity] based on light/dark theme preference
-         */
+        // Picks background color for [ReaderActivity] based on light/dark theme preference
+        // . */
         private fun automaticBackgroundColor(): Int {
             return if (baseContext.isNightMode()) {
                 grayBackgroundColor
@@ -1343,9 +1316,7 @@ internal class ReaderActivity : BaseActivity() {
             }
         }
 
-        /**
-         * Sets the display profile to [path].
-         */
+        // Sets the display profile to [path].
         private fun setDisplayProfile(path: String) {
             val file = UniFile.fromUri(baseContext, path.toUri())
             if (file != null && file.exists()) {
@@ -1362,9 +1333,7 @@ internal class ReaderActivity : BaseActivity() {
             }
         }
 
-        /**
-         * Sets the keep screen on mode according to [enabled].
-         */
+        // Sets the keep screen on mode according to [enabled].
         private fun setKeepScreenOn(enabled: Boolean) {
             if (enabled) {
                 window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -1373,9 +1342,7 @@ internal class ReaderActivity : BaseActivity() {
             }
         }
 
-        /**
-         * Sets the custom brightness overlay according to [enabled].
-         */
+        // Sets the custom brightness overlay according to [enabled].
         private fun setCustomBrightness(enabled: Boolean) {
             if (enabled) {
                 readerPreferences.customBrightnessValue.changes()
@@ -1387,12 +1354,10 @@ internal class ReaderActivity : BaseActivity() {
             }
         }
 
-        /**
-         * Sets the brightness of the screen. Range is [-75, 100].
-         * From -75 to -1 a semi-transparent black view is overlaid with the minimum brightness.
-         * From 1 to 100 it sets that value as brightness.
-         * 0 sets system brightness and hides the overlay.
-         */
+        // Sets the brightness of the screen. Range is [-75, 100].
+        // From -75 to -1 a semi-transparent black view is overlaid with the minimum brightness.
+        // From 1 to 100 it sets that value as brightness.
+        // 0 sets system brightness and hides the overlay.
         private fun setCustomBrightnessValue(value: Int) {
             // Calculate and set reader brightness.
             val readerBrightness = when {

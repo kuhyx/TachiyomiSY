@@ -12,9 +12,7 @@ internal class KitsuInterceptor(private val kitsu: Kitsu) : Interceptor {
 
     private val json: Json by injectLazy()
 
-    /**
-     * OAuth object used for authenticated requests.
-     */
+    // OAuth object used for authenticated requests.
     private var oauth: KitsuOAuth? = kitsu.restoreToken()
 
     override fun intercept(chain: Interceptor.Chain): Response {

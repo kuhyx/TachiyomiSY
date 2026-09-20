@@ -27,9 +27,7 @@ internal class CreateSortTag(
         data object Success : Result()
     }
 
-    /**
-     * Returns true if a tag with the given name already exists.
-     */
+    // Returns true if a tag with the given name already exists.
     private fun tagExists(name: String): Boolean = getSortTag.await().any { it.equals(name) }
 
     companion object {

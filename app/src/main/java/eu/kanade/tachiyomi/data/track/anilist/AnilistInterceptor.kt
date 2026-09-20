@@ -9,12 +9,9 @@ import java.io.IOException
 
 internal class AnilistInterceptor(val anilist: Anilist, private var token: String?) : Interceptor {
 
-    /**
-     * OAuth object used for authenticated requests.
-     *
-     * Anilist returns the date without milliseconds. We fix that and make the token expire 1 minute
-     * before its original expiration date.
-     */
+    // OAuth object used for authenticated requests.
+    // Anilist returns the date without milliseconds. We fix that and make the token expire 1 minute
+    // before its original expiration date.
     private var oauth: ALOAuth? = null
         set(value) {
             field = value?.copy(expires = value.expires * 1000 - 60 * 1000)

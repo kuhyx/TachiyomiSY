@@ -30,11 +30,11 @@ internal interface EnhancedTracker {
 
     /**
      * Checks whether the provided source/track/manga triplet is from this [Tracker]
-     */
+. */
     fun isTrackFrom(track: Track, manga: Manga, source: Source?): Boolean
 
     /**
      * Migrates the given track for the manga to the newSource, if possible
-     */
+. */
     fun migrateTrack(track: Track, manga: Manga, newSource: Source): Track?
 }

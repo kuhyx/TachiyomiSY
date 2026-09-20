@@ -42,16 +42,11 @@ internal class DownloadNotifier(private val context: Context) {
         }
     }
 
-    /**
-     * Status of download. Used for correct notification icon.
-     */
+    // Status of download. Used for correct notification icon.
     private var isDownloading = false
 
-    /**
-     * Shows a notification from this builder.
-     *
-     * @param id the id of the notification.
-     */
+    // Shows a notification from this builder.
+    // @param id the id of the notification.
     private fun NotificationCompat.Builder.show(id: Int) {
         context.notify(id, build())
     }

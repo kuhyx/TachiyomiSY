@@ -16,14 +16,10 @@ import android.widget.FrameLayout
  */
 internal class WebtoonFrame(context: Context) : FrameLayout(context) {
 
-    /**
-     * Scale detector, either with pinch or quick scale.
-     */
+    // Scale detector, either with pinch or quick scale.
     private val scaleDetector = ScaleGestureDetector(context, ScaleListener())
 
-    /**
-     * Fling detector.
-     */
+    // Fling detector.
     private val flingDetector = GestureDetector(context, FlingListener())
 
     var doubleTapZoom = true
@@ -39,9 +35,7 @@ internal class WebtoonFrame(context: Context) : FrameLayout(context) {
             recycler?.zoomOutDisabled = value
         }
 
-    /**
-     * Recycler view added in this frame.
-     */
+    // Recycler view added in this frame.
     private val recycler: WebtoonRecyclerView?
         get() = getChildAt(0) as? WebtoonRecyclerView
 

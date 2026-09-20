@@ -95,11 +95,8 @@ internal class ExtensionInstaller(
             }
     }
 
-    /**
-     * Starts an intent to install the extension at the given uri.
-     *
-     * @param tempFile The file of the extension to install. Delete after use.
-     */
+    // Starts an intent to install the extension at the given uri.
+    // @param tempFile The file of the extension to install. Delete after use.
     private fun installApk(downloadId: Long, tempFile: File) {
         when (val installer = extensionInstaller.get()) {
             BasePreferences.ExtensionInstaller.LEGACY -> {

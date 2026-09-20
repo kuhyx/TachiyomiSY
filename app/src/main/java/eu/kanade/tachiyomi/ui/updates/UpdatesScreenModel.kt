@@ -199,11 +199,8 @@ internal class UpdatesScreenModel(
         return started
     }
 
-    /**
-     * Update status of chapters.
-     *
-     * @param download download object containing progress.
-     */
+    // Update status of chapters.
+    // @param download download object containing progress.
     private fun updateDownloadState(download: Download) {
         mutableState.update { state ->
             val newItems = state.items.toMutableList().also { list ->
@@ -287,10 +284,8 @@ internal class UpdatesScreenModel(
         toggleAllSelection(false)
     }
 
-    /**
-     * Downloads the given list of chapters with the manager.
-     * @param updatesItem the list of chapters to download.
-     */
+    // Downloads the given list of chapters with the manager.
+    // @param updatesItem the list of chapters to download.
     private fun downloadChapters(updatesItem: List<UpdatesItem>) {
         screenModelScope.launchNonCancellable {
             val groupedUpdates = updatesItem.groupBy { it.update.mangaId }.values
@@ -306,7 +301,7 @@ internal class UpdatesScreenModel(
     }
 
     /**
-     * Delete selected chapters
+     * Delete selected chapters.
      *
      * @param updatesItem list of chapters
      */

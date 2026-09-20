@@ -56,16 +56,13 @@ internal class LibraryUpdateNotifier(
         maximumFractionDigits = 0
     }
 
-    /**
-     * Pending intent of action that cancels the library update
-     */
+    // Pending intent of action that cancels the library update
+    // . */
     private val cancelIntent by lazy {
         NotificationReceiver.cancelLibraryUpdatePendingBroadcast(context)
     }
 
-    /**
-     * Bitmap of the app for notifications.
-     */
+    // Bitmap of the app for notifications.
     private val notificationBitmap by lazy {
         BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
     }
@@ -363,9 +360,7 @@ internal class LibraryUpdateNotifier(
         }
     }
 
-    /**
-     * Returns an intent to open the main activity.
-     */
+    // Returns an intent to open the main activity.
     private fun getNotificationIntent(): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP

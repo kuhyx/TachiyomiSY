@@ -12,7 +12,7 @@ internal val Context.cacheImageDir: File
     get() = File(cacheDir, "shared_image")
 
 /**
- * Returns the uri of a file
+ * Returns the uri of a file.
  *
  * @param context context of application
  */

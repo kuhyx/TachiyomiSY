@@ -7,9 +7,7 @@ import tachiyomi.core.common.util.system.logcat
 
 internal class DelayedTrackingStore(context: Context) {
 
-    /**
-     * Preference file where queued tracking updates are stored.
-     */
+    // Preference file where queued tracking updates are stored.
     private val preferences = context.getSharedPreferences("tracking_queue", Context.MODE_PRIVATE)
 
     fun add(trackId: Long, lastChapterRead: Double) {

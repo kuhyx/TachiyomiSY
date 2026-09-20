@@ -40,13 +40,10 @@ internal class MemAutoFlushingLookupTable<T>(
     private val serializer: EntrySerializer<T>,
     private val debounceTimeMs: Long = 3000,
 ) : CoroutineScope by CoroutineScope(Dispatchers.IO + SupervisorJob()), Closeable {
-    /**
-     * The context of this scope.
-     * Context is encapsulated by the scope and used for implementation of coroutine builders that are extensions on the scope.
-     * Accessing this property in general code is not recommended for any purposes except accessing [Job] instance for advanced usages.
-     *
-     * By convention, should contain an instance of a [job][Job] to enforce structured concurrency.
-     */
+    // The context of this scope.
+    // Context is encapsulated by the scope and used for implementation of coroutine builders that are extensions on the scope.
+    // Accessing this property in general code is not recommended for any purposes except accessing [Job] instance for advanced usages.
+    // By convention, should contain an instance of a [job][Job] to enforce structured concurrency.
 
     private val table = SparseArray<T>(INITIAL_SIZE)
     private val mutex = Mutex(true)

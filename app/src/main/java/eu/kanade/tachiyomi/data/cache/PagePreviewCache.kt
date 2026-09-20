@@ -39,21 +39,17 @@ internal class PagePreviewCache(private val context: Context) {
         const val PARAMETER_VALUE_COUNT = 1
     }
 
-    /** Google Json class used for parsing JSON files.  */
+    // Google Json class used for parsing JSON files.
     private val json: Json by injectLazy()
 
-    /** Cache class used for cache management.  */
+    // Cache class used for cache management.
     private var diskCache = setupDiskCache(75)
 
-    /**
-     * Returns directory of cache.
-     */
+    // Returns directory of cache.
     private val cacheDir: File
         get() = diskCache.directory
 
-    /**
-     * Returns real size of directory.
-     */
+    // Returns real size of directory.
     private val realSize: Long
         get() = DiskUtil.getDirectorySize(cacheDir)
 
@@ -189,12 +185,9 @@ internal class PagePreviewCache(private val context: Context) {
         return deletedFiles
     }
 
-    /**
-     * Remove file from cache.
-     *
-     * @param file name of file "md5.0".
-     * @return status of deletion for the file.
-     */
+    // Remove file from cache.
+    // @param file name of file "md5.0".
+    // @return status of deletion for the file.
     private fun removeFileFromCache(file: String): Boolean {
         // Make sure we don't delete the journal file (keeps track of cache).
         if (file == "journal" || file.startsWith("journal.")) {

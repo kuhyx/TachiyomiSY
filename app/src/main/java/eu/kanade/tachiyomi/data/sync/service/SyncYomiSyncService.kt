@@ -170,9 +170,8 @@ internal class SyncYomiSyncService(
         }
     }
 
-    /**
-     * Return true if update success
-     */
+    // Return true if update success
+    // . */
     private suspend fun pushSyncData(syncData: SyncData, eTag: String): Boolean {
         val backup = syncData.backup ?: return true
 

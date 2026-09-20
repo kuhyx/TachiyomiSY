@@ -179,18 +179,16 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
 
     /**
      * Check if the image can be panned to the left
-     */
+. */
     fun canPanLeft(): Boolean = canPan { it.left }
 
     /**
      * Check if the image can be panned to the right
-     */
+. */
     fun canPanRight(): Boolean = canPan { it.right }
 
-    /**
-     * Check whether the image can be panned.
-     * @param fn a function that returns the direction to check for
-     */
+    // Check whether the image can be panned.
+    // @param fn a function that returns the direction to check for
     private fun canPan(fn: (RectF) -> Float): Boolean {
         (pageView as? SubsamplingScaleImageView)?.let { view ->
             RectF().let {
@@ -215,10 +213,8 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
         pan { center, view -> center.also { it.x += view.width / view.scale } }
     }
 
-    /**
-     * Pans the image.
-     * @param fn a function that computes the new center of the image
-     */
+    // Pans the image.
+    // @param fn a function that computes the new center of the image
     private fun pan(fn: (PointF, SubsamplingScaleImageView) -> PointF) {
         (pageView as? SubsamplingScaleImageView)?.let { view ->
 

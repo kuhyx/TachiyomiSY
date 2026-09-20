@@ -10,7 +10,7 @@ import tachiyomi.domain.manga.model.sortDescending
 
 /**
  * Gets next unread chapter with filters and sorting applied
- */
+. */
 internal fun List<Chapter>.getNextUnread(
     manga: Manga,
     downloadManager: DownloadManager /* SY --> */,
@@ -36,7 +36,7 @@ internal fun List<Chapter>.getNextUnread(
 
 /**
  * Gets next unread chapter with filters and sorting applied
- */
+. */
 internal fun List<ChapterList.Item>.getNextUnread(manga: Manga): Chapter? {
     return applyFilters(manga).let { chapters ->
         // SY -->

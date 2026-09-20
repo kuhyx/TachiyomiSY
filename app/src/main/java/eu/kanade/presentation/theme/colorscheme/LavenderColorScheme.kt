@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * Colors for Lavender theme
- * Color scheme by Osyx
+ * Color scheme by Osyx.
  *
  * Key colors:
  * Primary #A177FF

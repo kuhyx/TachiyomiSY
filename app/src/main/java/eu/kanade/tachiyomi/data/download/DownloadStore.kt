@@ -25,14 +25,10 @@ internal class DownloadStore(
     private val getChapter: GetChapter = Injekt.get(),
 ) {
 
-    /**
-     * Preference file where active downloads are stored.
-     */
+    // Preference file where active downloads are stored.
     private val preferences = context.getSharedPreferences("active_downloads", Context.MODE_PRIVATE)
 
-    /**
-     * Counter used to keep the queue order.
-     */
+    // Counter used to keep the queue order.
     private var counter = 0
 
     /**
@@ -77,11 +73,8 @@ internal class DownloadStore(
         }
     }
 
-    /**
-     * Returns the preference's key for the given download.
-     *
-     * @param download the download.
-     */
+    // Returns the preference's key for the given download.
+    // @param download the download.
     private fun getKey(download: Download): String = download.chapter.id.toString()
 
     /**
@@ -111,21 +104,15 @@ internal class DownloadStore(
         return downloads
     }
 
-    /**
-     * Converts a download to a string.
-     *
-     * @param download the download to serialize.
-     */
+    // Converts a download to a string.
+    // @param download the download to serialize.
     private fun serialize(download: Download): String {
         val obj = DownloadObject(download.manga.id, download.chapter.id, counter++)
         return json.encodeToString(obj)
     }
 
-    /**
-     * Restore a download from a string.
-     *
-     * @param string the download as string.
-     */
+    // Restore a download from a string.
+    // @param string the download as string.
     private fun deserialize(string: String): DownloadObject? {
         return try {
             json.decodeFromString<DownloadObject>(string)
@@ -136,7 +123,7 @@ internal class DownloadStore(
 }
 
 /**
- * Class used for download serialization
+ * Class used for download serialization.
  *
  * @param mangaId the id of the manga.
  * @param chapterId the id of the chapter.

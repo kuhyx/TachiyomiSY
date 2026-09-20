@@ -65,11 +65,8 @@ internal class AppUpdateDownloadJob(private val context: Context, workerParams: 
         )
     }
 
-    /**
-     * Called to start downloading apk of new update
-     *
-     * @param url url location of file
-     */
+    // Called to start downloading apk of new update.
+    // @param url url location of file
     private suspend fun downloadApk(title: String, url: String) {
         // Show notification download starting.
         notifier.onDownloadStarted(title)

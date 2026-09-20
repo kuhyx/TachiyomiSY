@@ -89,7 +89,7 @@ internal sealed class Preference {
 
         /**
          * [ListPreference] but with no connection to a [PreferenceData]
-         */
+. */
         data class BasicListPreference(
             val value: String,
             val entries: Map<String, String>,

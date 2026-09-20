@@ -47,17 +47,13 @@ internal class DownloadManager(
     private val downloadPreferences: DownloadPreferences = Injekt.get(),
 ) {
 
-    /**
-     * Downloader whose only task is to download chapters.
-     */
+    // Downloader whose only task is to download chapters.
     private val downloader = Downloader(context, provider, cache)
 
     val isRunning: Boolean
         get() = downloader.isRunning
 
-    /**
-     * Queue to delay the deletion of a list of chapters until triggered.
-     */
+    // Queue to delay the deletion of a list of chapters until triggered.
     private val pendingDeleter = DownloadPendingDeleter(context)
 
     val queueState
@@ -101,7 +97,7 @@ internal class DownloadManager(
 
     /**
      * Returns the download from queue if the chapter is queued for download
-     * else it will return null which means that the chapter is not queued for download
+     * else it will return null which means that the chapter is not queued for download.
      *
      * @param chapterId the chapter to check.
      */
@@ -290,11 +286,11 @@ internal class DownloadManager(
 
     /**
      * return the list of all manga folders
-     */
+. */
     fun getMangaFolders(source: Source): List<UniFile> = provider.findSourceDir(source)?.listFiles()?.toList().orEmpty()
 
     /**
-     * Deletes the directories of chapters that were read or have no match
+     * Deletes the directories of chapters that were read or have no match.
      *
      * @param allChapters the list of chapters to delete.
      * @param manga the manga of the chapters.
@@ -368,7 +364,7 @@ internal class DownloadManager(
     }
 
     /**
-     * Renames source download folder
+     * Renames source download folder.
      *
      * @param oldSource the old source.
      * @param newSource the new source.
@@ -394,7 +390,7 @@ internal class DownloadManager(
     }
 
     /**
-     * Renames manga download folder
+     * Renames manga download folder.
      *
      * @param manga the manga
      * @param newTitle the new manga title.
@@ -426,7 +422,7 @@ internal class DownloadManager(
     }
 
     /**
-     * Renames an already downloaded chapter
+     * Renames an already downloaded chapter.
      *
      * @param source the source of the manga.
      * @param manga the manga of the chapter.

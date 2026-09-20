@@ -4,7 +4,7 @@ import android.content.Context
 import android.provider.Settings
 
 /**
- * Gets the duration multiplier for general animations on the device
+ * Gets the duration multiplier for general animations on the device.
  * @see Settings.Global.ANIMATOR_DURATION_SCALE
  */
 internal val Context.animatorDurationScale: Float

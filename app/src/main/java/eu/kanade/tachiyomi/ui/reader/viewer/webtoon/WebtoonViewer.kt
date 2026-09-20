@@ -49,19 +49,13 @@ internal class WebtoonViewer(
      */
     val recycler = WebtoonRecyclerView(activity)
 
-    /**
-     * Frame containing the recycler view.
-     */
+    // Frame containing the recycler view.
     private val frame = WebtoonFrame(activity)
 
-    /**
-     * Distance to scroll when the user taps on one side of the recycler view.
-     */
+    // Distance to scroll when the user taps on one side of the recycler view.
     private val scrollDistance = activity.resources.displayMetrics.heightPixels * 3 / 4
 
-    /**
-     * Layout manager of the recycler view.
-     */
+    // Layout manager of the recycler view.
     private val layoutManager = WebtoonLayoutManager(activity, scrollDistance)
 
     /**
@@ -69,9 +63,7 @@ internal class WebtoonViewer(
      */
     val config = WebtoonConfig(scope)
 
-    /**
-     * Adapter of the recycler view.
-     */
+    // Adapter of the recycler view.
     private val adapter = WebtoonAdapter(this)
 
     /**
@@ -207,10 +199,8 @@ internal class WebtoonViewer(
         scope.cancel()
     }
 
-    /**
-     * Called from the RecyclerView listener when a [page] is marked as active. It notifies the
-     * activity of the change and requests the preload of the next chapter if this is the last page.
-     */
+    // Called from the RecyclerView listener when a [page] is marked as active. It notifies the
+    // activity of the change and requests the preload of the next chapter if this is the last page.
     private fun onPageSelected(page: ReaderPage, allowPreload: Boolean) {
         val pages = page.chapter.pages ?: return
         logcat { "onPageSelected: ${page.number}/${pages.size}" }
@@ -229,10 +219,8 @@ internal class WebtoonViewer(
         }
     }
 
-    /**
-     * Called from the RecyclerView listener when a [transition] is marked as active. It request the
-     * preload of the destination chapter of the transition.
-     */
+    // Called from the RecyclerView listener when a [transition] is marked as active. It request the
+    // preload of the destination chapter of the transition.
     private fun onTransitionSelected(transition: ChapterTransition) {
         logcat { "onTransitionSelected: $transition" }
         val toChapter = transition.to
@@ -285,9 +273,7 @@ internal class WebtoonViewer(
         }
     }
 
-    /**
-     * Scrolls up by [scrollDistance].
-     */
+    // Scrolls up by [scrollDistance].
     private fun scrollUp() {
         if (config.usePageTransitions) {
             recycler.smoothScrollBy(0, -scrollDistance)
@@ -298,7 +284,7 @@ internal class WebtoonViewer(
 
     /**
      * Scrolls one screen over a period of time
-     */
+. */
     fun linearScroll(duration: Duration) {
         recycler.smoothScrollBy(
             0,
@@ -385,10 +371,8 @@ internal class WebtoonViewer(
      */
     override fun handleGenericMotionEvent(event: MotionEvent): Boolean = false
 
-    /**
-     * Notifies adapter of changes around the current page to trigger a relayout in the recycler.
-     * Used when an image configuration is changed.
-     */
+    // Notifies adapter of changes around the current page to trigger a relayout in the recycler.
+    // Used when an image configuration is changed.
     private fun refreshAdapter() {
         val position = layoutManager.findLastEndVisibleItemPosition()
         adapter.refresh()

@@ -12,9 +12,7 @@ internal class ShikimoriInterceptor(private val shikimori: Shikimori) : Intercep
 
     private val json: Json by injectLazy()
 
-    /**
-     * OAuth object used for authenticated requests.
-     */
+    // OAuth object used for authenticated requests.
     private var oauth: SMOAuth? = shikimori.restoreToken()
 
     override fun intercept(chain: Interceptor.Chain): Response {

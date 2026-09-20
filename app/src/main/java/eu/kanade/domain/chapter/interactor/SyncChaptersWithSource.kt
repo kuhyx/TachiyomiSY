@@ -40,7 +40,7 @@ internal class SyncChaptersWithSource(
 ) {
 
     /**
-     * Method to synchronize db chapters with source ones
+     * Method to synchronize db chapters with source ones.
      *
      * @param rawSourceChapters the chapters from the source.
      * @param manga the manga the chapters belong to.

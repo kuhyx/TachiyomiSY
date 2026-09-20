@@ -50,26 +50,18 @@ internal class PagerPageHolder(
     override val item
         get() = page to extraPage
 
-    /**
-     * Loading progress bar to indicate the current progress.
-     */
+    // Loading progress bar to indicate the current progress.
     private var progressIndicator: ReaderProgressIndicator? = null // = ReaderProgressIndicator(readerThemedContext)
 
-    /**
-     * Error layout to show when the image fails to load.
-     */
+    // Error layout to show when the image fails to load.
     private var errorLayout: ReaderErrorBinding? = null
 
     private val scope = MainScope()
 
-    /**
-     * Job for loading the page and processing changes to the page's status.
-     */
+    // Job for loading the page and processing changes to the page's status.
     private var loadJob: Job? = null
 
-    /**
-     * Job for loading the page.
-     */
+    // Job for loading the page.
     private var extraLoadJob: Job? = null
 
     init {
@@ -96,13 +88,10 @@ internal class PagerPageHolder(
         }
     }
 
-    /**
-     * Loads the page and processes changes to the page's status.
-     *
-     * Returns immediately if the page has no PageLoader.
-     * Otherwise, this function does not return. It will continue to process status changes until
-     * the Job is cancelled.
-     */
+    // Loads the page and processes changes to the page's status.
+    // Returns immediately if the page has no PageLoader.
+    // Otherwise, this function does not return. It will continue to process status changes until
+    // the Job is cancelled.
     private suspend fun loadPageAndProcessStatus(pageIndex: Int) {
         // SY -->
         val page = if (pageIndex == 1) page else extraPage
@@ -130,36 +119,28 @@ internal class PagerPageHolder(
         }
     }
 
-    /**
-     * Called when the page is queued.
-     */
+    // Called when the page is queued.
     private fun setQueued() {
         initProgressIndicator()
         progressIndicator?.show()
         removeErrorLayout()
     }
 
-    /**
-     * Called when the page is loading.
-     */
+    // Called when the page is loading.
     private fun setLoading() {
         initProgressIndicator()
         progressIndicator?.show()
         removeErrorLayout()
     }
 
-    /**
-     * Called when the page is downloading.
-     */
+    // Called when the page is downloading.
     private fun setDownloading() {
         initProgressIndicator()
         progressIndicator?.show()
         removeErrorLayout()
     }
 
-    /**
-     * Called when the page is ready.
-     */
+    // Called when the page is ready.
     private suspend fun setImage() {
         if (extraPage == null) {
             progressIndicator?.setProgress(0)
@@ -405,9 +386,7 @@ internal class PagerPageHolder(
         viewer.onPageSplit(page, newPage)
     }
 
-    /**
-     * Called when the page has an error.
-     */
+    // Called when the page has an error.
     private fun setError(error: Throwable?) {
         progressIndicator?.hide()
         showErrorLayout(error)
@@ -464,9 +443,7 @@ internal class PagerPageHolder(
         return errorLayout!!
     }
 
-    /**
-     * Removes the decode error layout from the holder, if found.
-     */
+    // Removes the decode error layout from the holder, if found.
     private fun removeErrorLayout() {
         errorLayout?.root?.isVisible = false
         errorLayout = null

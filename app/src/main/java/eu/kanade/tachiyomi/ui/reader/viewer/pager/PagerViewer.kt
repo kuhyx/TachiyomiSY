@@ -47,9 +47,7 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      */
     val config = PagerConfig(this, scope)
 
-    /**
-     * Adapter of the pager.
-     */
+    // Adapter of the pager.
     private val adapter = PagerViewerAdapter(this)
 
     /**
@@ -58,16 +56,12 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
     /* [EXH] private */
     var currentPage: ReaderItem? = null
 
-    /**
-     * Viewer chapters to set when the pager enters idle mode. Otherwise, if the view was settling
-     * or dragging, there'd be a noticeable and annoying jump.
-     */
+    // Viewer chapters to set when the pager enters idle mode. Otherwise, if the view was settling
+    // or dragging, there'd be a noticeable and annoying jump.
     private var awaitingIdleViewerChapters: ViewerChapters? = null
 
-    /**
-     * Whether the view pager is currently in idle mode. It sets the awaiting chapters if setting
-     * this field to true.
-     */
+    // Whether the view pager is currently in idle mode. It sets the awaiting chapters if setting
+    // this field to true.
     private var isIdle = true
         set(value) {
             field = value
@@ -171,9 +165,8 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      */
     override fun getView(): View = pager
 
-    /**
-     * Returns the PagerPageHolder for the provided page
-     */
+    // Returns the PagerPageHolder for the provided page
+    // . */
     private fun getPageHolder(page: ReaderPage): PagerPageHolder? =
         pager.children
             .filterIsInstance<PagerPageHolder>()
@@ -181,7 +174,7 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
 
     /**
      * Called when a new page (either a [ReaderPage] or [ChapterTransition]) is marked as active
-     */
+. */
     fun onPageChange(position: Int) {
         val pagePair = adapter.joinedItems.getOrNull(position)
         val page = pagePair?.first
@@ -228,10 +221,8 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
         }
     }
 
-    /**
-     * Called when a [ReaderPage] is marked as active. It notifies the
-     * activity of the change and requests the preload of the next chapter if this is the last page.
-     */
+    // Called when a [ReaderPage] is marked as active. It notifies the
+    // activity of the change and requests the preload of the next chapter if this is the last page.
     private fun onReaderPageSelected(page: ReaderPage, allowPreload: Boolean, forward: Boolean, hasExtraPage: Boolean) {
         val pages = page.chapter.pages ?: return
         logcat { "onReaderPageSelected: ${page.number}/${pages.size}" }
@@ -253,10 +244,8 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
         }
     }
 
-    /**
-     * Called when a [ChapterTransition] is marked as active. It request the
-     * preload of the destination chapter of the transition.
-     */
+    // Called when a [ChapterTransition] is marked as active. It request the
+    // preload of the destination chapter of the transition.
     private fun onTransitionSelected(transition: ChapterTransition) {
         logcat { "onTransitionSelected: $transition" }
         val toChapter = transition.to
@@ -281,9 +270,7 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
         }
     }
 
-    /**
-     * Sets the active [chapters] on this pager.
-     */
+    // Sets the active [chapters] on this pager.
     private fun setChaptersInternal(chapters: ViewerChapters) {
         // Remove listener so the change in item doesn't trigger it
         pager.removeOnPageChangeListener(pagerListener)
@@ -387,10 +374,8 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
         moveToNext()
     }
 
-    /**
-     * Resets the adapter in order to recreate all the views. Used when a image configuration is
-     * changed.
-     */
+    // Resets the adapter in order to recreate all the views. Used when a image configuration is
+    // changed.
     private fun refreshAdapter() {
         val currentItem = pager.currentItem
         adapter.refresh()

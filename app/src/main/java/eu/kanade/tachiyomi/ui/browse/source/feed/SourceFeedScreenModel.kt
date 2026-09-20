@@ -138,9 +138,7 @@ internal open class SourceFeedScreenModel(
             )
     }
 
-    /**
-     * Initiates get manga per feed.
-     */
+    // Initiates get manga per feed.
     private fun getFeed(feedSavedSearch: List<SourceFeedUI>) {
         screenModelScope.launch {
             feedSavedSearch.map { sourceFeed ->

@@ -19,14 +19,10 @@ internal class DownloadPendingDeleter(
     private val json: Json = Injekt.get(),
 ) {
 
-    /**
-     * Preferences used to store the list of chapters to delete.
-     */
+    // Preferences used to store the list of chapters to delete.
     private val preferences = context.getSharedPreferences("chapters_to_delete", Context.MODE_PRIVATE)
 
-    /**
-     * Last added chapter, used to avoid decoding from the preference too often.
-     */
+    // Last added chapter, used to avoid decoding from the preference too often.
     private var lastAddedEntry: Entry? = null
 
     /**
@@ -94,9 +90,7 @@ internal class DownloadPendingDeleter(
         }
     }
 
-    /**
-     * Decodes all the chapters from preferences.
-     */
+    // Decodes all the chapters from preferences.
     private fun decodeAll(): List<Entry> {
         return preferences.all.values.mapNotNull { rawEntry ->
             try {
@@ -107,9 +101,7 @@ internal class DownloadPendingDeleter(
         }
     }
 
-    /**
-     * Returns a copy of chapter entries ensuring no duplicates by chapter id.
-     */
+    // Returns a copy of chapter entries ensuring no duplicates by chapter id.
     private fun List<ChapterEntry>.addUniqueById(chapters: List<Chapter>): List<ChapterEntry> {
         val newList = toMutableList()
         for (chapter in chapters) {
@@ -120,19 +112,13 @@ internal class DownloadPendingDeleter(
         return newList
     }
 
-    /**
-     * Returns a manga entry from a manga model.
-     */
+    // Returns a manga entry from a manga model.
     private fun Manga.toEntry() = MangaEntry(id, url, /* SY --> */ ogTitle /* SY <-- */, source)
 
-    /**
-     * Returns a chapter entry from a chapter model.
-     */
+    // Returns a chapter entry from a chapter model.
     private fun Chapter.toEntry() = ChapterEntry(id, url, name, scanlator)
 
-    /**
-     * Returns a manga model from a manga entry.
-     */
+    // Returns a manga model from a manga entry.
     private fun MangaEntry.toModel() = Manga.create().copy(
         url = url,
         // SY -->
@@ -142,9 +128,7 @@ internal class DownloadPendingDeleter(
         id = id,
     )
 
-    /**
-     * Returns a chapter model from a chapter entry.
-     */
+    // Returns a chapter model from a chapter entry.
     private fun ChapterEntry.toModel() = Chapter.create().copy(
         id = id,
         url = url,

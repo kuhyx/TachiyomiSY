@@ -12,9 +12,7 @@ internal class BangumiInterceptor(private val bangumi: Bangumi) : Interceptor {
 
     private val json: Json by injectLazy()
 
-    /**
-     * OAuth object used for authenticated requests.
-     */
+    // OAuth object used for authenticated requests.
     private var oauth: BGMOAuth? = bangumi.restoreToken()
 
     override fun intercept(chain: Interceptor.Chain): Response {

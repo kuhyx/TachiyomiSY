@@ -21,9 +21,7 @@ internal object Notifications {
     const val CHANNEL_COMMON = "common_channel"
     const val ID_DOWNLOAD_IMAGE = 2
 
-    /**
-     * Notification channel and ids used by the library updater.
-     */
+    // Notification channel and ids used by the library updater.
     private const val GROUP_LIBRARY = "group_library"
     const val CHANNEL_LIBRARY_PROGRESS = "library_progress_channel"
     const val ID_LIBRARY_PROGRESS = -101
@@ -34,9 +32,7 @@ internal object Notifications {
     const val ID_EHENTAI_PROGRESS = -199
     const val ID_EHENTAI_ERROR = -198
 
-    /**
-     * Notification channel and ids used by the downloader.
-     */
+    // Notification channel and ids used by the downloader.
     private const val GROUP_DOWNLOADER = "group_downloader"
     const val CHANNEL_DOWNLOADER_PROGRESS = "downloader_progress_channel"
     const val ID_DOWNLOAD_CHAPTER_PROGRESS = -201
@@ -50,9 +46,7 @@ internal object Notifications {
     const val ID_NEW_CHAPTERS = -301
     const val GROUP_NEW_CHAPTERS = "eu.kanade.tachiyomi.NEW_CHAPTERS"
 
-    /**
-     * Notification channel and ids used by the backup/restore system.
-     */
+    // Notification channel and ids used by the backup/restore system.
     private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
     const val CHANNEL_BACKUP_RESTORE_PROGRESS = "backup_restore_progress_channel"
     const val ID_BACKUP_PROGRESS = -501
@@ -63,13 +57,11 @@ internal object Notifications {
 
     /**
      * Notification channel used for Incognito Mode
-     */
+. */
     const val CHANNEL_INCOGNITO_MODE = "incognito_mode_channel"
     const val ID_INCOGNITO_MODE = -701
 
-    /**
-     * Notification channel and ids used for app and extension updates.
-     */
+    // Notification channel and ids used for app and extension updates.
     private const val GROUP_APK_UPDATES = "group_apk_updates"
     const val CHANNEL_APP_UPDATE = "app_apk_update_channel"
     const val ID_APP_UPDATER = 1

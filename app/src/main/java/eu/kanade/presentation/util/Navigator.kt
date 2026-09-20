@@ -27,7 +27,7 @@ import soup.compose.material.motion.animation.rememberSlideDistance
 
 /**
  * For invoking back press to the parent activity
- */
+. */
 internal val LocalBackPress: ProvidableCompositionLocal<(() -> Unit)?> = staticCompositionLocalOf { null }
 
 internal interface Tab : cafe.adriel.voyager.navigator.tab.Tab {

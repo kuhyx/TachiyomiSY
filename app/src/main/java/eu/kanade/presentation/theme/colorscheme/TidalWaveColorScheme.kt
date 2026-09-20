@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * Colors for Tidal Wave theme
- * Original color scheme by NahutabDevelop
+ * Original color scheme by NahutabDevelop.
  *
  * Key colors:
  * Primary #004152

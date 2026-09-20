@@ -42,10 +42,8 @@ internal class PagerTransitionHolder(
     override val item: Any
         get() = transition
 
-    /**
-     * View container of the current status of the transition page. Child views will be added
-     * dynamically.
-     */
+    // View container of the current status of the transition page. Child views will be added
+    // dynamically.
     private var pagesContainer = LinearLayout(context).apply {
         layoutParams = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         orientation = VERTICAL
@@ -75,10 +73,8 @@ internal class PagerTransitionHolder(
         stateJob?.cancel()
     }
 
-    /**
-     * Observes the status of the page list of the next/previous chapter. Whenever there's a new
-     * state, the pages container is cleaned up before setting the new state.
-     */
+    // Observes the status of the page list of the next/previous chapter. Whenever there's a new
+    // state, the pages container is cleaned up before setting the new state.
     private fun observeStatus(chapter: ReaderChapter) {
         stateJob?.cancel()
         stateJob = scope.launch {
@@ -96,9 +92,7 @@ internal class PagerTransitionHolder(
         }
     }
 
-    /**
-     * Sets the loading state on the pages container.
-     */
+    // Sets the loading state on the pages container.
     private fun setLoading() {
         val progress = CircularProgressIndicator(context)
         progress.isIndeterminate = true
@@ -112,9 +106,7 @@ internal class PagerTransitionHolder(
         pagesContainer.addView(textView)
     }
 
-    /**
-     * Sets the error state on the pages container.
-     */
+    // Sets the error state on the pages container.
     private fun setError(error: Throwable) {
         val textView = AppCompatTextView(context).apply {
             wrapContent()
@@ -137,9 +129,7 @@ internal class PagerTransitionHolder(
         pagesContainer.addView(retryBtn)
     }
 
-    /**
-     * Extension method to set layout params to wrap content on this view.
-     */
+    // Extension method to set layout params to wrap content on this view.
     private fun View.wrapContent() {
         layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
     }

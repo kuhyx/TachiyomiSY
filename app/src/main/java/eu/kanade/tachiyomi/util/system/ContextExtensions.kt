@@ -30,7 +30,7 @@ import uy.kohesive.injekt.api.get
 import java.io.File
 
 /**
- * Copies a string to clipboard
+ * Copies a string to clipboard.
  *
  * @param label Label to show to the user describing the content
  * @param content the actual text to copy to the board
@@ -132,7 +132,7 @@ internal fun Context.createReaderThemeContext(): Context {
 }
 
 /**
- * Gets document size of provided [Uri]
+ * Gets document size of provided [Uri].
  *
  * @return document size of [uri] or null if size can't be obtained
  */

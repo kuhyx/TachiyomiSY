@@ -33,10 +33,8 @@ internal class WebtoonTransitionHolder(
 
     private val transitionView = ReaderTransitionView(context)
 
-    /**
-     * View container of the current status of the transition page. Child views will be added
-     * dynamically.
-     */
+    // View container of the current status of the transition page. Child views will be added
+    // dynamically.
     private var pagesContainer = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
         gravity = Gravity.CENTER
@@ -76,10 +74,8 @@ internal class WebtoonTransitionHolder(
         stateJob?.cancel()
     }
 
-    /**
-     * Observes the status of the page list of the next/previous chapter. Whenever there's a new
-     * state, the pages container is cleaned up before setting the new state.
-     */
+    // Observes the status of the page list of the next/previous chapter. Whenever there's a new
+    // state, the pages container is cleaned up before setting the new state.
     private fun observeStatus(chapter: ReaderChapter, transition: ChapterTransition) {
         stateJob?.cancel()
         stateJob = scope.launch {
@@ -98,9 +94,7 @@ internal class WebtoonTransitionHolder(
         }
     }
 
-    /**
-     * Sets the loading state on the pages container.
-     */
+    // Sets the loading state on the pages container.
     private fun setLoading() {
         val progress = CircularProgressIndicator(context)
         progress.isIndeterminate = true
@@ -114,9 +108,7 @@ internal class WebtoonTransitionHolder(
         pagesContainer.addView(textView)
     }
 
-    /**
-     * Sets the error state on the pages container.
-     */
+    // Sets the error state on the pages container.
     private fun setError(error: Throwable, transition: ChapterTransition) {
         val textView = AppCompatTextView(context).apply {
             wrapContent()

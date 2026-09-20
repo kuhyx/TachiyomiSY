@@ -257,10 +257,8 @@ internal class GoogleDriveService(private val context: Context) {
         initGoogleDriveService()
     }
 
-    /**
-     * Initializes the Google Drive service by obtaining the access token and refresh token from the SyncPreferences
-     * and setting up the service using the obtained tokens.
-     */
+    // Initializes the Google Drive service by obtaining the access token and refresh token from the SyncPreferences
+    // and setting up the service using the obtained tokens.
     private fun initGoogleDriveService() {
         val accessToken = syncPreferences.googleDriveAccessToken.get()
         val refreshToken = syncPreferences.googleDriveRefreshToken.get()
@@ -288,13 +286,11 @@ internal class GoogleDriveService(private val context: Context) {
         }
     }
 
-    /**
-     * Generates the authorization URL required for the user to grant the application
-     * permission to access their Google Drive account.
-     * Sets the approval prompt to "force" to ensure that the user is always prompted to grant access,
-     * even if they have previously granted access.
-     * @return The authorization URL.
-     */
+    // Generates the authorization URL required for the user to grant the application
+    // permission to access their Google Drive account.
+    // Sets the approval prompt to "force" to ensure that the user is always prompted to grant access,
+    // even if they have previously granted access.
+    // @return The authorization URL.
     private fun generateAuthorizationUrl(): String {
         val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
         val secrets = GoogleClientSecrets.load(
@@ -358,11 +354,9 @@ internal class GoogleDriveService(private val context: Context) {
         }
     }
 
-    /**
-     * Sets up the Google Drive service using the provided access token and refresh token.
-     * @param accessToken The access token obtained from the SyncPreferences.
-     * @param refreshToken The refresh token obtained from the SyncPreferences.
-     */
+    // Sets up the Google Drive service using the provided access token and refresh token.
+    // @param accessToken The access token obtained from the SyncPreferences.
+    // @param refreshToken The refresh token obtained from the SyncPreferences.
     private fun setupGoogleDriveService(accessToken: String, refreshToken: String) {
         val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
         val secrets = GoogleClientSecrets.load(
@@ -383,10 +377,8 @@ internal class GoogleDriveService(private val context: Context) {
             .build()
     }
 
-    /**
-     * What the deprecated `GoogleCredential.Builder().setClientSecrets(secrets)` built: a bearer-token
-     * credential against Google's token endpoint, authenticating with the installed-app client secrets.
-     */
+    // What the deprecated `GoogleCredential.Builder().setClientSecrets(secrets)` built: a bearer-token
+    // credential against Google's token endpoint, authenticating with the installed-app client secrets.
     private fun googleCredential(jsonFactory: JsonFactory, secrets: GoogleClientSecrets): Credential =
         Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
             .setJsonFactory(jsonFactory)

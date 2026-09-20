@@ -47,9 +47,7 @@ internal class HttpPageLoader(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    /**
-     * A queue used to manage requests one by one while allowing priorities.
-     */
+    // A queue used to manage requests one by one while allowing priorities.
     private val queue = PriorityBlockingQueue<PriorityPage>()
 
     private val preloadSize = /* SY --> */ readerPreferences.preloadSize.get() // SY <--
@@ -187,11 +185,8 @@ internal class HttpPageLoader(
         }
     }
 
-    /**
-     * Preloads the given [amount] of pages after the [currentPage] with a lower priority.
-     *
-     * @return a list of [PriorityPage] that were added to the [queue]
-     */
+    // Preloads the given [amount] of pages after the [currentPage] with a lower priority.
+    // @return a list of [PriorityPage] that were added to the [queue]
     private fun preloadNextPages(currentPage: ReaderPage, amount: Int): List<PriorityPage> {
         val pageIndex = currentPage.index
         val pages = currentPage.chapter.pages ?: return emptyList()
@@ -208,12 +203,9 @@ internal class HttpPageLoader(
             }
     }
 
-    /**
-     * Loads the page, retrieving the image URL and downloading the image if necessary.
-     * Downloaded images are stored in the chapter cache.
-     *
-     * @param page the page whose source image has to be downloaded.
-     */
+    // Loads the page, retrieving the image URL and downloading the image if necessary.
+    // Downloaded images are stored in the chapter cache.
+    // @param page the page whose source image has to be downloaded.
     private suspend fun internalLoadPage(page: ReaderPage, force: Boolean) {
         try {
             if (page.imageUrl.isNullOrEmpty()) {

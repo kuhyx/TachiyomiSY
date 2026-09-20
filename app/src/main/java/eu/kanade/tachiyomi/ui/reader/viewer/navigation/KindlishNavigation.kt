@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
  * +---+---+---+
  * | P | N | N |   N: Next
  * +---+---+---+
-*/
+. */
 internal class KindlishNavigation : ViewerNavigation() {
 
     override var regionList: List<Region> = listOf(
