@@ -136,7 +136,7 @@ private fun ColumnScope.FilterPage(
         state = filterCompleted,
         onClick = { screenModel.toggleFilter(LibraryPreferences::filterCompleted) },
     )
-    // TODO: re-enable when custom intervals are ready for stable
+    // Follow-up: re-enable when custom intervals are ready for stable (https://github.com/kuhyx/TachiyomiSY/issues/10)
     if (
         (isDebugBuildType || isPreviewBuildType) &&
         LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in autoUpdateMangaRestrictions

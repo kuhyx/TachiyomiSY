@@ -95,7 +95,7 @@ import java.net.URLEncoder
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
-// TODO Consider gallery updating when doing tabbed browsing
+// Follow-up: Consider gallery updating when doing tabbed browsing (https://github.com/kuhyx/TachiyomiSY/issues/20)
 class EHentai(
     override val id: Long,
     val exh: Boolean,

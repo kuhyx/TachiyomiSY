@@ -189,7 +189,7 @@ fun MangaActionRow(
 ) {
     val defaultActionButtonColor = MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_ALPHA)
 
-    // TODO: show something better when using custom interval
+    // Follow-up: show something better when using custom interval (https://github.com/kuhyx/TachiyomiSY/issues/12)
     val nextUpdateDays = remember(nextUpdate) {
         return@remember if (nextUpdate != null) {
             val now = Instant.now()

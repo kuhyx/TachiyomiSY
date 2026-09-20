@@ -38,7 +38,7 @@ interface Tracker {
 
     fun getScoreList(): List<String>
 
-    // TODO: Store all scores as 10 point in the future maybe?
+    // Follow-up: Store all scores as 10 point in the future maybe? (https://github.com/kuhyx/TachiyomiSY/issues/17)
     fun get10PointScore(track: DomainTrack): Double
 
     fun indexToScore(index: Int): Double
@@ -72,7 +72,8 @@ interface Tracker {
 
     fun saveCredentials(username: String, password: String)
 
-    // TODO: move this to an interactor, and update all trackers based on common data
+    // Follow-up: move this to an interactor, and update all trackers based on common data
+    // https://github.com/kuhyx/TachiyomiSY/issues/6
     suspend fun register(item: Track, mangaId: Long)
 
     suspend fun setRemoteStatus(track: Track, status: Long)

@@ -32,7 +32,8 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
         // Add the authorization header to the original request
         val authRequest = originalRequest.newBuilder()
             .addHeader("Authorization", "Bearer ${oauth!!.accessToken}")
-            // TODO(antsy): Add back custom user agent when they stop blocking us for no apparent reason
+            // Follow-up: Add back custom user agent when they stop blocking us for no apparent reason
+            // https://github.com/kuhyx/TachiyomiSY/issues/18
             // .header("User-Agent", "TachiyomiSY v${BuildConfig.VERSION_NAME} (${BuildConfig.APPLICATION_ID})")
             .build()
 

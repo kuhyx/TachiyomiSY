@@ -17,7 +17,7 @@ import tachiyomi.domain.manga.model.unreadFilter
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-// TODO: move these into the domain model
+// Follow-up: move these into the domain model (https://github.com/kuhyx/TachiyomiSY/issues/5)
 val Manga.readingMode: Long
     get() = viewerFlags and ReadingMode.MASK.toLong()
 

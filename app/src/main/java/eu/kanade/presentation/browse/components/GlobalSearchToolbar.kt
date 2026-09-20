@@ -73,7 +73,8 @@ fun GlobalSearchToolbar(
                 .padding(horizontal = MaterialTheme.padding.small),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
         ) {
-            // TODO: make this UX better; it only applies when triggering a new search
+            // Follow-up: make this UX better; it only applies when triggering a new search
+            // https://github.com/kuhyx/TachiyomiSY/issues/8
             if (!hideSourceFilter) {
                 FilterChip(
                     selected = sourceFilter == SourceFilter.PinnedOnly,

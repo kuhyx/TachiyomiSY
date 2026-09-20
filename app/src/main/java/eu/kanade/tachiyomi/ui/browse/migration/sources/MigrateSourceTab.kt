@@ -53,7 +53,8 @@ fun Screen.migrateSourceTab(): TabContent {
                 onToggleSortingMode = screenModel::toggleSortingMode,
                 // SY -->
                 onClickAll = { source ->
-                    // TODO: Jay wtf, need to clean this up sometime
+                    // Follow-up: Jay wtf, need to clean this up sometime
+                    // https://github.com/kuhyx/TachiyomiSY/issues/21
                     @OptIn(DelicateCoroutinesApi::class)
                     launchIO {
                         val manga = Injekt.get<GetFavorites>().await()

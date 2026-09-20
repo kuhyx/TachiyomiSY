@@ -48,7 +48,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.time.Duration.Companion.seconds
 
-// TODO only apply database changes after sync
+// Follow-up: only apply database changes after sync (https://github.com/kuhyx/TachiyomiSY/issues/24)
 class FavoritesSyncHelper(val context: Context) {
     private val getLibraryManga: GetLibraryManga by injectLazy()
     private val getCategories: GetCategories by injectLazy()

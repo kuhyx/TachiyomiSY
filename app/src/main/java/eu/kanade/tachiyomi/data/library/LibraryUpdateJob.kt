@@ -311,7 +311,7 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
         notifier.showQueueSizeWarningNotificationIfNeeded(mangaToUpdate)
 
         if (skippedUpdates.isNotEmpty()) {
-            // TODO: surface skipped reasons to user?
+            // Follow-up: surface skipped reasons to user? (https://github.com/kuhyx/TachiyomiSY/issues/16)
             logcat {
                 skippedUpdates
                     .groupBy { it.second }

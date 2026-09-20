@@ -27,7 +27,7 @@ class AddTracks(
     private val trackerManager: TrackerManager,
 ) {
 
-    // TODO: update all trackers based on common data
+    // Follow-up: update all trackers based on common data (https://github.com/kuhyx/TachiyomiSY/issues/6)
     suspend fun bind(tracker: Tracker, item: Track, mangaId: Long) = withNonCancellableContext {
         withIOContext {
             val allChapters = getChaptersByMangaId.await(mangaId)
@@ -38,7 +38,7 @@ class AddTracks(
 
             insertTrack.await(track)
 
-            // TODO: merge into [SyncChapterProgressWithTrack]?
+            // Follow-up: merge into [SyncChapterProgressWithTrack]? (https://github.com/kuhyx/TachiyomiSY/issues/7)
             // Update chapter progress if newer chapters marked read locally
             if (hasReadChapters) {
                 val latestLocalReadChapterNumber = allChapters

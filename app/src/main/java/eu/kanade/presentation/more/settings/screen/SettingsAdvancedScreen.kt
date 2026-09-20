@@ -488,7 +488,8 @@ object SettingsAdvancedScreen : SearchableSettings {
                     preference = extensionInstallerPref,
                     entries = extensionInstallerPref.entries
                         .filter {
-                            // TODO: allow private option in stable versions once URL handling is more fleshed out
+                            // Follow-up: allow private option in stable versions once URL handling is more fleshed out
+                            // https://github.com/kuhyx/TachiyomiSY/issues/13
                             if (isPreviewBuildType || isDebugBuildType) {
                                 true
                             } else {

@@ -22,7 +22,8 @@ fun Configuration.isTabletUi(): Boolean {
     return smallestScreenWidthDp >= TABLET_UI_REQUIRED_SCREEN_WIDTH_DP
 }
 
-// TODO: move the logic to `isTabletUi()` when main activity is rewritten in Compose
+// Follow-up: move the logic to `isTabletUi()` when main activity is rewritten in Compose
+// https://github.com/kuhyx/TachiyomiSY/issues/23
 fun Context.prepareTabletUiContext(): Context {
     val configuration = resources.configuration
     val expected = when (Injekt.get<UiPreferences>().tabletUiMode.get()) {

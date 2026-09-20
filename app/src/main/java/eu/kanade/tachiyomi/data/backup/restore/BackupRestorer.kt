@@ -148,7 +148,8 @@ class BackupRestorer(
                 restoreExtensionStores(backup.backupExtensionStores)
             }
 
-            // TODO: optionally trigger online library + tracker update
+            // Follow-up: optionally trigger online library + tracker update
+            // https://github.com/kuhyx/TachiyomiSY/issues/15
         }
     }
 

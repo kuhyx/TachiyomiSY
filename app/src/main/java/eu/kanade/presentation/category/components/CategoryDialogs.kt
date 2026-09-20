@@ -109,7 +109,7 @@ fun CategoryCreateDialog(
     )
 
     LaunchedEffect(focusRequester) {
-        // TODO: https://issuetracker.google.com/issues/204502668
+        // Follow-up: https://issuetracker.google.com/issues/204502668 (https://github.com/kuhyx/TachiyomiSY/issues/9)
         delay(0.1.seconds)
         focusRequester.requestFocus()
     }
@@ -173,7 +173,7 @@ fun CategoryRenameDialog(
     )
 
     LaunchedEffect(focusRequester) {
-        // TODO: https://issuetracker.google.com/issues/204502668
+        // Follow-up: https://issuetracker.google.com/issues/204502668 (https://github.com/kuhyx/TachiyomiSY/issues/9)
         delay(0.1.seconds)
         focusRequester.requestFocus()
     }
