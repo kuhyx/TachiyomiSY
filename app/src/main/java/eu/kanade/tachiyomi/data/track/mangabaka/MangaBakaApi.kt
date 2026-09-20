@@ -239,10 +239,8 @@ internal class MangaBakaApi(
                         .data
                         .let { parseSearchItem(it) }
                 } catch (e: HttpException) {
-                    if (e.code == HttpURLConnection.HTTP_NOT_FOUND) {
-                        return@with null
-                    }
-                    throw e
+                    if (e.code != HttpURLConnection.HTTP_NOT_FOUND) throw e
+                    null
                 }
             }
         }

@@ -53,34 +53,31 @@ internal class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : In
 
     private fun refreshToken(chain: Interceptor.Chain): MALOAuth = synchronized(this) {
         if (tokenExpired) throw MALTokenExpired()
-        oauth?.takeUnless { it.isExpired() }?.let { return@synchronized it }
+        oauth?.takeUnless { it.isExpired() } ?: fetchRefreshedToken(chain)
+    }
 
-        val response = try {
-            chain.proceed(MyAnimeListApi.refreshTokenRequest(oauth!!))
-        } catch (_: Throwable) {
-            throw MALTokenRefreshFailed()
-        }
-
-        if (response.code == HttpURLConnection.HTTP_UNAUTHORIZED) {
+    // Trades the stored refresh token for a new OAuth pair and keeps it.
+    private fun fetchRefreshedToken(chain: Interceptor.Chain): MALOAuth {
+        val response = runCatching { chain.proceed(MyAnimeListApi.refreshTokenRequest(oauth!!)) }.getOrNull()
+        if (response?.code == HttpURLConnection.HTTP_UNAUTHORIZED) {
             myanimelist.setAuthExpired()
             throw MALTokenExpired()
         }
 
-        return runCatching {
-            if (response.isSuccessful) {
-                with(json) { response.parseAs<MALOAuth>() }
-            } else {
-                response.close()
-                null
-            }
-        }
-            .getOrNull()
-            ?.also {
-                this.oauth = it
-                myanimelist.saveOAuth(it)
-            }
-            ?: throw MALTokenRefreshFailed()
+        val refreshed = response?.let(::parseRefreshedToken) ?: throw MALTokenRefreshFailed()
+        this.oauth = refreshed
+        myanimelist.saveOAuth(refreshed)
+        return refreshed
     }
+
+    private fun parseRefreshedToken(response: Response): MALOAuth? = runCatching {
+        if (response.isSuccessful) {
+            with(json) { response.parseAs<MALOAuth>() }
+        } else {
+            response.close()
+            null
+        }
+    }.getOrNull()
 }
 
 internal class MALTitleNotApproved : IOException("MAL: This title can't be added because it is waiting for approval.")

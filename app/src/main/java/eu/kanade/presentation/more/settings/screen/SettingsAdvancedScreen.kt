@@ -294,11 +294,11 @@ internal object SettingsAdvancedScreen : SearchableSettings {
                             // OkHttp checks for valid values internally
                             Headers.Builder().add("User-Agent", it)
                             context.toast(MR.strings.requires_app_restart)
+                            true
                         } catch (_: IllegalArgumentException) {
                             context.toast(MR.strings.error_user_agent_string_invalid)
-                            return@EditTextPreference false
+                            false
                         }
-                        true
                     },
                 ),
                 Preference.PreferenceItem.TextPreference(

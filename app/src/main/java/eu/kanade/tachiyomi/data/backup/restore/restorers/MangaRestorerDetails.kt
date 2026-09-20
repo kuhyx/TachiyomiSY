@@ -111,18 +111,13 @@ internal suspend fun MangaRestorer.restoreTracking(manga: Manga, backupTracks: L
         .mapNotNull {
             val track = it.getTrackImpl()
             val dbTrack = dbTrackByTrackerId[track.trackerId]
-                ?: // New track
-                return@mapNotNull track.copy(
-                    id = 0, // Let DB assign new ID
-                    mangaId = manga.id,
-                )
-
-            if (track.forComparison() == dbTrack.forComparison()) {
+            when {
+                // New track; the db assigns the id
+                dbTrack == null -> track.copy(id = 0, mangaId = manga.id)
                 // Same state; skip
-                null
-            } else {
+                track.forComparison() == dbTrack.forComparison() -> null
                 // Update to an existing track
-                dbTrack.copy(
+                else -> dbTrack.copy(
                     remoteId = track.remoteId,
                     libraryId = track.libraryId,
                     lastChapterRead = max(dbTrack.lastChapterRead, track.lastChapterRead),

@@ -152,9 +152,7 @@ internal class SyncYomiSyncService(
                 .takeIf { it?.isNotEmpty() == true }
                 ?: throw SyncYomiException("Missing ETag")
 
-            val byteArray = response.body.byteStream().use {
-                return@use it.readBytes()
-            }
+            val byteArray = response.body.byteStream().use { it.readBytes() }
 
             return try {
                 val backup = protoBuf.decodeFromByteArray(Backup.serializer(), byteArray)

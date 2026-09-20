@@ -19,9 +19,7 @@ import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import eu.kanade.domain.manga.interactor.UpdateManga
-import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.domain.sync.SyncPreferences
-import eu.kanade.domain.track.model.toDbTrack
 import eu.kanade.domain.track.model.toDomainTrack
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.startDownloads
@@ -38,9 +36,6 @@ import eu.kanade.tachiyomi.util.system.isRunning
 import eu.kanade.tachiyomi.util.system.setForegroundSafely
 import eu.kanade.tachiyomi.util.system.workManager
 import exh.log.xLogE
-import exh.md.utils.FollowStatus
-import exh.md.utils.MdUtil
-import exh.md.utils.getEnabledMangaDex
 import exh.source.LIBRARY_UPDATE_EXCLUDED_SOURCES
 import exh.source.MERGED_SOURCE_ID
 import exh.source.mangaDexSourceIds
@@ -109,28 +104,28 @@ private const val BACKOFF_MINUTES = 10L
 internal class LibraryUpdateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
-    private val sourceManager: SourceManager = Injekt.get()
+    internal val sourceManager: SourceManager = Injekt.get()
     private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val downloadManager: DownloadManager = Injekt.get()
     private val getLibraryManga: GetLibraryManga = Injekt.get()
-    private val getManga: GetManga = Injekt.get()
+    internal val getManga: GetManga = Injekt.get()
     private val fetchInterval: FetchInterval = Injekt.get()
     private val filterChaptersForDownload: FilterChaptersForDownload = Injekt.get()
-    private val updateManga: UpdateManga = Injekt.get()
-    private val updateMangaFromRemote: UpdateMangaFromRemote = Injekt.get()
+    internal val updateManga: UpdateManga = Injekt.get()
+    internal val updateMangaFromRemote: UpdateMangaFromRemote = Injekt.get()
 
     // SY -->
-    private val getFavorites: GetFavorites = Injekt.get()
-    private val insertFlatMetadata: InsertFlatMetadata = Injekt.get()
-    private val networkToLocalManga: NetworkToLocalManga = Injekt.get()
+    internal val getFavorites: GetFavorites = Injekt.get()
+    internal val insertFlatMetadata: InsertFlatMetadata = Injekt.get()
+    internal val networkToLocalManga: NetworkToLocalManga = Injekt.get()
     private val getMergedMangaForDownloading: GetMergedMangaForDownloading = Injekt.get()
-    private val getTracks: GetTracks = Injekt.get()
-    private val insertTrack: InsertTrack = Injekt.get()
+    internal val getTracks: GetTracks = Injekt.get()
+    internal val insertTrack: InsertTrack = Injekt.get()
     private val trackerManager: TrackerManager = Injekt.get()
-    private val mdList = trackerManager.mdList
+    internal val mdList = trackerManager.mdList
     // SY <--
 
-    private val notifier = LibraryUpdateNotifier(context)
+    internal val notifier = LibraryUpdateNotifier(context)
 
     private var mangaToUpdate: List<LibraryManga> = mutableListOf()
 
@@ -462,12 +457,8 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
             val downloadingManga = runBlocking { getMergedMangaForDownloading.await(manga.id) }
                 .associateBy { it.id }
             chapters.groupBy { it.mangaId }
-                .forEach {
-                    downloadManager.downloadChapters(
-                        downloadingManga[it.key] ?: return@forEach,
-                        it.value,
-                        false,
-                    )
+                .forEach { (mangaId, mangaChapters) ->
+                    downloadingManga[mangaId]?.let { downloadManager.downloadChapters(it, mangaChapters, false) }
                 }
 
             return
@@ -542,91 +533,6 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
 
     // SY -->
 
-    // filter all follows from Mangadex and only add reading or rereading manga to library.
-    private suspend fun syncFollows() = coroutineScope {
-        val preferences = Injekt.get<SourcePreferences>()
-        var count = 0
-        val mangaDex = MdUtil.getEnabledMangaDex(preferences, sourceManager = sourceManager)
-            ?: return@coroutineScope
-        val syncFollowStatusInts = preferences.mangadexSyncToLibraryIndexes.get().map { it.toInt() }
-
-        val size: Int
-        mangaDex.fetchAllFollows()
-            .filter { (_, metadata) ->
-                syncFollowStatusInts.contains(metadata.followStatus)
-            }
-            .also { size = it.size }
-            .forEach { (networkManga, metadata) ->
-                ensureActive()
-
-                count++
-                notifier.showProgressNotification(
-                    listOf(Manga.create().copy(ogTitle = networkManga.title)),
-                    count,
-                    size,
-                )
-
-                var dbManga = getManga.await(networkManga.url, mangaDex.id)
-
-                if (dbManga == null) {
-                    dbManga = networkToLocalManga(
-                        Manga.create().copy(
-                            url = networkManga.url,
-                            ogTitle = networkManga.title,
-                            source = mangaDex.id,
-                            favorite = true,
-                            dateAdded = System.currentTimeMillis(),
-                        ),
-                    )
-                } else if (!dbManga.favorite) {
-                    updateManga.awaitUpdateFavorite(dbManga.id, true)
-                }
-
-                updateMangaFromRemote(
-                    dbManga,
-                    fetchDetails = false,
-                    fetchChapters = false,
-                )
-
-                metadata.mangaId = dbManga.id
-                insertFlatMetadata.await(metadata)
-            }
-
-        notifier.cancelProgressNotification()
-    }
-
-    // Method that updates the all mangas which are not tracked as "reading" on mangadex.
-    private suspend fun pushFavorites() = coroutineScope {
-        var count = 0
-        val listManga = getFavorites.await().filter { it.source in mangaDexSourceIds }
-
-        // filter all follows from Mangadex and only add reading or rereading manga to library
-        if (mdList.isLoggedIn) {
-            listManga.forEach { manga ->
-                ensureActive()
-
-                count++
-                notifier.showProgressNotification(listOf(manga), count, listManga.size)
-
-                // Get this manga's trackers from the database
-                val dbTracks = getTracks.await(manga.id)
-
-                // find the mdlist entry if its unfollowed the follow it
-                var tracker = dbTracks.firstOrNull { it.trackerId == TrackerManager.MDLIST }
-                    ?: mdList.createInitialTracker(manga).toDomainTrack(idRequired = false)
-
-                if (tracker?.status == FollowStatus.UNFOLLOWED.long) {
-                    tracker = tracker.copy(
-                        status = FollowStatus.READING.long,
-                    )
-                    val updatedTrack = mdList.update(tracker.toDbTrack())
-                    insertTrack.await(updatedTrack.toDomainTrack(false)!!)
-                }
-            }
-        }
-
-        notifier.cancelProgressNotification()
-    }
     // SY <--
 
     private suspend fun withUpdateNotification(

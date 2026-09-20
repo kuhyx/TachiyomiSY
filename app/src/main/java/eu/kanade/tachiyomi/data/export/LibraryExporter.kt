@@ -51,7 +51,7 @@ internal object LibraryExporter {
             }
         }
         return rows.joinToString("\r\n") { columns ->
-            columns.joinToString(",") columns@{ column ->
+            columns.joinToString(",") { column ->
                 if (column.isNullOrBlank()) {
                     ""
                 } else {
