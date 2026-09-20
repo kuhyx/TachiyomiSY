@@ -132,7 +132,7 @@ internal data class BrowseSourceScreen(
         val snackbarHostState = remember { SnackbarHostState() }
 
         val onHelpClick = { uriHandler.openUri(LocalSource.HELP_URL) }
-        val onWebViewClick = f@{
+        val onWebViewClick = {
             val source = screenModel.source as? HttpSource
             if (source != null) {
                 navigator.push(

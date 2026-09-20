@@ -67,55 +67,56 @@ internal class AppModule(val app: Application) : InjektModule {
 
     private var sqlDriverRef: WeakReference<SqlDriver>? = null
 
+    // The shared driver: reused while alive, sqlcipher when the database is encrypted.
+    private fun sqlDriver(): SqlDriver = sqlDriverRef?.get() ?: newSqlDriver().also { sqlDriverRef = WeakReference(it) }
+
+    private fun newSqlDriver(): SqlDriver {
+        // SY -->
+        if (securityPreferences.encryptDatabase.get()) {
+            System.loadLibrary("sqlcipher")
+
+            return AndroidSqliteDriver(
+                schema = Database.Schema.synchronous(),
+                context = app,
+                name = CbzCrypto.DATABASE_NAME,
+                factory = SupportOpenHelperFactory(
+                    CbzCrypto.getDecryptedPasswordSql(),
+                    null,
+                    false,
+                    SQLCIPHER_MIN_PASSWORD_LENGTH,
+                ),
+                callback = object : AndroidSqliteDriver.Callback(Database.Schema.synchronous()) {
+                    override fun onOpen(db: SupportSQLiteDatabase) {
+                        super.onOpen(db)
+                        setPragma(db, "foreign_keys = ON")
+                        setPragma(db, "journal_mode = WAL")
+                        setPragma(db, "synchronous = NORMAL")
+                    }
+
+                    private fun setPragma(db: SupportSQLiteDatabase, pragma: String) {
+                        val cursor = db.query("PRAGMA $pragma")
+                        cursor.moveToFirst()
+                        cursor.close()
+                    }
+                },
+            )
+        }
+        // SY <--
+
+        return AndroidxSqliteDriver(
+            driver = BundledSQLiteDriver(),
+            databaseType = AndroidxSqliteDatabaseType.FileProvider(app, "tachiyomi.db"),
+            schema = Database.Schema,
+            configuration = AndroidxSqliteConfiguration(
+                isForeignKeyConstraintsEnabled = true,
+            ),
+        )
+    }
+
     override fun InjektRegistrar.registerInjectables() {
         addSingleton(app)
 
-        addSingletonFactory<SqlDriver> {
-            synchronized(lock) {
-                sqlDriverRef?.get()?.let { return@synchronized it }
-
-                // SY -->
-                if (securityPreferences.encryptDatabase.get()) {
-                    System.loadLibrary("sqlcipher")
-
-                    return@synchronized AndroidSqliteDriver(
-                        schema = Database.Schema.synchronous(),
-                        context = app,
-                        name = CbzCrypto.DATABASE_NAME,
-                        factory = SupportOpenHelperFactory(
-                            CbzCrypto.getDecryptedPasswordSql(),
-                            null,
-                            false,
-                            SQLCIPHER_MIN_PASSWORD_LENGTH,
-                        ),
-                        callback = object : AndroidSqliteDriver.Callback(Database.Schema.synchronous()) {
-                            override fun onOpen(db: SupportSQLiteDatabase) {
-                                super.onOpen(db)
-                                setPragma(db, "foreign_keys = ON")
-                                setPragma(db, "journal_mode = WAL")
-                                setPragma(db, "synchronous = NORMAL")
-                            }
-
-                            private fun setPragma(db: SupportSQLiteDatabase, pragma: String) {
-                                val cursor = db.query("PRAGMA $pragma")
-                                cursor.moveToFirst()
-                                cursor.close()
-                            }
-                        },
-                    ).also { sqlDriverRef = WeakReference(it) }
-                }
-            }
-            // SY <--
-
-            AndroidxSqliteDriver(
-                driver = BundledSQLiteDriver(),
-                databaseType = AndroidxSqliteDatabaseType.FileProvider(app, "tachiyomi.db"),
-                schema = Database.Schema,
-                configuration = AndroidxSqliteConfiguration(
-                    isForeignKeyConstraintsEnabled = true,
-                ),
-            ).also { sqlDriverRef = WeakReference(it) }
-        }
+        addSingletonFactory<SqlDriver> { synchronized(lock) { sqlDriver() } }
         addSingletonFactory {
             Database(
                 driver = get(),

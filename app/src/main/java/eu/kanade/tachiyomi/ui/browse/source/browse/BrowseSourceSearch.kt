@@ -46,32 +46,7 @@ internal fun BrowseSourceScreenModel.search(query: String? = null, filters: Filt
 
 internal fun BrowseSourceScreenModel.searchGenre(genreName: String) {
     val defaultFilters = source.getFilterList()
-    var genreExists = false
-
-    filter@ for (sourceFilter in defaultFilters) {
-        if (sourceFilter is SourceModelFilter.Group<*>) {
-            for (filter in sourceFilter.state) {
-                if (filter is SourceModelFilter<*> && filter.name.equals(genreName, true)) {
-                    when (filter) {
-                        is SourceModelFilter.TriState -> filter.state = 1
-                        is SourceModelFilter.CheckBox -> filter.state = true
-                        else -> {}
-                    }
-                    genreExists = true
-                    break@filter
-                }
-            }
-        } else if (sourceFilter is SourceModelFilter.Select<*>) {
-            val index = sourceFilter.values.filterIsInstance<String>()
-                .indexOfFirst { it.equals(genreName, true) }
-
-            if (index != -1) {
-                sourceFilter.state = index
-                genreExists = true
-                break
-            }
-        }
-    }
+    val genreExists = defaultFilters.any { applyGenre(it, genreName) }
 
     updateState {
         val listing = if (genreExists) {
@@ -84,5 +59,32 @@ internal fun BrowseSourceScreenModel.searchGenre(genreName: String) {
             listing = listing,
             toolbarQuery = listing.query,
         )
+    }
+}
+
+// Selects [genreName] in [sourceFilter] when it offers it; true when something was selected.
+private fun applyGenre(sourceFilter: SourceModelFilter<*>, genreName: String): Boolean = when (sourceFilter) {
+    is SourceModelFilter.Group<*> -> {
+        val filter = sourceFilter.state
+            .filterIsInstance<SourceModelFilter<*>>()
+            .firstOrNull { it.name.equals(genreName, true) }
+        when (filter) {
+            is SourceModelFilter.TriState -> {
+                filter.state = 1
+            }
+            is SourceModelFilter.CheckBox -> {
+                filter.state = true
+            }
+            else -> {}
+        }
+        filter != null
+    }
+    is SourceModelFilter.Select<*> -> {
+        val index = sourceFilter.values.filterIsInstance<String>().indexOfFirst { it.equals(genreName, true) }
+        if (index != -1) sourceFilter.state = index
+        index != -1
+    }
+    else -> {
+        false
     }
 }
