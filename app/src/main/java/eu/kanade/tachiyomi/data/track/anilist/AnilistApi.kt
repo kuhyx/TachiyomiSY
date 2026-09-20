@@ -29,6 +29,62 @@ internal const val QUERY = "query"
 // AniList tokens live a year.
 private const val YEAR_MILLIS = 365L * 24L * 60L * 60L * 1000L
 
+private val FIND_LIB_MANGA_QUERY = $$"""
+|query ($id: Int!, $manga_id: Int!) {
+    |Page {
+        |mediaList(userId: $id, type: MANGA, mediaId: $manga_id) {
+            |id
+            |status
+            |scoreRaw: score(format: POINT_100)
+            |progress
+            |private
+            |startedAt {
+                |year
+                |month
+                |day
+            |}
+            |completedAt {
+                |year
+                |month
+                |day
+            |}
+            |media {
+                |id
+                |title {
+                    |userPreferred
+                |}
+                |coverImage {
+                    |large
+                |}
+                |format
+                |status
+                |chapters
+                |description
+                |startDate {
+                    |year
+                    |month
+                    |day
+                |}
+                |staff {
+                    |edges {
+                        |role
+                        |id
+                        |node {
+                            |name {
+                                |full
+                                |userPreferred
+                                |native
+                            |}
+                        |}
+                    |}
+                |}
+            |}
+        |}
+    |}
+|}
+|
+""".trimMargin()
+
 internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
     internal val json: Json by injectLazy()
@@ -134,63 +190,8 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
 
     suspend fun findLibManga(track: Track, userid: Int): Track? {
         return withIOContext {
-            val query = $$"""
-            |query ($id: Int!, $manga_id: Int!) {
-                |Page {
-                    |mediaList(userId: $id, type: MANGA, mediaId: $manga_id) {
-                        |id
-                        |status
-                        |scoreRaw: score(format: POINT_100)
-                        |progress
-                        |private
-                        |startedAt {
-                            |year
-                            |month
-                            |day
-                        |}
-                        |completedAt {
-                            |year
-                            |month
-                            |day
-                        |}
-                        |media {
-                            |id
-                            |title {
-                                |userPreferred
-                            |}
-                            |coverImage {
-                                |large
-                            |}
-                            |format
-                            |status
-                            |chapters
-                            |description
-                            |startDate {
-                                |year
-                                |month
-                                |day
-                            |}
-                            |staff {
-                                |edges {
-                                    |role
-                                    |id
-                                    |node {
-                                        |name {
-                                            |full
-                                            |userPreferred
-                                            |native
-                                        |}
-                                    |}
-                                |}
-                            |}
-                        |}
-                    |}
-                |}
-            |}
-            |
-            """.trimMargin()
             val payload = buildJsonObject {
-                put(QUERY, query)
+                put(QUERY, FIND_LIB_MANGA_QUERY)
                 putJsonObject(VARIABLES) {
                     put("id", userid)
                     put("manga_id", track.remoteId)

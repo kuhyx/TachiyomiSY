@@ -24,6 +24,7 @@ import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.interactor.GetIdsOfFavoriteMangaWithMetadata
 import tachiyomi.domain.manga.interactor.GetSearchTags
 import tachiyomi.domain.manga.interactor.GetSearchTitles
+import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.model.Track
@@ -119,94 +120,98 @@ internal class LibrarySearch(
         searchTitles: List<SearchTitle>? = null,
         loggedInTrackServices: Map<Long, TriState>,
     ): Boolean {
-        val manga = libraryManga.manga
+        // Tracks only count as searchable while some tracker is logged in.
+        val searchableTracks = tracks.takeIf { loggedInTrackServices.isNotEmpty() }
+        val target = SearchTarget(libraryManga.manga, searchableTracks, source, checkGenre, searchTags, searchTitles)
+        return queries.all { queryComponent ->
+            when (queryComponent) {
+                is Text -> if (queryComponent.excluded) {
+                    target.excludes(queryComponent)
+                } else {
+                    target.matches(queryComponent)
+                }
+                is Namespace -> if (queryComponent.excluded) {
+                    target.excludes(queryComponent)
+                } else {
+                    target.matches(queryComponent)
+                }
+                else -> true
+            }
+        }
+    }
+
+    /** One library entry with everything a query component can be matched against. */
+    private inner class SearchTarget(
+        val manga: Manga,
+        val tracks: List<Track>?,
+        val source: Source?,
+        checkGenre: Boolean,
+        val searchTags: List<SearchTag>?,
+        val searchTitles: List<SearchTitle>?,
+    ) {
         val sourceIdString = manga.source.takeUnless { it == LocalSource.ID }?.toString()
         val genre = if (checkGenre) manga.genre.orEmpty() else emptyList()
         val context = Injekt.get<Application>()
-        return queries.all { queryComponent ->
-            when (queryComponent.excluded) {
-                false -> when (queryComponent) {
-                    is Text -> {
-                        val query = queryComponent.asQuery()
-                        manga.title.contains(query, true) ||
-                            manga.author?.contains(query, true) == true ||
-                            manga.artist?.contains(query, true) == true ||
-                            manga.description?.contains(query, true) == true ||
-                            source?.name?.contains(query, true) == true ||
-                            (sourceIdString != null && sourceIdString == query) ||
-                            (
-                                loggedInTrackServices.isNotEmpty() &&
-                                    tracks != null &&
-                                    filterTracks(query, tracks, context)
-                                ) ||
-                            genre.fastAny { it.contains(query, true) } ||
-                            searchTags?.fastAny { it.name.contains(query, true) } == true ||
-                            searchTitles?.fastAny { it.title.contains(query, true) } == true
-                    }
 
-                    is Namespace -> {
-                        searchTags != null &&
-                            searchTags.fastAny {
-                                val tag = queryComponent.tag
-                                (
-                                    it.namespace.equals(queryComponent.namespace, true) &&
-                                        tag?.run { it.name.contains(tag.asQuery(), true) } == true
-                                    ) ||
-                                    (tag == null && it.namespace.equals(queryComponent.namespace, true))
-                            }
-                    }
+        fun matches(component: Text): Boolean {
+            val query = component.asQuery()
+            return manga.title.contains(query, true) ||
+                manga.author?.contains(query, true) == true ||
+                manga.artist?.contains(query, true) == true ||
+                manga.description?.contains(query, true) == true ||
+                source?.name?.contains(query, true) == true ||
+                (sourceIdString != null && sourceIdString == query) ||
+                (tracks != null && filterTracks(query, tracks, context)) ||
+                genre.fastAny { it.contains(query, true) } ||
+                searchTags?.fastAny { it.name.contains(query, true) } == true ||
+                searchTitles?.fastAny { it.title.contains(query, true) } == true
+        }
 
-                    else -> {
-                        true
+        fun excludes(component: Text): Boolean {
+            val query = component.asQuery()
+            return query.isBlank() ||
+                (
+                    !manga.title.contains(query, true) &&
+                        manga.author?.contains(query, true) != true &&
+                        manga.artist?.contains(query, true) != true &&
+                        manga.description?.contains(query, true) != true &&
+                        source?.name?.contains(query, true) != true &&
+                        sourceIdString != null && sourceIdString != query &&
+                        (tracks == null || !filterTracks(query, tracks, context)) &&
+                        !genre.fastAny { it.contains(query, true) } &&
+                        searchTags?.fastAny { it.name.contains(query, true) } != true &&
+                        searchTitles?.fastAny { it.title.contains(query, true) } != true
+                    )
+        }
+
+        fun matches(component: Namespace): Boolean {
+            val tag = component.tag
+            return searchTags != null &&
+                searchTags.fastAny {
+                    (
+                        it.namespace.equals(component.namespace, true) &&
+                            tag?.run { it.name.contains(tag.asQuery(), true) } == true
+                        ) ||
+                        (tag == null && it.namespace.equals(component.namespace, true))
+                }
+        }
+
+        fun excludes(component: Namespace): Boolean {
+            val searchedTag = component.tag?.asQuery()
+            return searchTags == null ||
+                (component.namespace.isBlank() && searchedTag.isNullOrBlank()) ||
+                searchTags.fastAll { mangaTag ->
+                    when {
+                        component.namespace.isBlank() && !searchedTag.isNullOrBlank() ->
+                            !mangaTag.name.contains(searchedTag, true)
+                        searchedTag.isNullOrBlank() ->
+                            mangaTag.namespace == null || !mangaTag.namespace.equals(component.namespace, true)
+                        mangaTag.namespace.isNullOrBlank() -> true
+                        else ->
+                            !mangaTag.name.contains(searchedTag, true) ||
+                                !mangaTag.namespace.equals(component.namespace, true)
                     }
                 }
-
-                true -> when (queryComponent) {
-                    is Text -> {
-                        val query = queryComponent.asQuery()
-                        query.isBlank() ||
-                            (
-                                !manga.title.contains(query, true) &&
-                                    manga.author?.contains(query, true) != true &&
-                                    manga.artist?.contains(query, true) != true &&
-                                    manga.description?.contains(query, true) != true &&
-                                    source?.name?.contains(query, true) != true &&
-                                    sourceIdString != null && sourceIdString != query &&
-                                    (
-                                        loggedInTrackServices.isEmpty() ||
-                                            tracks == null ||
-                                            !filterTracks(query, tracks, context)
-                                        ) &&
-                                    !genre.fastAny { it.contains(query, true) } &&
-                                    searchTags?.fastAny { it.name.contains(query, true) } != true &&
-                                    searchTitles?.fastAny { it.title.contains(query, true) } != true
-                                )
-                    }
-
-                    is Namespace -> {
-                        val searchedTag = queryComponent.tag?.asQuery()
-                        searchTags == null ||
-                            (queryComponent.namespace.isBlank() && searchedTag.isNullOrBlank()) ||
-                            searchTags.fastAll { mangaTag ->
-                                if (queryComponent.namespace.isBlank() && !searchedTag.isNullOrBlank()) {
-                                    !mangaTag.name.contains(searchedTag, true)
-                                } else if (searchedTag.isNullOrBlank()) {
-                                    mangaTag.namespace == null ||
-                                        !mangaTag.namespace.equals(queryComponent.namespace, true)
-                                } else if (mangaTag.namespace.isNullOrBlank()) {
-                                    true
-                                } else {
-                                    !mangaTag.name.contains(searchedTag, true) ||
-                                        !mangaTag.namespace.equals(queryComponent.namespace, true)
-                                }
-                            }
-                    }
-
-                    else -> {
-                        true
-                    }
-                }
-            }
         }
     }
 

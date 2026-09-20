@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -59,11 +58,8 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.NetworkPreferences
 import eu.kanade.tachiyomi.ui.base.delegate.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.DeviceUtil
-import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
-import eu.kanade.tachiyomi.util.system.cancelNotification
-import eu.kanade.tachiyomi.util.system.notify
 import exh.SY_DEBUG_VERSION
 import exh.log.CrashlyticsPrinter
 import exh.log.EHLogLevel
@@ -71,21 +67,16 @@ import exh.log.EnhancedFilePrinter
 import exh.log.XLogLogcatLogger
 import exh.log.xLogD
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import logcat.LogPriority
 import logcat.LogcatLogger
 import mihon.core.firebase.FirebaseConfig
 import mihon.core.migration.Migrator
 import mihon.core.migration.migrations.migrations
 import org.conscrypt.Conscrypt
-import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
-import tachiyomi.core.common.util.system.ImageUtil
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.storage.service.StorageManager
-import tachiyomi.i18n.MR
 import tachiyomi.presentation.widget.WidgetManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -101,10 +92,10 @@ private const val IMAGE_DECODE_THREADS = 3
 internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factory {
 
     internal val basePreferences: BasePreferences by injectLazy()
-    private val privacyPreferences: PrivacyPreferences by injectLazy()
+    internal val privacyPreferences: PrivacyPreferences by injectLazy()
     private val networkPreferences: NetworkPreferences by injectLazy()
 
-    private val disableIncognitoReceiver = DisableIncognitoReceiver()
+    internal val disableIncognitoReceiver = DisableIncognitoReceiver()
 
     @SuppressLint("LaunchActivityFromNotification")
     override fun onCreate() {
@@ -149,52 +140,8 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
 
         val scope = ProcessLifecycleOwner.get().lifecycleScope
 
-        // Show notification to disable Incognito Mode when it's enabled
-        basePreferences.incognitoMode.changes()
-            .onEach { enabled ->
-                if (enabled) {
-                    disableIncognitoReceiver.register()
-                    notify(
-                        Notifications.ID_INCOGNITO_MODE,
-                        Notifications.CHANNEL_INCOGNITO_MODE,
-                    ) {
-                        setContentTitle(stringResource(MR.strings.pref_incognito_mode))
-                        setContentText(stringResource(MR.strings.notification_incognito_text))
-                        setSmallIcon(R.drawable.ic_glasses_24dp)
-                        setOngoing(true)
-
-                        val pendingIntent = PendingIntent.getBroadcast(
-                            this@App,
-                            0,
-                            Intent(ACTION_DISABLE_INCOGNITO_MODE).setPackage(BuildConfig.APPLICATION_ID),
-                            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
-                        )
-                        setContentIntent(pendingIntent)
-                    }
-                } else {
-                    disableIncognitoReceiver.unregister()
-                    cancelNotification(Notifications.ID_INCOGNITO_MODE)
-                }
-            }
-            .launchIn(scope)
-
-        privacyPreferences.analytics
-            .changes()
-            .onEach(FirebaseConfig::setAnalyticsEnabled)
-            .launchIn(scope)
-
-        privacyPreferences.crashlytics
-            .changes()
-            .onEach(FirebaseConfig::setCrashlyticsEnabled)
-            .launchIn(scope)
-
-        basePreferences.hardwareBitmapThreshold.let { preference ->
-            if (!preference.isSet()) preference.set(GLUtil.DEVICE_TEXTURE_LIMIT)
-        }
-
-        basePreferences.hardwareBitmapThreshold.changes()
-            .onEach { ImageUtil.hardwareBitmapThreshold = it }
-            .launchIn(scope)
+        observeIncognitoMode(scope)
+        observeRuntimePreferences(scope)
 
         setAppCompatDelegateThemeMode(Injekt.get<UiPreferences>().themeMode.get())
 
@@ -208,11 +155,7 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
         if (!WorkManager.isInitialized()) {
             WorkManager.initialize(this, Configuration.Builder().build())
         }
-        val syncPreferences: SyncPreferences = Injekt.get()
-        val syncTriggerOpt = syncPreferences.getSyncTriggerOptions()
-        if (syncPreferences.isSyncEnabled() && syncTriggerOpt.syncOnAppStart) {
-            SyncDataJob.startNow(this@App)
-        }
+        startSyncIfEnabledOnAppStart()
 
         initializeMigrator()
     }
@@ -376,7 +319,7 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
         )
     }
 
-    private inner class DisableIncognitoReceiver : BroadcastReceiver() {
+    internal inner class DisableIncognitoReceiver : BroadcastReceiver() {
         private var registered = false
 
         override fun onReceive(context: Context, intent: Intent) {
@@ -404,7 +347,7 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
     }
 }
 
-private const val ACTION_DISABLE_INCOGNITO_MODE = "tachi.action.DISABLE_INCOGNITO_MODE"
+internal const val ACTION_DISABLE_INCOGNITO_MODE = "tachi.action.DISABLE_INCOGNITO_MODE"
 
 /** One xlog [Printer] over several: the vararg `XLog.init` would otherwise need a spread copy. */
 private class FanOutPrinter(private val printers: List<Printer>) : Printer {

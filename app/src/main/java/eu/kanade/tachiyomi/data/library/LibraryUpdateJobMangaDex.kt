@@ -7,12 +7,15 @@ import eu.kanade.domain.track.model.toDbTrack
 import eu.kanade.domain.track.model.toDomainTrack
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.source.online.all.MangaDex
+import exh.log.xLogE
 import exh.md.utils.FollowStatus
 import exh.md.utils.MdUtil
 import exh.md.utils.getEnabledMangaDex
 import exh.source.mangaDexSourceIds
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
+import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.manga.model.Manga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -105,4 +108,22 @@ internal suspend fun LibraryUpdateJob.pushFavorites() = coroutineScope {
     }
 
     notifier.cancelProgressNotification()
+}
+
+/** Creates the MDList tracker for every entry in [mangaInSource] that has none; errors are logged and skipped. */
+internal suspend fun LibraryUpdateJob.addInitialMdListTracks(mangaInSource: List<LibraryManga>) {
+    mangaInSource.forEach { (manga) ->
+        try {
+            val tracks = getTracks.await(manga.id)
+            if (tracks.isEmpty() || tracks.none { it.trackerId == TrackerManager.MDLIST }) {
+                val track = mdList.createInitialTracker(manga)
+                insertTrack.await(mdList.refresh(track).toDomainTrack(false)!!)
+            }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            xLogE("Error adding initial track for ${manga.title}", expected)
+        }
+    }
 }

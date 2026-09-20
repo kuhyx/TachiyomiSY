@@ -8,23 +8,15 @@ import exh.md.dto.ChapterDto
 import exh.md.dto.MangaDto
 import exh.md.utils.MdConstants
 import exh.md.utils.MdUtil
-import exh.md.utils.addAltTitleToDesc
-import exh.md.utils.addFinalChapterToDesc
-import exh.md.utils.asMdMap
-import exh.md.utils.cleanDescription
-import exh.md.utils.getFromLangMap
 import exh.md.utils.getTitleFromManga
 import exh.metadata.metadata.MangaDexSearchMetadata
-import exh.metadata.metadata.base.RaisedTag
 import exh.metadata.metadata.base.raise
-import exh.util.capitalize
 import exh.util.floor
 import exh.util.nullIfEmpty
 import tachiyomi.domain.manga.interactor.GetFlatMetadataById
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.InsertFlatMetadata
 import uy.kohesive.injekt.injectLazy
-import java.util.Locale
 
 internal class ApiMangaParser(
     private val lang: String,
@@ -69,118 +61,30 @@ internal class ApiMangaParser(
         preferences: MangaDetailsPreferences,
     ) {
         val (simpleChapters, statistics, coverFileName) = extras
-        val coverQuality = preferences.coverQuality
-        val altTitlesInDesc = preferences.altTitlesInDesc
-        val finalChapterInDesc = preferences.finalChapterInDesc
-        val preferExtensionLangTitle = preferences.preferExtensionLangTitle
         with(metadata) {
             try {
                 val mangaAttributesDto = mangaDto.data.attributes
                 mdUuid = mangaDto.data.id
-                title = MdUtil.getTitleFromManga(mangaAttributesDto, lang, preferExtensionLangTitle)
+                title = MdUtil.getTitleFromManga(mangaAttributesDto, lang, preferences.preferExtensionLangTitle)
                 altTitles = mangaAttributesDto.altTitles
                     .filter { it.containsKey(lang) || it.containsKey("${mangaAttributesDto.originalLanguage}-ro") }
                     .mapNotNull { it.values.singleOrNull() }
                     .nullIfEmpty()
-
-                val mangaRelationshipsDto = mangaDto.data.relationships
-                cover = if (!coverFileName.isNullOrEmpty()) {
-                    MdUtil.cdnCoverUrl(mangaDto.data.id, "$coverFileName$coverQuality")
-                } else {
-                    mangaRelationshipsDto
-                        .firstOrNull { relationshipDto -> relationshipDto.type == MdConstants.Types.coverArt }
-                        ?.attributes
-                        ?.fileName
-                        ?.let { coverFileName ->
-                            MdUtil.cdnCoverUrl(mangaDto.data.id, "$coverFileName$coverQuality")
-                        }
-                }
-                val rawDesc = MdUtil.getFromLangMap(
-                    langMap = mangaAttributesDto.description.asMdMap(),
-                    currentLang = lang,
-                    originalLanguage = mangaAttributesDto.originalLanguage,
-                ).orEmpty()
-
-                description = MdUtil.cleanDescription(rawDesc)
-                    .let { if (altTitlesInDesc) MdUtil.addAltTitleToDesc(it, altTitles) else it }
-                    .let {
-                        if (finalChapterInDesc) {
-                            MdUtil.addFinalChapterToDesc(
-                                it,
-                                mangaAttributesDto.lastVolume,
-                                mangaAttributesDto.lastChapter,
-                            )
-                        } else {
-                            it
-                        }
-                    }
-
-                authors = mangaRelationshipsDto.filter { relationshipDto ->
-                    relationshipDto.type.equals(MdConstants.Types.author, true)
-                }.mapNotNull { it.attributes?.name }.distinct()
-
-                artists = mangaRelationshipsDto.filter { relationshipDto ->
-                    relationshipDto.type.equals(MdConstants.Types.artist, true)
-                }.mapNotNull { it.attributes?.name }.distinct()
-
+                cover = mangaDto.data.coverUrl(coverFileName, preferences.coverQuality)
+                description = mangaAttributesDto.description(lang, altTitles, preferences)
+                authors = mangaDto.data.relationshipNames(MdConstants.Types.author)
+                artists = mangaDto.data.relationshipNames(MdConstants.Types.artist)
                 langFlag = mangaAttributesDto.originalLanguage
-                val lastChapter = mangaAttributesDto.lastChapter?.toFloatOrNull()
-                lastChapterNumber = lastChapter?.floor()
-
+                lastChapterNumber = mangaAttributesDto.lastChapter?.toFloatOrNull()?.floor()
                 statistics?.rating?.let {
                     rating = it.bayesian?.toFloat()
                     // manga.users = it.users
                 }
-
-                mangaAttributesDto.links?.asMdMap<String>()?.let { links ->
-                    links["al"]?.let { anilistId = it }
-                    links["kt"]?.let { kitsuId = it }
-                    links["mal"]?.let { myAnimeListId = it }
-                    links["mu"]?.let { mangaUpdatesId = it }
-                    links["ap"]?.let { animePlanetId = it }
-                }
-
+                applyExternalLinks(mangaAttributesDto)
                 // val filteredChapters = filterChapterForChecking(networkApiManga)
-
-                val tempStatus = parseStatus(mangaAttributesDto.status)
-                val publishedOrCancelled = tempStatus == SManga.PUBLISHING_FINISHED || tempStatus == SManga.CANCELLED
-                status = if (
-                    mangaAttributesDto.lastChapter != null &&
-                    publishedOrCancelled &&
-                    mangaAttributesDto.lastChapter in simpleChapters
-                ) {
-                    SManga.COMPLETED
-                } else {
-                    tempStatus
-                }
-
-                // things that will go with the genre tags but aren't actually genre
-                val nonGenres = listOfNotNull(
-                    mangaAttributesDto.publicationDemographic
-                        ?.let {
-                            RaisedTag("Demographic", it.capitalize(Locale.US), MangaDexSearchMetadata.TAG_TYPE_DEFAULT)
-                        },
-                    mangaAttributesDto.contentRating
-                        ?.takeUnless { it == "safe" }
-                        ?.let {
-                            RaisedTag(
-                                "Content Rating",
-                                it.capitalize(Locale.US),
-                                MangaDexSearchMetadata.TAG_TYPE_DEFAULT,
-                            )
-                        },
-                )
-
-                val genres = nonGenres + mangaAttributesDto.tags
-                    .mapNotNull {
-                        it.attributes.name[lang] ?: it.attributes.name["en"]
-                    }
-                    .map {
-                        RaisedTag("Tags", it, MangaDexSearchMetadata.TAG_TYPE_DEFAULT)
-                    }
-
+                status = mangaAttributesDto.mangaStatus(parseStatus(mangaAttributesDto.status), simpleChapters)
                 if (tags.isNotEmpty()) tags.clear()
-                tags += genres
+                tags += mangaAttributesDto.genreTags(lang)
             } catch (expected: Exception) {
                 // Logged whatever the cause; the caller carries on.
                 xLogE("Parse into metadata error", expected)

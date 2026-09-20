@@ -104,7 +104,7 @@ internal class MangaMerger(
         if (manga.id == originalMangaId) {
             throw IllegalArgumentException(context.stringResource(SYMR.strings.merged_already))
         }
-        var mergedManga = Manga.create()
+        val draft = Manga.create()
             .copy(
                 url = originalManga.url,
                 ogTitle = originalManga.title,
@@ -118,57 +118,17 @@ internal class MangaMerger(
                 chapterFlags = originalManga.chapterFlags,
                 dateAdded = System.currentTimeMillis(),
             )
-
-        var existingManga = getManga.await(mergedManga.url, mergedManga.source)
-        while (existingManga != null) {
-            if (existingManga.favorite) {
-                throw IllegalArgumentException(context.stringResource(SYMR.strings.merge_duplicate))
-            } else {
-                withNonCancellableContext {
-                    existingManga?.id?.let {
-                        deleteByMergeId.await(it)
-                        deleteMangaById.await(it)
-                    }
-                }
-            }
-            existingManga = getManga.await(mergedManga.url, mergedManga.source)
-        }
-
-        mergedManga = networkToLocalManga(mergedManga)
+        deleteStaleMergedEntries(draft)
+        val mergedManga = networkToLocalManga(draft)
 
         getCategories.await(originalMangaId)
             .let {
                 setMangaCategories.await(mergedManga.id, it.map { it.id })
             }
 
-        val originalMangaReference = MergedMangaReference(
-            id = -1,
-            isInfoManga = true,
-            getChapterUpdates = true,
-            chapterSortMode = 0,
-            chapterPriority = 0,
-            downloadChapters = true,
-            mergeId = mergedManga.id,
-            mergeUrl = mergedManga.url,
-            mangaId = originalManga.id,
-            mangaUrl = originalManga.url,
-            mangaSourceId = originalManga.source,
-        )
-
-        val newMangaReference = MergedMangaReference(
-            id = -1,
-            isInfoManga = false,
-            getChapterUpdates = true,
-            chapterSortMode = 0,
-            chapterPriority = 0,
-            downloadChapters = true,
-            mergeId = mergedManga.id,
-            mergeUrl = mergedManga.url,
-            mangaId = manga.id,
-            mangaUrl = manga.url,
-            mangaSourceId = manga.source,
-        )
-
+        // The info entry, the newly merged one, and the merged entry's self-reference.
+        val originalMangaReference = mergedManga.referenceTo(originalManga, isInfoManga = true)
+        val newMangaReference = mergedManga.referenceTo(manga, isInfoManga = false)
         val mergedMangaReference = MergedMangaReference(
             id = -1,
             isInfoManga = false,
@@ -188,6 +148,37 @@ internal class MangaMerger(
         // Note that if the manga are merged in a different order, this won't trigger, but I don't care lol
         return mergedManga
     }
+
+    // A previous, non-favourited merged entry at the same url is leftover state; a favourited one is a real duplicate.
+    private suspend fun deleteStaleMergedEntries(draft: Manga) {
+        var existingManga = getManga.await(draft.url, draft.source)
+        while (existingManga != null) {
+            if (existingManga.favorite) {
+                throw IllegalArgumentException(context.stringResource(SYMR.strings.merge_duplicate))
+            }
+            withNonCancellableContext {
+                existingManga?.id?.let {
+                    deleteByMergeId.await(it)
+                    deleteMangaById.await(it)
+                }
+            }
+            existingManga = getManga.await(draft.url, draft.source)
+        }
+    }
+
+    private fun Manga.referenceTo(member: Manga, isInfoManga: Boolean) = MergedMangaReference(
+        id = -1,
+        isInfoManga = isInfoManga,
+        getChapterUpdates = true,
+        chapterSortMode = 0,
+        chapterPriority = 0,
+        downloadChapters = true,
+        mergeId = id,
+        mergeUrl = url,
+        mangaId = member.id,
+        mangaUrl = member.url,
+        mangaSourceId = member.source,
+    )
 
     suspend fun updateMergeSettings(mergedMangaReferences: List<MergedMangaReference>) {
         if (mergedMangaReferences.isEmpty()) return

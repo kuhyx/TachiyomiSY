@@ -24,115 +24,67 @@ import tachiyomi.domain.manga.repository.CustomMangaRepository
 
 internal class LocalFavoritesStorageTest {
 
-    @Test
-    fun aliasesResolveToCanonical() = runBlocking<Unit> {
-        val favorites = listOf(
-            Manga.create().copy(
-                id = 1,
-                favorite = true,
-                source = EXH_SOURCE_ID,
-                url = "/g/gid/token",
-            ),
-            // an alias for gid2/token2
-            Manga.create().copy(
-                id = 3,
-                favorite = true,
-                source = EXH_SOURCE_ID,
-                url = "/g/gid3/token3",
-            ),
-            // add this one to library
-            Manga.create().copy(
-                id = 3,
-                favorite = true,
-                source = EXH_SOURCE_ID,
-                url = "/g/gid4/token4",
-            ),
-        )
-        val categories = listOf(
-            Category(
-                id = 1,
-                name = "a",
-                order = 1,
-                flags = 0,
-            ),
-        )
-        val favoriteEntries = listOf(
-            FavoriteEntry(
-                gid = "gid",
-                token = "token",
-                title = "a",
-                category = 0,
-            ),
-            FavoriteEntry(
-                gid = "gid2",
-                token = "token2",
-                title = "a",
-                category = 0,
-            ),
-            // the alias for gid2/token2
-            FavoriteEntry(
-                gid = "gid2",
-                token = "token2",
-                title = "a",
-                category = 0,
-                otherGid = "gid3",
-                otherToken = "token3",
-            ),
-            // removed on remote and local
-            FavoriteEntry(
-                gid = "gid6",
-                token = "token6",
-                title = "a",
-                category = 0,
-            ),
-        )
+    private val favorites = listOf(
+        libraryManga(id = 1, url = "/g/gid/token"),
+        // an alias for gid2/token2
+        libraryManga(id = 3, url = "/g/gid3/token3"),
+        // add this one to library
+        libraryManga(id = 3, url = "/g/gid4/token4"),
+    )
 
+    private val categories = listOf(Category(id = 1, name = "a", order = 1, flags = 0))
+
+    private val favoriteEntries = listOf(
+        FavoriteEntry(gid = "gid", token = "token", title = "a", category = 0),
+        FavoriteEntry(gid = "gid2", token = "token2", title = "a", category = 0),
+        // the alias for gid2/token2
+        FavoriteEntry(
+            gid =
+            "gid2",
+            token = "token2", title = "a", category = 0, otherGid = "gid3", otherToken = "token3",
+        ),
+        // removed on remote and local
+        FavoriteEntry(gid = "gid6", token = "token6", title = "a", category = 0),
+    )
+
+    /** gid4 is in the library but not in the stored entries; gid6 is stored but no longer in the library. */
+    @Test
+    fun dbDiffAddsNewRemovesStale() = runBlocking<Unit> {
+        val (added, removed) = storage().getChangedDbEntries()
+        added.shouldForAll { it.gid == "gid4" && it.token == "token4" }
+        removed.shouldForAll { it.gid == "gid6" && it.token == "token6" }
+    }
+
+    /** gid3 is only an alias of gid2, so it is neither added nor removed; gid5 is new on the remote. */
+    @Test
+    fun remoteDiffResolvesAliases() = runBlocking<Unit> {
+        val remote = listOf("/g/gid/token", "/g/gid2/token2", "/g/gid5/token5").map { url ->
+            EHentai.ParsedManga(0, SManga(url, "a"), EHentaiSearchMetadata())
+        }
+        val (remoteAdded, remoteRemoved) = storage().getChangedRemoteEntries(remote)
+        remoteAdded.shouldForAll { it.gid == "gid5" && it.token == "token5" }
+        remoteRemoved.shouldForAll { it.gid == "gid6" && it.token == "token6" }
+    }
+
+    private fun storage(): LocalFavoritesStorage {
         val getFavorites = mockk<GetFavorites>()
         coEvery { getFavorites.await() } returns favorites
-
         val getCategories = mockk<GetCategories>()
         coEvery { getCategories.await() } returns categories
         coEvery { getCategories.await(any()) } returns categories
-
         val getFavoriteEntries = mockk<GetFavoriteEntries>()
         coEvery { getFavoriteEntries.await() } returns favoriteEntries
-
-        val storage = LocalFavoritesStorage(
+        return LocalFavoritesStorage(
             getFavorites = getFavorites,
             getCategories = getCategories,
             deleteFavoriteEntries = mockk(),
             getFavoriteEntries = getFavoriteEntries,
             insertFavoriteEntries = mockk(),
         )
-
-        val (added, removed) = storage.getChangedDbEntries()
-        added.shouldForAll { it.gid == "gid4" && it.token == "token4" }
-        removed.shouldForAll { it.gid == "gid6" && it.token == "token6" }
-
-        val (remoteAdded, remoteRemoved) = storage.getChangedRemoteEntries(
-            listOf(
-                EHentai.ParsedManga(
-                    0,
-                    SManga("/g/gid/token", "a"),
-                    EHentaiSearchMetadata(),
-                ),
-                EHentai.ParsedManga(
-                    0,
-                    SManga("/g/gid2/token2", "a"),
-                    EHentaiSearchMetadata(),
-                ),
-                // added on remote
-                EHentai.ParsedManga(
-                    0,
-                    SManga("/g/gid5/token5", "a"),
-                    EHentaiSearchMetadata(),
-                ),
-            ),
-        )
-
-        remoteAdded.shouldForAll { it.gid == "gid5" && it.token == "token5" }
-        remoteRemoved.shouldForAll { it.gid == "gid6" && it.token == "token6" }
     }
+
+    private fun libraryManga(id: Long, url: String): Manga =
+        Manga.create().copy(id = id, favorite = true, source = EXH_SOURCE_ID, url = url)
 
     companion object {
         @JvmStatic

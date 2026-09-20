@@ -53,26 +53,12 @@ internal class MangaBackupCreator(
                 null
             }, /* SY <-- */
         )
-
         // SY -->
-        if (manga.source == MERGED_SOURCE_ID) {
-            mangaObject.mergedMangaReferences = database.mergedQueries
-                .selectByMergeId(manga.id, backupMergedMangaReferenceMapper)
-                .awaitAsList()
-        }
-
-        val source = sourceManager.get(manga.source)?.getMainSource<MetadataSource<*, *>>()
-        if (source != null) {
-            getFlatMetadataById.await(manga.id)?.let { flatMetadata ->
-                mangaObject.flatMetadata = BackupFlatMetadata.copyFrom(flatMetadata)
-            }
-        }
+        addSyMetadata(manga, mangaObject)
         // SY <--
-
         mangaObject.excludedScanlators = database.excluded_scanlatorsQueries
             .getExcludedScanlatorsByMangaId(manga.id)
             .awaitAsList()
-
         if (options.chapters) {
             // Backup all the chapters
             database.chaptersQueries
@@ -85,7 +71,6 @@ internal class MangaBackupCreator(
                 .takeUnless(List<BackupChapter>::isEmpty)
                 ?.let { mangaObject.chapters = it }
         }
-
         if (options.categories) {
             // Backup categories for this manga
             val categoriesForManga = getCategories.await(manga.id)
@@ -93,7 +78,6 @@ internal class MangaBackupCreator(
                 mangaObject.categories = categoriesForManga.map { it.order }
             }
         }
-
         if (options.tracking) {
             val tracks = database.manga_syncQueries
                 .getTracksByMangaId(manga.id, backupTrackMapper)
@@ -102,23 +86,36 @@ internal class MangaBackupCreator(
                 mangaObject.tracking = tracks
             }
         }
-
         if (options.history) {
-            val historyByMangaId = getHistory.await(manga.id)
-            if (historyByMangaId.isNotEmpty()) {
-                val history = historyByMangaId.map { history ->
-                    val chapter = database.chaptersQueries
-                        .getChapterById(history.chapterId)
-                        .awaitAsOne()
-                    BackupHistory(chapter.url, history.readAt?.time ?: 0L, history.readDuration)
-                }
-                if (history.isNotEmpty()) {
-                    mangaObject.history = history
-                }
+            backupHistory(manga)?.let { mangaObject.history = it }
+        }
+        return mangaObject
+    }
+
+    // Merged-manga references and the flat metadata of metadata-aware sources (SY additions).
+    private suspend fun addSyMetadata(manga: Manga, mangaObject: BackupManga) {
+        if (manga.source == MERGED_SOURCE_ID) {
+            mangaObject.mergedMangaReferences = database.mergedQueries
+                .selectByMergeId(manga.id, backupMergedMangaReferenceMapper)
+                .awaitAsList()
+        }
+        val source = sourceManager.get(manga.source)?.getMainSource<MetadataSource<*, *>>()
+        if (source != null) {
+            getFlatMetadataById.await(manga.id)?.let { flatMetadata ->
+                mangaObject.flatMetadata = BackupFlatMetadata.copyFrom(flatMetadata)
             }
         }
+    }
 
-        return mangaObject
+    // The manga's history keyed by chapter url, or null when there is none to back up.
+    private suspend fun backupHistory(manga: Manga): List<BackupHistory>? {
+        val history = getHistory.await(manga.id).map { history ->
+            val chapter = database.chaptersQueries
+                .getChapterById(history.chapterId)
+                .awaitAsOne()
+            BackupHistory(chapter.url, history.readAt?.time ?: 0L, history.readDuration)
+        }
+        return history.takeIf { it.isNotEmpty() }
     }
 }
 

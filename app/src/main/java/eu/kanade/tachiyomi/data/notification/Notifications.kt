@@ -1,10 +1,12 @@
 package eu.kanade.tachiyomi.data.notification
 
 import android.content.Context
+import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.NotificationManagerCompat.IMPORTANCE_DEFAULT
 import androidx.core.app.NotificationManagerCompat.IMPORTANCE_HIGH
 import androidx.core.app.NotificationManagerCompat.IMPORTANCE_LOW
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.tachiyomi.util.system.buildNotificationChannel
 import eu.kanade.tachiyomi.util.system.buildNotificationChannelGroup
 import tachiyomi.core.common.i18n.stringResource
@@ -83,6 +85,60 @@ internal object Notifications {
         "library_skipped_channel",
     )
 
+    private val channelGroups = listOf(
+        GROUP_BACKUP_RESTORE to MR.strings.label_backup,
+        GROUP_DOWNLOADER to MR.strings.download_notifier_downloader_title,
+        GROUP_LIBRARY to MR.strings.label_library,
+        GROUP_APK_UPDATES to MR.strings.label_recent_updates,
+    )
+
+    private val channels = listOf(
+        ChannelSpec(CHANNEL_COMMON, IMPORTANCE_LOW, MR.strings.channel_common),
+        ChannelSpec(
+            CHANNEL_LIBRARY_PROGRESS, IMPORTANCE_LOW, MR.strings.channel_progress, GROUP_LIBRARY,
+            badge =
+            false,
+        ),
+        ChannelSpec(CHANNEL_LIBRARY_ERROR, IMPORTANCE_LOW, MR.strings.channel_errors, GROUP_LIBRARY, badge = false),
+        ChannelSpec(CHANNEL_NEW_CHAPTERS, IMPORTANCE_DEFAULT, MR.strings.channel_new_chapters),
+        ChannelSpec(
+            CHANNEL_DOWNLOADER_PROGRESS, IMPORTANCE_LOW, MR.strings.channel_progress, GROUP_DOWNLOADER,
+            badge =
+            false,
+        ),
+        ChannelSpec(
+            CHANNEL_DOWNLOADER_ERROR, IMPORTANCE_LOW, MR.strings.channel_errors, GROUP_DOWNLOADER,
+            badge =
+            false,
+        ),
+        ChannelSpec(
+            CHANNEL_BACKUP_RESTORE_PROGRESS,
+            IMPORTANCE_LOW,
+            MR.strings.channel_progress,
+            GROUP_BACKUP_RESTORE,
+            badge = false,
+        ),
+        ChannelSpec(
+            CHANNEL_BACKUP_RESTORE_COMPLETE,
+            IMPORTANCE_HIGH,
+            MR.strings.channel_complete,
+            GROUP_BACKUP_RESTORE,
+            badge = false,
+            silent = true,
+        ),
+        ChannelSpec(CHANNEL_INCOGNITO_MODE, IMPORTANCE_LOW, MR.strings.pref_incognito_mode),
+        ChannelSpec(CHANNEL_APP_UPDATE, IMPORTANCE_DEFAULT, MR.strings.channel_app_updates, GROUP_APK_UPDATES),
+        ChannelSpec(CHANNEL_EXTENSIONS_UPDATE, IMPORTANCE_DEFAULT, MR.strings.channel_ext_updates, GROUP_APK_UPDATES),
+        // SY -->
+        ChannelSpec(
+            CHANNEL_LIBRARY_EHENTAI, IMPORTANCE_LOW,
+            literalName =
+            "EHentai",
+            group = GROUP_LIBRARY, badge = false,
+        ),
+        // SY <--
+    )
+
     /**
      * Creates the notification channels introduced in Android Oreo.
      * This won't do anything on Android versions that don't support notification channels.
@@ -96,80 +152,28 @@ internal object Notifications {
         deprecatedChannels.forEach(notificationManager::deleteNotificationChannel)
 
         notificationManager.createNotificationChannelGroupsCompat(
-            listOf(
-                buildNotificationChannelGroup(GROUP_BACKUP_RESTORE) {
-                    setName(context.stringResource(MR.strings.label_backup))
-                },
-                buildNotificationChannelGroup(GROUP_DOWNLOADER) {
-                    setName(context.stringResource(MR.strings.download_notifier_downloader_title))
-                },
-                buildNotificationChannelGroup(GROUP_LIBRARY) {
-                    setName(context.stringResource(MR.strings.label_library))
-                },
-                buildNotificationChannelGroup(GROUP_APK_UPDATES) {
-                    setName(context.stringResource(MR.strings.label_recent_updates))
-                },
-            ),
+            channelGroups.map { (id, name) ->
+                buildNotificationChannelGroup(id) { setName(context.stringResource(name)) }
+            },
         )
+        notificationManager.createNotificationChannelsCompat(channels.map { it.build(context) })
+    }
 
-        notificationManager.createNotificationChannelsCompat(
-            listOf(
-                buildNotificationChannel(CHANNEL_COMMON, IMPORTANCE_LOW) {
-                    setName(context.stringResource(MR.strings.channel_common))
-                },
-                buildNotificationChannel(CHANNEL_LIBRARY_PROGRESS, IMPORTANCE_LOW) {
-                    setName(context.stringResource(MR.strings.channel_progress))
-                    setGroup(GROUP_LIBRARY)
-                    setShowBadge(false)
-                },
-                buildNotificationChannel(CHANNEL_LIBRARY_ERROR, IMPORTANCE_LOW) {
-                    setName(context.stringResource(MR.strings.channel_errors))
-                    setGroup(GROUP_LIBRARY)
-                    setShowBadge(false)
-                },
-                buildNotificationChannel(CHANNEL_NEW_CHAPTERS, IMPORTANCE_DEFAULT) {
-                    setName(context.stringResource(MR.strings.channel_new_chapters))
-                },
-                buildNotificationChannel(CHANNEL_DOWNLOADER_PROGRESS, IMPORTANCE_LOW) {
-                    setName(context.stringResource(MR.strings.channel_progress))
-                    setGroup(GROUP_DOWNLOADER)
-                    setShowBadge(false)
-                },
-                buildNotificationChannel(CHANNEL_DOWNLOADER_ERROR, IMPORTANCE_LOW) {
-                    setName(context.stringResource(MR.strings.channel_errors))
-                    setGroup(GROUP_DOWNLOADER)
-                    setShowBadge(false)
-                },
-                buildNotificationChannel(CHANNEL_BACKUP_RESTORE_PROGRESS, IMPORTANCE_LOW) {
-                    setName(context.stringResource(MR.strings.channel_progress))
-                    setGroup(GROUP_BACKUP_RESTORE)
-                    setShowBadge(false)
-                },
-                buildNotificationChannel(CHANNEL_BACKUP_RESTORE_COMPLETE, IMPORTANCE_HIGH) {
-                    setName(context.stringResource(MR.strings.channel_complete))
-                    setGroup(GROUP_BACKUP_RESTORE)
-                    setShowBadge(false)
-                    setSound(null, null)
-                },
-                buildNotificationChannel(CHANNEL_INCOGNITO_MODE, IMPORTANCE_LOW) {
-                    setName(context.stringResource(MR.strings.pref_incognito_mode))
-                },
-                buildNotificationChannel(CHANNEL_APP_UPDATE, IMPORTANCE_DEFAULT) {
-                    setGroup(GROUP_APK_UPDATES)
-                    setName(context.stringResource(MR.strings.channel_app_updates))
-                },
-                buildNotificationChannel(CHANNEL_EXTENSIONS_UPDATE, IMPORTANCE_DEFAULT) {
-                    setGroup(GROUP_APK_UPDATES)
-                    setName(context.stringResource(MR.strings.channel_ext_updates))
-                },
-                // SY -->
-                buildNotificationChannel(CHANNEL_LIBRARY_EHENTAI, IMPORTANCE_LOW) {
-                    setName("EHentai")
-                    setGroup(GROUP_LIBRARY)
-                    setShowBadge(false)
-                },
-                // SY <--
-            ),
-        )
+    /** A channel's static description; the name is resolved against [Context] when the channel is created. */
+    private class ChannelSpec(
+        val id: String,
+        val importance: Int,
+        val name: StringResource? = null,
+        val group: String? = null,
+        val badge: Boolean = true,
+        val silent: Boolean = false,
+        val literalName: String? = null,
+    ) {
+        fun build(context: Context): NotificationChannelCompat = buildNotificationChannel(id, importance) {
+            setName(literalName ?: context.stringResource(name!!))
+            group?.let(::setGroup)
+            setShowBadge(badge)
+            if (silent) setSound(null, null)
+        }
     }
 }

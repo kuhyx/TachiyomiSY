@@ -52,6 +52,12 @@ internal class EditMergedSettingsHeaderAdapter(
         private val binding: EditMergedSettingsHeaderBinding,
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bind() {
+            bindDedupeSpinner()
+            bindInfoMangaSpinner()
+            bindDedupeSwitch()
+        }
+
+        private fun bindDedupeSpinner() {
             val dedupeAdapter: ArrayAdapter<String> = ArrayAdapter(
                 itemView.context,
                 android.R.layout.simple_spinner_item,
@@ -88,7 +94,9 @@ internal class EditMergedSettingsHeaderAdapter(
                     )
                 }
             }
+        }
 
+        private fun bindInfoMangaSpinner() {
             val mergedMangas = state.mergedMangas
 
             val mangaInfoAdapter: ArrayAdapter<String> = ArrayAdapter(
@@ -133,7 +141,9 @@ internal class EditMergedSettingsHeaderAdapter(
                     }
                 }
             }
+        }
 
+        private fun bindDedupeSwitch() {
             binding.dedupeSwitch.isChecked = state.mergeReference?.let {
                 it.chapterSortMode != MergedMangaReference.CHAPTER_SORT_NONE
             } ?: false

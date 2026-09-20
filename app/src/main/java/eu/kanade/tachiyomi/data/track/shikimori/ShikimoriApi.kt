@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackMangaMetadata
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMAddMangaResponse
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMMetadata
+import eu.kanade.tachiyomi.data.track.shikimori.dto.SMMetadataResult
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMOAuth
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMSearchResult
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMUser
@@ -31,6 +32,25 @@ import tachiyomi.domain.track.model.Track as DomainTrack
 private const val VARIABLES = "variables"
 private const val CLIENT_ID_KEY = "client_id"
 private const val QUERY = "query"
+
+private val MANGA_METADATA_QUERY = """
+    |query(${'$'}ids: String!) {
+        |mangas(ids: ${'$'}ids) {
+            |id
+            |name
+            |description
+            |poster {
+                |originalUrl
+            |}
+            |personRoles {
+                |person {
+                    |name
+                |}
+                |rolesEn
+            |}
+        |}
+    |}
+""".trimMargin()
 
 internal class ShikimoriApi(
     private val trackId: Long,
@@ -210,26 +230,8 @@ internal class ShikimoriApi(
 
     suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata {
         return withIOContext {
-            val query = """
-                |query(${'$'}ids: String!) {
-                    |mangas(ids: ${'$'}ids) {
-                        |id
-                        |name
-                        |description
-                        |poster {
-                            |originalUrl
-                        |}
-                        |personRoles {
-                            |person {
-                                |name
-                            |}
-                            |rolesEn
-                        |}
-                    |}
-                |}
-            """.trimMargin()
             val payload = buildJsonObject {
-                put(QUERY, query)
+                put(QUERY, MANGA_METADATA_QUERY)
                 putJsonObject(VARIABLES) {
                     put("ids", "${track.remoteId}")
                 }
@@ -243,28 +245,11 @@ internal class ShikimoriApi(
                 )
                     .awaitSuccess()
                     .parseAs<SMMetadata>()
-                    .let {
-                        if (it.data.mangas.isEmpty()) {
-                            throw NoSuchElementException("Could not get metadata from Shikimori")
-                        }
-                        val manga = it.data.mangas[0]
-                        TrackMangaMetadata(
-                            remoteId = manga.id.toLong(),
-                            title = manga.name,
-                            thumbnailUrl = manga.poster.originalUrl,
-                            description = manga.description,
-                            authors = manga.personRoles
-                                .filter { it.roles.contains("Story") || it.roles.contains("Story & Art") }
-                                .map { it.person.name }
-                                .joinToString(", ")
-                                .ifEmpty { null },
-                            artists = manga.personRoles
-                                .filter { it.roles.contains("Art") || it.roles.contains("Story & Art") }
-                                .map { it.person.name }
-                                .joinToString(", ")
-                                .ifEmpty { null },
-                        )
-                    }
+                    .data
+                    .mangas
+                    .firstOrNull()
+                    ?.toTrackMangaMetadata()
+                    ?: throw NoSuchElementException("Could not get metadata from Shikimori")
             }
         }
     }
@@ -318,4 +303,20 @@ internal class ShikimoriApi(
                 .build(),
         )
     }
+}
+
+private fun SMMetadataResult.toTrackMangaMetadata(): TrackMangaMetadata {
+    fun namedWithRole(vararg roles: String): String? = personRoles
+        .filter { role -> roles.any { it in role.roles } }
+        .map { it.person.name }
+        .joinToString(", ")
+        .ifEmpty { null }
+    return TrackMangaMetadata(
+        remoteId = id.toLong(),
+        title = name,
+        thumbnailUrl = poster.originalUrl,
+        description = description,
+        authors = namedWithRole("Story", "Story & Art"),
+        artists = namedWithRole("Art", "Story & Art"),
+    )
 }

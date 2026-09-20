@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.deleteManga
 import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.TrackerManager
+import eu.kanade.tachiyomi.source.Source
 import kotlinx.coroutines.CancellationException
 import mihon.domain.migration.models.MigrationFlag
 import mihon.domain.source.interactor.UpdateMangaFromRemote
@@ -89,108 +90,103 @@ internal class MigrateMangaUseCase(collaborators: Collaborators) {
 
             // Update chapters read state, history, bookmark and dateFetch
             if (MigrationFlag.CHAPTER in flags) {
-                // SY -->
-                val chapterUpdates = mutableListOf<ChapterUpdate>()
-                val targetChapters = getChaptersByMangaId.await(target.id)
-                val currentChapters = getChaptersByMangaId.await(current.id)
-                val historyUpdates = mutableListOf<HistoryUpdate>()
-                val targetHistory = getHistoryByMangaId.await(target.id)
-                val currentHistory = getHistoryByMangaId.await(current.id)
-
-                val maxChapterRead = currentChapters
-                    .filter { it.read }
-                    .maxOfOrNull { it.chapterNumber }
-
-                targetChapters.forEach { mangaChapter ->
-                    var updatedChapter = mangaChapter
-
-                    if (updatedChapter.isRecognizedNumber) {
-                        val prevChapter = currentChapters
-                            .find { it.isRecognizedNumber && it.chapterNumber == updatedChapter.chapterNumber }
-
-                        if (prevChapter != null) {
-                            updatedChapter = updatedChapter.copy(
-                                dateFetch = prevChapter.dateFetch,
-                                bookmark = prevChapter.bookmark,
-                                lastPageRead = prevChapter.lastPageRead,
-                            )
-
-                            var updatedHistory = currentHistory.find { it.chapterId == prevChapter.id }
-                            val chapterHasHistory =
-                                mangaChapter.read && targetHistory.find { it.chapterId == mangaChapter.id } != null
-
-                            if (updatedHistory != null && !chapterHasHistory) {
-                                updatedHistory = updatedHistory.copy(chapterId = updatedChapter.id)
-                                historyUpdates.add(updatedHistory.toHistoryUpdate())
-                            }
-                        }
-
-                        if (maxChapterRead != null && updatedChapter.chapterNumber <= maxChapterRead) {
-                            updatedChapter = updatedChapter.copy(read = true)
-                        }
-                    }
-                    chapterUpdates.add(updatedChapter.toChapterUpdate())
-                    // SY <--
-                }
-
-                updateChapter.awaitAll(chapterUpdates)
-                // SY -->
-                updateHistory.awaitAll(historyUpdates)
-                // SY <--
+                migrateChapters(current, target)
             }
-
             // Update categories
             if (MigrationFlag.CATEGORY in flags) {
                 val categoryIds = getCategories.await(current.id).map { it.id }
                 setMangaCategories.await(target.id, categoryIds)
             }
-
-            // Update track
-            getTracks.await(current.id).mapNotNull { track ->
-                val updatedTrack = track.copy(mangaId = target.id)
-
-                val service = enhancedServices
-                    .firstOrNull { it.isTrackFrom(updatedTrack, current, currentSource) }
-
-                if (service != null) {
-                    service.migrateTrack(updatedTrack, target, targetSource)
-                } else {
-                    updatedTrack
-                }
-            }
-                .takeIf { it.isNotEmpty() }
-                ?.let { insertTrack.awaitAll(it) }
-
+            migrateTracks(current, currentSource, target, targetSource)
             // Delete downloaded
             if (MigrationFlag.REMOVE_DOWNLOAD in flags && currentSource != null) {
                 downloadManager.deleteManga(current, currentSource)
             }
-
             // Update custom cover (recheck if custom cover exists)
             if (MigrationFlag.CUSTOM_COVER in flags && current.hasCustomCover()) {
                 coverCache.setCustomCoverToCache(target, coverCache.getCustomCoverFile(current.id).inputStream())
             }
-
-            val currentMangaUpdate = MangaUpdate(
-                id = current.id,
-                favorite = false,
-                dateAdded = 0,
-            )
-                .takeIf { replace }
-            val targetMangaUpdate = MangaUpdate(
-                id = target.id,
-                favorite = true,
-                chapterFlags = current.chapterFlags,
-                viewerFlags = current.viewerFlags,
-                dateAdded = if (replace) current.dateAdded else Instant.now().toEpochMilli(),
-                notes = if (MigrationFlag.NOTES in flags) current.notes else null,
-            )
-
-            updateManga.awaitAll(listOfNotNull(currentMangaUpdate, targetMangaUpdate))
+            swapFavorite(current, target, replace, flags)
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (expected: Throwable) {
             // Rethrown (or wrapped) whatever the cause.
         }
+    }
+
+    // SY -->
+
+    // Carries read state, bookmarks, page progress and history over to the target's matching chapter numbers.
+    private suspend fun migrateChapters(current: Manga, target: Manga) {
+        val chapterUpdates = mutableListOf<ChapterUpdate>()
+        val targetChapters = getChaptersByMangaId.await(target.id)
+        val currentChapters = getChaptersByMangaId.await(current.id)
+        val historyUpdates = mutableListOf<HistoryUpdate>()
+        val targetHistory = getHistoryByMangaId.await(target.id)
+        val currentHistory = getHistoryByMangaId.await(current.id)
+        val maxChapterRead = currentChapters
+            .filter { it.read }
+            .maxOfOrNull { it.chapterNumber }
+
+        targetChapters.forEach { mangaChapter ->
+            var updatedChapter = mangaChapter
+            if (updatedChapter.isRecognizedNumber) {
+                val prevChapter = currentChapters
+                    .find { it.isRecognizedNumber && it.chapterNumber == updatedChapter.chapterNumber }
+                if (prevChapter != null) {
+                    updatedChapter = updatedChapter.copy(
+                        dateFetch = prevChapter.dateFetch,
+                        bookmark = prevChapter.bookmark,
+                        lastPageRead = prevChapter.lastPageRead,
+                    )
+                    val updatedHistory = currentHistory.find { it.chapterId == prevChapter.id }
+                    val chapterHasHistory =
+                        mangaChapter.read && targetHistory.find { it.chapterId == mangaChapter.id } != null
+                    if (updatedHistory != null && !chapterHasHistory) {
+                        historyUpdates.add(updatedHistory.copy(chapterId = updatedChapter.id).toHistoryUpdate())
+                    }
+                }
+                if (maxChapterRead != null && updatedChapter.chapterNumber <= maxChapterRead) {
+                    updatedChapter = updatedChapter.copy(read = true)
+                }
+            }
+            chapterUpdates.add(updatedChapter.toChapterUpdate())
+        }
+        updateChapter.awaitAll(chapterUpdates)
+        updateHistory.awaitAll(historyUpdates)
+    }
+    // SY <--
+
+    // Re-points every track at the target; an enhanced tracker gets to migrate its own remote entry.
+    private suspend fun migrateTracks(current: Manga, currentSource: Source?, target: Manga, targetSource: Source) {
+        getTracks.await(current.id).mapNotNull { track ->
+            val updatedTrack = track.copy(mangaId = target.id)
+            val service = enhancedServices.firstOrNull { it.isTrackFrom(updatedTrack, current, currentSource) }
+            if (service != null) {
+                service.migrateTrack(updatedTrack, target, targetSource)
+            } else {
+                updatedTrack
+            }
+        }
+            .takeIf { it.isNotEmpty() }
+            ?.let { insertTrack.awaitAll(it) }
+    }
+
+    private suspend fun swapFavorite(current: Manga, target: Manga, replace: Boolean, flags: Set<MigrationFlag>) {
+        val currentMangaUpdate = MangaUpdate(
+            id = current.id,
+            favorite = false,
+            dateAdded = 0,
+        )
+            .takeIf { replace }
+        val targetMangaUpdate = MangaUpdate(
+            id = target.id,
+            favorite = true,
+            chapterFlags = current.chapterFlags,
+            viewerFlags = current.viewerFlags,
+            dateAdded = if (replace) current.dateAdded else Instant.now().toEpochMilli(),
+            notes = if (MigrationFlag.NOTES in flags) current.notes else null,
+        )
+        updateManga.awaitAll(listOfNotNull(currentMangaUpdate, targetMangaUpdate))
     }
 }

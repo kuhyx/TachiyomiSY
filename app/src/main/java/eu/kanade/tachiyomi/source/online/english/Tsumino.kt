@@ -77,7 +77,6 @@ internal class Tsumino(delegate: HttpSource, val context: Context) :
             input.select("meta[property=og:title]").firstOrNull()?.attr("content")?.let {
                 title = it.trim()
             }
-
             input.getElementById("Artist")?.children()?.first()?.attr(DATA_DEFINE)?.trim()?.let { artistString ->
                 artistString.split("|").trimAll().dropBlank().forEach {
                     tags.add(RaisedTag("artist", it, TAG_TYPE_DEFAULT))
@@ -85,64 +84,61 @@ internal class Tsumino(delegate: HttpSource, val context: Context) :
                 tags.add(RaisedTag("artist", artistString, TAG_TYPE_VIRTUAL))
                 artist = artistString
             }
-
             input.getElementById("Uploader")?.children()?.first()?.text()?.trim()?.let {
                 uploader = it
             }
-
             input.getElementById("Uploaded")?.text()?.let {
                 uploadDate = TM_DATE_FORMAT.parse(it.trim())!!.time
             }
-
             input.getElementById("Pages")?.text()?.let {
                 length = it.trim().toIntOrNull()
             }
-
-            input.getElementById("Rating")?.text()?.let {
-                ratingString = it.trim()
-                val ratingString = ratingString
-                if (!ratingString.isNullOrBlank()) {
-                    averageRating = RATING_FLOAT_REGEX.find(ratingString)?.groups?.get(1)?.value?.toFloatOrNull()
-                    userRatings = RATING_USERS_REGEX.find(ratingString)?.groups?.get(1)?.value?.toLongOrNull()
-                    favorites = RATING_FAVORITES_REGEX.find(ratingString)?.groups?.get(1)?.value?.toLongOrNull()
-                }
-            }
-
-            input.getElementById("Category")?.children()?.first()?.attr(DATA_DEFINE)?.let {
-                category = it.trim()
-                tags.add(RaisedTag("genre", it, TAG_TYPE_VIRTUAL))
-            }
-
-            input.getElementById("Collection")?.children()?.first()?.attr(DATA_DEFINE)?.let {
-                collection = it.trim()
-                tags.add(RaisedTag("collection", it, TAG_TYPE_DEFAULT))
-            }
-
-            input.getElementById("Group")?.children()?.first()?.attr(DATA_DEFINE)?.let {
-                group = it.trim()
-                tags.add(RaisedTag("group", it, TAG_TYPE_DEFAULT))
-            }
-
-            parody = input.getElementById("Parody")?.children()?.map {
-                val entry = it.attr(DATA_DEFINE).trim()
-                tags.add(RaisedTag("parody", entry, TAG_TYPE_DEFAULT))
-                entry
-            }.orEmpty()
-
-            character = input.getElementById("Character")?.children()?.map {
-                val entry = it.attr(DATA_DEFINE).trim()
-                tags.add(RaisedTag("character", entry, TAG_TYPE_DEFAULT))
-                entry
-            }.orEmpty()
-
-            input.getElementById("Tag")?.children()?.let { tagElements ->
-                tags.addAll(
-                    tagElements.map {
-                        RaisedTag("tags", it.attr(DATA_DEFINE).trim(), TAG_TYPE_DEFAULT)
-                    },
-                )
-            }
+            input.getElementById("Rating")?.text()?.let { parseRating(it.trim()) }
+            parseTaxonomy(input)
         }
+    }
+
+    private fun TsuminoSearchMetadata.parseRating(rating: String) {
+        ratingString = rating
+        if (rating.isNotBlank()) {
+            averageRating = RATING_FLOAT_REGEX.find(rating)?.groups?.get(1)?.value?.toFloatOrNull()
+            userRatings = RATING_USERS_REGEX.find(rating)?.groups?.get(1)?.value?.toLongOrNull()
+            favorites = RATING_FAVORITES_REGEX.find(rating)?.groups?.get(1)?.value?.toLongOrNull()
+        }
+    }
+
+    // Category, collection, group, parody, character and free tags -- each a `data-define` list.
+    private fun TsuminoSearchMetadata.parseTaxonomy(input: Document) {
+        input.getElementById("Category")?.children()?.first()?.attr(DATA_DEFINE)?.let {
+            category = it.trim()
+            tags.add(RaisedTag("genre", it, TAG_TYPE_VIRTUAL))
+        }
+        input.getElementById("Collection")?.children()?.first()?.attr(DATA_DEFINE)?.let {
+            collection = it.trim()
+            tags.add(RaisedTag("collection", it, TAG_TYPE_DEFAULT))
+        }
+        input.getElementById("Group")?.children()?.first()?.attr(DATA_DEFINE)?.let {
+            group = it.trim()
+            tags.add(RaisedTag("group", it, TAG_TYPE_DEFAULT))
+        }
+        parody = taggedEntries(input, "Parody", "parody")
+        character = taggedEntries(input, "Character", "character")
+        input.getElementById("Tag")?.children()?.let { tagElements ->
+            tags.addAll(tagElements.map { RaisedTag("tags", it.attr(DATA_DEFINE).trim(), TAG_TYPE_DEFAULT) })
+        }
+    }
+
+    // The `data-define` entries under [elementId], each also recorded as a [namespace] tag.
+    private fun TsuminoSearchMetadata.taggedEntries(
+        input: Document,
+        elementId: String,
+        namespace: String,
+    ): List<String> {
+        return input.getElementById(elementId)?.children()?.map {
+            val entry = it.attr(DATA_DEFINE).trim()
+            tags.add(RaisedTag(namespace, entry, TAG_TYPE_DEFAULT))
+            entry
+        }.orEmpty()
     }
 
     companion object {

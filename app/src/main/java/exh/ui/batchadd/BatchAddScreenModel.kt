@@ -36,21 +36,7 @@ internal class BatchAddScreenModel(
     }
 
     private fun addGalleries(context: Context, galleries: String) {
-        val splitGalleries = if (ehVisitedRegex.containsMatchIn(galleries)) {
-            val url = if (exhPreferences.enableExhentai.get()) {
-                "https://exhentai.org/g/"
-            } else {
-                "https://e-hentai.org/g/"
-            }
-            ehVisitedRegex.findAll(galleries).map { galleryKeys ->
-                val linkParts = galleryKeys.value.split(".")
-                url + linkParts[0] + "/" + linkParts[1].replace(":", "")
-            }.toList()
-        } else {
-            galleries.split("\n")
-                .mapNotNull(String::trimOrNull)
-        }
-
+        val splitGalleries = splitGalleryLinks(galleries)
         mutableState.update { state ->
             state.copy(
                 progress = 0,
@@ -58,51 +44,45 @@ internal class BatchAddScreenModel(
                 state = State.PROGRESS,
             )
         }
-
         val handler = CoroutineExceptionHandler { _, throwable ->
             xLogE("Batch add error", throwable)
         }
-
         screenModelScope.launch(Dispatchers.IO + handler) {
-            val succeeded = mutableListOf<String>()
-            val failed = mutableListOf<String>()
-
+            var succeeded = 0
             splitGalleries.forEachIndexed { i, s ->
                 ensureActive()
                 val result = withIOContext {
-                    galleryAdder.addGallery(
-                        context = context,
-                        url = s,
-                        fav = true,
-                        retry = 2,
-                    )
+                    galleryAdder.addGallery(context = context, url = s, fav = true, retry = 2)
                 }
-                if (result is GalleryAddEvent.Success) {
-                    succeeded.add(s)
-                } else {
-                    failed.add(s)
+                if (result is GalleryAddEvent.Success) succeeded++
+                val label = when (result) {
+                    is GalleryAddEvent.Success -> context.stringResource(SYMR.strings.batch_add_ok)
+                    is GalleryAddEvent.Fail -> context.stringResource(SYMR.strings.batch_add_error)
                 }
                 mutableState.update { state ->
-                    state.copy(
-                        progress = i + 1,
-                        events = state.events.plus(
-                            when (result) {
-                                is GalleryAddEvent.Success -> context.stringResource(SYMR.strings.batch_add_ok)
-                                is GalleryAddEvent.Fail -> context.stringResource(SYMR.strings.batch_add_error)
-                            } + " " + result.logMessage,
-                        ),
-                    )
+                    state.copy(progress = i + 1, events = state.events + "$label ${result.logMessage}")
                 }
             }
-
             // Show report
-            val summary = context.stringResource(SYMR.strings.batch_add_summary, succeeded.size, failed.size)
-            mutableState.update { state ->
-                state.copy(
-                    events = state.events + summary,
-                )
-            }
+            val summary = context.stringResource(
+                SYMR.strings.batch_add_summary,
+                succeeded,
+                splitGalleries.size - succeeded,
+            )
+            mutableState.update { state -> state.copy(events = state.events + summary) }
         }
+    }
+
+    // Either the "gid.token" keys pasted from a visited-galleries page, rebuilt into urls, or one url per line.
+    private fun splitGalleryLinks(galleries: String): List<String> {
+        if (!ehVisitedRegex.containsMatchIn(galleries)) {
+            return galleries.split("\n").mapNotNull(String::trimOrNull)
+        }
+        val url = if (exhPreferences.enableExhentai.get()) "https://exhentai.org/g/" else "https://e-hentai.org/g/"
+        return ehVisitedRegex.findAll(galleries).map { galleryKeys ->
+            val linkParts = galleryKeys.value.split(".")
+            url + linkParts[0] + "/" + linkParts[1].replace(":", "")
+        }.toList()
     }
 
     fun finish() {

@@ -10,6 +10,7 @@ import exh.metadata.metadata.RaisedSearchMetadata.Companion.toGenreString
 import exh.metadata.metadata.base.RaisedTag
 import exh.util.nullIfBlank
 import exh.util.trimOrNull
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -51,134 +52,92 @@ private val FAVORITES_BORDER_HEX_COLORS = listOf(
 
 /** Parses an e-hentai gallery list page (compact or extended layout) into entries and the next page. */
 internal class EHentaiGalleryListParser {
-    fun parse(doc: Document) = with(doc) {
+    fun parse(doc: Document): Pair<List<EHentai.ParsedManga>, Long?> {
         // Parse mangas (supports compact + extended layout)
-        val parsedMangas = select(".itg > tbody > tr").filter { element ->
+        val parsedMangas = doc.select(".itg > tbody > tr").filter { element ->
             // Do not parse header and ads
             element.selectFirst("th") == null && element.selectFirst(".itd") == null
-        }.map { body ->
-            val thumbnailElement = body.selectFirst(".gl1e img, .gl2c .glthumb img")!!
-            val column2 = body.selectFirst(".gl3e, .gl2c")!!
-            val linkElement = body.selectFirst(".gl3c > a, .gl2e > div > a")!!
-            val infoElement = body.selectFirst(".gl3e")
-
-            // why is column2 null
-            val favElement = column2.children().find { it.attr(STYLE).startsWith("border-color") }
-            val infoElements = infoElement?.select("div")
-            val parsedTags = mutableListOf<RaisedTag>()
-
-            EHentai.ParsedManga(
-                fav = FAVORITES_BORDER_HEX_COLORS.indexOf(
-                    favElement?.attr(STYLE)?.substring(BORDER_COLOR_START, BORDER_COLOR_END),
-                ),
-                manga = SManga.create().apply {
-                    // Get title
-                    title = thumbnailElement.attr(TITLE)
-                    url = EHentaiSearchMetadata.normalizeUrl(linkElement.attr("href"))
-                    // Get image
-                    thumbnail_url = thumbnailElement.attr("src")
-
-                    if (infoElements != null) {
-                        linkElement.select("div div").getOrNull(1)?.select("tr")?.forEach { row ->
-                            val namespace = row.select(".tc").text().removeSuffix(":")
-                            parsedTags.addAll(
-                                row.select("div").map { element ->
-                                    RaisedTag(
-                                        namespace,
-                                        element.text().trim(),
-                                        when {
-                                            element.hasClass("gtl") -> TAG_TYPE_LIGHT
-                                            element.hasClass("gtw") -> TAG_TYPE_WEAK
-                                            else -> TAG_TYPE_NORMAL
-                                        },
-                                    )
-                                },
-                            )
-                        }
-                    } else {
-                        val tagElement = body.selectFirst(".gl3c > a")!!
-                        val tagElements = tagElement.select("div")
-                        tagElements.forEach { element ->
-                            if (element.className() == "gt") {
-                                val namespace = element.attr(TITLE).substringBefore(":").trimOrNull() ?: "misc"
-                                parsedTags += RaisedTag(
-                                    namespace,
-                                    element.attr(TITLE).substringAfter(":").trim(),
-                                    TAG_TYPE_NORMAL,
-                                )
-                            }
-                        }
-                    }
-
-                    genre = parsedTags.toGenreString()
-                },
-                metadata = EHentaiSearchMetadata().apply {
-                    tags += parsedTags
-
-                    if (infoElements != null) {
-                        genre = getGenre(infoElements.getOrNull(1))
-
-                        datePosted = getDateTag(infoElements.getOrNull(2))
-
-                        averageRating = getRating(infoElements.getOrNull(COMPACT_RATING_INDEX))
-
-                        uploader = getUploader(infoElements.getOrNull(COMPACT_UPLOADER_INDEX))
-
-                        length = getPageCount(infoElements.getOrNull(COMPACT_LENGTH_INDEX))
-                    } else {
-                        genre = getGenre(body.selectFirst(".gl1c div"))
-
-                        val info = body.selectFirst(".gl2c")!!
-                        val extraInfo = body.selectFirst(".gl4c")!!
-
-                        val infoList = info.select("div div")
-
-                        datePosted = getDateTag(infoList.getOrNull(EXTENDED_DATE_INDEX))
-
-                        averageRating = getRating(infoList.getOrNull(EXTENDED_RATING_INDEX))
-
-                        val extraInfoList = extraInfo.select("div")
-
-                        if (extraInfoList.getOrNull(2) == null) {
-                            uploader = getUploader(extraInfoList.getOrNull(0))
-
-                            length = getPageCount(extraInfoList.getOrNull(1))
-                        } else {
-                            uploader = getUploader(extraInfoList.getOrNull(1))
-
-                            length = getPageCount(extraInfoList.getOrNull(2))
-                        }
-                    }
-                },
-            )
-        }.ifEmpty {
-            selectFirst(".searchwarn")?.let { throw IOException(it.text()) }
+        }.map(::parseRow).ifEmpty {
+            doc.selectFirst(".searchwarn")?.let { throw IOException(it.text()) }
             emptyList()
         }
 
         val parsedLocation = doc.location().toHttpUrlOrNull()
         val isReversed = parsedLocation != null && parsedLocation.queryParameterNames.contains(REVERSE_PARAM)
+        val nextPage = nextPage(doc, parsedLocation, parsedMangas, isReversed)
+        return parsedMangas.let { if (isReversed) it.reversed() else it } to nextPage
+    }
 
-        // Add to page if required
-        val hasNextPage = if (isReversed) {
-            select(".searchnav >div > a")
-                .any { "prev" in it.attr("href") }
-        } else {
-            select(".searchnav >div > a")
-                .any { "next" in it.attr("href") }
-        }
-        val nextPage = if (parsedLocation?.pathSegments?.contains("toplist.php") == true) {
-            ((parsedLocation.queryParameter("p")?.toLong() ?: 0) + 2).takeIf { it <= TOPLIST_LAST_PAGE }
-        } else if (hasNextPage) {
-            parsedMangas.let { if (isReversed) it.first() else it.last() }
-                .manga
-                .url
-                .let { EHentaiSearchMetadata.galleryId(it).toLong() }
-        } else {
-            null
-        }
+    private fun parseRow(body: Element): EHentai.ParsedManga {
+        val thumbnailElement = body.selectFirst(".gl1e img, .gl2c .glthumb img")!!
+        val column2 = body.selectFirst(".gl3e, .gl2c")!!
+        val linkElement = body.selectFirst(".gl3c > a, .gl2e > div > a")!!
+        val infoElements = body.selectFirst(".gl3e")?.select("div")
 
-        parsedMangas.let { if (isReversed) it.reversed() else it } to nextPage
+        // why is column2 null
+        val favElement = column2.children().find { it.attr(STYLE).startsWith("border-color") }
+        val parsedTags = parseTags(body, linkElement, isCompact = infoElements != null)
+
+        return EHentai.ParsedManga(
+            fav = FAVORITES_BORDER_HEX_COLORS.indexOf(
+                favElement?.attr(STYLE)?.substring(BORDER_COLOR_START, BORDER_COLOR_END),
+            ),
+            manga = SManga.create().apply {
+                // Get title
+                title = thumbnailElement.attr(TITLE)
+                url = EHentaiSearchMetadata.normalizeUrl(linkElement.attr("href"))
+                // Get image
+                thumbnail_url = thumbnailElement.attr("src")
+                genre = parsedTags.toMutableList().toGenreString()
+            },
+            metadata = EHentaiSearchMetadata().apply {
+                tags += parsedTags
+                if (infoElements != null) parseCompactInfo(infoElements) else parseExtendedInfo(body)
+            },
+        )
+    }
+
+    // The compact layout lists tags by namespace row; the extended one flattens them into `.gt` divs.
+    private fun parseTags(body: Element, linkElement: Element, isCompact: Boolean): List<RaisedTag> {
+        if (!isCompact) {
+            return body.selectFirst(".gl3c > a")!!.select("div")
+                .filter { it.className() == "gt" }
+                .map { element ->
+                    val namespace = element.attr(TITLE).substringBefore(":").trimOrNull() ?: "misc"
+                    RaisedTag(namespace, element.attr(TITLE).substringAfter(":").trim(), TAG_TYPE_NORMAL)
+                }
+        }
+        return linkElement.select("div div").getOrNull(1)?.select("tr").orEmpty().flatMap { row ->
+            val namespace = row.select(".tc").text().removeSuffix(":")
+            row.select("div").map { element ->
+                val type = when {
+                    element.hasClass("gtl") -> TAG_TYPE_LIGHT
+                    element.hasClass("gtw") -> TAG_TYPE_WEAK
+                    else -> TAG_TYPE_NORMAL
+                }
+                RaisedTag(namespace, element.text().trim(), type)
+            }
+        }
+    }
+
+    private fun EHentaiSearchMetadata.parseCompactInfo(infoElements: List<Element>) {
+        genre = getGenre(infoElements.getOrNull(1))
+        datePosted = getDateTag(infoElements.getOrNull(2))
+        averageRating = getRating(infoElements.getOrNull(COMPACT_RATING_INDEX))
+        uploader = getUploader(infoElements.getOrNull(COMPACT_UPLOADER_INDEX))
+        length = getPageCount(infoElements.getOrNull(COMPACT_LENGTH_INDEX))
+    }
+
+    private fun EHentaiSearchMetadata.parseExtendedInfo(body: Element) {
+        genre = getGenre(body.selectFirst(".gl1c div"))
+        val infoList = body.selectFirst(".gl2c")!!.select("div div")
+        datePosted = getDateTag(infoList.getOrNull(EXTENDED_DATE_INDEX))
+        averageRating = getRating(infoList.getOrNull(EXTENDED_RATING_INDEX))
+        // The uploader column is absent on some listings, which shifts uploader and page count left by one.
+        val extraInfoList = body.selectFirst(".gl4c")!!.select("div")
+        val offset = if (extraInfoList.getOrNull(2) == null) 0 else 1
+        uploader = getUploader(extraInfoList.getOrNull(offset))
+        length = getPageCount(extraInfoList.getOrNull(offset + 1))
     }
 
     private fun getGenre(element: Element?): String? {
@@ -223,5 +182,25 @@ internal class EHentaiGalleryListParser {
     private fun getPageCount(element: Element?): Int? {
         val pageCount = element?.text()?.trimOrNull()
         return pageCount?.let { PAGE_COUNT_REGEX.find(it)?.value?.toIntOrNull() }
+    }
+}
+
+// The next page's key: a page number on the toplist, otherwise the boundary gallery id.
+private fun nextPage(
+    doc: Document,
+    parsedLocation: HttpUrl?,
+    parsedMangas: List<EHentai.ParsedManga>,
+    isReversed: Boolean,
+): Long? {
+    val navDirection = if (isReversed) "prev" else "next"
+    val hasNextPage = doc.select(".searchnav >div > a").any { navDirection in it.attr("href") }
+    return when {
+        parsedLocation?.pathSegments?.contains("toplist.php") == true ->
+            ((parsedLocation.queryParameter("p")?.toLong() ?: 0) + 2).takeIf { it <= TOPLIST_LAST_PAGE }
+        hasNextPage -> parsedMangas.let { if (isReversed) it.first() else it.last() }
+            .manga
+            .url
+            .let { EHentaiSearchMetadata.galleryId(it).toLong() }
+        else -> null
     }
 }

@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.content.Context
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastMap
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.tachiyomi.data.track.TrackStatus
 import eu.kanade.tachiyomi.data.track.TrackerManager
@@ -49,83 +51,40 @@ internal class LibraryItemPipeline(
         trackingFilter: Map<Long, TriState>,
         preferences: LibraryScreenModel.ItemPreferences,
     ): List<LibraryItem> {
-        val downloadedOnly = preferences.globalFilterDownloaded
-        val skipOutsideReleasePeriod = preferences.skipOutsideReleasePeriod
-        val filterDownloaded = if (downloadedOnly) TriState.ENABLED_IS else preferences.filterDownloaded
-        val filterUnread = preferences.filterUnread
-        val filterStarted = preferences.filterStarted
-        val filterBookmarked = preferences.filterBookmarked
-        val filterCompleted = preferences.filterCompleted
-        val filterIntervalCustom = preferences.filterIntervalCustom
+        val filterDownloaded =
+            if (preferences.globalFilterDownloaded) TriState.ENABLED_IS else preferences.filterDownloaded
+        val filters: List<(LibraryItem) -> Boolean> = listOf(
+            { applyFilter(filterDownloaded) { it.isLocal || it.downloadCount > 0 } },
+            { applyFilter(preferences.filterUnread) { it.libraryManga.unreadCount > 0 } },
+            { applyFilter(preferences.filterStarted) { it.libraryManga.hasStarted } },
+            { applyFilter(preferences.filterBookmarked) { it.libraryManga.hasBookmarks } },
+            { applyFilter(preferences.filterCompleted) { it.libraryManga.manga.status.toInt() == SManga.COMPLETED } },
+            {
+                !preferences.skipOutsideReleasePeriod ||
+                    applyFilter(preferences.filterIntervalCustom) { it.libraryManga.manga.fetchInterval < 0 }
+            },
+            trackingFilter(trackMap, trackingFilter),
+            // SY -->
+            { applyFilter(preferences.filterLewd) { it.libraryManga.manga.isLewd() } },
+            // SY <--
+        )
+        return fastFilter { item -> filters.all { it(item) } }
+    }
 
-        val isNotLoggedInAnyTrack = trackingFilter.isEmpty()
-
+    // Keeps items with an included tracker (when any is chosen) and without an excluded one.
+    private fun trackingFilter(
+        trackMap: Map<Long, List<Track>>,
+        trackingFilter: Map<Long, TriState>,
+    ): (LibraryItem) -> Boolean {
         val excludedTracks = trackingFilter.mapNotNull { if (it.value == TriState.ENABLED_NOT) it.key else null }
         val includedTracks = trackingFilter.mapNotNull { if (it.value == TriState.ENABLED_IS) it.key else null }
-        val trackFiltersIsIgnored = includedTracks.isEmpty() && excludedTracks.isEmpty()
-
-        // SY -->
-        val filterLewd = preferences.filterLewd
-        // SY <--
-
-        val filterFnDownloaded: (LibraryItem) -> Boolean = {
-            applyFilter(filterDownloaded) { it.isLocal || it.downloadCount > 0 }
-        }
-
-        val filterFnUnread: (LibraryItem) -> Boolean = {
-            applyFilter(filterUnread) { it.libraryManga.unreadCount > 0 }
-        }
-
-        val filterFnStarted: (LibraryItem) -> Boolean = {
-            applyFilter(filterStarted) { it.libraryManga.hasStarted }
-        }
-
-        val filterFnBookmarked: (LibraryItem) -> Boolean = {
-            applyFilter(filterBookmarked) { it.libraryManga.hasBookmarks }
-        }
-
-        val filterFnCompleted: (LibraryItem) -> Boolean = {
-            applyFilter(filterCompleted) { it.libraryManga.manga.status.toInt() == SManga.COMPLETED }
-        }
-
-        val filterFnIntervalCustom: (LibraryItem) -> Boolean = {
-            if (skipOutsideReleasePeriod) {
-                applyFilter(filterIntervalCustom) { it.libraryManga.manga.fetchInterval < 0 }
-            } else {
-                true
-            }
-        }
-
-        // SY -->
-        val filterFnLewd: (LibraryItem) -> Boolean = {
-            applyFilter(filterLewd) { it.libraryManga.manga.isLewd() }
-        }
-        // SY <--
-
-        val filterFnTracking: (LibraryItem) -> Boolean = { item ->
-            if (isNotLoggedInAnyTrack || trackFiltersIsIgnored) {
-                true
-            } else {
-                val mangaTracks = trackMap[item.id].orEmpty().map { it.trackerId }
-
-                val isExcluded = excludedTracks.isNotEmpty() && mangaTracks.fastAny { it in excludedTracks }
-                val isIncluded = includedTracks.isEmpty() || mangaTracks.fastAny { it in includedTracks }
-
-                !isExcluded && isIncluded
-            }
-        }
-
-        return fastFilter {
-            filterFnDownloaded(it) &&
-                filterFnUnread(it) &&
-                filterFnStarted(it) &&
-                filterFnBookmarked(it) &&
-                filterFnCompleted(it) &&
-                filterFnIntervalCustom(it) &&
-                filterFnTracking(it) &&
-                // SY -->
-                filterFnLewd(it)
-            // SY <--
+        // Not logged in anywhere, or no tracker chosen either way: nothing to filter on.
+        if (trackingFilter.isEmpty() || (includedTracks.isEmpty() && excludedTracks.isEmpty())) return { true }
+        return { item ->
+            val mangaTracks = trackMap[item.id].orEmpty().map { it.trackerId }
+            val isExcluded = excludedTracks.isNotEmpty() && mangaTracks.fastAny { it in excludedTracks }
+            val isIncluded = includedTracks.isEmpty() || mangaTracks.fastAny { it in includedTracks }
+            !isExcluded && isIncluded
         }
     }
 
@@ -306,90 +265,71 @@ internal class LibraryItemPipeline(
         groupType: Int,
     ): Map<Category, List</* LibraryItem */ Long>> {
         val context = preferences.context
-        return when (groupType) {
-            LibraryGroup.BY_TRACK_STATUS -> {
-                val tracks = runBlocking { getTracks.await() }.groupBy { it.mangaId }
-                groupBy { item ->
-                    val status = tracks[item.libraryManga.manga.id]?.firstNotNullOfOrNull { track ->
-                        TrackStatus.parseTrackerStatus(trackerManager, track.trackerId, track.status)
-                    } ?: TrackStatus.OTHER
-
-                    status.int
-                }.mapKeys { (id) ->
-                    Category(
-                        id = id.toLong(),
-                        name = TrackStatus.entries
-                            .find { it.int == id }
-                            .let { it ?: TrackStatus.OTHER }
-                            .let { context.stringResource(it.res) },
-                        order = TrackStatus.entries.indexOfFirst {
-                            it.int == id
-                        }.takeUnless { it == -1 }?.toLong() ?: TrackStatus.OTHER.ordinal.toLong(),
-                        flags = 0,
-                    )
-                }
-            }
-
-            LibraryGroup.BY_SOURCE -> {
-                val sources: List<Long>
-                groupBy { item ->
-                    item.libraryManga.manga.source
-                }.also {
-                    sources = it.keys
-                        .map {
-                            sourceManager.getOrStub(it)
-                        }
-                        .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name.ifBlank { it.id.toString() } })
-                        .map { it.id }
-                }.mapKeys {
-                    Category(
-                        id = it.key,
-                        name = if (it.key == LocalSource.ID) {
-                            context.stringResource(MR.strings.local_source)
-                        } else {
-                            val source = sourceManager.getOrStub(it.key)
-                            source.name.ifBlank { source.id.toString() }
-                        },
-                        order = sources.indexOf(it.key).takeUnless { it == -1 }?.toLong() ?: Long.MAX_VALUE,
-                        flags = 0,
-                    )
-                }
-            }
-
-            LibraryGroup.BY_STATUS -> {
-                groupBy { item ->
-                    item.libraryManga.manga.status
-                }.mapKeys {
-                    Category(
-                        id = it.key + 1,
-                        name = when (it.key) {
-                            SManga.ONGOING.toLong() -> context.stringResource(MR.strings.ongoing)
-                            SManga.LICENSED.toLong() -> context.stringResource(MR.strings.licensed)
-                            SManga.CANCELLED.toLong() -> context.stringResource(MR.strings.cancelled)
-                            SManga.ON_HIATUS.toLong() -> context.stringResource(MR.strings.on_hiatus)
-                            SManga.PUBLISHING_FINISHED.toLong() ->
-                                context.stringResource(MR.strings.publishing_finished)
-                            SManga.COMPLETED.toLong() -> context.stringResource(MR.strings.completed)
-                            else -> context.stringResource(MR.strings.unknown)
-                        },
-                        order = when (it.key) {
-                            SManga.ONGOING.toLong() -> 1
-                            SManga.LICENSED.toLong() -> 2
-                            SManga.CANCELLED.toLong() -> 3
-                            SManga.ON_HIATUS.toLong() -> 4
-                            SManga.PUBLISHING_FINISHED.toLong() -> 5
-                            SManga.COMPLETED.toLong() -> 6
-                            else -> 7
-                        },
-                        flags = 0,
-                    )
-                }
-            }
-
-            else -> {
-                emptyMap()
-            }
-        }.toSortedMap(compareBy { it.order })
+        val grouped = when (groupType) {
+            LibraryGroup.BY_TRACK_STATUS -> groupByTrackStatus(context)
+            LibraryGroup.BY_SOURCE -> groupBySource(context)
+            LibraryGroup.BY_STATUS -> groupByStatus(context)
+            else -> emptyMap()
+        }
+        return grouped.toSortedMap(compareBy { it.order })
             .mapValues { (_, libraryItem) -> libraryItem.fastMap { it.id } }
     }
+
+    private fun List<LibraryItem>.groupByTrackStatus(context: Context): Map<Category, List<LibraryItem>> {
+        val tracks = runBlocking { getTracks.await() }.groupBy { it.mangaId }
+        return groupBy { item ->
+            val status = tracks[item.libraryManga.manga.id]?.firstNotNullOfOrNull { track ->
+                TrackStatus.parseTrackerStatus(trackerManager, track.trackerId, track.status)
+            } ?: TrackStatus.OTHER
+            status.int
+        }.mapKeys { (id) ->
+            val status = TrackStatus.entries.find { it.int == id } ?: TrackStatus.OTHER
+            Category(
+                id = id.toLong(),
+                name = context.stringResource(status.res),
+                order = TrackStatus.entries.indexOf(status).toLong(),
+                flags = 0,
+            )
+        }
+    }
+
+    private fun List<LibraryItem>.groupBySource(context: Context): Map<Category, List<LibraryItem>> {
+        val bySource = groupBy { item -> item.libraryManga.manga.source }
+        val sources = bySource.keys
+            .map { sourceManager.getOrStub(it) }
+            .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name.ifBlank { it.id.toString() } })
+            .map { it.id }
+        return bySource.mapKeys {
+            Category(
+                id = it.key,
+                name = if (it.key == LocalSource.ID) {
+                    context.stringResource(MR.strings.local_source)
+                } else {
+                    val source = sourceManager.getOrStub(it.key)
+                    source.name.ifBlank { source.id.toString() }
+                },
+                order = sources.indexOf(it.key).takeUnless { it == -1 }?.toLong() ?: Long.MAX_VALUE,
+                flags = 0,
+            )
+        }
+    }
+
+    private fun List<LibraryItem>.groupByStatus(context: Context): Map<Category, List<LibraryItem>> {
+        return groupBy { item -> item.libraryManga.manga.status }.mapKeys {
+            val index = STATUS_GROUPS.indexOfFirst { (status) -> status == it.key }
+            val name = if (index == -1) MR.strings.unknown else STATUS_GROUPS[index].second
+            val order = if (index == -1) STATUS_GROUPS.size else index
+            Category(id = it.key + 1, name = context.stringResource(name), order = order + 1L, flags = 0)
+        }
+    }
 }
+
+// The publishing-status groups in display order; anything else sorts after them as "unknown".
+private val STATUS_GROUPS: List<Pair<Long, StringResource>> = listOf(
+    SManga.ONGOING.toLong() to MR.strings.ongoing,
+    SManga.LICENSED.toLong() to MR.strings.licensed,
+    SManga.CANCELLED.toLong() to MR.strings.cancelled,
+    SManga.ON_HIATUS.toLong() to MR.strings.on_hiatus,
+    SManga.PUBLISHING_FINISHED.toLong() to MR.strings.publishing_finished,
+    SManga.COMPLETED.toLong() to MR.strings.completed,
+)

@@ -9,11 +9,9 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.all.EHentai
 import eu.kanade.tachiyomi.source.online.all.fetchFavorites
 import eu.kanade.tachiyomi.util.system.toast
-import exh.GalleryAddEvent
 import exh.GalleryAdder
 import exh.eh.EHentaiUpdateWorker
 import exh.log.xLog
-import exh.source.EH_SOURCE_ID
 import exh.source.EXH_SOURCE_ID
 import exh.source.ExhPreferences
 import exh.source.isEhBasedManga
@@ -40,8 +38,6 @@ import tachiyomi.domain.category.model.CategoryUpdate
 import tachiyomi.domain.manga.interactor.GetLibraryManga
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.FavoriteEntry
-import tachiyomi.domain.manga.model.Manga
-import tachiyomi.domain.manga.model.getUrl
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
@@ -54,30 +50,30 @@ private const val EXH_REQUEST_RETRIES = 10
 
 internal class FavoritesSyncHelper(val context: Context) {
     private val getLibraryManga: GetLibraryManga by injectLazy()
-    private val getCategories: GetCategories by injectLazy()
-    private val getManga: GetManga by injectLazy()
-    private val updateManga: UpdateManga by injectLazy()
-    private val setMangaCategories: SetMangaCategories by injectLazy()
+    internal val getCategories: GetCategories by injectLazy()
+    internal val getManga: GetManga by injectLazy()
+    internal val updateManga: UpdateManga by injectLazy()
+    internal val setMangaCategories: SetMangaCategories by injectLazy()
     private val createCategoryWithName: CreateCategoryWithName by injectLazy()
     private val updateCategory: UpdateCategory by injectLazy()
 
-    private val exhPreferences: ExhPreferences by injectLazy()
+    internal val exhPreferences: ExhPreferences by injectLazy()
 
-    private val exh by lazy {
+    internal val exh by lazy {
         Injekt.get<SourceManager>().get(EXH_SOURCE_ID) as? EHentai
             ?: EHentai(0, true, context)
     }
 
     private val storage by lazy { LocalFavoritesStorage() }
 
-    private val galleryAdder by lazy { GalleryAdder() }
+    internal val galleryAdder by lazy { GalleryAdder() }
 
-    private val throttleManager by lazy { ThrottleManager() }
+    internal val throttleManager by lazy { ThrottleManager() }
 
     private var wifiLock: WifiManager.WifiLock? = null
     private var wakeLock: PowerManager.WakeLock? = null
 
-    private val logger by lazy { xLog() }
+    internal val logger by lazy { xLog() }
 
     val status: MutableStateFlow<FavoritesSyncStatus> = MutableStateFlow(FavoritesSyncStatus.Idle)
 
@@ -98,27 +94,9 @@ internal class FavoritesSyncHelper(val context: Context) {
             status.value = FavoritesSyncStatus.SyncError.NotLoggedInSyncError
             return
         }
-
         // Validate library state
         status.value = FavoritesSyncStatus.Processing.VerifyingLibrary
-        val libraryManga = getLibraryManga.await()
-        val seenManga = HashSet<Long>(libraryManga.size)
-        libraryManga.forEach { (manga) ->
-            if (manga.isEhBasedManga()) {
-                if (manga.id in seenManga) {
-                    val inCategories = getCategories.await(manga.id)
-                    status.value = FavoritesSyncStatus.BadLibraryState
-                        .MangaInMultipleCategories(manga.id, manga.title, inCategories.map { it.name })
-
-                    logger.w(
-                        context.stringResource(SYMR.strings.favorites_sync_gallery_multiple_categories_error, manga.id),
-                    )
-                    return
-                } else {
-                    seenManga += manga.id
-                }
-            }
-        }
+        if (!libraryStateIsSyncable()) return
 
         // Download remote favorites
         val favorites = try {
@@ -132,7 +110,40 @@ internal class FavoritesSyncHelper(val context: Context) {
         }
 
         val errorList = mutableListOf<FavoritesSyncStatus.SyncError.GallerySyncError>()
+        val completed = syncUnderLocks(favorites, errorList)
+        status.value = when {
+            !completed -> return
+            errorList.isEmpty() -> FavoritesSyncStatus.Idle
+            else -> FavoritesSyncStatus.CompleteWithErrors(errorList)
+        }
+    }
 
+    // An EH gallery in more than one category cannot be mirrored to a single remote favourite slot.
+    private suspend fun libraryStateIsSyncable(): Boolean {
+        val libraryManga = getLibraryManga.await()
+        val seenManga = HashSet<Long>(libraryManga.size)
+        for ((manga) in libraryManga) {
+            if (!manga.isEhBasedManga()) continue
+            if (manga.id in seenManga) {
+                val inCategories = getCategories.await(manga.id)
+                status.value = FavoritesSyncStatus.BadLibraryState
+                    .MangaInMultipleCategories(manga.id, manga.title, inCategories.map { it.name })
+                logger.w(
+                    context.stringResource(SYMR.strings.favorites_sync_gallery_multiple_categories_error, manga.id),
+                )
+                return false
+            }
+            seenManga += manga.id
+        }
+        return true
+    }
+
+    // Runs the exchange with the wake and wifi locks held and background gallery updates paused.
+    // @return false when it failed, with [status] already set to the error.
+    private suspend fun syncUnderLocks(
+        favorites: Pair<List<EHentai.ParsedManga>, List<String>>,
+        errorList: MutableList<FavoritesSyncStatus.SyncError.GallerySyncError>,
+    ): Boolean {
         try {
             // Take wake + wifi locks
             ignore { wakeLock?.release() }
@@ -171,12 +182,12 @@ internal class FavoritesSyncHelper(val context: Context) {
         } catch (e: IgnoredException) {
             // Do not display error as this error has already been reported
             logger.w(context.stringResource(SYMR.strings.favorites_sync_ignoring_exception), e)
-            return
+            return false
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.
             status.value = FavoritesSyncStatus.SyncError.UnknownSyncError(expected.message.orEmpty())
             logger.e(context.stringResource(SYMR.strings.favorites_sync_sync_error), expected)
-            return
+            return false
         } finally {
             // Release wake + wifi locks
             ignore {
@@ -187,16 +198,10 @@ internal class FavoritesSyncHelper(val context: Context) {
                 wifiLock?.release()
                 wifiLock = null
             }
-
             // Update galleries again!
             EHentaiUpdateWorker.scheduleBackground(context)
         }
-
-        if (errorList.isEmpty()) {
-            status.value = FavoritesSyncStatus.Idle
-        } else {
-            status.value = FavoritesSyncStatus.CompleteWithErrors(errorList)
-        }
+        return true
     }
 
     private suspend fun applyRemoteCategories(categories: List<String>) {
@@ -324,101 +329,7 @@ internal class FavoritesSyncHelper(val context: Context) {
         }
     }
 
-    private suspend fun applyChangeSetToLocal(
-        errorList: MutableList<FavoritesSyncStatus.SyncError.GallerySyncError>,
-        changeSet: ChangeSet,
-    ) {
-        val removedManga = mutableListOf<Manga>()
-
-        // Apply removals
-        changeSet.removed.forEachIndexed { index, gallery ->
-            status.value = FavoritesSyncStatus.Processing.RemovingGalleryFromLocal(
-                index = index + 1,
-                total = changeSet.removed.size,
-            )
-            val url = gallery.getUrl()
-
-            // Consider both EX and EH sources
-            listOf(
-                EXH_SOURCE_ID,
-                EH_SOURCE_ID,
-            ).forEach {
-                val manga = getManga.await(url, it)
-
-                if (manga?.favorite == true) {
-                    updateManga.awaitUpdateFavorite(manga.id, false)
-                    removedManga += manga
-                }
-            }
-        }
-
-        // Can't do too many DB OPs in one go
-        removedManga.forEach {
-            setMangaCategories.await(it.id, emptyList())
-        }
-
-        val insertedMangaCategories = mutableListOf<Pair<Long, Manga>>()
-        val categories = getCategories.await()
-            .filterNot(Category::isSystemCategory)
-
-        // Apply additions
-        throttleManager.resetThrottle()
-        changeSet.added.forEachIndexed { index, gallery ->
-            status.value = FavoritesSyncStatus.Processing.AddingGalleryToLocal(
-                index = index + 1,
-                total = changeSet.added.size,
-                isThrottling = needWarnThrottle(),
-                title = gallery.title,
-            )
-
-            throttleManager.throttle()
-
-            // Import using gallery adder
-            val result = galleryAdder.addGallery(
-                context = context,
-                url = "${exh.baseUrl}${gallery.getUrl()}",
-                fav = true,
-                forceSource = exh,
-                throttleFunc = throttleManager::throttle,
-                retry = 3,
-            )
-
-            if (result is GalleryAddEvent.Fail.NotFound) {
-                // Skip this gallery, it no longer exists
-                logger.e(context.stringResource(SYMR.strings.favorites_sync_remote_not_exist, gallery.getUrl()))
-            } else if (result is GalleryAddEvent.Fail) {
-                val error = when (result) {
-                    is GalleryAddEvent.Fail.Error -> FavoritesSyncStatus.SyncError.GallerySyncError.GalleryAddFail(
-                        gallery.title, result.logMessage,
-                    )
-                    is GalleryAddEvent.Fail.UnknownType ->
-                        FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail(
-                            gallery.title, result.galleryUrl,
-                        )
-                    is GalleryAddEvent.Fail.UnknownSource ->
-                        FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail(
-                            gallery.title, result.galleryUrl,
-                        )
-                }
-
-                if (exhPreferences.exhLenientSync.get()) {
-                    errorList += error
-                } else {
-                    status.value = error
-                    throw IgnoredException(error)
-                }
-            } else if (result is GalleryAddEvent.Success) {
-                insertedMangaCategories += categories[gallery.category].id to result.manga
-            }
-        }
-
-        // Can't do too many DB OPs in one go
-        insertedMangaCategories.forEach { (category, manga) ->
-            setMangaCategories.await(manga.id, listOf(category))
-        }
-    }
-
-    private fun needWarnThrottle() =
+    internal fun needWarnThrottle() =
         throttleManager.throttleTime >= THROTTLE_WARN
 
     class IgnoredException(

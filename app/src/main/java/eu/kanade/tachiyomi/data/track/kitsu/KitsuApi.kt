@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuAlgoliaSearchResult
 import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuCurrentUserResult
 import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuListSearchResult
 import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuMangaMetadata
+import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuMangaMetadataMedia
 import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuOAuth
 import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuSearchResult
 import eu.kanade.tachiyomi.data.track.kitsu.dto.KitsuUser
@@ -41,6 +42,33 @@ private const val CONTENT_TYPE = "Content-Type"
 private const val MANGA = "manga"
 
 private const val STAFF_COUNT = 25
+
+private val MANGA_METADATA_QUERY = """
+    |query(${'$'}libraryId: ID!, ${'$'}staffCount: Int) {
+    |findLibraryEntryById(id: ${'$'}libraryId) {
+        |media {
+            |id
+            |titles {
+                |preferred
+            |}
+            |posterImage {
+                |original {
+                    |url
+                |}
+            |}
+            |description
+            |staff(first: ${'$'}staffCount) {
+                |nodes {
+                    |role
+                    |person {
+                        |name
+                    |}
+                |}
+            |}
+        |}
+    |}
+    |}
+""".trimMargin()
 
 internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
 
@@ -253,34 +281,8 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
 
     suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata {
         return withIOContext {
-            val query = """
-                |query(${'$'}libraryId: ID!, ${'$'}staffCount: Int) {
-                |findLibraryEntryById(id: ${'$'}libraryId) {
-                    |media {
-                        |id
-                        |titles {
-                            |preferred
-                        |}
-                        |posterImage {
-                            |original {
-                                |url
-                            |}
-                        |}
-                        |description
-                        |staff(first: ${'$'}staffCount) {
-                            |nodes {
-                                |role
-                                |person {
-                                    |name
-                                |}
-                            |}
-                        |}
-                    |}
-                |}
-                |}
-            """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
+                put("query", MANGA_METADATA_QUERY)
                 putJsonObject("variables") {
                     put("libraryId", track.remoteId)
                     put("staffCount", STAFF_COUNT) // based on nothing
@@ -296,25 +298,10 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
                 )
                     .awaitSuccess()
                     .parseAs<KitsuMangaMetadata>()
-                    .let {
-                        val manga = it.data.findLibraryEntryById.media
-                        TrackMangaMetadata(
-                            remoteId = manga.id.toLong(),
-                            title = manga.titles.preferred,
-                            thumbnailUrl = manga.posterImage.original.url,
-                            description = manga.description.en?.htmlDecode()?.ifEmpty { null },
-                            authors = manga.staff.nodes
-                                .filter { it.role == "Story" || it.role == "Story & Art" }
-                                .map { it.person.name }
-                                .joinToString(", ")
-                                .ifEmpty { null },
-                            artists = manga.staff.nodes
-                                .filter { it.role == "Art" || it.role == "Story & Art" }
-                                .map { it.person.name }
-                                .joinToString(", ")
-                                .ifEmpty { null },
-                        )
-                    }
+                    .data
+                    .findLibraryEntryById
+                    .media
+                    .toTrackMangaMetadata()
             }
         }
     }
@@ -352,4 +339,20 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
                 .build(),
         )
     }
+}
+
+private fun KitsuMangaMetadataMedia.toTrackMangaMetadata(): TrackMangaMetadata {
+    fun staffNamed(vararg roles: String): String? = staff.nodes
+        .filter { it.role in roles }
+        .map { it.person.name }
+        .joinToString(", ")
+        .ifEmpty { null }
+    return TrackMangaMetadata(
+        remoteId = id.toLong(),
+        title = titles.preferred,
+        thumbnailUrl = posterImage.original.url,
+        description = description.en?.htmlDecode()?.ifEmpty { null },
+        authors = staffNamed("Story", "Story & Art"),
+        artists = staffNamed("Art", "Story & Art"),
+    )
 }

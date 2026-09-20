@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.widget.ArrayAdapter
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
@@ -31,12 +30,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.Tracker
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.databinding.EditMangaDialogBinding
-import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.materialdialogs.setTextInput
 import exh.ui.metadata.adapters.MetadataUIUtil.getResourceColor
-import exh.util.dropBlank
 import exh.util.trimOrNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -50,26 +46,6 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-
-// Spinner positions of the status picker; the first entry is "default" (keep the source's status).
-private val STATUS_OPTIONS = listOf(
-    null,
-    SManga.ONGOING,
-    SManga.COMPLETED,
-    SManga.LICENSED,
-    SManga.PUBLISHING_FINISHED,
-    SManga.CANCELLED,
-    SManga.ON_HIATUS,
-)
-
-// Status codes older SY builds stored for the three statuses Mihon later numbered.
-private const val LEGACY_PUBLISHING_FINISHED = 61
-private const val LEGACY_CANCELLED = 62
-private const val LEGACY_ON_HIATUS = 63
-
-private const val DESCRIPTION_HINT_LENGTH = 20
-private const val THUMBNAIL_HINT_LENGTH = 40
-private const val EXTENSION_HINT_LENGTH = 6
 
 @Composable
 internal fun EditMangaDialog(
@@ -98,18 +74,8 @@ internal fun EditMangaDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    @Suppress("NAME_SHADOWING")
-                    val binding = binding
-                    if (binding != null) {
-                        onPositiveClick(
-                            binding.title.text.toString(),
-                            binding.mangaAuthor.text.toString(),
-                            binding.mangaArtist.text.toString(),
-                            binding.thumbnailUrl.text.toString(),
-                            binding.mangaDescription.text.toString(),
-                            binding.mangaGenresTags.getTextStrings(),
-                            STATUS_OPTIONS.getOrNull(binding.status.selectedItemPosition)?.toLong(),
-                        )
+                    binding?.let {
+                        it.submit(onPositiveClick)
                         onDismissRequest()
                     }
                 },
@@ -165,6 +131,28 @@ internal fun EditMangaDialog(
     }
 }
 
+private fun EditMangaDialogBinding.submit(
+    onPositiveClick: (
+        title: String?,
+        author: String?,
+        artist: String?,
+        thumbnailUrl: String?,
+        description: String?,
+        tags: List<String>?,
+        status: Long?,
+    ) -> Unit,
+) {
+    onPositiveClick(
+        title.text.toString(),
+        mangaAuthor.text.toString(),
+        mangaArtist.text.toString(),
+        thumbnailUrl.text.toString(),
+        mangaDescription.text.toString(),
+        mangaGenresTags.getTextStrings(),
+        STATUS_OPTIONS.getOrNull(status.selectedItemPosition)?.toLong(),
+    )
+}
+
 private fun onViewCreated(
     manga: Manga,
     context: Context,
@@ -176,86 +164,11 @@ private fun onViewCreated(
     showTrackerSelectionDialogue: MutableState<Boolean>,
 ) {
     loadCover(manga, binding)
-
-    val statusAdapter: ArrayAdapter<String> = ArrayAdapter(
-        context,
-        android.R.layout.simple_spinner_dropdown_item,
-        listOf(
-            MR.strings.label_default,
-            MR.strings.ongoing,
-            MR.strings.completed,
-            MR.strings.licensed,
-            MR.strings.publishing_finished,
-            MR.strings.cancelled,
-            MR.strings.on_hiatus,
-        ).map { context.stringResource(it) },
-    )
-
-    binding.status.adapter = statusAdapter
-    if (manga.status != manga.ogStatus) {
-        val status = when (manga.status.toInt()) {
-            LEGACY_PUBLISHING_FINISHED -> SManga.PUBLISHING_FINISHED
-            LEGACY_CANCELLED -> SManga.CANCELLED
-            LEGACY_ON_HIATUS -> SManga.ON_HIATUS
-            else -> manga.status.toInt()
-        }
-        binding.status.setSelection(STATUS_OPTIONS.indexOf(status).coerceAtLeast(0))
-    }
-
+    binding.setUpStatusSpinner(manga, context)
     if (manga.isLocal()) {
-        if (manga.title != manga.url) {
-            binding.title.setText(manga.title)
-        }
-
-        binding.title.hint = context.stringResource(SYMR.strings.title_hint, manga.url)
-        binding.mangaAuthor.setText(manga.author.orEmpty())
-        binding.mangaArtist.setText(manga.artist.orEmpty())
-        binding.thumbnailUrl.setText(manga.thumbnailUrl.orEmpty())
-        binding.mangaDescription.setText(manga.description.orEmpty())
-        binding.mangaGenresTags.setChips(manga.genre.orEmpty().dropBlank(), scope)
+        binding.fillLocalFields(manga, context, scope)
     } else {
-        if (manga.title != manga.ogTitle) {
-            binding.title.append(manga.title)
-        }
-        if (manga.author != manga.ogAuthor) {
-            binding.mangaAuthor.append(manga.author.orEmpty())
-        }
-        if (manga.artist != manga.ogArtist) {
-            binding.mangaArtist.append(manga.artist.orEmpty())
-        }
-        if (manga.thumbnailUrl != manga.ogThumbnailUrl) {
-            binding.thumbnailUrl.append(manga.thumbnailUrl.orEmpty())
-        }
-        if (manga.description != manga.ogDescription) {
-            binding.mangaDescription.append(manga.description.orEmpty())
-        }
-        binding.mangaGenresTags.setChips(manga.genre.orEmpty().dropBlank(), scope)
-
-        binding.title.hint = context.stringResource(SYMR.strings.title_hint, manga.ogTitle)
-
-        binding.mangaAuthor.hint = context.stringResource(SYMR.strings.author_hint, manga.ogAuthor ?: "")
-        binding.mangaArtist.hint = context.stringResource(SYMR.strings.artist_hint, manga.ogArtist ?: "")
-        binding.mangaDescription.hint =
-            context.stringResource(
-                SYMR.strings.description_hint,
-                manga.ogDescription
-                    ?.takeIf { it.isNotBlank() }
-                    ?.replace("\n", " ")
-                    ?.chop(DESCRIPTION_HINT_LENGTH)
-                    ?: "",
-            )
-        binding.thumbnailUrl.hint =
-            context.stringResource(
-                SYMR.strings.thumbnail_url_hint,
-                manga.ogThumbnailUrl?.let {
-                    it.chop(THUMBNAIL_HINT_LENGTH) +
-                        if (it.length > THUMBNAIL_HINT_LENGTH + EXTENSION_HINT_LENGTH) {
-                            "." + it.substringAfterLast(".").chop(EXTENSION_HINT_LENGTH)
-                        } else {
-                            ""
-                        }
-                } ?: "",
-            )
+        binding.fillSourcedFields(manga, context, scope)
     }
     binding.mangaGenresTags.clearFocus()
 
@@ -291,7 +204,7 @@ private fun resetInfo(manga: Manga, binding: EditMangaDialogBinding, scope: Coro
     resetTags(manga, binding, scope)
 }
 
-private fun ChipGroup.setChips(items: List<String>, scope: CoroutineScope) {
+internal fun ChipGroup.setChips(items: List<String>, scope: CoroutineScope) {
     removeAllViews()
 
     items.asSequence().map { item ->

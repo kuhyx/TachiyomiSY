@@ -88,3 +88,27 @@ internal fun NotificationReceiver.downloadChapters(chapterUrls: Array<String>, m
         }
     }
 }
+
+/**
+ * Runs a chapter-list [action] for the manga and chapter urls carried by [intent], after dismissing
+ * the notification (and its group) that raised it.
+ */
+internal fun NotificationReceiver.onChapterAction(
+    context: Context,
+    intent: Intent,
+    action: (Array<String>, Long) -> Unit,
+) {
+    val notificationId = intent.getIntExtra(NotificationReceiver.EXTRA_NOTIFICATION_ID, -1)
+    if (notificationId > -1) {
+        NotificationReceiver.dismissNotification(
+            context,
+            notificationId,
+            intent.getIntExtra(NotificationReceiver.EXTRA_GROUP_ID, 0),
+        )
+    }
+    val urls = intent.getStringArrayExtra(NotificationReceiver.EXTRA_CHAPTER_URL) ?: return
+    val mangaId = intent.getLongExtra(NotificationReceiver.EXTRA_MANGA_ID, -1)
+    if (mangaId > -1) {
+        action(urls, mangaId)
+    }
+}

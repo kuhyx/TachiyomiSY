@@ -69,28 +69,51 @@ internal class ShellInterface : IShellInterface.Stub() {
         val pmInterface = Class.forName($$"android.content.pm.IPackageManager$Stub")
             .getMethod("asInterface", IBinder::class.java)
             .invoke(null, SystemServiceHelper.getSystemService("package"))
-
         val packageInstaller = Class.forName("android.content.pm.IPackageManager")
             .getMethod("getPackageInstaller")
-            .invoke(pmInterface)
+            .invoke(pmInterface)!!
 
-        val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
+        val sessionId = createSession(packageInstaller, replaceExistingParams())
+        val session = packageInstaller::class.java
+            .getMethod("openSession", Int::class.java)
+            .invoke(packageInstaller, sessionId)!!
+
+        openSessionWrite(session, apk.length).use { output ->
+            apk.createInputStream().use { input -> input.copyTo(output) }
+        }
+
+        val statusIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            Intent(ACTION_INSTALL_RESULT).setPackage(packageName),
+            PendingIntent.FLAG_MUTABLE,
+        )
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+            session::class.java.getMethod("commit", IntentSender::class.java, Boolean::class.java)
+                .invoke(session, statusIntent.intentSender, false)
+        } else {
+            session::class.java.getMethod("commit", IntentSender::class.java)
+                .invoke(session, statusIntent.intentSender)
+        }
+    }
+
+    // A full-install session that may replace the installed package, attributed to this app where the API allows.
+    private fun replaceExistingParams(): PackageInstaller.SessionParams {
+        return PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
             val installFlags = this::class.java.getField("installFlags")
-            installFlags.set(
-                this,
-                installFlags.getInt(this) or REPLACE_EXISTING_INSTALL_FLAG,
-            )
-
+            installFlags.set(this, installFlags.getInt(this) or REPLACE_EXISTING_INSTALL_FLAG)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 setPackageSource(PackageInstaller.PACKAGE_SOURCE_STORE)
             }
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 setInstallerPackageName(packageName)
             }
         }
+    }
 
-        val sessionId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    // `IPackageInstaller.createSession` grew an installer-attribution parameter in Android 12.
+    private fun createSession(packageInstaller: Any, params: PackageInstaller.SessionParams): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             packageInstaller::class.java.getMethod(
                 "createSession",
                 PackageInstaller.SessionParams::class.java,
@@ -106,49 +129,27 @@ internal class ShellInterface : IShellInterface.Stub() {
                 Int::class.java,
             ).invoke(packageInstaller, params, packageName, userId) as Int
         }
+    }
 
-        val session = packageInstaller::class.java
-            .getMethod("openSession", Int::class.java)
-            .invoke(packageInstaller, sessionId)
-
-        session::class.java.getMethod(
+    // The stream the session's "extension" entry is written through; wraps the fd the way the platform expects.
+    @SuppressLint("PrivateApi")
+    private fun openSessionWrite(session: Any, length: Long): OutputStream {
+        val fd = session::class.java.getMethod(
             "openWrite",
             String::class.java,
             Long::class.java,
             Long::class.java,
         )
-            .invoke(session, "extension", 0L, apk.length)
-            .let { it as ParcelFileDescriptor }
-            .let { fd ->
-                val revocable = Class.forName("android.os.SystemProperties")
-                    .getMethod("getBoolean", String::class.java, Boolean::class.java)
-                    .invoke(null, "fw.revocable_fd", false) as Boolean
-
-                if (revocable) {
-                    ParcelFileDescriptor.AutoCloseOutputStream(fd)
-                } else {
-                    Class.forName($$"android.os.FileBridge$FileBridgeOutputStream")
-                        .getConstructor(ParcelFileDescriptor::class.java)
-                        .newInstance(fd) as OutputStream
-                }
-            }
-            .use { output ->
-                apk.createInputStream().use { input -> input.copyTo(output) }
-            }
-
-        val statusIntent = PendingIntent.getBroadcast(
-            context,
-            0,
-            Intent(ACTION_INSTALL_RESULT).setPackage(packageName),
-            PendingIntent.FLAG_MUTABLE,
-        )
-
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-            session::class.java.getMethod("commit", IntentSender::class.java, Boolean::class.java)
-                .invoke(session, statusIntent.intentSender, false)
+            .invoke(session, "extension", 0L, length) as ParcelFileDescriptor
+        val revocable = Class.forName("android.os.SystemProperties")
+            .getMethod("getBoolean", String::class.java, Boolean::class.java)
+            .invoke(null, "fw.revocable_fd", false) as Boolean
+        return if (revocable) {
+            ParcelFileDescriptor.AutoCloseOutputStream(fd)
         } else {
-            session::class.java.getMethod("commit", IntentSender::class.java)
-                .invoke(session, statusIntent.intentSender)
+            Class.forName($$"android.os.FileBridge$FileBridgeOutputStream")
+                .getConstructor(ParcelFileDescriptor::class.java)
+                .newInstance(fd) as OutputStream
         }
     }
 

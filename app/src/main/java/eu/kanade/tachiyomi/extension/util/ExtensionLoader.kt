@@ -10,9 +10,6 @@ import eu.kanade.domain.extension.interactor.TrustExtension
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.LoadResult
-import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceFactory
-import eu.kanade.tachiyomi.util.system.ChildFirstPathClassLoader
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -42,7 +39,6 @@ internal object ExtensionLoader {
     }
 
     internal const val EXTENSION_FEATURE = "tachiyomi.extension"
-    private const val METADATA_SOURCE_CLASS = "tachiyomi.extension.class"
     private const val METADATA_SOURCE_FACTORY = "tachiyomi.extension.factory"
     private const val METADATA_NSFW = "tachiyomi.extension.nsfw"
 
@@ -171,109 +167,111 @@ internal object ExtensionLoader {
     // @param context The application context.
     // @param extensionInfo The extension to load.
     private suspend fun loadExtension(context: Context, extensionInfo: ExtensionInfo): LoadResult {
-        val pkgManager = context.packageManager
         val pkgInfo = extensionInfo.packageInfo
+        val header = extensionHeader(context, pkgInfo) ?: return LoadResult.Error
+        return checkTrust(pkgInfo, header) ?: buildExtension(context, extensionInfo, header)
+    }
+
+    /** The manifest fields every load path needs; null (logged) when the version or lib version is unusable. */
+    private data class ExtensionHeader(
+        val name: String,
+        val versionName: String,
+        val versionCode: Long,
+        val libVersion: Double,
+        val isNsfw: Boolean,
+    )
+
+    private fun extensionHeader(context: Context, pkgInfo: PackageInfo): ExtensionHeader? {
         val appInfo = pkgInfo.applicationInfo!!
-        val pkgName = pkgInfo.packageName
-
         val extName = appInfo.metaData.getString(METADATA_NAME)
-            ?: pkgManager.getApplicationLabel(appInfo).toString().substringAfter("Tachiyomi: ")
+            ?: context.packageManager.getApplicationLabel(appInfo).toString().substringAfter("Tachiyomi: ")
         val versionName = pkgInfo.versionName
-        val versionCode = PackageInfoCompat.getLongVersionCode(pkgInfo)
-
-        if (versionName.isNullOrEmpty()) {
-            logcat(LogPriority.WARN) { "Missing versionName for extension $extName" }
-            return LoadResult.Error
-        }
-
         // Validate lib version
-        val libVersion = appInfo.metaData.getFloat(METADATA_EXTENSION_LIB)
-            .takeUnless { it == 0.0f }
-            ?.toString()
-            ?.toDouble()
-            ?: versionName.substringBeforeLast('.').toDoubleOrNull()
-        if (libVersion == null || libVersion !in SUPPORTED_LIB_VERSIONS) {
-            logcat(LogPriority.WARN) {
-                "Lib version is $libVersion, while only version(s) " +
-                    "${SUPPORTED_LIB_VERSIONS.joinToString()} are supported"
-            }
-            return LoadResult.Error
+        val libVersion = versionName?.let { name ->
+            appInfo.metaData.getFloat(METADATA_EXTENSION_LIB)
+                .takeUnless { it == 0.0f }
+                ?.toString()
+                ?.toDouble()
+                ?: name.substringBeforeLast('.').toDoubleOrNull()
         }
-
-        val signatures = getSignatures(pkgInfo)
-        if (signatures.isNullOrEmpty()) {
-            logcat(LogPriority.WARN) { "Package $pkgName isn't signed" }
-            return LoadResult.Error
-        } else if (!trustExtension.isTrusted(pkgInfo, signatures)) {
-            val extension = Extension.Untrusted(
-                extName,
-                pkgName,
-                versionName,
-                versionCode,
-                libVersion,
-                signatures.last(),
-            )
-            logcat(LogPriority.WARN) { "Extension $pkgName isn't trusted" }
-            return LoadResult.Untrusted(extension)
-        }
-
         val isNsfw = appInfo.metaData.getInt(METADATA_CONTENT_WARNING) > 0 ||
             appInfo.metaData.getInt(METADATA_NSFW) == 1
-        if (!loadNsfwSource && isNsfw) {
-            logcat(LogPriority.WARN) { "NSFW extension $pkgName not allowed" }
+        return when {
+            versionName.isNullOrEmpty() -> {
+                logcat(LogPriority.WARN) { "Missing versionName for extension $extName" }
+                null
+            }
+            libVersion == null || libVersion !in SUPPORTED_LIB_VERSIONS -> {
+                logcat(LogPriority.WARN) {
+                    "Lib version is $libVersion, while only version(s) " +
+                        "${SUPPORTED_LIB_VERSIONS.joinToString()} are supported"
+                }
+                null
+            }
+            else -> {
+                ExtensionHeader(
+                    name = extName,
+                    versionName = versionName,
+                    versionCode = PackageInfoCompat.getLongVersionCode(pkgInfo),
+                    libVersion = libVersion,
+                    isNsfw = isNsfw,
+                )
+            }
+        }
+    }
+
+    // The load result that stops an unsigned or untrusted package, or null when it may be loaded.
+    private suspend fun checkTrust(pkgInfo: PackageInfo, header: ExtensionHeader): LoadResult? {
+        val pkgName = pkgInfo.packageName
+        val signatures = getSignatures(pkgInfo)
+        return when {
+            signatures.isNullOrEmpty() -> {
+                logcat(LogPriority.WARN) { "Package $pkgName isn't signed" }
+                LoadResult.Error
+            }
+            !trustExtension.isTrusted(pkgInfo, signatures) -> {
+                val extension = Extension.Untrusted(
+                    header.name,
+                    pkgName,
+                    header.versionName,
+                    header.versionCode,
+                    header.libVersion,
+                    signatures.last(),
+                )
+                logcat(LogPriority.WARN) { "Extension $pkgName isn't trusted" }
+                LoadResult.Untrusted(extension)
+            }
+            else -> {
+                null
+            }
+        }
+    }
+
+    private fun buildExtension(context: Context, extensionInfo: ExtensionInfo, header: ExtensionHeader): LoadResult {
+        val pkgInfo = extensionInfo.packageInfo
+        val appInfo = pkgInfo.applicationInfo!!
+        if (!loadNsfwSource && header.isNsfw) {
+            logcat(LogPriority.WARN) { "NSFW extension ${pkgInfo.packageName} not allowed" }
             return LoadResult.Error
         }
-
-        val classLoader = try {
-            ChildFirstPathClassLoader(appInfo.sourceDir, null, context.classLoader)
-        } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected) { "Extension load error: $extName ($pkgName)" }
-            return LoadResult.Error
-        }
-
-        val sources = appInfo.metaData.getString(METADATA_SOURCE_CLASS)!!
-            .split(";")
-            .map {
-                val sourceClass = it.trim()
-                if (sourceClass.startsWith(".")) {
-                    pkgInfo.packageName + sourceClass
-                } else {
-                    sourceClass
-                }
-            }
-            .flatMap {
-                try {
-                    when (val obj = Class.forName(it, false, classLoader).getDeclaredConstructor().newInstance()) {
-                        is Source -> listOf(obj)
-                        is SourceFactory -> obj.createSources()
-                        else -> error("Unknown source class type: ${obj.javaClass}")
-                    }
-                } catch (expected: Throwable) {
-                    // Logged whatever the cause; the caller carries on.
-                    logcat(LogPriority.ERROR, expected) { "Extension load error: $extName ($it)" }
-                    return LoadResult.Error
-                }
-            }
-
+        val sources = loadSources(context, pkgInfo, appInfo, header.name) ?: return LoadResult.Error
         val langs = sources.map { it.lang }.toSet()
         val lang = when (langs.size) {
             0 -> ""
             1 -> langs.first()
             else -> "all"
         }
-
         val extension = Extension.Installed(
-            name = extName,
-            pkgName = pkgName,
-            versionName = versionName,
-            versionCode = versionCode,
-            libVersion = libVersion,
+            name = header.name,
+            pkgName = pkgInfo.packageName,
+            versionName = header.versionName,
+            versionCode = header.versionCode,
+            libVersion = header.libVersion,
             lang = lang,
-            isNsfw = isNsfw,
+            isNsfw = header.isNsfw,
             sources = sources,
             pkgFactory = appInfo.metaData.getString(METADATA_SOURCE_FACTORY),
-            icon = appInfo.loadIcon(pkgManager),
+            icon = appInfo.loadIcon(context.packageManager),
             isShared = extensionInfo.isShared,
         )
         return LoadResult.Success(extension)

@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.download.addDownloadsToStartOfQueue
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.MetadataSource
 import eu.kanade.tachiyomi.source.online.all.MergedSource
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
@@ -318,62 +319,28 @@ internal class ReaderViewModel @JvmOverloads constructor(
                     // SY -->
                     sourceManager.isInitialized.first { it }
                     val source = sourceManager.getOrStub(manga.source)
-                    val metadataSource = source.getMainSource<MetadataSource<*, *>>()
-                    val metadata = metadataSource?.let { getFlatMetadataById.await(mangaId)?.raise(it.metaClass) }
-                    val mergedReferences = if (source is MergedSource) {
-                        runBlocking {
-                            getMergedReferencesById.await(manga.id)
-                        }
-                    } else {
-                        emptyList()
-                    }
-                    val mergedManga = if (source is MergedSource) {
-                        runBlocking {
-                            getMergedMangaById.await(manga.id)
-                        }.associateBy { it.id }
-                    } else {
-                        emptyMap()
-                    }
-                    val relativeTime = uiPreferences.relativeTime.get()
-                    val autoScrollFreq = readerPreferences.autoscrollInterval.get()
+                    val merged = mergedDataFor(manga, source)
+                    publishInitialState(manga, source, merged)
                     // SY <--
-                    mutableState.update {
-                        it.copy(
-                            manga = manga,
-                            /* SY --> */
-                            meta = metadata,
-                            mergedManga = mergedManga,
-                            dateRelativeTime = relativeTime,
-                            ehAutoscrollFreq = if (autoScrollFreq == -1f) {
-                                ""
-                            } else {
-                                autoScrollFreq.toString()
-                            },
-                            isAutoScrollEnabled = autoScrollFreq != -1f,
-                            /* SY <-- */
-                        )
-                    }
                     if (chapterId == -1L) chapterId = initialChapterId
 
-                    val context = Injekt.get<Application>()
-                    // val source = sourceManager.getOrStub(manga.source)
-                    loader = ChapterLoader(
+                    val newLoader = ChapterLoader(
                         services = ChapterLoader.Services(
-                            context = context,
+                            context = Injekt.get<Application>(),
                             downloadManager = downloadManager,
                             downloadProvider = downloadProvider,
                             sourceManager = sourceManager,
                             readerPrefs = readerPreferences,
                         ),
                         manga = manga,
-                        source = source, /* SY --> */
-                        merged = ChapterLoader.MergedData(mergedReferences, mergedManga), /* SY <-- */
+                        source = source,
+                        /* SY --> */ merged = merged, /* SY <-- */
                     )
-
+                    loader = newLoader
                     loadChapter(
-                        loader!!,
+                        newLoader,
                         chapterList.first { chapterId == it.chapter.id },
-                        /* SY --> */page, /* SY <-- */
+                        /* SY --> */ page /* SY <-- */,
                     )
                     Result.success(true)
                 } else {
@@ -388,6 +355,34 @@ internal class ReaderViewModel @JvmOverloads constructor(
             }
         }
     }
+
+    // SY -->
+
+    // The merged-source references and entries backing [manga], empty for any other source.
+    private suspend fun mergedDataFor(manga: Manga, source: Source): ChapterLoader.MergedData {
+        if (source !is MergedSource) return ChapterLoader.MergedData(emptyList(), emptyMap())
+        val references = getMergedReferencesById.await(manga.id)
+        val mergedManga = getMergedMangaById.await(manga.id).associateBy { it.id }
+        return ChapterLoader.MergedData(references, mergedManga)
+    }
+
+    private suspend fun publishInitialState(manga: Manga, source: Source, merged: ChapterLoader.MergedData) {
+        val metadataSource = source.getMainSource<MetadataSource<*, *>>()
+        val metadata = metadataSource?.let { getFlatMetadataById.await(manga.id)?.raise(it.metaClass) }
+        val relativeTime = uiPreferences.relativeTime.get()
+        val autoScrollFreq = readerPreferences.autoscrollInterval.get()
+        mutableState.update {
+            it.copy(
+                manga = manga,
+                meta = metadata,
+                mergedManga = merged.manga,
+                dateRelativeTime = relativeTime,
+                ehAutoscrollFreq = if (autoScrollFreq == -1f) "" else autoScrollFreq.toString(),
+                isAutoScrollEnabled = autoScrollFreq != -1f,
+            )
+        }
+    }
+    // SY <--
 
     // SY -->
     fun getChapters(): List<ReaderChapterItem> {

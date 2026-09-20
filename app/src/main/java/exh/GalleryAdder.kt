@@ -1,7 +1,9 @@
 package exh
 
 import android.content.Context
+import android.net.Uri
 import androidx.core.net.toUri
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.source.online.UrlImportableSource
@@ -72,124 +74,135 @@ internal class GalleryAdder(
                 forceSource?.toString().orEmpty(),
             ),
         )
-        try {
+        return try {
             val uri = url.toUri()
-
-            // Find matching source
-            val source = if (forceSource != null) {
-                try {
-                    if (forceSource.matchesUri(uri)) {
-                        forceSource
-                    } else {
-                        return GalleryAddEvent.Fail.UnknownSource(url, context)
-                    }
-                } catch (expected: Exception) {
-                    // Logged whatever the cause; the caller carries on.
-                    logger.e(context.stringResource(SYMR.strings.gallery_adder_source_uri_must_match), expected)
-                    return GalleryAddEvent.Fail.UnknownType(url, context)
-                }
-            } else {
-                sourceManager.getVisibleSources()
-                    .mapNotNull { it.getMainSource<UrlImportableSource>() }
-                    .find {
-                        it.lang in filters.enabledLangs &&
-                            it.id !in filters.disabledSources &&
-                            try {
-                                it.matchesUri(uri)
-                            } catch (_: Exception) {
-                                // Any failure ends here and the fallback below applies.
-                                false
-                            }
-                    }
-                    ?: return GalleryAddEvent.Fail.UnknownSource(url, context)
+            val source = when (val match = matchSource(uri, url, forceSource, context)) {
+                is SourceMatch.Found -> match.source
+                is SourceMatch.Failed -> return match.event
             }
-
-            val realChapterUrl = try {
-                source.mapUrlToChapterUrl(uri)
-            } catch (expected: Exception) {
-                // Logged whatever the cause; the caller carries on.
-                logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_map_to_chapter_error), expected)
-                null
-            }
-
-            val cleanedChapterUrl = realChapterUrl?.let {
-                try {
-                    source.cleanChapterUrl(it)
-                } catch (expected: Exception) {
-                    // Logged whatever the cause; the caller carries on.
-                    logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_clean_error), expected)
-                    null
-                }
-            }
-
-            val chapterMangaUrl = realChapterUrl?.let { source.mapChapterUrlToMangaUrl(it.toUri()) }
-
-            // Map URL to manga URL
-            val realMangaUrl = try {
-                chapterMangaUrl ?: source.mapUrlToMangaUrl(uri)
-            } catch (expected: Exception) {
-                // Logged whatever the cause; the caller carries on.
-                logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_map_to_gallery_error), expected)
-                null
-            } ?: return GalleryAddEvent.Fail.UnknownType(url, context)
-
-            // Clean URL
-            val cleanedMangaUrl = try {
-                source.cleanMangaUrl(realMangaUrl)
-            } catch (expected: Exception) {
-                // Logged whatever the cause; the caller carries on.
-                logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_clean_error), expected)
-                null
-            } ?: return GalleryAddEvent.Fail.UnknownType(url, context)
-
-            // Use manga in DB if possible, otherwise, make a new manga
-            var manga = getManga.await(cleanedMangaUrl, source.id)
-                ?: networkToLocalManga(
-                    Manga.create().copy(
-                        source = source.id,
-                        url = cleanedMangaUrl,
-                    ),
-                )
-
-            // Fetch and copy details
-            manga = retry(retry) {
-                updateMangaFromRemote(
-                    manga,
-                    fetchDetails = true,
-                    fetchChapters = true,
-                    manualFetch = false,
-                    throttleFunc = throttleFunc,
-                ).getOrThrow().manga
-            }
-
-            if (fav) {
-                updateManga.awaitUpdateFavorite(manga.id, true)
-                manga = manga.copy(favorite = true)
-            }
-
-            return if (cleanedChapterUrl != null) {
-                val chapter = getChapter.await(cleanedChapterUrl, manga.id)
-                if (chapter != null) {
-                    GalleryAddEvent.Success(url, manga, context, chapter)
-                } else {
-                    GalleryAddEvent.Fail.Error(
-                        url,
-                        context.stringResource(SYMR.strings.gallery_adder_could_not_identify_chapter, url),
-                    )
-                }
-            } else {
-                GalleryAddEvent.Success(url, manga, context)
-            }
+            val urls = resolveUrls(source, uri, context) ?: return GalleryAddEvent.Fail.UnknownType(url, context)
+            val manga = importManga(source, urls.mangaUrl, fav, throttleFunc, retry)
+            successEvent(url, manga, urls.chapterUrl, context)
         } catch (notFound: EHentai.GalleryNotFoundException) {
             logger.w(context.stringResource(SYMR.strings.gallery_adder_could_not_add_gallery, url), notFound)
-            return GalleryAddEvent.Fail.NotFound(url, context)
+            GalleryAddEvent.Fail.NotFound(url, context)
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.
             logger.w(context.stringResource(SYMR.strings.gallery_adder_could_not_add_gallery, url), expected)
+            GalleryAddEvent.Fail.Error(url, ((expected.message ?: "Unknown error!") + " (Gallery: $url)").trim())
+        }
+    }
 
-            return GalleryAddEvent.Fail.Error(
+    private sealed interface SourceMatch {
+        class Found(val source: UrlImportableSource) : SourceMatch
+        class Failed(val event: GalleryAddEvent.Fail) : SourceMatch
+    }
+
+    // The forced source if it claims [uri], otherwise the first enabled importable source that does.
+    private fun matchSource(uri: Uri, url: String, forceSource: UrlImportableSource?, context: Context): SourceMatch {
+        if (forceSource != null) {
+            return try {
+                if (forceSource.matchesUri(uri)) {
+                    SourceMatch.Found(forceSource)
+                } else {
+                    SourceMatch.Failed(GalleryAddEvent.Fail.UnknownSource(url, context))
+                }
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logger.e(context.stringResource(SYMR.strings.gallery_adder_source_uri_must_match), expected)
+                SourceMatch.Failed(GalleryAddEvent.Fail.UnknownType(url, context))
+            }
+        }
+        val source = sourceManager.getVisibleSources()
+            .mapNotNull { it.getMainSource<UrlImportableSource>() }
+            .find {
+                it.lang in filters.enabledLangs &&
+                    it.id !in filters.disabledSources &&
+                    try {
+                        it.matchesUri(uri)
+                    } catch (_: Exception) {
+                        // Any failure ends here and the fallback below applies.
+                        false
+                    }
+            }
+        return source?.let(SourceMatch::Found) ?: SourceMatch.Failed(GalleryAddEvent.Fail.UnknownSource(url, context))
+    }
+
+    private data class ResolvedUrls(val mangaUrl: String, val chapterUrl: String?)
+
+    // The cleaned manga url the link points at (via its chapter, when it is a chapter link), or null when
+    // unmappable.
+    private suspend fun resolveUrls(source: UrlImportableSource, uri: Uri, context: Context): ResolvedUrls? {
+        val realChapterUrl = logged(context, SYMR.strings.gallery_adder_uri_map_to_chapter_error) {
+            source.mapUrlToChapterUrl(uri)
+        }
+        val cleanedChapterUrl = realChapterUrl?.let { chapterUrl ->
+            logged(context, SYMR.strings.gallery_adder_uri_clean_error) { source.cleanChapterUrl(chapterUrl) }
+        }
+        val chapterMangaUrl = realChapterUrl?.let { source.mapChapterUrlToMangaUrl(it.toUri()) }
+        // Map URL to manga URL
+        val realMangaUrl = logged(context, SYMR.strings.gallery_adder_uri_map_to_gallery_error) {
+            chapterMangaUrl ?: source.mapUrlToMangaUrl(uri)
+        } ?: return null
+        // Clean URL
+        val cleanedMangaUrl = logged(context, SYMR.strings.gallery_adder_uri_clean_error) {
+            source.cleanMangaUrl(realMangaUrl)
+        } ?: return null
+        return ResolvedUrls(cleanedMangaUrl, cleanedChapterUrl)
+    }
+
+    // Runs [block], logging any failure under [message] and yielding null in its place.
+    private inline fun <T> logged(context: Context, message: StringResource, block: () -> T?): T? {
+        return try {
+            block()
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logger.e(context.stringResource(message), expected)
+            null
+        }
+    }
+
+    // Use manga in DB if possible, otherwise make a new one; then fetch details and chapters.
+    private suspend fun importManga(
+        source: UrlImportableSource,
+        mangaUrl: String,
+        fav: Boolean,
+        throttleFunc: suspend () -> Unit,
+        retryCount: Int,
+    ): Manga {
+        var manga = getManga.await(mangaUrl, source.id)
+            ?: networkToLocalManga(Manga.create().copy(source = source.id, url = mangaUrl))
+        // Fetch and copy details
+        manga = retry(retryCount) {
+            updateMangaFromRemote(
+                manga,
+                fetchDetails = true,
+                fetchChapters = true,
+                manualFetch = false,
+                throttleFunc = throttleFunc,
+            ).getOrThrow().manga
+        }
+        if (fav) {
+            updateManga.awaitUpdateFavorite(manga.id, true)
+            manga = manga.copy(favorite = true)
+        }
+        return manga
+    }
+
+    private suspend fun successEvent(
+        url: String,
+        manga: Manga,
+        chapterUrl: String?,
+        context: Context,
+    ): GalleryAddEvent {
+        if (chapterUrl == null) return GalleryAddEvent.Success(url, manga, context)
+        val chapter = getChapter.await(chapterUrl, manga.id)
+        return if (chapter != null) {
+            GalleryAddEvent.Success(url, manga, context, chapter)
+        } else {
+            GalleryAddEvent.Fail.Error(
                 url,
-                ((expected.message ?: "Unknown error!") + " (Gallery: $url)").trim(),
+                context.stringResource(SYMR.strings.gallery_adder_could_not_identify_chapter, url),
             )
         }
     }

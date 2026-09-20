@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.track.anilist.AnilistApi.Companion.API_URL
 import eu.kanade.tachiyomi.data.track.anilist.dto.ALCurrentUserResult
 import eu.kanade.tachiyomi.data.track.anilist.dto.ALIdSearchResult
 import eu.kanade.tachiyomi.data.track.anilist.dto.ALMangaMetadata
+import eu.kanade.tachiyomi.data.track.anilist.dto.ALMangaMetadataMedia
 import eu.kanade.tachiyomi.data.track.anilist.dto.ALSearchResult
 import eu.kanade.tachiyomi.data.track.anilist.dto.ALUserViewerData
 import eu.kanade.tachiyomi.data.track.model.TrackMangaMetadata
@@ -25,50 +26,78 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-internal suspend fun AnilistApi.search(search: String): List<TrackSearch> {
-    return withIOContext {
-        val query = $$"""
-        |query Search($query: String) {
-            |Page (perPage: 50) {
-                |media(search: $query, type: MANGA, format_not_in: [NOVEL]) {
+private val SEARCH_QUERY = $$"""
+|query Search($query: String) {
+    |Page (perPage: 50) {
+        |media(search: $query, type: MANGA, format_not_in: [NOVEL]) {
+            |id
+            |staff {
+                |edges {
+                    |role
                     |id
-                    |staff {
-                        |edges {
-                            |role
-                            |id
-                            |node {
-                                |name {
-                                    |full
-                                    |userPreferred
-                                    |native
-                                |}
-                            |}
+                    |node {
+                        |name {
+                            |full
+                            |userPreferred
+                            |native
                         |}
                     |}
-                    |title {
+                |}
+            |}
+            |title {
+                |userPreferred
+            |}
+            |coverImage {
+                |large
+            |}
+            |format
+            |countryOfOrigin
+            |status
+            |chapters
+            |description
+            |startDate {
+                |year
+                |month
+                |day
+            |}
+            |averageScore
+        |}
+    |}
+|}
+|
+""".trimMargin()
+
+private val MANGA_METADATA_QUERY = """
+    |query (${'$'}mangaId: Int!) {
+    |Media (id: ${'$'}mangaId) {
+        |id
+        |title {
+            |userPreferred
+        |}
+        |coverImage {
+            |large
+        |}
+        |description
+        |staff {
+            |edges {
+                |role
+                |id
+                |node {
+                    |name {
                         |userPreferred
                     |}
-                    |coverImage {
-                        |large
-                    |}
-                    |format
-                    |countryOfOrigin
-                    |status
-                    |chapters
-                    |description
-                    |startDate {
-                        |year
-                        |month
-                        |day
-                    |}
-                    |averageScore
                 |}
             |}
         |}
-        |
-        """.trimMargin()
+    |}
+    |}
+    |
+""".trimMargin()
+
+internal suspend fun AnilistApi.search(search: String): List<TrackSearch> {
+    return withIOContext {
         val payload = buildJsonObject {
-            put(QUERY, query)
+            put(QUERY, SEARCH_QUERY)
             putJsonObject(VARIABLES) {
                 put(QUERY, search)
             }
@@ -124,34 +153,8 @@ internal suspend fun AnilistApi.getCurrentUser(): ALUserViewerData {
 
 internal suspend fun AnilistApi.getMangaMetadata(track: DomainTrack): TrackMangaMetadata {
     return withIOContext {
-        val query = """
-            |query (${'$'}mangaId: Int!) {
-            |Media (id: ${'$'}mangaId) {
-                |id
-                |title {
-                    |userPreferred
-                |}
-                |coverImage {
-                    |large
-                |}
-                |description
-                |staff {
-                    |edges {
-                        |role
-                        |id
-                        |node {
-                            |name {
-                                |userPreferred
-                            |}
-                        |}
-                    |}
-                |}
-            |}
-            |}
-            |
-        """.trimMargin()
         val payload = buildJsonObject {
-            put(QUERY, query)
+            put(QUERY, MANGA_METADATA_QUERY)
             putJsonObject(VARIABLES) {
                 put(MANGA_ID, track.remoteId)
             }
@@ -165,25 +168,9 @@ internal suspend fun AnilistApi.getMangaMetadata(track: DomainTrack): TrackManga
             )
                 .awaitSuccess()
                 .parseAs<ALMangaMetadata>()
-                .let {
-                    val media = it.data.media
-                    TrackMangaMetadata(
-                        remoteId = media.id,
-                        title = media.title.userPreferred,
-                        thumbnailUrl = media.coverImage.large,
-                        description = media.description?.htmlDecode()?.ifEmpty { null },
-                        authors = media.staff.edges
-                            .filter { it.role == "Story" || it.role == "Story & Art" }
-                            .map { it.node.name.userPreferred }
-                            .joinToString(", ")
-                            .ifEmpty { null },
-                        artists = media.staff.edges
-                            .filter { it.role == "Art" || it.role == "Story & Art" }
-                            .map { it.node.name.userPreferred }
-                            .joinToString(", ")
-                            .ifEmpty { null },
-                    )
-                }
+                .data
+                .media
+                .toTrackMangaMetadata()
         }
     }
 }
@@ -253,4 +240,20 @@ internal fun AnilistApi.createDate(dateValue: Long): JsonObject {
         put("month", dateTime.monthValue)
         put("day", dateTime.dayOfMonth)
     }
+}
+
+private fun ALMangaMetadataMedia.toTrackMangaMetadata(): TrackMangaMetadata {
+    fun staffNamed(vararg roles: String): String? = staff.edges
+        .filter { it.role in roles }
+        .map { it.node.name.userPreferred }
+        .joinToString(", ")
+        .ifEmpty { null }
+    return TrackMangaMetadata(
+        remoteId = id,
+        title = title.userPreferred,
+        thumbnailUrl = coverImage.large,
+        description = description?.htmlDecode()?.ifEmpty { null },
+        authors = staffNamed("Story", "Story & Art"),
+        artists = staffNamed("Art", "Story & Art"),
+    )
 }

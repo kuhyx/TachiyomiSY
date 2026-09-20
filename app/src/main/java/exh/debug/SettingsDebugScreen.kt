@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -120,25 +121,15 @@ internal class SettingsDebugScreen : Screen() {
                     WindowInsets.navigationBars.only(WindowInsetsSides.Vertical).asPaddingValues() +
                     topSmallPaddingValues,
             ) {
-                item {
-                    Text(
-                        text = "Functions",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(16.dp),
-                    )
-                }
+                sectionHeader("Functions")
                 items(functions) { (entry, name) ->
                     TextPreferenceWidget(
                         title = name,
                         onPreferenceClick = {
                             scope.launch(Dispatchers.Default) {
+                                running = true
                                 val text = try {
-                                    running = true
-                                    "Function returned result:\n\n${entry.function.call(entry.owner)}"
-                                } catch (expected: Exception) {
-                                    // Any failure ends here and the fallback below applies.
-                                    "Function threw exception:\n\n${Log.getStackTraceString(expected)}"
+                                    runDebugFunction(entry)
                                 } finally {
                                     running = false
                                 }
@@ -150,35 +141,8 @@ internal class SettingsDebugScreen : Screen() {
                 item {
                     HorizontalDivider()
                 }
-                item {
-                    Text(
-                        text = "Toggles",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(16.dp),
-                    )
-                }
-                items(toggles) { (name, pref, default) ->
-                    var state by pref
-                    TextPreferenceWidget(
-                        title = name.replace('_', ' ')
-                            .lowercase(LocalLocale.current.platformLocale)
-                            .capitalize(LocalLocale.current.platformLocale),
-                        subtitle = if (pref.value != default) {
-                            AnnotatedString("MODIFIED", SpanStyle(color = Color.Red))
-                        } else {
-                            null
-                        },
-                        content = {
-                            Switch(
-                                checked = state,
-                                onCheckedChange = null,
-                                modifier = Modifier.padding(start = TrailingWidgetBuffer),
-                            )
-                        },
-                        onPreferenceClick = { state = !state },
-                    )
-                }
+                sectionHeader("Toggles")
+                items(toggles) { toggle -> ToggleRow(toggle) }
                 item {
                     Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
                 }
@@ -205,6 +169,51 @@ internal class SettingsDebugScreen : Screen() {
                 onDismissRequest = { result = null },
             )
         }
+    }
+
+    private fun LazyListScope.sectionHeader(title: String) {
+        item {
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+    }
+
+    // The function's result, or its stack trace; either way something to show in the dialog.
+    private fun runDebugFunction(entry: DebugFunctions.Entry): String {
+        return try {
+            "Function returned result:\n\n${entry.function.call(entry.owner)}"
+        } catch (expected: Exception) {
+            // Any failure ends here and the fallback below applies.
+            "Function threw exception:\n\n${Log.getStackTraceString(expected)}"
+        }
+    }
+
+    @Composable
+    private fun ToggleRow(toggle: DebugToggle) {
+        val (name, pref, default) = toggle
+        var state by pref
+        TextPreferenceWidget(
+            title = name.replace('_', ' ')
+                .lowercase(LocalLocale.current.platformLocale)
+                .capitalize(LocalLocale.current.platformLocale),
+            subtitle = if (pref.value != default) {
+                AnnotatedString("MODIFIED", SpanStyle(color = Color.Red))
+            } else {
+                null
+            },
+            content = {
+                Switch(
+                    checked = state,
+                    onCheckedChange = null,
+                    modifier = Modifier.padding(start = TrailingWidgetBuffer),
+                )
+            },
+            onPreferenceClick = { state = !state },
+        )
     }
 
     @Composable

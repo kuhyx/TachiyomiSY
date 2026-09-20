@@ -23,94 +23,79 @@ internal enum class TrackStatus(val int: Int, val res: StringResource) {
     ;
 
     companion object {
-        fun parseTrackerStatus(trackerManager: TrackerManager, tracker: Long, status: Long): TrackStatus? {
-            return when (tracker) {
-                trackerManager.mdList.id -> {
-                    when (FollowStatus.fromLong(status)) {
-                        FollowStatus.UNFOLLOWED -> null
-                        FollowStatus.READING -> READING
-                        FollowStatus.COMPLETED -> COMPLETED
-                        FollowStatus.ON_HOLD -> PAUSED
-                        FollowStatus.PLAN_TO_READ -> PLAN_TO_READ
-                        FollowStatus.DROPPED -> DROPPED
-                        FollowStatus.RE_READING -> REPEATING
-                    }
-                }
-                trackerManager.myAnimeList.id -> {
-                    when (status) {
-                        MyAnimeList.READING -> READING
-                        MyAnimeList.COMPLETED -> COMPLETED
-                        MyAnimeList.ON_HOLD -> PAUSED
-                        MyAnimeList.PLAN_TO_READ -> PLAN_TO_READ
-                        MyAnimeList.DROPPED -> DROPPED
-                        MyAnimeList.REREADING -> REPEATING
-                        else -> null
-                    }
-                }
-                trackerManager.aniList.id -> {
-                    when (status) {
-                        Anilist.READING -> READING
-                        Anilist.COMPLETED -> COMPLETED
-                        Anilist.ON_HOLD -> PAUSED
-                        Anilist.PLAN_TO_READ -> PLAN_TO_READ
-                        Anilist.DROPPED -> DROPPED
-                        Anilist.REREADING -> REPEATING
-                        else -> null
-                    }
-                }
-                trackerManager.kitsu.id -> {
-                    when (status) {
-                        Kitsu.READING -> READING
-                        Kitsu.COMPLETED -> COMPLETED
-                        Kitsu.ON_HOLD -> PAUSED
-                        Kitsu.PLAN_TO_READ -> PLAN_TO_READ
-                        Kitsu.DROPPED -> DROPPED
-                        else -> null
-                    }
-                }
-                trackerManager.shikimori.id -> {
-                    when (status) {
-                        Shikimori.READING -> READING
-                        Shikimori.COMPLETED -> COMPLETED
-                        Shikimori.ON_HOLD -> PAUSED
-                        Shikimori.PLAN_TO_READ -> PLAN_TO_READ
-                        Shikimori.DROPPED -> DROPPED
-                        Shikimori.REREADING -> REPEATING
-                        else -> null
-                    }
-                }
-                trackerManager.bangumi.id -> {
-                    when (status) {
-                        Bangumi.READING -> READING
-                        Bangumi.COMPLETED -> COMPLETED
-                        Bangumi.ON_HOLD -> PAUSED
-                        Bangumi.PLAN_TO_READ -> PLAN_TO_READ
-                        Bangumi.DROPPED -> DROPPED
-                        else -> null
-                    }
-                }
-                trackerManager.komga.id -> {
-                    when (status) {
-                        Komga.READING -> READING
-                        Komga.COMPLETED -> COMPLETED
-                        Komga.UNREAD -> null
-                        else -> null
-                    }
-                }
-                trackerManager.mangaUpdates.id -> {
-                    when (status) {
-                        MangaUpdates.READING_LIST -> READING
-                        MangaUpdates.COMPLETE_LIST -> COMPLETED
-                        MangaUpdates.ON_HOLD_LIST -> PAUSED
-                        MangaUpdates.WISH_LIST -> PLAN_TO_READ
-                        MangaUpdates.UNFINISHED_LIST -> DROPPED
-                        else -> null
-                    }
-                }
-                else -> {
-                    null
-                }
-            }
-        }
+        // One table per tracker, keyed by that tracker's own status constant. A status a tracker has
+        // no reading-state equivalent for (MangaDex UNFOLLOWED, Komga UNREAD) is simply absent.
+        internal val mdListStatuses = mapOf(
+            FollowStatus.READING.long to READING,
+            FollowStatus.COMPLETED.long to COMPLETED,
+            FollowStatus.ON_HOLD.long to PAUSED,
+            FollowStatus.PLAN_TO_READ.long to PLAN_TO_READ,
+            FollowStatus.DROPPED.long to DROPPED,
+            FollowStatus.RE_READING.long to REPEATING,
+        )
+        private val myAnimeListStatuses = mapOf(
+            MyAnimeList.READING to READING,
+            MyAnimeList.COMPLETED to COMPLETED,
+            MyAnimeList.ON_HOLD to PAUSED,
+            MyAnimeList.PLAN_TO_READ to PLAN_TO_READ,
+            MyAnimeList.DROPPED to DROPPED,
+            MyAnimeList.REREADING to REPEATING,
+        )
+        private val aniListStatuses = mapOf(
+            Anilist.READING to READING,
+            Anilist.COMPLETED to COMPLETED,
+            Anilist.ON_HOLD to PAUSED,
+            Anilist.PLAN_TO_READ to PLAN_TO_READ,
+            Anilist.DROPPED to DROPPED,
+            Anilist.REREADING to REPEATING,
+        )
+        private val kitsuStatuses = mapOf(
+            Kitsu.READING to READING,
+            Kitsu.COMPLETED to COMPLETED,
+            Kitsu.ON_HOLD to PAUSED,
+            Kitsu.PLAN_TO_READ to PLAN_TO_READ,
+            Kitsu.DROPPED to DROPPED,
+        )
+        private val shikimoriStatuses = mapOf(
+            Shikimori.READING to READING,
+            Shikimori.COMPLETED to COMPLETED,
+            Shikimori.ON_HOLD to PAUSED,
+            Shikimori.PLAN_TO_READ to PLAN_TO_READ,
+            Shikimori.DROPPED to DROPPED,
+            Shikimori.REREADING to REPEATING,
+        )
+        private val bangumiStatuses = mapOf(
+            Bangumi.READING to READING,
+            Bangumi.COMPLETED to COMPLETED,
+            Bangumi.ON_HOLD to PAUSED,
+            Bangumi.PLAN_TO_READ to PLAN_TO_READ,
+            Bangumi.DROPPED to DROPPED,
+        )
+        private val komgaStatuses = mapOf(
+            Komga.READING to READING,
+            Komga.COMPLETED to COMPLETED,
+        )
+        private val mangaUpdatesStatuses = mapOf(
+            MangaUpdates.READING_LIST to READING,
+            MangaUpdates.COMPLETE_LIST to COMPLETED,
+            MangaUpdates.ON_HOLD_LIST to PAUSED,
+            MangaUpdates.WISH_LIST to PLAN_TO_READ,
+            MangaUpdates.UNFINISHED_LIST to DROPPED,
+        )
+
+        /** The status tables by tracker id; an unknown tracker has none. */
+        internal fun statusTables(trackerManager: TrackerManager): Map<Long, Map<Long, TrackStatus>> = mapOf(
+            trackerManager.mdList.id to mdListStatuses,
+            trackerManager.myAnimeList.id to myAnimeListStatuses,
+            trackerManager.aniList.id to aniListStatuses,
+            trackerManager.kitsu.id to kitsuStatuses,
+            trackerManager.shikimori.id to shikimoriStatuses,
+            trackerManager.bangumi.id to bangumiStatuses,
+            trackerManager.komga.id to komgaStatuses,
+            trackerManager.mangaUpdates.id to mangaUpdatesStatuses,
+        )
+
+        fun parseTrackerStatus(trackerManager: TrackerManager, tracker: Long, status: Long): TrackStatus? =
+            statusTables(trackerManager)[tracker]?.get(status)
     }
 }

@@ -75,13 +75,11 @@ internal class RecommendationSearchHelper(val context: Context) {
 
         // Trackers such as MAL need to be throttled more strictly
         val stricterThrottling = SearchFlags.hasIncludeTrackers(flags)
-
-        val throttleManager =
-            ThrottleManager(
-                max = 3.seconds,
-                inc = 50.milliseconds,
-                initial = if (stricterThrottling) 2.seconds else 0.seconds,
-            )
+        val throttleManager = ThrottleManager(
+            max = 3.seconds,
+            inc = 50.milliseconds,
+            initial = if (stricterThrottling) 2.seconds else 0.seconds,
+        )
 
         try {
             // Take wake + wifi locks
@@ -92,79 +90,16 @@ internal class RecommendationSearchHelper(val context: Context) {
 
             // Map of results grouped by recommendation source
             val resultsMap = Collections.synchronizedMap(mutableMapOf<String, SearchResults>())
-
             mangaList.forEachIndexed { index, sourceManga ->
                 // Check if the job has been cancelled
                 currentCoroutineContext().ensureActive()
-
                 status.value = SearchStatus.Processing(sourceManga.toSManga(), index + 1, mangaList.size)
-
-                val jobs = RecommendationPagingSource.createSources(
-                    sourceManga,
-                    sourceManager.getOrStub(sourceManga.source),
-                ).mapNotNull { source ->
-                    // Apply source filters
-                    if (source is TrackerRecommendationPagingSource && !SearchFlags.hasIncludeTrackers(flags)) {
-                        null
-                    } else {
-                        if (source.associatedSourceId != null && !SearchFlags.hasIncludeSources(flags)) {
-                            null
-                        } else {
-                            // Parallelize fetching recommendations from all sources in the current context
-                            CoroutineScope(currentCoroutineContext()).async(Dispatchers.IO) {
-                                val recSourceId = source::class.qualifiedName!!
-
-                                try {
-                                    val page = source.requestNextPage(1)
-
-                                    // Try to filter out mangas that are already in the library
-                                    val mangas = page.mangas
-                                        .filterLibraryItemsIfEnabled(source, libraryManga, tracks)
-
-                                    // Add or update the result collection for the current source
-                                    resultsMap.getOrPut(recSourceId) {
-                                        SearchResults(
-                                            recSourceName = source.name,
-                                            recSourceCategoryResId = source.category.resourceId,
-                                            recAssociatedSourceId = source.associatedSourceId,
-                                            results = mutableListOf(),
-                                        )
-                                    }.results.addAll(mangas)
-                                } catch (_: NoResultsException) {
-                                } catch (expected: Exception) {
-                                    // Logged whatever the cause; the caller carries on.
-                                    logger.e("Error while fetching recommendations for $recSourceId", expected)
-                                }
-                            }
-                        }
-                    }
-                }
-                jobs.awaitAll()
-
+                collectRecommendations(sourceManga, flags, libraryManga, tracks, resultsMap)
                 // Continuously slow down the search to avoid hitting rate limits
                 throttleManager.throttle()
             }
 
-            val rankedMap = resultsMap.map {
-                RankedSearchResults(
-                    recSourceName = it.value.recSourceName,
-                    recSourceCategoryResId = it.value.recSourceCategoryResId,
-                    recAssociatedSourceId = it.value.recAssociatedSourceId,
-                    results = it.value.results
-                        // Group by URL and count occurrences
-                        .groupingBy(SManga::url)
-                        .eachCount()
-                        .entries
-                        // Sort by occurrences desc
-                        .sortedByDescending(Map.Entry<String, Int>::value)
-                        // Resolve SManga instances from URL keys
-                        .associate { (url, count) ->
-                            val manga = it.value.results.first { manga -> manga.url == url }
-                            manga to count
-                        },
-                )
-            }
-
+            val rankedMap = resultsMap.map { it.value.ranked() }
             status.value = if (rankedMap.isNotEmpty()) {
                 SearchStatus.Finished.WithResults(rankedMap)
             } else {
@@ -175,7 +110,6 @@ internal class RecommendationSearchHelper(val context: Context) {
             // Logged whatever the cause; the caller carries on.
             status.value = SearchStatus.Error(expected.message.orEmpty())
             logger.e("Error during recommendation search", expected)
-            return
         } finally {
             // Release wake + wifi locks
             ignore {
@@ -188,6 +122,65 @@ internal class RecommendationSearchHelper(val context: Context) {
             }
         }
     }
+
+    // Fetches [sourceManga]'s first page from every enabled recommendation source in parallel, into [resultsMap].
+    private suspend fun collectRecommendations(
+        sourceManga: Manga,
+        flags: Int,
+        libraryManga: List<LibraryManga>,
+        tracks: List<Track>,
+        resultsMap: MutableMap<String, SearchResults>,
+    ) {
+        val sources = RecommendationPagingSource.createSources(sourceManga, sourceManager.getOrStub(sourceManga.source))
+            .filter { source ->
+                // Apply source filters
+                val trackerAllowed =
+                    source !is TrackerRecommendationPagingSource || SearchFlags.hasIncludeTrackers(flags)
+                val sourceAllowed = source.associatedSourceId == null || SearchFlags.hasIncludeSources(flags)
+                trackerAllowed && sourceAllowed
+            }
+        // Parallelize fetching recommendations from all sources in the current context
+        val scope = CoroutineScope(currentCoroutineContext())
+        sources.map { source ->
+            scope.async(Dispatchers.IO) {
+                val recSourceId = source::class.qualifiedName!!
+                try {
+                    val page = source.requestNextPage(1)
+                    // Try to filter out mangas that are already in the library
+                    val mangas = page.mangas.filterLibraryItemsIfEnabled(source, libraryManga, tracks)
+                    // Add or update the result collection for the current source
+                    resultsMap.getOrPut(recSourceId) {
+                        SearchResults(
+                            recSourceName = source.name,
+                            recSourceCategoryResId = source.category.resourceId,
+                            recAssociatedSourceId = source.associatedSourceId,
+                            results = mutableListOf(),
+                        )
+                    }.results.addAll(mangas)
+                } catch (_: NoResultsException) {
+                } catch (expected: Exception) {
+                    // Logged whatever the cause; the caller carries on.
+                    logger.e("Error while fetching recommendations for $recSourceId", expected)
+                }
+            }
+        }.awaitAll()
+    }
+
+    // The source's results ordered by how many of the searched entries recommended each one.
+    private fun SearchResults.ranked(): RankedSearchResults = RankedSearchResults(
+        recSourceName = recSourceName,
+        recSourceCategoryResId = recSourceCategoryResId,
+        recAssociatedSourceId = recAssociatedSourceId,
+        results = results
+            // Group by URL and count occurrences
+            .groupingBy(SManga::url)
+            .eachCount()
+            .entries
+            // Sort by occurrences desc
+            .sortedByDescending(Map.Entry<String, Int>::value)
+            // Resolve SManga instances from URL keys
+            .associate { (url, count) -> results.first { manga -> manga.url == url } to count },
+    )
 
     private suspend fun List<SManga>.filterLibraryItemsIfEnabled(
         recSource: RecommendationPagingSource,

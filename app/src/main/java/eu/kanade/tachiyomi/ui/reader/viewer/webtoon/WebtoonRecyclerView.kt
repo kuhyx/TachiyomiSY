@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.ui.reader.viewer.GestureDetectorWithLongTap
 import kotlin.math.abs
+import kotlin.math.sign
 
 /**
  * Implementation of a [RecyclerView] used by the webtoon reader.
@@ -280,79 +281,64 @@ internal class WebtoonRecyclerView @JvmOverloads constructor(
         var isQuickScaling = false
 
         override fun onTouchEvent(ev: MotionEvent): Boolean {
-            val action = ev.actionMasked
             val actionIndex = ev.actionIndex
-
-            when (action) {
+            when (ev.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    scrollPointerId = ev.getPointerId(0)
-                    downX = ev.x.roundToPixel()
-                    downY = ev.y.roundToPixel()
+                    trackPointer(ev, 0)
                 }
                 MotionEvent.ACTION_POINTER_DOWN -> {
-                    scrollPointerId = ev.getPointerId(actionIndex)
-                    downX = ev.getX(actionIndex).roundToPixel()
-                    downY = ev.getY(actionIndex).roundToPixel()
+                    trackPointer(ev, actionIndex)
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    if (isDoubleTapping && isQuickScaling) {
-                        return true
-                    }
-
-                    val index = ev.findPointerIndex(scrollPointerId)
-                    if (index < 0) {
-                        return false
-                    }
-
-                    val x = ev.getX(index).roundToPixel()
-                    val y = ev.getY(index).roundToPixel()
-                    var dx = x - downX
-                    var dy = if (atFirstPosition || atLastPosition) y - downY else 0
-
-                    if (!isZoomDragging && currentScale > 1f) {
-                        var startScroll = false
-
-                        if (abs(dx) > touchSlop) {
-                            if (dx < 0) {
-                                dx += touchSlop
-                            } else {
-                                dx -= touchSlop
-                            }
-                            startScroll = true
-                        }
-                        if (abs(dy) > touchSlop) {
-                            if (dy < 0) {
-                                dy += touchSlop
-                            } else {
-                                dy -= touchSlop
-                            }
-                            startScroll = true
-                        }
-
-                        if (startScroll) {
-                            isZoomDragging = true
-                        }
-                    }
-
-                    if (isZoomDragging) {
-                        zoomScrollBy(dx, dy)
-                    }
+                    onMove(ev)?.let { return it }
                 }
                 MotionEvent.ACTION_UP -> {
                     if (isDoubleTapping && !isQuickScaling) {
                         listener.onDoubleTapConfirmed(ev)
                     }
-                    isZoomDragging = false
-                    isDoubleTapping = false
-                    isQuickScaling = false
+                    resetGesture()
                 }
                 MotionEvent.ACTION_CANCEL -> {
-                    isZoomDragging = false
-                    isDoubleTapping = false
-                    isQuickScaling = false
+                    resetGesture()
                 }
             }
             return super.onTouchEvent(ev)
+        }
+
+        private fun trackPointer(ev: MotionEvent, pointerIndex: Int) {
+            scrollPointerId = ev.getPointerId(pointerIndex)
+            downX = ev.getX(pointerIndex).roundToPixel()
+            downY = ev.getY(pointerIndex).roundToPixel()
+        }
+
+        private fun resetGesture() {
+            isZoomDragging = false
+            isDoubleTapping = false
+            isQuickScaling = false
+        }
+
+        // Drags the zoomed content; a non-null result is the event's final answer, null falls through to super.
+        private fun onMove(ev: MotionEvent): Boolean? {
+            if (isDoubleTapping && isQuickScaling) return true
+            val index = ev.findPointerIndex(scrollPointerId)
+            if (index < 0) return false
+
+            val x = ev.getX(index).roundToPixel()
+            val y = ev.getY(index).roundToPixel()
+            var dx = x - downX
+            var dy = if (atFirstPosition || atLastPosition) y - downY else 0
+            if (!isZoomDragging && currentScale > 1f) {
+                // Start dragging once either axis moves past the touch slop, and eat the slop.
+                val pastSlopX = abs(dx) > touchSlop
+                val pastSlopY = abs(dy) > touchSlop
+                if (pastSlopX) dx -= touchSlop * dx.sign
+                if (pastSlopY) dy -= touchSlop * dy.sign
+                if (pastSlopX || pastSlopY) isZoomDragging = true
+            }
+            if (isZoomDragging) {
+                zoomScrollBy(dx, dy)
+            }
+            return null
         }
     }
 }

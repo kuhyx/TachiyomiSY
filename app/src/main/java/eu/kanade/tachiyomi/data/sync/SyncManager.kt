@@ -1,34 +1,23 @@
 package eu.kanade.tachiyomi.data.sync
 
 import android.content.Context
-import android.net.Uri
 import app.cash.sqldelight.async.coroutines.awaitAsList
 import eu.kanade.domain.sync.SyncPreferences
+import eu.kanade.domain.sync.models.SyncSettings
 import eu.kanade.tachiyomi.data.backup.create.BackupCreator
-import eu.kanade.tachiyomi.data.backup.create.BackupOptions
-import eu.kanade.tachiyomi.data.backup.create.backupAppPreferences
 import eu.kanade.tachiyomi.data.backup.create.backupCategories
-import eu.kanade.tachiyomi.data.backup.create.backupExtensionStores
-import eu.kanade.tachiyomi.data.backup.create.backupMangas
-import eu.kanade.tachiyomi.data.backup.create.backupSavedSearches
-import eu.kanade.tachiyomi.data.backup.create.backupSourcePreferences
-import eu.kanade.tachiyomi.data.backup.create.backupSources
 import eu.kanade.tachiyomi.data.backup.models.Backup
-import eu.kanade.tachiyomi.data.backup.models.BackupChapter
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.restore.BackupRestoreJob
-import eu.kanade.tachiyomi.data.backup.restore.RestoreOptions
 import eu.kanade.tachiyomi.data.backup.restore.restorers.MangaRestorer
 import eu.kanade.tachiyomi.data.backup.restore.restorers.persistManga
 import eu.kanade.tachiyomi.data.sync.service.GoogleDriveSyncService
 import eu.kanade.tachiyomi.data.sync.service.SyncData
 import eu.kanade.tachiyomi.data.sync.service.SyncYomiSyncService
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.protobuf.ProtoBuf
 import logcat.LogPriority
 import logcat.logcat
 import tachiyomi.core.common.util.system.logcat
-import tachiyomi.data.Chapters
 import tachiyomi.data.Database
 import tachiyomi.data.awaitList
 import tachiyomi.data.manga.MangaMapper.mapManga
@@ -36,10 +25,9 @@ import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.manga.model.Manga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.File
-import java.io.IOException
 import java.util.Date
 import kotlin.system.measureTimeMillis
+import eu.kanade.tachiyomi.data.sync.service.SyncService as RemoteSyncService
 
 // A manager to handle synchronization tasks in the app, such as updating
 // sync preferences and performing synchronization with a remote server.
@@ -88,193 +76,88 @@ internal class SyncManager(
 
         val syncOptions = syncPreferences.getSyncSettings()
         val databaseManga = getAllMangaThatNeedsSync()
+        val backup = backupCreator.createSyncBackup(databaseManga, syncOptions.toBackupOptions())
+        val syncData = SyncData(deviceId = syncPreferences.uniqueDeviceID(), backup = backup)
+        val remoteBackup = createSyncService()?.doSync(syncData)
 
-        val backupOptions = BackupOptions(
-            libraryEntries = syncOptions.libraryEntries,
-            categories = syncOptions.categories,
-            chapters = syncOptions.chapters,
-            tracking = syncOptions.tracking,
-            history = syncOptions.history,
-            extensionStores = syncOptions.extensionStores,
-            appSettings = syncOptions.appSettings,
-            sourceSettings = syncOptions.sourceSettings,
-            privateSettings = syncOptions.privateSettings,
-
-            // SY -->
-            customInfo = syncOptions.customInfo,
-            readEntries = syncOptions.readEntries,
-            savedSearches = syncOptions.savedSearches,
-            // SY <--
-        )
-
-        logcat(LogPriority.DEBUG) { "Begin create backup" }
-        val backupManga = backupCreator.backupMangas(databaseManga, backupOptions)
-        val backup = Backup(
-            backupManga = backupManga,
-            backupCategories = backupCreator.backupCategories(backupOptions),
-            backupSources = backupCreator.backupSources(backupManga),
-            backupPreferences = backupCreator.backupAppPreferences(backupOptions),
-            backupSourcePreferences = backupCreator.backupSourcePreferences(backupOptions),
-            backupExtensionStores = backupCreator.backupExtensionStores(backupOptions),
-
-            // SY -->
-            backupSavedSearches = backupCreator.backupSavedSearches(backupOptions),
-            // SY <--
-        )
-        logcat(LogPriority.DEBUG) { "End create backup" }
-
-        // Create the SyncData object
-        val syncData = SyncData(
-            deviceId = syncPreferences.uniqueDeviceID(),
-            backup = backup,
-        )
-
-        // Handle sync based on the selected service
-        val syncService = when (val syncService = SyncService.fromInt(syncPreferences.syncService.get())) {
-            SyncService.SYNCYOMI -> {
-                SyncYomiSyncService(
-                    context,
-                    json,
-                    syncPreferences,
-                    notifier,
-                )
+        when {
+            // should we call showSyncError?
+            remoteBackup == null -> {
+                logcat(LogPriority.DEBUG) { "Skip restore due to network issues" }
             }
+            remoteBackup === backup -> {
+                // nothing changed
+                logcat(LogPriority.DEBUG) { "Skip restore due to remote was overwrite from local" }
+                markSynced("Sync completed successfully")
+            }
+            remoteBackup.isEmptyRemote() -> {
+                notifier.showSyncError("No data found on remote server.")
+            }
+            // First sync with a populated library: the remote was just seeded, nothing to restore.
+            syncPreferences.lastSyncTimestamp.get() == 0L && databaseManga.isNotEmpty() -> {
+                markSynced("Updated remote data successfully")
+            }
+            else -> {
+                restoreRemote(backup, remoteBackup, syncOptions)
+            }
+        }
+    }
 
+    private fun createSyncService(): RemoteSyncService? {
+        return when (val syncService = SyncService.fromInt(syncPreferences.syncService.get())) {
+            SyncService.SYNCYOMI -> {
+                SyncYomiSyncService(context, json, syncPreferences, notifier)
+            }
             SyncService.GOOGLE_DRIVE -> {
                 GoogleDriveSyncService(context, json, syncPreferences)
             }
-
             else -> {
                 logcat(LogPriority.ERROR) { "Invalid sync service type: $syncService" }
                 null
             }
         }
+    }
 
-        val remoteBackup = syncService?.doSync(syncData)
+    private fun markSynced(message: String) {
+        syncPreferences.lastSyncTimestamp.set(Date().time)
+        notifier.showSyncSuccess(message)
+    }
 
-        if (remoteBackup == null) {
-            logcat(LogPriority.DEBUG) { "Skip restore due to network issues" }
-            // should we call showSyncError?
-            return
-        }
-
-        if (remoteBackup === syncData.backup) {
-            // nothing changed
-            logcat(LogPriority.DEBUG) { "Skip restore due to remote was overwrite from local" }
-            syncPreferences.lastSyncTimestamp.set(Date().time)
-            notifier.showSyncSuccess("Sync completed successfully")
-            return
-        }
-
-        // Stop the sync early if the remote backup is null or empty
-        val remoteIsEmpty = remoteBackup.backupManga.isEmpty() &&
-            remoteBackup.backupCategories.isEmpty() &&
-            remoteBackup.backupSources.isEmpty()
-        if (remoteIsEmpty) {
-            notifier.showSyncError("No data found on remote server.")
-            return
-        }
-
-        // Check if it's first sync based on lastSyncTimestamp
-        if (syncPreferences.lastSyncTimestamp.get() == 0L && databaseManga.isNotEmpty()) {
-            // It's first sync no need to restore data. (just update remote data)
-            syncPreferences.lastSyncTimestamp.set(Date().time)
-            notifier.showSyncSuccess("Updated remote data successfully")
-            return
-        }
-
+    // Merges the remote backup over the local one and hands the result to [BackupRestoreJob].
+    private suspend fun restoreRemote(backup: Backup, remoteBackup: Backup, syncOptions: SyncSettings) {
         val (filteredFavorites, nonFavorites) = filterFavoritesAndNonFavorites(remoteBackup)
         updateNonFavorites(nonFavorites)
-
-        val newSyncData = backup.copy(
-            backupManga = filteredFavorites,
-            backupCategories = remoteBackup.backupCategories,
-            backupSources = remoteBackup.backupSources,
-            backupPreferences = remoteBackup.backupPreferences,
-            backupSourcePreferences = remoteBackup.backupSourcePreferences,
-            backupExtensionStores = remoteBackup.backupExtensionStores,
-
-            // SY -->
-            backupSavedSearches = remoteBackup.backupSavedSearches,
-            // SY <--
-        )
-
-        val hasMangaChanges = filteredFavorites.isNotEmpty()
-        val hasCategoryChanges = remoteBackup.backupCategories != backup.backupCategories
-        val hasSourceChanges = remoteBackup.backupSources != backup.backupSources
-        val hasPreferenceChanges = remoteBackup.backupPreferences != backup.backupPreferences
-        val hasSourcePreferenceChanges = remoteBackup.backupSourcePreferences != backup.backupSourcePreferences
-        val hasExtensionRepoChanges = remoteBackup.backupExtensionStores != backup.backupExtensionStores
-        val hasSavedSearchChanges = remoteBackup.backupSavedSearches != backup.backupSavedSearches
-
-        val hasAnyChanges = listOf(
-            hasMangaChanges,
-            hasCategoryChanges,
-            hasSourceChanges,
-            hasPreferenceChanges,
-            hasSourcePreferenceChanges,
-            hasExtensionRepoChanges,
-            hasSavedSearchChanges,
-        ).any { it }
-        if (!hasAnyChanges) {
-            // update the sync timestamp
-            syncPreferences.lastSyncTimestamp.set(Date().time)
-            notifier.showSyncSuccess("Sync completed successfully")
+        if (!backup.hasChangesFrom(remoteBackup, filteredFavorites)) {
+            markSynced("Sync completed successfully")
             return
         }
 
+        val newSyncData = backup.mergedWithRemote(remoteBackup, filteredFavorites)
         if (syncOptions.categories) {
-            val mergedUids = newSyncData.backupCategories.map { it.uid }.toSet()
-            val mergedNames = newSyncData.backupCategories.map { it.name }.toSet()
-            val localCategories = getCategories.await().filterNot { it.id == 0L } // Exclude system category
-            val categoriesToDelete = localCategories.filter {
-                it.uid !in mergedUids && it.name !in mergedNames
-            }
-            if (categoriesToDelete.isNotEmpty()) {
-                database.transaction {
-                    categoriesToDelete.forEach {
-                        database.categoriesQueries.delete(it.id)
-                    }
-                }
-            }
+            deleteCategoriesMissingFrom(newSyncData)
         }
 
         val backupUri = writeSyncDataToCache(context, newSyncData)
         logcat(LogPriority.DEBUG) { "Got Backup Uri: $backupUri" }
-        if (backupUri != null) {
-            BackupRestoreJob.start(
-                context,
-                backupUri,
-                sync = true,
-                options = RestoreOptions(
-                    appSettings = syncOptions.appSettings,
-                    sourceSettings = syncOptions.sourceSettings,
-                    libraryEntries = syncOptions.libraryEntries,
-                    categories = syncOptions.categories,
-                    extensionStores = syncOptions.extensionStores,
-                    // SY -->
-                    savedSearches = syncOptions.savedSearches,
-                    // SY <--
-                ),
-            )
-
-            // update the sync timestamp
-            syncPreferences.lastSyncTimestamp.set(Date().time)
-        } else {
+        if (backupUri == null) {
             logcat(LogPriority.ERROR) { "Failed to write sync data to file" }
+            return
         }
+        BackupRestoreJob.start(context, backupUri, sync = true, options = syncOptions.toRestoreOptions())
+        // update the sync timestamp
+        syncPreferences.lastSyncTimestamp.set(Date().time)
     }
 
-    private fun writeSyncDataToCache(context: Context, backup: Backup): Uri? {
-        val cacheFile = File(context.cacheDir, "tachiyomi_sync_data.proto.gz")
-        return try {
-            cacheFile.outputStream().use { output ->
-                output.write(ProtoBuf.encodeToByteArray(Backup.serializer(), backup))
-                Uri.fromFile(cacheFile)
+    // Drops local categories the merged backup no longer knows by uid or by name.
+    private suspend fun deleteCategoriesMissingFrom(merged: Backup) {
+        val mergedUids = merged.backupCategories.map { it.uid }.toSet()
+        val mergedNames = merged.backupCategories.map { it.name }.toSet()
+        val localCategories = getCategories.await().filterNot { it.id == 0L } // Exclude system category
+        val categoriesToDelete = localCategories.filter { it.uid !in mergedUids && it.name !in mergedNames }
+        if (categoriesToDelete.isNotEmpty()) {
+            database.transaction {
+                categoriesToDelete.forEach { database.categoriesQueries.delete(it.id) }
             }
-        } catch (e: IOException) {
-            logcat(LogPriority.ERROR, throwable = e) { "Failed to write sync data to cache" }
-            null
         }
     }
 
@@ -306,26 +189,6 @@ internal class SyncManager(
 
         if (localCategories.toSet() != remoteManga.categories.toSet()) {
             return true
-        }
-
-        return false
-    }
-
-    private fun areChaptersDifferent(localChapters: List<Chapters>, remoteChapters: List<BackupChapter>): Boolean {
-        val localChapterMap = localChapters.associateBy { it.url }
-        val remoteChapterMap = remoteChapters.associateBy { it.url }
-
-        if (localChapterMap.size != remoteChapterMap.size) {
-            return true
-        }
-
-        for ((url, localChapter) in localChapterMap) {
-            val remoteChapter = remoteChapterMap[url]
-
-            // If a matching remote chapter doesn't exist, or the version numbers are different, consider them different
-            if (remoteChapter == null || localChapter.version != remoteChapter.version) {
-                return true
-            }
         }
 
         return false
