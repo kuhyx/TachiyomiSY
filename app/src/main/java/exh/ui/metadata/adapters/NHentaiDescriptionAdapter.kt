@@ -33,63 +33,64 @@ internal fun NHentaiDescription(state: State.Success, openMetadataViewer: () -> 
         },
         update = {
             val meta = state.meta
-            if (meta == null || meta !is NHentaiSearchMetadata) return@AndroidView
-            val binding = DescriptionAdapterNhBinding.bind(it)
+            if (!(meta == null || meta !is NHentaiSearchMetadata)) {
+                val binding = DescriptionAdapterNhBinding.bind(it)
 
-            binding.genre.text = meta.tags.filter {
-                it.namespace == NHentaiSearchMetadata.NHENTAI_CATEGORIES_NAMESPACE
-            }.let { tags ->
-                if (tags.isNotEmpty()) tags.joinToString(transform = { it.name }) else null
-            }.let { categoriesString ->
-                categoriesString?.let { MetadataUIUtil.getGenreAndColour(context, it) }?.let {
-                    binding.genre.setBackgroundColor(it.first)
-                    it.second
-                } ?: categoriesString ?: context.stringResource(MR.strings.unknown)
-            }
-
-            meta.favoritesCount?.let {
-                if (it != 0L) {
-                    binding.favorites.text = NumberFormat.getIntegerInstance().format(it)
-                    binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
+                binding.genre.text = meta.tags.filter {
+                    it.namespace == NHentaiSearchMetadata.NHENTAI_CATEGORIES_NAMESPACE
+                }.let { tags ->
+                    if (tags.isNotEmpty()) tags.joinToString(transform = { it.name }) else null
+                }.let { categoriesString ->
+                    categoriesString?.let { MetadataUIUtil.getGenreAndColour(context, it) }?.let {
+                        binding.genre.setBackgroundColor(it.first)
+                        it.second
+                    } ?: categoriesString ?: context.stringResource(MR.strings.unknown)
                 }
-            }
 
-            binding.whenPosted.text = MetadataUtil.EX_DATE_FORMAT
-                .format(
-                    ZonedDateTime
-                        .ofInstant(Instant.ofEpochSecond(meta.uploadDate ?: 0), ZoneId.systemDefault()),
-                )
+                meta.favoritesCount?.let {
+                    if (it != 0L) {
+                        binding.favorites.text = NumberFormat.getIntegerInstance().format(it)
+                        binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
+                    }
+                }
 
-            binding.pages.text = context.pluralStringResource(
-                SYMR.plurals.num_pages,
-                meta.pageImagePreviewUrls.size,
-                meta.pageImagePreviewUrls.size,
-            )
-            binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
-
-            @SuppressLint("SetTextI18n")
-            binding.id.text = "#" + (meta.nhId ?: 0)
-
-            binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
-
-            listOf(
-                binding.favorites,
-                binding.genre,
-                binding.id,
-                binding.pages,
-                binding.whenPosted,
-            ).forEach { textView ->
-                textView.setOnLongClickListener {
-                    context.copyToClipboard(
-                        textView.text.toString(),
-                        textView.text.toString(),
+                binding.whenPosted.text = MetadataUtil.EX_DATE_FORMAT
+                    .format(
+                        ZonedDateTime
+                            .ofInstant(Instant.ofEpochSecond(meta.uploadDate ?: 0), ZoneId.systemDefault()),
                     )
-                    true
-                }
-            }
 
-            binding.moreInfo.setOnClickListener {
-                openMetadataViewer()
+                binding.pages.text = context.pluralStringResource(
+                    SYMR.plurals.num_pages,
+                    meta.pageImagePreviewUrls.size,
+                    meta.pageImagePreviewUrls.size,
+                )
+                binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
+
+                @SuppressLint("SetTextI18n")
+                binding.id.text = "#" + (meta.nhId ?: 0)
+
+                binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
+
+                listOf(
+                    binding.favorites,
+                    binding.genre,
+                    binding.id,
+                    binding.pages,
+                    binding.whenPosted,
+                ).forEach { textView ->
+                    textView.setOnLongClickListener {
+                        context.copyToClipboard(
+                            textView.text.toString(),
+                            textView.text.toString(),
+                        )
+                        true
+                    }
+                }
+
+                binding.moreInfo.setOnClickListener {
+                    openMetadataViewer()
+                }
             }
         },
     )

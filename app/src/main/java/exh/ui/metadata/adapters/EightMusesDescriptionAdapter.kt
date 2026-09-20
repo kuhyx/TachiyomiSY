@@ -25,23 +25,24 @@ internal fun EightMusesDescription(state: State.Success, openMetadataViewer: () 
         },
         update = {
             val meta = state.meta
-            if (meta == null || meta !is EightMusesSearchMetadata) return@AndroidView
-            val binding = DescriptionAdapter8mBinding.bind(it)
+            if (!(meta == null || meta !is EightMusesSearchMetadata)) {
+                val binding = DescriptionAdapter8mBinding.bind(it)
 
-            binding.title.text = meta.title ?: context.stringResource(MR.strings.unknown)
+                binding.title.text = meta.title ?: context.stringResource(MR.strings.unknown)
 
-            binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
+                binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
 
-            binding.title.setOnLongClickListener {
-                context.copyToClipboard(
-                    binding.title.text.toString(),
-                    binding.title.text.toString(),
-                )
-                true
-            }
+                binding.title.setOnLongClickListener {
+                    context.copyToClipboard(
+                        binding.title.text.toString(),
+                        binding.title.text.toString(),
+                    )
+                    true
+                }
 
-            binding.moreInfo.setOnClickListener {
-                openMetadataViewer()
+                binding.moreInfo.setOnClickListener {
+                    openMetadataViewer()
+                }
             }
         },
     )

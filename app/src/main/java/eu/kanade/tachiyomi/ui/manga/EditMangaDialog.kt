@@ -99,17 +99,19 @@ internal fun EditMangaDialog(
             TextButton(
                 onClick = {
                     @Suppress("NAME_SHADOWING")
-                    val binding = binding ?: return@TextButton
-                    onPositiveClick(
-                        binding.title.text.toString(),
-                        binding.mangaAuthor.text.toString(),
-                        binding.mangaArtist.text.toString(),
-                        binding.thumbnailUrl.text.toString(),
-                        binding.mangaDescription.text.toString(),
-                        binding.mangaGenresTags.getTextStrings(),
-                        STATUS_OPTIONS.getOrNull(binding.status.selectedItemPosition)?.toLong(),
-                    )
-                    onDismissRequest()
+                    val binding = binding
+                    if (binding != null) {
+                        onPositiveClick(
+                            binding.title.text.toString(),
+                            binding.mangaAuthor.text.toString(),
+                            binding.mangaArtist.text.toString(),
+                            binding.thumbnailUrl.text.toString(),
+                            binding.mangaDescription.text.toString(),
+                            binding.mangaGenresTags.getTextStrings(),
+                            STATUS_OPTIONS.getOrNull(binding.status.selectedItemPosition)?.toLong(),
+                        )
+                        onDismissRequest()
+                    }
                 },
             ) {
                 Text(stringResource(MR.strings.action_save))

@@ -25,25 +25,26 @@ internal fun HBrowseDescription(state: State.Success, openMetadataViewer: () -> 
         },
         update = {
             val meta = state.meta
-            if (meta == null || meta !is HBrowseSearchMetadata) return@AndroidView
-            val binding = DescriptionAdapterHbBinding.bind(it)
+            if (!(meta == null || meta !is HBrowseSearchMetadata)) {
+                val binding = DescriptionAdapterHbBinding.bind(it)
 
-            binding.pages.text =
-                context.pluralStringResource(SYMR.plurals.num_pages, meta.length ?: 0, meta.length ?: 0)
-            binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
+                binding.pages.text =
+                    context.pluralStringResource(SYMR.plurals.num_pages, meta.length ?: 0, meta.length ?: 0)
+                binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
 
-            binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
+                binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
 
-            binding.pages.setOnLongClickListener {
-                context.copyToClipboard(
-                    binding.pages.text.toString(),
-                    binding.pages.text.toString(),
-                )
-                true
-            }
+                binding.pages.setOnLongClickListener {
+                    context.copyToClipboard(
+                        binding.pages.text.toString(),
+                        binding.pages.text.toString(),
+                    )
+                    true
+                }
 
-            binding.moreInfo.setOnClickListener {
-                openMetadataViewer()
+                binding.moreInfo.setOnClickListener {
+                    openMetadataViewer()
+                }
             }
         },
     )

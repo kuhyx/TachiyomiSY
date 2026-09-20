@@ -84,12 +84,13 @@ internal fun LibraryContent(
             enabled = selection.isEmpty(),
             onRefresh = {
                 val started = onRefresh()
-                if (!started) return@PullRefresh
-                scope.launch {
-                    // Fake refresh status but hide it after a second as it's a long running task
-                    isRefreshing = true
-                    delay(1.seconds)
-                    isRefreshing = false
+                if (started) {
+                    scope.launch {
+                        // Fake refresh status but hide it after a second as it's a long running task
+                        isRefreshing = true
+                        delay(1.seconds)
+                        isRefreshing = false
+                    }
                 }
             },
         ) {

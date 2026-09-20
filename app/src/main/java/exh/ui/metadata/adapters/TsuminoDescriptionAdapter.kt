@@ -34,52 +34,53 @@ internal fun TsuminoDescription(state: State.Success, openMetadataViewer: () -> 
         },
         update = {
             val meta = state.meta
-            if (meta == null || meta !is TsuminoSearchMetadata) return@AndroidView
-            val binding = DescriptionAdapterTsBinding.bind(it)
+            if (!(meta == null || meta !is TsuminoSearchMetadata)) {
+                val binding = DescriptionAdapterTsBinding.bind(it)
 
-            binding.genre.text = meta.category?.let { MetadataUIUtil.getGenreAndColour(context, it) }?.let {
-                binding.genre.setBackgroundColor(it.first)
-                it.second
-            } ?: meta.category ?: context.stringResource(MR.strings.unknown)
+                binding.genre.text = meta.category?.let { MetadataUIUtil.getGenreAndColour(context, it) }?.let {
+                    binding.genre.setBackgroundColor(it.first)
+                    it.second
+                } ?: meta.category ?: context.stringResource(MR.strings.unknown)
 
-            binding.favorites.text = NumberFormat.getIntegerInstance().format(meta.favorites ?: 0)
-            binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
+                binding.favorites.text = NumberFormat.getIntegerInstance().format(meta.favorites ?: 0)
+                binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
 
-            binding.whenPosted.text = TsuminoSearchMetadata.TSUMINO_DATE_FORMAT.format(Date(meta.uploadDate ?: 0))
+                binding.whenPosted.text = TsuminoSearchMetadata.TSUMINO_DATE_FORMAT.format(Date(meta.uploadDate ?: 0))
 
-            binding.uploader.text = meta.uploader ?: context.stringResource(MR.strings.unknown)
+                binding.uploader.text = meta.uploader ?: context.stringResource(MR.strings.unknown)
 
-            binding.pages.text =
-                context.pluralStringResource(SYMR.plurals.num_pages, meta.length ?: 0, meta.length ?: 0)
-            binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
+                binding.pages.text =
+                    context.pluralStringResource(SYMR.plurals.num_pages, meta.length ?: 0, meta.length ?: 0)
+                binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
 
-            binding.ratingBar.rating = meta.averageRating ?: 0F
-            @SuppressLint("SetTextI18n")
-            binding.rating.text =
-                (round((meta.averageRating ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " +
-                MetadataUIUtil.getRatingString(context, meta.averageRating?.times(2))
+                binding.ratingBar.rating = meta.averageRating ?: 0F
+                @SuppressLint("SetTextI18n")
+                binding.rating.text =
+                    (round((meta.averageRating ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " +
+                    MetadataUIUtil.getRatingString(context, meta.averageRating?.times(2))
 
-            binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
+                binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
 
-            listOf(
-                binding.favorites,
-                binding.genre,
-                binding.pages,
-                binding.rating,
-                binding.uploader,
-                binding.whenPosted,
-            ).forEach { textView ->
-                textView.setOnLongClickListener {
-                    context.copyToClipboard(
-                        textView.text.toString(),
-                        textView.text.toString(),
-                    )
-                    true
+                listOf(
+                    binding.favorites,
+                    binding.genre,
+                    binding.pages,
+                    binding.rating,
+                    binding.uploader,
+                    binding.whenPosted,
+                ).forEach { textView ->
+                    textView.setOnLongClickListener {
+                        context.copyToClipboard(
+                            textView.text.toString(),
+                            textView.text.toString(),
+                        )
+                        true
+                    }
                 }
-            }
 
-            binding.moreInfo.setOnClickListener {
-                openMetadataViewer()
+                binding.moreInfo.setOnClickListener {
+                    openMetadataViewer()
+                }
             }
         },
     )

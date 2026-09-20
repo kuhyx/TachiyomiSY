@@ -30,75 +30,77 @@ internal fun EHentaiDescription(state: State.Success, openMetadataViewer: () -> 
         },
         update = {
             val meta = state.meta
-            if (meta == null || meta !is EHentaiSearchMetadata) return@AndroidView
-            val binding = DescriptionAdapterEhBinding.bind(it)
+            if (!(meta == null || meta !is EHentaiSearchMetadata)) {
+                val binding = DescriptionAdapterEhBinding.bind(it)
 
-            binding.genre.text =
-                meta.genre?.let { MetadataUIUtil.getGenreAndColour(context, it) }
-                    ?.let {
-                        binding.genre.setBackgroundColor(it.first)
-                        it.second
-                    }
-                    ?: meta.genre
-                    ?: context.stringResource(MR.strings.unknown)
+                binding.genre.text =
+                    meta.genre?.let { MetadataUIUtil.getGenreAndColour(context, it) }
+                        ?.let {
+                            binding.genre.setBackgroundColor(it.first)
+                            it.second
+                        }
+                        ?: meta.genre
+                        ?: context.stringResource(MR.strings.unknown)
 
-            binding.visible.text =
-                context.stringResource(
-                    SYMR.strings.is_visible,
-                    meta.visible ?: context.stringResource(MR.strings.unknown),
-                )
-
-            binding.favorites.text = NumberFormat.getIntegerInstance().format(meta.favorites ?: 0)
-            binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
-
-            binding.uploader.text = meta.uploader ?: context.stringResource(MR.strings.unknown)
-
-            binding.size.text = MetadataUtil.humanReadableByteCount(meta.size ?: 0, true)
-            binding.size.bindDrawable(context, R.drawable.ic_outline_sd_card_24)
-
-            val length = meta.length ?: 0
-            binding.pages.text = context.pluralStringResource(SYMR.plurals.num_pages, length, length)
-            binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
-
-            val language = meta.language ?: context.stringResource(MR.strings.unknown)
-            binding.language.text = if (meta.translated == true) {
-                context.stringResource(SYMR.strings.language_translated, language)
-            } else {
-                language
-            }
-
-            val ratingFloat = meta.averageRating?.toFloat()
-            binding.ratingBar.rating = ratingFloat ?: 0F
-            @SuppressLint("SetTextI18n")
-            binding.rating.text =
-                (ratingFloat ?: 0F).toString() + " - " + MetadataUIUtil.getRatingString(context, ratingFloat?.times(2))
-
-            binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
-
-            listOf(
-                binding.favorites,
-                binding.genre,
-                binding.language,
-                binding.pages,
-                binding.rating,
-                binding.uploader,
-                binding.visible,
-            ).forEach { textView ->
-                textView.setOnLongClickListener {
-                    context.copyToClipboard(
-                        textView.text.toString(),
-                        textView.text.toString(),
+                binding.visible.text =
+                    context.stringResource(
+                        SYMR.strings.is_visible,
+                        meta.visible ?: context.stringResource(MR.strings.unknown),
                     )
-                    true
+
+                binding.favorites.text = NumberFormat.getIntegerInstance().format(meta.favorites ?: 0)
+                binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
+
+                binding.uploader.text = meta.uploader ?: context.stringResource(MR.strings.unknown)
+
+                binding.size.text = MetadataUtil.humanReadableByteCount(meta.size ?: 0, true)
+                binding.size.bindDrawable(context, R.drawable.ic_outline_sd_card_24)
+
+                val length = meta.length ?: 0
+                binding.pages.text = context.pluralStringResource(SYMR.plurals.num_pages, length, length)
+                binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
+
+                val language = meta.language ?: context.stringResource(MR.strings.unknown)
+                binding.language.text = if (meta.translated == true) {
+                    context.stringResource(SYMR.strings.language_translated, language)
+                } else {
+                    language
                 }
-            }
 
-            binding.uploader.setOnClickListener {
-                meta.uploader?.let { search("uploader:\"$it\"") }
-            }
+                val ratingFloat = meta.averageRating?.toFloat()
+                binding.ratingBar.rating = ratingFloat ?: 0F
+                @SuppressLint("SetTextI18n")
+                binding.rating.text =
+                    (ratingFloat ?: 0F).toString() + " - " +
+                    MetadataUIUtil.getRatingString(context, ratingFloat?.times(2))
 
-            binding.moreInfo.setOnClickListener {
-                openMetadataViewer()
+                binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
+
+                listOf(
+                    binding.favorites,
+                    binding.genre,
+                    binding.language,
+                    binding.pages,
+                    binding.rating,
+                    binding.uploader,
+                    binding.visible,
+                ).forEach { textView ->
+                    textView.setOnLongClickListener {
+                        context.copyToClipboard(
+                            textView.text.toString(),
+                            textView.text.toString(),
+                        )
+                        true
+                    }
+                }
+
+                binding.uploader.setOnClickListener {
+                    meta.uploader?.let { search("uploader:\"$it\"") }
+                }
+
+                binding.moreInfo.setOnClickListener {
+                    openMetadataViewer()
+                }
             }
         },
     )

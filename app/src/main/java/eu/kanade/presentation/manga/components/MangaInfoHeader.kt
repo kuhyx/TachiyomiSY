@@ -632,15 +632,15 @@ private fun descriptionAnnotator(loadImages: Boolean, linkStyle: SpanStyle) = re
                     pop()
                 }
 
-                return@markdownAnnotator true
+                true
+            } else {
+                if (child.type in DISALLOWED_MARKDOWN_TYPES) {
+                    append(content.substring(child.startOffset, child.endOffset))
+                    true
+                } else {
+                    false
+                }
             }
-
-            if (child.type in DISALLOWED_MARKDOWN_TYPES) {
-                append(content.substring(child.startOffset, child.endOffset))
-                return@markdownAnnotator true
-            }
-
-            false
         },
         config = markdownAnnotatorConfig(
             eolAsNewLine = true,

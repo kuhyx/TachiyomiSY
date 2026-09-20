@@ -32,52 +32,54 @@ internal fun PururinDescription(state: State.Success, openMetadataViewer: () -> 
         },
         update = {
             val meta = state.meta
-            if (meta == null || meta !is PururinSearchMetadata) return@AndroidView
-            val binding = DescriptionAdapterPuBinding.bind(it)
+            if (!(meta == null || meta !is PururinSearchMetadata)) {
+                val binding = DescriptionAdapterPuBinding.bind(it)
 
-            binding.genre.text =
-                meta.tags.find { it.namespace == PururinSearchMetadata.TAG_NAMESPACE_CATEGORY }.let { genre ->
-                    genre?.let { MetadataUIUtil.getGenreAndColour(context, it.name) }?.let {
-                        binding.genre.setBackgroundColor(it.first)
-                        it.second
-                    } ?: genre?.name ?: context.stringResource(MR.strings.unknown)
+                binding.genre.text =
+                    meta.tags.find { it.namespace == PururinSearchMetadata.TAG_NAMESPACE_CATEGORY }.let { genre ->
+                        genre?.let { MetadataUIUtil.getGenreAndColour(context, it.name) }?.let {
+                            binding.genre.setBackgroundColor(it.first)
+                            it.second
+                        } ?: genre?.name ?: context.stringResource(MR.strings.unknown)
+                    }
+
+                binding.uploader.text = meta.uploaderDisp ?: meta.uploader.orEmpty()
+
+                binding.size.text = meta.fileSize ?: context.stringResource(MR.strings.unknown)
+                binding.size.bindDrawable(context, R.drawable.ic_outline_sd_card_24)
+
+                binding.pages.text =
+                    context.pluralStringResource(SYMR.plurals.num_pages, meta.pages ?: 0, meta.pages ?: 0)
+                binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
+
+                val ratingFloat = meta.averageRating?.toFloat()
+                binding.ratingBar.rating = ratingFloat ?: 0F
+                @SuppressLint("SetTextI18n")
+                binding.rating.text =
+                    (round((ratingFloat ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " +
+                    MetadataUIUtil.getRatingString(context, ratingFloat?.times(2))
+
+                binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
+
+                listOf(
+                    binding.genre,
+                    binding.pages,
+                    binding.rating,
+                    binding.size,
+                    binding.uploader,
+                ).forEach { textView ->
+                    textView.setOnLongClickListener {
+                        context.copyToClipboard(
+                            textView.text.toString(),
+                            textView.text.toString(),
+                        )
+                        true
+                    }
                 }
 
-            binding.uploader.text = meta.uploaderDisp ?: meta.uploader.orEmpty()
-
-            binding.size.text = meta.fileSize ?: context.stringResource(MR.strings.unknown)
-            binding.size.bindDrawable(context, R.drawable.ic_outline_sd_card_24)
-
-            binding.pages.text = context.pluralStringResource(SYMR.plurals.num_pages, meta.pages ?: 0, meta.pages ?: 0)
-            binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
-
-            val ratingFloat = meta.averageRating?.toFloat()
-            binding.ratingBar.rating = ratingFloat ?: 0F
-            @SuppressLint("SetTextI18n")
-            binding.rating.text =
-                (round((ratingFloat ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " +
-                MetadataUIUtil.getRatingString(context, ratingFloat?.times(2))
-
-            binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
-
-            listOf(
-                binding.genre,
-                binding.pages,
-                binding.rating,
-                binding.size,
-                binding.uploader,
-            ).forEach { textView ->
-                textView.setOnLongClickListener {
-                    context.copyToClipboard(
-                        textView.text.toString(),
-                        textView.text.toString(),
-                    )
-                    true
+                binding.moreInfo.setOnClickListener {
+                    openMetadataViewer()
                 }
-            }
-
-            binding.moreInfo.setOnClickListener {
-                openMetadataViewer()
             }
         },
     )

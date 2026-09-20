@@ -30,31 +30,32 @@ internal fun MangaDexDescription(state: State.Success, openMetadataViewer: () ->
         },
         update = {
             val meta = state.meta
-            if (meta == null || meta !is MangaDexSearchMetadata) return@AndroidView
-            val binding = DescriptionAdapterMdBinding.bind(it)
+            if (!(meta == null || meta !is MangaDexSearchMetadata)) {
+                val binding = DescriptionAdapterMdBinding.bind(it)
 
-            // todo
-            val ratingFloat = meta.rating
-            binding.ratingBar.rating = ratingFloat?.div(2F) ?: 0F
-            @SuppressLint("SetTextI18n")
-            binding.rating.text =
-                (round((ratingFloat ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " +
-                getRatingString(context, ratingFloat)
-            binding.rating.isVisible = ratingFloat != null
-            binding.ratingBar.isVisible = ratingFloat != null
+                // todo
+                val ratingFloat = meta.rating
+                binding.ratingBar.rating = ratingFloat?.div(2F) ?: 0F
+                @SuppressLint("SetTextI18n")
+                binding.rating.text =
+                    (round((ratingFloat ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " +
+                    getRatingString(context, ratingFloat)
+                binding.rating.isVisible = ratingFloat != null
+                binding.ratingBar.isVisible = ratingFloat != null
 
-            binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
+                binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
 
-            binding.rating.setOnLongClickListener {
-                context.copyToClipboard(
-                    binding.rating.text.toString(),
-                    binding.rating.text.toString(),
-                )
-                true
-            }
+                binding.rating.setOnLongClickListener {
+                    context.copyToClipboard(
+                        binding.rating.text.toString(),
+                        binding.rating.text.toString(),
+                    )
+                    true
+                }
 
-            binding.moreInfo.setOnClickListener {
-                openMetadataViewer()
+                binding.moreInfo.setOnClickListener {
+                    openMetadataViewer()
+                }
             }
         },
     )

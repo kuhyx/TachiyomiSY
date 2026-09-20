@@ -282,74 +282,76 @@ internal fun SearchToolbar(
     AppBar(
         modifier = modifier,
         titleContent = {
-            if (searchQuery == null) return@AppBar titleContent()
+            if (searchQuery == null) {
+                titleContent()
+            } else {
+                val keyboardController = LocalSoftwareKeyboardController.current
+                val focusManager = LocalFocusManager.current
 
-            val keyboardController = LocalSoftwareKeyboardController.current
-            val focusManager = LocalFocusManager.current
-
-            val searchAndClearFocus: () -> Unit = f@{
-                if (searchQuery.isNotBlank()) {
-                    onSearch(searchQuery)
-                    focusManager.clearFocus()
-                    keyboardController?.hide()
-                    focusManager.moveFocus(FocusDirection.Next)
+                val searchAndClearFocus: () -> Unit = f@{
+                    if (searchQuery.isNotBlank()) {
+                        onSearch(searchQuery)
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                        focusManager.moveFocus(FocusDirection.Next)
+                    }
                 }
-            }
 
-            // Callers own the query as a String; the field's own state is bridged both ways
-            // through SearchQueryBridge, which keeps the caller's stale echoes out of the field.
-            val textFieldState = rememberTextFieldState(searchQuery)
-            val bridge = remember(textFieldState) { SearchQueryBridge(searchQuery) }
-            LaunchedEffect(textFieldState) {
-                snapshotFlow { textFieldState.text.toString() }
-                    .collect { if (bridge.fieldChanged(it)) onChangeSearchQuery(it) }
-            }
-            LaunchedEffect(searchQuery) {
-                if (bridge.callerChanged(searchQuery)) {
-                    textFieldState.setTextAndPlaceCursorAtEnd(searchQuery)
+                // Callers own the query as a String; the field's own state is bridged both ways
+                // through SearchQueryBridge, which keeps the caller's stale echoes out of the field.
+                val textFieldState = rememberTextFieldState(searchQuery)
+                val bridge = remember(textFieldState) { SearchQueryBridge(searchQuery) }
+                LaunchedEffect(textFieldState) {
+                    snapshotFlow { textFieldState.text.toString() }
+                        .collect { if (bridge.fieldChanged(it)) onChangeSearchQuery(it) }
                 }
-            }
-            val textStyle = MaterialTheme.typography.titleMedium.copy(
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Normal,
-                fontSize = 18.sp,
-            )
+                LaunchedEffect(searchQuery) {
+                    if (bridge.callerChanged(searchQuery)) {
+                        textFieldState.setTextAndPlaceCursorAtEnd(searchQuery)
+                    }
+                }
+                val textStyle = MaterialTheme.typography.titleMedium.copy(
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 18.sp,
+                )
 
-            BasicTextField(
-                state = textFieldState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester)
-                    .runOnEnterKeyPressed(action = searchAndClearFocus)
-                    .showSoftKeyboard(remember { searchQuery.isEmpty() })
-                    .clearFocusOnSoftKeyboardHide(),
-                textStyle = textStyle,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                onKeyboardAction = { searchAndClearFocus() },
-                lineLimits = TextFieldLineLimits.SingleLine,
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
-                interactionSource = interactionSource,
-                decorator = TextFieldDefaults.decorator(
+                BasicTextField(
                     state = textFieldState,
-                    enabled = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .runOnEnterKeyPressed(action = searchAndClearFocus)
+                        .showSoftKeyboard(remember { searchQuery.isEmpty() })
+                        .clearFocusOnSoftKeyboardHide(),
+                    textStyle = textStyle,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    onKeyboardAction = { searchAndClearFocus() },
                     lineLimits = TextFieldLineLimits.SingleLine,
-                    outputTransformation = null,
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
                     interactionSource = interactionSource,
-                    placeholder = {
-                        Text(
-                            modifier = Modifier.secondaryItemAlpha(),
-                            text = placeholderText ?: stringResource(MR.strings.action_search_hint),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Normal,
-                            ),
-                        )
-                    },
-                    container = {},
-                ),
-            )
+                    decorator = TextFieldDefaults.decorator(
+                        state = textFieldState,
+                        enabled = true,
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                        outputTransformation = null,
+                        interactionSource = interactionSource,
+                        placeholder = {
+                            Text(
+                                modifier = Modifier.secondaryItemAlpha(),
+                                text = placeholderText ?: stringResource(MR.strings.action_search_hint),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Normal,
+                                ),
+                            )
+                        },
+                        container = {},
+                    ),
+                )
+            }
         },
         navigateUp = if (searchQuery == null) navigateUp else onClickCloseSearch,
         actions = {

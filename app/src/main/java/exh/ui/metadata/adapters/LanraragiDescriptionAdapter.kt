@@ -25,35 +25,36 @@ internal fun LanraragiDescription(state: State.Success, openMetadataViewer: () -
         },
         update = {
             val meta = state.meta
-            if (meta == null || meta !is LanraragiSearchMetadata) return@AndroidView
-            val binding = DescriptionAdapterLaBinding.bind(it)
+            if (!(meta == null || meta !is LanraragiSearchMetadata)) {
+                val binding = DescriptionAdapterLaBinding.bind(it)
 
-            binding.ext.text = meta.extension?.uppercase().orEmpty()
+                binding.ext.text = meta.extension?.uppercase().orEmpty()
 
-            binding.pages.text = context.pluralStringResource(
-                SYMR.plurals.num_pages,
-                meta.pageCount ?: 1,
-                meta.pageCount ?: 1,
-            )
-            binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
+                binding.pages.text = context.pluralStringResource(
+                    SYMR.plurals.num_pages,
+                    meta.pageCount ?: 1,
+                    meta.pageCount ?: 1,
+                )
+                binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
 
-            binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
+                binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
 
-            listOf(
-                binding.pages,
-                binding.ext,
-            ).forEach { textView ->
-                textView.setOnLongClickListener {
-                    context.copyToClipboard(
-                        textView.text.toString(),
-                        textView.text.toString(),
-                    )
-                    true
+                listOf(
+                    binding.pages,
+                    binding.ext,
+                ).forEach { textView ->
+                    textView.setOnLongClickListener {
+                        context.copyToClipboard(
+                            textView.text.toString(),
+                            textView.text.toString(),
+                        )
+                        true
+                    }
                 }
-            }
 
-            binding.moreInfo.setOnClickListener {
-                openMetadataViewer()
+                binding.moreInfo.setOnClickListener {
+                    openMetadataViewer()
+                }
             }
         },
     )

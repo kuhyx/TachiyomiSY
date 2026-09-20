@@ -113,14 +113,16 @@ internal data class MigrateSourceSearchScreen(
                 snackbarHostState = snackbarHostState,
                 contentPadding = paddingValues,
                 onWebViewClick = {
-                    val source = screenModel.source as? HttpSource ?: return@BrowseSourceContent
-                    navigator.push(
-                        WebViewScreen(
-                            url = source.getHomeUrl(),
-                            initialTitle = source.name,
-                            sourceId = source.id,
-                        ),
-                    )
+                    val source = screenModel.source as? HttpSource
+                    if (source != null) {
+                        navigator.push(
+                            WebViewScreen(
+                                url = source.getHomeUrl(),
+                                initialTitle = source.name,
+                                sourceId = source.id,
+                            ),
+                        )
+                    }
                 },
                 onHelpClick = { uriHandler.openUri(Constants.URL_HELP) },
                 onLocalSourceHelpClick = { uriHandler.openUri(LocalSource.HELP_URL) },

@@ -113,12 +113,13 @@ internal fun UpdateScreen(
                     refreshing = isRefreshing,
                     onRefresh = {
                         val started = onUpdateLibrary()
-                        if (!started) return@PullRefresh
-                        scope.launch {
-                            // Fake refresh status but hide it after a second as it's a long running task
-                            isRefreshing = true
-                            delay(1.seconds)
-                            isRefreshing = false
+                        if (started) {
+                            scope.launch {
+                                // Fake refresh status but hide it after a second as it's a long running task
+                                isRefreshing = true
+                                delay(1.seconds)
+                                isRefreshing = false
+                            }
                         }
                     },
                     enabled = !state.selectionMode,
