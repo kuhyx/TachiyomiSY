@@ -15,9 +15,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
@@ -28,14 +28,12 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 import kotlin.random.Random
 
-data class EmptyScreenAction(
-    val stringRes: StringResource,
-    val icon: ImageVector,
-    val onClick: () -> Unit,
-)
+private val EmptyScreenHorizontalPadding: Dp = 24.dp
+private val MessageTopSpacing: Dp = 24.dp
 
+/** A centred "nothing here" face with a message from a string resource and optional actions. */
 @Composable
-fun EmptyScreen(
+public fun EmptyScreen(
     stringRes: StringResource,
     modifier: Modifier = Modifier,
     actions: List<EmptyScreenAction>? = null,
@@ -47,8 +45,9 @@ fun EmptyScreen(
     )
 }
 
+/** A centred "nothing here" face with a [message] and optional [actions] beneath. */
 @Composable
-fun EmptyScreen(
+public fun EmptyScreen(
     message: String,
     modifier: Modifier = Modifier,
     actions: List<EmptyScreenAction>? = null,
@@ -58,7 +57,7 @@ fun EmptyScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = EmptyScreenHorizontalPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -73,7 +72,7 @@ fun EmptyScreen(
         Text(
             text = message,
             modifier = Modifier
-                .paddingFromBaseline(top = 24.dp)
+                .paddingFromBaseline(top = MessageTopSpacing)
                 .secondaryItemAlpha(),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
@@ -82,7 +81,7 @@ fun EmptyScreen(
         if (!actions.isNullOrEmpty()) {
             Row(
                 modifier = Modifier
-                    .padding(top = 24.dp),
+                    .padding(top = MessageTopSpacing),
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
             ) {
                 actions.fastForEach {
@@ -113,6 +112,4 @@ private val ErrorFaces = listOf(
     "(¬_¬)",
 )
 
-private fun getRandomErrorFace(): String {
-    return ErrorFaces[Random.nextInt(ErrorFaces.size)]
-}
+private fun getRandomErrorFace(): String = ErrorFaces[Random.nextInt(ErrorFaces.size)]

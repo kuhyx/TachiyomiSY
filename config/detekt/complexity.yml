@@ -43,7 +43,9 @@ complexity:
     # SManga.invoke/copy take one parameter per SManga field (9); they mirror the extension ABI.
     functionThreshold: 10
     constructorThreshold: 7
-    ignoreDefaultParameters: false
+    # Composables take their options as defaulted parameters by the Compose API guidelines
+    # ("prefer parameters over configuration objects"); only the required ones count.
+    ignoreDefaultParameters: true
     ignoreDataClasses: true
     ignoreAnnotatedParameter: []
   MethodOverloading:

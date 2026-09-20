@@ -31,13 +31,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.tooling.preview.Preview
 
+private const val FULL_TURN_DEGREES = 360f
+private const val ROTATION_MILLIS = 2000
+private const val PREVIEW_STEP = 0.2f
+
 /**
  * A combined [CircularProgressIndicator] that always rotates.
  *
  * By always rotating we give the feedback to the user that the application isn't 'stuck'.
  */
 @Composable
-fun CombinedCircularProgressIndicator(
+public fun RotatingProgressIndicator(
     progress: () -> Float,
     modifier: Modifier = Modifier,
 ) {
@@ -55,9 +59,9 @@ fun CombinedCircularProgressIndicator(
             val infiniteTransition = rememberInfiniteTransition(label = "infiniteRotation")
             val rotation by infiniteTransition.animateFloat(
                 initialValue = 0f,
-                targetValue = 360f,
+                targetValue = FULL_TURN_DEGREES,
                 animationSpec = infiniteRepeatable(
-                    animation = tween(2000, easing = LinearEasing),
+                    animation = tween(ROTATION_MILLIS, easing = LinearEasing),
                     repeatMode = RepeatMode.Restart,
                 ),
                 label = "rotation",
@@ -75,9 +79,10 @@ fun CombinedCircularProgressIndicator(
     }
 }
 
+/** [RotatingProgressIndicator] with a button cycling through progress values, for the IDE preview. */
 @Preview
 @Composable
-private fun CombinedCircularProgressIndicatorPreview() {
+internal fun RotatingProgressPreview() {
     var progress by remember { mutableFloatStateOf(0f) }
     MaterialTheme {
         Scaffold(
@@ -85,14 +90,7 @@ private fun CombinedCircularProgressIndicatorPreview() {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        progress = when (progress) {
-                            0f -> 0.15f
-                            0.15f -> 0.25f
-                            0.25f -> 0.5f
-                            0.5f -> 0.75f
-                            0.75f -> 0.95f
-                            else -> 0f
-                        }
+                        progress = if (progress + PREVIEW_STEP < 1f) progress + PREVIEW_STEP else 0f
                     },
                 ) {
                     Text("change")
@@ -105,7 +103,7 @@ private fun CombinedCircularProgressIndicatorPreview() {
                     .fillMaxSize()
                     .padding(it),
             ) {
-                CombinedCircularProgressIndicator(progress = { progress })
+                RotatingProgressIndicator(progress = { progress })
             }
         }
     }

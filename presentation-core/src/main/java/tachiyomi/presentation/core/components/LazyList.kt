@@ -18,19 +18,23 @@ import tachiyomi.presentation.core.util.drawVerticalScrollbar
 
 /**
  * LazyColumn with scrollbar.
+ *
+ * `state`: the list state; a fresh remembered one when `null`.
+ * `verticalArrangement`: top-aligned, or bottom-aligned when [reverseLayout], when `null`.
  */
 @Composable
-fun ScrollbarLazyColumn(
+public fun ScrollbarLazyColumn(
     modifier: Modifier = Modifier,
-    state: LazyListState = rememberLazyListState(),
+    state: LazyListState? = null,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     reverseLayout: Boolean = false,
-    verticalArrangement: Arrangement.Vertical =
-        if (!reverseLayout) Arrangement.Top else Arrangement.Bottom,
+    verticalArrangement: Arrangement.Vertical? = null,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     userScrollEnabled: Boolean = true,
     content: LazyListScope.() -> Unit,
 ) {
+    val listState = state ?: rememberLazyListState()
+    val arrangement = verticalArrangement ?: if (!reverseLayout) Arrangement.Top else Arrangement.Bottom
     val direction = LocalLayoutDirection.current
     val density = LocalDensity.current
     val positionOffset = remember(contentPadding) {
@@ -39,14 +43,14 @@ fun ScrollbarLazyColumn(
     LazyColumn(
         modifier = modifier
             .drawVerticalScrollbar(
-                state = state,
+                state = listState,
                 reverseScrolling = reverseLayout,
                 positionOffsetPx = positionOffset,
             ),
-        state = state,
+        state = listState,
         contentPadding = contentPadding,
         reverseLayout = reverseLayout,
-        verticalArrangement = verticalArrangement,
+        verticalArrangement = arrangement,
         horizontalAlignment = horizontalAlignment,
         userScrollEnabled = userScrollEnabled,
         content = content,
@@ -55,30 +59,34 @@ fun ScrollbarLazyColumn(
 
 /**
  * LazyColumn with fast scroller.
+ *
+ * `state`: the list state; a fresh remembered one when `null`.
+ * `verticalArrangement`: top-aligned, or bottom-aligned when [reverseLayout], when `null`.
  */
 @Composable
-fun FastScrollLazyColumn(
+public fun FastScrollLazyColumn(
     modifier: Modifier = Modifier,
-    state: LazyListState = rememberLazyListState(),
+    state: LazyListState? = null,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     reverseLayout: Boolean = false,
-    verticalArrangement: Arrangement.Vertical =
-        if (!reverseLayout) Arrangement.Top else Arrangement.Bottom,
+    verticalArrangement: Arrangement.Vertical? = null,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     userScrollEnabled: Boolean = true,
     content: LazyListScope.() -> Unit,
 ) {
+    val listState = state ?: rememberLazyListState()
+    val arrangement = verticalArrangement ?: if (!reverseLayout) Arrangement.Top else Arrangement.Bottom
     VerticalFastScroller(
-        listState = state,
+        listState = listState,
         modifier = modifier,
         topContentPadding = contentPadding.calculateTopPadding(),
         endContentPadding = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
     ) {
         LazyColumn(
-            state = state,
+            state = listState,
             contentPadding = contentPadding,
             reverseLayout = reverseLayout,
-            verticalArrangement = verticalArrangement,
+            verticalArrangement = arrangement,
             horizontalAlignment = horizontalAlignment,
             userScrollEnabled = userScrollEnabled,
             content = content,

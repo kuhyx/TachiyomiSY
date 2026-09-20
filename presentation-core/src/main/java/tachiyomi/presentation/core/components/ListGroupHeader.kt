@@ -8,8 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import tachiyomi.presentation.core.components.material.padding
 
+/** The small header above a group of list items. */
 @Composable
-fun ListGroupHeader(
+public fun ListGroupHeader(
     text: String,
     modifier: Modifier = Modifier,
 ) {

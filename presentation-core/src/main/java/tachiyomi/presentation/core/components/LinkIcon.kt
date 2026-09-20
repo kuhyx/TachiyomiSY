@@ -10,8 +10,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 
+/** An icon button that opens [url] in the browser, described by [label]. */
 @Composable
-fun LinkIcon(
+public fun LinkIcon(
     label: String,
     icon: ImageVector,
     url: String,

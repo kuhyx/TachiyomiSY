@@ -8,26 +8,25 @@ import dev.icerock.moko.resources.StringResource
 import tachiyomi.core.common.i18n.pluralStringResource
 import tachiyomi.core.common.i18n.stringResource
 
+/** The string for [resource] in the current context. */
 @Composable
 @ReadOnlyComposable
-fun stringResource(resource: StringResource): String {
-    return LocalContext.current.stringResource(resource)
-}
+public fun stringResource(resource: StringResource): String = LocalContext.current.stringResource(resource)
 
+/** The string for [resource] formatted with [args]. */
 @Composable
 @ReadOnlyComposable
-fun stringResource(resource: StringResource, vararg args: Any): String {
-    return LocalContext.current.stringResource(resource, *args)
-}
+public fun stringResource(resource: StringResource, vararg args: Any): String =
+    LocalContext.current.stringResource(resource, *args)
 
+/** The plural form of [resource] for [count]. */
 @Composable
 @ReadOnlyComposable
-fun pluralStringResource(resource: PluralsResource, count: Int): String {
-    return LocalContext.current.pluralStringResource(resource, count)
-}
+public fun pluralStringResource(resource: PluralsResource, count: Int): String =
+    LocalContext.current.pluralStringResource(resource, count)
 
+/** The plural form of [resource] for [count], formatted with [args]. */
 @Composable
 @ReadOnlyComposable
-fun pluralStringResource(resource: PluralsResource, count: Int, vararg args: Any): String {
-    return LocalContext.current.pluralStringResource(resource, count, *args)
-}
+public fun pluralStringResource(resource: PluralsResource, count: Int, vararg args: Any): String =
+    LocalContext.current.pluralStringResource(resource, count, *args)

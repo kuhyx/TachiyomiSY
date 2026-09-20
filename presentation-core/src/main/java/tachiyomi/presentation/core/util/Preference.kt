@@ -6,8 +6,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import tachiyomi.core.common.preference.Preference
 
+/** This preference's value as state, starting from its current value. */
 @Composable
-fun <T> Preference<T>.collectAsState(): State<T> {
+public fun <T> Preference<T>.collectAsState(): State<T> {
     val flow = remember(this) { changes() }
     return flow.collectAsState(initial = get())
 }

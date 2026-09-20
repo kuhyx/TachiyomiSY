@@ -16,8 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/** The body of an alert dialog: optional [icon] and [title] over [text], with [buttons] under it. */
 @Composable
-fun AlertDialogContent(
+public fun AlertDialogContent(
     buttons: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
@@ -68,8 +69,9 @@ fun AlertDialogContent(
     )
 }
 
+/** The body of an alert dialog with free-form [content] and no button row. */
 @Composable
-fun AlertDialogContent(
+public fun AlertDialogContent(
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
     title: (@Composable () -> Unit)? = null,

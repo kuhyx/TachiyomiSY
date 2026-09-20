@@ -18,33 +18,42 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+private val NavigationRailMinWidth: Dp = 80.dp
+private val NavigationRailElevation: Dp = 3.dp
+
 /**
- * Center-aligned M3 Navigation rail
+ * Center-aligned M3 Navigation rail; nullable parameters take the Material defaults.
  *
  * @see [androidx.compose.material3.NavigationRail]
+ *
+ * `containerColor`: the rail's colour; Material's container colour when `Unspecified`.
+ * `contentColor`: the icon and label colour; the matching content colour when `Unspecified`.
  */
 @Composable
-fun NavigationRail(
+public fun NavigationRail(
     modifier: Modifier = Modifier,
-    containerColor: Color = NavigationRailDefaults.ContainerColor,
-    contentColor: Color = contentColorFor(containerColor),
+    containerColor: Color = Color.Unspecified,
+    contentColor: Color = Color.Unspecified,
     header: @Composable (ColumnScope.() -> Unit)? = null,
-    windowInsets: WindowInsets = NavigationRailDefaults.windowInsets,
+    windowInsets: WindowInsets? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val container = containerColor.takeOrElse { NavigationRailDefaults.ContainerColor }
     androidx.compose.material3.Surface(
-        color = containerColor,
-        contentColor = contentColor,
+        color = container,
+        contentColor = contentColor.takeOrElse { contentColorFor(container) },
         modifier = modifier,
-        tonalElevation = 3.dp,
+        tonalElevation = NavigationRailElevation,
     ) {
         Column(
             Modifier
                 .fillMaxHeight()
-                .windowInsetsPadding(windowInsets)
-                .widthIn(min = 80.dp)
+                .windowInsetsPadding(windowInsets ?: NavigationRailDefaults.windowInsets)
+                .widthIn(min = NavigationRailMinWidth)
                 .padding(vertical = MaterialTheme.padding.extraSmall)
                 .selectableGroup(),
             horizontalAlignment = Alignment.CenterHorizontally,

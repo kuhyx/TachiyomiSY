@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.isVisible
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import eu.kanade.presentation.theme.TachiyomiTheme
-import tachiyomi.presentation.core.components.CombinedCircularProgressIndicator
+import tachiyomi.presentation.core.components.RotatingProgressIndicator
 
 /**
  * A wrapper for [CircularProgressIndicator] that always rotates.
@@ -38,7 +38,7 @@ class ReaderProgressIndicator @JvmOverloads constructor(
     @Composable
     override fun Content() {
         TachiyomiTheme {
-            CombinedCircularProgressIndicator(progress = { progress })
+            RotatingProgressIndicator(progress = { progress })
         }
     }
 

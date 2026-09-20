@@ -16,8 +16,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import tachiyomi.presentation.core.components.material.padding
 
+/** A checkbox with its [label] beside it; the whole row toggles it. */
 @Composable
-fun LabeledCheckbox(
+public fun LabeledCheckbox(
     label: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,

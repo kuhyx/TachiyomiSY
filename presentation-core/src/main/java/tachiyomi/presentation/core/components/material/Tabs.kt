@@ -10,9 +10,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import tachiyomi.presentation.core.components.Pill
 
+private const val PILL_ALPHA_DARK = 0.12f
+private const val PILL_ALPHA_LIGHT = 0.08f
+private val BadgeFontSize = 10.sp
+
+/** A tab's title with an optional count pill after it. */
 @Composable
-fun TabText(text: String, badgeCount: Int? = null) {
-    val pillAlpha = if (isSystemInDarkTheme()) 0.12f else 0.08f
+public fun TabText(text: String, badgeCount: Int? = null) {
+    val pillAlpha = if (isSystemInDarkTheme()) PILL_ALPHA_DARK else PILL_ALPHA_LIGHT
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -26,7 +31,7 @@ fun TabText(text: String, badgeCount: Int? = null) {
             Pill(
                 text = "$badgeCount",
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = pillAlpha),
-                fontSize = 10.sp,
+                fontSize = BadgeFontSize,
             )
         }
     }

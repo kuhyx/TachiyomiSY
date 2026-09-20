@@ -33,55 +33,53 @@ package tachiyomi.presentation.core.util
 
 import android.view.ViewConfiguration
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastFirstOrNull
-import androidx.compose.ui.util.fastSumBy
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.sample
 import tachiyomi.presentation.core.components.Scroller.STICKY_HEADER_KEY_PREFIX
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+
+private const val SCROLLBAR_ALPHA = 0.364f
+internal val ScrollSampling: Duration = 0.1.seconds
+internal val ScrollBarVisibilityDurationMillis: Long = ViewConfiguration.getScrollDefaultDelay().toLong()
+internal val ImmediateFadeOutAnimationSpec: TweenSpec<Float> = tween(
+    durationMillis = ViewConfiguration.getScrollBarFadeDuration(),
+)
 
 /**
  * Draws horizontal scrollbar to a LazyList.
  *
  * Set key with [STICKY_HEADER_KEY_PREFIX] prefix to any sticky header item in the list.
+ *
+ * `positionOffsetPx`: the amount of offset the scrollbar position towards the top of the layout
  */
 @Composable
-fun Modifier.drawHorizontalScrollbar(
+public fun Modifier.drawHorizontalScrollbar(
     state: LazyListState,
     reverseScrolling: Boolean = false,
-    // The amount of offset the scrollbar position towards the top of the layout
     positionOffsetPx: Float = 0f,
 ): Modifier = drawScrollbar(state, Orientation.Horizontal, reverseScrolling, positionOffsetPx)
 
@@ -89,141 +87,52 @@ fun Modifier.drawHorizontalScrollbar(
  * Draws vertical scrollbar to a LazyList.
  *
  * Set key with [STICKY_HEADER_KEY_PREFIX] prefix to any sticky header item in the list.
+ *
+ * `positionOffsetPx`: the amount of offset the scrollbar position towards the start of the layout
  */
 @Composable
-fun Modifier.drawVerticalScrollbar(
+public fun Modifier.drawVerticalScrollbar(
     state: LazyListState,
     reverseScrolling: Boolean = false,
-    // The amount of offset the scrollbar position towards the start of the layout
     positionOffsetPx: Float = 0f,
 ): Modifier = drawScrollbar(state, Orientation.Vertical, reverseScrolling, positionOffsetPx)
 
+/** How the scrollbar is oriented and painted; the same for every frame of one composition. */
+internal data class ScrollbarStyle(
+    val reverseDirection: Boolean,
+    val atEnd: Boolean,
+    val thickness: Float,
+    val color: Color,
+    val alpha: () -> Float,
+)
+
+/**
+ * The scrollbar behind [drawVerticalScrollbar] and [drawHorizontalScrollbar]: shown on every
+ * scroll tick, faded out after the platform's delay, drawn over the content from the list's
+ * layout info.
+ */
 @Composable
-private fun Modifier.drawScrollbar(
+internal fun Modifier.drawScrollbar(
     state: LazyListState,
     orientation: Orientation,
     reverseScrolling: Boolean,
     positionOffset: Float,
-): Modifier = drawScrollbar(
-    orientation,
-    reverseScrolling,
-) { reverseDirection, atEnd, thickness, color, alpha ->
-    val layoutInfo = state.layoutInfo
-    val viewportSize = if (orientation == Orientation.Horizontal) {
-        layoutInfo.viewportSize.width
-    } else {
-        layoutInfo.viewportSize.height
-    } - layoutInfo.beforeContentPadding - layoutInfo.afterContentPadding
-    val items = layoutInfo.visibleItemsInfo
-    val itemsSize = items.fastSumBy { it.size }
-    val showScrollbar = items.size < layoutInfo.totalItemsCount || itemsSize > viewportSize
-    val estimatedItemSize = if (items.isEmpty()) 0f else itemsSize.toFloat() / items.size
-    val totalSize = estimatedItemSize * layoutInfo.totalItemsCount
-    val thumbSize = viewportSize / totalSize * viewportSize
-    val startOffset = if (items.isEmpty()) {
-        0f
-    } else {
-        items
-            .fastFirstOrNull { (it.key as? String)?.startsWith(STICKY_HEADER_KEY_PREFIX)?.not() ?: true }
-            ?.run {
-                val startPadding = if (reverseDirection) {
-                    layoutInfo.afterContentPadding
-                } else {
-                    layoutInfo.beforeContentPadding
-                }
-                startPadding + ((estimatedItemSize * index - offset) / totalSize * viewportSize)
-            } ?: 0f
-    }
-    val drawScrollbar = onDrawScrollbar(
-        orientation, reverseDirection, atEnd, showScrollbar,
-        thickness, color, alpha, thumbSize, startOffset, positionOffset,
-    )
-    drawContent()
-    drawScrollbar()
-}
-
-private fun ContentDrawScope.onDrawScrollbar(
-    orientation: Orientation,
-    reverseDirection: Boolean,
-    atEnd: Boolean,
-    showScrollbar: Boolean,
-    thickness: Float,
-    color: Color,
-    alpha: () -> Float,
-    thumbSize: Float,
-    scrollOffset: Float,
-    positionOffset: Float,
-): DrawScope.() -> Unit {
-    val topLeft = if (orientation == Orientation.Horizontal) {
-        Offset(
-            if (reverseDirection) size.width - scrollOffset - thumbSize else scrollOffset,
-            if (atEnd) size.height - positionOffset - thickness else positionOffset,
-        )
-    } else {
-        Offset(
-            if (atEnd) size.width - positionOffset - thickness else positionOffset,
-            if (reverseDirection) size.height - scrollOffset - thumbSize else scrollOffset,
-        )
-    }
-    val size = if (orientation == Orientation.Horizontal) {
-        Size(thumbSize, thickness)
-    } else {
-        Size(thickness, thumbSize)
-    }
-
-    return {
-        if (showScrollbar) {
-            drawRect(
-                color = color,
-                topLeft = topLeft,
-                size = size,
-                alpha = alpha(),
-            )
-        }
-    }
-}
-
-@Composable
-private fun Modifier.drawScrollbar(
-    orientation: Orientation,
-    reverseScrolling: Boolean,
-    onDraw: ContentDrawScope.(
-        reverseDirection: Boolean,
-        atEnd: Boolean,
-        thickness: Float,
-        color: Color,
-        alpha: () -> Float,
-    ) -> Unit,
 ): Modifier {
     val scrolled = remember {
-        MutableSharedFlow<Unit>(
-            extraBufferCapacity = 1,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        )
+        MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     }
-    val nestedScrollConnection = remember(orientation, scrolled) {
-        object : NestedScrollConnection {
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource,
-            ): Offset {
-                val delta = if (orientation == Orientation.Horizontal) consumed.x else consumed.y
-                if (delta != 0f) scrolled.tryEmit(Unit)
-                return Offset.Zero
-            }
-        }
-    }
+    val nestedScrollConnection = remember(orientation, scrolled) { ScrollTicker(orientation, scrolled) }
 
     val alpha = remember { Animatable(0f) }
     LaunchedEffect(scrolled, alpha) {
         scrolled
-            .sample(0.1.seconds)
-            .collectLatest {
+            .sample(ScrollSampling)
+            .mapLatest {
                 alpha.snapTo(1f)
                 delay(ScrollBarVisibilityDurationMillis.milliseconds)
                 alpha.animateTo(0f, animationSpec = ImmediateFadeOutAnimationSpec)
             }
+            .launchIn(this)
     }
 
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
@@ -236,53 +145,37 @@ private fun Modifier.drawScrollbar(
 
     val context = LocalContext.current
     val thickness = remember { ViewConfiguration.get(context).scaledScrollBarSize.toFloat() }
-    val color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.364f)
+    val style = ScrollbarStyle(
+        reverseDirection = reverseDirection,
+        atEnd = atEnd,
+        thickness = thickness,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = SCROLLBAR_ALPHA),
+        alpha = alpha::value,
+    )
 
     return this
         .nestedScroll(nestedScrollConnection)
         .drawWithContent {
-            onDraw(reverseDirection, atEnd, thickness, color, alpha::value)
+            val metrics = LazyListScrollbarMetrics(state.layoutInfo, orientation, style.reverseDirection)
+            val drawScrollbar = onDrawScrollbar(
+                orientation = orientation,
+                style = style,
+                metrics = metrics,
+                positionOffset = positionOffset,
+            )
+            drawContent()
+            drawScrollbar()
         }
 }
 
-private val ScrollBarVisibilityDurationMillis = ViewConfiguration.getScrollDefaultDelay().toLong()
-private val ImmediateFadeOutAnimationSpec = tween<Float>(
-    durationMillis = ViewConfiguration.getScrollBarFadeDuration(),
-)
-
-@Preview(widthDp = 400, heightDp = 400, showBackground = true)
-@Composable
-fun LazyListScrollbarPreview() {
-    val state = rememberLazyListState()
-    LazyColumn(
-        modifier = Modifier.drawVerticalScrollbar(state),
-        state = state,
-    ) {
-        items(50) {
-            Text(
-                text = "Item ${it + 1}",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            )
-        }
-    }
-}
-
-@Preview(widthDp = 400, showBackground = true)
-@Composable
-fun LazyListHorizontalScrollbarPreview() {
-    val state = rememberLazyListState()
-    LazyRow(
-        modifier = Modifier.drawHorizontalScrollbar(state),
-        state = state,
-    ) {
-        items(50) {
-            Text(
-                text = (it + 1).toString(),
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 16.dp),
-            )
-        }
+/** Ticks [scrolled] whenever the list consumed scroll along [orientation]. */
+internal class ScrollTicker(
+    private val orientation: Orientation,
+    private val scrolled: MutableSharedFlow<Unit>,
+) : NestedScrollConnection {
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+        val delta = if (orientation == Orientation.Horizontal) consumed.x else consumed.y
+        if (delta != 0f) scrolled.tryEmit(Unit)
+        return Offset.Zero
     }
 }

@@ -15,8 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/** A lazy column with one full-width action button pinned under it. */
 @Composable
-fun LazyColumnWithAction(
+public fun LazyColumnWithAction(
     contentPadding: PaddingValues,
     actionLabel: String,
     onClickAction: () -> Unit,

@@ -32,8 +32,15 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
+private val ContentTopPadding: Dp = 48.dp
+private val InfoIconSize: Dp = 48.dp
+
+/**
+ * A full-screen notice: an icon, a heading and a subtitle over [content], with an accept button
+ * (and a reject one when both [rejectText] and [onRejectClick] are given) pinned at the bottom.
+ */
 @Composable
-fun InfoScreen(
+public fun InfoScreen(
     icon: ImageVector,
     headingText: String,
     subtitleText: String,
@@ -46,41 +53,13 @@ fun InfoScreen(
 ) {
     Scaffold(
         bottomBar = {
-            val strokeWidth = Dp.Hairline
-            val borderColor = MaterialTheme.colorScheme.outline
-            Column(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .drawBehind {
-                        drawLine(
-                            borderColor,
-                            Offset(0f, 0f),
-                            Offset(size.width, 0f),
-                            strokeWidth.value,
-                        )
-                    }
-                    .windowInsetsPadding(NavigationBarDefaults.windowInsets)
-                    .padding(
-                        horizontal = MaterialTheme.padding.medium,
-                        vertical = MaterialTheme.padding.small,
-                    ),
-            ) {
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = canAccept,
-                    onClick = onAcceptClick,
-                ) {
-                    Text(text = acceptText)
-                }
-                if (rejectText != null && onRejectClick != null) {
-                    OutlinedButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onRejectClick,
-                    ) {
-                        Text(text = rejectText)
-                    }
-                }
-            }
+            InfoScreenButtons(
+                acceptText = acceptText,
+                onAcceptClick = onAcceptClick,
+                canAccept = canAccept,
+                rejectText = rejectText,
+                onRejectClick = onRejectClick,
+            )
         },
     ) { paddingValues ->
         // Status bar scrim
@@ -98,7 +77,7 @@ fun InfoScreen(
                 .verticalScroll(rememberScrollState())
                 .fillMaxWidth()
                 .padding(paddingValues)
-                .padding(top = 48.dp)
+                .padding(top = ContentTopPadding)
                 .padding(horizontal = MaterialTheme.padding.medium),
         ) {
             Icon(
@@ -106,7 +85,7 @@ fun InfoScreen(
                 contentDescription = null,
                 modifier = Modifier
                     .padding(bottom = MaterialTheme.padding.small)
-                    .size(48.dp),
+                    .size(InfoIconSize),
                 tint = MaterialTheme.colorScheme.primary,
             )
             Text(
@@ -126,9 +105,55 @@ fun InfoScreen(
     }
 }
 
+@Composable
+private fun InfoScreenButtons(
+    acceptText: String,
+    onAcceptClick: () -> Unit,
+    canAccept: Boolean,
+    rejectText: String?,
+    onRejectClick: (() -> Unit)?,
+) {
+    val strokeWidth = Dp.Hairline
+    val borderColor = MaterialTheme.colorScheme.outline
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .drawBehind {
+                drawLine(
+                    borderColor,
+                    Offset(0f, 0f),
+                    Offset(size.width, 0f),
+                    strokeWidth.value,
+                )
+            }
+            .windowInsetsPadding(NavigationBarDefaults.windowInsets)
+            .padding(
+                horizontal = MaterialTheme.padding.medium,
+                vertical = MaterialTheme.padding.small,
+            ),
+    ) {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            enabled = canAccept,
+            onClick = onAcceptClick,
+        ) {
+            Text(text = acceptText)
+        }
+        if (rejectText != null && onRejectClick != null) {
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onRejectClick,
+            ) {
+                Text(text = rejectText)
+            }
+        }
+    }
+}
+
+/** [InfoScreen] with both buttons in both colour schemes, for the IDE preview. */
 @PreviewLightDark
 @Composable
-private fun InfoScaffoldPreview() {
+internal fun InfoScaffoldPreview() {
     InfoScreen(
         icon = Icons.Outlined.Newspaper,
         headingText = "Heading",

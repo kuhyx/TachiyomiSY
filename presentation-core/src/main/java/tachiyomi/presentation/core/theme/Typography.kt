@@ -6,7 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 
-val Typography.header: TextStyle
+/** The style of settings and list headers: body-medium, semi-bold, in the variant colour. */
+public val Typography.header: TextStyle
     @Composable
     get() = bodyMedium.copy(
         color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -3,10 +3,15 @@ plugins {
     alias(mihonx.plugins.compose)
 
     alias(mihonx.plugins.spotless)
+    alias(mihonx.plugins.lint)
+    alias(mihonx.plugins.coverage)
 }
 
 android {
     namespace = "tachiyomi.presentation.core"
+
+    // Compose UI tests run under Robolectric (no emulator).
+    testOptions.unitTests.isIncludeAndroidResources = true
 }
 
 kotlin {
@@ -18,6 +23,7 @@ kotlin {
             "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
             "-opt-in=kotlinx.coroutines.FlowPreview",
         )
     }
@@ -43,4 +49,14 @@ dependencies {
 
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
+
+    testImplementation(libs.bundles.test)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    // Compose's test rule is JUnit 4: run under Robolectric by the vintage engine.
+    testImplementation(libs.androidx.compose.uiTestJunit4)
+    testImplementation(libs.androidx.compose.uiTestManifest)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.junit4)
+    testRuntimeOnly(libs.junit.vintage)
 }

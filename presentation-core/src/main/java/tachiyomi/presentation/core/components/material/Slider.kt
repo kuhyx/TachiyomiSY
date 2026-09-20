@@ -13,33 +13,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import kotlin.math.roundToInt
 
+/**
+ * An integer [Slider] over [valueRange] (`0..1` when `null`); nullable parameters take the
+ * Material defaults.
+ *
+ * `steps`: the number of discrete stops between the range's ends; one per value when `null`.
+ * `thumb`: the thumb slot; Material's thumb in [colors] when `null`.
+ * `track`: the track slot; Material's track in [colors] when `null`.
+ */
 @Composable
-fun Slider(
+public fun Slider(
     value: Int,
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    valueRange: IntProgression = 0..1,
-    @IntRange(from = 0) steps: Int = with(valueRange) { (last - first) - 1 },
+    valueRange: IntProgression? = null,
+    @IntRange(from = 0) steps: Int? = null,
     onValueChangeFinished: (() -> Unit)? = null,
-    colors: SliderColors = SliderDefaults.colors(),
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    thumb: @Composable (SliderState) -> Unit = {
-        SliderDefaults.Thumb(
-            interactionSource = interactionSource,
-            colors = colors,
-            enabled = enabled,
-        )
-    },
-    track: @Composable (SliderState) -> Unit = { sliderState ->
-        SliderDefaults.Track(colors = colors, enabled = enabled, sliderState = sliderState)
-    },
+    colors: SliderColors? = null,
+    interactionSource: MutableInteractionSource? = null,
+    thumb: (@Composable (SliderState) -> Unit)? = null,
+    track: (@Composable (SliderState) -> Unit)? = null,
 ) {
-    val state = key(steps, valueRange) {
+    val range = valueRange ?: 0..1
+    val stepCount = steps ?: with(range) { last - first - 1 }
+    val sliderColors = colors ?: SliderDefaults.colors()
+    val source = interactionSource ?: remember { MutableInteractionSource() }
+    val state = key(stepCount, range) {
         rememberSliderState(
             value = value.toFloat(),
-            steps = steps,
-            trackRange = with(valueRange) { first.toFloat()..last.toFloat() },
+            steps = stepCount,
+            trackRange = with(range) { first.toFloat()..last.toFloat() },
         )
     }
     state.value = value.toFloat()
@@ -49,9 +53,17 @@ fun Slider(
         enabled = enabled,
         onValueChange = { onValueChange(it.roundToInt()) },
         onValueChangeFinished = onValueChangeFinished,
-        colors = colors,
-        interactionSource = interactionSource,
-        thumb = thumb,
-        track = track,
+        colors = sliderColors,
+        interactionSource = source,
+        thumb = thumb ?: {
+            SliderDefaults.Thumb(
+                interactionSource = source,
+                colors = sliderColors,
+                enabled = enabled,
+            )
+        },
+        track = track ?: { sliderState ->
+            SliderDefaults.Track(colors = sliderColors, enabled = enabled, sliderState = sliderState)
+        },
     )
 }

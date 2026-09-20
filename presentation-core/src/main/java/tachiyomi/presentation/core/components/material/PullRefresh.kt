@@ -13,14 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 /**
- * @param refreshing Whether the layout is currently refreshing
- * @param onRefresh Lambda which is invoked when a swipe to refresh gesture is completed.
- * @param enabled Whether the the layout should react to swipe gestures or not.
- * @param indicatorPadding Content padding for the indicator, to inset the indicator in if required.
- * @param content The content containing a vertically scrollable composable.
+ *
+ * `refreshing`: Whether the layout is currently refreshing
+ * `onRefresh`: Lambda which is invoked when a swipe to refresh gesture is completed.
+ * `enabled`: Whether the the layout should react to swipe gestures or not.
+ * `indicatorPadding`: Content padding for the indicator, to inset the indicator in if required.
+ * `content`: The content containing a vertically scrollable composable.
  */
 @Composable
-fun PullRefresh(
+public fun PullRefresh(
     refreshing: Boolean,
     enabled: Boolean,
     onRefresh: () -> Unit,

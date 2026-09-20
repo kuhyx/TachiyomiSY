@@ -13,22 +13,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+private val StartPanelMaxWidth: Dp = 450.dp
+
+/**
+ * Two side-by-side panels: the start one takes half the width up to 450 dp, the end one the rest.
+ *
+ * `contentWindowInsets`: insets the panels' outer edges keep clear of; none when `null`.
+ */
 @Composable
-fun TwoPanelBox(
+public fun TwoPanelBox(
     startContent: @Composable BoxScope.() -> Unit,
     endContent: @Composable BoxScope.() -> Unit,
     modifier: Modifier = Modifier,
-    contentWindowInsets: WindowInsets = WindowInsets(0),
+    contentWindowInsets: WindowInsets? = null,
 ) {
     val direction = LocalLayoutDirection.current
-    val padding = contentWindowInsets.asPaddingValues()
+    val padding = (contentWindowInsets ?: WindowInsets(0)).asPaddingValues()
     val startPadding = padding.calculateStartPadding(direction)
     val endPadding = padding.calculateEndPadding(direction)
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val width = maxWidth - startPadding - endPadding
-        val firstWidth = (width / 2).coerceAtMost(450.dp)
+        val firstWidth = (width / 2).coerceAtMost(StartPanelMaxWidth)
         val secondWidth = width - firstWidth
         Box(
             modifier = Modifier

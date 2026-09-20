@@ -7,9 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalLayoutDirection
 
+/** The sum of two paddings, side by side, in the current layout direction. */
 @Composable
 @ReadOnlyComposable
-operator fun PaddingValues.plus(other: PaddingValues): PaddingValues {
+public operator fun PaddingValues.plus(other: PaddingValues): PaddingValues {
     val layoutDirection = LocalLayoutDirection.current
     return PaddingValues(
         start = calculateStartPadding(layoutDirection) +

@@ -13,34 +13,43 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
+
+private val NavigationBarHeight: Dp = 80.dp
 
 /**
- * M3 Navbar with no horizontal spacer
+ * M3 Navbar with no horizontal spacer; nullable parameters take the Material defaults.
  *
  * @see [androidx.compose.material3.NavigationBar]
+ *
+ * `containerColor`: the bar's colour; Material's container colour when `Unspecified`.
+ * `contentColor`: the icon and label colour; the matching content colour when `Unspecified`.
+ * `tonalElevation`: the tonal elevation; Material's when `Unspecified`.
  */
 @Composable
-fun NavigationBar(
+public fun NavigationBar(
     modifier: Modifier = Modifier,
-    containerColor: Color = NavigationBarDefaults.containerColor,
-    contentColor: Color = MaterialTheme.colorScheme.contentColorFor(containerColor),
-    tonalElevation: Dp = NavigationBarDefaults.Elevation,
-    windowInsets: WindowInsets = NavigationBarDefaults.windowInsets,
+    containerColor: Color = Color.Unspecified,
+    contentColor: Color = Color.Unspecified,
+    tonalElevation: Dp = Dp.Unspecified,
+    windowInsets: WindowInsets? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
+    val container = containerColor.takeOrElse { NavigationBarDefaults.containerColor }
     androidx.compose.material3.Surface(
-        color = containerColor,
-        contentColor = contentColor,
-        tonalElevation = tonalElevation,
+        color = container,
+        contentColor = contentColor.takeOrElse { MaterialTheme.colorScheme.contentColorFor(container) },
+        tonalElevation = if (tonalElevation.isSpecified) tonalElevation else NavigationBarDefaults.Elevation,
         modifier = modifier,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .windowInsetsPadding(windowInsets)
-                .height(80.dp)
+                .windowInsetsPadding(windowInsets ?: NavigationBarDefaults.windowInsets)
+                .height(NavigationBarHeight)
                 .selectableGroup(),
             content = content,
         )

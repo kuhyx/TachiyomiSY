@@ -26,20 +26,26 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import tachiyomi.presentation.core.components.material.SECONDARY_ALPHA
 
+private const val SELECTED_ALPHA_DARK = 0.16f
+private const val SELECTED_ALPHA_LIGHT = 0.22f
+
+/** Tints the background with the secondary colour while [isSelected]. */
 @Composable
-fun Modifier.selectedBackground(isSelected: Boolean): Modifier {
+public fun Modifier.selectedBackground(isSelected: Boolean): Modifier {
     if (!isSelected) return this
-    val alpha = if (isSystemInDarkTheme()) 0.16f else 0.22f
+    val alpha = if (isSystemInDarkTheme()) SELECTED_ALPHA_DARK else SELECTED_ALPHA_LIGHT
     val color = MaterialTheme.colorScheme.secondary.copy(alpha = alpha)
     return this.drawBehind { drawRect(color) }
 }
 
-fun Modifier.secondaryItemAlpha(): Modifier = this.alpha(SECONDARY_ALPHA)
+/** Dims to the secondary-content opacity. */
+public fun Modifier.secondaryItemAlpha(): Modifier = this.alpha(SECONDARY_ALPHA)
 
-fun Modifier.clickableNoIndication(
+/** Click and long-click handling without a ripple. */
+public fun Modifier.clickableNoIndication(
     onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit,
-) = this.combinedClickable(
+): Modifier = this.combinedClickable(
     interactionSource = null,
     indication = null,
     onLongClick = onLongClick,
@@ -52,7 +58,7 @@ fun Modifier.clickableNoIndication(
  *
  * Naturally, the TextField should be set to single line only.
  */
-fun Modifier.runOnEnterKeyPressed(action: () -> Unit): Modifier = this.onPreviewKeyEvent {
+public fun Modifier.runOnEnterKeyPressed(action: () -> Unit): Modifier = this.onPreviewKeyEvent {
     when (it.key) {
         Key.Enter, Key.NumPadEnter -> {
             // Physical keyboards generate two event types:
@@ -66,7 +72,9 @@ fun Modifier.runOnEnterKeyPressed(action: () -> Unit): Modifier = this.onPreview
             }
         }
 
-        else -> false
+        else -> {
+            false
+        }
     }
 }
 
@@ -75,7 +83,7 @@ fun Modifier.runOnEnterKeyPressed(action: () -> Unit): Modifier = this.onPreview
  * to the element the first time it's composed.
  */
 @Composable
-fun Modifier.showSoftKeyboard(show: Boolean): Modifier {
+public fun Modifier.showSoftKeyboard(show: Boolean): Modifier {
     if (!show) return this
     val focusRequester = remember { FocusRequester() }
     var openKeyboard by rememberSaveable { mutableStateOf(show) }
@@ -93,7 +101,7 @@ fun Modifier.showSoftKeyboard(show: Boolean): Modifier {
  * keyboard is hidden.
  */
 @Composable
-fun Modifier.clearFocusOnSoftKeyboardHide(
+public fun Modifier.clearFocusOnSoftKeyboardHide(
     onFocusCleared: (() -> Unit)? = null,
 ): Modifier {
     var isFocused by remember { mutableStateOf(false) }

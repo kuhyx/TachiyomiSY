@@ -13,8 +13,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import tachiyomi.presentation.core.components.material.padding
 
+/** An outlined button with an icon over its [title], as used under an empty screen. */
 @Composable
-fun ActionButton(
+public fun ActionButton(
     title: String,
     icon: ImageVector,
     onClick: () -> Unit,

@@ -16,8 +16,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
+/** A toggle button showing [imageVector] over its [title], filled while [checked]. */
 @Composable
-fun IconToggleButton(
+public fun IconToggleButton(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     imageVector: ImageVector,

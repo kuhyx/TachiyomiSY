@@ -22,8 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import tachiyomi.presentation.core.theme.header
 
+/** A [heading] row that toggles its [content] open and closed; open from the start when [startExpanded]. */
 @Composable
-fun CollapsibleBox(
+public fun CollapsibleBox(
     heading: String,
     // SY -->
     startExpanded: Boolean = false,

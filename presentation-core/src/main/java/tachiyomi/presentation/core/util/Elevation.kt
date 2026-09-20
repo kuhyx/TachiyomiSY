@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.Dp
 /**
  * Animates the [Dp] value of [this] between [from] and [to] [Interaction]s, to [target]. The
  * [AnimationSpec] used depends on the values for [from] and [to], see
- * [ElevationDefaults.incomingAnimationSpecForInteraction] and
- * [ElevationDefaults.outgoingAnimationSpecForInteraction] for more details.
+ * [ElevationDefaults.incomingSpecFor] and
+ * [ElevationDefaults.outgoingSpecFor] for more details.
  *
  * @param target the [Dp] target elevation for this component, corresponding to the elevation
  * desired for the [to] state.
@@ -47,16 +47,16 @@ import androidx.compose.ui.unit.Dp
  * when this component is being pressed. `null` if this component is moving back to its default
  * state.
  */
-suspend fun Animatable<Dp, *>.animateElevation(
+public suspend fun Animatable<Dp, *>.animateElevation(
     target: Dp,
     from: Interaction? = null,
     to: Interaction? = null,
 ) {
     val spec = when {
         // Moving to a new state
-        to != null -> ElevationDefaults.incomingAnimationSpecForInteraction(to)
+        to != null -> ElevationDefaults.incomingSpecFor(to)
         // Moving to default, from a previous state
-        from != null -> ElevationDefaults.outgoingAnimationSpecForInteraction(from)
+        from != null -> ElevationDefaults.outgoingSpecFor(from)
         // Loading the initial state, or moving back to the baseline state from a disabled /
         // unknown state, so just snap to the final value.
         else -> null
@@ -80,7 +80,7 @@ private object ElevationDefaults {
      *
      * @param interaction the [Interaction] that is being animated to
      */
-    fun incomingAnimationSpecForInteraction(interaction: Interaction): AnimationSpec<Dp>? {
+    fun incomingSpecFor(interaction: Interaction): AnimationSpec<Dp>? {
         return when (interaction) {
             is PressInteraction.Press -> DefaultIncomingSpec
             is DragInteraction.Start -> DefaultIncomingSpec
@@ -96,7 +96,7 @@ private object ElevationDefaults {
      *
      * @param interaction the [Interaction] that is being animated away from
      */
-    fun outgoingAnimationSpecForInteraction(interaction: Interaction): AnimationSpec<Dp>? {
+    fun outgoingSpecFor(interaction: Interaction): AnimationSpec<Dp>? {
         return when (interaction) {
             is PressInteraction.Press -> DefaultOutgoingSpec
             is DragInteraction.Start -> DefaultOutgoingSpec
@@ -107,7 +107,7 @@ private object ElevationDefaults {
     }
 }
 
-private val OutgoingSpecEasing: Easing = CubicBezierEasing(0.40f, 0.00f, 0.60f, 1.00f)
+private val OutgoingSpecEasing: Easing = CubicBezierEasing(a = 0.40f, b = 0.00f, c = 0.60f, d = 1.00f)
 
 private val DefaultIncomingSpec = TweenSpec<Dp>(
     durationMillis = 120,

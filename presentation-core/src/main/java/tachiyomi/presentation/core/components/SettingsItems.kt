@@ -1,80 +1,57 @@
 package tachiyomi.presentation.core.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridScope
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.rounded.CheckBox
-import androidx.compose.material.icons.rounded.CheckBoxOutlineBlank
-import androidx.compose.material.icons.rounded.DisabledByDefault
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenu
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.StringResource
 import tachiyomi.core.common.preference.Preference
-import tachiyomi.core.common.preference.TriState
 import tachiyomi.core.common.preference.toggle
-import tachiyomi.presentation.core.components.material.DISABLED_ALPHA
-import tachiyomi.presentation.core.components.material.Slider
-import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.theme.header
 import tachiyomi.presentation.core.util.collectAsState
-import tachiyomi.presentation.core.util.secondaryItemAlpha
 
-object SettingsItemsPaddings {
-    val Horizontal = 24.dp
-    val Vertical = 10.dp
+private val SortIconSize: Dp = 24.dp
+
+/** The inset every settings row shares. */
+public object SettingsItemsPaddings {
+    /** Space between a row's content and the screen's side edges. */
+    public val Horizontal: Dp = 24.dp
+
+    /** Space above and below a row's content. */
+    public val Vertical: Dp = 10.dp
 }
 
+/** A section heading from a string resource. */
 @Composable
-fun HeadingItem(labelRes: StringResource) {
+public fun HeadingItem(labelRes: StringResource) {
     HeadingItem(stringResource(labelRes))
 }
 
+/** A section heading. */
 @Composable
-fun HeadingItem(text: String) {
+public fun HeadingItem(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.header,
@@ -87,11 +64,12 @@ fun HeadingItem(text: String) {
     )
 }
 
+/** A row with a primary-tinted [icon] before its [label]. */
 @Composable
-fun IconItem(label: String, icon: ImageVector, onClick: () -> Unit) {
+public fun IconItem(label: String, icon: ImageVector, onClick: () -> Unit) {
     BaseSettingsItem(
         label = label,
-        widget = {
+        content = {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -102,13 +80,10 @@ fun IconItem(label: String, icon: ImageVector, onClick: () -> Unit) {
     )
 }
 
+/** A sort row: an arrow shows the direction, or nothing while [sortDescending] is `null`. */
 @Composable
-fun SortItem(label: String, sortDescending: Boolean?, onClick: () -> Unit) {
-    val arrowIcon = when (sortDescending) {
-        true -> Icons.Default.ArrowDownward
-        false -> Icons.Default.ArrowUpward
-        null -> null
-    }
+public fun SortItem(label: String, sortDescending: Boolean?, onClick: () -> Unit) {
+    val arrowIcon = sortDescending?.let { if (it) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward }
 
     BaseSortItem(
         label = label,
@@ -117,11 +92,12 @@ fun SortItem(label: String, sortDescending: Boolean?, onClick: () -> Unit) {
     )
 }
 
+/** A sort row with an arbitrary [icon], or an icon-sized gap when it is `null`. */
 @Composable
-fun BaseSortItem(label: String, icon: ImageVector?, onClick: () -> Unit) {
+public fun BaseSortItem(label: String, icon: ImageVector?, onClick: () -> Unit) {
     BaseSettingsItem(
         label = label,
-        widget = {
+        content = {
             if (icon != null) {
                 Icon(
                     imageVector = icon,
@@ -129,28 +105,31 @@ fun BaseSortItem(label: String, icon: ImageVector?, onClick: () -> Unit) {
                     tint = MaterialTheme.colorScheme.primary,
                 )
             } else {
-                Spacer(modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.size(SortIconSize))
             }
         },
         onClick = onClick,
     )
 }
 
+/** A checkbox row bound to [pref]: tapping toggles it. */
 @Composable
-fun CheckboxItem(label: String, pref: Preference<Boolean>) {
+public fun CheckboxItem(label: String, pref: Preference<Boolean>) {
     val checked by pref.collectAsState()
+    val currentPref = rememberUpdatedState(pref)
     CheckboxItem(
         label = label,
         checked = checked,
-        onClick = { pref.toggle() },
+        onClick = { currentPref.value.toggle() },
     )
 }
 
+/** A checkbox row. */
 @Composable
-fun CheckboxItem(label: String, checked: Boolean, onClick: () -> Unit) {
+public fun CheckboxItem(label: String, checked: Boolean, onClick: () -> Unit) {
     BaseSettingsItem(
         label = label,
-        widget = {
+        content = {
             Checkbox(
                 checked = checked,
                 onCheckedChange = null,
@@ -160,11 +139,12 @@ fun CheckboxItem(label: String, checked: Boolean, onClick: () -> Unit) {
     )
 }
 
+/** A radio-button row. */
 @Composable
-fun RadioItem(label: String, selected: Boolean, onClick: () -> Unit) {
+public fun RadioItem(label: String, selected: Boolean, onClick: () -> Unit) {
     BaseSettingsItem(
         label = label,
-        widget = {
+        content = {
             RadioButton(
                 selected = selected,
                 onClick = null,
@@ -174,236 +154,9 @@ fun RadioItem(label: String, selected: Boolean, onClick: () -> Unit) {
     )
 }
 
+/** A row with a painted [icon], tinted primary while [selected]. */
 @Composable
-fun SliderItem(
-    value: Int,
-    valueRange: IntProgression,
-    label: String,
-    onChange: (Int) -> Unit,
-    steps: Int = with(valueRange) { (last - first) - 1 },
-    valueString: String = value.toString(),
-    labelStyle: TextStyle = MaterialTheme.typography.bodyMedium,
-    pillColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-) {
-    BaseSliderItem(
-        value = value,
-        valueRange = valueRange,
-        steps = steps,
-        title = label,
-        valueString = valueString,
-        onChange = onChange,
-        titleStyle = labelStyle,
-        pillColor = pillColor,
-        modifier = Modifier.padding(
-            horizontal = SettingsItemsPaddings.Horizontal,
-            vertical = SettingsItemsPaddings.Vertical,
-        ),
-    )
-}
-
-@Composable
-fun BaseSliderItem(
-    value: Int,
-    valueRange: IntProgression,
-    title: String,
-    onChange: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-    subtitle: String? = null,
-    steps: Int = with(valueRange) { (last - first) - 1 },
-    valueString: String = value.toString(),
-    titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
-    subtitleStyle: TextStyle = MaterialTheme.typography.bodySmall,
-    pillColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
-) {
-    val haptic = LocalHapticFeedback.current
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(modifier),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = titleStyle,
-                )
-                if (subtitle != null) {
-                    Text(
-                        text = subtitle,
-                        style = subtitleStyle,
-                        modifier = Modifier.secondaryItemAlpha(),
-                    )
-                }
-            }
-            Pill(
-                text = valueString,
-                style = MaterialTheme.typography.bodyMedium,
-                color = pillColor,
-            )
-        }
-        Slider(
-            value = value,
-            onValueChange = f@{
-                if (it == value) return@f
-                onChange(it)
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-            },
-            valueRange = valueRange,
-            steps = steps,
-        )
-    }
-}
-
-@Composable
-@PreviewLightDark
-fun SliderItemPreview() {
-    MaterialTheme(if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
-        var value by remember { mutableIntStateOf(0) }
-        Surface {
-            BaseSliderItem(
-                value = value,
-                valueRange = 0..10,
-                title = "Item per row",
-                valueString = if (value == 0) "Auto" else value.toString(),
-                onChange = { value = it },
-                modifier = Modifier.padding(
-                    horizontal = SettingsItemsPaddings.Horizontal,
-                    vertical = SettingsItemsPaddings.Vertical,
-                ),
-            )
-        }
-    }
-}
-
-@Composable
-fun SelectItem(
-    label: String,
-    options: Array<out Any?>,
-    selectedIndex: Int,
-    onSelect: (Int) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-    ) {
-        OutlinedTextField(
-            modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                .fillMaxWidth()
-                .padding(
-                    horizontal = SettingsItemsPaddings.Horizontal,
-                    vertical = SettingsItemsPaddings.Vertical,
-                ),
-            label = { Text(text = label) },
-            value = options[selectedIndex].toString(),
-            onValueChange = {},
-            enabled = false,
-            readOnly = true,
-            singleLine = true,
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded,
-                )
-            },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(
-                disabledTextColor = MaterialTheme.colorScheme.onSurface,
-            ),
-        )
-
-        ExposedDropdownMenu(
-            modifier = Modifier.exposedDropdownSize(),
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            options.forEachIndexed { index, text ->
-                DropdownMenuItem(
-                    text = { Text(text.toString()) },
-                    onClick = {
-                        onSelect(index)
-                        expanded = false
-                    },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun TriStateItem(
-    label: String,
-    state: TriState,
-    enabled: Boolean = true,
-    onClick: ((TriState) -> Unit)?,
-) {
-    Row(
-        modifier = Modifier
-            .clickable(
-                enabled = enabled && onClick != null,
-                onClick = {
-                    when (state) {
-                        TriState.DISABLED -> onClick?.invoke(TriState.ENABLED_IS)
-                        TriState.ENABLED_IS -> onClick?.invoke(TriState.ENABLED_NOT)
-                        TriState.ENABLED_NOT -> onClick?.invoke(TriState.DISABLED)
-                    }
-                },
-            )
-            .fillMaxWidth()
-            .padding(
-                horizontal = SettingsItemsPaddings.Horizontal,
-                vertical = SettingsItemsPaddings.Vertical,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.large),
-    ) {
-        val stateAlpha = if (enabled && onClick != null) 1f else DISABLED_ALPHA
-
-        Icon(
-            imageVector = when (state) {
-                TriState.DISABLED -> Icons.Rounded.CheckBoxOutlineBlank
-                TriState.ENABLED_IS -> Icons.Rounded.CheckBox
-                TriState.ENABLED_NOT -> Icons.Rounded.DisabledByDefault
-            },
-            contentDescription = null,
-            tint = if (!enabled || state == TriState.DISABLED) {
-                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = stateAlpha)
-            } else {
-                when (onClick) {
-                    null -> MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_ALPHA)
-                    else -> MaterialTheme.colorScheme.primary
-                }
-            },
-        )
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = stateAlpha),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-    }
-}
-
-@Composable
-fun TextItem(label: String, value: String, onChange: (String) -> Unit) {
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = SettingsItemsPaddings.Horizontal, vertical = 4.dp),
-        label = { Text(text = label) },
-        value = value,
-        onValueChange = onChange,
-        singleLine = true,
-    )
-}
-
-// SY -->
-@Composable
-fun IconItem(
+public fun IconItem(
     label: String,
     icon: Painter,
     selected: Boolean,
@@ -411,7 +164,7 @@ fun IconItem(
 ) {
     BaseSettingsItem(
         label = label,
-        widget = {
+        content = {
             Icon(
                 painter = icon,
                 contentDescription = label,
@@ -425,48 +178,13 @@ fun IconItem(
         onClick = onClick,
     )
 }
-// SY <--
 
+/** A clickable row: [content] at the start, [label] beside it. */
 @Composable
-fun SettingsChipRow(labelRes: StringResource, content: @Composable FlowRowScope.() -> Unit) {
-    Column {
-        HeadingItem(labelRes)
-        FlowRow(
-            modifier = Modifier.padding(
-                start = SettingsItemsPaddings.Horizontal,
-                top = 0.dp,
-                end = SettingsItemsPaddings.Horizontal,
-                bottom = SettingsItemsPaddings.Vertical,
-            ),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-            content = content,
-        )
-    }
-}
-
-@Composable
-fun SettingsIconGrid(labelRes: StringResource, content: LazyGridScope.() -> Unit) {
-    Column {
-        HeadingItem(labelRes)
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(128.dp),
-            modifier = Modifier.padding(
-                start = SettingsItemsPaddings.Horizontal,
-                end = SettingsItemsPaddings.Horizontal,
-                bottom = SettingsItemsPaddings.Vertical,
-            ),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-            content = content,
-        )
-    }
-}
-
-@Composable
-private fun BaseSettingsItem(
+internal fun BaseSettingsItem(
     label: String,
-    widget: @Composable RowScope.() -> Unit,
     onClick: () -> Unit,
+    content: @Composable RowScope.() -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -477,9 +195,9 @@ private fun BaseSettingsItem(
                 vertical = SettingsItemsPaddings.Vertical,
             ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalArrangement = Arrangement.spacedBy(SettingsItemsPaddings.Horizontal),
     ) {
-        widget(this)
+        content(this)
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,

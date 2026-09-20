@@ -37,7 +37,7 @@ import kotlin.math.ln
  */
 @Composable
 @NonRestartableComposable
-fun Surface(
+public fun Surface(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
@@ -104,8 +104,12 @@ private fun surfaceColorAtElevation(color: Color, elevation: Dp): Color {
     }
 }
 
+private const val ELEVATION_ALPHA_SCALE = 4.5f
+private const val ELEVATION_ALPHA_OFFSET = 2f
+private const val PERCENT = 100f
+
 private fun ColorScheme.surfaceColorAtElevation(elevation: Dp): Color {
     if (elevation == 0.dp) return surface
-    val alpha = ((4.5f * ln(elevation.value + 1)) + 2f) / 100f
+    val alpha = (ELEVATION_ALPHA_SCALE * ln(elevation.value + 1) + ELEVATION_ALPHA_OFFSET) / PERCENT
     return surfaceTint.copy(alpha = alpha).compositeOver(surface)
 }

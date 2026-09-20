@@ -14,8 +14,9 @@ import dev.icerock.moko.resources.StringResource
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
+/** A card in a lazy list with an optional heading from [titleRes] above it. */
 @Composable
-fun LazyItemScope.SectionCard(
+public fun LazyItemScope.SectionCard(
     titleRes: StringResource? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
