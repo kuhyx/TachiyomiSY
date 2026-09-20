@@ -8,6 +8,10 @@ import android.net.Uri
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.data.backup.restore.BackupRestoreJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.clearQueue
+import eu.kanade.tachiyomi.data.download.deleteChapters
+import eu.kanade.tachiyomi.data.download.pauseDownloads
+import eu.kanade.tachiyomi.data.download.startDownloads
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.sync.SyncDataJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateDownloadJob

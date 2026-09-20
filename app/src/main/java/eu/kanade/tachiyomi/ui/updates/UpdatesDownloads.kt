@@ -3,7 +3,11 @@ package eu.kanade.tachiyomi.ui.updates
 import androidx.compose.runtime.getValue
 import cafe.adriel.voyager.core.model.screenModelScope
 import eu.kanade.presentation.manga.components.ChapterDownloadAction
+import eu.kanade.tachiyomi.data.download.cancelQueuedDownloads
+import eu.kanade.tachiyomi.data.download.getQueuedDownloadOrNull
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.download.startDownloadNow
+import eu.kanade.tachiyomi.data.download.startDownloads
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import tachiyomi.core.common.util.lang.launchNonCancellable

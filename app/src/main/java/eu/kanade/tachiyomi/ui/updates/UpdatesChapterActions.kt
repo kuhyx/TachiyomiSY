@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.updates
 
 import androidx.compose.runtime.getValue
 import cafe.adriel.voyager.core.model.screenModelScope
+import eu.kanade.tachiyomi.data.download.deleteChapters
 import eu.kanade.tachiyomi.ui.updates.UpdatesScreenModel.Dialog
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update

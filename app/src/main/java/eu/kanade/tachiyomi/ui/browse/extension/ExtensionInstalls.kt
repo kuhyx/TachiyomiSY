@@ -1,7 +1,12 @@
 package eu.kanade.tachiyomi.ui.browse.extension
 
 import cafe.adriel.voyager.core.model.screenModelScope
+import eu.kanade.tachiyomi.extension.cancelInstallUpdateExtension
+import eu.kanade.tachiyomi.extension.installExtension
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.extension.trust
+import eu.kanade.tachiyomi.extension.uninstallExtension
+import eu.kanade.tachiyomi.extension.updateExtension
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import tachiyomi.core.common.util.lang.launchIO

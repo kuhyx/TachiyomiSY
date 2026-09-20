@@ -10,6 +10,8 @@ import androidx.annotation.CallSuper
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.InstallStep
+import eu.kanade.tachiyomi.extension.setInstalling
+import eu.kanade.tachiyomi.extension.updateInstallStep
 import uy.kohesive.injekt.injectLazy
 import java.util.Collections
 import kotlin.concurrent.atomics.AtomicReference

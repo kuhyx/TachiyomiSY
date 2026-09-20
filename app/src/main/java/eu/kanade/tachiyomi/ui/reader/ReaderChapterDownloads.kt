@@ -3,6 +3,10 @@ package eu.kanade.tachiyomi.ui.reader
 import androidx.lifecycle.viewModelScope
 import eu.kanade.tachiyomi.data.database.models.toDomainChapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.cancelQueuedDownloads
+import eu.kanade.tachiyomi.data.download.deletePendingChapters
+import eu.kanade.tachiyomi.data.download.enqueueChaptersToDelete
+import eu.kanade.tachiyomi.data.download.getQueuedDownloadOrNull
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter

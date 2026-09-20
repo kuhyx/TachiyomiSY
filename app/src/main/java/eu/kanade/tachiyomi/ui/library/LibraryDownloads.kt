@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.library
 import androidx.compose.ui.util.fastAny
 import eu.kanade.core.util.fastFilterNot
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.getQueuedDownloadOrNull
 import exh.source.MERGED_SOURCE_ID
 import tachiyomi.domain.chapter.interactor.GetBookmarkedChaptersByMangaId
 import tachiyomi.domain.history.interactor.GetNextChapters

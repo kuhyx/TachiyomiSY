@@ -4,6 +4,7 @@ import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
 import cafe.adriel.voyager.core.model.screenModelScope
 import eu.kanade.presentation.manga.DownloadAction
+import eu.kanade.tachiyomi.data.download.deleteManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.all.MergedSource
 import eu.kanade.tachiyomi.util.removeCovers

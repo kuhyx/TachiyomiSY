@@ -26,6 +26,7 @@ import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.util.formattedMessage
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.getQueuedDownloadOrNull
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.PagePreviewSource
 import eu.kanade.tachiyomi.source.Source

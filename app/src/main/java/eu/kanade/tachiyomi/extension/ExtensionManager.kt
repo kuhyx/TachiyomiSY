@@ -2,14 +2,10 @@ package eu.kanade.tachiyomi.extension
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import androidx.core.content.ContextCompat
 import eu.kanade.domain.extension.interactor.TrustExtension
 import eu.kanade.domain.source.service.SourcePreferences
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.api.ExtensionApi
-import eu.kanade.tachiyomi.extension.api.ExtensionUpdateNotifier
 import eu.kanade.tachiyomi.extension.model.Extension
-import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.extension.util.ExtensionInstallReceiver
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
@@ -17,17 +13,12 @@ import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.util.system.toast
 import exh.log.xLogD
 import exh.source.BlacklistedSources
-import exh.source.EH_SOURCE_ID
-import exh.source.EXH_SOURCE_ID
-import exh.source.MERGED_SOURCE_ID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import logcat.LogPriority
@@ -47,9 +38,9 @@ import java.util.Locale
  * loaded.
  */
 internal class ExtensionManager(
-    private val context: Context,
-    private val preferences: SourcePreferences = Injekt.get(),
-    private val trustExtension: TrustExtension = Injekt.get(),
+    internal val context: Context,
+    internal val preferences: SourcePreferences = Injekt.get(),
+    internal val trustExtension: TrustExtension = Injekt.get(),
 ) {
 
     val scope = CoroutineScope(SupervisorJob())
@@ -61,21 +52,21 @@ internal class ExtensionManager(
     private val api = ExtensionApi()
 
     // The installer which installs, updates and uninstalls the extensions.
-    private val installer by lazy { ExtensionInstaller(context) }
+    internal val installer by lazy { ExtensionInstaller(context) }
 
-    private val iconMap = mutableMapOf<String, Drawable>()
+    internal val iconMap = mutableMapOf<String, Drawable>()
 
-    private val installedExtensionMapFlow = MutableStateFlow(emptyMap<String, Extension.Installed>())
+    internal val installedExtensionMapFlow = MutableStateFlow(emptyMap<String, Extension.Installed>())
     val installedExtensionsFlow = installedExtensionMapFlow.mapExtensions(scope)
 
-    private val availableExtensionMapFlow = MutableStateFlow(emptyMap<String, Extension.Available>())
+    internal val availableExtensionMapFlow = MutableStateFlow(emptyMap<String, Extension.Available>())
 
     // SY -->
     val availableExtensionsFlow = availableExtensionMapFlow.map { it.filterNotBlacklisted().values.toList() }
         .stateIn(scope, SharingStarted.Lazily, availableExtensionMapFlow.value.values.toList())
     // SY <--
 
-    private val untrustedExtensionMapFlow = MutableStateFlow(emptyMap<String, Extension.Untrusted>())
+    internal val untrustedExtensionMapFlow = MutableStateFlow(emptyMap<String, Extension.Untrusted>())
     val untrustedExtensionsFlow = untrustedExtensionMapFlow.mapExtensions(scope)
 
     init {
@@ -85,43 +76,7 @@ internal class ExtensionManager(
 
     private var subLanguagesEnabledOnFirstRun = preferences.enabledLanguages.isSet()
 
-    private var availableExtensionsSourcesData: Map<Long, StubSource> = emptyMap()
-
-    fun getExtensionPackage(sourceId: Long): String? {
-        return installedExtensionsFlow.value.find { extension ->
-            extension.sources.any { it.id == sourceId }
-        }
-            ?.pkgName
-    }
-
-    fun getExtensionPackageAsFlow(sourceId: Long): Flow<String?> {
-        return installedExtensionsFlow.map { extensions ->
-            extensions.find { extension ->
-                extension.sources.any { it.id == sourceId }
-            }
-                ?.pkgName
-        }
-    }
-
-    fun getAppIconForSource(sourceId: Long): Drawable? {
-        val pkgName = getExtensionPackage(sourceId)
-
-        if (pkgName != null) {
-            return iconMap[pkgName] ?: iconMap.getOrPut(pkgName) {
-                ExtensionLoader.getExtensionPackageInfo(context, pkgName)!!.applicationInfo!!
-                    .loadIcon(context.packageManager)
-            }
-        }
-
-        // SY -->
-        return when (sourceId) {
-            EH_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_ehentai_source)
-            EXH_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_exhentai_source)
-            MERGED_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_merged_source)
-            else -> null
-        }
-        // SY <--
-    }
+    internal var availableExtensionsSourcesData: Map<Long, StubSource> = emptyMap()
 
     private fun setupAvailableSourcesMap(extensions: List<Extension.Available>) {
         if (extensions.isEmpty()) return
@@ -129,8 +84,6 @@ internal class ExtensionManager(
             .flatMap { ext -> ext.sources.map { it.toStubSource() } }
             .associateBy { it.id }
     }
-
-    fun getSourceData(id: Long) = availableExtensionsSourcesData[id]
 
     // Loads and registers the installed extensions.
     private fun initExtensions() {
@@ -167,7 +120,7 @@ internal class ExtensionManager(
         }
     }
 
-    private fun Extension.isBlacklisted(blacklistEnabled: Boolean = preferences.enableSourceBlacklist.get()): Boolean =
+    internal fun Extension.isBlacklisted(blacklistEnabled: Boolean = preferences.enableSourceBlacklist.get()): Boolean =
         pkgName in BlacklistedSources.BLACKLISTED_EXTENSIONS && blacklistEnabled
     // EXH <--
 
@@ -261,107 +214,6 @@ internal class ExtensionManager(
     }
 
     /**
-     * Returns a flow of the installation process for the given extension. It will complete
-     * once the extension is installed or throws an error. The process will be canceled if
-     * unsubscribed before its completion.
-     *
-     * @param extension The extension to be installed.
-     */
-    fun installExtension(extension: Extension.Available): Flow<InstallStep> =
-        installer.downloadAndInstall(extension.apkUrl, extension)
-
-    /**
-     * Returns a flow of the installation process for the given extension. It will complete
-     * once the extension is updated or throws an error. The process will be canceled if
-     * unsubscribed before its completion.
-     *
-     * @param extension The extension to be updated.
-     */
-    fun updateExtension(extension: Extension.Installed): Flow<InstallStep> {
-        val availableExt = availableExtensionMapFlow.value[extension.pkgName] ?: return emptyFlow()
-        return installExtension(availableExt)
-    }
-
-    fun cancelInstallUpdateExtension(extension: Extension) {
-        installer.cancelInstall(extension.pkgName)
-    }
-
-    /**
-     * Sets to "installing" status of an extension installation.
-     *
-     * @param downloadId The id of the download.
-     */
-    fun setInstalling(downloadId: Long) {
-        installer.updateInstallStep(downloadId, InstallStep.Installing)
-    }
-
-    fun updateInstallStep(downloadId: Long, step: InstallStep) {
-        installer.updateInstallStep(downloadId, step)
-    }
-
-    /**
-     * Uninstalls the extension that matches the given package name.
-     *
-     * @param extension The extension to uninstall.
-     */
-    fun uninstallExtension(extension: Extension) {
-        installer.uninstallApk(extension.pkgName)
-    }
-
-    /**
-     * Adds the given extension to the list of trusted extensions. It also loads in background the
-     * now trusted extensions.
-     *
-     * @param extension the extension to trust
-     */
-    suspend fun trust(extension: Extension.Untrusted) {
-        untrustedExtensionMapFlow.value[extension.pkgName] ?: return
-
-        trustExtension.trust(extension.pkgName, extension.versionCode, extension.signatureHash)
-
-        untrustedExtensionMapFlow.value -= extension.pkgName
-
-        ExtensionLoader.loadExtensionFromPkgName(context, extension.pkgName)
-            .let { it as? LoadResult.Success }
-            ?.let { registerNewExtension(it.extension) }
-    }
-
-    // Registers the given extension in this and the source managers.
-    // @param extension The extension to be registered.
-    internal fun registerNewExtension(extension: Extension.Installed) {
-        // SY -->
-        if (extension.isBlacklisted()) {
-            xLogD("Removing blacklisted extension: (name: String, pkgName: %s)!", extension.name, extension.pkgName)
-            return
-        }
-        // SY <--
-
-        installedExtensionMapFlow.value += extension
-    }
-
-    // Registers the given updated extension in this and the source managers previously removing
-    // the outdated ones.
-    // @param extension The extension to be registered.
-    internal fun registerUpdatedExtension(extension: Extension.Installed) {
-        // SY -->
-        if (extension.isBlacklisted()) {
-            xLogD("Removing blacklisted extension: (name: %s, pkgName: %s)!", extension.name, extension.pkgName)
-            return
-        }
-        // SY <--
-
-        installedExtensionMapFlow.value += extension
-    }
-
-    // Unregisters the extension in this and the source managers given its package name. Note this
-    // method is called for every uninstalled application in the system.
-    // @param pkgName The package name of the uninstalled application.
-    internal fun unregisterExtension(pkgName: String) {
-        installedExtensionMapFlow.value -= pkgName
-        untrustedExtensionMapFlow.value -= pkgName
-    }
-
-    /**
      * Listener which receives events of the extensions being installed, updated or removed.
      */
     private inner class InstallationListener : ExtensionInstallReceiver.Listener {
@@ -406,15 +258,7 @@ internal class ExtensionManager(
         return availableExt.versionCode > versionCode || availableExt.libVersion > libVersion
     }
 
-    internal fun updatePendingUpdatesCount() {
-        val pendingUpdateCount = installedExtensionMapFlow.value.values.count { it.hasUpdate }
-        preferences.extensionUpdatesCount.set(pendingUpdateCount)
-        if (pendingUpdateCount == 0) {
-            ExtensionUpdateNotifier(context).dismiss()
-        }
-    }
-
-    private operator fun <T : Extension> Map<String, T>.plus(extension: T) = plus(extension.pkgName to extension)
+    internal operator fun <T : Extension> Map<String, T>.plus(extension: T) = plus(extension.pkgName to extension)
 
     private fun <T : Extension> StateFlow<Map<String, T>>.mapExtensions(scope: CoroutineScope): StateFlow<List<T>> =
         map { it.values.toList() }.stateIn(scope, SharingStarted.Lazily, value.values.toList())

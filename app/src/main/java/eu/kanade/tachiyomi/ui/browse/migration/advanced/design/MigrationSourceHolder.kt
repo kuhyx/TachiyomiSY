@@ -5,6 +5,7 @@ import android.view.View
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.databinding.MigrationSourceItemBinding
 import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.extension.getAppIconForSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import exh.util.capitalize
 import uy.kohesive.injekt.Injekt

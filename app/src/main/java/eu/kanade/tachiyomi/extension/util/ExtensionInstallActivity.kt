@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.InstallStep
+import eu.kanade.tachiyomi.extension.updateInstallStep
 import eu.kanade.tachiyomi.util.system.hasMiuiPackageInstaller
 import eu.kanade.tachiyomi.util.system.toast
 import uy.kohesive.injekt.Injekt

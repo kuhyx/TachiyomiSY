@@ -8,7 +8,13 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import eu.kanade.presentation.manga.DownloadAction
 import eu.kanade.presentation.manga.components.ChapterDownloadAction
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.cancelQueuedDownloads
+import eu.kanade.tachiyomi.data.download.deleteChapters
+import eu.kanade.tachiyomi.data.download.deleteManga
+import eu.kanade.tachiyomi.data.download.getQueuedDownloadOrNull
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.download.startDownloadNow
+import eu.kanade.tachiyomi.data.download.startDownloads
 import eu.kanade.tachiyomi.source.online.all.MergedSource
 import exh.source.isEhBasedManga
 import kotlinx.coroutines.flow.catch
