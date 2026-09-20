@@ -61,7 +61,7 @@ internal interface AssistContentScreen {
 }
 
 @Composable
-internal fun DefaultNavigatorScreenTransition(
+internal fun DefaultScreenTransition(
     navigator: Navigator,
     modifier: Modifier = Modifier,
 ) {

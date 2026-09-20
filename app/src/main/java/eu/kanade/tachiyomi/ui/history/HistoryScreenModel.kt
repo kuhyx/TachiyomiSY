@@ -151,7 +151,7 @@ internal class HistoryScreenModel(
         }
     }
 
-    fun moveMangaToCategoriesAndAddToLibrary(manga: Manga, categories: List<Long>) {
+    fun addToLibraryInCategories(manga: Manga, categories: List<Long>) {
         moveMangaToCategory(manga.id, categories)
         if (manga.favorite) return
 

@@ -20,7 +20,7 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import eu.kanade.core.preference.asState
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.updates.UpdateScreen
-import eu.kanade.presentation.updates.UpdatesDeleteConfirmationDialog
+import eu.kanade.presentation.updates.UpdatesDeleteConfirmDialog
 import eu.kanade.presentation.updates.UpdatesFilterDialog
 import eu.kanade.presentation.util.Tab
 import eu.kanade.tachiyomi.R
@@ -102,7 +102,7 @@ internal data object UpdatesTab : Tab {
         val onDismissDialog = { screenModel.setDialog(null) }
         when (val dialog = state.dialog) {
             is UpdatesScreenModel.Dialog.DeleteConfirmation -> {
-                UpdatesDeleteConfirmationDialog(
+                UpdatesDeleteConfirmDialog(
                     onDismissRequest = onDismissDialog,
                     onConfirm = { screenModel.deleteChapters(dialog.toDelete) },
                 )

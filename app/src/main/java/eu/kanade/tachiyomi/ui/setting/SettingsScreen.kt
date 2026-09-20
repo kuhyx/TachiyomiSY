@@ -17,7 +17,7 @@ import eu.kanade.presentation.more.settings.screen.SettingsDataScreen
 import eu.kanade.presentation.more.settings.screen.SettingsMainScreen
 import eu.kanade.presentation.more.settings.screen.SettingsTrackingScreen
 import eu.kanade.presentation.more.settings.screen.about.AboutScreen
-import eu.kanade.presentation.util.DefaultNavigatorScreenTransition
+import eu.kanade.presentation.util.DefaultScreenTransition
 import eu.kanade.presentation.util.LocalBackPress
 import eu.kanade.presentation.util.Screen
 import eu.kanade.presentation.util.isTabletUi
@@ -50,7 +50,7 @@ internal class SettingsScreen(
                     }
                 }
                 CompositionLocalProvider(LocalBackPress provides pop) {
-                    DefaultNavigatorScreenTransition(navigator = it)
+                    DefaultScreenTransition(navigator = it)
                 }
             }
         } else {
@@ -73,7 +73,7 @@ internal class SettingsScreen(
                             SettingsMainScreen.Content(twoPane = true)
                         }
                     },
-                    endContent = { DefaultNavigatorScreenTransition(navigator = it) },
+                    endContent = { DefaultScreenTransition(navigator = it) },
                 )
             }
         }

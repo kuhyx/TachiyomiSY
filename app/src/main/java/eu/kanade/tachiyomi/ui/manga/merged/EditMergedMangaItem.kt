@@ -6,7 +6,6 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.EditMergedSettingsItemBinding
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MergedMangaReference
 
@@ -15,8 +14,6 @@ internal class EditMergedMangaItem(
     val mergedMangaReference: MergedMangaReference,
 ) : AbstractFlexibleItem<EditMergedMangaHolder>() {
 
-    lateinit var binding: EditMergedSettingsItemBinding
-
     override fun getLayoutRes(): Int = R.layout.edit_merged_settings_item
 
     override fun isDraggable(): Boolean = true
@@ -24,10 +21,7 @@ internal class EditMergedMangaItem(
     override fun createViewHolder(
         view: View,
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-    ): EditMergedMangaHolder {
-        binding = EditMergedSettingsItemBinding.bind(view)
-        return EditMergedMangaHolder(binding.root, adapter as EditMergedMangaAdapter)
-    }
+    ): EditMergedMangaHolder = EditMergedMangaHolder(view, adapter as EditMergedMangaAdapter)
 
     override fun bindViewHolder(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>?,

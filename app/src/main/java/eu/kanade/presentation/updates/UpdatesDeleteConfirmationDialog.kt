@@ -8,7 +8,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-internal fun UpdatesDeleteConfirmationDialog(
+internal fun UpdatesDeleteConfirmDialog(
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
 ) {

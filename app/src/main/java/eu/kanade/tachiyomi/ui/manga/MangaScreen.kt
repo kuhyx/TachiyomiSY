@@ -250,7 +250,7 @@ internal class MangaScreen(
                     onDismissRequest = onDismissRequest,
                     onEditCategories = { navigator.push(CategoryScreen()) },
                     onConfirm = { include, _ ->
-                        screenModel.moveMangaToCategoriesAndAddToLibrary(dialog.manga, include)
+                        screenModel.addToLibraryInCategories(dialog.manga, include)
                     },
                 )
             }

@@ -49,13 +49,13 @@ import eu.kanade.presentation.components.WarningBanner
 import eu.kanade.presentation.manga.components.DotSeparatorNoSpaceText
 import eu.kanade.presentation.more.settings.screen.browse.ExtensionStoresScreen
 import eu.kanade.presentation.util.animateItemFastScroll
-import eu.kanade.presentation.util.rememberRequestPackageInstallsPermissionState
+import eu.kanade.presentation.util.rememberInstallPermissionState
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.ui.browse.extension.ExtensionUiModel
 import eu.kanade.tachiyomi.ui.browse.extension.ExtensionsScreenModel
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import eu.kanade.tachiyomi.util.system.launchRequestPackageInstallsPermission
+import eu.kanade.tachiyomi.util.system.launchInstallPermissionRequest
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
@@ -150,7 +150,7 @@ private fun ExtensionContent(
 ) {
     val context = LocalContext.current
     var trustState by remember { mutableStateOf<Extension.Untrusted?>(null) }
-    val installGranted = rememberRequestPackageInstallsPermissionState(initialValue = true)
+    val installGranted = rememberInstallPermissionState(initialValue = true)
 
     FastScrollLazyColumn(
         contentPadding = contentPadding + topSmallPaddingValues,
@@ -160,7 +160,7 @@ private fun ExtensionContent(
                 WarningBanner(
                     textRes = MR.strings.ext_permission_install_apps_warning,
                     modifier = Modifier.clickable {
-                        context.launchRequestPackageInstallsPermission()
+                        context.launchInstallPermissionRequest()
                     },
                 )
             }

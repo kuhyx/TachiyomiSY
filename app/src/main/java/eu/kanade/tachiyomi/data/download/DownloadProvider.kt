@@ -97,6 +97,7 @@ internal class DownloadProvider(
      *
      * @param chapterName the name of the chapter to query.
      * @param chapterScanlator scanlator of the chapter to query
+     * @param chapterUrl url of the chapter to query.
      * @param mangaTitle the title of the manga to query.
      * @param source the source of the chapter.
      */
@@ -185,6 +186,8 @@ internal class DownloadProvider(
      * @param chapterName the name of the chapter to query.
      * @param chapterScanlator scanlator of the chapter to query.
      * @param chapterUrl url of the chapter to query.
+     * @param disallowNonAsciiFilenames whether non-ASCII characters are stripped from the name.
+     * @param includeChapterUrlHash whether a hash of the url is appended to the name.
      */
     fun getChapterDirName(
         chapterName: String,
@@ -260,7 +263,9 @@ internal class DownloadProvider(
     /**
      * Returns valid downloaded chapter directory names.
      *
-     * @param chapter the domain chapter object.
+     * @param chapterName the name of the chapter.
+     * @param chapterScanlator scanlator of the chapter.
+     * @param chapterUrl url of the chapter.
      */
     fun getValidChapterDirNames(chapterName: String, chapterScanlator: String?, chapterUrl: String): List<String> {
         val chapterDirName = getChapterDirName(chapterName, chapterScanlator, chapterUrl)

@@ -66,7 +66,8 @@ internal class Bangumi(id: Long) : BaseTracker(id, "Bangumi") {
     override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? = api.getMangaMetadata(track)
 
     override suspend fun refresh(track: Track): Track {
-        val remoteStatusTrack = api.statusLibManga(track, getUsername()) ?: throw NoSuchElementException("Could not find manga")
+        val remoteStatusTrack = api.statusLibManga(track, getUsername())
+            ?: throw NoSuchElementException("Could not find manga")
         track.copyPersonalFrom(remoteStatusTrack)
         return track
     }

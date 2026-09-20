@@ -36,7 +36,7 @@ internal class AppUpdateNotifier(private val context: Context) {
 
     @SuppressLint("LaunchActivityFromNotification")
     fun promptUpdate(release: Release) {
-        val updateIntent = NotificationReceiver.downloadAppUpdatePendingBroadcast(
+        val updateIntent = NotificationReceiver.downloadAppUpdateBroadcast(
             context,
             release.getDownloadLink(),
             release.version,
@@ -89,7 +89,7 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_close_24dp,
                 context.stringResource(MR.strings.action_cancel),
-                NotificationReceiver.cancelDownloadAppUpdatePendingBroadcast(context),
+                NotificationReceiver.cancelAppUpdateBroadcast(context),
             )
         }
         notificationBuilder.show()
@@ -133,7 +133,7 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_close_24dp,
                 context.stringResource(MR.strings.action_cancel),
-                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_APP_UPDATE_PROMPT),
+                NotificationReceiver.dismissNotificationBroadcast(context, Notifications.ID_APP_UPDATE_PROMPT),
             )
         }
         notificationBuilder.show(Notifications.ID_APP_UPDATE_PROMPT)
@@ -155,12 +155,12 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_refresh_24dp,
                 context.stringResource(MR.strings.action_retry),
-                NotificationReceiver.downloadAppUpdatePendingBroadcast(context, url),
+                NotificationReceiver.downloadAppUpdateBroadcast(context, url),
             )
             addAction(
                 R.drawable.ic_close_24dp,
                 context.stringResource(MR.strings.action_cancel),
-                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_APP_UPDATE_ERROR),
+                NotificationReceiver.dismissNotificationBroadcast(context, Notifications.ID_APP_UPDATE_ERROR),
             )
         }
         notificationBuilder.show(Notifications.ID_APP_UPDATE_ERROR)

@@ -49,11 +49,12 @@ internal class EHentaiUpdateHelper(context: Context) {
     private val insertFavoriteEntryAlternative: InsertFavoriteEntryAlternative by injectLazy()
 
     /**
+     * @param sourceId the source the chapters were fetched from
      * @param chapters Cannot be an empty list!
      *
      * @return Triple<Accepted, Discarded, HasNew>
      */
-    suspend fun findAcceptedRootAndDiscardOthers(
+    suspend fun acceptRootAndDiscardOthers(
         sourceId: Long,
         chapters: List<Chapter>,
     ): Triple<ChapterChain, List<ChapterChain>, List<Chapter>> {

@@ -108,7 +108,7 @@ internal class ExtensionManager(
 
         if (pkgName != null) {
             return iconMap[pkgName] ?: iconMap.getOrPut(pkgName) {
-                ExtensionLoader.getExtensionPackageInfoFromPkgName(context, pkgName)!!.applicationInfo!!
+                ExtensionLoader.getExtensionPackageInfo(context, pkgName)!!.applicationInfo!!
                     .loadIcon(context.packageManager)
             }
         }
@@ -123,7 +123,7 @@ internal class ExtensionManager(
         // SY <--
     }
 
-    private fun setupAvailableExtensionsSourcesDataMap(extensions: List<Extension.Available>) {
+    private fun setupAvailableSourcesMap(extensions: List<Extension.Available>) {
         if (extensions.isEmpty()) return
         availableExtensionsSourcesData = extensions
             .flatMap { ext -> ext.sources.map { it.toStubSource() } }
@@ -187,8 +187,8 @@ internal class ExtensionManager(
         enableAdditionalSubLanguages(extensions)
 
         availableExtensionMapFlow.value = extensions.associateBy { it.pkgName }
-        updatedInstalledExtensionsStatuses(extensions)
-        setupAvailableExtensionsSourcesDataMap(extensions)
+        updateInstalledStatuses(extensions)
+        setupAvailableSourcesMap(extensions)
     }
 
     // Enables the additional sub-languages in the app first run. This addresses
@@ -220,7 +220,7 @@ internal class ExtensionManager(
 
     // Sets the update field of the installed extensions with the given [availableExtensions].
     // @param availableExtensions The list of extensions given by the [api].
-    private fun updatedInstalledExtensionsStatuses(availableExtensions: List<Extension.Available>) {
+    private fun updateInstalledStatuses(availableExtensions: List<Extension.Available>) {
         if (availableExtensions.isEmpty()) {
             preferences.extensionUpdatesCount.set(0)
             return

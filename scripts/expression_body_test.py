@@ -50,3 +50,12 @@ def test_main_applies_findings_and_reports_manual(tmp_path: Path, capsys: pytest
 
 def test_main_usage() -> None:
     assert main(["expression_body.py"]) == 2
+
+
+def test_multiline_header(tmp_path: Path) -> None:
+    source = tmp_path / "A.kt"
+    source.write_text("fun f(\n    a: Int,\n): Int {\n    return a + 1\n}\n")
+    log = tmp_path / "detekt.log"
+    log.write_text(f"{source}:4:5: Use expression body. [ExpressionBodySyntax]\n")
+    assert main(["expression_body.py", str(log)]) == 0
+    assert source.read_text() == "fun f(\n    a: Int,\n): Int = a + 1\n"

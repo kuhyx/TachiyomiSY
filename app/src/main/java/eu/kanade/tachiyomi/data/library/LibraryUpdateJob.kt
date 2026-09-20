@@ -204,6 +204,13 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
 
     // Adds list of manga to be updated.
     // @param categoryId the ID of the category to update, or -1 if no category specified.
+    // SY --> whether this run covers every category instead of a single group
+    private fun updatesWholeLibrary(group: Int, groupLibraryUpdateType: GroupLibraryMode): Boolean =
+        group == LibraryGroup.BY_DEFAULT ||
+            groupLibraryUpdateType == GroupLibraryMode.GLOBAL ||
+            (groupLibraryUpdateType == GroupLibraryMode.ALL_BUT_UNGROUPED && group == LibraryGroup.UNGROUPED)
+    // SY <--
+
     private suspend fun addMangaToQueue(categoryId: Long, group: Int, groupExtra: String?) {
         val libraryManga = getLibraryManga.await()
         // SY -->
@@ -213,11 +220,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
         val listToUpdate = if (categoryId != -1L) {
             libraryManga.filter { categoryId in it.categories }
             // SY -->
-        } else if (
-            group == LibraryGroup.BY_DEFAULT ||
-            groupLibraryUpdateType == GroupLibraryMode.GLOBAL ||
-            (groupLibraryUpdateType == GroupLibraryMode.ALL_BUT_UNGROUPED && group == LibraryGroup.UNGROUPED)
-        ) {
+        } else if (updatesWholeLibrary(group, groupLibraryUpdateType)) {
             // SY <--
             val includedCategories = libraryPreferences.updateCategories.get().map { it.toLong() }.toSet()
             val excludedCategories = libraryPreferences.updateCategoriesExclude.get().map { it.toLong() }.toSet()
@@ -315,7 +318,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
             }
             .sortedBy { it.manga.title }
 
-        notifier.showQueueSizeWarningNotificationIfNeeded(mangaToUpdate)
+        notifier.showQueueSizeWarningIfNeeded(mangaToUpdate)
 
         if (skippedUpdates.isNotEmpty()) {
             // Follow-up: surface skipped reasons to user? (https://github.com/kuhyx/TachiyomiSY/issues/16)

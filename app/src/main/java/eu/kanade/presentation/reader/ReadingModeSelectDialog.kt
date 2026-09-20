@@ -78,7 +78,7 @@ private fun DialogContent(
 
 @PreviewLightDark
 @Composable
-internal fun ReadingModeDialogContentPreview() {
+internal fun ReadingModeContentPreview() {
     TachiyomiPreviewTheme {
         Surface {
             Column {

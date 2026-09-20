@@ -80,7 +80,7 @@ private fun DialogContent(
 
 @PreviewLightDark
 @Composable
-internal fun OrientationDialogContentPreview() {
+internal fun OrientationContentPreview() {
     TachiyomiPreviewTheme {
         Surface {
             Column {

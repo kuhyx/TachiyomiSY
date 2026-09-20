@@ -18,7 +18,7 @@ import exh.metadata.metadata.base.RaisedTag
 import exh.source.DelegatedHttpSource
 import exh.util.dropBlank
 import exh.util.trimAll
-import exh.util.urlImportFetchSearchMangaSuspend
+import exh.util.urlImportSearchManga
 import org.jsoup.nodes.Document
 import rx.Observable
 import tachiyomi.core.common.util.lang.runAsObservable
@@ -55,7 +55,7 @@ internal class Pururin(delegate: HttpSource, val context: Context) :
         } else {
             query
         }
-        return urlImportFetchSearchMangaSuspend(context, newQuery) {
+        return urlImportSearchManga(context, newQuery) {
             super<DelegatedHttpSource>.getSearchManga(page, query, filters)
         }
     }

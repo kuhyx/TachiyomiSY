@@ -999,7 +999,7 @@ internal class LibraryScreenModel(
             .asState(screenModelScope)
     }
 
-    fun getRandomLibraryItemForCurrentCategory(): LibraryItem? {
+    fun randomItemInCurrentCategory(): LibraryItem? {
         val state = state.value
         return state.getItemsForCategoryId(state.activeCategory?.id).randomOrNull()
     }

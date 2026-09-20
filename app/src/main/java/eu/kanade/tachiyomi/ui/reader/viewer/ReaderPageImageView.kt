@@ -124,12 +124,9 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
 
     private fun SubsamplingScaleImageView.landscapeZoom(forward: Boolean) {
         val config = config
-        if (config != null &&
-            config.landscapeZoom &&
-            config.minimumScaleType == SCALE_TYPE_CENTER_INSIDE &&
-            sWidth > sHeight &&
-            scale == minScale
-        ) {
+        val zoomsLandscape =
+            config != null && config.landscapeZoom && config.minimumScaleType == SCALE_TYPE_CENTER_INSIDE
+        if (zoomsLandscape && sWidth > sHeight && scale == minScale) {
             handler?.postDelayed(ZOOM_ANIMATION_MS) {
                 val point = when (config.zoomStartPosition) {
                     ZoomStartPosition.LEFT -> if (forward) PointF(0F, 0F) else PointF(sWidth.toFloat(), 0F)

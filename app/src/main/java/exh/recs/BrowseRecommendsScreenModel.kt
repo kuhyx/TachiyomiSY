@@ -44,8 +44,7 @@ internal class BrowseRecommendsScreenModel(
 
     override fun Flow<Manga>.combineMetadata(
         metadata: RaisedSearchMetadata?,
-    ): Flow<Pair<Manga, RaisedSearchMetadata?>> {
+    ): Flow<Pair<Manga, RaisedSearchMetadata?>> =
         // Overridden to prevent our custom metadata from being replaced from a cache
-        return flatMapLatest { manga -> flowOf(manga to metadata) }
-    }
+        flatMapLatest { manga -> flowOf(manga to metadata) }
 }

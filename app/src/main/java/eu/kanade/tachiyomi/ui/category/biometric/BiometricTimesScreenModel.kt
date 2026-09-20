@@ -42,9 +42,9 @@ internal class BiometricTimesScreenModel(
     }
 
     /**
-     * Creates and adds a new category to the database.
+     * Adds a new lock time range to the preferences.
      *
-     * @param name The name of the category to create.
+     * @param timeRange The range to add.
      */
     fun createTimeRange(timeRange: TimeRange) {
         // todo usecase
@@ -60,9 +60,9 @@ internal class BiometricTimesScreenModel(
     }
 
     /**
-     * Deletes the given categories from the database.
+     * Deletes the given time range from the preferences.
      *
-     * @param timeRanges The list of categories to delete.
+     * @param timeRange The range to delete.
      */
     fun deleteTimeRanges(timeRange: TimeRangeItem) {
         // todo usecase

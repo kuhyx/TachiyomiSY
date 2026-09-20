@@ -86,22 +86,22 @@ internal class DownloadStore(
             .mapNotNull { deserialize(it) }
             .sortedBy { it.order }
 
-        val downloads = mutableListOf<Download>()
-        if (objs.isNotEmpty()) {
-            val cachedManga = mutableMapOf<Long, Manga?>()
-            for ((mangaId, chapterId) in objs) {
-                val manga = cachedManga.getOrPut(mangaId) {
-                    runBlocking { getManga.await(mangaId) }
-                } ?: continue
-                val source = sourceManager.get(manga.source) as? HttpSource ?: continue
-                val chapter = runBlocking { getChapter.await(chapterId) } ?: continue
-                downloads.add(Download(source, manga, chapter))
-            }
+        val cachedManga = mutableMapOf<Long, Manga?>()
+        val downloads = objs.mapNotNull { (mangaId, chapterId) ->
+            val manga = cachedManga.getOrPut(mangaId) { runBlocking { getManga.await(mangaId) } }
+            manga?.let { restoreDownload(it, chapterId) }
         }
 
         // Clear the store, downloads will be added again immediately.
         clear()
         return downloads
+    }
+
+    // Rebuilds one queued download; null when its source or chapter is gone.
+    private fun restoreDownload(manga: Manga, chapterId: Long): Download? {
+        val source = sourceManager.get(manga.source) as? HttpSource ?: return null
+        val chapter = runBlocking { getChapter.await(chapterId) } ?: return null
+        return Download(source, manga, chapter)
     }
 
     // Converts a download to a string.
@@ -126,9 +126,9 @@ internal class DownloadStore(
 /**
  * Class used for download serialization.
  *
- * @param mangaId the id of the manga.
- * @param chapterId the id of the chapter.
- * @param order the order of the download in the queue.
+ * @property mangaId the id of the manga.
+ * @property chapterId the id of the chapter.
+ * @property order the order of the download in the queue.
  */
 @Serializable
 private data class DownloadObject(val mangaId: Long, val chapterId: Long, val order: Int)

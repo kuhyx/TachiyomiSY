@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.util.asJsoup
 import exh.metadata.metadata.HBrowseSearchMetadata
 import exh.metadata.metadata.base.RaisedTag
 import exh.source.DelegatedHttpSource
-import exh.util.urlImportFetchSearchMangaSuspend
+import exh.util.urlImportSearchManga
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import rx.Observable
@@ -41,7 +41,7 @@ internal class HBrowse(delegate: HttpSource, val context: Context) :
         runAsObservable { getSearchManga(page, query, filters) }
 
     override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage {
-        return urlImportFetchSearchMangaSuspend(context, query) {
+        return urlImportSearchManga(context, query) {
             super<DelegatedHttpSource>.getSearchManga(page, query, filters)
         }
     }

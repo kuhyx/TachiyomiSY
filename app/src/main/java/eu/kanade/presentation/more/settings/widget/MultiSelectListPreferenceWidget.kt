@@ -17,7 +17,7 @@ import tachiyomi.presentation.core.components.LabeledCheckbox
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-internal fun <T> MultiSelectListPreferenceWidget(
+internal fun <T> MultiSelectListPrefWidget(
     values: Set<T>,
     title: String,
     subtitle: String?,

@@ -21,3 +21,6 @@ google-services.json
 *.apk
 # kuhy fork: CI checks out github.com/kuhyx/utils here for the shared gates
 .utils
+# kuhy fork: bytecode caches of the scripts/ codemods and their pytest runs
+__pycache__/
+.pytest_cache/

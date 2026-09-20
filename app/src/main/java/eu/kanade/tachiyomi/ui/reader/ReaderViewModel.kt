@@ -689,7 +689,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
                 (hasExtraPage && readerChapter.pages?.lastIndex?.minus(1) == page.index)
             ) {
                 // SY <--
-                updateChapterProgressOnComplete(readerChapter)
+                updateProgressOnComplete(readerChapter)
 
                 // Check if syncing is enabled for chapter read:
                 if (isSyncEnabled && syncTriggerOpt.syncOnChapterRead) {
@@ -714,7 +714,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
         }
     }
 
-    private suspend fun updateChapterProgressOnComplete(readerChapter: ReaderChapter) {
+    private suspend fun updateProgressOnComplete(readerChapter: ReaderChapter) {
         readerChapter.chapter.read = true
         // SY -->
         if (manga?.isEhBasedManga() == true) {
@@ -1020,7 +1020,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
         mutableState.update { it.copy(dialog = Dialog.ReadingModeSelect) }
     }
 
-    fun openOrientationModeSelectDialog() {
+    fun openOrientationSelectDialog() {
         mutableState.update { it.copy(dialog = Dialog.OrientationModeSelect) }
     }
 

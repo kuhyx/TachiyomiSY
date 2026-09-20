@@ -64,7 +64,7 @@ import eu.kanade.presentation.more.settings.screen.about.WhatsNewDialog
 import eu.kanade.presentation.more.settings.screen.browse.ExtensionStoresScreen
 import eu.kanade.presentation.more.settings.screen.data.RestoreBackupScreen
 import eu.kanade.presentation.util.AssistContentScreen
-import eu.kanade.presentation.util.DefaultNavigatorScreenTransition
+import eu.kanade.presentation.util.DefaultScreenTransition
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.download.DownloadCache
@@ -259,7 +259,7 @@ internal class MainActivity : BaseActivity() {
                     // Consume insets already used by app state banners
                     Box {
                         // Shows current screen
-                        DefaultNavigatorScreenTransition(
+                        DefaultScreenTransition(
                             navigator = navigator,
                             modifier = Modifier
                                 .padding(contentPadding)

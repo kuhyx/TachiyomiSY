@@ -5,6 +5,7 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
+import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences.ArchiveReaderMode
 import eu.kanade.tachiyomi.util.lang.compareNaturalIgnoreCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -36,7 +37,7 @@ internal class ArchivePageLoader(private val reader: ArchiveReader) : PageLoader
                 error("Incorrect archive password")
             }
         }
-        if (readerPreferences.archiveReaderMode.get() == ReaderPreferences.ArchiveReaderMode.CACHE_TO_DISK) {
+        if (readerPreferences.archiveReaderMode.get() == ArchiveReaderMode.CACHE_TO_DISK) {
             tmpDir.mkdirs()
             reader.useEntries { entries ->
                 entries
@@ -61,7 +62,7 @@ internal class ArchivePageLoader(private val reader: ArchiveReader) : PageLoader
 
     override suspend fun getPages(): List<ReaderPage> = reader.useEntries { entries ->
         // SY -->
-        if (readerPreferences.archiveReaderMode.get() == ReaderPreferences.ArchiveReaderMode.CACHE_TO_DISK) {
+        if (readerPreferences.archiveReaderMode.get() == ArchiveReaderMode.CACHE_TO_DISK) {
             return DirectoryPageLoader(UniFile.fromFile(tmpDir)!!).getPages()
         }
         // SY <--
@@ -71,7 +72,7 @@ internal class ArchivePageLoader(private val reader: ArchiveReader) : PageLoader
             .mapIndexed { i, entry ->
                 // SY -->
                 val imageBytesDeferred: Deferred<ByteArray>? =
-                    if (readerPreferences.archiveReaderMode.get() == ReaderPreferences.ArchiveReaderMode.LOAD_INTO_MEMORY) {
+                    if (readerPreferences.archiveReaderMode.get() == ArchiveReaderMode.LOAD_INTO_MEMORY) {
                         CoroutineScope(Dispatchers.IO).async {
                             mutex.withLock {
                                 reader.getInputStream(entry.name)!!.buffered().use { stream ->

@@ -68,7 +68,7 @@ internal object ExtensionLoader {
         val extension = context.packageManager.getPackageArchiveInfo(file.absolutePath, PACKAGE_FLAGS)
             ?.takeIf { isPackageAnExtension(it) }
             ?: return false
-        val currentExtension = getExtensionPackageInfoFromPkgName(context, extension.packageName)
+        val currentExtension = getExtensionPackageInfo(context, extension.packageName)
 
         if (currentExtension != null) {
             if (PackageInfoCompat.getLongVersionCode(extension) <
@@ -184,7 +184,7 @@ internal object ExtensionLoader {
         return loadExtension(context, extensionPackage)
     }
 
-    fun getExtensionPackageInfoFromPkgName(context: Context, pkgName: String): PackageInfo? =
+    fun getExtensionPackageInfo(context: Context, pkgName: String): PackageInfo? =
         getExtensionInfoFromPkgName(context, pkgName)?.packageInfo
 
     private fun getExtensionInfoFromPkgName(context: Context, pkgName: String): ExtensionInfo? {

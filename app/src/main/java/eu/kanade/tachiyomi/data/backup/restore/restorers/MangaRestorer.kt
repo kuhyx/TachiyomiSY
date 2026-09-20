@@ -339,7 +339,7 @@ internal class MangaRestorer(
         restoreExcludedScanlators(manga, excludedScanlators)
         updateManga.awaitUpdateFetchInterval(manga, now, currentFetchWindow)
         // SY -->
-        restoreMergedMangaReferencesForManga(manga.id, mergedMangaReferences)
+        restoreMergedReferencesFor(manga.id, mergedMangaReferences)
         flatMetadata?.let { restoreFlatMetadata(manga.id, it) }
         restoreEditedInfo(customManga?.copy(id = manga.id))
         // SY <--
@@ -476,7 +476,7 @@ internal class MangaRestorer(
     // Restore the categories from Json.
     // @param manga the merge manga for the references
     // @param backupMergedMangaReferences the list of backup manga references for the merged manga
-    private suspend fun restoreMergedMangaReferencesForManga(
+    private suspend fun restoreMergedReferencesFor(
         mergeMangaId: Long,
         backupMergedMangaReferences: List<BackupMergedMangaReference>,
     ) {
@@ -532,14 +532,15 @@ internal class MangaRestorer(
     }
 
     fun BackupManga.getCustomMangaInfo(): CustomMangaInfo? {
-        if (customTitle != null ||
-            customArtist != null ||
-            customAuthor != null ||
-            customThumbnailUrl != null ||
-            customDescription != null ||
-            customGenre != null ||
-            customStatus != 0
-        ) {
+        val customTexts = listOf(
+            customTitle,
+            customArtist,
+            customAuthor,
+            customThumbnailUrl,
+            customDescription,
+            customGenre,
+        )
+        if (customTexts.any { it != null } || customStatus != 0) {
             return CustomMangaInfo(
                 id = 0L,
                 title = customTitle,

@@ -14,7 +14,7 @@ private const val BACKUP_EXTENSION_STORE_IS_LEGACY = 7
 private const val BACKUP_EXTENSION_STORE_EXTENSION_LIST_URL = 8
 
 @Serializable
-internal class BackupExtensionStore(
+internal data class BackupExtensionStore(
     @ProtoNumber(BACKUP_EXTENSION_STORE_INDEX_URL) var indexUrl: String,
     @ProtoNumber(BACKUP_EXTENSION_STORE_NAME) var name: String,
     @ProtoNumber(BACKUP_EXTENSION_STORE_BADGE_LABEL) var badgeLabel: String?,

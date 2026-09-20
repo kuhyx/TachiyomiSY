@@ -7,7 +7,7 @@ import rx.Producer
 import rx.Subscription
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal fun Call.asObservableWithAsyncStacktrace(): Observable<Pair<Exception, Response>> {
+internal fun Call.asObservableWithStacktrace(): Observable<Pair<Exception, Response>> {
     // Record stacktrace at creation time for easier debugging
     //   asObservable is involved in a lot of crashes so this is worth the performance hit
     val asyncStackTrace = Exception("Async stacktrace")

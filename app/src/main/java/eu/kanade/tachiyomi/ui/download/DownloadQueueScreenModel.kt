@@ -34,7 +34,7 @@ internal class DownloadQueueScreenModel(
     private val _state = MutableStateFlow(emptyList<DownloadHeaderItem>())
     val state = _state.asStateFlow()
 
-    lateinit var controllerBinding: DownloadListBinding
+    var controllerBinding: DownloadListBinding? = null
 
     /**
      * Adapter containing the active downloads.
@@ -255,5 +255,5 @@ internal class DownloadQueueScreenModel(
     // @param download the download to find.
     // @return the holder of the download or null if it's not bound.
     private fun getHolder(download: Download): DownloadHolder? =
-        controllerBinding.root.findViewHolderForItemId(download.chapter.id) as? DownloadHolder
+        controllerBinding?.root?.findViewHolderForItemId(download.chapter.id) as? DownloadHolder
 }

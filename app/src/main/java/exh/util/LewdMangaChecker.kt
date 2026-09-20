@@ -16,7 +16,7 @@ internal fun Manga.isLewd(): Boolean {
     val sourceName = Injekt.get<SourceManager>().get(source)?.name
 
     if (isEhBasedManga() || source in nHentaiSourceIds) {
-        return genre.orEmpty().none { tag -> isNonHentaiTag(tag) }
+        return genre.orEmpty().all { tag -> !isNonHentaiTag(tag) }
     }
 
     return source in LEWD_SOURCE_SERIES + FIRST_LEWD_OFFSET..LEWD_SOURCE_SERIES + LAST_LEWD_OFFSET ||

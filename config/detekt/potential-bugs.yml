@@ -70,8 +70,10 @@ potential-bugs:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
     # SMangaImpl/SChapterImpl leave url and name lateinit because extensions fill them in
-    # after construction; a default would silently hide a missing field.
-    ignoreOnClassesPattern: '^SMangaImpl$|^SChapterImpl$'
+    # after construction; a default would silently hide a missing field. ReaderPage.chapter is
+    # the same shape: archive/epub/directory loaders build pages from files without knowing the
+    # chapter, and ChapterLoader attaches it right after; a nullable would spread `!!` over ~100 reads.
+    ignoreOnClassesPattern: '^SMangaImpl$|^SChapterImpl$|^ReaderPage$'
   MapGetWithNotNullAssertionOperator:
     active: true
   MissingPackageDeclaration:

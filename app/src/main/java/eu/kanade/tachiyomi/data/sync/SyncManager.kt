@@ -199,10 +199,16 @@ internal class SyncManager(
         val hasExtensionRepoChanges = remoteBackup.backupExtensionStores != backup.backupExtensionStores
         val hasSavedSearchChanges = remoteBackup.backupSavedSearches != backup.backupSavedSearches
 
-        if (!hasMangaChanges && !hasCategoryChanges && !hasSourceChanges &&
-            !hasPreferenceChanges && !hasSourcePreferenceChanges &&
-            !hasExtensionRepoChanges && !hasSavedSearchChanges
-        ) {
+        val hasAnyChanges = listOf(
+            hasMangaChanges,
+            hasCategoryChanges,
+            hasSourceChanges,
+            hasPreferenceChanges,
+            hasSourcePreferenceChanges,
+            hasExtensionRepoChanges,
+            hasSavedSearchChanges,
+        ).any { it }
+        if (!hasAnyChanges) {
             // update the sync timestamp
             syncPreferences.lastSyncTimestamp.set(Date().time)
             notifier.showSyncSuccess("Sync completed successfully")

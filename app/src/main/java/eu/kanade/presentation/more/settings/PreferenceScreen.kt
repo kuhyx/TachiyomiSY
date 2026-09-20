@@ -22,6 +22,7 @@ import kotlin.time.Duration.Companion.seconds
  * @param items [Preference] items which should be displayed on the preference screen. An item can be a single
  * [PreferenceItem] or a group ([Preference.PreferenceGroup])
  * @param modifier [Modifier] to be applied to the preferenceScreen layout
+ * @param contentPadding padding applied inside the scrolling list
  */
 @Composable
 internal fun PreferenceScreen(

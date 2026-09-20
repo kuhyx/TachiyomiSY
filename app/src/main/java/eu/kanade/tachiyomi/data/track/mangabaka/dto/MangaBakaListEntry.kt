@@ -30,6 +30,6 @@ internal data class MangaBakaListEntry(
         "plan_to_read" -> MangaBaka.PLAN_TO_READ
         "reading" -> MangaBaka.READING
         "rereading" -> MangaBaka.REREADING
-        else -> throw NotImplementedError("Unknown status: $state")
+        else -> throw IllegalArgumentException("Unknown status: $state")
     }
 }

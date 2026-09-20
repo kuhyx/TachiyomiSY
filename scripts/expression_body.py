@@ -9,7 +9,8 @@ the ``return`` line) and turns each
     }
 
 into ``fun f(): T = <expr>`` when the block holds nothing but that return and
-the ``fun`` header ends on the line before the block. Anything else is printed
+the ``fun`` header (one line, or a multi-line parameter list closing with `) {`) ends
+on the line before the block. Anything else is printed
 as MANUAL. Run spotlessApply afterwards; the expression keeps its indentation.
 
 Usage: expression_body.py <detekt-log>
@@ -36,7 +37,10 @@ def rewrite(lines: list[str], return_line: int) -> bool:
         return False
     indent, expr_head = match.groups()
     header = lines[return_line - 2]
-    if not header.rstrip().endswith("{") or " fun " not in header and not header.lstrip().startswith("fun "):
+    # The header may span lines; its last line closes the parameter list (`) {` or `): T {`).
+    is_header_end = re.match(r"^\s*\)(: .*)? \{\s*$", header) is not None and header.startswith(indent[:-4] + ")")
+    is_one_line_fun = " fun " in header or header.lstrip().startswith("fun ")
+    if not header.rstrip().endswith("{") or not (is_one_line_fun or is_header_end):
         return False
     outer = indent[:-4]
     end = return_line

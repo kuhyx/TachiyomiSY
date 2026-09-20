@@ -61,7 +61,9 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
 
     // The token on 200; 401 and 500 are the server saying the key is wrong or it is broken.
     private fun readToken(response: Response, apiUrl: String, apiKey: String): String? = when (response.code) {
-        HttpURLConnection.HTTP_OK -> with(json) { response.parseAs<AuthenticationDto>().token }
+        HttpURLConnection.HTTP_OK -> {
+            with(json) { response.parseAs<AuthenticationDto>().token }
+        }
         HttpURLConnection.HTTP_UNAUTHORIZED -> {
             logcat(LogPriority.WARN) {
                 "Unauthorized / API key not valid: API URL: $apiUrl, empty API key: ${apiKey.isEmpty()}"
@@ -69,10 +71,14 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
             throw IOException("Unauthorized / api key not valid")
         }
         HttpURLConnection.HTTP_INTERNAL_ERROR -> {
-            logcat(LogPriority.WARN) { "Error fetching JWT token. API URL: $apiUrl, empty API key: ${apiKey.isEmpty()}" }
+            logcat(LogPriority.WARN) {
+                "Error fetching JWT token. API URL: $apiUrl, empty API key: ${apiKey.isEmpty()}"
+            }
             throw IOException("Error fetching JWT token")
         }
-        else -> null
+        else -> {
+            null
+        }
     }
 
     private fun getApiVolumesUrl(url: String): String =

@@ -360,7 +360,7 @@ internal fun TransitionTextNoNextPreview() {
 
 @PreviewLightDark
 @Composable
-internal fun TransitionTextNoPreviousPreview() {
+internal fun TransitionNoPreviousPreview() {
     TachiyomiPreviewTheme {
         Surface(modifier = Modifier.padding(48.dp)) {
             ChapterTransition(

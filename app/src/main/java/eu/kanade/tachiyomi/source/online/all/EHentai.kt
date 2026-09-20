@@ -54,7 +54,7 @@ import exh.util.ignore
 import exh.util.nullIfBlank
 import exh.util.trimAll
 import exh.util.trimOrNull
-import exh.util.urlImportFetchSearchMangaSuspend
+import exh.util.urlImportSearchManga
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 import kotlinx.serialization.json.Json
@@ -522,7 +522,7 @@ internal class EHentai(
         runAsObservable { getSearchManga(page, query, filters) }
 
     override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage {
-        return urlImportFetchSearchMangaSuspend(context, query) {
+        return urlImportSearchManga(context, query) {
             super<HttpSource>.getSearchManga(page, query, filters).checkValid()
         }
     }

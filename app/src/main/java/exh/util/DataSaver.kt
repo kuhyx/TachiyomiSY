@@ -66,10 +66,8 @@ private class BandwidthHeroDataSaver(preferences: SourcePreferences) : DataSaver
         }
     }
 
-    private fun getUrl(imageUrl: String): String {
-        // Network Request sent for the Bandwidth Hero Proxy server
-        return "$dataSavedServer/?jpg=$format&l=$quality&bw=$colorBW&url=$imageUrl"
-    }
+    // Network Request sent for the Bandwidth Hero Proxy server
+    private fun getUrl(imageUrl: String): String = "$dataSavedServer/?jpg=$format&l=$quality&bw=$colorBW&url=$imageUrl"
 
     private fun Preference<Boolean>.toIntRepresentation() = if (get()) "1" else "0"
 }

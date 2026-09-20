@@ -16,7 +16,7 @@ internal class TrackSearch : Track {
 
     override var libraryId: Long? = null
 
-    override lateinit var title: String
+    override var title: String = ""
 
     override var lastChapterRead: Double = 0.0
 
@@ -32,7 +32,7 @@ internal class TrackSearch : Track {
 
     override var private: Boolean = false
 
-    override lateinit var trackingUrl: String
+    override var trackingUrl: String = ""
 
     var authors: List<String> = emptyList()
 

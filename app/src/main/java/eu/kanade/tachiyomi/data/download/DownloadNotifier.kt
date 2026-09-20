@@ -70,7 +70,7 @@ internal class DownloadNotifier(private val context: Context) {
                 setSmallIcon(android.R.drawable.stat_sys_download)
                 clearActions()
                 // Open download manager when clicked
-                setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+                setContentIntent(NotificationHandler.openDownloadManagerActivity(context))
                 isDownloading = true
                 // Pause action
                 addAction(
@@ -124,12 +124,12 @@ internal class DownloadNotifier(private val context: Context) {
             setOngoing(false)
             clearActions()
             // Open download manager when clicked
-            setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+            setContentIntent(NotificationHandler.openDownloadManagerActivity(context))
             // Resume action
             addAction(
                 R.drawable.ic_play_arrow_24dp,
                 context.stringResource(MR.strings.action_resume),
-                NotificationReceiver.resumeDownloadsPendingBroadcast(context),
+                NotificationReceiver.resumeDownloadsBroadcast(context),
             )
             // Clear action
             addAction(
@@ -160,8 +160,9 @@ internal class DownloadNotifier(private val context: Context) {
      *
      * @param reason the text to show.
      * @param timeout duration after which to automatically dismiss the notification.
-     * @param mangaId the id of the entry being warned about
      * Only works on Android 8+.
+     * @param contentIntent intent fired when the notification is tapped.
+     * @param mangaId the id of the entry being warned about
      */
     fun onWarning(reason: String, timeout: Long? = null, contentIntent: PendingIntent? = null, mangaId: Long? = null) {
         with(errorNotificationBuilder) {
@@ -170,7 +171,7 @@ internal class DownloadNotifier(private val context: Context) {
             setSmallIcon(R.drawable.ic_warning_white_24dp)
             setAutoCancel(true)
             clearActions()
-            setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+            setContentIntent(NotificationHandler.openDownloadManagerActivity(context))
             if (mangaId != null) {
                 addAction(
                     R.drawable.ic_book_24dp,
@@ -195,6 +196,7 @@ internal class DownloadNotifier(private val context: Context) {
      *
      * @param error string containing error information.
      * @param chapter string containing chapter title.
+     * @param mangaTitle title of the entry that the error occurred on
      * @param mangaId the id of the entry that the error occurred on
      */
     fun onError(error: String? = null, chapter: String? = null, mangaTitle: String? = null, mangaId: Long? = null) {
@@ -206,7 +208,7 @@ internal class DownloadNotifier(private val context: Context) {
             setContentText(error ?: context.stringResource(MR.strings.download_notifier_unknown_error))
             setSmallIcon(R.drawable.ic_warning_white_24dp)
             clearActions()
-            setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+            setContentIntent(NotificationHandler.openDownloadManagerActivity(context))
             if (mangaId != null) {
                 addAction(
                     R.drawable.ic_book_24dp,

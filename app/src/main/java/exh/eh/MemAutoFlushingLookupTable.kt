@@ -84,8 +84,7 @@ internal class MemAutoFlushingLookupTable<T>(
                 atomicFile.openRead().source().buffer().use { input ->
                     val bb = ByteBuffer.allocate(ENTRY_HEADER_BYTES)
 
-                    while (true) {
-                        if (!input.requireBytes(bb.array(), ENTRY_HEADER_BYTES)) break
+                    while (input.requireBytes(bb.array(), ENTRY_HEADER_BYTES)) {
                         val k = bb.getInt(0)
                         val size = bb.getInt(SIZE_OFFSET)
                         val strBArr = ByteArray(size)

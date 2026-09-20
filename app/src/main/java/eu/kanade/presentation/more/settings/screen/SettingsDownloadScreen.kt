@@ -114,7 +114,7 @@ internal object SettingsDownloadScreen : SearchableSettings {
                     preference = downloadPreferences.removeBookmarkedChapters,
                     title = stringResource(MR.strings.pref_remove_bookmarked_chapters),
                 ),
-                getExcludedCategoriesPreference(
+                excludedCategoriesPreference(
                     downloadPreferences = downloadPreferences,
                     categories = { categories },
                 ),
@@ -123,7 +123,7 @@ internal object SettingsDownloadScreen : SearchableSettings {
     }
 
     @Composable
-    private fun getExcludedCategoriesPreference(
+    private fun excludedCategoriesPreference(
         downloadPreferences: DownloadPreferences,
         categories: () -> List<Category>,
     ): Preference.PreferenceItem.MultiSelectListPreference<String> {

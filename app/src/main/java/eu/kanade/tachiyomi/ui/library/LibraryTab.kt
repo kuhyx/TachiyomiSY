@@ -51,8 +51,8 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.toast
 import exh.favorites.FavoritesSyncStatus
 import exh.recs.RecommendsScreen
-import exh.recs.batch.RecommendationSearchBottomSheetDialog
-import exh.recs.batch.RecommendationSearchProgressDialog
+import exh.recs.batch.RecSearchBottomSheetDialog
+import exh.recs.batch.RecSearchProgressDialog
 import exh.recs.batch.SearchStatus
 import exh.source.MERGED_SOURCE_ID
 import kotlinx.coroutines.channels.Channel
@@ -156,7 +156,7 @@ internal data object LibraryTab : Tab {
                     onClickGlobalUpdate = { onClickRefresh(null) },
                     onClickOpenRandomManga = {
                         scope.launch {
-                            val randomItem = screenModel.getRandomLibraryItemForCurrentCategory()
+                            val randomItem = screenModel.randomItemInCurrentCategory()
                             if (randomItem != null) {
                                 navigator.push(MangaScreen(randomItem.libraryManga.manga.id))
                             } else {
@@ -348,7 +348,7 @@ internal data object LibraryTab : Tab {
             }
 
             is LibraryScreenModel.Dialog.RecommendationSearchSheet -> {
-                RecommendationSearchBottomSheetDialog(
+                RecSearchBottomSheetDialog(
                     onDismissRequest = onDismissRequest,
                     onSearchRequest = {
                         onDismissRequest()
@@ -368,7 +368,7 @@ internal data object LibraryTab : Tab {
             openManga = { navigator.push(MangaScreen(it)) },
         )
 
-        RecommendationSearchProgressDialog(
+        RecSearchProgressDialog(
             status = screenModel.recommendationSearch.status.collectAsState().value,
             setStatusIdle = { screenModel.recommendationSearch.status.value = SearchStatus.Idle },
             setStatusCancelling = { screenModel.recommendationSearch.status.value = SearchStatus.Cancelling },

@@ -31,8 +31,6 @@ internal class BufferedSourceFetcher(
             data: BufferedSource,
             options: Options,
             imageLoader: ImageLoader,
-        ): Fetcher {
-            return BufferedSourceFetcher(data, options)
-        }
+        ): Fetcher = BufferedSourceFetcher(data, options)
     }
 }

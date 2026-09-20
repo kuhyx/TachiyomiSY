@@ -45,6 +45,8 @@ internal class SyncChaptersWithSource(
      * @param rawSourceChapters the chapters from the source.
      * @param manga the manga the chapters belong to.
      * @param source the source the manga belongs to.
+     * @param manualFetch whether the user asked for this refresh.
+     * @param fetchWindow the current update window used to keep the next-update estimate.
      * @return Newly added chapters
      */
     suspend fun await(

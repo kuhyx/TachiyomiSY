@@ -40,7 +40,7 @@ internal class ExtensionInstaller(
     private val scope = CoroutineScope(Dispatchers.IO)
     private val activeJobs = mutableMapOf<String, Job>()
     private val activeSteps = mutableMapOf<Long, MutableStateFlow<InstallStep>>()
-    private val extensionInstaller = Injekt.get<BasePreferences>().extensionInstaller
+    private val installerPreference = Injekt.get<BasePreferences>().extensionInstaller
 
     private val httpClient: OkHttpClient = Injekt.get<NetworkHelper>().client
 
@@ -98,7 +98,7 @@ internal class ExtensionInstaller(
     // Starts an intent to install the extension at the given uri.
     // @param tempFile The file of the extension to install. Delete after use.
     private fun installApk(downloadId: Long, tempFile: File) {
-        when (val installer = extensionInstaller.get()) {
+        when (val installer = installerPreference.get()) {
             BasePreferences.ExtensionInstaller.LEGACY -> {
                 val intent = Intent(context, ExtensionInstallActivity::class.java)
                     .setDataAndType(tempFile.getUriCompat(context), APK_MIME)

@@ -170,7 +170,7 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
     private fun altTitlesInDesc() = sourcePreferences.getBoolean(getAltTitlesInDescKey(mdLang.lang), false)
     private fun finalChapterInDesc() = sourcePreferences.getBoolean(getFinalChapterInDescPrefKey(mdLang.lang), false)
     private fun preferExtensionLangTitle() =
-        sourcePreferences.getBoolean(getPreferExtensionLangTitlePrefKey(mdLang.extLang), true)
+        sourcePreferences.getBoolean(preferExtensionLangTitleKey(mdLang.extLang), true)
 
     // UrlImportableSource methods
     override suspend fun mapUrlToMangaUrl(uri: Uri): String? {
@@ -339,6 +339,6 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
 
         fun getFinalChapterInDescPrefKey(dexLang: String): String = "${finalChapterInDescPref}_$dexLang"
 
-        fun getPreferExtensionLangTitlePrefKey(dexLang: String): String = "${preferExtensionLangTitlePref}_$dexLang"
+        fun preferExtensionLangTitleKey(dexLang: String): String = "${preferExtensionLangTitlePref}_$dexLang"
     }
 }

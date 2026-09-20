@@ -87,8 +87,6 @@ internal class ExtensionApi {
     // SY -->
     private fun Extension.isBlacklisted(
         blacklistEnabled: Boolean = sourcePreferences.enableSourceBlacklist.get(),
-    ): Boolean {
-        return pkgName in BlacklistedSources.BLACKLISTED_EXTENSIONS && blacklistEnabled
-    }
+    ): Boolean = pkgName in BlacklistedSources.BLACKLISTED_EXTENSIONS && blacklistEnabled
     // SY <--
 }

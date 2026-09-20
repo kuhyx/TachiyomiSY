@@ -22,7 +22,7 @@ import exh.metadata.metadata.RaisedSearchMetadata
 import exh.metadata.metadata.base.RaisedTag
 import exh.source.DelegatedHttpSource
 import exh.util.trimOrNull
-import exh.util.urlImportFetchSearchMangaSuspend
+import exh.util.urlImportSearchManga
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -72,7 +72,7 @@ internal class NHentai(delegate: HttpSource, val context: Context) :
         runAsObservable { getSearchManga(page, query, filters) }
 
     override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage {
-        return urlImportFetchSearchMangaSuspend(context, query) {
+        return urlImportSearchManga(context, query) {
             super<DelegatedHttpSource>.getSearchManga(page, query, filters)
         }
     }

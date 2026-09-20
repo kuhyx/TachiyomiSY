@@ -64,6 +64,8 @@ internal class PagePreviewCache(private val context: Context) {
      * Get page list from cache.
      *
      * @param manga the manga.
+     * @param chapterIds the chapters whose previews are wanted.
+     * @param page the preview page index.
      * @return the list of pages.
      */
     fun getPageListFromCache(manga: Manga, chapterIds: List<Long>, page: Int): PagePreviewPage {
@@ -80,6 +82,7 @@ internal class PagePreviewCache(private val context: Context) {
      * Add page list to disk cache.
      *
      * @param manga the manga.
+     * @param chapterIds the chapters the previews belong to.
      * @param pages list of pages.
      */
     fun putPageListToCache(manga: Manga, chapterIds: List<Long>, pages: PagePreviewPage) {
@@ -140,7 +143,7 @@ internal class PagePreviewCache(private val context: Context) {
      * Add page to cache.
      *
      * @param imageUrl url of page.
-     * @param response http response from page.
+     * @param source the source that serves the page.
      * @throws IOException page error.
      */
     @Throws(IOException::class)

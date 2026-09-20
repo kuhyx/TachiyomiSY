@@ -24,7 +24,7 @@ internal class EditMergedMangaHolder(
     adapter,
 ) {
 
-    lateinit var reference: MergedMangaReference
+    var reference: MergedMangaReference? = null
     var binding = EditMergedSettingsItemBinding.bind(view)
 
     init {
@@ -36,7 +36,7 @@ internal class EditMergedMangaHolder(
             adapter.editMergedMangaItemListener.onToggleChapterUpdatesClicked(bindingAdapterPosition)
         }
         binding.download.setOnClickListener {
-            adapter.editMergedMangaItemListener.onToggleChapterDownloadsClicked(bindingAdapterPosition)
+            adapter.editMergedMangaItemListener.onToggleDownloadsClicked(bindingAdapterPosition)
         }
         setHandelAlpha(adapter.isPriorityOrder)
     }

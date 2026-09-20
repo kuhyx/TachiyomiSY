@@ -11,9 +11,9 @@ internal class ChapterImpl : Chapter {
 
     override var mangaId: Long? = null
 
-    override lateinit var url: String
+    override var url: String = ""
 
-    override lateinit var name: String
+    override var name: String = ""
 
     override var scanlator: String? = null
 

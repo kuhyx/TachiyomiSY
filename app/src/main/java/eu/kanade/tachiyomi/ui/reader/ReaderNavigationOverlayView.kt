@@ -46,7 +46,8 @@ internal class ReaderNavigationOverlayView(context: Context, attributeSet: Attri
         this.navigation = navigation
         invalidate()
 
-        if (isVisible || (!showOnStart && firstLaunch) || navigation is DisabledNavigation) {
+        val skipOnStart = !showOnStart && firstLaunch
+        if (isVisible || skipOnStart || navigation is DisabledNavigation) {
             return
         }
 

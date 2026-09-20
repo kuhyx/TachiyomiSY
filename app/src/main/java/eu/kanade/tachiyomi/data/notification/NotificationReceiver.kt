@@ -277,7 +277,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
          * @param context context of application
          * @return [PendingIntent]
          */
-        internal fun resumeDownloadsPendingBroadcast(context: Context): PendingIntent {
+        internal fun resumeDownloadsBroadcast(context: Context): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_RESUME_DOWNLOADS
             }
@@ -332,7 +332,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
          * @param notificationId id of notification
          * @return [PendingIntent]
          */
-        internal fun dismissNotificationPendingBroadcast(context: Context, notificationId: Int): PendingIntent {
+        internal fun dismissNotificationBroadcast(context: Context, notificationId: Int): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_DISMISS_NOTIFICATION
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
@@ -346,11 +346,11 @@ internal class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that starts a service which dismissed the notification.
+         * Dismisses the notification, and its summary once the group is empty.
          *
          * @param context context of application
          * @param notificationId id of notification
-         * @return [PendingIntent]
+         * @param groupId id of the notification group, if any
          */
         internal fun dismissNotification(context: Context, notificationId: Int, groupId: Int? = null) {
             /*
@@ -388,7 +388,6 @@ internal class NotificationReceiver : BroadcastReceiver() {
          *
          * @param context context of application
          * @param uri location path of file
-         * @param notificationId id of notification
          * @return [PendingIntent]
          */
         internal fun shareImagePendingBroadcast(context: Context, uri: Uri): PendingIntent {
@@ -426,6 +425,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
          *
          * @param context context of application
          * @param manga manga of chapter
+         * @param groupId id of the notification group to dismiss
          */
         internal fun openChapterPendingActivity(context: Context, manga: Manga, groupId: Int): PendingIntent {
             val newIntent =
@@ -447,6 +447,8 @@ internal class NotificationReceiver : BroadcastReceiver() {
          *
          * @param context context of application
          * @param manga manga of chapter
+         * @param chapters chapters to mark as read
+         * @param groupId id of the notification group to dismiss
          */
         internal fun markAsReadPendingBroadcast(
             context: Context,
@@ -474,8 +476,10 @@ internal class NotificationReceiver : BroadcastReceiver() {
          *
          * @param context context of application
          * @param manga manga of chapter
+         * @param chapters chapters to download
+         * @param groupId id of the notification group to dismiss
          */
-        internal fun downloadChaptersPendingBroadcast(
+        internal fun downloadChaptersBroadcast(
             context: Context,
             manga: Manga,
             chapters: Array<Chapter>,
@@ -522,7 +526,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
          * @param context context of application
          * @return [PendingIntent]
          */
-        internal fun cancelLibraryUpdatePendingBroadcast(context: Context): PendingIntent {
+        internal fun cancelLibraryUpdateBroadcast(context: Context): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_LIBRARY_UPDATE
             }
@@ -538,9 +542,11 @@ internal class NotificationReceiver : BroadcastReceiver() {
          * Returns [PendingIntent] that starts the [AppUpdateDownloadJob] to download an app update.
          *
          * @param context context of application
+         * @param url download url of the update
+         * @param title release title shown in the notification
          * @return [PendingIntent]
          */
-        internal fun downloadAppUpdatePendingBroadcast(
+        internal fun downloadAppUpdateBroadcast(
             context: Context,
             url: String,
             title: String? = null,
@@ -561,7 +567,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
         /**
          *
          */
-        internal fun cancelDownloadAppUpdatePendingBroadcast(context: Context): PendingIntent {
+        internal fun cancelAppUpdateBroadcast(context: Context): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_APP_UPDATE_DOWNLOAD
             }

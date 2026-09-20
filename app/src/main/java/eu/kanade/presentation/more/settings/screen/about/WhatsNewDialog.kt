@@ -148,7 +148,8 @@ internal fun Changelog.toDisplayChangelog(): List<DisplayChangelog> {
                                 try {
                                     pop()
                                 } catch (e: IllegalStateException) {
-                                    throw IllegalStateException("Exception on ${version.versionName}:$index:$charIndex", e)
+                                    val where = "${version.versionName}:$index:$charIndex"
+                                    throw IllegalStateException("Exception on $where", e)
                                 }
                             } else {
                                 pushStyle(SpanStyle(fontWeight = FontWeight.Bold))

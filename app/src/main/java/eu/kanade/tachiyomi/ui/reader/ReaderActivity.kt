@@ -145,7 +145,7 @@ internal class ReaderActivity : BaseActivity() {
     private val readerPreferences = Injekt.get<ReaderPreferences>()
     private val preferences = Injekt.get<BasePreferences>()
 
-    lateinit var binding: ReaderActivityBinding
+    val binding: ReaderActivityBinding by lazy { ReaderActivityBinding.inflate(layoutInflater) }
 
     val viewModel by viewModels<ReaderViewModel>()
     private var assistUrl: String? = null
@@ -192,7 +192,6 @@ internal class ReaderActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
 
-        binding = ReaderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.setComposeOverlay()
 
@@ -638,7 +637,7 @@ internal class ReaderActivity : BaseActivity() {
             orientation = ReaderOrientation.fromPreference(
                 viewModel.getMangaOrientation(resolveDefault = false),
             ),
-            onClickOrientation = viewModel::openOrientationModeSelectDialog,
+            onClickOrientation = viewModel::openOrientationSelectDialog,
             cropEnabled = cropEnabled,
             onClickCropBorder = {
                 val enabled = viewModel.toggleCropBorders()
@@ -877,12 +876,10 @@ internal class ReaderActivity : BaseActivity() {
         val defaultReaderType = manga?.defaultReaderType(
             manga.mangaType(sourceName = sourceManager.get(manga.source)?.name),
         )
-        if (
-            readerPreferences.useAutoWebtoon.get() &&
-            (manga?.readingMode?.toInt() ?: ReadingMode.DEFAULT.flagValue) == ReadingMode.DEFAULT.flagValue &&
-            defaultReaderType != null &&
-            defaultReaderType == ReadingMode.WEBTOON.flagValue
-        ) {
+        val usesDefaultReadingMode =
+            (manga?.readingMode?.toInt() ?: ReadingMode.DEFAULT.flagValue) == ReadingMode.DEFAULT.flagValue
+        val autoWebtoon = readerPreferences.useAutoWebtoon.get() && defaultReaderType == ReadingMode.WEBTOON.flagValue
+        if (autoWebtoon && usesDefaultReadingMode) {
             readingModeToast?.cancel()
             readingModeToast = toast(SYMR.strings.eh_auto_webtoon_snack)
         } else if (readerPreferences.showReadingMode.get()) {
@@ -1165,7 +1162,6 @@ internal class ReaderActivity : BaseActivity() {
 
     // Updates viewer inset depending on fullscreen reader preferences.
     private fun updateViewerInset(fullscreen: Boolean, drawUnderCutout: Boolean) {
-        if (!::binding.isInitialized) return
         val view = binding.viewerContainer
 
         view.applyInsetsPadding(ViewCompat.getRootWindowInsets(view), fullscreen, drawUnderCutout)

@@ -144,8 +144,8 @@ internal abstract class Installer(private val service: Service) {
     /**
      * Install item to queue.
      *
-     * @param downloadId Download ID as known by [ExtensionManager]
-     * @param uri Uri of APK to install
+     * @property downloadId Download ID as known by [ExtensionManager]
+     * @property uri Uri of APK to install
      */
     data class Entry(val downloadId: Long, val uri: Uri)
 
@@ -156,6 +156,7 @@ internal abstract class Installer(private val service: Service) {
         /**
          * Attempts to cancel the installation entry for the provided download ID.
          *
+         * @param context context used to send the local broadcast
          * @param downloadId Download ID as known by [ExtensionManager]
          */
         fun cancelInstallQueue(context: Context, downloadId: Long) {

@@ -314,12 +314,11 @@ internal class PagerPageHolder(
     }
 
     private fun handleWideImage(imageSource: BufferedSource): BufferedSource {
-        return if (
-            !ImageUtil.isAnimatedAndSupported(imageSource) &&
-            ImageUtil.isWideImage(imageSource) &&
+        val wantsCenterMargin =
             viewer.config.centerMarginType and PagerConfig.CenterMarginType.WIDE_PAGE_CENTER_MARGIN > 0 &&
-            !viewer.config.imageCropBorders
-        ) {
+                !viewer.config.imageCropBorders
+        val isStillWideImage = !ImageUtil.isAnimatedAndSupported(imageSource) && ImageUtil.isWideImage(imageSource)
+        return if (wantsCenterMargin && isStillWideImage) {
             ImageUtil.addHorizontalCenterMargin(imageSource, height, context)
         } else {
             imageSource

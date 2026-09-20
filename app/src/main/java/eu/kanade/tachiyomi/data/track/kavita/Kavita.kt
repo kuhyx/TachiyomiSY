@@ -62,9 +62,9 @@ internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
 
     override suspend fun bind(track: Track, hasReadChapters: Boolean): Track = track
 
-    override suspend fun search(query: String): List<TrackSearch> {
-        TODO("Not yet implemented: search")
-    }
+    // Enhanced trackers bind by URL, so the search UI is never offered for them.
+    override suspend fun search(query: String): List<TrackSearch> =
+        throw UnsupportedOperationException("Search is not supported by this tracker")
 
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.getTrackSearch(track.trackingUrl)
@@ -110,21 +110,18 @@ internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
             val sourceId = sourceIdOf(name = "kavita_$id", lang = "all", versionId = 1)
             val preferences = (sourceManager.get(sourceId) as ConfigurableSource).sourcePreferences()
 
-            val prefApiUrl = preferences.getString("APIURL", "")
-            val prefApiKey = preferences.getString("APIKEY", "")
-            if (prefApiUrl.isNullOrEmpty() || prefApiKey.isNullOrEmpty()) {
-                // Source not configured. Skip
-                continue
+            val prefApiUrl = preferences.getString("APIURL", "").orEmpty()
+            val prefApiKey = preferences.getString("APIKEY", "").orEmpty()
+            // Unconfigured or unreachable sources are skipped.
+            val token = if (prefApiUrl.isEmpty() || prefApiKey.isEmpty()) {
+                null
+            } else {
+                api.getNewToken(apiUrl = prefApiUrl, apiKey = prefApiKey)
             }
-
-            val token = api.getNewToken(apiUrl = prefApiUrl, apiKey = prefApiKey)
-            if (token.isNullOrEmpty()) {
-                // Source is not accessible. Skip
-                continue
+            if (!token.isNullOrEmpty()) {
+                authentication.apiUrl = prefApiUrl
+                authentication.jwtToken = token
             }
-
-            authentication.apiUrl = prefApiUrl
-            authentication.jwtToken = token
         }
         authentications = oauth
     }

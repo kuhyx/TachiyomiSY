@@ -91,7 +91,7 @@ internal class PagePreviewFetcher(
             val responseBody = checkNotNull(response.body) { "Null response source" }
             try {
                 // Read from page preview cache after page preview updated
-                val responsePagePreviewCache = writeResponseToPagePreviewCache(response)
+                val responsePagePreviewCache = writeResponseToPreviewCache(response)
                 if (responsePagePreviewCache != null) {
                     return fileLoader(responsePagePreviewCache)
                 }
@@ -180,7 +180,7 @@ internal class PagePreviewFetcher(
         }
     }
 
-    private fun writeResponseToPagePreviewCache(response: Response): File? {
+    private fun writeResponseToPreviewCache(response: Response): File? {
         if (!options.diskCachePolicy.writeEnabled) return null
         return try {
             response.peekBody(Long.MAX_VALUE).source().use { input ->

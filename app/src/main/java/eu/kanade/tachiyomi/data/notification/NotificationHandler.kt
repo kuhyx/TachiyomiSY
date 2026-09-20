@@ -18,7 +18,7 @@ internal object NotificationHandler {
      *
      * @param context context of application
      */
-    internal fun openDownloadManagerPendingActivity(context: Context): PendingIntent {
+    internal fun openDownloadManagerActivity(context: Context): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             action = Constants.SHORTCUT_DOWNLOADS
@@ -35,7 +35,7 @@ internal object NotificationHandler {
      * Returns [PendingIntent] that starts a gallery activity.
      *
      * @param context context of application
-     * @param file file containing image
+     * @param uri uri of the image file
      */
     internal fun openImagePendingActivity(context: Context, uri: Uri): PendingIntent {
         val intent = Intent(Intent.ACTION_VIEW).apply {

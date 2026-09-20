@@ -131,13 +131,10 @@ internal abstract class BaseTracker(
     }
 
     // SY -->
-    override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? {
-        throw NotImplementedError("Not implemented.")
-    }
+    // Trackers without a metadata endpoint simply report nothing; callers treat null as "no data".
+    override suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? = null
 
-    override suspend fun searchById(id: String): TrackSearch? {
-        throw NotImplementedError("Not implemented.")
-    }
+    override suspend fun searchById(id: String): TrackSearch? = null
     // SY <--
 
     private suspend fun updateRemote(track: Track) = withIOContext {

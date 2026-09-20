@@ -121,8 +121,8 @@ internal object MdUtil {
             ?: ""
     }
 
-    fun getFromLangMap(langMap: Map<String, String>, currentLang: String, originalLanguage: String): String? {
-        return langMap[currentLang]
+    fun getFromLangMap(langMap: Map<String, String>, currentLang: String, originalLanguage: String): String? =
+        langMap[currentLang]
             ?: langMap["en"]
             ?: if (originalLanguage == "ja") {
                 langMap["ja-ro"]
@@ -130,15 +130,12 @@ internal object MdUtil {
             } else {
                 null
             }
-    }
 
     fun findTitleInMaps(
         lang: String,
         titleMap: Map<String, String>,
         altTitleMaps: List<Map<String, String>>,
-    ): String? {
-        return titleMap[lang] ?: altTitleMaps.firstNotNullOfOrNull { it[lang] }
-    }
+    ): String? = titleMap[lang] ?: altTitleMaps.firstNotNullOfOrNull { it[lang] }
 
     fun cdnCoverUrl(dexId: String, fileName: String): String = "$cdnUrl/covers/$dexId/$fileName"
 

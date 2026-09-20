@@ -7,7 +7,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
-import eu.kanade.presentation.browse.components.BrowseSourceFloatingActionButton
+import eu.kanade.presentation.browse.components.BrowseSourceFab
 import eu.kanade.presentation.browse.components.GlobalSearchCardRow
 import eu.kanade.presentation.browse.components.GlobalSearchErrorResultItem
 import eu.kanade.presentation.browse.components.GlobalSearchLoadingResultItem
@@ -54,7 +54,7 @@ internal fun SourceFeedScreen(
             )
         },
         floatingActionButton = {
-            BrowseSourceFloatingActionButton(
+            BrowseSourceFab(
                 isVisible = hasFilters,
                 onFabClick = onFabClick,
             )

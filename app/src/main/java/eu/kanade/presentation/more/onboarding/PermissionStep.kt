@@ -35,9 +35,9 @@ import androidx.core.net.toUri
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import eu.kanade.presentation.util.rememberRequestPackageInstallsPermissionState
+import eu.kanade.presentation.util.rememberInstallPermissionState
 import eu.kanade.tachiyomi.core.security.PrivacyPreferences
-import eu.kanade.tachiyomi.util.system.launchRequestPackageInstallsPermission
+import eu.kanade.tachiyomi.util.system.launchInstallPermissionRequest
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
@@ -57,7 +57,7 @@ internal class PermissionStep : OnboardingStep {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
 
-        val installGranted = rememberRequestPackageInstallsPermissionState()
+        val installGranted = rememberInstallPermissionState()
 
         DisposableEffect(lifecycleOwner.lifecycle) {
             val observer = object : DefaultLifecycleObserver {
@@ -84,7 +84,7 @@ internal class PermissionStep : OnboardingStep {
                 subtitle = stringResource(MR.strings.onboarding_permission_install_apps_description),
                 granted = installGranted,
                 onButtonClick = {
-                    context.launchRequestPackageInstallsPermission()
+                    context.launchInstallPermissionRequest()
                 },
             )
 

@@ -259,9 +259,9 @@ internal fun AppBarActions(
 }
 
 /**
- * @param searchEnabled Set to false if you don't want to show search action.
- * @param searchQuery If null, use normal toolbar.
- * @param placeholderText If null, [MR.strings.action_search_hint] is used.
+ * Toolbar that switches into a search field. A null [searchQuery] shows the normal toolbar;
+ * [searchEnabled] false hides the search action; a null [placeholderText] falls back to
+ * [MR.strings.action_search_hint].
  */
 @Composable
 internal fun SearchToolbar(

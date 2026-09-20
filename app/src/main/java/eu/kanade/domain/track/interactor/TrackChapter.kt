@@ -30,12 +30,13 @@ internal class TrackChapter(
 
             tracks.mapNotNull { track ->
                 val service = trackerManager.get(track.trackerId)
-                if (
-                    service == null ||
-                    !service.isLoggedIn ||
-                    chapterNumber <= track.lastChapterRead /* SY --> */ ||
-                    (service is MdList && track.status == FollowStatus.UNFOLLOWED.long)/* SY <-- */
-                ) {
+                // SY --> an unfollowed MangaDex entry is never updated
+                val unfollowedMdList = service is MdList && track.status == FollowStatus.UNFOLLOWED.long
+                // SY <--
+                if (service == null || !service.isLoggedIn || unfollowedMdList) {
+                    return@mapNotNull null
+                }
+                if (chapterNumber <= track.lastChapterRead) {
                     return@mapNotNull null
                 }
 

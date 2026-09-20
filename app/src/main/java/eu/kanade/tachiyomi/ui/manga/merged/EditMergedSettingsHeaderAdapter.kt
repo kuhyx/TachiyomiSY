@@ -31,17 +31,15 @@ internal class EditMergedSettingsHeaderAdapter(
 
     private val sourceManager: SourceManager by injectLazy()
 
-    private lateinit var binding: EditMergedSettingsHeaderBinding
-
     val editMergedMangaItemSortingListener: SortingListener = adapter
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HeaderViewHolder {
-        binding = EditMergedSettingsHeaderBinding.inflate(
+        val binding = EditMergedSettingsHeaderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false,
         )
-        return HeaderViewHolder(binding.root)
+        return HeaderViewHolder(binding)
     }
 
     override fun getItemCount(): Int = 1
@@ -50,7 +48,9 @@ internal class EditMergedSettingsHeaderAdapter(
         holder.bind()
     }
 
-    inner class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class HeaderViewHolder(
+        private val binding: EditMergedSettingsHeaderBinding,
+    ) : RecyclerView.ViewHolder(binding.root) {
         fun bind() {
             val dedupeAdapter: ArrayAdapter<String> = ArrayAdapter(
                 itemView.context,

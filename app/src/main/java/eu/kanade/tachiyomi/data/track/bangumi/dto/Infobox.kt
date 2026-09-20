@@ -30,13 +30,13 @@ internal sealed interface Infobox {
     val key: String
 
     @Serializable
-    class SingleValue(
+    data class SingleValue(
         override val key: String,
         val value: String,
     ) : Infobox
 
     @Serializable
-    class MultipleValues(
+    data class MultipleValues(
         override val key: String,
         val value: List<InfoboxNestedValue>,
     ) : Infobox

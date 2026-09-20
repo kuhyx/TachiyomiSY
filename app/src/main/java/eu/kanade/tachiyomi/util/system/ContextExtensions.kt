@@ -114,7 +114,11 @@ internal fun Context.createReaderThemeContext(): Context {
     val isDarkBackground = when (readerPreferences.readerTheme.get()) {
         1, 2 -> true // Black, Gray
         // Automatic bg uses activity background by default
-        THEME_AUTOMATIC -> if (themeMode == ThemeMode.SYSTEM) applicationContext.isNightMode() else themeMode == ThemeMode.DARK
+        THEME_AUTOMATIC -> if (themeMode == ThemeMode.SYSTEM) {
+            applicationContext.isNightMode()
+        } else {
+            themeMode == ThemeMode.DARK
+        }
         else -> false // White
     }
     val expected = if (isDarkBackground) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
@@ -155,7 +159,7 @@ internal val Context.hasMiuiPackageInstaller get() = isPackageInstalled("com.miu
 
 internal val Context.isShizukuInstalled get() = isPackageInstalled("moe.shizuku.privileged.api") || Sui.isSui()
 
-internal fun Context.launchRequestPackageInstallsPermission() {
+internal fun Context.launchInstallPermissionRequest() {
     val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
             data = "package:$packageName".toUri()

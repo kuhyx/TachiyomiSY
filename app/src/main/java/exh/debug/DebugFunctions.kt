@@ -135,13 +135,13 @@ internal object DebugFunctions {
 
     fun countMangaInDatabaseInLibrary() = runBlocking { getFavorites.await().size }
 
-    fun countMangaInDatabaseNotInLibrary() = runBlocking { getAllManga.await() }.count { !it.favorite }
+    fun countMangaNotInLibrary() = runBlocking { getAllManga.await() }.count { !it.favorite }
 
     fun countMangaInDatabase() = runBlocking { getAllManga.await() }.size
 
     fun countMetadataInDatabase() = runBlocking { getSearchMetadata.await().size }
 
-    fun countMangaInLibraryWithMissingMetadata() = runBlocking {
+    fun countLibraryMissingMetadata() = runBlocking {
         getAllManga.await().count {
             it.favorite && getSearchMetadata.await(it.id) == null
         }
@@ -168,15 +168,15 @@ internal object DebugFunctions {
         "${it.id}: ${it.name} (${it.lang.uppercase()})"
     }
 
-    fun convertAllEhentaiGalleriesToExhentai() = convertSources(EH_SOURCE_ID, EXH_SOURCE_ID)
+    fun convertEhentaiToExhentai() = convertSources(EH_SOURCE_ID, EXH_SOURCE_ID)
 
-    fun convertAllExhentaiGalleriesToEhentai() = convertSources(EXH_SOURCE_ID, EH_SOURCE_ID)
+    fun convertExhentaiToEhentai() = convertSources(EXH_SOURCE_ID, EH_SOURCE_ID)
 
-    fun testLaunchEhentaiBackgroundUpdater() {
+    fun testLaunchEhUpdater() {
         EHentaiUpdateWorker.launchBackgroundTest(app)
     }
 
-    fun rescheduleEhentaiBackgroundUpdater() {
+    fun rescheduleEhUpdater() {
         EHentaiUpdateWorker.scheduleBackground(app)
     }
 
@@ -302,7 +302,7 @@ internal object DebugFunctions {
         runBlocking { database.ehQueries.resetReaderViewerForAllManga() }
     }
 
-    fun migrateLangNhentaiToMultiLangSource() {
+    fun migrateNhentaiToMultiLang() {
         val sources = nHentaiSourceIds - NHentai.otherId
 
         runBlocking { database.ehQueries.migrateAllNhentaiToOtherLang(NHentai.otherId, sources) }

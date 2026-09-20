@@ -57,9 +57,9 @@ internal class Komga(id: Long) : BaseTracker(id, "Komga"), EnhancedTracker {
 
     override suspend fun bind(track: Track, hasReadChapters: Boolean): Track = track
 
-    override suspend fun search(query: String): List<TrackSearch> {
-        TODO("Not yet implemented: search")
-    }
+    // Enhanced trackers bind by URL, so the search UI is never offered for them.
+    override suspend fun search(query: String): List<TrackSearch> =
+        throw UnsupportedOperationException("Search is not supported by this tracker")
 
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.getTrackSearch(track.trackingUrl)

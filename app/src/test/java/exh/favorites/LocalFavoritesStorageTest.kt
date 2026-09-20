@@ -1,21 +1,14 @@
+package exh.favorites
 
-import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.all.EHentai
-import exh.favorites.LocalFavoritesStorage
 import exh.metadata.metadata.EHentaiSearchMetadata
 import exh.source.EXH_SOURCE_ID
 import io.kotest.inspectors.shouldForAll
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.protobuf.ProtoBuf
-import okio.buffer
-import okio.gzip
-import okio.sink
-import okio.source
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -28,34 +21,11 @@ import tachiyomi.domain.manga.model.CustomMangaInfo
 import tachiyomi.domain.manga.model.FavoriteEntry
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.repository.CustomMangaRepository
-import java.io.File
 
-internal class Tester {
-
-    @Disabled
-    @Test
-    fun stripBackup() {
-        val bytes = File("D:\\Downloads\\pacthiyomi_2023-05-08_13-30.proto (1).gz")
-            .inputStream()
-            .source()
-            .buffer()
-            .gzip()
-            .buffer()
-            .readByteArray()
-        val backup = ProtoBuf.decodeFromByteArray(Backup.serializer(), bytes)
-        val newBytes = ProtoBuf.encodeToByteArray(
-            Backup.serializer(),
-            backup.copy(
-                backupManga = backup.backupManga.filter { it.favorite },
-            ),
-        )
-        File("D:\\Downloads\\pacthiyomi_2023-05-08_13-30 (2).proto.gz").outputStream().sink().gzip().buffer().use {
-            it.write(newBytes)
-        }
-    }
+internal class LocalFavoritesStorageTest {
 
     @Test
-    fun localFavoritesStorageTester() = runBlocking {
+    fun aliasesResolveToCanonical() = runBlocking<Unit> {
         val favorites = listOf(
             Manga.create().copy(
                 id = 1,

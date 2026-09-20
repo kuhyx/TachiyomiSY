@@ -122,7 +122,7 @@ private const val MILLIS_PER_MINUTE = 60_000L
 
 internal class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObserver {
 
-    private lateinit var activity: AppCompatActivity
+    private var activity: AppCompatActivity? = null
 
     private val preferences: BasePreferences by injectLazy()
     private val securityPreferences: SecurityPreferences by injectLazy()
@@ -141,6 +141,7 @@ internal class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifec
     }
 
     private fun setSecureScreen() {
+        val activity = activity ?: return
         val secureScreenFlow = securityPreferences.secureScreen.changes()
         val incognitoModeFlow = preferences.incognitoMode.changes()
         combine(secureScreenFlow, incognitoModeFlow) { secureScreen, incognitoMode ->
@@ -153,6 +154,7 @@ internal class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifec
 
     private fun setAppLock() {
         if (!securityPreferences.useAuthenticator.get()) return
+        val activity = activity ?: return
         if (activity.isAuthenticationSupported()) {
             if (!SecureActivityDelegate.requireUnlock) return
             activity.startActivity(Intent(activity, UnlockActivity::class.java))

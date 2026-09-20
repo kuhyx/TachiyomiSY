@@ -250,13 +250,14 @@ internal object DownloadQueueScreen : Screen() {
                 AndroidView(
                     modifier = Modifier.fillMaxWidth(),
                     factory = { context ->
-                        screenModel.controllerBinding = DownloadListBinding.inflate(LayoutInflater.from(context))
+                        val binding = DownloadListBinding.inflate(LayoutInflater.from(context))
+                        screenModel.controllerBinding = binding
                         screenModel.adapter = DownloadAdapter(screenModel.listener)
-                        screenModel.controllerBinding.root.adapter = screenModel.adapter
+                        binding.root.adapter = screenModel.adapter
                         screenModel.adapter?.isHandleDragEnabled = true
-                        screenModel.controllerBinding.root.layoutManager = LinearLayoutManager(context)
+                        binding.root.layoutManager = LinearLayoutManager(context)
 
-                        ViewCompat.setNestedScrollingEnabled(screenModel.controllerBinding.root, true)
+                        ViewCompat.setNestedScrollingEnabled(binding.root, true)
 
                         scope.launchUI {
                             screenModel.getDownloadStatusFlow()
@@ -267,16 +268,15 @@ internal object DownloadQueueScreen : Screen() {
                                 .collect(screenModel::onUpdateDownloadedPages)
                         }
 
-                        screenModel.controllerBinding.root
+                        binding.root
                     },
-                    update = {
-                        screenModel.controllerBinding.root
-                            .updatePadding(
-                                left = left,
-                                top = top,
-                                right = right,
-                                bottom = bottom,
-                            )
+                    update = { view ->
+                        view.updatePadding(
+                            left = left,
+                            top = top,
+                            right = right,
+                            bottom = bottom,
+                        )
 
                         screenModel.adapter?.updateDataSet(downloadList)
                     },

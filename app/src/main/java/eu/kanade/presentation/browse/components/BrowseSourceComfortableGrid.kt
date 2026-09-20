@@ -54,7 +54,7 @@ internal fun BrowseSourceComfortableGrid(
             val metadata = pair.second
             // SY <--
 
-            BrowseSourceComfortableGridItem(
+            BrowseComfortableGridItem(
                 manga = manga,
                 // SY -->
                 metadata = metadata,
@@ -73,7 +73,7 @@ internal fun BrowseSourceComfortableGrid(
 }
 
 @Composable
-private fun BrowseSourceComfortableGridItem(
+private fun BrowseComfortableGridItem(
     manga: Manga,
     // SY -->
     metadata: RaisedSearchMetadata?,

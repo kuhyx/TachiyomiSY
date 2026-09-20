@@ -86,7 +86,7 @@ internal fun SuggestionChip(
     enabled: Boolean = true,
     icon: @Composable (() -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    elevation: ChipElevation? = SuggestionChipDefaults.suggestionChipElevation(),
+    elevation: ChipElevation? = SuggestionChipDefaults.elevatedChipElevation(),
     shape: Shape = MaterialTheme.shapes.small,
     border: ChipBorder? = SuggestionChipDefaults.suggestionChipBorder(),
     colors: ChipColors = SuggestionChipDefaults.suggestionChipColors(),
@@ -383,7 +383,7 @@ internal object SuggestionChipDefaults {
      * @param disabledElevation the elevation used when the chip is not enabled
      */
     @Composable
-    fun elevatedSuggestionChipElevation(
+    fun elevatedChipElevation(
         defaultElevation: Dp = 1.0.dp,
         pressedElevation: Dp = 1.0.dp,
         focusedElevation: Dp = 1.0.dp,
@@ -562,9 +562,7 @@ internal class ChipElevation internal constructor(
     internal fun tonalElevation(
         enabled: Boolean,
         interactionSource: InteractionSource,
-    ): State<Dp> {
-        return animateElevation(enabled = enabled, interactionSource = interactionSource)
-    }
+    ): State<Dp> = animateElevation(enabled = enabled, interactionSource = interactionSource)
 
     /**
      * Represents the shadow elevation used in a chip, depending on its [enabled] state and
@@ -581,9 +579,7 @@ internal class ChipElevation internal constructor(
     internal fun shadowElevation(
         enabled: Boolean,
         interactionSource: InteractionSource,
-    ): State<Dp> {
-        return animateElevation(enabled = enabled, interactionSource = interactionSource)
-    }
+    ): State<Dp> = animateElevation(enabled = enabled, interactionSource = interactionSource)
 
     @Composable
     private fun animateElevation(

@@ -24,12 +24,12 @@ internal class DownloadHolder(private val view: View, val adapter: DownloadAdapt
         binding.menu.setOnClickListener { it.post { showPopupMenu(it) } }
     }
 
-    private lateinit var download: Download
+    private var download: Download? = null
 
     /**
-     * Binds this holder with the given category.
+     * Binds this holder with the given download.
      *
-     * @param category The category to bind.
+     * @param download The download to bind.
      */
     fun bind(download: Download) {
         this.download = download
@@ -56,6 +56,7 @@ internal class DownloadHolder(private val view: View, val adapter: DownloadAdapt
      * Updates the progress bar of the download.
      */
     fun notifyProgress() {
+        val download = download ?: return
         val pages = download.pages ?: return
         if (binding.downloadProgress.max == 1) {
             binding.downloadProgress.max = pages.size * PERCENT
@@ -67,6 +68,7 @@ internal class DownloadHolder(private val view: View, val adapter: DownloadAdapt
      * Updates the text field of the number of downloaded pages.
      */
     fun notifyDownloadedPages() {
+        val download = download ?: return
         val pages = download.pages ?: return
         binding.downloadProgressText.text = "${download.downloadedImages}/${pages.size}"
     }

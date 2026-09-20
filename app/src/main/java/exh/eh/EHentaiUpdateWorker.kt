@@ -105,20 +105,51 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
         val metadataManga = getExhFavoriteMangaWithMetadata.await()
 
         logger.d("Filtering manga and raising metadata...")
+        val allMeta = collectUpdateEntries(metadataManga)
+
+        logger.d("Found %s manga to update, starting updates!", allMeta.size)
+        val mangaMetaToUpdateThisIter = allMeta.take(UPDATES_PER_ITERATION)
+
+        val iteration = UpdateIteration(mangaMetaToUpdateThisIter.size)
+        try {
+            for ((index, entry) in mangaMetaToUpdateThisIter.withIndex()) {
+                if (iteration.failures > MAX_UPDATE_FAILURES) {
+                    logger.w("Too many update failures, aborting...")
+                    break
+                }
+                iteration.updateGallery(index, entry)
+            }
+        } finally {
+            exhPreferences.exhAutoUpdateStats.set(
+                Json.encodeToString(
+                    EHentaiUpdaterStats(
+                        startTime,
+                        allMeta.size,
+                        iteration.updated,
+                    ),
+                ),
+            )
+
+            updateNotifier.cancelProgressNotification()
+            if (iteration.updatedManga.isNotEmpty()) {
+                libraryUpdateNotifier.showUpdateNotifications(iteration.updatedManga)
+            }
+        }
+    }
+
+    // Galleries due for a check, oldest check first; recently checked ones are skipped.
+    private suspend fun collectUpdateEntries(metadataManga: List<Manga>): List<UpdateEntry> {
         val curTime = System.currentTimeMillis()
-        val allMeta = metadataManga.asFlow().cancellable().mapNotNull { manga ->
+        return metadataManga.asFlow().cancellable().mapNotNull { manga ->
             val meta = getFlatMetadataById.await(manga.id)
                 ?: return@mapNotNull null
 
             val raisedMeta = meta.raise(EHentaiSearchMetadata::class)
 
             // Don't update galleries too frequently
-            if (raisedMeta.aged ||
-                (
-                    curTime - raisedMeta.lastUpdateCheck < MIN_BACKGROUND_UPDATE_FREQ &&
-                        DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY.enabled
-                    )
-            ) {
+            val checkedRecently = curTime - raisedMeta.lastUpdateCheck < MIN_BACKGROUND_UPDATE_FREQ &&
+                DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY.enabled
+            if (raisedMeta.aged || checkedRecently) {
                 return@mapNotNull null
             }
 
@@ -128,110 +159,88 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
 
             UpdateEntry(manga, raisedMeta, chapter)
         }.toList().sortedBy { it.meta.lastUpdateCheck }
+    }
 
-        logger.d("Found %s manga to update, starting updates!", allMeta.size)
-        val mangaMetaToUpdateThisIter = allMeta.take(UPDATES_PER_ITERATION)
+    // Mutable bookkeeping for one updater run.
+    private inner class UpdateIteration(private val total: Int) {
+        var failures: Int = 0
+        var updated: Int = 0
+        val updatedManga: MutableList<Pair<Manga, Array<Chapter>>> = mutableListOf()
+        private val modified = mutableSetOf<Long>()
 
-        var failuresThisIteration = 0
-        var updatedThisIteration = 0
-        val updatedManga = mutableListOf<Pair<Manga, Array<Chapter>>>()
-        val modifiedThisIteration = mutableSetOf<Long>()
+        suspend fun updateGallery(index: Int, entry: UpdateEntry) {
+            val (manga, meta) = entry
+            logger.d(
+                "Updating gallery (index: %s, manga.id: %s, meta.gId: %s, meta.gToken: %s, " +
+                    "failures-so-far: %s, modifiedThisIteration.size: %s)...",
+                index,
+                manga.id,
+                meta.gId,
+                meta.gToken,
+                failures,
+                modified.size,
+            )
 
-        try {
-            for ((index, entry) in mangaMetaToUpdateThisIter.withIndex()) {
-                val (manga, meta) = entry
-                if (failuresThisIteration > MAX_UPDATE_FAILURES) {
-                    logger.w("Too many update failures, aborting...")
-                    break
-                }
+            if (manga.id in modified) {
+                // We already processed this manga!
+                logger.w("Gallery already updated this iteration, skipping...")
+                updated++
+                return
+            }
 
-                logger.d(
-                    "Updating gallery (index: %s, manga.id: %s, meta.gId: %s, meta.gToken: %s, " +
-                        "failures-so-far: %s, modifiedThisIteration.size: %s)...",
-                    index,
+            val (new, chapters) = fetchChapters(manga, meta) ?: return
+            if (chapters.isEmpty()) {
+                logger.e(
+                    "No chapters found for gallery (manga.id: %s, meta.gId: %s, meta.gToken: %s, " +
+                        "failures-so-far: %s)!",
                     manga.id,
                     meta.gId,
                     meta.gToken,
-                    failuresThisIteration,
-                    modifiedThisIteration.size,
+                    failures,
                 )
+                return
+            }
 
-                if (manga.id in modifiedThisIteration) {
-                    // We already processed this manga!
-                    logger.w("Gallery already updated this iteration, skipping...")
-                    updatedThisIteration++
-                    continue
-                }
+            // Find accepted root and discard others
+            val (acceptedRoot, discardedRoots, exhNew) =
+                updateHelper.acceptRootAndDiscardOthers(manga.source, chapters)
 
-                val (new, chapters) = try {
-                    updateNotifier.showProgressNotification(
-                        manga,
-                        updatedThisIteration + failuresThisIteration,
-                        mangaMetaToUpdateThisIter.size,
-                    )
-                    updateEntryAndGetChapters(manga)
-                } catch (e: GalleryNotUpdatedException) {
-                    if (e.network) {
-                        failuresThisIteration++
+            if (new.isNotEmpty() && manga.id == acceptedRoot.manga.id) {
+                libraryPreferences.newUpdatesCount.getAndSet { it + new.size }
+                updatedManga += acceptedRoot.manga to new.toTypedArray()
+            } else if (exhNew.isNotEmpty() && updatedManga.none { it.first.id == acceptedRoot.manga.id }) {
+                libraryPreferences.newUpdatesCount.getAndSet { it + exhNew.size }
+                updatedManga += acceptedRoot.manga to exhNew.toTypedArray()
+            }
 
-                        logger.e("> Network error while updating gallery!", e)
-                        logger.e(
-                            "> (manga.id: %s, meta.gId: %s, meta.gToken: %s, failures-so-far: %s)",
-                            manga.id,
-                            meta.gId,
-                            meta.gToken,
-                            failuresThisIteration,
-                        )
-                    }
+            modified += acceptedRoot.manga.id
+            modified += discardedRoots.map { it.manga.id }
+            updated++
+        }
 
-                    continue
-                }
+        // (new, current) chapters, or null when the gallery could not be updated; network failures count.
+        private suspend fun fetchChapters(
+            manga: Manga,
+            meta: EHentaiSearchMetadata,
+        ): Pair<List<Chapter>, List<Chapter>>? =
+            try {
+                updateNotifier.showProgressNotification(manga, updated + failures, total)
+                updateEntryAndGetChapters(manga)
+            } catch (e: GalleryNotUpdatedException) {
+                if (e.network) {
+                    failures++
 
-                if (chapters.isEmpty()) {
+                    logger.e("> Network error while updating gallery!", e)
                     logger.e(
-                        "No chapters found for gallery (manga.id: %s, meta.gId: %s, meta.gToken: %s, " +
-                            "failures-so-far: %s)!",
+                        "> (manga.id: %s, meta.gId: %s, meta.gToken: %s, failures-so-far: %s)",
                         manga.id,
                         meta.gId,
                         meta.gToken,
-                        failuresThisIteration,
+                        failures,
                     )
-
-                    continue
                 }
-
-                // Find accepted root and discard others
-                val (acceptedRoot, discardedRoots, exhNew) =
-                    updateHelper.findAcceptedRootAndDiscardOthers(manga.source, chapters)
-
-                if (new.isNotEmpty() && manga.id == acceptedRoot.manga.id) {
-                    libraryPreferences.newUpdatesCount.getAndSet { it + new.size }
-                    updatedManga += acceptedRoot.manga to new.toTypedArray()
-                } else if (exhNew.isNotEmpty() && updatedManga.none { it.first.id == acceptedRoot.manga.id }) {
-                    libraryPreferences.newUpdatesCount.getAndSet { it + exhNew.size }
-                    updatedManga += acceptedRoot.manga to exhNew.toTypedArray()
-                }
-
-                modifiedThisIteration += acceptedRoot.manga.id
-                modifiedThisIteration += discardedRoots.map { it.manga.id }
-                updatedThisIteration++
+                null
             }
-        } finally {
-            exhPreferences.exhAutoUpdateStats.set(
-                Json.encodeToString(
-                    EHentaiUpdaterStats(
-                        startTime,
-                        allMeta.size,
-                        updatedThisIteration,
-                    ),
-                ),
-            )
-
-            updateNotifier.cancelProgressNotification()
-            if (updatedManga.isNotEmpty()) {
-                libraryUpdateNotifier.showUpdateNotifications(updatedManga)
-            }
-        }
     }
 
     // New, current

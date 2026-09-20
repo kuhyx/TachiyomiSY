@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.databinding.RecommendationSearchBottomSheetBinding
 import uy.kohesive.injekt.injectLazy
 
 @Composable
-internal fun RecommendationSearchBottomSheetDialog(
+internal fun RecSearchBottomSheetDialog(
     onDismissRequest: () -> Unit,
     onSearchRequest: () -> Unit,
 ) {

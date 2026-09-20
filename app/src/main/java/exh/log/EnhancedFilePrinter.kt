@@ -17,14 +17,8 @@ import com.elvishew.xlog.flattener.Flattener2 as Flattener
 /**
  * Log [Printer] using file system. When print a log, it will print it to the specified file.
  *
- * Use the [Builder] to construct a [EnhancedFilePrinter] object.
- *
- * @param folder The folder path of log file.
- * @param fileNameGenerator the file name generator for log file.
- * @param backupStrategy the backup strategy for log file.
- * @param cleanStrategy The clean strategy for log file.
- * @param flattener The flattener when print a log.
- *
+ * Use the [Builder] to construct a [EnhancedFilePrinter] object. It needs the log folder, a file name
+ * generator, a backup strategy and the flattener used when printing a log.
  */
 @Suppress("unused")
 internal class EnhancedFilePrinter internal constructor(
@@ -104,8 +98,7 @@ internal class EnhancedFilePrinter internal constructor(
     }
 
     /**
-     * Builder for [EnhancedFilePrinter].
-     * @param folderPath the folder path of log file
+     * Builder for [EnhancedFilePrinter] writing into one log folder.
      */
     class Builder(private val folder: UniFile) {
         /**
@@ -269,7 +262,7 @@ internal class EnhancedFilePrinter internal constructor(
         /**
          * Open the file of specific name to be written into.
          *
-         * @param newFileName the specific file name
+         * @param file the file to write into
          * @return true if opened successfully, false otherwise
          */
         fun open(file: UniFile): Boolean {

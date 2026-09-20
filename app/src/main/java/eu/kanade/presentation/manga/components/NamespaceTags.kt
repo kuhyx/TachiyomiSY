@@ -110,12 +110,12 @@ internal fun NamespaceTags(
                     modifier = Modifier.padding(start = 8.dp, end = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    tags.forEach { (_, text, search, border) ->
-                        val borderDp = border?.dp
+                    tags.forEach { tag ->
+                        val borderDp = tag.border?.dp
                         TagsChip(
                             modifier = Modifier.padding(vertical = 4.dp),
-                            text = text,
-                            onClick = { onClick(search) },
+                            text = tag.text,
+                            onClick = { onClick(tag.search) },
                             border = borderDp?.let {
                                 SuggestionChipDefaults.suggestionChipBorder(borderWidth = it)
                             } ?: SuggestionChipDefaults.suggestionChipBorder(),

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.widget.EditTextPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.InfoWidget
 import eu.kanade.presentation.more.settings.widget.ListPreferenceWidget
-import eu.kanade.presentation.more.settings.widget.MultiSelectListPreferenceWidget
+import eu.kanade.presentation.more.settings.widget.MultiSelectListPrefWidget
 import eu.kanade.presentation.more.settings.widget.PrefsHorizontalPadding
 import eu.kanade.presentation.more.settings.widget.PrefsVerticalPadding
 import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
@@ -130,7 +130,7 @@ internal fun PreferenceItem(
             }
             is Preference.PreferenceItem.MultiSelectListPreference<*> -> {
                 val values by item.preference.collectAsState()
-                MultiSelectListPreferenceWidget(
+                MultiSelectListPrefWidget(
                     values = values,
                     title = item.title,
                     subtitle = item.internalSubtitleProvider(values, item.entries),

@@ -7,7 +7,7 @@ import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 /**
  * Adapter storing a list of downloads.
  *
- * @param downloadItemListener Listener called when an item of the list is released.
+ * @property downloadItemListener Listener called when an item of the list is released.
  */
 internal class DownloadAdapter(
     val downloadItemListener: DownloadItemListener,
@@ -17,10 +17,9 @@ internal class DownloadAdapter(
     true,
 ) {
 
-    override fun shouldMove(fromPosition: Int, toPosition: Int): Boolean {
-        // Don't let sub-items changing group
-        return getHeaderOf(getItem(fromPosition)) == getHeaderOf(getItem(toPosition))
-    }
+    // Don't let sub-items changing group
+    override fun shouldMove(fromPosition: Int, toPosition: Int): Boolean =
+        getHeaderOf(getItem(fromPosition)) == getHeaderOf(getItem(toPosition))
 
     interface DownloadItemListener {
         fun onItemReleased(position: Int)

@@ -58,7 +58,7 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Cache where we dump the downloads directory from the filesystem. This class is needed because
  * directory checking is expensive and it slows down the app. The cache is invalidated by the time
- * defined in [renewInterval] as we don't have any control over the filesystem and the user can
+ * defined by the renew interval as we don't have any control over the filesystem and the user can
  * delete the folders at any time without the app noticing.
  */
 internal class DownloadCache(
@@ -441,11 +441,9 @@ internal class DownloadCache(
         notifyChanges()
     }
 
-    private fun getSources(): List<Source> {
-        // SY -->
-        return sourceManager.getVisibleOnlineSources() + sourceManager.getStubSources()
-        // SY <--
-    }
+    // SY --> stub sources included so their downloads are still counted
+    private fun getSources(): List<Source> = sourceManager.getVisibleOnlineSources() + sourceManager.getStubSources()
+    // SY <--
 
     private fun notifyChanges() {
         scope.launchNonCancellable {
@@ -479,7 +477,7 @@ internal class DownloadCache(
  * Class to store the files under the root downloads directory.
  */
 @Serializable
-private class RootDirectory(
+private data class RootDirectory(
     @Serializable(with = UniFileAsStringSerializer::class)
     val dir: UniFile?,
     var sourceDirs: Map<Long, SourceDirectory> = mapOf(),
@@ -489,7 +487,7 @@ private class RootDirectory(
  * Class to store the files under a source directory.
  */
 @Serializable
-private class SourceDirectory(
+private data class SourceDirectory(
     @Serializable(with = UniFileAsStringSerializer::class)
     val dir: UniFile?,
     var mangaDirs: Map<String, MangaDirectory> = mapOf(),
@@ -499,7 +497,7 @@ private class SourceDirectory(
  * Class to store the files under a manga directory.
  */
 @Serializable
-private class MangaDirectory(
+private data class MangaDirectory(
     @Serializable(with = UniFileAsStringSerializer::class)
     val dir: UniFile?,
     var chapterDirs: MutableSet<String> = mutableSetOf(),

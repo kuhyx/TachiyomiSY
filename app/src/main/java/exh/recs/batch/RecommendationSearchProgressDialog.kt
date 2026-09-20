@@ -23,7 +23,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
 @Composable
-internal fun RecommendationSearchProgressDialog(
+internal fun RecSearchProgressDialog(
     status: SearchStatus,
     setStatusIdle: () -> Unit,
     setStatusCancelling: () -> Unit,

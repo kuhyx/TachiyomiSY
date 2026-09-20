@@ -267,7 +267,7 @@ internal class MangaScreenModel(
                         launchIO {
                             try {
                                 val (acceptedChain) =
-                                    updateHelper.findAcceptedRootAndDiscardOthers(manga.source, chapters)
+                                    updateHelper.acceptRootAndDiscardOthers(manga.source, chapters)
                                 // Redirect if we are not the accepted root
                                 if (manga.id != acceptedChain.manga.id && acceptedChain.manga.favorite) {
                                     // Update if any of our chapters are not in accepted manga's chapters
@@ -314,14 +314,16 @@ internal class MangaScreenModel(
                 .combine(downloadManager.queueState) { state, _ -> state }
                 // SY <--
                 .flowWithLifecycle(lifecycle)
-                .collectLatest { (manga, chapters /* SY --> */, flatMetadata, mergedData /* SY <-- */) ->
-                    val chapterItems = chapters.toChapterListItems(manga /* SY --> */, mergedData /* SY <-- */)
+                .collectLatest { combined ->
+                    val manga = combined.manga
+                    val mergedData = combined.mergedData
+                    val chapterItems = combined.chapters.toChapterListItems(manga /* SY --> */, mergedData /* SY <-- */)
                     updateSuccessState {
                         it.copy(
                             manga = manga,
                             chapters = chapterItems,
                             // SY -->
-                            meta = raiseMetadata(flatMetadata, it.source),
+                            meta = raiseMetadata(combined.flatMetadata, it.source),
                             mergedData = mergedData,
                             // SY <--
                         )
@@ -914,7 +916,7 @@ internal class MangaScreenModel(
             .map { it.id }
     }
 
-    fun moveMangaToCategoriesAndAddToLibrary(manga: Manga, categories: List<Long>) {
+    fun addToLibraryInCategories(manga: Manga, categories: List<Long>) {
         moveMangaToCategory(categories)
         if (manga.favorite) return
 
@@ -1317,6 +1319,7 @@ internal class MangaScreenModel(
     /**
      * Bookmarks the given list of chapters.
      * @param chapters the list of chapters to bookmark.
+     * @param bookmarked whether to bookmark or un-bookmark them.
      */
     fun bookmarkChapters(chapters: List<Chapter>, bookmarked: Boolean) {
         screenModelScope.launchIO {
@@ -1467,7 +1470,7 @@ internal class MangaScreenModel(
                 if (selectedIndex < 0) return@apply
 
                 val selectedItem = get(selectedIndex)
-                if ((selectedItem.selected && selected) || (!selectedItem.selected && !selected)) return@apply
+                if (selectedItem.selected == selected) return@apply
 
                 val firstSelection = none { it.selected }
                 set(selectedIndex, selectedItem.copy(selected = selected))

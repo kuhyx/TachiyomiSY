@@ -59,9 +59,9 @@ import eu.kanade.presentation.manga.components.MangaInfoBox
 import eu.kanade.presentation.manga.components.MangaInfoButtons
 import eu.kanade.presentation.manga.components.MangaToolbar
 import eu.kanade.presentation.manga.components.MissingChapterCountListItem
-import eu.kanade.presentation.manga.components.PagePreviewItems
 import eu.kanade.presentation.manga.components.PagePreviews
 import eu.kanade.presentation.manga.components.SearchMetadataChips
+import eu.kanade.presentation.manga.components.pagePreviewItems
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.Source
@@ -548,7 +548,7 @@ private fun MangaScreenSmallImpl(
                     }
 
                     if (state.pagePreviewsState !is PagePreviewState.Unused && previewsRowCount > 0) {
-                        PagePreviewItems(
+                        pagePreviewItems(
                             pagePreviewState = state.pagePreviewsState,
                             onOpenPage = onOpenPagePreview,
                             onMorePreviewsClicked = onMorePreviewsClicked,

@@ -13,6 +13,7 @@ import uy.kohesive.injekt.api.get
  * Class used to keep a list of chapters for future deletion.
  *
  * @param context the application context.
+ * @param json serializer for the pending list.
  */
 internal class DownloadPendingDeleter(
     context: Context,

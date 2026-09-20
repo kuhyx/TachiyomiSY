@@ -238,7 +238,9 @@ internal class ShikimoriApi(
                     .awaitSuccess()
                     .parseAs<SMMetadata>()
                     .let {
-                        if (it.data.mangas.isEmpty()) throw NoSuchElementException("Could not get metadata from Shikimori")
+                        if (it.data.mangas.isEmpty()) {
+                            throw NoSuchElementException("Could not get metadata from Shikimori")
+                        }
                         val manga = it.data.mangas[0]
                         TrackMangaMetadata(
                             remoteId = manga.id.toLong(),

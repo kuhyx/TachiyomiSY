@@ -14,7 +14,7 @@ internal class TrackImpl : Track {
 
     override var libraryId: Long? = null
 
-    override lateinit var title: String
+    override var title: String = ""
 
     override var lastChapterRead: Double = 0.0
 

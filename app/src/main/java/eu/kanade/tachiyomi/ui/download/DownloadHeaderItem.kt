@@ -24,9 +24,7 @@ internal data class DownloadHeaderItem(
     override fun createViewHolder(
         view: View,
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-    ): DownloadHeaderHolder {
-        return DownloadHeaderHolder(view, adapter)
-    }
+    ): DownloadHeaderHolder = DownloadHeaderHolder(view, adapter)
 
     override fun bindViewHolder(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,

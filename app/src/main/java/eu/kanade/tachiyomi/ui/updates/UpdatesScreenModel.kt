@@ -275,6 +275,7 @@ internal class UpdatesScreenModel(
     /**
      * Bookmarks the given list of chapters.
      * @param updates the list of chapters to bookmark.
+     * @param bookmark whether to bookmark or un-bookmark them.
      */
     fun bookmarkUpdates(updates: List<UpdatesItem>, bookmark: Boolean) {
         screenModelScope.launchIO {
@@ -293,9 +294,8 @@ internal class UpdatesScreenModel(
             val groupedUpdates = updatesItem.groupBy { it.update.mangaId }.values
             for (updates in groupedUpdates) {
                 val mangaId = updates.first().update.mangaId
-                val manga = getManga.await(mangaId) ?: continue
-                // Don't download if source isn't available
-                sourceManager.get(manga.source) ?: continue
+                // Don't download if the manga or its source isn't available
+                val manga = getManga.await(mangaId)?.takeIf { sourceManager.get(it.source) != null } ?: continue
                 val chapters = updates.mapNotNull { getChapter.await(it.update.chapterId) }
                 downloadManager.downloadChapters(manga, chapters)
             }

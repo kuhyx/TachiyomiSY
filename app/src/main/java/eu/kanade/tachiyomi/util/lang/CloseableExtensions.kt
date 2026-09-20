@@ -6,6 +6,7 @@ import java.io.Closeable
  * Executes the given block function on this resources and then closes it down correctly whether an exception is
  * thrown or not.
  *
+ * @param T the closeable element type.
  * @param block a function to process with given Closeable resources.
  * @return the result of block function invoked on this resource.
  */

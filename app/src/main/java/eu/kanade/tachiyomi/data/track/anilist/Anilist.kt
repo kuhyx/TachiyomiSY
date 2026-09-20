@@ -87,10 +87,8 @@ internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker 
         }
     }
 
-    override fun get10PointScore(track: DomainTrack): Double {
-        // Score is stored in 100 point format
-        return track.score / POINTS_PER_TEN_POINT_STEP
-    }
+    // Score is stored in 100 point format
+    override fun get10PointScore(track: DomainTrack): Double = track.score / POINTS_PER_TEN_POINT_STEP
 
     override fun indexToScore(index: Int): Double {
         return when (scorePreference.get()) {

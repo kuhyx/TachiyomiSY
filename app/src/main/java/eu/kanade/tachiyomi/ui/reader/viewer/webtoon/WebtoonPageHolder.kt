@@ -47,12 +47,14 @@ internal class WebtoonPageHolder(
     viewer: WebtoonViewer,
 ) : WebtoonBaseHolder(frame, viewer) {
 
-    // Loading progress bar to indicate the current progress.
-    private val progressIndicator = createProgressIndicator()
-
     // Progress bar container. Needed to keep a minimum height size of the holder, otherwise the
     // adapter would create more views to fill the screen, which is not wanted.
-    private lateinit var progressContainer: ViewGroup
+    private val progressContainer: ViewGroup = FrameLayout(context).also {
+        frame.addView(it, MATCH_PARENT, parentHeight)
+    }
+
+    // Loading progress bar to indicate the current progress.
+    private val progressIndicator = createProgressIndicator()
 
     // Error layout to show when the image fails to load.
     private var errorLayout: ReaderErrorBinding? = null
@@ -244,9 +246,6 @@ internal class WebtoonPageHolder(
 
     // Creates a new progress bar.
     private fun createProgressIndicator(): ReaderProgressIndicator {
-        progressContainer = FrameLayout(context)
-        frame.addView(progressContainer, MATCH_PARENT, parentHeight)
-
         val progress = ReaderProgressIndicator(context).apply {
             updateLayoutParams<FrameLayout.LayoutParams> {
                 updateMargins(top = parentHeight / 4)

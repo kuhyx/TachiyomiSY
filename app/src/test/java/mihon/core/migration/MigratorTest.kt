@@ -42,7 +42,7 @@ internal class MigratorTest {
         assertInstanceOf(InitialMigrationStrategy::class.java, strategy)
 
         val migrations = slot<List<Migration>>()
-        val execute = strategy(listOf(Migration.of(Migration.ALWAYS) { true }, Migration.of(2f) { false }))
+        val execute = strategy(listOf(migration(Migration.ALWAYS) { true }, migration(2f) { false }))
 
         execute.await()
 
@@ -56,7 +56,7 @@ internal class MigratorTest {
         val strategy = migrationStrategyFactory.create(1, 1)
         assertInstanceOf(NoopMigrationStrategy::class.java, strategy)
 
-        val execute = strategy(listOf(Migration.of(Migration.ALWAYS) { true }, Migration.of(2f) { false }))
+        val execute = strategy(listOf(migration(Migration.ALWAYS) { true }, migration(2f) { false }))
 
         val result = execute.await()
         assertFalse(result)
@@ -83,7 +83,7 @@ internal class MigratorTest {
         assertInstanceOf(VersionRangeMigrationStrategy::class.java, strategy)
 
         val migrations = slot<List<Migration>>()
-        val execute = strategy(listOf(Migration.of(Migration.ALWAYS) { true }, Migration.of(2f) { true }))
+        val execute = strategy(listOf(migration(Migration.ALWAYS) { true }, migration(2f) { true }))
 
         execute.await()
 
@@ -95,16 +95,16 @@ internal class MigratorTest {
     @Test
     fun largeMigration() = runBlocking {
         val input = listOf(
-            Migration.of(Migration.ALWAYS) { true },
-            Migration.of(2f) { true },
-            Migration.of(3f) { true },
-            Migration.of(4f) { true },
-            Migration.of(5f) { true },
-            Migration.of(6f) { true },
-            Migration.of(7f) { true },
-            Migration.of(8f) { true },
-            Migration.of(9f) { true },
-            Migration.of(10f) { true },
+            migration(Migration.ALWAYS) { true },
+            migration(2f) { true },
+            migration(3f) { true },
+            migration(4f) { true },
+            migration(5f) { true },
+            migration(6f) { true },
+            migration(7f) { true },
+            migration(8f) { true },
+            migration(9f) { true },
+            migration(10f) { true },
         )
 
         val strategy = migrationStrategyFactory.create(1, 10)
@@ -128,9 +128,9 @@ internal class MigratorTest {
         val migrations = slot<List<Migration>>()
         val execute = strategy(
             listOf(
-                Migration.of(Migration.ALWAYS) { true },
-                Migration.of(2f) { true },
-                Migration.of(3f) { false },
+                migration(Migration.ALWAYS) { true },
+                migration(2f) { true },
+                migration(3f) { false },
             ),
         )
 
@@ -159,4 +159,11 @@ internal class MigratorTest {
             mainThreadSurrogate.close()
         }
     }
+}
+
+// Test double: a migration whose outcome is fixed by [action].
+private fun migration(version: Float, action: suspend (MigrationContext) -> Boolean): Migration = object : Migration {
+    override val version: Float = version
+
+    override suspend operator fun invoke(migrationContext: MigrationContext): Boolean = action(migrationContext)
 }

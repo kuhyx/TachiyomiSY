@@ -262,12 +262,10 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
                     }.coerceAtLeast(0)
 
                     // Add a shifted page to the first place there isnt a full page
-                    run loop@{
-                        (fullPageBeforeIndex until items.size).forEach {
-                            if (items[it]?.fullPage == false) {
-                                items[it]?.shiftedPage = true
-                                return@loop
-                            }
+                    for (i in fullPageBeforeIndex until items.size) {
+                        if (items[i]?.fullPage == false) {
+                            items[i]?.shiftedPage = true
+                            break
                         }
                     }
                 }
@@ -280,12 +278,9 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
                     if (currentItem?.fullPage == true || currentItem?.shiftedPage == true) {
                         // Add a 'blank' page after each full page. It will be used when chunked to solo a page
                         items.add(itemIndex + 1, null)
-                        if (
-                            currentItem.fullPage &&
-                            itemIndex > 0 &&
-                            items[itemIndex - 1] != null &&
-                            (itemIndex - 1) % 2 == 0
-                        ) {
+                        val previousIsEvenPage =
+                            itemIndex > 0 && items[itemIndex - 1] != null && (itemIndex - 1) % 2 == 0
+                        if (currentItem.fullPage && previousIsEvenPage) {
                             // If a page is a full page, check if the previous page needs to be isolated
                             // we should check if it's an even or odd page, since even pages need shifting
                             // For example if Page 1 is full, Page 0 needs to be isolated
@@ -332,7 +327,9 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
             else -> oldCurrent?.first ?: return
         }
 
-        val index = if (newPage is ChapterTransition && joinedItems.none { it.first == newPage || it.second == newPage }) {
+        val isUnjoinedTransition = newPage is ChapterTransition &&
+            joinedItems.none { it.first == newPage || it.second == newPage }
+        val index = if (isUnjoinedTransition) {
             val filteredPages = joinedItems.filter {
                 it.first is ReaderPage &&
                     (it.first as ReaderPage).chapter == newPage.to

@@ -60,7 +60,7 @@ internal class LibraryUpdateNotifier(
 
     // Pending intent of action that cancels the library update.
     private val cancelIntent by lazy {
-        NotificationReceiver.cancelLibraryUpdatePendingBroadcast(context)
+        NotificationReceiver.cancelLibraryUpdateBroadcast(context)
     }
 
     // Bitmap of the app for notifications.
@@ -114,7 +114,7 @@ internal class LibraryUpdateNotifier(
     /**
      * Warn when excessively checking any single source.
      */
-    fun showQueueSizeWarningNotificationIfNeeded(mangaToUpdate: List<LibraryManga>) {
+    fun showQueueSizeWarningIfNeeded(mangaToUpdate: List<LibraryManga>) {
         val maxUpdatesFromSource = mangaToUpdate
             .groupBy { it.manga.source }
             .filterKeys { sourceManager.get(it) !is UnmeteredSource }
@@ -273,7 +273,7 @@ internal class LibraryUpdateNotifier(
                 addAction(
                     android.R.drawable.stat_sys_download_done,
                     context.stringResource(MR.strings.action_download),
-                    NotificationReceiver.downloadChaptersPendingBroadcast(
+                    NotificationReceiver.downloadChaptersBroadcast(
                         context,
                         manga,
                         chapters,

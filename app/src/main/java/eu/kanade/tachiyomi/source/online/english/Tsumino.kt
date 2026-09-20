@@ -18,7 +18,7 @@ import exh.metadata.metadata.base.RaisedTag
 import exh.source.DelegatedHttpSource
 import exh.util.dropBlank
 import exh.util.trimAll
-import exh.util.urlImportFetchSearchMangaSuspend
+import exh.util.urlImportSearchManga
 import org.jsoup.nodes.Document
 import rx.Observable
 import tachiyomi.core.common.util.lang.runAsObservable
@@ -46,7 +46,7 @@ internal class Tsumino(delegate: HttpSource, val context: Context) :
         runAsObservable { getSearchManga(page, query, filters) }
 
     override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage {
-        return urlImportFetchSearchMangaSuspend(context, query) {
+        return urlImportSearchManga(context, query) {
             super<DelegatedHttpSource>.getSearchManga(page, query, filters)
         }
     }

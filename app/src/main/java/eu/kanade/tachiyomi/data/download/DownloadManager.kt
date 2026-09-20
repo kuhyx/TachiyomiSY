@@ -184,6 +184,7 @@ internal class DownloadManager(
      *
      * @param chapterName the name of the chapter to query.
      * @param chapterScanlator scanlator of the chapter to query
+     * @param chapterUrl url of the chapter to query.
      * @param mangaTitle the title of the manga to query.
      * @param sourceId the id of the source of the chapter.
      * @param skipCache whether to skip the directory cache and check in the filesystem.
@@ -195,9 +196,7 @@ internal class DownloadManager(
         mangaTitle: String,
         sourceId: Long,
         skipCache: Boolean = false,
-    ): Boolean {
-        return cache.isChapterDownloaded(chapterName, chapterScanlator, chapterUrl, mangaTitle, sourceId, skipCache)
-    }
+    ): Boolean = cache.isChapterDownloaded(chapterName, chapterScanlator, chapterUrl, mangaTitle, sourceId, skipCache)
 
     /**
      * Returns the amount of downloaded chapters.
@@ -296,6 +295,8 @@ internal class DownloadManager(
      * @param allChapters the list of chapters to delete.
      * @param manga the manga of the chapters.
      * @param source the source of the chapters.
+     * @param removeRead whether read chapters are deleted.
+     * @param removeNonFavorite whether chapters of non-favourite manga are deleted.
      */
     suspend fun cleanupChapters(
         allChapters: List<Chapter>,

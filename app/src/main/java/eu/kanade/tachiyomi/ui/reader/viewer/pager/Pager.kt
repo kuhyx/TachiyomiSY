@@ -104,10 +104,8 @@ internal open class Pager(
      * Executes the given key event when this pager has focus. Just do nothing because the reader
      * already dispatches key events to the viewer and has more control than this method.
      */
-    override fun executeKeyEvent(event: KeyEvent): Boolean {
-        // Disable viewpager's default key event handling
-        return false
-    }
+    // Disable viewpager's default key event handling
+    override fun executeKeyEvent(event: KeyEvent): Boolean = false
 
     /**
      * Enables or disables the gesture detector.

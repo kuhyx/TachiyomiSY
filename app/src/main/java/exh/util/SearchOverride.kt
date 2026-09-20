@@ -14,7 +14,7 @@ private val galleryAdder by lazy {
 /**
  * A version of fetchSearchManga that supports URL importing.
  */
-internal suspend fun UrlImportableSource.urlImportFetchSearchMangaSuspend(
+internal suspend fun UrlImportableSource.urlImportSearchManga(
     context: Context,
     query: String,
     fail: suspend () -> MangasPage,

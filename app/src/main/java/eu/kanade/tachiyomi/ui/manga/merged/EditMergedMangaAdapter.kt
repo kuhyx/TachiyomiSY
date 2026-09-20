@@ -5,8 +5,8 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 /**
  * Adapter storing a list of merged manga.
  *
- * @param controller the context of the fragment containing this adapter.
- * @param isPriorityOrder if deduplication mode is based on priority
+ * @param listener receives the list edits.
+ * @property isPriorityOrder if deduplication mode is based on priority
  */
 internal class EditMergedMangaAdapter(listener: EditMergedSettingsState, var isPriorityOrder: Boolean) :
     FlexibleAdapter<EditMergedMangaItem>(null, listener, true),
@@ -21,7 +21,7 @@ internal class EditMergedMangaAdapter(listener: EditMergedSettingsState, var isP
         fun onItemReleased(position: Int)
         fun onDeleteClick(position: Int)
         fun onToggleChapterUpdatesClicked(position: Int)
-        fun onToggleChapterDownloadsClicked(position: Int)
+        fun onToggleDownloadsClicked(position: Int)
     }
 
     override fun onSetPrioritySort(isPriorityOrder: Boolean) {

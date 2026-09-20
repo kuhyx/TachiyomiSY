@@ -172,7 +172,7 @@ internal class SearchEngine {
             } else if (enableWildcard && (char == '*' || char == '%')) {
                 flushText()
                 queuedText.add(MultiWildcard(char.toString()))
-            } else if (char == '-' && !inQuotes && (queuedRawText.isBlank() || queuedRawText.last() == ' ')) {
+            } else if (char == '-' && !inQuotes && queuedRawText.atWordStart()) {
                 nextIsExcluded = true
             } else if (char == '$') {
                 nextIsExact = true
@@ -202,6 +202,9 @@ internal class SearchEngine {
 
         res
     }
+
+    // A leading '-' only excludes when it starts a word.
+    private fun StringBuilder.atWordStart(): Boolean = isBlank() || last() == ' '
 
     companion object {
         private const val COL_MANGA_ID = "cmid"

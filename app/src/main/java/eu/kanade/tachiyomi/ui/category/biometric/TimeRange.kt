@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.category.biometric
 import android.content.Context
 import android.text.format.DateFormat
 import java.util.Date
+import java.util.Locale
 import java.util.SimpleTimeZone
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
@@ -14,7 +15,7 @@ internal data class TimeRange(private val startTime: Duration, private val endTi
         val startMinute = (startTime - startHour.hours).inWholeMinutes
         val endHour = endTime.inWholeHours
         val endMinute = (endTime - endHour.hours).inWholeMinutes
-        return String.format("%02d:%02d - %02d:%02d", startHour, startMinute, endHour, endMinute)
+        return String.format(Locale.ROOT, "%02d:%02d - %02d:%02d", startHour, startMinute, endHour, endMinute)
     }
 
     fun getFormattedString(context: Context): String {

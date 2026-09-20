@@ -10,7 +10,7 @@ internal fun Track.toApiStatus() = when (status) {
     Hikka.DROPPED -> "dropped"
     Hikka.PLAN_TO_READ -> "planned"
     Hikka.REREADING -> "reading"
-    else -> throw NotImplementedError("Hikka: Unknown status: $status")
+    else -> throw IllegalArgumentException("Hikka: Unknown status: $status")
 }
 
 internal fun toTrackStatus(status: String) = when (status) {
@@ -19,7 +19,7 @@ internal fun toTrackStatus(status: String) = when (status) {
     "on_hold" -> Hikka.ON_HOLD
     "dropped" -> Hikka.DROPPED
     "planned" -> Hikka.PLAN_TO_READ
-    else -> throw NotImplementedError("Hikka: Unknown status: $status")
+    else -> throw IllegalArgumentException("Hikka: Unknown status: $status")
 }
 
 internal fun stringToNumber(input: String): Long {

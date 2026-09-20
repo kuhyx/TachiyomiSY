@@ -14,7 +14,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
-internal fun rememberRequestPackageInstallsPermissionState(initialValue: Boolean = false): Boolean {
+internal fun rememberInstallPermissionState(initialValue: Boolean = false): Boolean {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 

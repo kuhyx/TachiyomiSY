@@ -28,7 +28,7 @@ internal data class DummyTracker(
 ) : Tracker {
 
     override val client: OkHttpClient
-        get() = TODO("Not yet implemented")
+        get() = throw UnsupportedOperationException("DummyTracker performs no network calls")
 
     override fun getLogo(): Int = valLogo
 

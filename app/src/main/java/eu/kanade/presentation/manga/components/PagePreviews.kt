@@ -125,7 +125,7 @@ internal fun PagePreviews(
     }
 }
 
-internal fun LazyListScope.PagePreviewItems(
+internal fun LazyListScope.pagePreviewItems(
     pagePreviewState: PagePreviewState,
     onOpenPage: (Int) -> Unit,
     onMorePreviewsClicked: () -> Unit,

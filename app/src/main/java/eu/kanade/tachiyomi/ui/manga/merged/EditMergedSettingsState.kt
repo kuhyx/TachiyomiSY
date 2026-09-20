@@ -106,7 +106,7 @@ internal class EditMergedSettingsState(
             if (reference.id != adapterReference.id) return@map pair
 
             mergedMangaAdapter?.allBoundViewHolders?.firstOrNull {
-                it is EditMergedMangaHolder && it.reference.id == reference.id
+                it is EditMergedMangaHolder && it.reference?.id == reference.id
             }?.let {
                 if (it is EditMergedMangaHolder) {
                     it.updateChapterUpdatesIcon(!reference.getChapterUpdates)
@@ -117,7 +117,7 @@ internal class EditMergedSettingsState(
         }
     }
 
-    override fun onToggleChapterDownloadsClicked(position: Int) {
+    override fun onToggleDownloadsClicked(position: Int) {
         MaterialAlertDialogBuilder(context)
             .setTitle(SYMR.strings.download_merged_entry.getString(context))
             .setMessage(SYMR.strings.download_merged_entry_desc.getString(context))
@@ -136,7 +136,7 @@ internal class EditMergedSettingsState(
             if (reference.id != adapterReference.id) return@map pair
 
             mergedMangaAdapter?.allBoundViewHolders?.firstOrNull {
-                it is EditMergedMangaHolder && it.reference.id == reference.id
+                it is EditMergedMangaHolder && it.reference?.id == reference.id
             }?.let {
                 if (it is EditMergedMangaHolder) {
                     it.updateDownloadChaptersIcon(!reference.downloadChapters)
