@@ -1,23 +1,19 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.content.res.Resources
-import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
-import androidx.core.view.updateMargins
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-import eu.kanade.presentation.util.formattedMessage
 import eu.kanade.tachiyomi.databinding.ReaderErrorBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.hideMenu
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
-import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressIndicator
-import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.ui.reader.viewer.recycle
+import eu.kanade.tachiyomi.ui.reader.viewer.setImage
 import eu.kanade.tachiyomi.util.system.dpToPx
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -26,31 +22,28 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import logcat.LogPriority
 import okio.Buffer
-import okio.BufferedSource
-import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.lang.withUIContext
 import tachiyomi.core.common.util.system.ImageUtil
 import tachiyomi.core.common.util.system.logcat
-import tachiyomi.i18n.MR
 
 // Holder of the webtoon reader for a single page of a chapter.
 // @param frame the root view for this holder.
 // @param viewer the webtoon viewer.
 // @constructor creates a new webtoon holder.
 private const val PERCENT = 100f
-private const val QUARTER_TURN_DEGREES = 90f
-private const val ERROR_LAYOUT_HEIGHT = 0.8
+internal const val QUARTER_TURN_DEGREES = 90f
+internal const val ERROR_LAYOUT_HEIGHT = 0.8
 
 internal class WebtoonPageHolder(
-    private val frame: ReaderPageImageView,
+    internal val frame: ReaderPageImageView,
     viewer: WebtoonViewer,
 ) : WebtoonBaseHolder(frame, viewer) {
 
     // Progress bar container. Needed to keep a minimum height size of the holder, otherwise the
     // adapter would create more views to fill the screen, which is not wanted.
-    private val progressContainer: ViewGroup = FrameLayout(context).also {
+    internal val progressContainer: ViewGroup = FrameLayout(context).also {
         frame.addView(it, MATCH_PARENT, parentHeight)
     }
 
@@ -58,14 +51,14 @@ internal class WebtoonPageHolder(
     private val progressIndicator = createProgressIndicator()
 
     // Error layout to show when the image fails to load.
-    private var errorLayout: ReaderErrorBinding? = null
+    internal var errorLayout: ReaderErrorBinding? = null
 
     // Getter to retrieve the height of the recycler view.
-    private val parentHeight
+    internal val parentHeight
         get() = viewer.recycler.height
 
     // Page of a chapter.
-    private var page: ReaderPage? = null
+    internal var page: ReaderPage? = null
 
     private val scope = MainScope()
 
@@ -207,88 +200,9 @@ internal class WebtoonPageHolder(
         }
     }
 
-    private fun process(imageSource: BufferedSource): BufferedSource {
-        if (viewer.config.dualPageRotateToFit) {
-            return rotateDualPage(imageSource)
-        }
-
-        if (viewer.config.dualPageSplit) {
-            val isDoublePage = ImageUtil.isWideImage(imageSource)
-            if (isDoublePage) {
-                val upperSide = if (viewer.config.dualPageInvert) ImageUtil.Side.LEFT else ImageUtil.Side.RIGHT
-                return ImageUtil.splitAndMerge(imageSource, upperSide)
-            }
-        }
-
-        return imageSource
-    }
-
-    private fun rotateDualPage(imageSource: BufferedSource): BufferedSource {
-        val isDoublePage = ImageUtil.isWideImage(imageSource)
-        return if (isDoublePage) {
-            val rotation = if (viewer.config.dualPageRotateToFitInvert) -QUARTER_TURN_DEGREES else QUARTER_TURN_DEGREES
-            ImageUtil.rotateImage(imageSource, rotation)
-        } else {
-            imageSource
-        }
-    }
-
-    // Called when the page has an error.
-    private fun setError(error: Throwable?) {
-        progressContainer.isVisible = false
-        initErrorLayout(error)
-    }
-
     // Called when the image is decoded and going to be displayed.
     private fun onImageDecoded() {
         progressContainer.isVisible = false
         removeErrorLayout()
-    }
-
-    // Creates a new progress bar.
-    private fun createProgressIndicator(): ReaderProgressIndicator {
-        val progress = ReaderProgressIndicator(context).apply {
-            updateLayoutParams<FrameLayout.LayoutParams> {
-                updateMargins(top = parentHeight / 4)
-            }
-        }
-        progressContainer.addView(progress)
-        return progress
-    }
-
-    // Initializes a button to retry pages.
-    private fun initErrorLayout(error: Throwable?): ReaderErrorBinding {
-        if (errorLayout == null) {
-            errorLayout = ReaderErrorBinding.inflate(LayoutInflater.from(context), frame, true)
-            errorLayout?.root?.layoutParams =
-                FrameLayout.LayoutParams(MATCH_PARENT, (parentHeight * ERROR_LAYOUT_HEIGHT).toInt())
-            errorLayout?.actionRetry?.setOnClickListener {
-                page?.let { it.chapter.pageLoader?.retryPage(it) }
-            }
-        }
-
-        val imageUrl = page?.imageUrl
-        errorLayout?.actionOpenInWebView?.isVisible = imageUrl != null
-        if (imageUrl != null && imageUrl.startsWith("http", true)) {
-            errorLayout?.actionOpenInWebView?.setOnClickListener {
-                val sourceId = viewer.activity.viewModel.manga?.source
-
-                val intent = WebViewActivity.newIntent(context, imageUrl, sourceId)
-                context.startActivity(intent)
-            }
-        }
-
-        errorLayout?.errorMessage?.text = with(context) { error?.formattedMessage }
-            ?: context.stringResource(MR.strings.decode_image_error)
-
-        return errorLayout!!
-    }
-
-    // Removes the decode error layout from the holder, if found.
-    private fun removeErrorLayout() {
-        errorLayout?.let {
-            frame.removeView(it.root)
-            errorLayout = null
-        }
     }
 }

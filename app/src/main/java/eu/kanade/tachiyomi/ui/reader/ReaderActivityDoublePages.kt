@@ -4,6 +4,8 @@ import android.content.res.Configuration
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.setChaptersDoubleShift
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.updateShifting
 import uy.kohesive.injekt.api.get
 
 internal fun ReaderActivity.reloadChapters(doublePages: Boolean, force: Boolean = false) {

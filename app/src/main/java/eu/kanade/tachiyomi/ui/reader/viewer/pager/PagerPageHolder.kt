@@ -2,56 +2,45 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.view.LayoutInflater
-import androidx.core.view.isVisible
-import eu.kanade.presentation.util.formattedMessage
 import eu.kanade.tachiyomi.databinding.ReaderErrorBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.hideMenu
-import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressIndicator
-import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.ui.reader.viewer.setImage
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import logcat.LogPriority
 import okio.Buffer
-import okio.BufferedSource
-import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.lang.withUIContext
 import tachiyomi.core.common.util.system.ImageUtil
 import tachiyomi.core.common.util.system.logcat
-import tachiyomi.decoder.ImageDecoder
-import tachiyomi.i18n.MR
-import kotlin.math.max
 
 // View of the ViewPager that contains a page of a chapter.
 // Progress-bar milestones while a page is prepared, and the double-page layout metrics.
 private const val PROGRESS_DECODING = 95
-private const val PROGRESS_SPLITTING = 96
-private const val PROGRESS_MERGING = 97
+internal const val PROGRESS_SPLITTING = 96
+internal const val PROGRESS_MERGING = 97
 private const val PROGRESS_DONE = 100
 private const val STREAM_BUFFER_SIZE = 16
-private const val QUARTER_TURN_DEGREES = 90f
-private const val CENTER_MARGIN_PX = 96
-private const val HALF_CENTER_MARGIN_PX = 48
-private const val SPLIT_DELAY_MS = 100L
+internal const val QUARTER_TURN_DEGREES = 90f
+internal const val CENTER_MARGIN_PX = 96
+internal const val HALF_CENTER_MARGIN_PX = 48
+internal const val PAGE_SPLIT_DELAY_MS = 100L
 
 @SuppressLint("ViewConstructor")
 internal class PagerPageHolder(
     readerThemedContext: Context,
     val viewer: PagerViewer,
     val page: ReaderPage,
-    private var extraPage: ReaderPage? = null,
+    internal var extraPage: ReaderPage? = null,
 ) : ReaderPageImageView(readerThemedContext), ViewPagerAdapter.PositionableView {
 
     /**
@@ -61,12 +50,12 @@ internal class PagerPageHolder(
         get() = page to extraPage
 
     // Loading progress bar to indicate the current progress.
-    private var progressIndicator: ReaderProgressIndicator? = null // = ReaderProgressIndicator(readerThemedContext)
+    internal var progressIndicator: ReaderProgressIndicator? = null // = ReaderProgressIndicator(readerThemedContext)
 
     // Error layout to show when the image fails to load.
-    private var errorLayout: ReaderErrorBinding? = null
+    internal var errorLayout: ReaderErrorBinding? = null
 
-    private val scope = MainScope()
+    internal val scope = MainScope()
 
     // Job for loading the page and processing changes to the page's status.
     private var loadJob: Job? = null
@@ -216,137 +205,7 @@ internal class PagerPageHolder(
         }
     }
 
-    private fun process(page: ReaderPage, imageSource: BufferedSource): BufferedSource {
-        if (viewer.config.dualPageRotateToFit) {
-            return rotateDualPage(imageSource)
-        }
-
-        if (!viewer.config.dualPageSplit) {
-            return imageSource
-        }
-
-        if (page is InsertPage) {
-            return splitInHalf(imageSource)
-        }
-
-        val isDoublePage = ImageUtil.isWideImage(imageSource)
-        if (!isDoublePage) {
-            return imageSource
-        }
-
-        onPageSplit(page)
-
-        return splitInHalf(imageSource)
-    }
-
-    private fun rotateDualPage(imageSource: BufferedSource): BufferedSource {
-        val isDoublePage = ImageUtil.isWideImage(imageSource)
-        return if (isDoublePage) {
-            val rotation = if (viewer.config.dualPageRotateToFitInvert) -QUARTER_TURN_DEGREES else QUARTER_TURN_DEGREES
-            ImageUtil.rotateImage(imageSource, rotation)
-        } else {
-            imageSource
-        }
-    }
-
-    private fun mergePages(imageSource: BufferedSource, imageSource2: BufferedSource?): BufferedSource {
-        // Handle adding a center margin to wide images if requested
-        if (imageSource2 == null) {
-            return handleWideImage(imageSource)
-        }
-
-        if (page.fullPage) return imageSource
-        if (ImageUtil.isAnimatedAndSupported(imageSource)) {
-            page.fullPage = true
-            splitDoublePages()
-            return imageSource
-        } else if (ImageUtil.isAnimatedAndSupported(imageSource2)) {
-            page.isolatedPage = true
-            extraPage?.fullPage = true
-            splitDoublePages()
-            return imageSource
-        }
-
-        val imageBitmap = decodeImage(imageSource)
-        if (imageBitmap == null) {
-            imageSource2.close()
-            page.fullPage = true
-            splitDoublePages()
-            logcat(LogPriority.ERROR) { "Cannot combine pages" }
-            return imageSource
-        }
-
-        scope.launch { progressIndicator?.setProgress(PROGRESS_SPLITTING) }
-        if (imageBitmap.height < imageBitmap.width) {
-            imageSource2.close()
-            page.fullPage = true
-            splitDoublePages()
-            return imageSource
-        }
-
-        val imageBitmap2 = decodeImage(imageSource2)
-        if (imageBitmap2 == null) {
-            imageSource2.close()
-            extraPage?.fullPage = true
-            page.isolatedPage = true
-            splitDoublePages()
-            logcat(LogPriority.ERROR) { "Cannot combine pages" }
-            return imageSource
-        }
-
-        scope.launch { progressIndicator?.setProgress(PROGRESS_MERGING) }
-        if (imageBitmap2.height < imageBitmap2.width) {
-            imageSource2.close()
-            extraPage?.fullPage = true
-            page.isolatedPage = true
-            splitDoublePages()
-            return imageSource
-        }
-
-        val isLTR = (viewer !is R2LPagerViewer) xor viewer.config.invertDoublePages
-        val centerMargin = calculateCenterMargin(imageBitmap.height, imageBitmap2.height)
-
-        imageSource.close()
-        imageSource2.close()
-
-        return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, centerMargin, viewer.config.pageCanvasColor) {
-            updateProgress(it)
-        }
-    }
-
-    private fun handleWideImage(imageSource: BufferedSource): BufferedSource {
-        val wantsCenterMargin =
-            viewer.config.centerMarginType and PagerConfig.CenterMarginType.WIDE_PAGE_CENTER_MARGIN > 0 &&
-                !viewer.config.imageCropBorders
-        val isStillWideImage = !ImageUtil.isAnimatedAndSupported(imageSource) && ImageUtil.isWideImage(imageSource)
-        return if (wantsCenterMargin && isStillWideImage) {
-            ImageUtil.addHorizontalCenterMargin(imageSource, height, context)
-        } else {
-            imageSource
-        }
-    }
-
-    private fun decodeImage(imageSource: BufferedSource): Bitmap? {
-        return try {
-            ImageDecoder.newInstance(imageSource.inputStream())?.decode()
-        } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected) { "Cannot decode image" }
-            null
-        }
-    }
-
-    private fun calculateCenterMargin(height: Int, height2: Int): Int {
-        return if (viewer.config.centerMarginType and PagerConfig.CenterMarginType.DOUBLE_PAGE_CENTER_MARGIN > 0 &&
-            !viewer.config.imageCropBorders
-        ) {
-            CENTER_MARGIN_PX / (this.height.coerceAtLeast(1) / max(height, height2).coerceAtLeast(1)).coerceAtLeast(1)
-        } else {
-            0
-        }
-    }
-
-    private fun updateProgress(progress: Int) {
+    internal fun updateProgress(progress: Int) {
         scope.launch {
             if (progress == PROGRESS_DONE) {
                 progressIndicator?.hide()
@@ -354,56 +213,6 @@ internal class PagerPageHolder(
                 progressIndicator?.setProgress(progress)
             }
         }
-    }
-
-    private fun splitDoublePages() {
-        scope.launch {
-            delay(SPLIT_DELAY_MS)
-            viewer.splitDoublePages(page)
-            if (extraPage?.fullPage == true || page.fullPage) {
-                extraPage = null
-            }
-        }
-    }
-
-    private fun splitInHalf(imageSource: BufferedSource): BufferedSource {
-        var side = when {
-            viewer is L2RPagerViewer && page is InsertPage -> ImageUtil.Side.RIGHT
-            viewer !is L2RPagerViewer && page is InsertPage -> ImageUtil.Side.LEFT
-            viewer is L2RPagerViewer && page !is InsertPage -> ImageUtil.Side.LEFT
-            viewer !is L2RPagerViewer && page !is InsertPage -> ImageUtil.Side.RIGHT
-            else -> error("We should choose a side!")
-        }
-
-        if (viewer.config.dualPageInvert) {
-            side = when (side) {
-                ImageUtil.Side.RIGHT -> ImageUtil.Side.LEFT
-                ImageUtil.Side.LEFT -> ImageUtil.Side.RIGHT
-            }
-        }
-
-        val sideMargin = if (viewer.config.centerMarginType and PagerConfig.CenterMarginType.DOUBLE_PAGE_CENTER_MARGIN >
-            0 &&
-            viewer.config.doublePages &&
-            !viewer.config.imageCropBorders
-        ) {
-            HALF_CENTER_MARGIN_PX
-        } else {
-            0
-        }
-
-        return ImageUtil.splitInHalf(imageSource, side, sideMargin)
-    }
-
-    private fun onPageSplit(page: ReaderPage) {
-        val newPage = InsertPage(page)
-        viewer.onPageSplit(page, newPage)
-    }
-
-    // Called when the page has an error.
-    private fun setError(error: Throwable?) {
-        progressIndicator?.hide()
-        showErrorLayout(error)
     }
 
     override fun onImageLoaded() {
@@ -425,39 +234,5 @@ internal class PagerPageHolder(
     override fun onScaleChanged(newScale: Float) {
         super.onScaleChanged(newScale)
         viewer.activity.hideMenu()
-    }
-
-    private fun showErrorLayout(error: Throwable?): ReaderErrorBinding {
-        if (errorLayout == null) {
-            errorLayout = ReaderErrorBinding.inflate(LayoutInflater.from(context), this, true)
-            errorLayout?.actionRetry?.viewer = viewer
-            errorLayout?.actionRetry?.setOnClickListener {
-                page.chapter.pageLoader?.retryPage(page)
-            }
-        }
-
-        val imageUrl = page.imageUrl
-        errorLayout?.actionOpenInWebView?.isVisible = imageUrl != null
-        if (imageUrl != null && imageUrl.startsWith("http", true)) {
-            errorLayout?.actionOpenInWebView?.viewer = viewer
-            errorLayout?.actionOpenInWebView?.setOnClickListener {
-                val sourceId = viewer.activity.viewModel.manga?.source
-
-                val intent = WebViewActivity.newIntent(context, imageUrl, sourceId)
-                context.startActivity(intent)
-            }
-        }
-
-        errorLayout?.errorMessage?.text = with(context) { error?.formattedMessage }
-            ?: context.stringResource(MR.strings.decode_image_error)
-
-        errorLayout?.root?.isVisible = true
-        return errorLayout!!
-    }
-
-    // Removes the decode error layout from the holder, if found.
-    private fun removeErrorLayout() {
-        errorLayout?.root?.isVisible = false
-        errorLayout = null
     }
 }
