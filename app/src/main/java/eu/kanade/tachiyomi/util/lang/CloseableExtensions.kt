@@ -13,9 +13,10 @@ internal inline fun <T : Closeable?> Array<T>.use(block: () -> Unit) {
     var blockException: Throwable? = null
     try {
         return block()
-    } catch (e: Throwable) {
-        blockException = e
-        throw e
+    } catch (expected: Throwable) {
+        // Rethrown (or wrapped) whatever the cause.
+        blockException = expected
+        throw expected
     } finally {
         if (blockException == null) {
             forEach { it?.close() }
@@ -23,8 +24,9 @@ internal inline fun <T : Closeable?> Array<T>.use(block: () -> Unit) {
             forEach {
                 try {
                     it?.close()
-                } catch (closeException: Throwable) {
-                    blockException.addSuppressed(closeException)
+                } catch (expected: Throwable) {
+                    // Any failure ends here and the fallback below applies.
+                    blockException.addSuppressed(expected)
                 }
             }
         }

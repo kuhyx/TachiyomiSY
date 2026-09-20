@@ -49,7 +49,8 @@ internal class GalleryAdder(
                     it.id !in filters.disabledSources &&
                     try {
                         it.matchesUri(uri)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
+                        // Any failure ends here and the fallback below applies.
                         false
                     }
             }
@@ -82,8 +83,9 @@ internal class GalleryAdder(
                     } else {
                         return GalleryAddEvent.Fail.UnknownSource(url, context)
                     }
-                } catch (e: Exception) {
-                    logger.e(context.stringResource(SYMR.strings.gallery_adder_source_uri_must_match), e)
+                } catch (expected: Exception) {
+                    // Logged whatever the cause; the caller carries on.
+                    logger.e(context.stringResource(SYMR.strings.gallery_adder_source_uri_must_match), expected)
                     return GalleryAddEvent.Fail.UnknownType(url, context)
                 }
             } else {
@@ -94,7 +96,8 @@ internal class GalleryAdder(
                             it.id !in filters.disabledSources &&
                             try {
                                 it.matchesUri(uri)
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
+                                // Any failure ends here and the fallback below applies.
                                 false
                             }
                     }
@@ -103,16 +106,18 @@ internal class GalleryAdder(
 
             val realChapterUrl = try {
                 source.mapUrlToChapterUrl(uri)
-            } catch (e: Exception) {
-                logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_map_to_chapter_error), e)
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_map_to_chapter_error), expected)
                 null
             }
 
             val cleanedChapterUrl = realChapterUrl?.let {
                 try {
                     source.cleanChapterUrl(it)
-                } catch (e: Exception) {
-                    logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_clean_error), e)
+                } catch (expected: Exception) {
+                    // Logged whatever the cause; the caller carries on.
+                    logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_clean_error), expected)
                     null
                 }
             }
@@ -122,16 +127,18 @@ internal class GalleryAdder(
             // Map URL to manga URL
             val realMangaUrl = try {
                 chapterMangaUrl ?: source.mapUrlToMangaUrl(uri)
-            } catch (e: Exception) {
-                logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_map_to_gallery_error), e)
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_map_to_gallery_error), expected)
                 null
             } ?: return GalleryAddEvent.Fail.UnknownType(url, context)
 
             // Clean URL
             val cleanedMangaUrl = try {
                 source.cleanMangaUrl(realMangaUrl)
-            } catch (e: Exception) {
-                logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_clean_error), e)
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logger.e(context.stringResource(SYMR.strings.gallery_adder_uri_clean_error), expected)
                 null
             } ?: return GalleryAddEvent.Fail.UnknownType(url, context)
 
@@ -173,16 +180,17 @@ internal class GalleryAdder(
             } else {
                 GalleryAddEvent.Success(url, manga, context)
             }
-        } catch (e: Exception) {
-            logger.w(context.stringResource(SYMR.strings.gallery_adder_could_not_add_gallery, url), e)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logger.w(context.stringResource(SYMR.strings.gallery_adder_could_not_add_gallery, url), expected)
 
-            if (e is EHentai.GalleryNotFoundException) {
+            if (expected is EHentai.GalleryNotFoundException) {
                 return GalleryAddEvent.Fail.NotFound(url, context)
             }
 
             return GalleryAddEvent.Fail.Error(
                 url,
-                ((e.message ?: "Unknown error!") + " (Gallery: $url)").trim(),
+                ((expected.message ?: "Unknown error!") + " (Gallery: $url)").trim(),
             )
         }
     }
@@ -195,11 +203,12 @@ internal class GalleryAdder(
             if (result == null) {
                 try {
                     result = block()
-                } catch (e: Exception) {
-                    if (e is EHentai.GalleryNotFoundException) {
-                        throw e
+                } catch (expected: Exception) {
+                    // Rethrown (or wrapped) whatever the cause.
+                    if (expected is EHentai.GalleryNotFoundException) {
+                        throw expected
                     }
-                    lastError = e
+                    lastError = expected
                 }
             }
         }

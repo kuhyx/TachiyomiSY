@@ -25,8 +25,9 @@ internal class ClearBrokenPagePreviewCacheMigration : Migration {
 
             try {
                 it.delete()
-            } catch (e: Exception) {
-                logcat(LogPriority.WARN, e) { "Failed to remove file from cache" }
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.WARN, expected) { "Failed to remove file from cache" }
             }
         }
 

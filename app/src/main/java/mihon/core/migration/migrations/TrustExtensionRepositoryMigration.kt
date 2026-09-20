@@ -22,8 +22,9 @@ internal class TrustExtensionRepositoryMigration : Migration {
                     indexUrl = source.removeSuffix("/index.min.json").removeSuffix("/index.json") + "/repo.json",
                     name = "Repo #${index + 1}",
                 )
-            } catch (e: Exception) {
-                logcat(LogPriority.ERROR, e) { "Error Migrating Extension Repo with baseUrl: $source" }
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR, expected) { "Error Migrating Extension Repo with baseUrl: $source" }
             }
         }
         sourcePreferences.extensionRepos.delete()

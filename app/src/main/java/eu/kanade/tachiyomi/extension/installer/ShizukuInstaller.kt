@@ -126,8 +126,9 @@ internal class ShizukuInstaller(private val service: Service) : Installer(servic
                 shellInterface?.install(it)
             }
             service.contentResolver.delete(entry.uri, null, null)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Failed to install extension ${entry.downloadId} ${entry.uri}" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Failed to install extension ${entry.downloadId} ${entry.uri}" }
             continueQueue(InstallStep.Error)
         }
     }
@@ -141,8 +142,9 @@ internal class ShizukuInstaller(private val service: Service) : Installer(servic
         if (Shizuku.pingBinder()) {
             try {
                 Shizuku.unbindUserService(shizukuArgs, connection, true)
-            } catch (e: Exception) {
-                logcat(LogPriority.WARN, e) { "Failed to unbind shizuku service" }
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.WARN, expected) { "Failed to unbind shizuku service" }
             }
         }
         service.unregisterReceiver(receiver)

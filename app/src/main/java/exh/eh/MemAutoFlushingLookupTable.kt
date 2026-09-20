@@ -137,9 +137,10 @@ internal class MemAutoFlushingLookupTable<T>(
             }
             out.flush()
             atomicFile.finishWrite(fos)
-        } catch (t: Throwable) {
+        } catch (expected: Throwable) {
+            // Rethrown (or wrapped) whatever the cause.
             atomicFile.failWrite(fos)
-            throw t
+            throw expected
         }
     }
 

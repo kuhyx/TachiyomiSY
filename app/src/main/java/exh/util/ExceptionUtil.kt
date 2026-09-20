@@ -3,7 +3,8 @@ package exh.util
 internal inline fun <T> ignore(expr: () -> T): T? {
     return try {
         expr()
-    } catch (t: Throwable) {
+    } catch (_: Throwable) {
+        // Any failure ends here and the fallback below applies.
         null
     }
 }

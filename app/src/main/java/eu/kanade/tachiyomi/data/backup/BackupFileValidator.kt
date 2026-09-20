@@ -22,8 +22,9 @@ internal class BackupFileValidator(
     fun validate(uri: Uri): Results {
         val backup = try {
             BackupDecoder(context).decode(uri)
-        } catch (e: Exception) {
-            throw IllegalStateException(e)
+        } catch (expected: Exception) {
+            // Rethrown (or wrapped) whatever the cause.
+            throw IllegalStateException(expected)
         }
 
         val sources = backup.backupSources.associate { it.sourceId to it.name }

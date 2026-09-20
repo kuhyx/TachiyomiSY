@@ -107,8 +107,9 @@ internal class DownloadCache(
                         rootDownloadsDir = diskCache
                         lastRenew = System.currentTimeMillis()
                     }
-                } catch (e: Throwable) {
-                    logcat(LogPriority.ERROR, e) { "Failed to initialize from disk cache" }
+                } catch (expected: Throwable) {
+                    // Logged whatever the cause; the caller carries on.
+                    logcat(LogPriority.ERROR, expected) { "Failed to initialize from disk cache" }
                     diskCacheFile.delete()
                 }
             }
@@ -462,10 +463,11 @@ internal class DownloadCache(
             ensureActive()
             try {
                 diskCacheFile.writeBytes(bytes)
-            } catch (e: Throwable) {
+            } catch (expected: Throwable) {
+                // Logged whatever the cause; the caller carries on.
                 logcat(
                     priority = LogPriority.ERROR,
-                    throwable = e,
+                    throwable = expected,
                     message = { "Failed to write disk cache file" },
                 )
             }

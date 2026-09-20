@@ -206,7 +206,7 @@ internal object SettingsDataScreen : SearchableSettings {
             onClick = {
                 try {
                     pickStorageLocation.launch(null)
-                } catch (e: ActivityNotFoundException) {
+                } catch (_: ActivityNotFoundException) {
                     context.toast(MR.strings.file_picker_error)
                 }
             },
@@ -350,8 +350,9 @@ internal object SettingsDataScreen : SearchableSettings {
                                     context.toast(context.stringResource(MR.strings.cache_deleted, deletedFiles))
                                     cacheReadableSizeSema++
                                 }
-                            } catch (e: Throwable) {
-                                logcat(LogPriority.ERROR, e)
+                            } catch (expected: Throwable) {
+                                // Logged whatever the cause; the caller carries on.
+                                logcat(LogPriority.ERROR, expected)
                                 withUIContext { context.toast(MR.strings.cache_delete_error) }
                             }
                         }
@@ -369,8 +370,9 @@ internal object SettingsDataScreen : SearchableSettings {
                                     context.toast(context.stringResource(MR.strings.cache_deleted, deletedFiles))
                                     pagePreviewReadableSizeSema++
                                 }
-                            } catch (e: Throwable) {
-                                logcat(LogPriority.ERROR, e)
+                            } catch (expected: Throwable) {
+                                // Logged whatever the cause; the caller carries on.
+                                logcat(LogPriority.ERROR, expected)
                                 withUIContext { context.toast(MR.strings.cache_delete_error) }
                             }
                         }

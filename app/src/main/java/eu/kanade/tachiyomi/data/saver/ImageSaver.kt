@@ -103,8 +103,9 @@ internal class ImageSaver(
                     input.copyTo(output!!)
                 }
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
             throw IOException(context.stringResource(MR.strings.error_saving_picture))
         }
 

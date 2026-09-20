@@ -18,9 +18,9 @@ internal fun Response.interceptAsHtml(block: (Document) -> Unit): Response {
             // Search for captcha
             val parsed = asJsoup(html = bodyString)
             block(parsed)
-        } catch (t: Throwable) {
+        } catch (expected: Throwable) {
             // Ignore all errors
-            xLogW("Interception error!", t)
+            xLogW("Interception error!", expected)
         } finally {
             close()
         }

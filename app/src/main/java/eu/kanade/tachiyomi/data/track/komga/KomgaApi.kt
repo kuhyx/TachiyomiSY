@@ -75,9 +75,10 @@ internal class KomgaApi(
                     }
                     lastChapterRead = progress.lastReadContinuousNumberSort
                 }
-            } catch (e: Exception) {
-                logcat(LogPriority.WARN, e) { "Could not get item: $url" }
-                throw e
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.WARN, expected) { "Could not get item: $url" }
+                throw expected
             }
         }
 

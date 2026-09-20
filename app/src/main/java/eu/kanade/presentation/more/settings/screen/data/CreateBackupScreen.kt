@@ -71,7 +71,7 @@ internal class CreateBackupScreen : Screen() {
                     if (!BackupCreateJob.isManualJobRunning(context)) {
                         try {
                             chooseBackupDir.launch(BackupCreator.getFilename())
-                        } catch (e: ActivityNotFoundException) {
+                        } catch (_: ActivityNotFoundException) {
                             context.toast(MR.strings.file_picker_error)
                         }
                     } else {

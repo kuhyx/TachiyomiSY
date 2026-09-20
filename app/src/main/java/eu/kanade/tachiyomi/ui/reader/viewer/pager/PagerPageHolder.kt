@@ -206,10 +206,11 @@ internal class PagerPageHolder(
                 }
                 removeErrorLayout()
             }
-        } catch (e: Throwable) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Throwable) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
             withUIContext {
-                setError(e)
+                setError(expected)
             }
         }
     }
@@ -328,8 +329,9 @@ internal class PagerPageHolder(
     private fun decodeImage(imageSource: BufferedSource): Bitmap? {
         return try {
             ImageDecoder.newInstance(imageSource.inputStream())?.decode()
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Cannot decode image" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Cannot decode image" }
             null
         }
     }

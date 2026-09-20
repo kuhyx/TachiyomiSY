@@ -195,10 +195,11 @@ internal class WebtoonPageHolder(
                 )
                 removeErrorLayout()
             }
-        } catch (e: Throwable) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Throwable) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
             withUIContext {
-                setError(e)
+                setError(expected)
             }
         }
     }

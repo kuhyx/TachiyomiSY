@@ -95,7 +95,8 @@ internal class DownloadPendingDeleter(
         return preferences.all.values.mapNotNull { rawEntry ->
             try {
                 (rawEntry as? String)?.let { json.decodeFromString<Entry>(it) }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
+                // Any failure ends here and the fallback below applies.
                 null
             }
         }

@@ -96,10 +96,11 @@ internal class AddTracks(
                                 service,
                             )
                         }
-                    } catch (e: Exception) {
+                    } catch (expected: Exception) {
+                        // Logged whatever the cause; the caller carries on.
                         logcat(
                             LogPriority.WARN,
-                            e,
+                            expected,
                         ) { "Could not match manga: ${manga.title} with service $service" }
                     }
                 }

@@ -17,9 +17,9 @@ internal class CrashlyticsPrinter(private val logLevel: Int) : Printer {
         if (logLevel >= this.logLevel) {
             try {
                 Firebase.crashlytics.log("$logLevel/$tag: $msg")
-            } catch (t: Throwable) {
+            } catch (expected: Throwable) {
                 // Crash in debug if shit like this happens
-                if (BuildConfig.DEBUG) throw t
+                if (BuildConfig.DEBUG) throw expected
             }
         }
     }

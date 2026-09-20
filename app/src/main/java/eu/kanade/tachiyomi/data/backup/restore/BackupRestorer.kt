@@ -72,8 +72,9 @@ internal class BackupRestorer(
         if (options.libraryEntries) {
             try {
                 Injekt.get<DownloadCache>().invalidateCache()
-            } catch (e: Exception) {
-                logcat(LogPriority.ERROR, e) { "Failed to invalidate download cache after restore" }
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR, expected) { "Failed to invalidate download cache after restore" }
             }
         }
 
@@ -195,9 +196,10 @@ internal class BackupRestorer(
 
                         try {
                             mangaRestorer.restore(it, backupCategories)
-                        } catch (e: Exception) {
+                        } catch (expected: Exception) {
+                            // Any failure ends here and the fallback below applies.
                             val sourceName = sourceMapping[it.source] ?: it.source.toString()
-                            errors.add(Date() to "${it.title} [$sourceName]: ${e.message}")
+                            errors.add(Date() to "${it.title} [$sourceName]: ${expected.message}")
                         }
 
                         restoreProgress.incrementAndFetch()
@@ -251,8 +253,9 @@ internal class BackupRestorer(
 
                         try {
                             extensionStoreRestorer(it)
-                        } catch (e: Exception) {
-                            errors.add(Date() to "Error Adding Repo: ${it.name} : ${e.message}")
+                        } catch (expected: Exception) {
+                            // Any failure ends here and the fallback below applies.
+                            errors.add(Date() to "Error Adding Repo: ${it.name} : ${expected.message}")
                         }
 
                         restoreProgress.incrementAndFetch()

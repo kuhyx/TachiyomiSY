@@ -123,9 +123,10 @@ internal class FavoritesSyncHelper(val context: Context) {
         val favorites = try {
             status.value = FavoritesSyncStatus.Processing.DownloadingFavorites
             exh.fetchFavorites()
-        } catch (e: Exception) {
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
             status.value = FavoritesSyncStatus.SyncError.FailedToFetchFavorites
-            logger.e(context.stringResource(SYMR.strings.favorites_sync_could_not_fetch), e)
+            logger.e(context.stringResource(SYMR.strings.favorites_sync_could_not_fetch), expected)
             return
         }
 
@@ -170,9 +171,10 @@ internal class FavoritesSyncHelper(val context: Context) {
             // Do not display error as this error has already been reported
             logger.w(context.stringResource(SYMR.strings.favorites_sync_ignoring_exception), e)
             return
-        } catch (e: Exception) {
-            status.value = FavoritesSyncStatus.SyncError.UnknownSyncError(e.message.orEmpty())
-            logger.e(context.stringResource(SYMR.strings.favorites_sync_sync_error), e)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            status.value = FavoritesSyncStatus.SyncError.UnknownSyncError(expected.message.orEmpty())
+            logger.e(context.stringResource(SYMR.strings.favorites_sync_sync_error), expected)
             return
         } finally {
             // Release wake + wifi locks
@@ -263,8 +265,9 @@ internal class FavoritesSyncHelper(val context: Context) {
                 try {
                     val resp = withIOContext { exh.client.newCall(request).await() }
                     success = resp.isSuccessful
-                } catch (e: Exception) {
-                    logger.w(context.stringResource(SYMR.strings.favorites_sync_network_error), e)
+                } catch (expected: Exception) {
+                    // Logged whatever the cause; the caller carries on.
+                    logger.w(context.stringResource(SYMR.strings.favorites_sync_network_error), expected)
                 }
             }
         }

@@ -83,9 +83,10 @@ internal fun ConfigureExhDialog(run: Boolean, onRunning: () -> Unit) {
                     launchUI {
                         context.toast(SYMR.strings.eh_settings_successfully_uploaded)
                     }
-                } catch (e: Exception) {
-                    configureFailedDialogOpen = e
-                    xLogE("Configuration error!", e)
+                } catch (expected: Exception) {
+                    // Logged whatever the cause; the caller carries on.
+                    configureFailedDialogOpen = expected
+                    xLogE("Configuration error!", expected)
                 } finally {
                     configureDialogOpen = false
                 }

@@ -316,9 +316,10 @@ internal object SettingsTrackingScreen : SearchableSettings {
             tracker.login(username, password)
             withUIContext { context.toast(MR.strings.login_success) }
             true
-        } catch (e: Throwable) {
+        } catch (expected: Throwable) {
+            // Any failure ends here and the fallback below applies.
             tracker.logout()
-            withUIContext { context.toast(e.message.toString()) }
+            withUIContext { context.toast(expected.message.toString()) }
             false
         }
     }

@@ -36,7 +36,8 @@ internal class CrashLogUtil(
 
             val uri = file.getUriCompat(context)
             context.startActivity(uri.toShareIntent(context, "text/plain"))
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
+            // Any failure ends here and the fallback below applies.
             withUIContext { context.toast("Failed to get logs") }
         }
     }

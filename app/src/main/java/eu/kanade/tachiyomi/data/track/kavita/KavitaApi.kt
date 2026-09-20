@@ -65,16 +65,17 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
                 }
             }
             // Not sure which one to catch
-        } catch (e: SocketTimeoutException) {
+        } catch (_: SocketTimeoutException) {
             logcat(LogPriority.WARN) {
                 "Could not fetch JWT token. Probably due to connectivity issue or URL '$apiUrl' not available, skipping"
             }
             return null
-        } catch (e: Exception) {
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
             logcat(LogPriority.ERROR) {
                 "Unhandled exception fetching JWT token for URL: '$apiUrl'"
             }
-            throw IOException(e)
+            throw IOException(expected)
         }
 
         return null
@@ -110,9 +111,10 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
             }
 
             return if (maxChapterNumber > volumeNumber) maxChapterNumber else volumeNumber
-        } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "Exception fetching Total Chapters. Request:$requestUrl" }
-            throw e
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.WARN, expected) { "Exception fetching Total Chapters. Request:$requestUrl" }
+            throw expected
         }
     }
 
@@ -130,12 +132,13 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
                     }
                 }
             }
-        } catch (e: Exception) {
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
             logcat(
                 LogPriority.WARN,
-                e,
+                expected,
             ) { "Exception getting latest chapter read. Could not get itemRequest: $requestUrl" }
-            throw e
+            throw expected
         }
         return 0.0
     }
@@ -162,9 +165,10 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
                 }
                 lastChapterRead = getLatestChapterRead(url)
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "Could not get item: $url" }
-            throw e
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.WARN, expected) { "Could not get item: $url" }
+            throw expected
         }
     }
 

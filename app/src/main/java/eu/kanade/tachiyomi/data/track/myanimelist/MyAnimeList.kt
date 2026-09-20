@@ -115,7 +115,8 @@ internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), Deletable
             val username = api.getCurrentUser()
             saveDisplayUsername(username)
             saveCredentials(username, oauth.accessToken)
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
+            // Any failure ends here and the fallback below applies.
             logout()
         }
     }
@@ -145,7 +146,8 @@ internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), Deletable
     fun loadOAuth(): MALOAuth? {
         return try {
             json.decodeFromString<MALOAuth>(trackPreferences.trackToken(this).get())
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // Any failure ends here and the fallback below applies.
             null
         }
     }

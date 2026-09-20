@@ -32,9 +32,10 @@ internal class SmartSearchScreenModel(
                 } else {
                     SearchResults.NotFound
                 }
-            } catch (e: Exception) {
-                if (e is CancellationException) {
-                    throw e
+            } catch (expected: Exception) {
+                // Rethrown (or wrapped) whatever the cause.
+                if (expected is CancellationException) {
+                    throw expected
                 } else {
                     SearchResults.Error
                 }

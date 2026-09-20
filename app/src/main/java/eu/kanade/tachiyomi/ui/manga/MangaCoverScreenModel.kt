@@ -56,8 +56,9 @@ internal class MangaCoverScreenModel(
                     context.stringResource(MR.strings.cover_saved),
                     withDismissAction = true,
                 )
-            } catch (e: Throwable) {
-                logcat(LogPriority.ERROR, e)
+            } catch (expected: Throwable) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR, expected)
                 snackbarHostState.showSnackbar(
                     context.stringResource(MR.strings.error_saving_cover),
                     withDismissAction = true,
@@ -73,8 +74,9 @@ internal class MangaCoverScreenModel(
                 withUIContext {
                     context.startActivity(uri.toShareIntent(context))
                 }
-            } catch (e: Throwable) {
-                logcat(LogPriority.ERROR, e)
+            } catch (expected: Throwable) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR, expected)
                 snackbarHostState.showSnackbar(
                     context.stringResource(MR.strings.error_sharing_cover),
                     withDismissAction = true,
@@ -121,8 +123,9 @@ internal class MangaCoverScreenModel(
                 try {
                     manga.editCover(Injekt.get(), it, updateManga, coverCache)
                     notifyCoverUpdated(context)
-                } catch (e: Exception) {
-                    notifyFailedCoverUpdate(context, e)
+                } catch (expected: Exception) {
+                    // Any failure ends here and the fallback below applies.
+                    notifyFailedCoverUpdate(context, expected)
                 }
             }
         }
@@ -135,8 +138,9 @@ internal class MangaCoverScreenModel(
                 coverCache.deleteCustomCover(mangaId)
                 updateManga.awaitUpdateCoverLastModified(mangaId)
                 notifyCoverUpdated(context)
-            } catch (e: Exception) {
-                notifyFailedCoverUpdate(context, e)
+            } catch (expected: Exception) {
+                // Any failure ends here and the fallback below applies.
+                notifyFailedCoverUpdate(context, expected)
             }
         }
     }

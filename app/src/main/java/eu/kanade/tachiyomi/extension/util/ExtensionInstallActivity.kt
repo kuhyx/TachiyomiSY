@@ -38,10 +38,10 @@ internal class ExtensionInstallActivity : Activity() {
 
         try {
             startActivityForResult(installIntent, INSTALL_REQUEST_CODE)
-        } catch (error: Exception) {
+        } catch (expected: Exception) {
             // Either install package can't be found (probably bots) or there's a security exception
             // with the download manager. Nothing we can workaround.
-            toast(error.message)
+            toast(expected.message)
         }
     }
 

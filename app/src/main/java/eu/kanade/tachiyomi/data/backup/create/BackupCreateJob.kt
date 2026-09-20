@@ -59,9 +59,10 @@ internal class BackupCreateJob(private val context: Context, workerParams: Worke
                 notifier.showBackupComplete(UniFile.fromUri(context, location.toUri())!!)
             }
             Result.success()
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
-            if (!isAutoBackup) notifier.showBackupError(e.message)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
+            if (!isAutoBackup) notifier.showBackupError(expected.message)
             Result.failure()
         } finally {
             context.cancelNotification(Notifications.ID_BACKUP_PROGRESS)

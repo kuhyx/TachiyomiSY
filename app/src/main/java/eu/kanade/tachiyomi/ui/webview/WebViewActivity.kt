@@ -61,8 +61,9 @@ internal class WebViewActivity : BaseActivity() {
         (sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource)?.let { source ->
             try {
                 headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
-            } catch (e: Exception) {
-                logcat(LogPriority.ERROR, e) { "Failed to build headers" }
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR, expected) { "Failed to build headers" }
             }
         }
 
@@ -102,8 +103,9 @@ internal class WebViewActivity : BaseActivity() {
     private fun shareWebpage(url: String) {
         try {
             startActivity(url.toUri().toShareIntent(this, type = "text/plain"))
-        } catch (e: Exception) {
-            toast(e.message)
+        } catch (expected: Exception) {
+            // Any failure ends here and the fallback below applies.
+            toast(expected.message)
         }
     }
 

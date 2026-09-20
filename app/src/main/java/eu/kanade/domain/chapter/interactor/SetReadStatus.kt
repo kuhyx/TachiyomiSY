@@ -46,9 +46,10 @@ internal class SetReadStatus(
             chapterRepository.updateAll(
                 chaptersToUpdate.map { mapper(it, read) },
             )
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
-            return@withNonCancellableContext Result.InternalError(e)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
+            return@withNonCancellableContext Result.InternalError(expected)
         }
 
         if (read && downloadPreferences.removeAfterMarkedAsRead.get()) {

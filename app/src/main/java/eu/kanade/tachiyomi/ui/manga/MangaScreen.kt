@@ -129,8 +129,9 @@ internal class MangaScreen(
                     withIOContext {
                         assistUrl = getMangaUrl(screenModel.manga, screenModel.source)
                     }
-                } catch (e: Exception) {
-                    logcat(LogPriority.ERROR, e) { "Failed to get manga URL" }
+                } catch (expected: Exception) {
+                    // Logged whatever the cause; the caller carries on.
+                    logcat(LogPriority.ERROR, expected) { "Failed to get manga URL" }
                 }
             }
         }
@@ -410,8 +411,9 @@ internal class MangaScreen(
                 val intent = url.toUri().toShareIntent(context, type = "text/plain")
                 context.startActivity(intent)
             }
-        } catch (e: Exception) {
-            context.toast(e.message)
+        } catch (expected: Exception) {
+            // Any failure ends here and the fallback below applies.
+            context.toast(expected.message)
         }
     }
 
@@ -526,10 +528,11 @@ internal class MangaScreen(
                 navigator.pop()
                 navigator replace MangaScreen(mergedManga.id, true)
                 context.toast(SYMR.strings.entry_merged)
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
+            } catch (expected: Exception) {
+                // Rethrown (or wrapped) whatever the cause.
+                if (expected is CancellationException) throw expected
 
-                context.toast(context.stringResource(SYMR.strings.failed_merge, e.message.orEmpty()))
+                context.toast(context.stringResource(SYMR.strings.failed_merge, expected.message.orEmpty()))
             }
         }
     }

@@ -77,7 +77,8 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
                 logger.d("Update job completed!")
                 Result.success()
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // Any failure ends here and the fallback below applies.
             Result.success() // retry again later
         } finally {
             updateNotifier.cancelProgressNotification()
@@ -250,8 +251,9 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
                 manualFetch = false,
             ).getOrThrow()
             return result.newChapters to getChaptersByMangaId.await(manga.id)
-        } catch (t: Throwable) {
-            if (t is EHentai.GalleryNotFoundException) {
+        } catch (expected: Throwable) {
+            // Logged whatever the cause; the caller carries on.
+            if (expected is EHentai.GalleryNotFoundException) {
                 val meta = getFlatMetadataById.await(manga.id)?.raise(EHentaiSearchMetadata::class)
                 if (meta != null) {
                     // Age dead galleries
@@ -259,9 +261,9 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
                     meta.aged = true
                     insertFlatMetadata.await(meta)
                 }
-                throw GalleryNotUpdatedException(false, t)
+                throw GalleryNotUpdatedException(false, expected)
             }
-            throw GalleryNotUpdatedException(true, t)
+            throw GalleryNotUpdatedException(true, expected)
         }
     }
 

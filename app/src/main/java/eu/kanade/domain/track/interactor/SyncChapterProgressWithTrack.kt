@@ -44,8 +44,9 @@ internal class SyncChapterProgressWithTrack(
             tracker.update(updatedTrack.toDbTrack())
             updateChapter.awaitAll(chapterUpdates)
             insertTrack.await(updatedTrack)
-        } catch (e: Throwable) {
-            logcat(LogPriority.WARN, e)
+        } catch (expected: Throwable) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.WARN, expected)
         }
     }
 }

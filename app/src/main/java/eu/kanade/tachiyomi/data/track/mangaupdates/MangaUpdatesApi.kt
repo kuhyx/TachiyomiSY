@@ -124,7 +124,8 @@ internal class MangaUpdatesApi(
                     .awaitSuccess()
                     .parseAs<MURating>()
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // Any failure ends here and the fallback below applies.
             null
         }
     }

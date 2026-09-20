@@ -29,8 +29,9 @@ internal class DeleteOldEhFavoritesDatabaseMigration : Migration {
                     it.delete()
                 }
             }
-        } catch (e: Exception) {
-            xLogE("Failed to delete old favorites database", e)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            xLogE("Failed to delete old favorites database", expected)
         }
 
         return@withIOContext true

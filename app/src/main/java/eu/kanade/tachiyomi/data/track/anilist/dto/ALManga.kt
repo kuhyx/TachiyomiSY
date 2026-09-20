@@ -35,7 +35,7 @@ internal data class ALManga(
             startDate = try {
                 val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                 outputDf.format(startDateFuzzy)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 ""
             }
         }

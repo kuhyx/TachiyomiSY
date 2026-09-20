@@ -129,10 +129,11 @@ internal class BackupCreator(
             }
 
             return fileUri.toString()
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
             file?.delete()
-            throw e
+            throw expected
         }
     }
 

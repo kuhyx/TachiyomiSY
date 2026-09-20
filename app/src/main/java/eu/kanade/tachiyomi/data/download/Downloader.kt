@@ -251,10 +251,11 @@ internal class Downloader(
             if (areAllDownloadsFinished()) {
                 stop()
             }
-        } catch (e: Throwable) {
-            if (e is CancellationException) throw e
-            logcat(LogPriority.ERROR, e)
-            notifier.onError(e.message)
+        } catch (expected: Throwable) {
+            // Logged whatever the cause; the caller carries on.
+            if (expected is CancellationException) throw expected
+            logcat(LogPriority.ERROR, expected)
+            notifier.onError(expected.message)
             stop()
         }
     }
@@ -385,8 +386,9 @@ internal class Downloader(
                         page.status = Page.State.LoadPage
                         try {
                             page.imageUrl = download.source.getImageUrl(page)
-                        } catch (e: Throwable) {
-                            page.status = Page.State.Error(e)
+                        } catch (expected: Throwable) {
+                            // Any failure ends here and the fallback below applies.
+                            page.status = Page.State.Error(expected)
                         }
                     }
 
@@ -425,12 +427,13 @@ internal class Downloader(
             DiskUtil.createNoMediaFile(tmpDir, context)
 
             download.status = Download.State.DOWNLOADED
-        } catch (error: Throwable) {
-            if (error is CancellationException) throw error
+        } catch (expected: Throwable) {
+            // Logged whatever the cause; the caller carries on.
+            if (expected is CancellationException) throw expected
             // If the page list threw, it will resume here
-            logcat(LogPriority.ERROR, error)
+            logcat(LogPriority.ERROR, expected)
             download.status = Download.State.ERROR
-            notifier.onError(error.message, download.chapter.name, download.manga.title, download.manga.id)
+            notifier.onError(expected.message, download.chapter.name, download.manga.title, download.manga.id)
         }
     }
 
@@ -468,12 +471,13 @@ internal class Downloader(
             page.uri = file.uri
             page.progress = PROGRESS_DONE
             page.status = Page.State.Ready
-        } catch (e: Throwable) {
-            if (e is CancellationException) throw e
+        } catch (expected: Throwable) {
+            // Rethrown (or wrapped) whatever the cause.
+            if (expected is CancellationException) throw expected
             // Mark this page as error and allow to download the remaining
             page.progress = 0
-            page.status = Page.State.Error(e)
-            notifier.onError(e.message, download.chapter.name, download.manga.title, download.manga.id)
+            page.status = Page.State.Error(expected)
+            notifier.onError(expected.message, download.chapter.name, download.manga.title, download.manga.id)
         }
     }
 
@@ -573,8 +577,9 @@ internal class Downloader(
                 imageFile,
                 filenamePrefix,
             )
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Failed to split downloaded image" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Failed to split downloaded image" }
         }
     }
 

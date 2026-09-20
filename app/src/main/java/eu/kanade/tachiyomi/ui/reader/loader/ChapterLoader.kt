@@ -72,9 +72,10 @@ internal class ChapterLoader(
                 }
 
                 chapter.state = ReaderChapter.State.Loaded(pages)
-            } catch (e: Throwable) {
-                chapter.state = ReaderChapter.State.Error(e)
-                throw e
+            } catch (expected: Throwable) {
+                // Rethrown (or wrapped) whatever the cause.
+                chapter.state = ReaderChapter.State.Error(expected)
+                throw expected
             }
         }
     }

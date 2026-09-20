@@ -201,8 +201,9 @@ internal class MigrationListScreenModel(
                     throttleFunc = throttleManager::throttle,
                     // SY <--
                 ).getOrThrow()
-            } catch (e: Exception) {
-                logcat(LogPriority.ERROR, e)
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR, expected)
             }
             localManga to getChapterInfo(localManga.id)
         } catch (e: CancellationException) {
@@ -293,9 +294,10 @@ internal class MigrationListScreenModel(
                                 // SY <--
                             )
                         }
-                    } catch (e: Exception) {
-                        if (e is CancellationException) throw e
-                        logcat(LogPriority.WARN, throwable = e)
+                    } catch (expected: Exception) {
+                        // Logged whatever the cause; the caller carries on.
+                        if (expected is CancellationException) throw expected
+                        logcat(LogPriority.WARN, throwable = expected)
                     }
                     mutableState.update {
                         it.copy(dialog = Dialog.Progress((index.toFloat() / items.size).coerceAtMost(1f)))

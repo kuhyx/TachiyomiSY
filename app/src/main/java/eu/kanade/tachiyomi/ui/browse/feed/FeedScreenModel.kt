@@ -234,7 +234,8 @@ internal open class FeedScreenModel(
                         } else {
                             emptyList()
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
+                        // Any failure ends here and the fallback below applies.
                         emptyList()
                     }
 

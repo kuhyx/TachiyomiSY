@@ -28,8 +28,9 @@ internal class WebViewScreenModel(
         sourceId?.let { sourceManager.get(it) as? HttpSource }?.let { source ->
             try {
                 headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
-            } catch (e: Exception) {
-                logcat(LogPriority.ERROR, e) { "Failed to build headers" }
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR, expected) { "Failed to build headers" }
             }
         }
     }
@@ -37,8 +38,9 @@ internal class WebViewScreenModel(
     fun shareWebpage(context: Context, url: String) {
         try {
             context.startActivity(url.toUri().toShareIntent(context, type = "text/plain"))
-        } catch (e: Exception) {
-            context.toast(e.message)
+        } catch (expected: Exception) {
+            // Any failure ends here and the fallback below applies.
+            context.toast(expected.message)
         }
     }
 

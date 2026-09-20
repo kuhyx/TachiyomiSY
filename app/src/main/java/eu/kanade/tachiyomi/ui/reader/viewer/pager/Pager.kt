@@ -79,7 +79,7 @@ internal open class Pager(
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         return try {
             super.onInterceptTouchEvent(ev)
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             false
         }
     }
@@ -91,11 +91,11 @@ internal open class Pager(
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         return try {
             super.onTouchEvent(ev)
-        } catch (e: NullPointerException) {
+        } catch (_: NullPointerException) {
             false
-        } catch (e: IndexOutOfBoundsException) {
+        } catch (_: IndexOutOfBoundsException) {
             false
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             false
         }
     }

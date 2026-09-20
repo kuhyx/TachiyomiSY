@@ -112,13 +112,15 @@ internal class PagePreviewFetcher(
                     mimeType = "image/*",
                     dataSource = if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK,
                 )
-            } catch (e: Exception) {
+            } catch (expected: Exception) {
+                // Rethrown (or wrapped) whatever the cause.
                 responseBody.close()
-                throw e
+                throw expected
             }
-        } catch (e: Exception) {
+        } catch (expected: Exception) {
+            // Rethrown (or wrapped) whatever the cause.
             snapshot?.close()
-            throw e
+            throw expected
         }
     }
 
@@ -171,8 +173,9 @@ internal class PagePreviewFetcher(
             } else {
                 null
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Failed to write snapshot data to page preview cache $diskCacheKey" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Failed to write snapshot data to page preview cache $diskCacheKey" }
             null
         }
     }
@@ -188,8 +191,9 @@ internal class PagePreviewFetcher(
             } else {
                 null
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Failed to write response data to page preview cache $diskCacheKey" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Failed to write response data to page preview cache $diskCacheKey" }
             null
         }
     }
@@ -211,12 +215,13 @@ internal class PagePreviewFetcher(
                 response.body.source().readAll(this)
             }
             return editor.commitAndOpenSnapshot()
-        } catch (e: Exception) {
+        } catch (expected: Exception) {
+            // Rethrown (or wrapped) whatever the cause.
             try {
                 editor.abort()
             } catch (ignored: Exception) {
             }
-            throw e
+            throw expected
         }
     }
 

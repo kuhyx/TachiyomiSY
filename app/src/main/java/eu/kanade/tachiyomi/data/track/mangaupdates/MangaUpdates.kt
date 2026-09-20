@@ -65,7 +65,8 @@ internal class MangaUpdates(id: Long) : BaseTracker(id, "MangaUpdates"), Deletab
         return try {
             val (series, rating) = api.getSeriesListItem(track)
             track.copyFrom(series, rating)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // Any failure ends here and the fallback below applies.
             track.score = 0.0
             api.addSeriesToList(track, hasReadChapters)
             track

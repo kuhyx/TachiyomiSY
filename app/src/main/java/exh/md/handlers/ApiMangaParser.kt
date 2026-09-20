@@ -192,9 +192,10 @@ internal class ApiMangaParser(
 
                 if (tags.isNotEmpty()) tags.clear()
                 tags += genres
-            } catch (e: Exception) {
-                xLogE("Parse into metadata error", e)
-                throw e
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                xLogE("Parse into metadata error", expected)
+                throw expected
             }
         }
     }

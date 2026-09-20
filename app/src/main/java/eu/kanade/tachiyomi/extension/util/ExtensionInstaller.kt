@@ -75,11 +75,12 @@ internal class ExtensionInstaller(
 
                 step.value = InstallStep.Installing
                 installApk(downloadId, tmpFile)
-            } catch (e: Exception) {
-                if (e is InterruptedException) {
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                if (expected is InterruptedException) {
                     // Canceled
                 } else {
-                    logcat(LogPriority.ERROR, e)
+                    logcat(LogPriority.ERROR, expected)
                     step.value = InstallStep.Error
                 }
             }
@@ -114,8 +115,9 @@ internal class ExtensionInstaller(
                     } else {
                         updateInstallStep(downloadId, InstallStep.Error)
                     }
-                } catch (e: Exception) {
-                    logcat(LogPriority.ERROR, e) { "Failed to read downloaded extension file." }
+                } catch (expected: Exception) {
+                    // Logged whatever the cause; the caller carries on.
+                    logcat(LogPriority.ERROR, expected) { "Failed to read downloaded extension file." }
                     updateInstallStep(downloadId, InstallStep.Error)
                 }
 

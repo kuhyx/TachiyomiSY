@@ -104,12 +104,12 @@ internal abstract class TrackerRecommendationPagingSource(
             logcat { name + " > Results: " + results.size }
 
             results.ifEmpty { throw NoResultsException() }
-        } catch (e: Exception) {
+        } catch (expected: Exception) {
             // 'No results' should not be logged as it happens frequently and is expected
-            if (e !is NoResultsException) {
-                logcat(LogPriority.ERROR, e) { name }
+            if (expected !is NoResultsException) {
+                logcat(LogPriority.ERROR, expected) { name }
             }
-            throw e
+            throw expected
         }
 
         return MangasPage(recs, false)

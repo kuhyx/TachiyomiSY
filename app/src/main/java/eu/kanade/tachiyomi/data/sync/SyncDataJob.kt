@@ -48,9 +48,10 @@ internal class SyncDataJob(private val context: Context, workerParams: WorkerPar
         return try {
             SyncManager(context).syncData()
             Result.success()
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
-            notifier.showSyncError(e.message)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
+            notifier.showSyncError(expected.message)
             Result.success() // try again next time
         } finally {
             context.cancelNotification(Notifications.ID_RESTORE_PROGRESS)

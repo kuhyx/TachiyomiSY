@@ -107,8 +107,9 @@ internal class PreferenceRestorer(
                         }
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("PreferenceRestorer", "Failed to restore preference <$key>", e)
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                Log.e("PreferenceRestorer", "Failed to restore preference <$key>", expected)
             }
         }
     }

@@ -116,7 +116,8 @@ internal class DownloadStore(
     private fun deserialize(string: String): DownloadObject? {
         return try {
             json.decodeFromString<DownloadObject>(string)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // Any failure ends here and the fallback below applies.
             null
         }
     }

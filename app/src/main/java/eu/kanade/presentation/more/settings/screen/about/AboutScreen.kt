@@ -240,9 +240,10 @@ internal object AboutScreen : Screen() {
                         context.toast(MR.strings.update_check_eol)
                     }
                 }
-            } catch (e: Exception) {
-                context.toast(e.message)
-                logcat(LogPriority.ERROR, e)
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                context.toast(expected.message)
+                logcat(LogPriority.ERROR, expected)
             } finally {
                 onFinish()
             }
@@ -294,7 +295,8 @@ internal object AboutScreen : Screen() {
                         Injekt.get<UiPreferences>().dateFormat.get(),
                     ),
                 )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // Any failure ends here and the fallback below applies.
             BuildConfig.BUILD_TIME
         }
     }

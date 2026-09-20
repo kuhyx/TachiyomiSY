@@ -276,8 +276,9 @@ internal class MangaScreenModel(
                                         EXHRedirect(acceptedChain.manga.id),
                                     )
                                 }
-                            } catch (e: Exception) {
-                                logcat(LogPriority.ERROR, e) { "Error loading accepted chapter chain" }
+                            } catch (expected: Exception) {
+                                // Logged whatever the cause; the caller carries on.
+                                logcat(LogPriority.ERROR, expected) { "Error loading accepted chapter chain" }
                             }
                         }
                     }
@@ -496,12 +497,13 @@ internal class MangaScreenModel(
             }
         } catch (_: CancellationException) {
             // ignore
-        } catch (e: Exception) {
-            val message = if (e is NoChaptersException) {
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            val message = if (expected is NoChaptersException) {
                 context.stringResource(MR.strings.no_chapters_error)
             } else {
-                logcat(LogPriority.ERROR, e)
-                with(context) { e.formattedMessage }
+                logcat(LogPriority.ERROR, expected)
+                with(context) { expected.formattedMessage }
             }
 
             screenModelScope.launch {
@@ -1330,8 +1332,9 @@ internal class MangaScreenModel(
                         state.source,
                     )
                 }
-            } catch (e: Throwable) {
-                logcat(LogPriority.ERROR, e)
+            } catch (expected: Throwable) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR, expected)
             }
         }
     }

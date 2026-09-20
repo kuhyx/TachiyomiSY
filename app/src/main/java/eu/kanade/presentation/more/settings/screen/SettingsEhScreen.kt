@@ -928,8 +928,9 @@ internal object SettingsEhScreen : SearchableSettings {
                             withUIContext {
                                 context.toast(context.stringResource(SYMR.strings.sync_state_reset), Toast.LENGTH_LONG)
                             }
-                        } catch (e: Exception) {
-                            this@SettingsEhScreen.logcat(LogPriority.ERROR, e)
+                        } catch (expected: Exception) {
+                            // Logged whatever the cause; the caller carries on.
+                            this@SettingsEhScreen.logcat(LogPriority.ERROR, expected)
                         }
                     }
                 },
@@ -1200,8 +1201,9 @@ internal object SettingsEhScreen : SearchableSettings {
                             metaInRelativeDuration(30.days),
                             metaInRelativeDuration(365.days),
                         )
-                    } catch (e: Exception) {
-                        logcat(LogPriority.ERROR, e) { "Error loading gallery update info" }
+                    } catch (expected: Exception) {
+                        // Logged whatever the cause; the caller carries on.
+                        logcat(LogPriority.ERROR, expected) { "Error loading gallery update info" }
                         ""
                     }
                 }

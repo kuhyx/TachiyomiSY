@@ -59,12 +59,13 @@ internal class MetadataUpdateJob(private val context: Context, workerParams: Wor
             try {
                 updateMetadata()
                 Result.success()
-            } catch (e: Exception) {
-                if (e is CancellationException) {
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                if (expected is CancellationException) {
                     // Assume success although cancelled
                     Result.success()
                 } else {
-                    logcat(LogPriority.ERROR, e)
+                    logcat(LogPriority.ERROR, expected)
                     Result.failure()
                 }
             } finally {
@@ -119,9 +120,9 @@ internal class MetadataUpdateJob(private val context: Context, workerParams: Wor
                                             manga = manga,
                                             fetchDetails = true,
                                         ).getOrThrow()
-                                    } catch (e: Throwable) {
+                                    } catch (expected: Throwable) {
                                         // Ignore errors and continue
-                                        logcat(LogPriority.ERROR, e)
+                                        logcat(LogPriority.ERROR, expected)
                                     }
                                 }
                             }

@@ -91,9 +91,10 @@ internal open class RecommendsScreenModel(
                         if (isActive) {
                             updateItem(recSource, RecommendationItemResult.Success(titles))
                         }
-                    } catch (e: Exception) {
+                    } catch (expected: Exception) {
+                        // Any failure ends here and the fallback below applies.
                         if (isActive) {
-                            updateItem(recSource, RecommendationItemResult.Error(e))
+                            updateItem(recSource, RecommendationItemResult.Error(expected))
                         }
                     }
                 }

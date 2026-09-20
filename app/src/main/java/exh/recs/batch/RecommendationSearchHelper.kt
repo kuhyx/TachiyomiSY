@@ -133,8 +133,9 @@ internal class RecommendationSearchHelper(val context: Context) {
                                 )
                             }.results.addAll(mangas)
                         } catch (_: NoResultsException) {
-                        } catch (e: Exception) {
-                            logger.e("Error while fetching recommendations for $recSourceId", e)
+                        } catch (expected: Exception) {
+                            // Logged whatever the cause; the caller carries on.
+                            logger.e("Error while fetching recommendations for $recSourceId", expected)
                         }
                     }
                 }
@@ -170,9 +171,10 @@ internal class RecommendationSearchHelper(val context: Context) {
                 SearchStatus.Finished.WithoutResults
             }
         } catch (_: CancellationException) {
-        } catch (e: Exception) {
-            status.value = SearchStatus.Error(e.message.orEmpty())
-            logger.e("Error during recommendation search", e)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            status.value = SearchStatus.Error(expected.message.orEmpty())
+            logger.e("Error during recommendation search", expected)
             return
         } finally {
             // Release wake + wifi locks

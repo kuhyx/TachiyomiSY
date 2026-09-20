@@ -355,13 +355,14 @@ private suspend fun autofillFromTracker(binding: EditMangaDialogBinding, track: 
         setTextIfNotBlank(binding.mangaArtist::setText, trackerMangaMetadata?.artists)
         setTextIfNotBlank(binding.thumbnailUrl::setText, trackerMangaMetadata?.thumbnailUrl)
         setTextIfNotBlank(binding.mangaDescription::setText, trackerMangaMetadata?.description)
-    } catch (e: Throwable) {
-        tracker.logcat(LogPriority.ERROR, e)
+    } catch (expected: Throwable) {
+        // Logged whatever the cause; the caller carries on.
+        tracker.logcat(LogPriority.ERROR, expected)
         binding.root.context.toast(
             binding.root.context.stringResource(
                 MR.strings.track_error,
                 tracker.name,
-                e.message ?: "",
+                expected.message ?: "",
             ),
         )
     }

@@ -100,8 +100,9 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
 
             pushSyncData(syncData)
             return syncData.backup
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, "SyncService") { "Error syncing: ${e.message}" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, "SyncService") { "Error syncing: ${expected.message}" }
             return null
         }
     }
@@ -132,9 +133,10 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
                     return SyncData(deviceId = deviceId, backup = backup)
                 }
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, throwable = e) { "Error downloading file" }
-            throw Exception("Failed to download sync data: ${e.message}", e)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, throwable = expected) { "Error downloading file" }
+            throw Exception("Failed to download sync data: ${expected.message}", expected)
         }
     }
 
@@ -205,8 +207,9 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
             logcat { "AppData folder file list: $fileList" }
 
             return fileList
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, throwable = e) { "Error no sync data found in appData folder" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, throwable = expected) { "Error no sync data found in appData folder" }
             return mutableListOf()
         }
     }
@@ -237,8 +240,9 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
                     }
                     DeleteSyncDataStatus.SUCCESS
                 }
-            } catch (e: Exception) {
-                this@GoogleDriveSyncService.logcat(LogPriority.ERROR, throwable = e) {
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                this@GoogleDriveSyncService.logcat(LogPriority.ERROR, throwable = expected) {
                     "Error occurred while interacting with Google Drive"
                 }
                 DeleteSyncDataStatus.ERROR
@@ -433,10 +437,11 @@ internal class GoogleDriveService(private val context: Context) {
             activity.runOnUiThread {
                 onSuccess()
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, throwable = e) { "Failed to handle authorization code" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, throwable = expected) { "Failed to handle authorization code" }
             activity.runOnUiThread {
-                onFailure(e.localizedMessage ?: "Unknown error")
+                onFailure(expected.localizedMessage ?: "Unknown error")
             }
         }
     }

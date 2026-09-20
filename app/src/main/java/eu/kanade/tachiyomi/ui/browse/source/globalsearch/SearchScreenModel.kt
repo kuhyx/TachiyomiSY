@@ -172,9 +172,10 @@ internal abstract class SearchScreenModel(
                         if (isActive) {
                             updateItem(source, SearchItemResult.Success(titles))
                         }
-                    } catch (e: Exception) {
+                    } catch (expected: Exception) {
+                        // Any failure ends here and the fallback below applies.
                         if (isActive) {
-                            updateItem(source, SearchItemResult.Error(e))
+                            updateItem(source, SearchItemResult.Error(expected))
                         }
                     }
                 }

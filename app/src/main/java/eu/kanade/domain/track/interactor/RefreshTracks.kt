@@ -34,8 +34,9 @@ internal class RefreshTracks(
                             insertTrack.await(updatedTrack)
                             syncChapterProgressWithTrack.await(mangaId, updatedTrack, service)
                             null
-                        } catch (e: Throwable) {
-                            service to e
+                        } catch (expected: Throwable) {
+                            // Any failure ends here and the fallback below applies.
+                            service to expected
                         }
                     }
                 }

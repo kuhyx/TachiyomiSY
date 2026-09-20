@@ -111,8 +111,9 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
         super<Application>.onCreate()
         try {
             FirebaseConfig.init(applicationContext)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (expected: Exception) {
+            // Any failure ends here and the fallback below applies.
+            expected.printStackTrace()
         }
 
         GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)
@@ -309,8 +310,9 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
     private fun setupNotificationChannels() {
         try {
             Notifications.createChannels(this)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Failed to modify notification channels" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Failed to modify notification channels" }
         }
     }
 

@@ -309,8 +309,9 @@ internal data class TrackInfoDialogHomeScreen(
                         else -> null
                     }
                 }
-            } catch (e: Throwable) {
-                logcat(LogPriority.ERROR, e) { "Failed to search manga on tracker by id" }
+            } catch (expected: Throwable) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR, expected) { "Failed to search manga on tracker by id" }
                 return null
             }
         }
@@ -322,8 +323,9 @@ internal data class TrackInfoDialogHomeScreen(
                         tracker.register(track, mangaId)
                         return true
                     }
-                } catch (e: Throwable) {
-                    logcat(LogPriority.ERROR, e) { "Failed to register tracking by id" }
+                } catch (expected: Throwable) {
+                    // Logged whatever the cause; the caller carries on.
+                    logcat(LogPriority.ERROR, expected) { "Failed to register tracking by id" }
                 }
             }
             return false
@@ -810,8 +812,9 @@ internal data class TrackerSearchScreen(
                     try {
                         val results = tracker.search(query)
                         Result.success(results)
-                    } catch (e: Throwable) {
-                        Result.failure(e)
+                    } catch (expected: Throwable) {
+                        // Any failure ends here and the fallback below applies.
+                        Result.failure(expected)
                     }
                 }
                 mutableState.update { oldState ->
@@ -932,8 +935,9 @@ private data class TrackerRemoveScreen(
             screenModelScope.launchNonCancellable {
                 try {
                     (tracker as DeletableTracker).delete(track)
-                } catch (e: Exception) {
-                    logcat(LogPriority.ERROR, e) { "Failed to delete entry from service" }
+                } catch (expected: Exception) {
+                    // Logged whatever the cause; the caller carries on.
+                    logcat(LogPriority.ERROR, expected) { "Failed to delete entry from service" }
                 }
             }
         }

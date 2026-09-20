@@ -150,7 +150,8 @@ internal class MergedMangaRewriteMigration : Migration {
             fun readFromUrl(url: String): MangaConfig? {
                 return try {
                     Json.decodeFromString(url)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
+                    // Any failure ends here and the fallback below applies.
                     null
                 }
             }
@@ -176,7 +177,8 @@ internal class MergedMangaRewriteMigration : Migration {
     private fun readUrlConfig(url: String): UrlConfig? {
         return try {
             Json.decodeFromString(url)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // Any failure ends here and the fallback below applies.
             null
         }
     }

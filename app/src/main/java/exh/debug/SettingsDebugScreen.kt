@@ -141,8 +141,9 @@ internal class SettingsDebugScreen : Screen() {
                                 val text = try {
                                     running = true
                                     "Function returned result:\n\n${func.call(DebugFunctions)}"
-                                } catch (e: Exception) {
-                                    "Function threw exception:\n\n${Log.getStackTraceString(e)}"
+                                } catch (expected: Exception) {
+                                    // Any failure ends here and the fallback below applies.
+                                    "Function threw exception:\n\n${Log.getStackTraceString(expected)}"
                                 } finally {
                                     running = false
                                 }

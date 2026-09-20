@@ -101,14 +101,15 @@ internal class SyncYomiSyncService(
             }
 
             return finalSyncData.backup
-        } catch (e: Exception) {
-            if (e is CancellationException) {
-                reportSyncEvent(SyncEventStatus.SYNC_CANCELLED, e.message)
-                throw e
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            if (expected is CancellationException) {
+                reportSyncEvent(SyncEventStatus.SYNC_CANCELLED, expected.message)
+                throw expected
             }
-            logcat(LogPriority.ERROR) { "Error syncing: ${e.message}" }
-            notifier.showSyncError(e.message)
-            reportSyncEvent(SyncEventStatus.SYNC_ERROR, e.message)
+            logcat(LogPriority.ERROR) { "Error syncing: ${expected.message}" }
+            notifier.showSyncError(expected.message)
+            reportSyncEvent(SyncEventStatus.SYNC_ERROR, expected.message)
             return null
         }
     }
@@ -255,8 +256,9 @@ internal class SyncYomiSyncService(
 
                 val client = OkHttpClient()
                 client.newCall(request).await().close()
-            } catch (e: Exception) {
-                logcat(LogPriority.ERROR) { "Failed to report sync event: ${e.message}" }
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR) { "Failed to report sync event: ${expected.message}" }
             }
         }
     }

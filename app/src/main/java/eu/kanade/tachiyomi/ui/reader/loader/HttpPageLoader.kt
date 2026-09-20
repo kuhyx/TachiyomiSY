@@ -88,9 +88,10 @@ internal class HttpPageLoader(
     override suspend fun getPages(): List<ReaderPage> {
         val pages = try {
             chapterCache.getPageListFromCache(chapter.chapter.toDomainChapter()!!)
-        } catch (e: Throwable) {
-            if (e is CancellationException) {
-                throw e
+        } catch (expected: Throwable) {
+            // Rethrown (or wrapped) whatever the cause.
+            if (expected is CancellationException) {
+                throw expected
             }
             source.getPageList(chapter.chapter)
         }
@@ -176,9 +177,10 @@ internal class HttpPageLoader(
                     // Convert to pages without reader information
                     val pagesToSave = pages.map { Page(it.index, it.url, it.imageUrl) }
                     chapterCache.putPageListToCache(chapter.chapter.toDomainChapter()!!, pagesToSave)
-                } catch (e: Throwable) {
-                    if (e is CancellationException) {
-                        throw e
+                } catch (expected: Throwable) {
+                    // Rethrown (or wrapped) whatever the cause.
+                    if (expected is CancellationException) {
+                        throw expected
                     }
                 }
             }
@@ -222,10 +224,11 @@ internal class HttpPageLoader(
 
             page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
             page.status = Page.State.Ready
-        } catch (e: Throwable) {
-            page.status = Page.State.Error(e)
-            if (e is CancellationException) {
-                throw e
+        } catch (expected: Throwable) {
+            // Rethrown (or wrapped) whatever the cause.
+            page.status = Page.State.Error(expected)
+            if (expected is CancellationException) {
+                throw expected
             }
         }
     }

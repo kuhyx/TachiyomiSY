@@ -409,11 +409,12 @@ internal class ReaderViewModel @JvmOverloads constructor(
                     // Unlikely but okay
                     Result.success(false)
                 }
-            } catch (e: Throwable) {
-                if (e is CancellationException) {
-                    throw e
+            } catch (expected: Throwable) {
+                // Rethrown (or wrapped) whatever the cause.
+                if (expected is CancellationException) {
+                    throw expected
                 }
-                Result.failure(e)
+                Result.failure(expected)
             }
         }
     }
@@ -480,11 +481,12 @@ internal class ReaderViewModel @JvmOverloads constructor(
 
             try {
                 loadChapter(loader, chapter)
-            } catch (e: Throwable) {
-                if (e is CancellationException) {
-                    throw e
+            } catch (expected: Throwable) {
+                // Logged whatever the cause; the caller carries on.
+                if (expected is CancellationException) {
+                    throw expected
                 }
-                logcat(LogPriority.ERROR, e)
+                logcat(LogPriority.ERROR, expected)
             }
         }
     }
@@ -507,11 +509,12 @@ internal class ReaderViewModel @JvmOverloads constructor(
             withIOContext {
                 loadChapter(loader, chapter)
             }
-        } catch (e: Throwable) {
-            if (e is CancellationException) {
-                throw e
+        } catch (expected: Throwable) {
+            // Logged whatever the cause; the caller carries on.
+            if (expected is CancellationException) {
+                throw expected
             }
-            logcat(LogPriority.ERROR, e)
+            logcat(LogPriority.ERROR, expected)
         } finally {
             mutableState.update { it.copy(isLoadingAdjacentChapter = false) }
         }
@@ -550,9 +553,10 @@ internal class ReaderViewModel @JvmOverloads constructor(
         try {
             logcat { "Preloading ${chapter.chapter.url}" }
             loader.loadChapter(chapter)
-        } catch (e: Throwable) {
-            if (e is CancellationException) {
-                throw e
+        } catch (expected: Throwable) {
+            // Rethrown (or wrapped) whatever the cause.
+            if (expected is CancellationException) {
+                throw expected
             }
             return
         }
@@ -807,8 +811,9 @@ internal class ReaderViewModel @JvmOverloads constructor(
 
         return try {
             source.getChapterUrl(sChapter)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
             null
         }
     }
@@ -1083,9 +1088,10 @@ internal class ReaderViewModel @JvmOverloads constructor(
                     notifier.onComplete(uri)
                     eventChannel.send(Event.SavedImage(SaveImageResult.Success(uri)))
                 }
-            } catch (e: Throwable) {
-                notifier.onError(e.message)
-                eventChannel.send(Event.SavedImage(SaveImageResult.Error(e)))
+            } catch (expected: Throwable) {
+                // Any failure ends here and the fallback below applies.
+                notifier.onError(expected.message)
+                eventChannel.send(Event.SavedImage(SaveImageResult.Error(expected)))
             }
         }
     }
@@ -1118,9 +1124,10 @@ internal class ReaderViewModel @JvmOverloads constructor(
                     manga = manga,
                 )
                 eventChannel.send(Event.SavedImage(SaveImageResult.Success(uri)))
-            } catch (e: Throwable) {
-                notifier.onError(e.message)
-                eventChannel.send(Event.SavedImage(SaveImageResult.Error(e)))
+            } catch (expected: Throwable) {
+                // Any failure ends here and the fallback below applies.
+                notifier.onError(expected.message)
+                eventChannel.send(Event.SavedImage(SaveImageResult.Error(expected)))
             }
         }
     }
@@ -1193,8 +1200,9 @@ internal class ReaderViewModel @JvmOverloads constructor(
                 )
                 eventChannel.send(if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, page))
             }
-        } catch (e: Throwable) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Throwable) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
         }
     }
 
@@ -1226,8 +1234,9 @@ internal class ReaderViewModel @JvmOverloads constructor(
                 val event = if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, firstPage, secondPage)
                 eventChannel.send(event)
             }
-        } catch (e: Throwable) {
-            logcat(LogPriority.ERROR, e)
+        } catch (expected: Throwable) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
         }
     }
     // SY <--
@@ -1255,7 +1264,8 @@ internal class ReaderViewModel @JvmOverloads constructor(
                 } else {
                     SetAsCoverResult.AddToLibraryFirst
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
+                // Any failure ends here and the fallback below applies.
                 SetAsCoverResult.Error
             }
             eventChannel.send(Event.SetCoverResult(result))

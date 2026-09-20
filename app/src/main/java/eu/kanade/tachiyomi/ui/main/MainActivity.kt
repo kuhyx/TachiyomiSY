@@ -391,8 +391,9 @@ internal class MainActivity : BaseActivity() {
                         )
                         navigator.push(updateScreen)
                     }
-                } catch (e: Exception) {
-                    logcat(LogPriority.ERROR, e)
+                } catch (expected: Exception) {
+                    // Logged whatever the cause; the caller carries on.
+                    logcat(LogPriority.ERROR, expected)
                 }
             }
         }
@@ -401,8 +402,9 @@ internal class MainActivity : BaseActivity() {
         LaunchedEffect(Unit) {
             try {
                 ExtensionApi().checkForUpdates(context)
-            } catch (e: Exception) {
-                logcat(LogPriority.ERROR, e)
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                logcat(LogPriority.ERROR, expected)
             }
         }
     }

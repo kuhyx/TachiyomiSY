@@ -108,9 +108,10 @@ internal class AppUpdateDownloadJob(private val context: Context, workerParams: 
             }
             notifier.cancel()
             notifier.promptInstall(apkFile.getUriCompat(context))
-        } catch (e: Exception) {
-            val shouldCancel = e is CancellationException ||
-                (e is StreamResetException && e.errorCode == ErrorCode.CANCEL)
+        } catch (expected: Exception) {
+            // Any failure ends here and the fallback below applies.
+            val shouldCancel = expected is CancellationException ||
+                (expected is StreamResetException && expected.errorCode == ErrorCode.CANCEL)
             if (shouldCancel) {
                 notifier.cancel()
             } else {

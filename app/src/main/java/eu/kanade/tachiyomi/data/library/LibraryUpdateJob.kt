@@ -176,12 +176,13 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                     // SY <--
                 }
                 Result.success()
-            } catch (e: Exception) {
-                if (e is CancellationException) {
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                if (expected is CancellationException) {
                     // Assume success although cancelled
                     Result.success()
                 } else {
-                    logcat(LogPriority.ERROR, e)
+                    logcat(LogPriority.ERROR, expected)
                     Result.failure()
                 }
             } finally {
@@ -371,9 +372,10 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                                                 val track = mdList.createInitialTracker(manga)
                                                 insertTrack.await(mdList.refresh(track).toDomainTrack(false)!!)
                                             }
-                                        } catch (e: Exception) {
-                                            if (e is CancellationException) throw e
-                                            xLogE("Error adding initial track for ${manga.title}", e)
+                                        } catch (expected: Exception) {
+                                            // Logged whatever the cause; the caller carries on.
+                                            if (expected is CancellationException) throw expected
+                                            xLogE("Error adding initial track for ${manga.title}", expected)
                                         }
                                     }
                                 }
@@ -409,8 +411,9 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                                             // Convert to the manga that contains new chapters
                                             newUpdates.add(manga to newChapters.toTypedArray())
                                         }
-                                    } catch (e: Throwable) {
-                                        val errorMessage = when (e) {
+                                    } catch (expected: Throwable) {
+                                        // Any failure ends here and the fallback below applies.
+                                        val errorMessage = when (expected) {
                                             is NoChaptersException -> context.stringResource(
                                                 MR.strings.no_chapters_error,
                                             )
@@ -419,7 +422,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                                             is SourceNotInstalledException -> context.stringResource(
                                                 MR.strings.loader_not_implemented_error,
                                             )
-                                            else -> e.message
+                                            else -> expected.message
                                         }
                                         failedUpdates.add(manga to errorMessage)
                                     }
@@ -518,9 +521,9 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                                             fetchChapters = false,
                                             manualFetch = true,
                                         ).getOrThrow()
-                                    } catch (e: Throwable) {
+                                    } catch (expected: Throwable) {
                                         // Ignore errors and continue
-                                        logcat(LogPriority.ERROR, e)
+                                        logcat(LogPriority.ERROR, expected)
                                     }
                                 }
                             }

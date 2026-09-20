@@ -167,9 +167,10 @@ internal class MigrateMangaUseCase(
             )
 
             updateManga.awaitAll(listOfNotNull(currentMangaUpdate, targetMangaUpdate))
-        } catch (e: Throwable) {
-            if (e is CancellationException) {
-                throw e
+        } catch (expected: Throwable) {
+            // Rethrown (or wrapped) whatever the cause.
+            if (expected is CancellationException) {
+                throw expected
             }
         }
     }

@@ -104,9 +104,10 @@ internal class UpdateMangaFromRemote(
             val updatedManga = mangaRepository.getMangaById(manga.id)
 
             Result.success(RemoteMangaUpdate(manga = updatedManga, newChapters = newChapters))
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e)
-            Result.failure(e)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
+            Result.failure(expected)
         }
     }
 

@@ -125,8 +125,9 @@ internal object SettingsMangadexScreen : SearchableSettings {
                                     context.toast(MR.strings.unknown_error)
                                 }
                             }
-                        } catch (e: Exception) {
-                            logcat(LogPriority.ERROR, e) { "Logout error" }
+                        } catch (expected: Exception) {
+                            // Logged whatever the cause; the caller carries on.
+                            logcat(LogPriority.ERROR, expected) { "Logout error" }
                             withUIContext {
                                 context.toast(MR.strings.unknown_error)
                             }

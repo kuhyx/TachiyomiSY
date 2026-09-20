@@ -83,7 +83,8 @@ internal class Komga(id: Long) : BaseTracker(id, "Komga"), EnhancedTracker {
     override suspend fun match(manga: Manga): TrackSearch? =
         try {
             api.getTrackSearch(manga.url)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // Any failure ends here and the fallback below applies.
             null
         }
 

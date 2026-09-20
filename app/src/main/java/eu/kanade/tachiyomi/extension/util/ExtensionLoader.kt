@@ -100,8 +100,9 @@ internal object ExtensionLoader {
                 ExtensionInstallReceiver.notifyAdded(context, extension.packageName)
             }
             true
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Failed to copy extension file." }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Failed to copy extension file." }
             target.delete()
             false
         }
@@ -277,8 +278,9 @@ internal object ExtensionLoader {
 
         val classLoader = try {
             ChildFirstPathClassLoader(appInfo.sourceDir, null, context.classLoader)
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Extension load error: $extName ($pkgName)" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Extension load error: $extName ($pkgName)" }
             return LoadResult.Error
         }
 
@@ -299,8 +301,9 @@ internal object ExtensionLoader {
                         is SourceFactory -> obj.createSources()
                         else -> throw Exception("Unknown source class type: ${obj.javaClass}")
                     }
-                } catch (e: Throwable) {
-                    logcat(LogPriority.ERROR, e) { "Extension load error: $extName ($it)" }
+                } catch (expected: Throwable) {
+                    // Logged whatever the cause; the caller carries on.
+                    logcat(LogPriority.ERROR, expected) { "Extension load error: $extName ($it)" }
                     return LoadResult.Error
                 }
             }

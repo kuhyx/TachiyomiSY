@@ -192,9 +192,10 @@ private class RestoreBackupScreenModel(
     private fun validate(uri: Uri) {
         val results = try {
             BackupFileValidator(context).validate(uri)
-        } catch (e: Exception) {
+        } catch (expected: Exception) {
+            // Any failure ends here and the fallback below applies.
             setError(
-                error = InvalidRestore(uri, e.message.toString()),
+                error = InvalidRestore(uri, expected.message.toString()),
                 canRestore = false,
             )
             return

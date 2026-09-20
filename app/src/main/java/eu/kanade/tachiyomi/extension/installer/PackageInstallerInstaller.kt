@@ -107,8 +107,9 @@ internal class PackageInstallerInstaller(private val service: Service) : Install
                 @SuppressLint("RequestInstallPackagesPolicy")
                 session.commit(intentSender)
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Failed to install extension ${entry.downloadId} ${entry.uri}" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Failed to install extension ${entry.downloadId} ${entry.uri}" }
             activeSession?.let { (_, sessionId) ->
                 packageInstaller.abandonSession(sessionId)
             }

@@ -276,8 +276,9 @@ internal class EnhancedFilePrinter internal constructor(
                 lastFileName = file.name
                 this.file = file
                 true
-            } catch (e: Exception) {
-                e.printStackTrace()
+            } catch (expected: Exception) {
+                // Any failure ends here and the fallback below applies.
+                expected.printStackTrace()
                 false
             }
         }

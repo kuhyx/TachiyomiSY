@@ -80,8 +80,9 @@ internal abstract class BaseTracker(
         item.mangaId = mangaId
         try {
             addTracks.bind(this, item, mangaId)
-        } catch (e: Throwable) {
-            withUIContext { Injekt.get<Application>().toast(e.message) }
+        } catch (expected: Throwable) {
+            // Any failure ends here and the fallback below applies.
+            withUIContext { Injekt.get<Application>().toast(expected.message) }
         }
     }
 
@@ -145,9 +146,10 @@ internal abstract class BaseTracker(
             track.toDomainTrack(idRequired = false)?.let {
                 insertTrack.await(it)
             }
-        } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Failed to update remote track data id=$id" }
-            withUIContext { Injekt.get<Application>().toast(e.message) }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Failed to update remote track data id=$id" }
+            withUIContext { Injekt.get<Application>().toast(expected.message) }
         }
     }
 }

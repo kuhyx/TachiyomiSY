@@ -185,7 +185,7 @@ internal object SettingsAdvancedScreen : SearchableSettings {
                                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 }
                                 context.startActivity(intent)
-                            } catch (e: ActivityNotFoundException) {
+                            } catch (_: ActivityNotFoundException) {
                                 context.toast(MR.strings.battery_optimization_setting_activity_not_found)
                             }
                         } else {
@@ -263,8 +263,9 @@ internal object SettingsAdvancedScreen : SearchableSettings {
                                 File("$it/app_webview/").deleteRecursively()
                             }
                             context.toast(MR.strings.webview_data_deleted)
-                        } catch (e: Throwable) {
-                            logcat(LogPriority.ERROR, e)
+                        } catch (expected: Throwable) {
+                            // Logged whatever the cause; the caller carries on.
+                            logcat(LogPriority.ERROR, expected)
                             context.toast(MR.strings.cache_delete_error)
                         }
                     },

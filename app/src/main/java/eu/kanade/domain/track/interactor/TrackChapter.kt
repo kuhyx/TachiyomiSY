@@ -48,12 +48,13 @@ internal class TrackChapter(
                             service.update(updatedTrack.toDbTrack(), true)
                             insertTrack.await(updatedTrack)
                             delayedTrackingStore.remove(track.id)
-                        } catch (e: Exception) {
+                        } catch (expected: Exception) {
+                            // Rethrown (or wrapped) whatever the cause.
                             delayedTrackingStore.add(track.id, chapterNumber)
                             if (setupJobOnFailure) {
                                 DelayedTrackingUpdateJob.setupTask(context)
                             }
-                            throw e
+                            throw expected
                         }
                     }
                 }

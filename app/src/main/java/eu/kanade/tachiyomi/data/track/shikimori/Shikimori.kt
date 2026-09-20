@@ -105,7 +105,8 @@ internal class Shikimori(id: Long) : BaseTracker(id, "Shikimori"), DeletableTrac
             val user = api.getCurrentUser()
             saveDisplayUsername(user.nickname)
             saveCredentials(user.id, oauth.accessToken)
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
+            // Any failure ends here and the fallback below applies.
             logout()
         }
     }
@@ -117,7 +118,8 @@ internal class Shikimori(id: Long) : BaseTracker(id, "Shikimori"), DeletableTrac
     fun restoreToken(): SMOAuth? {
         return try {
             json.decodeFromString<SMOAuth>(trackPreferences.trackToken(this).get())
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            // Any failure ends here and the fallback below applies.
             null
         }
     }

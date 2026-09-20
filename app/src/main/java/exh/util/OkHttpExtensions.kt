@@ -30,9 +30,10 @@ internal fun Call.asObservableWithAsyncStacktrace(): Observable<Pair<Exception, 
                         subscriber.onNext(asyncStackTrace to response)
                         subscriber.onCompleted()
                     }
-                } catch (error: Throwable) {
+                } catch (expected: Throwable) {
+                    // Any failure ends here and the fallback below applies.
                     if (!subscriber.isUnsubscribed) {
-                        subscriber.onError(error.withRootCause(asyncStackTrace))
+                        subscriber.onError(expected.withRootCause(asyncStackTrace))
                     }
                 }
             }

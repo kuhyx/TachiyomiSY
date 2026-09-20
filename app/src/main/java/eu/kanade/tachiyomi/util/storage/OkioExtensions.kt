@@ -18,10 +18,11 @@ internal fun BufferedSource.saveTo(file: File) {
 
         // Copy to destination
         saveTo(file.outputStream())
-    } catch (e: Exception) {
+    } catch (expected: Exception) {
+        // Rethrown (or wrapped) whatever the cause.
         close()
         file.delete()
-        throw e
+        throw expected
     }
 }
 

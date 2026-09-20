@@ -125,8 +125,9 @@ internal class ChapterCache(
             diskCache.flush()
             editor.commit()
             editor.abortUnlessCommitted()
-        } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "Failed to put page list to cache" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.WARN, expected) { "Failed to put page list to cache" }
             // Ignore.
         } finally {
             editor?.abortUnlessCommitted()
@@ -217,8 +218,9 @@ internal class ChapterCache(
             val key = file.substringBeforeLast(".")
             // Remove file from cache
             diskCache.remove(key)
-        } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "Failed to remove file from cache" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.WARN, expected) { "Failed to remove file from cache" }
             false
         }
     }

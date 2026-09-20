@@ -35,8 +35,9 @@ internal class GetPagePreviews(
                 pagePreviews.hasNextPage,
                 pagePreviews.pagePreviewPages,
             )
-        } catch (e: Exception) {
-            Result.Error(e)
+        } catch (expected: Exception) {
+            // Any failure ends here and the fallback below applies.
+            Result.Error(expected)
         }
     }
 

@@ -103,7 +103,7 @@ internal class PagePreviewCache(private val context: Context) {
             diskCache.flush()
             editor.commit()
             editor.abortUnlessCommitted()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Ignore.
         } finally {
             editor?.abortUnlessCommitted()
@@ -119,7 +119,7 @@ internal class PagePreviewCache(private val context: Context) {
     fun isImageInCache(imageUrl: String): Boolean {
         return try {
             diskCache.get(DiskUtil.hashKeyForDisk(imageUrl)) != null
-        } catch (e: IOException) {
+        } catch (_: IOException) {
             false
         }
     }
@@ -188,8 +188,9 @@ internal class PagePreviewCache(private val context: Context) {
             val key = file.substringBeforeLast(".")
             // Remove file from cache.
             diskCache.remove(key)
-        } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "Failed to remove file from cache" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.WARN, expected) { "Failed to remove file from cache" }
             false
         }
     }

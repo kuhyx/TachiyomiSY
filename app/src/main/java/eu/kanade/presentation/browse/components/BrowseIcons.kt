@@ -136,7 +136,8 @@ private fun Extension.getIcon(density: Int = DisplayMetrics.DENSITY_DEFAULT): St
                         .toBitmap()
                         .asImageBitmap(),
                 )
-            } catch (e: Exception) {
+            } catch (_: Exception) {
+                // Any failure ends here and the fallback below applies.
                 Result.Error
             }
         }

@@ -47,8 +47,9 @@ internal fun Context.copyToClipboard(label: String, content: String) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
             toast(stringResource(MR.strings.copied_to_clipboard, content.truncateCenter(CLIPBOARD_TOAST_CHARS)))
         }
-    } catch (e: Throwable) {
-        logcat(LogPriority.ERROR, e)
+    } catch (expected: Throwable) {
+        // Logged whatever the cause; the caller carries on.
+        logcat(LogPriority.ERROR, expected)
         toast(MR.strings.clipboard_copy_error)
     }
 }
@@ -69,8 +70,9 @@ internal fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = fals
             }
         }
         startActivity(intent)
-    } catch (e: Exception) {
-        toast(e.message)
+    } catch (expected: Exception) {
+        // Any failure ends here and the fallback below applies.
+        toast(expected.message)
     }
 }
 

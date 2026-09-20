@@ -54,8 +54,9 @@ internal class MoveLibrarySortingSettingsMigration : Migration {
                 putString(libraryPreferences.sortingMode.key(), newSortingMode)
                 putString("library_sorting_ascending", newSortingDirection)
             }
-        } catch (e: Exception) {
-            logcat(throwable = e) { "Already done migration" }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(throwable = expected) { "Already done migration" }
         }
 
         return@withIOContext true
