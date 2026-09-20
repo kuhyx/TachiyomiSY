@@ -109,11 +109,11 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
                 }
 
                 val targetScale = height.toFloat() / sHeight.toFloat()
-                (animateScaleAndCenter(targetScale, point) ?: return@postDelayed)
-                    .withDuration(ZOOM_ANIMATION_MS)
-                    .withEasing(EASE_IN_OUT_QUAD)
-                    .withInterruptible(true)
-                    .start()
+                animateScaleAndCenter(targetScale, point)
+                    ?.withDuration(ZOOM_ANIMATION_MS)
+                    ?.withEasing(EASE_IN_OUT_QUAD)
+                    ?.withInterruptible(true)
+                    ?.start()
             }
         }
     }

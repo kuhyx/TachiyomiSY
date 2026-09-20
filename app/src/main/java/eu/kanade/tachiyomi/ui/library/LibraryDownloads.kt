@@ -32,7 +32,7 @@ internal class LibraryDownloads(
                 getNextChapters.await(manga.id)
                     .let { if (amount != null) it.take(amount) else it }
                     .groupBy { it.mangaId }
-                    .forEach ab@{ (mangaId, chapters) ->
+                    .forEach { (mangaId, chapters) ->
                         val mergedManga = mergedMangas[mangaId]
                         if (mergedManga != null) {
                             val downloadChapters = chapters.fastFilterNot { chapter ->
@@ -80,7 +80,7 @@ internal class LibraryDownloads(
                     .associateBy { it.id }
                 getBookmarkedChaptersByMangaId.await(manga.id)
                     .groupBy { it.mangaId }
-                    .forEach ab@{ (mangaId, chapters) ->
+                    .forEach { (mangaId, chapters) ->
                         val mergedManga = mergedMangas[mangaId]
                         if (mergedManga != null) {
                             val downloadChapters = chapters.fastFilterNot { chapter ->

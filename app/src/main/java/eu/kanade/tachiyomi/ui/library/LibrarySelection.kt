@@ -32,27 +32,27 @@ internal class LibrarySelection {
      * same category as the given manga.
      */
     fun toggleRange(state: State, category: Category, manga: LibraryManga): State {
-        val newSelection = state.selection.mutate { list ->
-            val lastSelected = list.lastOrNull()
-            if (lastSelectionCategory != category.id) {
-                list.add(manga.id)
-                return@mutate
-            }
-
-            val items = state.getItemsForCategoryId(category.id).fastMap { it.id }
-            val lastMangaIndex = items.indexOf(lastSelected)
-            val curMangaIndex = items.indexOf(manga.id)
-
-            val selectionRange = when {
-                lastMangaIndex < curMangaIndex -> lastMangaIndex..curMangaIndex
-                curMangaIndex < lastMangaIndex -> curMangaIndex..lastMangaIndex
-                // We shouldn't reach this point
-                else -> return@mutate
-            }
-            selectionRange.mapNotNull { items[it] }.let(list::addAll)
+        val toAdd = if (lastSelectionCategory != category.id) {
+            listOf(manga.id)
+        } else {
+            rangeToSelect(state, category, manga, state.selection.lastOrNull())
         }
         lastSelectionCategory = category.id
-        return state.copy(selection = newSelection)
+        return state.copy(selection = state.selection.mutate { it.addAll(toAdd) })
+    }
+
+    // The ids between the last selected manga and [manga] in [category]; empty when they coincide.
+    private fun rangeToSelect(state: State, category: Category, manga: LibraryManga, lastSelected: Long?): List<Long> {
+        val items = state.getItemsForCategoryId(category.id).fastMap { it.id }
+        val lastMangaIndex = items.indexOf(lastSelected)
+        val curMangaIndex = items.indexOf(manga.id)
+        val selectionRange = when {
+            lastMangaIndex < curMangaIndex -> lastMangaIndex..curMangaIndex
+            curMangaIndex < lastMangaIndex -> curMangaIndex..lastMangaIndex
+            // We shouldn't reach this point
+            else -> IntRange.EMPTY
+        }
+        return selectionRange.mapNotNull { items[it] }
     }
 
     fun selectAll(state: State): State {

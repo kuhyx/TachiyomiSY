@@ -102,7 +102,7 @@ internal class LibraryItemPipeline(
         }
         // SY <--
 
-        val filterFnTracking: (LibraryItem) -> Boolean = tracking@{ item ->
+        val filterFnTracking: (LibraryItem) -> Boolean = { item ->
             if (isNotLoggedInAnyTrack || trackFiltersIsIgnored) {
                 true
             } else {

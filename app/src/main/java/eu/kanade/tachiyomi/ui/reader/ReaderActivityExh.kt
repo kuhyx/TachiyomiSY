@@ -71,20 +71,9 @@ internal fun ReaderActivity.exhRetryAll() {
     viewModel.state.value.viewerChapters
         ?.currChapter
         ?.pages
-        ?.forEachIndexed { _, page ->
-            var shouldQueuePage = false
-            if (page.status is Page.State.Error) {
-                shouldQueuePage = true
-            } /*else if (page.status == Page.LOAD_PAGE ||
-                                page.status == Page.DOWNLOAD_IMAGE) {
-                            // Do nothing
-                        }*/
-
-            if (shouldQueuePage) {
-                page.status = Page.State.Queue
-            } else {
-                return@forEachIndexed
-            }
+        ?.filter { it.status is Page.State.Error }
+        ?.forEach { page ->
+            page.status = Page.State.Queue
 
             // If we are using EHentai/ExHentai, get a new image URL
             viewModel.manga?.let { m ->

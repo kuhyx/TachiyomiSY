@@ -780,7 +780,7 @@ internal data class TrackerSearchScreen(
             queryResult = state.queryResult,
             selected = state.selected,
             onSelectedChange = screenModel::updateSelection,
-            onConfirmSelection = f@{ private: Boolean ->
+            onConfirmSelection = { private: Boolean ->
                 val selected = state.selected
                 if (selected != null) {
                     selected.private = private

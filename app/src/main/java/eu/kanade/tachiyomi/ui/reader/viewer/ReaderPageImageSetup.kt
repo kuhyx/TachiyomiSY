@@ -89,32 +89,9 @@ internal fun ReaderPageImageView.setNonAnimatedImage(
                 setHardwareConfig(ImageUtil.canUseHardwareBitmap(data))
                 setImage(ImageSource.inputStream(data.inputStream()))
                 isVisible = true
-                return@apply
+            } else {
+                loadLongStrip(this, data, config)
             }
-
-            ImageRequest.Builder(context)
-                .data(data)
-                .memoryCachePolicy(CachePolicy.DISABLED)
-                .diskCachePolicy(CachePolicy.DISABLED)
-                .target(
-                    onSuccess = { result ->
-                        val image = result as BitmapImage
-                        setImage(ImageSource.bitmap(image.bitmap))
-                        isVisible = true
-                    },
-                )
-                .listener(
-                    onError = { _, result ->
-                        onImageLoadError(result.throwable)
-                    },
-                )
-                .size(ViewSizeResolver(this@setNonAnimatedImage))
-                .precision(Precision.INEXACT)
-                .cropBorders(config.cropBorders)
-                .customDecoder(true)
-                .crossfade(false)
-                .build()
-                .let(context.imageLoader::enqueue)
         }
         else -> {
             throw IllegalArgumentException("Not implemented for class ${data::class.simpleName}")
@@ -190,4 +167,35 @@ internal fun ReaderPageImageView.setAnimatedImage(
         .crossfade(false)
         .build()
     context.imageLoader.enqueue(request)
+}
+
+// A long strip goes through Coil so it can be decoded and cropped in pieces.
+private fun ReaderPageImageView.loadLongStrip(
+    view: SubsamplingScaleImageView,
+    data: BufferedSource,
+    config: ReaderPageImageView.Config,
+) {
+    ImageRequest.Builder(context)
+        .data(data)
+        .memoryCachePolicy(CachePolicy.DISABLED)
+        .diskCachePolicy(CachePolicy.DISABLED)
+        .target(
+            onSuccess = { result ->
+                val image = result as BitmapImage
+                view.setImage(ImageSource.bitmap(image.bitmap))
+                view.isVisible = true
+            },
+        )
+        .listener(
+            onError = { _, result ->
+                onImageLoadError(result.throwable)
+            },
+        )
+        .size(ViewSizeResolver(this))
+        .precision(Precision.INEXACT)
+        .cropBorders(config.cropBorders)
+        .customDecoder(true)
+        .crossfade(false)
+        .build()
+        .let(context.imageLoader::enqueue)
 }

@@ -140,19 +140,12 @@ internal class WebtoonViewer(
                 NavigationRegion.PREV, NavigationRegion.LEFT -> scrollUp()
             }
         }
-        recycler.longTapListener = f@{ event ->
-            if (activity.viewModel.state.value.menuVisible || config.longTapEnabled) {
-                val child = recycler.findChildViewUnder(event.x, event.y)
-                if (child != null) {
-                    val position = recycler.getChildAdapterPosition(child)
-                    val item = adapter.items.getOrNull(position)
-                    if (item is ReaderPage) {
-                        activity.onPageLongTap(item)
-                        return@f true
-                    }
-                }
-            }
-            false
+        recycler.longTapListener = { event ->
+            val page = recycler.findChildViewUnder(event.x, event.y)
+                ?.let { adapter.items.getOrNull(recycler.getChildAdapterPosition(it)) as? ReaderPage }
+                ?.takeIf { activity.viewModel.state.value.menuVisible || config.longTapEnabled }
+            if (page != null) activity.onPageLongTap(page)
+            page != null
         }
 
         config.imagePropertyChangedListener = {

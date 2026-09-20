@@ -125,17 +125,12 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
                 NavigationRegion.LEFT -> moveLeft()
             }
         }
-        pager.longTapListener = f@{
-            if (activity.viewModel.state.value.menuVisible || config.longTapEnabled) {
-                val item = adapter.joinedItems.getOrNull(pager.currentItem)
-                val firstPage = item?.first as? ReaderPage
-                val secondPage = item?.second as? ReaderPage
-                if (firstPage is ReaderPage) {
-                    activity.onPageLongTap(firstPage, secondPage)
-                    return@f true
-                }
-            }
-            false
+        pager.longTapListener = {
+            val item = adapter.joinedItems.getOrNull(pager.currentItem)
+            val firstPage = (item?.first as? ReaderPage)
+                ?.takeIf { activity.viewModel.state.value.menuVisible || config.longTapEnabled }
+            if (firstPage != null) activity.onPageLongTap(firstPage, item.second as? ReaderPage)
+            firstPage != null
         }
 
         config.dualPageSplitChangedListener = { enabled ->
