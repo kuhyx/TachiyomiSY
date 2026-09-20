@@ -141,6 +141,10 @@ gradlePlugin {
             id = mihonx.plugins.lint.get().pluginId
             implementationClass = "mihon.gradle.plugins.PluginLint"
         }
+        register("sy-release") {
+            id = mihonx.plugins.sy.release.get().pluginId
+            implementationClass = "mihon.gradle.plugins.PluginSyRelease"
+        }
         register("spotless") {
             id = mihonx.plugins.spotless.get().pluginId
             implementationClass = "mihon.gradle.plugins.PluginSpotless"

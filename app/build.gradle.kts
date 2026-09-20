@@ -3,12 +3,14 @@ import mihon.gradle.getBuildTime
 import mihon.gradle.getLatestCommitCount
 import mihon.gradle.getLatestCommitSha
 import mihon.gradle.tasks.ReplaceShortcutsPlaceholderTask
-import java.util.Properties
 
 plugins {
     alias(mihonx.plugins.android.application)
     alias(mihonx.plugins.compose)
     alias(mihonx.plugins.spotless)
+    // SY fork (kuhy): the `kuhy` signing config and the `foss` drop-in build type
+    // (`-PsyReplaceUpstream`, `-PsyBuildNumber`) live in gradle/build-logic.
+    alias(mihonx.plugins.sy.release)
 
     kotlin("plugin.parcelize")
 
@@ -45,25 +47,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // SY fork (kuhy): key material for the drop-in replacement build. Absent on any
-    // other machine, in which case the signing config is simply not created and
-    // every stock task keeps working unchanged.
-    val kuhyKeyFile = File(System.getProperty("user.home"), ".android/release/key.properties")
-    val kuhyKeys = Properties().apply {
-        if (kuhyKeyFile.exists()) kuhyKeyFile.inputStream().use(::load)
-    }
-
-    signingConfigs {
-        if (kuhyKeys.isNotEmpty()) {
-            create("kuhy") {
-                storeFile = file(kuhyKeys.getProperty("storeFile"))
-                storePassword = kuhyKeys.getProperty("storePassword")
-                keyAlias = kuhyKeys.getProperty("keyAlias")
-                keyPassword = kuhyKeys.getProperty("keyPassword")
-            }
-        }
-    }
-
     buildTypes {
         named("debug") {
             versionNameSuffix = "-${getLatestCommitCount()}"
@@ -79,24 +62,6 @@ android {
             buildConfigField("String", "BUILD_TIME", "\"${getBuildTime(useLatestCommitTime = true)}\"")
             buildConfigField("boolean", "INCLUDE_UPDATER", "true")
         }
-        create("foss") {
-            initWith(getByName("release"))
-
-            // SY fork (kuhy): `-PsyReplaceUpstream` builds this as a replacement for the
-            // official APK rather than a companion to it -- same applicationId, signed
-            // with the personal release key so it can be upgraded in place afterwards.
-            // The stock app has to be uninstalled once first: its signature differs.
-            if (project.hasProperty("syReplaceUpstream")) {
-                versionNameSuffix = "-kuhy"
-                signingConfig = signingConfigs.getByName("kuhy")
-            } else {
-                applicationIdSuffix = ".foss"
-            }
-
-            matchingFallbacks.add("release")
-
-            buildConfigField("boolean", "INCLUDE_UPDATER", "false")
-        }
         create("benchmark") {
             initWith(getByName("release"))
 
@@ -111,7 +76,6 @@ android {
 
     sourceSets {
         getByName("release").java.directories.add("src/release/java")
-        getByName("foss").java.directories.add("src/foss/java")
         getByName("debug").java.directories.add("src/debug/java")
         getByName("benchmark").java.directories.add("src/debug/java")
         getByName("benchmark").res.directories.add("src/debug/res")
