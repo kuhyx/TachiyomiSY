@@ -383,13 +383,10 @@ internal class FavoritesSyncHelper(val context: Context) {
                 retry = 3,
             )
 
-            if (result is GalleryAddEvent.Fail) {
-                if (result is GalleryAddEvent.Fail.NotFound) {
-                    logger.e(context.stringResource(SYMR.strings.favorites_sync_remote_not_exist, gallery.getUrl()))
-                    // Skip this gallery, it no longer exists
-                    return@forEachIndexed
-                }
-
+            if (result is GalleryAddEvent.Fail.NotFound) {
+                // Skip this gallery, it no longer exists
+                logger.e(context.stringResource(SYMR.strings.favorites_sync_remote_not_exist, gallery.getUrl()))
+            } else if (result is GalleryAddEvent.Fail) {
                 val error = when (result) {
                     is GalleryAddEvent.Fail.Error -> FavoritesSyncStatus.SyncError.GallerySyncError.GalleryAddFail(
                         gallery.title, result.logMessage,

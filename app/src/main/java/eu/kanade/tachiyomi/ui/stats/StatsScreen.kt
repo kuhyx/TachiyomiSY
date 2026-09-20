@@ -52,15 +52,10 @@ internal class StatsScreen : Screen() {
                 )
             },
         ) { paddingValues ->
-            if (state is StatsScreenState.Loading) {
-                LoadingScreen()
-                return@Scaffold
+            when (val current = state) {
+                is StatsScreenState.Loading -> LoadingScreen()
+                is StatsScreenState.Success -> StatsScreenContent(state = current, paddingValues = paddingValues)
             }
-
-            StatsScreenContent(
-                state = state as? StatsScreenState.Success ?: return@Scaffold,
-                paddingValues = paddingValues,
-            )
         }
     }
 }

@@ -240,6 +240,7 @@ internal class MigrationConfigScreen(private val mangaIds: Collection<Long>) : S
             key = key(source),
             enabled = dragEnabled,
         ) { _ ->
+            val itemScope = this
             ElevatedCard(
                 shape = shape,
                 modifier = Modifier
@@ -250,7 +251,7 @@ internal class MigrationConfigScreen(private val mangaIds: Collection<Long>) : S
                     source = source,
                     showLanguage = showLanguage,
                     dragEnabled = dragEnabled,
-                    scope = this@ReorderableItem,
+                    scope = itemScope,
                     onClick = onClick,
                 )
             }

@@ -200,24 +200,20 @@ internal class RecommendationSearchHelper(val context: Context) {
             return this
         }
 
+        val srcId = recSource.associatedSourceId
+        val trackerId = (recSource as? TrackerRecommendationPagingSource)?.associatedTrackerId
         return filterNot { manga ->
-            // Source recommendations can be directly resolved, if the recommendation is from the same source
-            recSource.associatedSourceId?.let { srcId ->
-                return@filterNot networkToLocalManga(manga.toDomainManga(srcId))
+            when {
+                // Source recommendations can be directly resolved, if the recommendation is from the same source
+                srcId != null -> networkToLocalManga(manga.toDomainManga(srcId))
                     .let { local -> libraryManga.any { it.id == local.id } }
-            }
-
-            // Tracker recommendations can be resolved by checking if the tracker is attached to the recommendation
-            if (recSource is TrackerRecommendationPagingSource) {
-                recSource.associatedTrackerId?.let { trackerId ->
-                    return@filterNot tracks.any {
-                        it.trackerId == trackerId && it.remoteUrl.toUri().path == manga.url.toUri().path
-                    }
+                // Tracker recommendations can be resolved by checking if the tracker is attached to the recommendation
+                trackerId != null -> tracks.any {
+                    it.trackerId == trackerId && it.remoteUrl.toUri().path == manga.url.toUri().path
                 }
+                // Fallback to smart search otherwise
+                else -> smartSearchEngine.smartSearch(libraryManga, manga.title) != null
             }
-
-            // Fallback to smart search otherwise
-            smartSearchEngine.smartSearch(libraryManga, manga.title) != null
         }
     }
 }

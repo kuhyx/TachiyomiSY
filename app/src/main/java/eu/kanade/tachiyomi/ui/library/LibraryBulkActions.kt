@@ -150,10 +150,9 @@ internal fun LibraryScreenModel.removeMangas(mangas: List<Manga>, deleteFromLibr
                         val sources = mergedMangas.distinctBy {
                             it.source
                         }.map { sourceManager.getOrStub(it.source) }
-                        mergedMangas.forEach merge@{ mergedManga ->
-                            val mergedSource =
-                                sources.firstOrNull { mergedManga.source == it.id } as? HttpSource ?: return@merge
-                            downloadManager.deleteManga(mergedManga, mergedSource)
+                        mergedMangas.forEach { mergedManga ->
+                            (sources.firstOrNull { mergedManga.source == it.id } as? HttpSource)
+                                ?.let { downloadManager.deleteManga(mergedManga, it) }
                         }
                     } else {
                         downloadManager.deleteManga(manga, source)

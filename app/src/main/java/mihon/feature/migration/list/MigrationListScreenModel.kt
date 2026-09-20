@@ -16,16 +16,12 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
-import logcat.LogPriority
 import mihon.domain.migration.usecases.MigrateMangaUseCase
 import mihon.domain.source.interactor.UpdateMangaFromRemote
 import mihon.feature.migration.list.models.MigratingManga
 import mihon.feature.migration.list.models.MigratingManga.SearchResult
 import mihon.feature.migration.list.search.SmartSourceSearchEngine
 import tachiyomi.core.common.util.lang.launchIO
-import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
@@ -34,7 +30,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-private const val MAX_CONCURRENT_SOURCES = 5
+internal const val MAX_CONCURRENT_SOURCES = 5
 
 internal class MigrationListScreenModel(
     mangaIds: Collection<Long>,
@@ -42,13 +38,13 @@ internal class MigrationListScreenModel(
     private val preferences: SourcePreferences = Injekt.get(),
     internal val sourceManager: SourceManager = Injekt.get(),
     internal val getManga: GetManga = Injekt.get(),
-    private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
-    private val getChaptersByMangaId: GetChaptersByMangaId = Injekt.get(),
+    internal val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
+    internal val getChaptersByMangaId: GetChaptersByMangaId = Injekt.get(),
     internal val migrateManga: MigrateMangaUseCase = Injekt.get(),
     internal val updateMangaFromRemote: UpdateMangaFromRemote = Injekt.get(),
 ) : StateScreenModel<MigrationListScreenModel.State>(State()) {
 
-    private val smartSearchEngine = SmartSourceSearchEngine(extraSearchQuery)
+    internal val smartSearchEngine = SmartSourceSearchEngine(extraSearchQuery)
 
     // SY -->
     internal val throttleManager = ThrottleManager()
@@ -87,13 +83,6 @@ internal class MigrationListScreenModel(
             mutableState.update { it.copy(items = manga) }
             runMigrations(manga)
         }
-    }
-
-    private suspend fun getChapterInfo(id: Long) = getChaptersByMangaId.await(id).let { chapters ->
-        ChapterInfo(
-            latestChapter = chapters.maxOfOrNull { it.chapterNumber },
-            chapterCount = chapters.size,
-        )
     }
 
     internal suspend fun Manga.toSuccessSearchResult(): SearchResult.Success {
@@ -138,24 +127,9 @@ internal class MigrationListScreenModel(
         val result = try {
             manga.migrationScope.async {
                 if (prioritizeByChapters) {
-                    val sourceSemaphore = Semaphore(MAX_CONCURRENT_SOURCES)
-                    sources.map { source ->
-                        async innerAsync@{
-                            sourceSemaphore.withPermit {
-                                val result = searchSource(manga.manga, source, deepSearchMode)
-                                if (result == null || result.second.chapterCount == 0) return@innerAsync null
-                                result
-                            }
-                        }
-                    }
-                        .mapNotNull { it.await() }
-                        .maxByOrNull { it.second.latestChapter ?: 0.0 }
+                    searchByMostChapters(manga, sources, deepSearchMode)
                 } else {
-                    sources.forEach { source ->
-                        val result = searchSource(manga.manga, source, deepSearchMode)
-                        if (result != null) return@async result
-                    }
-                    null
+                    searchFirstMatch(manga, sources, deepSearchMode)
                 }
             }
                 .await()
@@ -185,41 +159,6 @@ internal class MigrationListScreenModel(
         }
 
         updateMigrationProgress()
-    }
-
-    private suspend fun searchSource(
-        manga: Manga,
-        source: Source,
-        deepSearchMode: Boolean,
-    ): Pair<Manga, ChapterInfo>? {
-        return try {
-            val searchResult = if (deepSearchMode) {
-                smartSearchEngine.deepSearch(source, manga.title)
-            } else {
-                smartSearchEngine.regularSearch(source, manga.title)
-            }
-
-            if (searchResult == null || (searchResult.url == manga.url && source.id == manga.source)) return null
-
-            val localManga = networkToLocalManga(searchResult)
-            try {
-                updateMangaFromRemote(
-                    localManga,
-                    fetchChapters = true,
-                    // SY -->
-                    throttleFunc = throttleManager::throttle,
-                    // SY <--
-                ).getOrThrow()
-            } catch (expected: Exception) {
-                // Logged whatever the cause; the caller carries on.
-                logcat(LogPriority.ERROR, expected)
-            }
-            localManga to getChapterInfo(localManga.id)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Exception) {
-            null
-        }
     }
 
     internal suspend fun updateMigrationProgress() {

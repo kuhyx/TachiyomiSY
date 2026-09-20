@@ -17,19 +17,13 @@ internal fun List<Chapter>.getNextUnread(
     mergedManga: Map<Long, Manga>, /* SY <-- */
 ): Chapter? {
     return applyFilters(manga, downloadManager/* SY --> */, mergedManga/* SY <-- */).let { chapters ->
-        // SY -->
-        if (manga.isEhBasedManga()) {
-            return@let if (manga.sortDescending()) {
-                chapters.firstOrNull()?.takeUnless { it.read }
-            } else {
-                chapters.lastOrNull()?.takeUnless { it.read }
-            }
-        }
-        // SY <--
-        if (manga.sortDescending()) {
-            chapters.findLast { !it.read }
-        } else {
-            chapters.find { !it.read }
+        when {
+            // SY -->
+            manga.isEhBasedManga() && manga.sortDescending() -> chapters.firstOrNull()?.takeUnless { it.read }
+            manga.isEhBasedManga() -> chapters.lastOrNull()?.takeUnless { it.read }
+            // SY <--
+            manga.sortDescending() -> chapters.findLast { !it.read }
+            else -> chapters.find { !it.read }
         }
     }
 }
@@ -39,19 +33,13 @@ internal fun List<Chapter>.getNextUnread(
  */
 internal fun List<ChapterList.Item>.getNextUnread(manga: Manga): Chapter? {
     return applyFilters(manga).let { chapters ->
-        // SY -->
-        if (manga.isEhBasedManga()) {
-            return@let if (manga.sortDescending()) {
-                chapters.firstOrNull()?.takeUnless { it.chapter.read }
-            } else {
-                chapters.lastOrNull()?.takeUnless { it.chapter.read }
-            }
-        }
-        // SY <--
-        if (manga.sortDescending()) {
-            chapters.findLast { !it.chapter.read }
-        } else {
-            chapters.find { !it.chapter.read }
+        when {
+            // SY -->
+            manga.isEhBasedManga() && manga.sortDescending() -> chapters.firstOrNull()?.takeUnless { it.chapter.read }
+            manga.isEhBasedManga() -> chapters.lastOrNull()?.takeUnless { it.chapter.read }
+            // SY <--
+            manga.sortDescending() -> chapters.findLast { !it.chapter.read }
+            else -> chapters.find { !it.chapter.read }
         }
     }?.chapter
 }

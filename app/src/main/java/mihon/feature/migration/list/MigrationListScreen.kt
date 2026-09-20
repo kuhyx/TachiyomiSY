@@ -38,15 +38,16 @@ internal class MigrationListScreen(
         val context = LocalContext.current
 
         LaunchedEffect(matchOverride) {
-            val (current, target) = matchOverride ?: return@LaunchedEffect
-            screenModel.useMangaForMigration(
-                current = current,
-                target = target,
-                onMissingChapters = {
-                    context.toast(MR.strings.migrationListScreen_matchWithoutChapterToast, Toast.LENGTH_LONG)
-                },
-            )
-            matchOverride = null
+            matchOverride?.let { (current, target) ->
+                screenModel.useMangaForMigration(
+                    current = current,
+                    target = target,
+                    onMissingChapters = {
+                        context.toast(MR.strings.migrationListScreen_matchWithoutChapterToast, Toast.LENGTH_LONG)
+                    },
+                )
+                matchOverride = null
+            }
         }
 
         LaunchedEffect(screenModel) {
