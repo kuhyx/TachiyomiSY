@@ -12,15 +12,18 @@ private const val VERSION = 28f
 internal class MoveCoverOnlyGridSettingMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>() ?: return false
+        withIOContext { migrate(context) }
+        return true
+    }
+
+    private fun migrate(context: Application) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         if (prefs.getString("pref_display_mode_library", null) == "NO_TITLE_GRID") {
             prefs.edit(commit = true) {
                 putString("pref_display_mode_library", "COVER_ONLY_GRID")
             }
         }
-
-        return@withIOContext true
     }
 }

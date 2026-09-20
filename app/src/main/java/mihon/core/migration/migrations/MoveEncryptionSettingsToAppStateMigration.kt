@@ -17,10 +17,16 @@ private const val VERSION = 66f
 internal class MoveEncryptionSettingsToAppStateMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val preferenceStore = migrationContext.get<PreferenceStore>()
+        if (context == null || preferenceStore == null) return false
+        withIOContext { migrate(context, preferenceStore) }
+        return true
+    }
+
+    private suspend fun migrate(context: Application, preferenceStore: PreferenceStore) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val preferenceStore = migrationContext.get<PreferenceStore>() ?: return@withIOContext false
         if (prefs.getBoolean(Preference.privateKey("encrypt_database"), false)) {
             withUIContext {
                 context.toast(
@@ -41,7 +47,5 @@ internal class MoveEncryptionSettingsToAppStateMigration : Migration {
             filterPredicate = { it.key in appStatePrefsToReplace },
             newKey = { Preference.appStateKey(it.replace("__PRIVATE_", "").trim()) },
         )
-
-        return@withIOContext true
     }
 }

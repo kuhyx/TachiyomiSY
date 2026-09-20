@@ -15,10 +15,19 @@ private const val VERSION_WITH_VERTICAL_NAVIGATOR_TOGGLE = 78
 internal class VerticalNavigatorMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val preferenceStore = migrationContext.get<PreferenceStore>() ?: return@withIOContext false
-        val readerPreferences = migrationContext.get<ReaderPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val preferenceStore = migrationContext.get<PreferenceStore>()
+        val readerPreferences = migrationContext.get<ReaderPreferences>()
+        if (preferenceStore == null || readerPreferences == null) return false
+        withIOContext { migrate(migrationContext, preferenceStore, readerPreferences) }
+        return true
+    }
 
+    private fun migrate(
+        migrationContext: MigrationContext,
+        preferenceStore: PreferenceStore,
+        readerPreferences: ReaderPreferences,
+    ) {
         if (migrationContext.previousVersion == VERSION_WITH_VERTICAL_NAVIGATOR_TOGGLE) {
             val oldVerticalNavigator = preferenceStore.getBoolean("pref_webtoon_vertical_navigator", true)
             if (oldVerticalNavigator.get()) {
@@ -32,7 +41,5 @@ internal class VerticalNavigatorMigration : Migration {
             readerPreferences.verticalNavigatorOnLeft.set(oldVerticalNavigatorOnLeft.get())
             oldVerticalNavigatorOnLeft.delete()
         }
-
-        return@withIOContext true
     }
 }

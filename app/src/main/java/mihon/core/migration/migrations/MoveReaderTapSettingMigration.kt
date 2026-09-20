@@ -15,16 +15,20 @@ private const val NAVIGATION_DISABLED = 5
 internal class MoveReaderTapSettingMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val readerPreferences = migrationContext.get<ReaderPreferences>()
+        if (context == null || readerPreferences == null) return false
+        withIOContext { migrate(context, readerPreferences) }
+        return true
+    }
+
+    private fun migrate(context: Application, readerPreferences: ReaderPreferences) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val readerPreferences = migrationContext.get<ReaderPreferences>() ?: return@withIOContext false
         val oldReaderTap = prefs.getBoolean("reader_tap", false)
         if (!oldReaderTap) {
             readerPreferences.navigationModePager.set(NAVIGATION_DISABLED)
             readerPreferences.navigationModeWebtoon.set(NAVIGATION_DISABLED)
         }
-
-        return@withIOContext true
     }
 }

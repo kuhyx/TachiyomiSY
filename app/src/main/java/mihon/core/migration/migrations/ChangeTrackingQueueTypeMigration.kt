@@ -12,8 +12,13 @@ private const val VERSION = 44f
 internal class ChangeTrackingQueueTypeMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>() ?: return false
+        withIOContext { migrate(context) }
+        return true
+    }
+
+    private fun migrate(context: Application) {
         val trackingQueuePref = context.getSharedPreferences("tracking_queue", Context.MODE_PRIVATE)
         trackingQueuePref.all.forEach {
             val (_, lastChapterRead) = it.value.toString().split(":")
@@ -22,7 +27,5 @@ internal class ChangeTrackingQueueTypeMigration : Migration {
                 putFloat(it.key, lastChapterRead.toFloat())
             }
         }
-
-        return@withIOContext true
     }
 }

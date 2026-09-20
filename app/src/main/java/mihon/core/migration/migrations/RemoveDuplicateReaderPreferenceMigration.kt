@@ -11,9 +11,13 @@ private const val VERSION = 75f
 internal class RemoveDuplicateReaderPreferenceMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val prefs = migrationContext.get<SharedPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val prefs = migrationContext.get<SharedPreferences>() ?: return false
+        withIOContext { migrate(prefs) }
+        return true
+    }
 
+    private fun migrate(prefs: SharedPreferences) {
         if (prefs.getBoolean("mark_read_dupe", false)) {
             val readPrefSet = prefs.getStringSet("mark_duplicate_read_chapter_read", emptySet())?.toMutableSet()
             readPrefSet?.add("existing")
@@ -22,7 +26,5 @@ internal class RemoveDuplicateReaderPreferenceMigration : Migration {
                 remove("mark_read_dupe")
             }
         }
-
-        return@withIOContext true
     }
 }

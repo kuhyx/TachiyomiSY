@@ -14,23 +14,25 @@ private const val VERSION = 58f
 internal class ClearBrokenPagePreviewCacheMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
-        val pagePreviewCache = migrationContext.get<PagePreviewCache>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val pagePreviewCache = migrationContext.get<PagePreviewCache>()
+        if (context == null || pagePreviewCache == null) return false
+        withIOContext { migrate(context, pagePreviewCache) }
+        return true
+    }
+
+    private fun migrate(context: Application, pagePreviewCache: PagePreviewCache) {
         pagePreviewCache.clear()
-        File(context.cacheDir, PagePreviewCache.PARAMETER_CACHE_DIRECTORY).listFiles()?.forEach {
-            if (it.name == "journal" || it.name.startsWith("journal.")) {
-                return@forEach
+        File(context.cacheDir, PagePreviewCache.PARAMETER_CACHE_DIRECTORY).listFiles()
+            ?.filterNot { it.name == "journal" || it.name.startsWith("journal.") }
+            ?.forEach {
+                try {
+                    it.delete()
+                } catch (expected: Exception) {
+                    // Logged whatever the cause; the caller carries on.
+                    logcat(LogPriority.WARN, expected) { "Failed to remove file from cache" }
+                }
             }
-
-            try {
-                it.delete()
-            } catch (expected: Exception) {
-                // Logged whatever the cause; the caller carries on.
-                logcat(LogPriority.WARN, expected) { "Failed to remove file from cache" }
-            }
-        }
-
-        return@withIOContext true
     }
 }

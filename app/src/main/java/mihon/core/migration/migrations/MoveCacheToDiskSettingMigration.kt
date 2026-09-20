@@ -12,15 +12,19 @@ private const val VERSION = 66f
 internal class MoveCacheToDiskSettingMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val readerPreferences = migrationContext.get<ReaderPreferences>()
+        if (context == null || readerPreferences == null) return false
+        withIOContext { migrate(context, readerPreferences) }
+        return true
+    }
+
+    private fun migrate(context: Application, readerPreferences: ReaderPreferences) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val readerPreferences = migrationContext.get<ReaderPreferences>() ?: return@withIOContext false
         val cacheImagesToDisk = prefs.getBoolean("cache_archive_manga_on_disk", false)
         if (cacheImagesToDisk) {
             readerPreferences.archiveReaderMode.set(ReaderPreferences.ArchiveReaderMode.CACHE_TO_DISK)
         }
-
-        return@withIOContext true
     }
 }

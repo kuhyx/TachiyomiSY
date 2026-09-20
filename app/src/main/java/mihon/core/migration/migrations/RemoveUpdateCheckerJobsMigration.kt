@@ -17,11 +17,17 @@ private const val VERSION = 52f
 internal class RemoveUpdateCheckerJobsMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val preferenceStore = migrationContext.get<PreferenceStore>()
+        val trackerManager = migrationContext.get<TrackerManager>()
+        if (context == null || preferenceStore == null || trackerManager == null) return false
+        withIOContext { migrate(context, preferenceStore, trackerManager) }
+        return true
+    }
+
+    private fun migrate(context: Application, preferenceStore: PreferenceStore, trackerManager: TrackerManager) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val preferenceStore = migrationContext.get<PreferenceStore>() ?: return@withIOContext false
-        val trackerManager = migrationContext.get<TrackerManager>() ?: return@withIOContext false
         // Removed background jobs
         context.workManager.cancelAllWorkByTag("UpdateChecker")
         context.workManager.cancelAllWorkByTag("ExtensionUpdate")
@@ -51,7 +57,5 @@ internal class RemoveUpdateCheckerJobsMigration : Migration {
                 preferenceStore.getEnum("${key}_v2", TriState.DISABLED).set(newValue)
             }
         }
-
-        return@withIOContext true
     }
 }

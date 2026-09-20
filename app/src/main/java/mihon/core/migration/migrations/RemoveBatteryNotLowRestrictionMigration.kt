@@ -11,13 +11,16 @@ private const val VERSION = 56f
 internal class RemoveBatteryNotLowRestrictionMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return false
+        withIOContext { migrate(libraryPreferences) }
+        return true
+    }
+
+    private fun migrate(libraryPreferences: LibraryPreferences) {
         val pref = libraryPreferences.autoUpdateDeviceRestrictions
         if (pref.isSet() && "battery_not_low" in pref.get()) {
             pref.getAndSet { it - "battery_not_low" }
         }
-
-        return@withIOContext true
     }
 }

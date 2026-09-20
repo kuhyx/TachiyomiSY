@@ -12,8 +12,13 @@ private const val VERSION = 16f
 internal class ResetRotationSettingMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>() ?: return false
+        withIOContext { migrate(context) }
+        return true
+    }
+
+    private fun migrate(context: Application) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         // Reset rotation to Free after replacing Lock
         if (prefs.contains("pref_rotation_type_key")) {
@@ -21,7 +26,5 @@ internal class ResetRotationSettingMigration : Migration {
                 putInt("pref_rotation_type_key", 1)
             }
         }
-
-        return@withIOContext true
     }
 }

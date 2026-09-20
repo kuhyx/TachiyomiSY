@@ -13,15 +13,19 @@ private const val VERSION = 23f
 internal class MoveLibraryNonCompleteSettingMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val libraryPreferences = migrationContext.get<LibraryPreferences>()
+        if (context == null || libraryPreferences == null) return false
+        withIOContext { migrate(context, libraryPreferences) }
+        return true
+    }
+
+    private fun migrate(context: Application, libraryPreferences: LibraryPreferences) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return@withIOContext false
         val oldUpdateOngoingOnly = prefs.getBoolean("pref_update_only_non_completed_key", true)
         if (!oldUpdateOngoingOnly) {
             libraryPreferences.autoUpdateMangaRestrictions -= LibraryPreferences.MANGA_NON_COMPLETED
         }
-
-        return@withIOContext true
     }
 }

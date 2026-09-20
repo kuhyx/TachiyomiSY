@@ -12,11 +12,20 @@ private const val VERSION = 72f
 internal class CategoryPreferencesCleanupMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return@withIOContext false
-        val downloadPreferences = migrationContext.get<DownloadPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val libraryPreferences = migrationContext.get<LibraryPreferences>()
+        val downloadPreferences = migrationContext.get<DownloadPreferences>()
+        val getCategories = migrationContext.get<GetCategories>()
+        if (libraryPreferences == null || downloadPreferences == null || getCategories == null) return false
+        withIOContext { migrate(libraryPreferences, downloadPreferences, getCategories) }
+        return true
+    }
 
-        val getCategories = migrationContext.get<GetCategories>() ?: return@withIOContext false
+    private suspend fun migrate(
+        libraryPreferences: LibraryPreferences,
+        downloadPreferences: DownloadPreferences,
+        getCategories: GetCategories,
+    ) {
         val allCategories = getCategories.await().map { it.id.toString() }.toSet()
 
         val defaultCategory = libraryPreferences.defaultCategory.get()
@@ -34,9 +43,9 @@ internal class CategoryPreferencesCleanupMigration : Migration {
         categoryPreferences.forEach { preference ->
             val ids = preference.get()
             val garbageIds = ids.minus(allCategories)
-            if (garbageIds.isEmpty()) return@forEach
-            preference.set(ids.minus(garbageIds))
+            if (garbageIds.isNotEmpty()) {
+                preference.set(ids.minus(garbageIds))
+            }
         }
-        return@withIOContext true
     }
 }

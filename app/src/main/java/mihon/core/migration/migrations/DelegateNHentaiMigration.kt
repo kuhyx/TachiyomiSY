@@ -15,6 +15,6 @@ internal class DelegateNHentaiMigration : Migration {
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         MigrateUtils.updateSourceId(migrationContext, NHentai.otherId, LEGACY_NHENTAI_SOURCE_ID)
 
-        return@withIOContext true
+        true
     }
 }

@@ -15,9 +15,19 @@ private const val VERSION = 4f
 internal class DelegateHBrowseMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val getMangaBySource = migrationContext.get<GetMangaBySource>() ?: return@withIOContext false
-        val updateManga = migrationContext.get<UpdateManga>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val getMangaBySource = migrationContext.get<GetMangaBySource>()
+        val updateManga = migrationContext.get<UpdateManga>()
+        if (getMangaBySource == null || updateManga == null) return false
+        withIOContext { migrate(migrationContext, getMangaBySource, updateManga) }
+        return true
+    }
+
+    private suspend fun migrate(
+        migrationContext: MigrationContext,
+        getMangaBySource: GetMangaBySource,
+        updateManga: UpdateManga,
+    ) {
         MigrateUtils.updateSourceId(migrationContext, HBROWSE_SOURCE_ID, LEGACY_HBROWSE_SOURCE_ID)
 
         // Migrate BHrowse URLs
@@ -26,6 +36,5 @@ internal class DelegateHBrowseMigration : Migration {
             MangaUpdate(it.id, url = it.url + "/c00001/")
         }
         updateManga.awaitAll(mangaUpdates)
-        return@withIOContext true
     }
 }

@@ -13,9 +13,15 @@ private const val VERSION = 67f
 internal class TrustExtensionRepositoryMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val sourcePreferences = migrationContext.get<SourcePreferences>() ?: return@withIOContext false
-        val repository = migrationContext.get<ExtensionStoreRepository>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val sourcePreferences = migrationContext.get<SourcePreferences>()
+        val repository = migrationContext.get<ExtensionStoreRepository>()
+        if (sourcePreferences == null || repository == null) return false
+        withIOContext { migrate(sourcePreferences, repository) }
+        return true
+    }
+
+    private suspend fun migrate(sourcePreferences: SourcePreferences, repository: ExtensionStoreRepository) {
         for ((index, source) in sourcePreferences.extensionRepos.get().withIndex()) {
             try {
                 repository.insertFromPreference(
@@ -28,6 +34,5 @@ internal class TrustExtensionRepositoryMigration : Migration {
             }
         }
         sourcePreferences.extensionRepos.delete()
-        return@withIOContext true
     }
 }

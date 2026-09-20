@@ -12,13 +12,16 @@ private const val THREE_HOURS = 3
 internal class RemoveShorterLibraryUpdatesMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return false
+        withIOContext { migrate(libraryPreferences) }
+        return true
+    }
+
+    private fun migrate(libraryPreferences: LibraryPreferences) {
         val updateInterval = libraryPreferences.autoUpdateInterval.get()
         if (updateInterval == 1 || updateInterval == 2) {
             libraryPreferences.autoUpdateInterval.set(THREE_HOURS)
         }
-
-        return@withIOContext true
     }
 }

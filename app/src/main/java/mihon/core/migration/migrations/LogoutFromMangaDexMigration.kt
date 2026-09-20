@@ -14,6 +14,6 @@ internal class LogoutFromMangaDexMigration : Migration {
         // Force MangaDex log out due to login flow change
         migrationContext.get<TrackerManager>()?.mdList?.logout()
 
-        return@withIOContext true
+        true
     }
 }

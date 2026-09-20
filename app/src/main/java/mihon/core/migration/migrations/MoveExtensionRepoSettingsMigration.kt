@@ -17,11 +17,17 @@ private const val VERSION = 60f
 internal class MoveExtensionRepoSettingsMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val preferenceStore = migrationContext.get<PreferenceStore>()
+        val sourcePreferences = migrationContext.get<SourcePreferences>()
+        if (context == null || preferenceStore == null || sourcePreferences == null) return false
+        withIOContext { migrate(context, preferenceStore, sourcePreferences) }
+        return true
+    }
+
+    private fun migrate(context: Application, preferenceStore: PreferenceStore, sourcePreferences: SourcePreferences) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val preferenceStore = migrationContext.get<PreferenceStore>() ?: return@withIOContext false
-        val sourcePreferences = migrationContext.get<SourcePreferences>() ?: return@withIOContext false
         sourcePreferences.extensionRepos.getAndSet {
             it.map { "https://raw.githubusercontent.com/$it/repo" }.toSet()
         }
@@ -33,7 +39,5 @@ internal class MoveExtensionRepoSettingsMigration : Migration {
         prefs.edit {
             remove(Preference.appStateKey("trusted_signatures"))
         }
-
-        return@withIOContext true
     }
 }

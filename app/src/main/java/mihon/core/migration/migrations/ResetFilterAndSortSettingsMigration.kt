@@ -13,10 +13,16 @@ private const val VERSION = 41f
 internal class ResetFilterAndSortSettingsMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val libraryPreferences = migrationContext.get<LibraryPreferences>()
+        if (context == null || libraryPreferences == null) return false
+        withIOContext { migrate(context, libraryPreferences) }
+        return true
+    }
+
+    private fun migrate(context: Application, libraryPreferences: LibraryPreferences) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return@withIOContext false
         val preferences = listOf(
             libraryPreferences.filterChapterByRead,
             libraryPreferences.filterChapterByDownloaded,
@@ -30,12 +36,11 @@ internal class ResetFilterAndSortSettingsMigration : Migration {
             preferences.forEach { preference ->
                 val key = preference.key()
                 val value = prefs.getInt(key, Int.MIN_VALUE)
-                if (value == Int.MIN_VALUE) return@forEach
-                remove(key)
-                putLong(key, value.toLong())
+                if (value != Int.MIN_VALUE) {
+                    remove(key)
+                    putLong(key, value.toLong())
+                }
             }
         }
-
-        return@withIOContext true
     }
 }

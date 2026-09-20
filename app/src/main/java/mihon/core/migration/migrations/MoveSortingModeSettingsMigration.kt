@@ -20,11 +20,17 @@ private const val SORT_BY_DATE_ADDED_FLAG = 0b00100000L
 internal class MoveSortingModeSettingsMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val libraryPreferences = migrationContext.get<LibraryPreferences>()
+        val database = migrationContext.get<Database>()
+        if (context == null || libraryPreferences == null || database == null) return false
+        withIOContext { migrate(context, libraryPreferences, database) }
+        return true
+    }
+
+    private suspend fun migrate(context: Application, libraryPreferences: LibraryPreferences, database: Database) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return@withIOContext false
-        val database = migrationContext.get<Database>() ?: return@withIOContext false
         // Handle renamed enum values
         val newSortingMode = when (
             val oldSortingMode = prefs.getString(libraryPreferences.sortingMode.key(), "ALPHABETICAL")
@@ -54,7 +60,5 @@ internal class MoveSortingModeSettingsMigration : Migration {
                     )
                 }
         }
-
-        return@withIOContext true
     }
 }

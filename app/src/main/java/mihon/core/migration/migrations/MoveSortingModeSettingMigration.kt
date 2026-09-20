@@ -13,17 +13,21 @@ private const val VERSION = 39f
 internal class MoveSortingModeSettingMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
-        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val libraryPreferences = migrationContext.get<LibraryPreferences>()
+        if (context == null || libraryPreferences == null) return false
+        withIOContext { migrate(context, libraryPreferences) }
+        return true
+    }
+
+    private fun migrate(context: Application, libraryPreferences: LibraryPreferences) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val sort = prefs.getString(libraryPreferences.sortingMode.key(), null) ?: return
+        val direction = prefs.getString("library_sorting_ascending", "ASCENDING")!!
         prefs.edit {
-            val sort = prefs.getString(libraryPreferences.sortingMode.key(), null) ?: return@edit
-            val direction = prefs.getString("library_sorting_ascending", "ASCENDING")!!
             putString(libraryPreferences.sortingMode.key(), "$sort,$direction")
             remove("library_sorting_ascending")
         }
-
-        return@withIOContext true
     }
 }

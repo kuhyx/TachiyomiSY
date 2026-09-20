@@ -14,9 +14,15 @@ private const val VERSION = 14f
 internal class MoveDOHSettingMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
-        val networkPreferences = migrationContext.get<NetworkPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val networkPreferences = migrationContext.get<NetworkPreferences>()
+        if (context == null || networkPreferences == null) return false
+        withIOContext { migrate(context, networkPreferences) }
+        return true
+    }
+
+    private fun migrate(context: Application, networkPreferences: NetworkPreferences) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         // Migrate DNS over HTTPS setting
         val wasDohEnabled = prefs.getBoolean("enable_doh", false)
@@ -26,7 +32,5 @@ internal class MoveDOHSettingMigration : Migration {
                 remove("enable_doh")
             }
         }
-
-        return@withIOContext true
     }
 }

@@ -13,14 +13,18 @@ private const val DEFAULT_RELATIVE_TIME_DAYS = 7
 internal class MoveRelativeTimeSettingMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val preferenceStore = migrationContext.get<PreferenceStore>() ?: return@withIOContext false
-        val uiPreferences = migrationContext.get<UiPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val preferenceStore = migrationContext.get<PreferenceStore>()
+        val uiPreferences = migrationContext.get<UiPreferences>()
+        if (preferenceStore == null || uiPreferences == null) return false
+        withIOContext { migrate(preferenceStore, uiPreferences) }
+        return true
+    }
+
+    private fun migrate(preferenceStore: PreferenceStore, uiPreferences: UiPreferences) {
         val pref = preferenceStore.getInt("relative_time", DEFAULT_RELATIVE_TIME_DAYS)
         if (pref.get() == 0) {
             uiPreferences.relativeTime.set(false)
         }
-
-        return@withIOContext true
     }
 }

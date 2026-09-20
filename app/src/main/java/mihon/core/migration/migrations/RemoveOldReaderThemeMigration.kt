@@ -14,13 +14,16 @@ private const val AUTOMATIC_THEME = 3
 internal class RemoveOldReaderThemeMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val readerPreferences = migrationContext.get<ReaderPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val readerPreferences = migrationContext.get<ReaderPreferences>() ?: return false
+        withIOContext { migrate(readerPreferences) }
+        return true
+    }
+
+    private fun migrate(readerPreferences: ReaderPreferences) {
         val readerTheme = readerPreferences.readerTheme.get()
         if (readerTheme == REMOVED_THEME) {
             readerPreferences.readerTheme.set(AUTOMATIC_THEME)
         }
-
-        return@withIOContext true
     }
 }

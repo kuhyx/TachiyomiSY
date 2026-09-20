@@ -12,8 +12,13 @@ private const val VERSION = 24f
 internal class DeleteOldEhFavoritesDatabaseMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>() ?: return false
+        withIOContext { migrate(context) }
+        return true
+    }
+
+    private fun migrate(context: Application) {
         try {
             sequenceOf(
                 "fav-sync",
@@ -33,7 +38,5 @@ internal class DeleteOldEhFavoritesDatabaseMigration : Migration {
             // Logged whatever the cause; the caller carries on.
             xLogE("Failed to delete old favorites database", expected)
         }
-
-        return@withIOContext true
     }
 }

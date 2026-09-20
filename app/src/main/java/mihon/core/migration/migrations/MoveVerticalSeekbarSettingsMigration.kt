@@ -13,9 +13,15 @@ private const val VERSION = 77f
 internal class MoveVerticalSeekbarSettingsMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
-        val readerPreferences = migrationContext.get<ReaderPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val readerPreferences = migrationContext.get<ReaderPreferences>()
+        if (context == null || readerPreferences == null) return false
+        withIOContext { migrate(context, readerPreferences) }
+        return true
+    }
+
+    private fun migrate(context: Application, readerPreferences: ReaderPreferences) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.edit {
             val forceHorzSeekbar = prefs.getBoolean("pref_force_horz_seekbar", false)
@@ -35,7 +41,5 @@ internal class MoveVerticalSeekbarSettingsMigration : Migration {
             }
             remove("pref_left_handed_vertical_seekbar")
         }
-
-        return@withIOContext true
     }
 }

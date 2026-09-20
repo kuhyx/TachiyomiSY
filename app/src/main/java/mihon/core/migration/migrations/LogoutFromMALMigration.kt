@@ -14,6 +14,6 @@ internal class LogoutFromMALMigration : Migration {
         // Force MAL log out due to login flow change
         migrationContext.get<TrackerManager>()?.myAnimeList?.logout()
 
-        return@withIOContext true
+        true
     }
 }

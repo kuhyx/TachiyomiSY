@@ -13,17 +13,21 @@ private const val VERSION = 42f
 internal class ChangeThemeModeToUppercaseMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val uiPreferences = migrationContext.get<UiPreferences>()
+        if (context == null || uiPreferences == null) return false
+        withIOContext { migrate(context, uiPreferences) }
+        return true
+    }
+
+    private fun migrate(context: Application, uiPreferences: UiPreferences) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val uiPreferences = migrationContext.get<UiPreferences>() ?: return@withIOContext false
         if (uiPreferences.themeMode.isSet()) {
-            prefs.edit {
-                val themeMode = prefs.getString(uiPreferences.themeMode.key(), null) ?: return@edit
-                putString(uiPreferences.themeMode.key(), themeMode.uppercase())
+            val themeMode = prefs.getString(uiPreferences.themeMode.key(), null)
+            if (themeMode != null) {
+                prefs.edit { putString(uiPreferences.themeMode.key(), themeMode.uppercase()) }
             }
         }
-
-        return@withIOContext true
     }
 }

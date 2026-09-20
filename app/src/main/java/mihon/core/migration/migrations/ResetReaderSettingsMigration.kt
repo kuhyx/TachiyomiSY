@@ -23,8 +23,13 @@ private val LEGACY_ROTATION_TYPES = listOf(
 internal class ResetReaderSettingsMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>() ?: return false
+        withIOContext { migrate(context) }
+        return true
+    }
+
+    private fun migrate(context: Application) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         // Migrate Rotation and Viewer values to default values for viewer_flags
         val newOrientation = LEGACY_ROTATION_TYPES
@@ -40,7 +45,5 @@ internal class ResetReaderSettingsMigration : Migration {
             putInt("pref_default_reading_mode_key", newReadingMode)
             remove("pref_default_viewer_key")
         }
-
-        return@withIOContext true
     }
 }

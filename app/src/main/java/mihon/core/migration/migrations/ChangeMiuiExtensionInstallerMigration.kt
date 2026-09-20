@@ -11,8 +11,13 @@ private const val VERSION = 27f
 internal class ChangeMiuiExtensionInstallerMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val basePreferences = migrationContext.get<BasePreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val basePreferences = migrationContext.get<BasePreferences>() ?: return false
+        withIOContext { migrate(basePreferences) }
+        return true
+    }
+
+    private fun migrate(basePreferences: BasePreferences) {
         if (
             DeviceUtil.isMiui &&
             basePreferences.extensionInstaller.get() == BasePreferences.ExtensionInstaller
@@ -20,7 +25,5 @@ internal class ChangeMiuiExtensionInstallerMigration : Migration {
         ) {
             basePreferences.extensionInstaller.set(BasePreferences.ExtensionInstaller.LEGACY)
         }
-
-        return@withIOContext true
     }
 }

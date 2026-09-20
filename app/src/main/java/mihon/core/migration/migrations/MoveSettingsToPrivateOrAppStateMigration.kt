@@ -13,9 +13,15 @@ private const val VERSION = 59f
 internal class MoveSettingsToPrivateOrAppStateMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
-        val preferenceStore = migrationContext.get<PreferenceStore>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val preferenceStore = migrationContext.get<PreferenceStore>()
+        if (context == null || preferenceStore == null) return false
+        withIOContext { migrate(context, preferenceStore) }
+        return true
+    }
+
+    private fun migrate(context: Application, preferenceStore: PreferenceStore) {
         val prefsToReplace = listOf(
             "pref_download_only",
             "incognito_mode",
@@ -63,7 +69,5 @@ internal class MoveSettingsToPrivateOrAppStateMigration : Migration {
 
         // Deleting old download cache index files, but might as well clear it all out
         context.cacheDir.deleteRecursively()
-
-        return@withIOContext true
     }
 }

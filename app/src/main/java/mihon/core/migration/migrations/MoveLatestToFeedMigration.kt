@@ -22,24 +22,22 @@ private const val VERSION = 31f
 internal class MoveLatestToFeedMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val insertSavedSearch = migrationContext.get<InsertSavedSearch>()
+        val insertFeedSavedSearch = migrationContext.get<InsertFeedSavedSearch>()
+        if (context == null || insertSavedSearch == null || insertFeedSavedSearch == null) return false
+        withIOContext { migrate(context, insertSavedSearch, insertFeedSavedSearch) }
+        return true
+    }
+
+    private suspend fun migrate(
+        context: Application,
+        insertSavedSearch: InsertSavedSearch,
+        insertFeedSavedSearch: InsertFeedSavedSearch,
+    ) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val insertSavedSearch = migrationContext.get<InsertSavedSearch>() ?: return@withIOContext false
-        val insertFeedSavedSearch = migrationContext.get<InsertFeedSavedSearch>() ?: return@withIOContext false
-        val savedSearch = prefs.getStringSet("eh_saved_searches", emptySet())?.mapNotNull {
-            runCatching {
-                val content = Json.decodeFromString<JsonObject>(it.substringAfter(':'))
-                SavedSearch(
-                    id = -1,
-                    source = it.substringBefore(':').toLongOrNull()
-                        ?: return@runCatching null,
-                    name = content["name"]!!.jsonPrimitive.content,
-                    query = content["query"]!!.jsonPrimitive.contentOrNull?.nullIfBlank(),
-                    filtersJson = Json.encodeToString(content["filters"]!!.jsonArray),
-                )
-            }.getOrNull()
-        }
+        val savedSearch = prefs.getStringSet("eh_saved_searches", emptySet())?.mapNotNull { parseSavedSearch(it) }
         if (!savedSearch.isNullOrEmpty()) {
             insertSavedSearch.awaitAll(savedSearch)
         }
@@ -58,7 +56,20 @@ internal class MoveLatestToFeedMigration : Migration {
             remove("eh_saved_searches")
             remove("latest_tab_sources")
         }
+    }
 
-        return@withIOContext true
+    // "<sourceId>:<json>" as the old preference stored it; null when either half is unreadable.
+    private fun parseSavedSearch(entry: String): SavedSearch? {
+        val source = entry.substringBefore(':').toLongOrNull() ?: return null
+        return runCatching {
+            val content = Json.decodeFromString<JsonObject>(entry.substringAfter(':'))
+            SavedSearch(
+                id = -1,
+                source = source,
+                name = content["name"]!!.jsonPrimitive.content,
+                query = content["query"]!!.jsonPrimitive.contentOrNull?.nullIfBlank(),
+                filtersJson = Json.encodeToString(content["filters"]!!.jsonArray),
+            )
+        }.getOrNull()
     }
 }

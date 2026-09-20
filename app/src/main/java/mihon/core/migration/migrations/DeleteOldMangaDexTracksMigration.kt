@@ -13,10 +13,14 @@ private const val OLD_MANGADEX_TRACKER_ID = 6L
 internal class DeleteOldMangaDexTracksMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val database = migrationContext.get<Database>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val database = migrationContext.get<Database>() ?: return false
+        withIOContext { migrate(database) }
+        return true
+    }
+
+    private suspend fun migrate(database: Database) {
         // Delete old mangadex trackers
         database.ehQueries.deleteBySyncId(OLD_MANGADEX_TRACKER_ID)
-        return@withIOContext true
     }
 }

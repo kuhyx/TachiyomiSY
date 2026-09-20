@@ -18,13 +18,16 @@ private const val REPLACEMENT_INTERVAL_HOURS = 12
 internal class RemoveShortLibraryUpdatesMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val libraryPreferences = migrationContext.get<LibraryPreferences>() ?: return false
+        withIOContext { migrate(libraryPreferences) }
+        return true
+    }
+
+    private fun migrate(libraryPreferences: LibraryPreferences) {
         val updateInterval = libraryPreferences.autoUpdateInterval.get()
         if (updateInterval in REMOVED_INTERVALS_HOURS) {
             libraryPreferences.autoUpdateInterval.set(REPLACEMENT_INTERVAL_HOURS)
         }
-
-        return@withIOContext true
     }
 }

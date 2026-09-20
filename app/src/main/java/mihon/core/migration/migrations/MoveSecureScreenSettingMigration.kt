@@ -12,15 +12,19 @@ private const val VERSION = 27f
 internal class MoveSecureScreenSettingMigration : Migration {
     override val version: Float = VERSION
 
-    override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
-        val context = migrationContext.get<Application>() ?: return@withIOContext false
+    override suspend fun invoke(migrationContext: MigrationContext): Boolean {
+        val context = migrationContext.get<Application>()
+        val securityPreferences = migrationContext.get<SecurityPreferences>()
+        if (context == null || securityPreferences == null) return false
+        withIOContext { migrate(context, securityPreferences) }
+        return true
+    }
+
+    private fun migrate(context: Application, securityPreferences: SecurityPreferences) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val securityPreferences = migrationContext.get<SecurityPreferences>() ?: return@withIOContext false
         val oldSecureScreen = prefs.getBoolean("secure_screen", false)
         if (oldSecureScreen) {
             securityPreferences.secureScreen.set(SecurityPreferences.SecureScreenMode.ALWAYS)
         }
-
-        return@withIOContext true
     }
 }
