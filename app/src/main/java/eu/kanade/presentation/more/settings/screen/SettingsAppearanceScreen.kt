@@ -192,7 +192,6 @@ internal object SettingsAppearanceScreen : SearchableSettings {
                     valueRange = 0..10,
                     onValueChanged = {
                         uiPreferences.previewsRowCount.set(it)
-                        true
                     },
                 ),
             ),

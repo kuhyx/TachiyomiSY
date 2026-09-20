@@ -54,6 +54,9 @@ internal class DelegatedHttpSourceMangaTest {
     fun mangaDetailsRequestForwards() {
         val request = delegated.invokeDeclared(DelegatedHttpSourceManga::class, "mangaDetailsRequest", listOf(manga))
         (request as Request).url.toString() shouldBe "https://bare.example/manga/1"
+        val direct =
+            delegated.invokeDeclared(DelegatedHttpSourceManga::class, "delegateMangaDetailsRequest", listOf(manga))
+        (direct as Request).url shouldBe request.url
     }
 
     @Test

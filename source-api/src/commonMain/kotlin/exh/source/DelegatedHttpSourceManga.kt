@@ -28,7 +28,13 @@ public abstract class DelegatedHttpSourceManga(delegate: HttpSource) : Delegated
     }
 
     @Deprecated(HELPER_DEPRECATION)
-    override fun mangaDetailsRequest(manga: SManga): Request {
+    override fun mangaDetailsRequest(manga: SManga): Request = delegateMangaDetailsRequest(manga)
+
+    /**
+     * The delegate's details request, for a wrapper that parses the page itself. The extension API
+     * only exposes it through the deprecated helper, hence the class-level suppression.
+     */
+    protected fun delegateMangaDetailsRequest(manga: SManga): Request {
         ensureDelegateCompatible()
         return delegate.mangaDetailsRequest(manga)
     }

@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
-import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.MetadataMangasPage
@@ -55,7 +54,6 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.reflect.KClass
 
-@Suppress("OverridingDeprecatedMember")
 internal class MangaDex(delegate: HttpSource, val context: Context) :
     DelegatedHttpSource(delegate),
     MetadataSource<MangaDexSearchMetadata, Triple<MangaDto, List<String>, StatisticsMangaDto>>,
@@ -176,40 +174,31 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
     }
 
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getLatestUpdates"))
-    override fun fetchLatestUpdates(page: Int): Observable<MangasPage> {
-        val request = delegate.latestUpdatesRequest(page)
-        val url = request.url.newBuilder()
-            .removeAllQueryParameters("includeFutureUpdates")
-            .build()
-        return client.newCall(request.newBuilder().url(url).build())
-            .asObservableSuccess()
-            .map { response ->
-                delegate.latestUpdatesParse(response)
-            }
-    }
+    override fun fetchLatestUpdates(page: Int): Observable<MangasPage> = runAsObservable { getLatestUpdates(page) }
 
     override suspend fun getLatestUpdates(page: Int): MangasPage {
-        val request = delegate.latestUpdatesRequest(page)
+        val request = delegateLatestUpdatesRequest(page)
         val url = request.url.newBuilder()
             .removeAllQueryParameters("includeFutureUpdates")
             .build()
 
         val response = client.newCall(request.newBuilder().url(url).build()).awaitSuccess()
-        return delegate.latestUpdatesParse(response)
+        return delegateLatestUpdatesParse(response)
     }
 
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getMangaDetails"))
-    override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
-        return mangaHandler.fetchMangaDetailsObservable(
-            manga,
-            id,
-            coverQuality(),
-            tryUsingFirstVolumeCover(),
-            altTitlesInDesc(),
-            finalChapterInDesc(),
-            preferExtensionLangTitle(),
-        )
-    }
+    override fun fetchMangaDetails(manga: SManga): Observable<SManga> = runAsObservable { getMangaDetails(manga) }
+
+    /** The SY details for [manga] from the MangaDex API, with this source's cover and title preferences. */
+    suspend fun getMangaDetails(manga: SManga): SManga = mangaHandler.getMangaDetails(
+        manga,
+        id,
+        coverQuality(),
+        tryUsingFirstVolumeCover(),
+        altTitlesInDesc(),
+        finalChapterInDesc(),
+        preferExtensionLangTitle(),
+    )
 
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
     override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
@@ -231,12 +220,7 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
     }
 
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getImageUrl"))
-    override fun fetchImageUrl(page: Page): Observable<String> {
-        return pageHandler.fetchImageUrl(page) {
-            @Suppress("DEPRECATION")
-            super.fetchImageUrl(it)
-        }
-    }
+    override fun fetchImageUrl(page: Page): Observable<String> = runAsObservable { getImageUrl(page) }
 
     override suspend fun getImageUrl(page: Page): String {
         return pageHandler.getImageUrl(page) {

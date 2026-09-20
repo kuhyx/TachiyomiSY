@@ -15,6 +15,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -34,6 +35,8 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 @Composable
 internal fun WhatsNewDialog(onDismissRequest: () -> Unit) {
@@ -50,9 +53,11 @@ internal fun WhatsNewDialog(onDismissRequest: () -> Unit) {
         text = {
             Column {
                 val context = LocalContext.current
+                // The DI graph's versioned instance: the companion's decodeFromReader is deprecated.
+                val xml = remember { Injekt.get<XML>() }
                 val changelog by produceState<List<DisplayChangelog>?>(initialValue = null) {
                     value = withIOContext {
-                        XML.decodeFromReader<Changelog>(
+                        xml.decodeFromReader<Changelog>(
                             AndroidXmlReader(
                                 context.resources.openRawResource(
                                     if (isPreviewBuildType) R.raw.changelog_debug else R.raw.changelog_release,

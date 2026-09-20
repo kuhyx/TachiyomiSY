@@ -6,39 +6,10 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.online.UrlImportableSource
 import exh.GalleryAddEvent
 import exh.GalleryAdder
-import rx.Observable
-import tachiyomi.core.common.util.lang.runAsObservable
 
 private val galleryAdder by lazy {
     GalleryAdder()
 }
-
-/**
- * A version of fetchSearchManga that supports URL importing
- */
-internal fun UrlImportableSource.urlImportFetchSearchManga(
-    context: Context,
-    query: String,
-    fail: () -> Observable<MangasPage>,
-): Observable<MangasPage> =
-    when {
-        query.startsWith("http://") || query.startsWith("https://") -> {
-            runAsObservable {
-                galleryAdder.addGallery(context, query, false, this@urlImportFetchSearchManga)
-            }
-                .map { res ->
-                    MangasPage(
-                        if (res is GalleryAddEvent.Success) {
-                            listOf(res.manga.toSManga())
-                        } else {
-                            emptyList()
-                        },
-                        false,
-                    )
-                }
-        }
-        else -> fail()
-    }
 
 /**
  * A version of fetchSearchManga that supports URL importing

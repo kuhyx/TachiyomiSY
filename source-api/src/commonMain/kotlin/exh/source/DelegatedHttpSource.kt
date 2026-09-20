@@ -1,8 +1,10 @@
 package exh.source
 
+import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
+import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 
@@ -40,6 +42,21 @@ public abstract class DelegatedHttpSource(delegate: HttpSource) : DelegatedHttpS
     override suspend fun getImage(page: Page, existingSize: Long): Response {
         ensureDelegateCompatible()
         return delegate.getImage(page, existingSize)
+    }
+
+    /**
+     * The delegate's latest-updates request, for a wrapper that rewrites it before sending. The
+     * extension API only exposes it through the deprecated helper, hence the class-level suppression.
+     */
+    protected fun delegateLatestUpdatesRequest(page: Int): Request {
+        ensureDelegateCompatible()
+        return delegate.latestUpdatesRequest(page)
+    }
+
+    /** The delegate's parse of a response to [delegateLatestUpdatesRequest]. */
+    protected fun delegateLatestUpdatesParse(response: Response): MangasPage {
+        ensureDelegateCompatible()
+        return delegate.latestUpdatesParse(response)
     }
 
     /** Thrown when the delegate's version or language differs from this source's. */

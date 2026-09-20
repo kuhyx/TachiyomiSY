@@ -5,8 +5,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextObfuscationMode
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -15,9 +16,9 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SecureTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
@@ -25,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
@@ -36,8 +36,6 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.FragmentActivity
@@ -300,18 +298,15 @@ internal object SettingsSecurityScreen : SearchableSettings {
         onDismissRequest: () -> Unit,
         onReturnPassword: (String) -> Unit,
     ) {
-        var password by rememberSaveable { mutableStateOf("") }
+        val password = rememberTextFieldState()
         var passwordVisibility by remember { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = onDismissRequest,
 
             title = { Text(text = stringResource(SYMR.strings.cbz_archive_password)) },
             text = {
-                TextField(
-                    value = password,
-                    onValueChange = { password = it },
-
-                    maxLines = 1,
+                SecureTextField(
+                    state = password,
                     placeholder = { Text(text = stringResource(MR.strings.password)) },
                     label = { Text(text = stringResource(MR.strings.password)) },
                     trailingIcon = {
@@ -334,19 +329,17 @@ internal object SettingsSecurityScreen : SearchableSettings {
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done,
                     ),
-                    keyboardActions = KeyboardActions(
-                        onDone = { onReturnPassword(password) },
-                    ),
+                    onKeyboardAction = { onReturnPassword(password.text.toString()) },
                     modifier = Modifier.onKeyEvent {
                         if (it.key == Key.Enter) {
                             return@onKeyEvent true
                         }
                         false
                     },
-                    visualTransformation = if (passwordVisibility) {
-                        VisualTransformation.None
+                    textObfuscationMode = if (passwordVisibility) {
+                        TextObfuscationMode.Visible
                     } else {
-                        PasswordVisualTransformation()
+                        TextObfuscationMode.Hidden
                     },
                 )
             },
@@ -356,7 +349,7 @@ internal object SettingsSecurityScreen : SearchableSettings {
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onReturnPassword(password)
+                        onReturnPassword(password.text.toString())
                     },
                 ) {
                     Text(text = stringResource(MR.strings.action_ok))

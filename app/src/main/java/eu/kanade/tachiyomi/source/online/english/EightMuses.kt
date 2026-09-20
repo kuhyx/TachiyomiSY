@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.util.asJsoup
 import exh.metadata.metadata.EightMusesSearchMetadata
 import exh.metadata.metadata.base.RaisedTag
 import exh.source.DelegatedHttpSource
-import exh.util.urlImportFetchSearchManga
 import exh.util.urlImportFetchSearchMangaSuspend
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -35,11 +34,8 @@ internal class EightMuses(delegate: HttpSource, val context: Context) :
 
     // Support direct URL importing
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getSearchManga"))
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList) =
-        urlImportFetchSearchManga(context, query) {
-            @Suppress("DEPRECATION")
-            super<DelegatedHttpSource>.fetchSearchManga(page, query, filters)
-        }
+    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> =
+        runAsObservable { getSearchManga(page, query, filters) }
 
     override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage {
         return urlImportFetchSearchMangaSuspend(context, query) {
@@ -59,7 +55,7 @@ internal class EightMuses(delegate: HttpSource, val context: Context) :
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getMangaDetails"))
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
         return runAsObservable {
-            val response = client.newCall(mangaDetailsRequest(manga)).awaitSuccess()
+            val response = client.newCall(delegateMangaDetailsRequest(manga)).awaitSuccess()
             parseToManga(manga, response.asJsoup())
         }
     }

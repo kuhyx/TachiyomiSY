@@ -4,11 +4,14 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import com.google.api.client.auth.oauth2.BearerToken
+import com.google.api.client.auth.oauth2.ClientParametersAuthentication
+import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.auth.oauth2.TokenResponseException
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse
 import com.google.api.client.http.InputStreamContent
 import com.google.api.client.http.javanet.NetHttpTransport
@@ -320,11 +323,7 @@ internal class GoogleDriveService(private val context: Context) {
             context.assets.open("client_secrets.json").reader(),
         )
 
-        val credential = GoogleCredential.Builder()
-            .setJsonFactory(jsonFactory)
-            .setTransport(NetHttpTransport())
-            .setClientSecrets(secrets)
-            .build()
+        val credential = googleCredential(jsonFactory, secrets)
 
         if (refreshToken == "") {
             throw Exception(context.stringResource(SYMR.strings.google_drive_not_signed_in))
@@ -371,11 +370,7 @@ internal class GoogleDriveService(private val context: Context) {
             context.assets.open("client_secrets.json").reader(),
         )
 
-        val credential = GoogleCredential.Builder()
-            .setJsonFactory(jsonFactory)
-            .setTransport(NetHttpTransport())
-            .setClientSecrets(secrets)
-            .build()
+        val credential = googleCredential(jsonFactory, secrets)
 
         credential.accessToken = accessToken
         credential.refreshToken = refreshToken
@@ -387,6 +382,20 @@ internal class GoogleDriveService(private val context: Context) {
         ).setApplicationName(context.stringResource(MR.strings.app_name))
             .build()
     }
+
+    /**
+     * What the deprecated `GoogleCredential.Builder().setClientSecrets(secrets)` built: a bearer-token
+     * credential against Google's token endpoint, authenticating with the installed-app client secrets.
+     */
+    private fun googleCredential(jsonFactory: JsonFactory, secrets: GoogleClientSecrets): Credential =
+        Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
+            .setJsonFactory(jsonFactory)
+            .setTransport(NetHttpTransport())
+            .setTokenServerEncodedUrl(GoogleOAuthConstants.TOKEN_SERVER_URL)
+            .setClientAuthentication(
+                ClientParametersAuthentication(secrets.details.clientId, secrets.details.clientSecret),
+            )
+            .build()
 
     /**
      * Handles the authorization code returned after the user has granted the application permission to access their

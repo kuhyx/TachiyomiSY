@@ -18,7 +18,6 @@ import exh.metadata.metadata.base.RaisedTag
 import exh.source.DelegatedHttpSource
 import exh.util.dropBlank
 import exh.util.trimAll
-import exh.util.urlImportFetchSearchManga
 import exh.util.urlImportFetchSearchMangaSuspend
 import org.jsoup.nodes.Document
 import rx.Observable
@@ -42,19 +41,8 @@ internal class Pururin(delegate: HttpSource, val context: Context) :
 
     // Support direct URL importing
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getSearchManga"))
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
-        val trimmedIdQuery = query.trim().removePrefix("id:")
-        val newQuery = if ((trimmedIdQuery.toIntOrNull() ?: -1) >= 0) {
-            "$baseUrl/gallery/$trimmedIdQuery/-"
-        } else {
-            query
-        }
-
-        return urlImportFetchSearchManga(context, newQuery) {
-            @Suppress("DEPRECATION")
-            super<DelegatedHttpSource>.fetchSearchManga(page, query, filters)
-        }
-    }
+    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> =
+        runAsObservable { getSearchManga(page, query, filters) }
 
     override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage {
         val trimmedIdQuery = query.trim().removePrefix("id:")
@@ -71,7 +59,7 @@ internal class Pururin(delegate: HttpSource, val context: Context) :
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getMangaDetails"))
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
         return runAsObservable {
-            val response = client.newCall(mangaDetailsRequest(manga)).awaitSuccess()
+            val response = client.newCall(delegateMangaDetailsRequest(manga)).awaitSuccess()
             parseToManga(manga, response.asJsoup())
         }
     }

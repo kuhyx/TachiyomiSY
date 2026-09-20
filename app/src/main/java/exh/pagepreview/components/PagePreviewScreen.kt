@@ -17,6 +17,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -129,6 +130,11 @@ internal fun PagePreviewPageDialog(
     var page by remember(currentPage) {
         mutableStateOf(currentPage.toFloat())
     }
+    // The thumb follows `page` so the snap animation below moves it too.
+    val sliderState = key(pageCount) {
+        rememberSliderState(value = currentPage.toFloat(), trackRange = 1F..pageCount.toFloat())
+    }
+    sliderState.value = page
     val scope = rememberCoroutineScope()
     AlertDialog(
         onDismissRequest = onDismissPageDialog,
@@ -154,8 +160,8 @@ internal fun PagePreviewPageDialog(
                 endLayout = { Text(text = pageCount.toString()) },
                 content = {
                     Slider(
+                        state = sliderState,
                         modifier = Modifier.fillMaxWidth(),
-                        value = page,
                         onValueChange = { page = it },
                         onValueChangeFinished = {
                             scope.launch {
@@ -167,7 +173,6 @@ internal fun PagePreviewPageDialog(
                                 }
                             }
                         },
-                        valueRange = 1F..pageCount.toFloat(),
                     )
                 },
             )

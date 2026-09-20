@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.network.GET
-import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
@@ -46,16 +45,15 @@ import exh.metadata.metadata.RaisedSearchMetadata.Companion.TAG_TYPE_VIRTUAL
 import exh.metadata.metadata.RaisedSearchMetadata.Companion.toGenreString
 import exh.metadata.metadata.base.RaisedTag
 import exh.source.ExhPreferences
+import exh.source.HELPER_DEPRECATION
 import exh.ui.login.EhLoginActivity
 import exh.util.UriFilter
 import exh.util.UriGroup
-import exh.util.asObservableWithAsyncStacktrace
 import exh.util.dropBlank
 import exh.util.ignore
 import exh.util.nullIfBlank
 import exh.util.trimAll
 import exh.util.trimOrNull
-import exh.util.urlImportFetchSearchManga
 import exh.util.urlImportFetchSearchMangaSuspend
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
@@ -433,40 +431,20 @@ internal class EHentai(
     }
 
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
-    @Suppress("DEPRECATION")
-    override fun fetchChapterList(manga: SManga) = fetchChapterList(manga) {}
-
-    @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
-    fun fetchChapterList(manga: SManga, throttleFunc: suspend () -> Unit) = runAsObservable {
-        getChapterList(manga, throttleFunc)
-    }
+    override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> = runAsObservable { getChapterList(manga) }
 
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getPageList"))
-    override fun fetchPageList(
-        chapter: SChapter,
-    ): Observable<List<Page>> = fetchChapterPage(chapter, baseUrl + chapter.url)
-        .map {
-            it.mapIndexed { i, s ->
-                Page(i, s)
-            }
-        }!!
+    override fun fetchPageList(chapter: SChapter): Observable<List<Page>> = runAsObservable { getPageList(chapter) }
 
-    private fun fetchChapterPage(
-        chapter: SChapter,
-        np: String,
-        pastUrls: List<String> = emptyList(),
-    ): Observable<List<String>> {
-        val urls = ArrayList(pastUrls)
-        return chapterPageCall(np).flatMap {
-            val jsoup = it.asJsoup()
+    override suspend fun getPageList(chapter: SChapter): List<Page> {
+        val urls = mutableListOf<String>()
+        var nextUrl: String? = baseUrl + chapter.url
+        while (nextUrl != null) {
+            val jsoup = client.newCall(chapterPageRequest(nextUrl)).awaitSuccess().asJsoup()
             urls += parseChapterPage(jsoup)
-            val nextUrl = nextPageUrl(jsoup)
-            if (nextUrl != null) {
-                fetchChapterPage(chapter, nextUrl, urls)
-            } else {
-                Observable.just(urls)
-            }
+            nextUrl = nextPageUrl(jsoup)
         }
+        return urls.mapIndexed { i, s -> Page(i, s) }
     }
 
     private fun parseChapterPage(response: Element) = with(response) {
@@ -479,9 +457,6 @@ internal class EHentai(
         ).sortedBy(Pair<Int, String>::first).map { it.second }
     }
 
-    private fun chapterPageCall(np: String): Observable<Response> {
-        return client.newCall(chapterPageRequest(np)).asObservableSuccess()
-    }
     private fun chapterPageRequest(np: String): Request {
         return exGet(url = np, additionalHeaders = headers)
     }
@@ -490,12 +465,9 @@ internal class EHentai(
         return if (it.text() == ">") it.attr("href") else null
     }
 
+    @Deprecated(HELPER_DEPRECATION)
     override fun popularMangaRequest(page: Int): Request {
         return exGet("$baseUrl/popular")
-    }
-
-    private fun <T : MangasPage> Observable<T>.checkValid(): Observable<MangasPage> = map {
-        it.checkValid()
     }
 
     private fun <T : MangasPage> T.checkValid(): MangasPage =
@@ -508,20 +480,14 @@ internal class EHentai(
         }
 
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getLatestUpdates"))
-    override fun fetchLatestUpdates(page: Int): Observable<MangasPage> {
-        @Suppress("DEPRECATION")
-        return super<HttpSource>.fetchLatestUpdates(page).checkValid()
-    }
+    override fun fetchLatestUpdates(page: Int): Observable<MangasPage> = runAsObservable { getLatestUpdates(page) }
 
     override suspend fun getLatestUpdates(page: Int): MangasPage {
         return super<HttpSource>.getLatestUpdates(page).checkValid()
     }
 
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getPopularManga"))
-    override fun fetchPopularManga(page: Int): Observable<MangasPage> {
-        @Suppress("DEPRECATION")
-        return super<HttpSource>.fetchPopularManga(page).checkValid()
-    }
+    override fun fetchPopularManga(page: Int): Observable<MangasPage> = runAsObservable { getPopularManga(page) }
 
     override suspend fun getPopularManga(page: Int): MangasPage {
         return super<HttpSource>.getPopularManga(page).checkValid()
@@ -530,10 +496,7 @@ internal class EHentai(
     // Support direct URL importing
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getSearchManga"))
     override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> =
-        urlImportFetchSearchManga(context, query) {
-            @Suppress("DEPRECATION")
-            super<HttpSource>.fetchSearchManga(page, query, filters).checkValid()
-        }
+        runAsObservable { getSearchManga(page, query, filters) }
 
     override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage {
         return urlImportFetchSearchMangaSuspend(context, query) {
@@ -541,6 +504,7 @@ internal class EHentai(
         }
     }
 
+    @Deprecated(HELPER_DEPRECATION)
     override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request {
         val toplist = ToplistOption.entries[filters.firstNotNullOfOrNull { (it as? ToplistOptions)?.state } ?: 0]
         if (toplist != ToplistOption.NONE) {
@@ -588,10 +552,16 @@ internal class EHentai(
         )
     }
 
+    @Deprecated(HELPER_DEPRECATION)
     override fun latestUpdatesRequest(page: Int) = exGet(baseUrl, page)
 
+    @Deprecated(HELPER_DEPRECATION)
     override fun popularMangaParse(response: Response) = genericMangaParse(response)
+
+    @Deprecated(HELPER_DEPRECATION)
     override fun searchMangaParse(response: Response) = genericMangaParse(response)
+
+    @Deprecated(HELPER_DEPRECATION)
     override fun latestUpdatesParse(response: Response) = genericMangaParse(response)
 
     private fun exGet(
@@ -634,49 +604,14 @@ internal class EHentai(
      * @param manga the manga to be updated.
      */
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getMangaDetails"))
-    override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
-        return client.newCall(mangaDetailsRequest(manga))
-            .asObservableWithAsyncStacktrace()
-            .flatMap { (stacktrace, response) ->
-                if (response.isSuccessful) {
-                    // Pull to most recent
-                    val doc = response.asJsoup()
-                    val newerGallery = doc.select("#gnd a").lastOrNull()
-                    val pre = if (
-                        newerGallery != null && DebugToggles.PULL_TO_ROOT_WHEN_LOADING_EXH_MANGA_DETAILS.enabled
-                    ) {
-                        manga.url = EHentaiSearchMetadata.normalizeUrl(newerGallery.attr("href"))
-                        client.newCall(mangaDetailsRequest(manga))
-                            .asObservableSuccess().map { it.asJsoup() }
-                    } else {
-                        Observable.just(doc)
-                    }
+    override fun fetchMangaDetails(manga: SManga): Observable<SManga> = runAsObservable { getMangaDetails(manga) }
 
-                    pre.flatMap {
-                        @Suppress("DEPRECATION")
-                        parseToMangaCompletable(manga, it).andThen(
-                            Observable.just(
-                                manga.apply {
-                                    initialized = true
-                                },
-                            ),
-                        )
-                    }
-                } else {
-                    response.close()
-
-                    if (response.code == 404) {
-                        throw GalleryNotFoundException(stacktrace)
-                    } else {
-                        throw Exception("HTTP error ${response.code}", stacktrace)
-                    }
-                }
-            }
-    }
+    /** The gallery page, as HttpSource's deprecated `mangaDetailsRequest` default builds it. */
+    private fun galleryRequest(manga: SManga): Request = GET(baseUrl + manga.url, headers)
 
     suspend fun getMangaDetails(manga: SManga): SManga {
         val exception = Exception("Async stacktrace")
-        val response = client.newCall(mangaDetailsRequest(manga)).await()
+        val response = client.newCall(galleryRequest(manga)).await()
         if (response.isSuccessful) {
             // Pull to most recent
             val doc = response.asJsoup()
@@ -687,7 +622,7 @@ internal class EHentai(
                 val sManga = manga.copy(
                     url = EHentaiSearchMetadata.normalizeUrl(newerGallery.attr("href")),
                 )
-                client.newCall(mangaDetailsRequest(sManga)).awaitSuccess().asJsoup()
+                client.newCall(galleryRequest(sManga)).awaitSuccess().asJsoup()
             } else {
                 doc
             }
@@ -708,6 +643,7 @@ internal class EHentai(
     /**
      * Parse gallery page to metadata model
      */
+    @Deprecated(HELPER_DEPRECATION)
     override fun mangaDetailsParse(response: Response) = throw UnsupportedOperationException()
 
     override fun newMetaInstance() = EHentaiSearchMetadata()
@@ -827,23 +763,21 @@ internal class EHentai(
         }
     }
 
+    @Deprecated(HELPER_DEPRECATION)
     override fun chapterListParse(response: Response) =
         throw UnsupportedOperationException("Unused method was called somehow!")
 
+    @Deprecated(HELPER_DEPRECATION)
     override fun pageListParse(response: Response) =
         throw UnsupportedOperationException("Unused method was called somehow!")
 
     override suspend fun getImageUrl(page: Page): String {
-        val imageUrlResponse = client.newCall(imageUrlRequest(page)).awaitSuccess()
+        val imageUrlResponse = client.newCall(GET(page.url, headers)).awaitSuccess()
         return realImageUrlParse(imageUrlResponse, page)
     }
 
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getImageUrl"))
-    override fun fetchImageUrl(page: Page): Observable<String> {
-        return client.newCall(imageUrlRequest(page))
-            .asObservableSuccess()
-            .map { realImageUrlParse(it, page) }
-    }
+    override fun fetchImageUrl(page: Page): Observable<String> = runAsObservable { getImageUrl(page) }
 
     private fun realImageUrlParse(response: Response, page: Page): String {
         with(response.asJsoup()) {
@@ -859,6 +793,7 @@ internal class EHentai(
         }
     }
 
+    @Deprecated(HELPER_DEPRECATION)
     override fun imageUrlParse(response: Response): String {
         throw UnsupportedOperationException("Unused method was called somehow!")
     }

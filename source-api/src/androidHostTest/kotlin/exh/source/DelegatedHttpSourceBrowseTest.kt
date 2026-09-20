@@ -6,10 +6,12 @@ import eu.kanade.tachiyomi.source.online.EchoHttpSource
 import eu.kanade.tachiyomi.source.online.PlainDelegatedSource
 import eu.kanade.tachiyomi.source.online.SourceHarness
 import eu.kanade.tachiyomi.source.online.StubDelegatedSource
+import eu.kanade.tachiyomi.source.online.cannedResponse
 import eu.kanade.tachiyomi.source.online.invokeDeclared
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
+import okhttp3.Request
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -95,6 +97,19 @@ internal class DelegatedHttpSourceBrowseTest {
         }
         shouldThrow<DelegatedHttpSource.IncompatibleDelegateException> {
             mismatched.invokeDeclared(DelegatedHttpSourceBrowse::class, "fetchLatestUpdates", listOf(1))
+        }
+    }
+
+    @Test
+    fun latestHelpersReachDelegate() {
+        val request = delegated.invokeDeclared(DelegatedHttpSource::class, "delegateLatestUpdatesRequest", listOf(4))
+        (request as Request).url.encodedPath shouldBe "/latest/4"
+        val response = cannedResponse("parsed by delegate")
+        val page = delegated.invokeDeclared(DelegatedHttpSource::class, "delegateLatestUpdatesParse", listOf(response))
+        (page as MangasPage).mangas.single().title shouldBe "parsed by delegate"
+        val mismatched = StubDelegatedSource(delegate = inner, versionId = 3)
+        shouldThrow<DelegatedHttpSource.IncompatibleDelegateException> {
+            mismatched.invokeDeclared(DelegatedHttpSource::class, "delegateLatestUpdatesRequest", listOf(4))
         }
     }
 

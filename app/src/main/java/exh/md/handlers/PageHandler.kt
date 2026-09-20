@@ -13,7 +13,6 @@ import exh.md.service.MangaDexService
 import exh.md.utils.MdApi
 import exh.md.utils.MdUtil
 import okhttp3.Call
-import rx.Observable
 import tachiyomi.core.common.util.lang.withIOContext
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.isAccessible
@@ -129,15 +128,6 @@ internal class PageHandler(
                 mangaHotHandler.client.newCachelessCallWithProgress(GET(page.imageUrl!!, mangaHotHandler.headers), page, existingSize)
             }
             else -> null
-        }
-    }
-
-    fun fetchImageUrl(page: Page, superMethod: (Page) -> Observable<String>): Observable<String> {
-        return when {
-            page.url.contains("/bfs/comic/") -> {
-                bilibiliHandler.fetchImageUrl(page)
-            }
-            else -> superMethod(page)
         }
     }
 

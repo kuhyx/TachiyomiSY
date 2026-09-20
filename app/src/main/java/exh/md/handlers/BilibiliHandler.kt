@@ -20,8 +20,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import rx.Observable
-import tachiyomi.core.common.util.lang.runAsObservable
 import uy.kohesive.injekt.injectLazy
 import kotlin.time.Duration.Companion.seconds
 
@@ -157,10 +155,6 @@ internal class BilibiliHandler(currentClient: OkHttpClient) {
     suspend fun getImageUrl(page: Page): String {
         val response = client.newCall(imageUrlRequest(page)).awaitSuccess()
         return imageUrlParse(response)
-    }
-
-    fun fetchImageUrl(page: Page): Observable<String> {
-        return runAsObservable { getImageUrl(page) }
     }
 
     private fun imageUrlRequest(page: Page): Request {
