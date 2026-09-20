@@ -1,5 +1,6 @@
 package tachiyomi.presentation.widget.components
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
@@ -26,8 +27,15 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.widget.util.calculateRowAndColumnCount
 
+private val RowVerticalPadding: Dp = 4.dp
+private val CoverHorizontalPadding: Dp = 3.dp
+
+/**
+ * The updates grid: a spinner while [data] is `null`, a "no recent updates" line when it is
+ * empty, otherwise rows of covers that open their manga when tapped.
+ */
 @Composable
-fun UpdatesWidget(
+public fun UpdatesWidget(
     data: List<Pair<Long, Bitmap?>>?,
     contentColor: ColorProvider,
     topPadding: Dp,
@@ -47,51 +55,58 @@ fun UpdatesWidget(
             )
         } else {
             val (rowCount, columnCount) = LocalSize.current.calculateRowAndColumnCount(topPadding, bottomPadding)
-            Column(
-                modifier = GlanceModifier.fillMaxHeight(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                (0..<rowCount).forEach { i ->
-                    val coverRow = (0..<columnCount).mapNotNull { j ->
-                        data.getOrNull(j + (i * columnCount))
-                    }
-                    if (coverRow.isNotEmpty()) {
-                        Row(
-                            modifier = GlanceModifier
-                                .padding(vertical = 4.dp)
-                                .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            coverRow.forEach { (mangaId, cover) ->
-                                Box(
-                                    modifier = GlanceModifier
-                                        .padding(horizontal = 3.dp),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    val intent = Intent(
-                                        LocalContext.current,
-                                        Class.forName(Constants.MAIN_ACTIVITY),
-                                    ).apply {
-                                        action = Constants.SHORTCUT_MANGA
-                                        putExtra(Constants.MANGA_EXTRA, mangaId)
-                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            CoverGrid(data, rowCount, columnCount)
+        }
+    }
+}
 
-                                        // https://issuetracker.google.com/issues/238793260
-                                        addCategory(mangaId.toString())
-                                    }
-                                    UpdatesMangaCover(
-                                        cover = cover,
-                                        modifier = GlanceModifier.clickable(actionStartActivity(intent)),
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+@Composable
+private fun CoverGrid(data: List<Pair<Long, Bitmap?>>, rowCount: Int, columnCount: Int) {
+    Column(
+        modifier = GlanceModifier.fillMaxHeight(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        for (i in 0..<rowCount) {
+            val coverRow = (0..<columnCount).mapNotNull { j -> data.getOrNull(j + (i * columnCount)) }
+            if (coverRow.isNotEmpty()) {
+                CoverRow(coverRow)
             }
         }
     }
 }
+
+@Composable
+private fun CoverRow(coverRow: List<Pair<Long, Bitmap?>>) {
+    Row(
+        modifier = GlanceModifier
+            .padding(vertical = RowVerticalPadding)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        coverRow.forEach { (mangaId, cover) ->
+            Box(
+                modifier = GlanceModifier.padding(horizontal = CoverHorizontalPadding),
+                contentAlignment = Alignment.Center,
+            ) {
+                val intent = openMangaIntent(LocalContext.current, mangaId)
+                UpdatesMangaCover(
+                    cover = cover,
+                    modifier = GlanceModifier.clickable(actionStartActivity(intent)),
+                )
+            }
+        }
+    }
+}
+
+private fun openMangaIntent(context: Context, mangaId: Long): Intent =
+    Intent(context, Class.forName(Constants.MAIN_ACTIVITY)).apply {
+        action = Constants.SHORTCUT_MANGA
+        putExtra(Constants.MANGA_EXTRA, mangaId)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+
+        // https://issuetracker.google.com/issues/238793260
+        addCategory(mangaId.toString())
+    }

@@ -2,6 +2,8 @@ package tachiyomi.presentation.widget.components
 
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
@@ -19,8 +21,12 @@ import tachiyomi.core.common.Constants
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
+private val LockedPadding: Dp = 8.dp
+private val LockedFontSize: TextUnit = 12.sp
+
+/** The notice shown instead of the grid while the app lock is on; tapping opens the app. */
 @Composable
-fun LockedWidget(
+public fun LockedWidget(
     foreground: ColorProvider,
     modifier: GlanceModifier = GlanceModifier,
 ) {
@@ -30,14 +36,14 @@ fun LockedWidget(
     Box(
         modifier = modifier
             .clickable(actionStartActivity(intent))
-            .padding(8.dp),
+            .padding(LockedPadding),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = stringResource(MR.strings.appwidget_unavailable_locked),
             style = TextStyle(
                 color = foreground,
-                fontSize = 12.sp,
+                fontSize = LockedFontSize,
                 textAlign = TextAlign.Center,
             ),
         )

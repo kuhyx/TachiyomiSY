@@ -2,6 +2,7 @@ package tachiyomi.presentation.widget.components
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
@@ -13,11 +14,15 @@ import androidx.glance.layout.size
 import tachiyomi.presentation.widget.R
 import tachiyomi.presentation.widget.util.appWidgetInnerRadius
 
-val CoverWidth = 58.dp
-val CoverHeight = 87.dp
+/** The width every cover in the grid is drawn at. */
+public val CoverWidth: Dp = 58.dp
 
+/** The height every cover in the grid is drawn at. */
+public val CoverHeight: Dp = 87.dp
+
+/** One cover of the grid, or the placeholder when its bitmap could not be loaded. */
 @Composable
-fun UpdatesMangaCover(
+public fun UpdatesMangaCover(
     cover: Bitmap?,
     modifier: GlanceModifier = GlanceModifier,
 ) {

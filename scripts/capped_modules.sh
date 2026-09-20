@@ -14,7 +14,7 @@
 #: Rollout order (AGENTS.md): gradle/build-logic source-api core-metadata
 #: core/common domain data presentation-core presentation-widget
 #: source-local i18n i18n-sy baseline-profile app.
-readonly CAPPED_MODULES=(gradle/build-logic source-api core-metadata core/common domain data i18n i18n-sy baseline-profile source-local)
+readonly CAPPED_MODULES=(gradle/build-logic source-api core-metadata core/common domain data i18n i18n-sy baseline-profile source-local presentation-widget)
 
 uncapped_module_pattern() {
     # ERE matching paths under modules NOT yet on the cap, e.g.

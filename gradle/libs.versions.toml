@@ -101,6 +101,7 @@ androidx-constraintLayout = { module = "androidx.constraintlayout:constraintlayo
 androidx-core = { module = "androidx.core:core", version.ref = "androidx-core" }
 androidx-coreSplashScreen = { module = "androidx.core:core-splashscreen", version.ref = "androidx-coreSplashScreen" }
 androidx-glance-appWidget = { module = "androidx.glance:glance-appwidget", version.ref = "androidx-glance" }
+androidx-glance-appWidgetTesting = { module = "androidx.glance:glance-appwidget-testing", version.ref = "androidx-glance" }
 androidx-interpolator = { module = "androidx.interpolator:interpolator", version.ref = "androidx-interpolator" }
 androidx-lifecycle-common = { module = "androidx.lifecycle:lifecycle-common", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidx-lifecycle" }

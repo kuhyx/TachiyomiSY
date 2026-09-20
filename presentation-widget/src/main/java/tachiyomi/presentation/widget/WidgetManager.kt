@@ -14,12 +14,17 @@ import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.updates.interactor.GetUpdates
 
-class WidgetManager(
+/** Keeps every placed updates widget in sync with the library and the app-lock setting. */
+public class WidgetManager(
     private val getUpdates: GetUpdates,
     private val securityPreferences: SecurityPreferences,
 ) {
 
-    fun Context.init(scope: LifecycleCoroutineScope) {
+    /**
+     * Redraws the widgets whenever the set of recent unread chapters or the app-lock
+     * preference changes, for as long as [scope] lives.
+     */
+    public fun Context.init(scope: LifecycleCoroutineScope) {
         combine(
             getUpdates.subscribe(read = false, after = BaseUpdatesGridGlanceWidget.DateLimit.toEpochMilli()),
             securityPreferences.useAuthenticator.changes(),
@@ -33,8 +38,8 @@ class WidgetManager(
                 try {
                     UpdatesGridGlanceWidget().updateAll(this)
                     UpdatesGridCoverScreenGlanceWidget().updateAll(this)
-                } catch (e: Exception) {
-                    logcat(LogPriority.ERROR, e) { "Failed to update widget" }
+                } catch (expected: Exception) {
+                    logcat(LogPriority.ERROR, expected) { "Failed to update widget" }
                 }
             }
             .flowOn(Dispatchers.Default)

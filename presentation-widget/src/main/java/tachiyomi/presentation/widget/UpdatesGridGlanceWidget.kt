@@ -1,14 +1,15 @@
 package tachiyomi.presentation.widget
 
-import android.annotation.SuppressLint
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.glance.ImageProvider
 import androidx.glance.unit.ColorProvider
+import tachiyomi.presentation.widget.util.dayNightColorResource
 
-class UpdatesGridGlanceWidget : BaseUpdatesGridGlanceWidget() {
-    @SuppressLint("RestrictedApi")
-    override val foreground = ColorProvider(R.color.appwidget_on_secondary_container)
-    override val background = ImageProvider(R.drawable.appwidget_background)
-    override val topPadding = 0.dp
-    override val bottomPadding = 0.dp
+/** The home-screen updates widget: themed background, no extra padding. */
+public class UpdatesGridGlanceWidget : BaseUpdatesGridGlanceWidget() {
+    override val foreground: ColorProvider = context.dayNightColorResource(R.color.appwidget_on_secondary_container)
+    override val background: ImageProvider = ImageProvider(R.drawable.appwidget_background)
+    override val topPadding: Dp = 0.dp
+    override val bottomPadding: Dp = 0.dp
 }

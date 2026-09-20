@@ -3,12 +3,12 @@ package tachiyomi.presentation.widget
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
-import android.os.Build
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
-import androidx.core.graphics.drawable.toBitmap
+import androidx.compose.ui.unit.DpSize
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.ImageProvider
@@ -21,25 +21,10 @@ import androidx.glance.background
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.unit.ColorProvider
-import coil3.annotation.ExperimentalCoilApi
-import coil3.asDrawable
-import coil3.executeBlocking
-import coil3.imageLoader
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
-import coil3.request.transformations
-import coil3.size.Precision
-import coil3.size.Scale
-import coil3.transform.RoundedCornersTransformation
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
-import eu.kanade.tachiyomi.util.system.dpToPx
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import tachiyomi.core.common.util.lang.withIOContext
-import tachiyomi.domain.manga.model.MangaCover
 import tachiyomi.domain.updates.interactor.GetUpdates
-import tachiyomi.domain.updates.model.UpdatesWithRelations
-import tachiyomi.presentation.widget.components.CoverHeight
-import tachiyomi.presentation.widget.components.CoverWidth
 import tachiyomi.presentation.widget.components.LockedWidget
 import tachiyomi.presentation.widget.components.UpdatesWidget
 import tachiyomi.presentation.widget.util.appWidgetBackgroundRadius
@@ -49,18 +34,34 @@ import uy.kohesive.injekt.api.get
 import java.time.Instant
 import java.time.ZonedDateTime
 
-abstract class BaseUpdatesGridGlanceWidget(
-    private val context: Context = Injekt.get<Application>(),
+private const val UPDATES_WINDOW_MONTHS: Long = 3
+
+/**
+ * A grid of the covers with recent unread chapters, or a "locked" notice while the app lock is
+ * on; subclasses pick the colours and the padding of their placement.
+ */
+public abstract class BaseUpdatesGridGlanceWidget(
+    /** The application context the widget resolves its resources with. */
+    protected val context: Context = Injekt.get<Application>(),
     private val getUpdates: GetUpdates = Injekt.get(),
     private val preferences: SecurityPreferences = Injekt.get(),
 ) : GlanceAppWidget() {
 
-    override val sizeMode = SizeMode.Exact
+    override val sizeMode: SizeMode = SizeMode.Exact
 
-    abstract val foreground: ColorProvider
-    abstract val background: ImageProvider
-    abstract val topPadding: Dp
-    abstract val bottomPadding: Dp
+    /** The text and progress colour. */
+    public abstract val foreground: ColorProvider
+
+    /** The widget's background image. */
+    public abstract val background: ImageProvider
+
+    /** Extra space kept clear above the grid. */
+    public abstract val topPadding: Dp
+
+    /** Extra space kept clear below the grid. */
+    public abstract val bottomPadding: Dp
+
+    private val coverLoader by lazy { UpdatesCoverLoader(context) }
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val locked = preferences.useAuthenticator.get()
@@ -71,30 +72,31 @@ abstract class BaseUpdatesGridGlanceWidget(
             .padding(top = topPadding, bottom = bottomPadding)
             .appWidgetBackgroundRadius()
 
-        val manager = GlanceAppWidgetManager(context)
-        val ids = manager.getGlanceIds(javaClass)
-        val (rowCount, columnCount) = ids
-            .flatMap { manager.getAppWidgetSizes(it) }
-            .maxBy { it.height.value * it.width.value }
+        val (rowCount, columnCount) = largestPlacedWidgetSize(context)
             .calculateRowAndColumnCount(topPadding, bottomPadding)
 
         provideContent {
-            // If app lock enabled, don't do anything
-            if (locked) {
-                LockedWidget(
-                    foreground = foreground,
-                    modifier = containerModifier,
-                )
-                return@provideContent
-            }
+            Content(locked, containerModifier, rowCount, columnCount)
+        }
+    }
 
-            val flow = remember {
-                getUpdates
-                    .subscribe(false, DateLimit.toEpochMilli())
-                    .map { rawData ->
-                        rawData.prepareData(rowCount, columnCount)
-                    }
-            }
+    private suspend fun largestPlacedWidgetSize(context: Context): DpSize {
+        val manager = GlanceAppWidgetManager(context)
+        return manager.getGlanceIds(javaClass)
+            .flatMap { manager.getAppWidgetSizes(it) }
+            .maxBy { it.height.value * it.width.value }
+    }
+
+    @Composable
+    private fun Content(locked: Boolean, containerModifier: GlanceModifier, rowCount: Int, columnCount: Int) {
+        // If app lock enabled, don't do anything
+        if (locked) {
+            LockedWidget(
+                foreground = foreground,
+                modifier = containerModifier,
+            )
+        } else {
+            val flow = remember { updatesCovers(rowCount, columnCount) }
             val data by flow.collectAsState(initial = null)
             UpdatesWidget(
                 data = data,
@@ -106,53 +108,14 @@ abstract class BaseUpdatesGridGlanceWidget(
         }
     }
 
-    @OptIn(ExperimentalCoilApi::class)
-    private suspend fun List<UpdatesWithRelations>.prepareData(
-        rowCount: Int,
-        columnCount: Int,
-    ): List<Pair<Long, Bitmap?>> {
-        // Resize to cover size
-        val widthPx = CoverWidth.value.toInt().dpToPx
-        val heightPx = CoverHeight.value.toInt().dpToPx
-        val roundPx = context.resources.getDimension(R.dimen.appwidget_inner_radius)
-        return withIOContext {
-            this@prepareData
-                .distinctBy { it.mangaId }
-                .take(rowCount * columnCount)
-                .map { updatesView ->
-                    val request = ImageRequest.Builder(context)
-                        .data(
-                            MangaCover(
-                                mangaId = updatesView.mangaId,
-                                sourceId = updatesView.sourceId,
-                                isMangaFavorite = true,
-                                ogUrl = updatesView.coverData.url,
-                                lastModified = updatesView.coverData.lastModified,
-                            ),
-                        )
-                        .memoryCachePolicy(CachePolicy.DISABLED)
-                        .precision(Precision.EXACT)
-                        .size(widthPx, heightPx)
-                        .scale(Scale.FILL)
-                        .let {
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                it.transformations(RoundedCornersTransformation(roundPx))
-                            } else {
-                                it // Handled by system
-                            }
-                        }
-                        .build()
-                    val bitmap = context.imageLoader.executeBlocking(request)
-                        .image
-                        ?.asDrawable(context.resources)
-                        ?.toBitmap()
-                    Pair(updatesView.mangaId, bitmap)
-                }
-        }
-    }
+    private fun updatesCovers(rowCount: Int, columnCount: Int): Flow<List<Pair<Long, Bitmap?>>> = getUpdates
+        .subscribe(false, DateLimit.toEpochMilli())
+        .map { rawData -> coverLoader.load(rawData, rowCount, columnCount) }
 
-    companion object {
-        val DateLimit: Instant
-            get() = ZonedDateTime.now().minusMonths(3).toInstant()
+    /** The window of updates the widgets show. */
+    public companion object {
+        /** Now minus three months: updates older than this are not shown. */
+        public val DateLimit: Instant
+            get() = ZonedDateTime.now().minusMonths(UPDATES_WINDOW_MONTHS).toInstant()
     }
 }
