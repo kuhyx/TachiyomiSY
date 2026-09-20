@@ -30,7 +30,7 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.repository.CustomMangaRepository
 import java.io.File
 
-class Tester {
+internal class Tester {
 
     @Disabled
     @Test

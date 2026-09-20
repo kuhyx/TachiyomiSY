@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.seconds
 
-class MigratorTest {
+internal class MigratorTest {
 
     lateinit var migrationCompletedListener: MigrationCompletedListener
     lateinit var migrationContext: MigrationContext
