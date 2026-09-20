@@ -3,16 +3,13 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 import android.net.Uri
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.model.TrackMangaMetadata
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALListItem
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALListItemStatus
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALManga
-import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALMangaMetadata
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALOAuth
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALSearchResult
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALUser
-import eu.kanade.tachiyomi.data.track.myanimelist.dto.getFullName
 import eu.kanade.tachiyomi.network.DELETE
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.HttpException
@@ -29,24 +26,22 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
-import java.text.SimpleDateFormat
-import java.util.Locale
 import tachiyomi.domain.track.model.Track as DomainTrack
 
 private const val CLIENT_ID_KEY = "client_id"
-private const val FIELDS = "fields"
+internal const val FIELDS = "fields"
 
 private const val MAX_QUERY_CHARS = 64
 
 internal class MyAnimeListApi(
-    private val trackId: Long,
+    internal val trackId: Long,
     private val client: OkHttpClient,
     interceptor: MyAnimeListInterceptor,
 ) {
 
-    private val json: Json by injectLazy()
+    internal val json: Json by injectLazy()
 
-    private val authClient = client.newBuilder().addInterceptor(interceptor).build()
+    internal val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
     suspend fun getAccessToken(authCode: String): MALOAuth {
         return withIOContext {
@@ -198,41 +193,6 @@ internal class MyAnimeListApi(
         }
     }
 
-    suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? {
-        return withIOContext {
-            val url = MANGA_API_URL.toUri().buildUpon()
-                .appendPath(track.remoteId.toString())
-                .appendQueryParameter(
-                    FIELDS,
-                    "id,title,synopsis,main_picture,authors{first_name,last_name}",
-                )
-                .build()
-            with(json) {
-                authClient.newCall(GET(url.toString()))
-                    .awaitSuccess()
-                    .parseAs<MALMangaMetadata>()
-                    .let {
-                        TrackMangaMetadata(
-                            remoteId = it.id,
-                            title = it.title,
-                            thumbnailUrl = it.covers.large.ifEmpty { null } ?: it.covers.medium,
-                            description = it.synopsis,
-                            authors = it.authors
-                                .filter { it.role == "Story" || it.role == "Story & Art" }
-                                .mapNotNull { it.node.getFullName() }
-                                .joinToString(separator = ", ")
-                                .ifEmpty { null },
-                            artists = it.authors
-                                .filter { it.role == "Art" || it.role == "Story & Art" }
-                                .mapNotNull { it.node.getFullName() }
-                                .joinToString(separator = ", ")
-                                .ifEmpty { null },
-                        )
-                    }
-            }
-        }
-    }
-
     private suspend fun getListPage(offset: Int): MALSearchResult {
         return withIOContext {
             val urlBuilder = "$BASE_API_URL/users/@me/mangalist".toUri().buildUpon()
@@ -254,59 +214,12 @@ internal class MyAnimeListApi(
         }
     }
 
-    private fun parseMangaItem(listStatus: MALListItemStatus, track: Track): Track {
-        return track.apply {
-            val isRereading = listStatus.isRereading
-            status = if (isRereading) MyAnimeList.REREADING else getStatus(listStatus.status)
-            lastChapterRead = listStatus.numChaptersRead
-            score = listStatus.score.toDouble()
-            listStatus.startDate?.let { startedReadingDate = parseDate(it) }
-            listStatus.finishDate?.let { finishedReadingDate = parseDate(it) }
-        }
-    }
-
-    private fun parseSearchItem(searchItem: MALManga): TrackSearch {
-        return TrackSearch.create(trackId).apply {
-            remoteId = searchItem.id
-            title = searchItem.title
-            summary = searchItem.synopsis
-            totalChapters = searchItem.numChapters
-            score = searchItem.mean
-            coverUrl = searchItem.covers?.large.orEmpty()
-            trackingUrl = "https://myanimelist.net/manga/$remoteId"
-            publishingStatus = searchItem.status.replace("_", " ")
-            publishingType = searchItem.mediaType.replace("_", " ")
-            startDate = searchItem.startDate ?: ""
-            artists = searchItem.authors
-                .filter { authorNode -> authorNode.role == "Art" }
-                .mapNotNull { authorNode -> authorNode.node.getFullName() }
-            authors = searchItem.authors
-                // count all with "Story" or "Story & Art" as authors, like is done for library entries
-                .filter { authorNode -> authorNode.role.contains("Story") }
-                .mapNotNull { authorNode -> authorNode.node.getFullName() }
-        }
-    }
-
-    private fun parseDate(isoDate: String): Long = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(isoDate)?.time ?: 0L
-
-    private fun convertToIsoDate(epochTime: Long): String? {
-        if (epochTime == 0L) {
-            return ""
-        }
-        return try {
-            val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-            outputDf.format(epochTime)
-        } catch (_: Exception) {
-            null
-        }
-    }
-
     companion object {
         private const val CLIENT_ID = "c46c9e24640a64dad5be5ca7a1a53a0f"
 
         private const val BASE_OAUTH_URL = "https://myanimelist.net/v1/oauth2"
         private const val BASE_API_URL = "https://api.myanimelist.net/v2"
-        private const val MANGA_API_URL = "$BASE_API_URL/manga"
+        internal const val MANGA_API_URL = "$BASE_API_URL/manga"
 
         private const val SEARCH_FIELDS =
             "id,title,synopsis,num_chapters,mean,main_picture,status,media_type,start_date," +

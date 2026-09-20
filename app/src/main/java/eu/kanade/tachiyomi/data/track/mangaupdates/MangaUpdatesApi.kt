@@ -3,18 +3,12 @@ package eu.kanade.tachiyomi.data.track.mangaupdates
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdates.Companion.READING_LIST
 import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdates.Companion.WISH_LIST
-import eu.kanade.tachiyomi.data.track.mangaupdates.dto.MUContext
-import eu.kanade.tachiyomi.data.track.mangaupdates.dto.MUCurrentUser
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.MUListItem
-import eu.kanade.tachiyomi.data.track.mangaupdates.dto.MULoginResponse
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.MURating
-import eu.kanade.tachiyomi.data.track.mangaupdates.dto.MURecord
-import eu.kanade.tachiyomi.data.track.mangaupdates.dto.MUSearchResult
 import eu.kanade.tachiyomi.network.DELETE
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.PUT
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.parseAs
 import kotlinx.serialization.json.Json
@@ -27,18 +21,17 @@ import kotlinx.serialization.json.putJsonObject
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import java.net.HttpURLConnection
 import tachiyomi.domain.track.model.Track as DomainTrack
 
 internal class MangaUpdatesApi(
     interceptor: MangaUpdatesInterceptor,
-    private val client: OkHttpClient,
+    internal val client: OkHttpClient,
 ) {
-    private val json: Json by injectLazy()
+    internal val json: Json by injectLazy()
 
-    private val authClient by lazy {
+    internal val authClient by lazy {
         client.newBuilder()
             .addInterceptor(interceptor)
             .build()
@@ -151,92 +144,12 @@ internal class MangaUpdatesApi(
         }
     }
 
-    suspend fun search(query: String): List<MURecord> {
-        val body = buildJsonObject {
-            put("search", query)
-            put(
-                "filter_types",
-                buildJsonArray {
-                    add("drama cd")
-                    add("novel")
-                },
-            )
-        }
-
-        return with(json) {
-            client.newCall(
-                POST(
-                    url = "$BASE_URL/v1/series/search",
-                    body = body.toString().toRequestBody(CONTENT_TYPE),
-                ),
-            )
-                .awaitSuccess()
-                .parseAs<MUSearchResult>()
-                .results
-                .map { it.record }
-        }
-    }
-
-    suspend fun authenticate(username: String, password: String): MUContext {
-        val body = buildJsonObject {
-            put("username", username)
-            put("password", password)
-        }
-        return with(json) {
-            client.newCall(
-                PUT(
-                    url = "$BASE_URL/v1/account/login",
-                    body = body.toString().toRequestBody(CONTENT_TYPE),
-                ),
-            )
-                .awaitSuccess()
-                .parseAs<MULoginResponse>()
-                .context
-        }
-    }
-
-    suspend fun getCurrentUser(): MUCurrentUser {
-        return with(json) {
-            authClient.newCall(GET("$BASE_URL/v1/account/profile"))
-                .awaitSuccess()
-                .parseAs<MUCurrentUser>()
-        }
-    }
-
-    suspend fun getSeries(track: DomainTrack): MURecord =
-        getSeries(track.remoteId)
-
-    // SY -->
-    suspend fun getSeries(remoteId: Long): MURecord {
-        return with(json) {
-            client.newCall(GET("$BASE_URL/v1/series/$remoteId"))
-                .awaitSuccess()
-                .parseAs<MURecord>()
-        }
-    }
-
-    suspend fun convertToNewId(legacyId: Int): String? =
-        client.newBuilder()
-            .followRedirects(false)
-            .build()
-            .newCall(GET("https://www.mangaupdates.com/series.html?id=$legacyId"))
-            .await()
-            .takeIf(Response::isRedirect)
-            ?.header("Location")
-            ?.let {
-                // Extract the new id from the redirected URL
-                Regex("""/series/(\w+)(/([\w-]+)?)?/?${'$'}""")
-                    .find(it)
-                    ?.groups
-                    ?.get(1)
-                    ?.value
-            }
     // SY <--
 
     companion object {
-        private const val BASE_URL = "https://api.mangaupdates.com"
+        internal const val BASE_URL = "https://api.mangaupdates.com"
 
-        private val CONTENT_TYPE = "application/json".toMediaType()
+        internal val CONTENT_TYPE = "application/json".toMediaType()
 
         private fun ratingUrl(track: Track) = "$BASE_URL/v1/series/${track.remoteId}/rating"
     }

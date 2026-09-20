@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import exh.log.xLogD
 import exh.md.dto.AtHomeDto
 import exh.md.service.MangaDexService
+import exh.md.service.getAtHomeServer
+import exh.md.service.viewChapter
 import exh.md.utils.MdApi
 import exh.md.utils.MdUtil
 import okhttp3.Call

@@ -8,6 +8,11 @@ import exh.md.dto.MangaDataDto
 import exh.md.dto.PersonalRatingDto
 import exh.md.dto.ReadingStatusDto
 import exh.md.service.MangaDexAuthService
+import exh.md.service.deleteMangaRating
+import exh.md.service.followManga
+import exh.md.service.mangasRating
+import exh.md.service.unfollowManga
+import exh.md.service.updateMangaRating
 import exh.md.utils.FollowStatus
 import exh.md.utils.MdUtil
 import exh.md.utils.asMdMap

@@ -16,18 +16,14 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.coil.MangaCoverFetcher.Companion.USE_CUSTOM_COVER_KEY
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.HttpSource
-import logcat.LogPriority
 import okhttp3.CacheControl
 import okhttp3.Call
 import okhttp3.Request
 import okhttp3.Response
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
-import okio.Source
 import okio.buffer
-import okio.sink
 import okio.source
-import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaCover
 import tachiyomi.domain.source.service.SourceManager
@@ -50,10 +46,10 @@ private const val IMAGE = "image/*"
 internal class MangaCoverFetcher(
     private val url: String?,
     private val isLibraryManga: Boolean,
-    private val options: Options,
+    internal val options: Options,
     cover: CoverLookups,
     private val callFactoryLazy: Lazy<Call.Factory>,
-    private val imageLoader: ImageLoader,
+    internal val imageLoader: ImageLoader,
 ) : Fetcher {
     private val coverFileLazy = cover.coverFile
     private val customCoverFileLazy = cover.customCoverFile
@@ -68,7 +64,7 @@ internal class MangaCoverFetcher(
         val source: Lazy<HttpSource?>,
     )
 
-    private val diskCacheKey: String
+    internal val diskCacheKey: String
         get() = diskCacheKeyLazy.value
 
     override suspend fun fetch(): FetchResult {
@@ -211,79 +207,6 @@ internal class MangaCoverFetcher(
         }
 
         return request.build()
-    }
-
-    private fun moveSnapshotToCoverCache(snapshot: DiskCache.Snapshot, cacheFile: File?): File? {
-        if (cacheFile == null) return null
-        return try {
-            imageLoader.diskCache?.run {
-                fileSystem.source(snapshot.data).use { input ->
-                    writeSourceToCoverCache(input, cacheFile)
-                }
-                remove(diskCacheKey)
-            }
-            cacheFile.takeIf { it.exists() }
-        } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected) { "Failed to write snapshot data to cover cache ${cacheFile.name}" }
-            null
-        }
-    }
-
-    private fun writeResponseToCoverCache(response: Response, cacheFile: File?): File? {
-        if (cacheFile == null || !options.diskCachePolicy.writeEnabled) return null
-        return try {
-            response.peekBody(Long.MAX_VALUE).source().use { input ->
-                writeSourceToCoverCache(input, cacheFile)
-            }
-            cacheFile.takeIf { it.exists() }
-        } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected) { "Failed to write response data to cover cache ${cacheFile.name}" }
-            null
-        }
-    }
-
-    private fun writeSourceToCoverCache(input: Source, cacheFile: File) {
-        cacheFile.parentFile?.mkdirs()
-        cacheFile.delete()
-        try {
-            cacheFile.sink().buffer().use { output ->
-                output.writeAll(input)
-            }
-        } catch (expected: Exception) {
-            // Rethrown (or wrapped) whatever the cause.
-            cacheFile.delete()
-            throw expected
-        }
-    }
-
-    private fun readFromDiskCache(): DiskCache.Snapshot? {
-        return if (options.diskCachePolicy.readEnabled) {
-            imageLoader.diskCache?.openSnapshot(diskCacheKey)
-        } else {
-            null
-        }
-    }
-
-    private fun writeToDiskCache(
-        response: Response,
-    ): DiskCache.Snapshot? {
-        val diskCache = imageLoader.diskCache
-        val editor = diskCache?.openEditor(diskCacheKey) ?: return null
-        try {
-            diskCache.fileSystem.write(editor.data) {
-                response.body.source().readAll(this)
-            }
-            return editor.commitAndOpenSnapshot()
-        } catch (expected: Exception) {
-            // Rethrown (or wrapped) whatever the cause.
-            try {
-                editor.abort()
-            } catch (ignored: Exception) {
-            }
-            throw expected
-        }
     }
 
     private fun DiskCache.Snapshot.toImageSource(): ImageSource {

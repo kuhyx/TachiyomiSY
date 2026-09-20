@@ -5,6 +5,8 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import exh.md.dto.ChapterDataDto
 import exh.md.service.MangaDexService
+import exh.md.service.viewChapter
+import exh.md.service.viewChapters
 import exh.md.utils.MdConstants
 import exh.md.utils.MdUtil
 import exh.md.utils.mdListCall

@@ -4,14 +4,12 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.network.parseAs
-import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import exh.log.xLogD
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import okhttp3.Headers
@@ -23,16 +21,16 @@ import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import kotlin.time.Duration.Companion.seconds
 
-private const val CONTENT_LENGTH = "Content-Length"
-private const val CONTENT_TYPE = "Content-Type"
-private const val REFERER = "Referer"
+internal const val CONTENT_LENGTH = "Content-Length"
+internal const val CONTENT_TYPE = "Content-Type"
+internal const val REFERER_HEADER = "Referer"
 
 internal class BilibiliHandler(currentClient: OkHttpClient) {
     val baseUrl = "https://www.bilibilicomics.com"
     val headers = Headers.Builder()
         .add("Accept", ACCEPT_JSON)
         .add("Origin", baseUrl)
-        .add(REFERER, "$baseUrl/")
+        .add(REFERER_HEADER, "$baseUrl/")
         .build()
 
     val client: OkHttpClient = currentClient.newBuilder()
@@ -41,24 +39,7 @@ internal class BilibiliHandler(currentClient: OkHttpClient) {
 
     val json by injectLazy<Json>()
 
-    suspend fun fetchPageList(externalUrl: String, chapterNumber: String): List<Page> {
-        // Sometimes the urls direct it to the manga page instead, so we try to find the correct chapter
-        // Though these seem to be older chapters, so maybe remove this later
-        val chapterUrl = if (externalUrl.contains("mc\\d*/\\d*".toRegex())) {
-            getChapterUrl(externalUrl)
-        } else {
-            val mangaUrl = getMangaUrl(externalUrl)
-            val chapters = getChapterList(mangaUrl)
-            val chapter = chapters
-                .find { it.chapter_number == chapterNumber.toFloatOrNull() }
-                ?: throw NoSuchElementException("Unknown chapter $chapterNumber")
-            chapter.url
-        }
-
-        return fetchPageList(chapterUrl)
-    }
-
-    private fun getMangaUrl(externalUrl: String): String {
+    internal fun getMangaUrl(externalUrl: String): String {
         xLogD(externalUrl)
         val comicId = externalUrl
             .substringAfter("/mc")
@@ -68,7 +49,7 @@ internal class BilibiliHandler(currentClient: OkHttpClient) {
         return "/detail/mc$comicId"
     }
 
-    private fun getChapterUrl(externalUrl: String): String {
+    internal fun getChapterUrl(externalUrl: String): String {
         val comicId = externalUrl.substringAfterLast("/mc")
             .substringBefore('/')
             .toInt()
@@ -87,7 +68,7 @@ internal class BilibiliHandler(currentClient: OkHttpClient) {
         val newHeaders = headers.newBuilder()
             .add(CONTENT_LENGTH, requestBody.contentLength().toString())
             .add(CONTENT_TYPE, requestBody.contentType().toString())
-            .set(REFERER, baseUrl + mangaUrl)
+            .set(REFERER_HEADER, baseUrl + mangaUrl)
             .build()
 
         return POST(
@@ -119,74 +100,6 @@ internal class BilibiliHandler(currentClient: OkHttpClient) {
         name = "Ep. " + episode.order.toString().removeSuffix(".0") + " - " + episode.title,
         chapterNumber = episode.order,
     )
-
-    private suspend fun fetchPageList(chapterUrl: String): List<Page> {
-        val response = client.newCall(pageListRequest(chapterUrl)).awaitSuccess()
-        return pageListParse(response)
-    }
-
-    private fun pageListRequest(chapterUrl: String): Request {
-        val chapterId = chapterUrl.substringAfterLast("/").toInt()
-
-        val jsonPayload = buildJsonObject { put("ep_id", chapterId) }
-        val requestBody = jsonPayload.toString().toRequestBody(JSON_MEDIA_TYPE)
-
-        val newHeaders = headers
-            .newBuilder()
-            .add(CONTENT_LENGTH, requestBody.contentLength().toString())
-            .add(CONTENT_TYPE, requestBody.contentType().toString())
-            .set(REFERER, baseUrl + chapterUrl)
-            .build()
-
-        return POST(
-            "$baseUrl/$BASE_API_ENDPOINT/GetImageIndex?device=pc&platform=web",
-            headers = newHeaders,
-            body = requestBody,
-        )
-    }
-
-    private fun pageListParse(response: Response): List<Page> {
-        val result = with(json) { response.parseAs<BilibiliResultDto<BilibiliReader>>() }
-
-        if (result.code != 0) {
-            return emptyList()
-        }
-
-        return result.data!!.images
-            .mapIndexed { i, page -> Page(i, page.path, "") }
-    }
-
-    suspend fun getImageUrl(page: Page): String {
-        val response = client.newCall(imageUrlRequest(page)).awaitSuccess()
-        return imageUrlParse(response)
-    }
-
-    private fun imageUrlRequest(page: Page): Request {
-        val jsonPayload = buildJsonObject {
-            put("urls", buildJsonArray { add(page.url) }.toString())
-        }
-        val requestBody = jsonPayload.toString().toRequestBody(JSON_MEDIA_TYPE)
-
-        val newHeaders = headers.newBuilder()
-            .add(CONTENT_LENGTH, requestBody.contentLength().toString())
-            .add(CONTENT_TYPE, requestBody.contentType().toString())
-            .build()
-
-        return POST(
-            "$baseUrl/$BASE_API_ENDPOINT/ImageToken?device=pc&platform=web",
-            headers = newHeaders,
-            body = requestBody,
-        )
-    }
-
-    private fun imageUrlParse(response: Response): String {
-        val result = with(json) {
-            response.parseAs<BilibiliResultDto<List<BilibiliPageDto>>>()
-        }
-        val page = result.data!![0]
-
-        return "${page.url}?token=${page.token}"
-    }
 
     @Serializable
     data class BilibiliPageDto(
@@ -235,8 +148,8 @@ internal class BilibiliHandler(currentClient: OkHttpClient) {
     )
 
     companion object {
-        private const val BASE_API_ENDPOINT = "twirp/comic.v1.Comic"
+        internal const val BASE_API_ENDPOINT = "twirp/comic.v1.Comic"
         private const val ACCEPT_JSON = "application/json, text/plain, */*"
-        private val JSON_MEDIA_TYPE = "application/json;charset=UTF-8".toMediaType()
+        internal val JSON_MEDIA_TYPE = "application/json;charset=UTF-8".toMediaType()
     }
 }
