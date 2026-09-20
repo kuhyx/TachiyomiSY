@@ -182,7 +182,9 @@ style:
       - 'equals'
     excludeLabeled: false
     excludeReturnFromLambda: true
-    excludeGuardClauses: false
+    # Leading `if (…) return` guards are the idiomatic Kotlin early exit; extracting them only
+    # moves the return into a helper. Only the multi-exit body that follows is counted.
+    excludeGuardClauses: true
   SafeCast:
     active: true
   SerialVersionUIDInSerializableClass:
