@@ -74,3 +74,23 @@ internal class LibrarySelection {
         return state.copy(selection = newSelection)
     }
 }
+
+internal fun LibraryScreenModel.clearSelection() {
+    updateState { selection.clear(it) }
+}
+
+internal fun LibraryScreenModel.toggleSelection(category: Category, manga: LibraryManga) {
+    updateState { selection.toggle(it, category, manga) }
+}
+
+internal fun LibraryScreenModel.toggleRangeSelection(category: Category, manga: LibraryManga) {
+    updateState { selection.toggleRange(it, category, manga) }
+}
+
+internal fun LibraryScreenModel.selectAll() {
+    updateState { selection.selectAll(it) }
+}
+
+internal fun LibraryScreenModel.invertSelection() {
+    updateState { selection.invert(it) }
+}
