@@ -68,20 +68,22 @@ internal class MangaCoverScreenModel(
     }
 
     fun shareCover(context: Context) {
-        screenModelScope.launch {
-            try {
-                val uri = saveCoverInternal(context, temp = true) ?: return@launch
-                withUIContext {
-                    context.startActivity(uri.toShareIntent(context))
-                }
-            } catch (expected: Throwable) {
-                // Logged whatever the cause; the caller carries on.
-                logcat(LogPriority.ERROR, expected)
-                snackbarHostState.showSnackbar(
-                    context.stringResource(MR.strings.error_sharing_cover),
-                    withDismissAction = true,
-                )
+        screenModelScope.launch { doShareCover(context = context) }
+    }
+
+    private suspend fun doShareCover(context: Context) {
+        try {
+            val uri = saveCoverInternal(context, temp = true) ?: return
+            withUIContext {
+                context.startActivity(uri.toShareIntent(context))
             }
+        } catch (expected: Throwable) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected)
+            snackbarHostState.showSnackbar(
+                context.stringResource(MR.strings.error_sharing_cover),
+                withDismissAction = true,
+            )
         }
     }
 

@@ -56,34 +56,36 @@ internal fun HistoryScreenModel.addFavorite(mangaId: Long) {
 }
 
 internal fun HistoryScreenModel.addFavorite(manga: Manga) {
-    screenModelScope.launchIO {
-        // Move to default category if applicable
-        val categories = getCategories()
-        val defaultCategoryId = libraryPreferences.defaultCategory.get().toLong()
-        val defaultCategory = categories.find { it.id == defaultCategoryId }
+    screenModelScope.launchIO { doAddFavorite(manga = manga) }
+}
 
-        when {
-            // Default category set
-            defaultCategory != null -> {
-                val result = updateManga.awaitUpdateFavorite(manga.id, true)
-                if (!result) return@launchIO
-                moveMangaToCategory(manga.id, defaultCategory)
-            }
+private suspend fun HistoryScreenModel.doAddFavorite(manga: Manga) {
+    // Move to default category if applicable
+    val categories = getCategories()
+    val defaultCategoryId = libraryPreferences.defaultCategory.get().toLong()
+    val defaultCategory = categories.find { it.id == defaultCategoryId }
 
-            // Automatic 'Default' or no categories
-            defaultCategoryId == 0L || categories.isEmpty() -> {
-                val result = updateManga.awaitUpdateFavorite(manga.id, true)
-                if (!result) return@launchIO
-                moveMangaToCategory(manga.id, null)
-            }
-
-            // Choose a category
-            else -> {
-                showChangeCategoryDialog(manga)
-            }
+    when {
+        // Default category set
+        defaultCategory != null -> {
+            val result = updateManga.awaitUpdateFavorite(manga.id, true)
+            if (!result) return
+            moveMangaToCategory(manga.id, defaultCategory)
         }
 
-        // Sync with tracking services if applicable
-        addTracks.bindEnhancedTrackers(manga, sourceManager.getOrStub(manga.source))
+        // Automatic 'Default' or no categories
+        defaultCategoryId == 0L || categories.isEmpty() -> {
+            val result = updateManga.awaitUpdateFavorite(manga.id, true)
+            if (!result) return
+            moveMangaToCategory(manga.id, null)
+        }
+
+        // Choose a category
+        else -> {
+            showChangeCategoryDialog(manga)
+        }
     }
+
+    // Sync with tracking services if applicable
+    addTracks.bindEnhancedTrackers(manga, sourceManager.getOrStub(manga.source))
 }

@@ -9,16 +9,18 @@ import tachiyomi.domain.source.model.FeedSavedSearch
 import uy.kohesive.injekt.api.get
 
 internal fun FeedScreenModel.openAddDialog() {
-    screenModelScope.launchIO {
-        if (hasTooManyFeeds()) {
-            emit(Event.TooManyFeeds)
-            return@launchIO
-        }
-        updateState { state ->
-            state.copy(
-                dialog = Dialog.AddFeed(getEnabledSources()),
-            )
-        }
+    screenModelScope.launchIO { doOpenAddDialog() }
+}
+
+private suspend fun FeedScreenModel.doOpenAddDialog() {
+    if (hasTooManyFeeds()) {
+        emit(Event.TooManyFeeds)
+        return
+    }
+    updateState { state ->
+        state.copy(
+            dialog = Dialog.AddFeed(getEnabledSources()),
+        )
     }
 }
 

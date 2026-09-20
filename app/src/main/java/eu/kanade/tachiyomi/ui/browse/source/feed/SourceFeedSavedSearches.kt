@@ -37,22 +37,30 @@ internal fun SourceFeedScreenModel.onSavedSearch(
     onToast: (StringResource) -> Unit,
 ) {
     screenModelScope.launchIO {
-        if (search.filterList == null && state.value.filters.isNotEmpty()) {
-            withUIContext {
-                onToast(SYMR.strings.save_search_invalid)
-            }
-            return@launchIO
-        }
+        doOnSavedSearch(search = search, onBrowseClick = onBrowseClick, onToast = onToast)
+    }
+}
 
-        val allDefault = search.filterList != null && search.filterList == source.getFilterList()
-        dismissDialog()
-
-        if (!allDefault) {
-            onBrowseClick(
-                state.value.searchQuery?.nullIfBlank(),
-                search.id,
-            )
+private suspend fun SourceFeedScreenModel.doOnSavedSearch(
+    search: EXHSavedSearch,
+    onBrowseClick: (query: String?, searchId: Long) -> Unit,
+    onToast: (StringResource) -> Unit,
+) {
+    if (search.filterList == null && state.value.filters.isNotEmpty()) {
+        withUIContext {
+            onToast(SYMR.strings.save_search_invalid)
         }
+        return
+    }
+
+    val allDefault = search.filterList != null && search.filterList == source.getFilterList()
+    dismissDialog()
+
+    if (!allDefault) {
+        onBrowseClick(
+            state.value.searchQuery?.nullIfBlank(),
+            search.id,
+        )
     }
 }
 
@@ -60,21 +68,28 @@ internal fun SourceFeedScreenModel.onSavedSearchAddToFeed(
     search: EXHSavedSearch,
     onToast: (StringResource) -> Unit,
 ) {
-    screenModelScope.launchIO {
-        if (hasTooManyFeeds()) {
-            withUIContext {
-                onToast(SYMR.strings.too_many_in_feed)
-            }
-            return@launchIO
+    screenModelScope.launchIO { doOnSavedSearchAddToFeed(search = search, onToast = onToast) }
+}
+
+private suspend fun SourceFeedScreenModel.doOnSavedSearchAddToFeed(
+    search: EXHSavedSearch,
+    onToast: (StringResource) -> Unit,
+) {
+    if (hasTooManyFeeds()) {
+        withUIContext {
+            onToast(SYMR.strings.too_many_in_feed)
         }
-        openAddFeed(search.id, search.name)
+        return
     }
+    openAddFeed(search.id, search.name)
 }
 
 internal fun SourceFeedScreenModel.onMangaDexRandom(onRandomFound: (String) -> Unit) {
-    screenModelScope.launchIO {
-        val random = source.getMainSource<MangaDex>()?.fetchRandomMangaUrl()
-            ?: return@launchIO
-        onRandomFound(random)
-    }
+    screenModelScope.launchIO { doOnMangaDexRandom(onRandomFound = onRandomFound) }
+}
+
+private suspend fun SourceFeedScreenModel.doOnMangaDexRandom(onRandomFound: (String) -> Unit) {
+    val random = source.getMainSource<MangaDex>()?.fetchRandomMangaUrl()
+        ?: return
+    onRandomFound(random)
 }

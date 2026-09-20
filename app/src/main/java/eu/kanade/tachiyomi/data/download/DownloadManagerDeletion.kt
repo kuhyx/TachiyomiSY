@@ -19,22 +19,24 @@ import uy.kohesive.injekt.api.get
  * @param source the source of the chapters.
  */
 internal fun DownloadManager.deleteChapters(chapters: List<Chapter>, manga: Manga, source: Source) {
-    launchIO {
-        val filteredChapters = getChaptersToDelete(chapters, manga)
-        if (filteredChapters.isEmpty()) {
-            return@launchIO
-        }
+    launchIO { doDeleteChapters(chapters = chapters, manga = manga, source = source) }
+}
 
-        removeFromDownloadQueue(filteredChapters)
+private suspend fun DownloadManager.doDeleteChapters(chapters: List<Chapter>, manga: Manga, source: Source) {
+    val filteredChapters = getChaptersToDelete(chapters, manga)
+    if (filteredChapters.isEmpty()) {
+        return
+    }
 
-        val (mangaDir, chapterDirs) = provider.findChapterDirs(filteredChapters, manga, source)
-        chapterDirs.forEach { it.delete() }
-        cache.removeChapters(filteredChapters, manga)
+    removeFromDownloadQueue(filteredChapters)
 
-        // Delete manga directory if empty
-        if (mangaDir?.listFiles()?.isEmpty() == true) {
-            deleteManga(manga, source, removeQueued = false)
-        }
+    val (mangaDir, chapterDirs) = provider.findChapterDirs(filteredChapters, manga, source)
+    chapterDirs.forEach { it.delete() }
+    cache.removeChapters(filteredChapters, manga)
+
+    // Delete manga directory if empty
+    if (mangaDir?.listFiles()?.isEmpty() == true) {
+        deleteManga(manga, source, removeQueued = false)
     }
 }
 

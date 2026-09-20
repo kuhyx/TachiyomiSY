@@ -32,31 +32,33 @@ internal fun BrowseSourceScreenModel.onSavedSearch(
     search: EXHSavedSearch,
     onToast: (StringResource) -> Unit,
 ) {
-    screenModelScope.launchIO {
-        if (search.filterList == null && state.value.filters.isNotEmpty()) {
-            withUIContext {
-                onToast(SYMR.strings.save_search_invalid)
-            }
-            return@launchIO
+    screenModelScope.launchIO { doOnSavedSearch(search = search, onToast = onToast) }
+}
+
+private suspend fun BrowseSourceScreenModel.doOnSavedSearch(search: EXHSavedSearch, onToast: (StringResource) -> Unit) {
+    if (search.filterList == null && state.value.filters.isNotEmpty()) {
+        withUIContext {
+            onToast(SYMR.strings.save_search_invalid)
         }
+        return
+    }
 
-        val allDefault = search.filterList != null && search.filterList == source.getFilterList()
-        setDialog(null)
+    val allDefault = search.filterList != null && search.filterList == source.getFilterList()
+    setDialog(null)
 
-        val filters = search.filterList
-            ?.takeUnless { allDefault }
-            ?: source.getFilterList()
+    val filters = search.filterList
+        ?.takeUnless { allDefault }
+        ?: source.getFilterList()
 
-        updateState {
-            it.copy(
-                listing = Listing.Search(
-                    query = search.query,
-                    filters = filters,
-                ),
+    updateState {
+        it.copy(
+            listing = Listing.Search(
+                query = search.query,
                 filters = filters,
-                toolbarQuery = search.query,
-            )
-        }
+            ),
+            filters = filters,
+            toolbarQuery = search.query,
+        )
     }
 }
 
@@ -93,9 +95,11 @@ internal fun BrowseSourceScreenModel.deleteSearch(savedSearchId: Long) {
 }
 
 internal fun BrowseSourceScreenModel.onMangaDexRandom(onRandomFound: (String) -> Unit) {
-    screenModelScope.launchIO {
-        val random = source.getMainSource<MangaDex>()?.fetchRandomMangaUrl()
-            ?: return@launchIO
-        onRandomFound(random)
-    }
+    screenModelScope.launchIO { doOnMangaDexRandom(onRandomFound = onRandomFound) }
+}
+
+private suspend fun BrowseSourceScreenModel.doOnMangaDexRandom(onRandomFound: (String) -> Unit) {
+    val random = source.getMainSource<MangaDex>()?.fetchRandomMangaUrl()
+        ?: return
+    onRandomFound(random)
 }
