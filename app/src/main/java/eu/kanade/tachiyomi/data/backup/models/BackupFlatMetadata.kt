@@ -16,9 +16,9 @@ private const val BACKUP_FLAT_METADATA_SEARCH_TITLES = 3
 
 @Serializable
 internal data class BackupFlatMetadata(
-    @ProtoNumber(BACKUP_FLAT_METADATA_SEARCH_METADATA) var searchMetadata: BackupSearchMetadata,
-    @ProtoNumber(BACKUP_FLAT_METADATA_SEARCH_TAGS) var searchTags: List<BackupSearchTag> = emptyList(),
-    @ProtoNumber(BACKUP_FLAT_METADATA_SEARCH_TITLES) var searchTitles: List<BackupSearchTitle> = emptyList(),
+    @ProtoNumber(BACKUP_FLAT_METADATA_SEARCH_METADATA) val searchMetadata: BackupSearchMetadata,
+    @ProtoNumber(BACKUP_FLAT_METADATA_SEARCH_TAGS) val searchTags: List<BackupSearchTag> = emptyList(),
+    @ProtoNumber(BACKUP_FLAT_METADATA_SEARCH_TITLES) val searchTitles: List<BackupSearchTitle> = emptyList(),
 ) {
 
     companion object {

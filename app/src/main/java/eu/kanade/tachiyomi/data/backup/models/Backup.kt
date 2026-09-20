@@ -14,14 +14,14 @@ private const val BACKUP_BACKUP_SAVED_SEARCHES = 600
 @Serializable
 internal data class Backup(
     @ProtoNumber(BACKUP_BACKUP_MANGA) val backupManga: List<BackupManga>,
-    @ProtoNumber(BACKUP_BACKUP_CATEGORIES) var backupCategories: List<BackupCategory> = emptyList(),
+    @ProtoNumber(BACKUP_BACKUP_CATEGORIES) val backupCategories: List<BackupCategory> = emptyList(),
     // @ProtoNumber(100) var backupBrokenSources, legacy source model with non-compliant proto
     // number,
-    @ProtoNumber(BACKUP_BACKUP_SOURCES) var backupSources: List<BackupSource> = emptyList(),
-    @ProtoNumber(BACKUP_BACKUP_PREFERENCES) var backupPreferences: List<BackupPreference> = emptyList(),
-    @ProtoNumber(BACKUP_BACKUP_SOURCE_PREFERENCES) var backupSourcePreferences: List<BackupSourcePreferences> =
+    @ProtoNumber(BACKUP_BACKUP_SOURCES) val backupSources: List<BackupSource> = emptyList(),
+    @ProtoNumber(BACKUP_BACKUP_PREFERENCES) val backupPreferences: List<BackupPreference> = emptyList(),
+    @ProtoNumber(BACKUP_BACKUP_SOURCE_PREFERENCES) val backupSourcePreferences: List<BackupSourcePreferences> =
         emptyList(),
-    @ProtoNumber(BACKUP_BACKUP_EXTENSION_STORES) var backupExtensionStores: List<BackupExtensionStore> = emptyList(),
+    @ProtoNumber(BACKUP_BACKUP_EXTENSION_STORES) val backupExtensionStores: List<BackupExtensionStore> = emptyList(),
     // SY specific values
-    @ProtoNumber(BACKUP_BACKUP_SAVED_SEARCHES) var backupSavedSearches: List<BackupSavedSearch> = emptyList(),
+    @ProtoNumber(BACKUP_BACKUP_SAVED_SEARCHES) val backupSavedSearches: List<BackupSavedSearch> = emptyList(),
 )

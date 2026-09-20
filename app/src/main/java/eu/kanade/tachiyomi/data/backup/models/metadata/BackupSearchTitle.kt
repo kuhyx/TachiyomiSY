@@ -9,8 +9,8 @@ private const val BACKUP_SEARCH_TITLE_TYPE = 2
 
 @Serializable
 internal data class BackupSearchTitle(
-    @ProtoNumber(BACKUP_SEARCH_TITLE_TITLE) var title: String,
-    @ProtoNumber(BACKUP_SEARCH_TITLE_TYPE) var type: Int,
+    @ProtoNumber(BACKUP_SEARCH_TITLE_TITLE) val title: String,
+    @ProtoNumber(BACKUP_SEARCH_TITLE_TYPE) val type: Int,
 ) {
 
     companion object {

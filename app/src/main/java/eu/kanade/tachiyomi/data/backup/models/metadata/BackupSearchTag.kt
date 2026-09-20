@@ -10,9 +10,9 @@ private const val BACKUP_SEARCH_TAG_TYPE = 3
 
 @Serializable
 internal data class BackupSearchTag(
-    @ProtoNumber(BACKUP_SEARCH_TAG_NAMESPACE) var namespace: String? = null,
-    @ProtoNumber(BACKUP_SEARCH_TAG_NAME) var name: String,
-    @ProtoNumber(BACKUP_SEARCH_TAG_TYPE) var type: Int,
+    @ProtoNumber(BACKUP_SEARCH_TAG_NAMESPACE) val namespace: String? = null,
+    @ProtoNumber(BACKUP_SEARCH_TAG_NAME) val name: String,
+    @ProtoNumber(BACKUP_SEARCH_TAG_TYPE) val type: Int,
 ) {
 
     companion object {

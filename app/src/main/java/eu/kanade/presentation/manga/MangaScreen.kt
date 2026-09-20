@@ -584,10 +584,12 @@ private fun MangaScreenSmallImpl(
                         // SY -->
                         alwaysShowReadingProgress = state.alwaysShowReadingProgress,
                         // SY <--
-                        onChapterClicked = onChapterClicked,
-                        onDownloadChapter = onDownloadChapter,
-                        onChapterSelected = onChapterSelected,
-                        onChapterSwipe = onChapterSwipe,
+                        actions = ChapterRowActions(
+                            onChapterClicked = onChapterClicked,
+                            onDownloadChapter = onDownloadChapter,
+                            onChapterSelected = onChapterSelected,
+                            onChapterSwipe = onChapterSwipe,
+                        ),
                     )
                 }
             }
@@ -881,10 +883,12 @@ internal fun MangaScreenLargeImpl(
                                 // SY -->
                                 alwaysShowReadingProgress = state.alwaysShowReadingProgress,
                                 // SY <--
-                                onChapterClicked = onChapterClicked,
-                                onDownloadChapter = onDownloadChapter,
-                                onChapterSelected = onChapterSelected,
-                                onChapterSwipe = onChapterSwipe,
+                                actions = ChapterRowActions(
+                                    onChapterClicked = onChapterClicked,
+                                    onDownloadChapter = onDownloadChapter,
+                                    onChapterSelected = onChapterSelected,
+                                    onChapterSwipe = onChapterSwipe,
+                                ),
                             )
                         }
                     }
@@ -936,6 +940,14 @@ private fun SharedMangaBottomActionMenu(
     )
 }
 
+/** What a chapter row does when tapped, downloaded, selected or swiped. */
+private data class ChapterRowActions(
+    val onChapterClicked: (Chapter) -> Unit,
+    val onDownloadChapter: ((List<ChapterList.Item>, ChapterDownloadAction) -> Unit)?,
+    val onChapterSelected: (ChapterList.Item, Boolean, Boolean) -> Unit,
+    val onChapterSwipe: (ChapterList.Item, LibraryPreferences.ChapterSwipeAction) -> Unit,
+)
+
 private fun LazyListScope.sharedChapterItems(
     manga: Manga,
     mergedData: MergedMangaData?,
@@ -946,10 +958,7 @@ private fun LazyListScope.sharedChapterItems(
     // SY -->
     alwaysShowReadingProgress: Boolean,
     // SY <--
-    onChapterClicked: (Chapter) -> Unit,
-    onDownloadChapter: ((List<ChapterList.Item>, ChapterDownloadAction) -> Unit)?,
-    onChapterSelected: (ChapterList.Item, Boolean, Boolean) -> Unit,
-    onChapterSwipe: (ChapterList.Item, LibraryPreferences.ChapterSwipeAction) -> Unit,
+    actions: ChapterRowActions,
 ) {
     items(
         items = chapters,
@@ -1015,22 +1024,22 @@ private fun LazyListScope.sharedChapterItems(
                     chapterSwipeStartAction = chapterSwipeStartAction,
                     chapterSwipeEndAction = chapterSwipeEndAction,
                     onLongClick = {
-                        onChapterSelected(item, !item.selected, true)
+                        actions.onChapterSelected(item, !item.selected, true)
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     },
                     onClick = {
                         onChapterItemClick(
                             chapterItem = item,
                             isAnyChapterSelected = isAnyChapterSelected,
-                            onToggleSelection = { onChapterSelected(item, !item.selected, false) },
-                            onChapterClicked = onChapterClicked,
+                            onToggleSelection = { actions.onChapterSelected(item, !item.selected, false) },
+                            onChapterClicked = actions.onChapterClicked,
                         )
                     },
-                    onDownloadClick = onDownloadChapter?.let { download ->
+                    onDownloadClick = actions.onDownloadChapter?.let { download ->
                         { action: ChapterDownloadAction -> download(listOf(item), action) }
                     },
                     onChapterSwipe = {
-                        onChapterSwipe(item, it)
+                        actions.onChapterSwipe(item, it)
                     },
                 )
             }

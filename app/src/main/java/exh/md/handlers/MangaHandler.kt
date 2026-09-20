@@ -21,15 +21,7 @@ internal class MangaHandler(
     private val service: MangaDexService,
     private val apiMangaParser: ApiMangaParser,
 ) {
-    suspend fun getMangaDetails(
-        manga: SManga,
-        sourceId: Long,
-        coverQuality: String,
-        tryUsingFirstVolumeCover: Boolean,
-        altTitlesInDesc: Boolean,
-        finalChapterInDesc: Boolean,
-        preferExtensionLangTitle: Boolean,
-    ): SManga {
+    suspend fun getMangaDetails(manga: SManga, sourceId: Long, preferences: MangaDetailsPreferences): SManga {
         return coroutineScope {
             val mangaId = MdUtil.getMangaId(manga.url)
             val response = async(Dispatchers.IO) { service.viewManga(mangaId) }
@@ -39,7 +31,7 @@ internal class MangaHandler(
                     kotlin.runCatching { service.mangasRating(mangaId) }.getOrNull()?.statistics?.get(mangaId)
                 }
             val responseData = response.await()
-            val coverFileName = if (tryUsingFirstVolumeCover) {
+            val coverFileName = if (preferences.tryUsingFirstVolumeCover) {
                 async(Dispatchers.IO) {
                     service.fetchFirstVolumeCover(responseData)
                 }
@@ -50,13 +42,8 @@ internal class MangaHandler(
                 manga,
                 sourceId,
                 responseData,
-                simpleChapters.await(),
-                statistics.await(),
-                coverFileName?.await(),
-                coverQuality,
-                altTitlesInDesc,
-                finalChapterInDesc,
-                preferExtensionLangTitle,
+                MangaDetailsExtras(simpleChapters.await(), statistics.await(), coverFileName?.await()),
+                preferences,
             )
         }
     }
@@ -106,19 +93,11 @@ internal class MangaHandler(
         }
     }
 
-    suspend fun getMangaMetadata(
-        track: Track,
-        sourceId: Long,
-        coverQuality: String,
-        tryUsingFirstVolumeCover: Boolean,
-        altTitlesInDesc: Boolean,
-        finalChapterInDesc: Boolean,
-        preferExtensionLangTitle: Boolean,
-    ): SManga {
+    suspend fun getMangaMetadata(track: Track, sourceId: Long, preferences: MangaDetailsPreferences): SManga {
         return withIOContext {
             val mangaId = MdUtil.getMangaId(track.trackingUrl)
             val response = service.viewManga(mangaId)
-            val coverFileName = if (tryUsingFirstVolumeCover) {
+            val coverFileName = if (preferences.tryUsingFirstVolumeCover) {
                 service.fetchFirstVolumeCover(response)
             } else {
                 null
@@ -129,13 +108,8 @@ internal class MangaHandler(
                 },
                 sourceId,
                 response,
-                emptyList(),
-                null,
-                coverFileName,
-                coverQuality,
-                altTitlesInDesc,
-                finalChapterInDesc,
-                preferExtensionLangTitle,
+                MangaDetailsExtras(emptyList(), null, coverFileName),
+                preferences,
             )
         }
     }

@@ -11,9 +11,9 @@ private const val BACKUP_HISTORY_READ_DURATION = 3
 
 @Serializable
 internal data class BackupHistory(
-    @ProtoNumber(BACKUP_HISTORY_URL) var url: String,
-    @ProtoNumber(BACKUP_HISTORY_LAST_READ) var lastRead: Long,
-    @ProtoNumber(BACKUP_HISTORY_READ_DURATION) var readDuration: Long = 0,
+    @ProtoNumber(BACKUP_HISTORY_URL) val url: String,
+    @ProtoNumber(BACKUP_HISTORY_LAST_READ) val lastRead: Long,
+    @ProtoNumber(BACKUP_HISTORY_READ_DURATION) val readDuration: Long = 0,
 )
 
 internal fun BackupHistory.getHistoryImpl(): History {

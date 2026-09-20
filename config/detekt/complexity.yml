@@ -47,6 +47,12 @@ complexity:
     # ("prefer parameters over configuration objects"); only the required ones count.
     ignoreDefaultParameters: true
     ignoreDataClasses: true
+    # ... and their required callbacks stay parameters too: bundling them into a data class
+    # collapses per-parameter skipping into one invalidation scope and adds generated
+    # equals/hashCode/copy on lambda holders. Decided 2026-09-20 (parameter objects stay the
+    # rule for everything else).
+    ignoreAnnotated:
+      - 'Composable'
     ignoreAnnotatedParameter: []
   MethodOverloading:
     active: true

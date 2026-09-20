@@ -104,26 +104,22 @@ internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
         }
 
     fun loadOAuth() {
-        val oauth = OAuth()
-        for (id in 1..KAVITA_SOURCES) {
-            val authentication = oauth.authentications[id - 1]
-            val sourceId = sourceIdOf(name = "kavita_$id", lang = "all", versionId = 1)
-            val preferences = (sourceManager.get(sourceId) as ConfigurableSource).sourcePreferences()
+        authentications = OAuth((1..KAVITA_SOURCES).map(::authenticate))
+    }
 
-            val prefApiUrl = preferences.getString("APIURL", "").orEmpty()
-            val prefApiKey = preferences.getString("APIKEY", "").orEmpty()
-            // Unconfigured or unreachable sources are skipped.
-            val token = if (prefApiUrl.isEmpty() || prefApiKey.isEmpty()) {
-                null
-            } else {
-                api.getNewToken(apiUrl = prefApiUrl, apiKey = prefApiKey)
-            }
-            if (!token.isNullOrEmpty()) {
-                authentication.apiUrl = prefApiUrl
-                authentication.jwtToken = token
-            }
+    // The auth for one Kavita source: unconfigured or unreachable sources keep an empty token.
+    private fun authenticate(id: Int): SourceAuth {
+        val sourceId = sourceIdOf(name = "kavita_$id", lang = "all", versionId = 1)
+        val preferences = (sourceManager.get(sourceId) as ConfigurableSource).sourcePreferences()
+
+        val prefApiUrl = preferences.getString("APIURL", "").orEmpty()
+        val prefApiKey = preferences.getString("APIKEY", "").orEmpty()
+        val token = if (prefApiUrl.isEmpty() || prefApiKey.isEmpty()) {
+            null
+        } else {
+            api.getNewToken(apiUrl = prefApiUrl, apiKey = prefApiKey)
         }
-        authentications = oauth
+        return if (token.isNullOrEmpty()) SourceAuth(sourceId = id) else SourceAuth(id, prefApiUrl, token)
     }
 
     companion object {

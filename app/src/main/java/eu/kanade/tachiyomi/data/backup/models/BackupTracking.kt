@@ -21,26 +21,26 @@ private const val BACKUP_TRACKING_MEDIA_ID = 100
 @Serializable
 internal data class BackupTracking(
     // in 1.x some of these values have different types or names
-    @ProtoNumber(BACKUP_TRACKING_SYNC_ID) var syncId: Int,
+    @ProtoNumber(BACKUP_TRACKING_SYNC_ID) val syncId: Int,
     // LibraryId is not null in 1.x
-    @ProtoNumber(BACKUP_TRACKING_LIBRARY_ID) var libraryId: Long,
+    @ProtoNumber(BACKUP_TRACKING_LIBRARY_ID) val libraryId: Long,
     @Deprecated("Use mediaId instead", level = DeprecationLevel.WARNING)
     @ProtoNumber(BACKUP_TRACKING_MEDIA_ID_INT)
-    var mediaIdInt: Int = 0,
+    val mediaIdInt: Int = 0,
     // trackingUrl is called mediaUrl in 1.x
-    @ProtoNumber(BACKUP_TRACKING_TRACKING_URL) var trackingUrl: String = "",
-    @ProtoNumber(BACKUP_TRACKING_TITLE) var title: String = "",
+    @ProtoNumber(BACKUP_TRACKING_TRACKING_URL) val trackingUrl: String = "",
+    @ProtoNumber(BACKUP_TRACKING_TITLE) val title: String = "",
     // lastChapterRead is called last read, and it has been changed to a float in 1.x
-    @ProtoNumber(BACKUP_TRACKING_LAST_CHAPTER_READ) var lastChapterRead: Float = 0F,
-    @ProtoNumber(BACKUP_TRACKING_TOTAL_CHAPTERS) var totalChapters: Int = 0,
-    @ProtoNumber(BACKUP_TRACKING_SCORE) var score: Float = 0F,
-    @ProtoNumber(BACKUP_TRACKING_STATUS) var status: Int = 0,
+    @ProtoNumber(BACKUP_TRACKING_LAST_CHAPTER_READ) val lastChapterRead: Float = 0F,
+    @ProtoNumber(BACKUP_TRACKING_TOTAL_CHAPTERS) val totalChapters: Int = 0,
+    @ProtoNumber(BACKUP_TRACKING_SCORE) val score: Float = 0F,
+    @ProtoNumber(BACKUP_TRACKING_STATUS) val status: Int = 0,
     // startedReadingDate is called startReadTime in 1.x
-    @ProtoNumber(BACKUP_TRACKING_STARTED_READING_DATE) var startedReadingDate: Long = 0,
+    @ProtoNumber(BACKUP_TRACKING_STARTED_READING_DATE) val startedReadingDate: Long = 0,
     // finishedReadingDate is called endReadTime in 1.x
-    @ProtoNumber(BACKUP_TRACKING_FINISHED_READING_DATE) var finishedReadingDate: Long = 0,
-    @ProtoNumber(BACKUP_TRACKING_PRIVATE) var private: Boolean = false,
-    @ProtoNumber(BACKUP_TRACKING_MEDIA_ID) var mediaId: Long = 0,
+    @ProtoNumber(BACKUP_TRACKING_FINISHED_READING_DATE) val finishedReadingDate: Long = 0,
+    @ProtoNumber(BACKUP_TRACKING_PRIVATE) val private: Boolean = false,
+    @ProtoNumber(BACKUP_TRACKING_MEDIA_ID) val mediaId: Long = 0,
 )
 
 @Suppress("DEPRECATION")

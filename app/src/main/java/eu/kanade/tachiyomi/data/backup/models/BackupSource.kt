@@ -8,6 +8,6 @@ private const val BACKUP_SOURCE_SOURCE_ID = 2
 
 @Serializable
 internal data class BackupSource(
-    @ProtoNumber(BACKUP_SOURCE_NAME) var name: String = "",
-    @ProtoNumber(BACKUP_SOURCE_SOURCE_ID) var sourceId: Long,
+    @ProtoNumber(BACKUP_SOURCE_NAME) val name: String = "",
+    @ProtoNumber(BACKUP_SOURCE_SOURCE_ID) val sourceId: Long,
 )

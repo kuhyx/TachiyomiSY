@@ -168,10 +168,10 @@ internal class EnhancedFilePrinter internal constructor(
     }
 
     private data class LogItem(
-        var timeMillis: Long,
-        var level: Int,
-        var tag: String,
-        var msg: String,
+        val timeMillis: Long,
+        val level: Int,
+        val tag: String,
+        val msg: String,
     )
 
     /**

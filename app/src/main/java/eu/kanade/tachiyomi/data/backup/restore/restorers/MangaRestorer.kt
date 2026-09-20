@@ -95,20 +95,7 @@ internal class MangaRestorer(
                 restoreExistingManga(manga, dbManga)
             }
 
-            restoreMangaDetails(
-                manga = restoredManga,
-                chapters = backupManga.chapters,
-                categories = backupManga.categories,
-                backupCategories = backupCategories,
-                history = backupManga.history,
-                tracks = backupManga.tracking,
-                excludedScanlators = backupManga.excludedScanlators,
-                // SY -->
-                mergedMangaReferences = backupManga.mergedMangaReferences,
-                flatMetadata = backupManga.flatMetadata,
-                customManga = backupManga.getCustomMangaInfo(),
-                // SY <--
-            )
+            restoreMangaDetails(restoredManga, backupManga, backupCategories)
 
             if (isSync) {
                 database.mangasQueries.resetIsSyncing()
@@ -322,30 +309,22 @@ internal class MangaRestorer(
             .awaitAsOne()
     }
 
+    // Restores everything the backup entry carries besides the manga row itself.
     private suspend fun restoreMangaDetails(
         manga: Manga,
-        chapters: List<BackupChapter>,
-        categories: List<Long>,
+        backupManga: BackupManga,
         backupCategories: List<BackupCategory>,
-        history: List<BackupHistory>,
-        tracks: List<BackupTracking>,
-        excludedScanlators: List<String>,
-        // SY -->
-        mergedMangaReferences: List<BackupMergedMangaReference>,
-        flatMetadata: BackupFlatMetadata?,
-        customManga: CustomMangaInfo?,
-        // SY <--
     ): Manga {
-        restoreCategories(manga, categories, backupCategories)
-        restoreChapters(manga, chapters)
-        restoreTracking(manga, tracks)
-        restoreHistory(manga, history)
-        restoreExcludedScanlators(manga, excludedScanlators)
+        restoreCategories(manga, backupManga.categories, backupCategories)
+        restoreChapters(manga, backupManga.chapters)
+        restoreTracking(manga, backupManga.tracking)
+        restoreHistory(manga, backupManga.history)
+        restoreExcludedScanlators(manga, backupManga.excludedScanlators)
         updateManga.awaitUpdateFetchInterval(manga, now, currentFetchWindow)
         // SY -->
-        restoreMergedReferencesFor(manga.id, mergedMangaReferences)
-        flatMetadata?.let { restoreFlatMetadata(manga.id, it) }
-        restoreEditedInfo(customManga?.copy(id = manga.id))
+        restoreMergedReferencesFor(manga.id, backupManga.mergedMangaReferences)
+        backupManga.flatMetadata?.let { restoreFlatMetadata(manga.id, it) }
+        restoreEditedInfo(backupManga.getCustomMangaInfo()?.copy(id = manga.id))
         // SY <--
 
         return manga

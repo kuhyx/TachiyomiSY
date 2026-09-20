@@ -81,7 +81,7 @@ internal class OAuth(
 }
 
 internal data class SourceAuth(
-    var sourceId: Int,
-    var apiUrl: String = "",
-    var jwtToken: String = "",
+    val sourceId: Int,
+    val apiUrl: String = "",
+    val jwtToken: String = "",
 )

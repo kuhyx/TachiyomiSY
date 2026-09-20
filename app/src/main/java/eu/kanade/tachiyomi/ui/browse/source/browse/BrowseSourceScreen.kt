@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -81,9 +82,9 @@ internal data class BrowseSourceScreen(
     // SY <--
 ) : Screen(), AssistContentScreen {
 
-    private var assistUrl: String? = null
+    private val assistUrl = mutableStateOf<String?>(null)
 
-    override fun onProvideAssistUrl() = assistUrl
+    override fun onProvideAssistUrl() = assistUrl.value
 
     @Composable
     override fun Content() {
@@ -145,7 +146,7 @@ internal data class BrowseSourceScreen(
         }
 
         LaunchedEffect(screenModel.source) {
-            assistUrl = (screenModel.source as? HttpSource)?.getHomeUrl()
+            assistUrl.value = (screenModel.source as? HttpSource)?.getHomeUrl()
         }
 
         Scaffold(

@@ -136,7 +136,7 @@ internal class Downloader(
         }
 
         val pending = queueState.value.filter { it.status != Download.State.DOWNLOADED }
-        pending.forEach { if (it.status != Download.State.QUEUE) it.status = Download.State.QUEUE }
+        pending.forEach { if (it.status != Download.State.QUEUE) it.transition(Download.State.QUEUE) }
 
         isPaused = false
 
@@ -152,7 +152,7 @@ internal class Downloader(
         cancelDownloaderJob()
         queueState.value
             .filter { it.status == Download.State.DOWNLOADING }
-            .forEach { it.status = Download.State.ERROR }
+            .forEach { it.transition(Download.State.ERROR) }
 
         if (reason != null) {
             notifier.onWarning(reason)
@@ -177,7 +177,7 @@ internal class Downloader(
         cancelDownloaderJob()
         queueState.value
             .filter { it.status == Download.State.DOWNLOADING }
-            .forEach { it.status = Download.State.QUEUE }
+            .forEach { it.transition(Download.State.QUEUE) }
         isPaused = true
     }
 
@@ -333,14 +333,14 @@ internal class Downloader(
     private suspend fun downloadChapter(download: Download) {
         val mangaDir =
             provider.getMangaDir(/* SY --> */ download.manga.ogTitle /* SY <-- */, download.source).getOrElse { e ->
-                download.status = Download.State.ERROR
+                download.transition(Download.State.ERROR)
                 notifier.onError(e.message, download.chapter.name, download.manga.title, download.manga.id)
                 return
             }
 
         val availSpace = DiskUtil.getAvailableStorageSpace(mangaDir)
         if (availSpace != -1L && availSpace < MIN_DISK_SPACE) {
-            download.status = Download.State.ERROR
+            download.transition(Download.State.ERROR)
             notifier.onError(
                 context.stringResource(MR.strings.download_insufficient_space),
                 download.chapter.name,
@@ -378,7 +378,7 @@ internal class Downloader(
                 DataSaver.NoOp
             }
 
-            download.status = Download.State.DOWNLOADING
+            download.transition(Download.State.DOWNLOADING)
 
             // Start downloading images, consider we can have downloaded images already
             pageList.asFlow().flatMapMerge(concurrency = downloadPreferences.parallelPageLimit.get()) { page ->
@@ -407,7 +407,7 @@ internal class Downloader(
             // Do after download completes
 
             if (!isDownloadSuccessful(download, tmpDir)) {
-                download.status = Download.State.ERROR
+                download.transition(Download.State.ERROR)
                 return
             }
 
@@ -428,14 +428,14 @@ internal class Downloader(
 
             DiskUtil.createNoMediaFile(tmpDir, context)
 
-            download.status = Download.State.DOWNLOADED
+            download.transition(Download.State.DOWNLOADED)
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (expected: Throwable) {
             // Logged whatever the cause; the caller carries on.
             // If the page list threw, it will resume here
             logcat(LogPriority.ERROR, expected)
-            download.status = Download.State.ERROR
+            download.transition(Download.State.ERROR)
             notifier.onError(expected.message, download.chapter.name, download.manga.title, download.manga.id)
         }
     }
@@ -683,7 +683,7 @@ internal class Downloader(
     private fun addAllToQueue(downloads: List<Download>) {
         _queueState.update {
             downloads.forEach { download ->
-                download.status = Download.State.QUEUE
+                download.transition(Download.State.QUEUE)
             }
             store.addAll(downloads)
             it + downloads
@@ -694,7 +694,7 @@ internal class Downloader(
         _queueState.update {
             store.remove(download)
             if (download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE) {
-                download.status = Download.State.NOT_DOWNLOADED
+                download.transition(Download.State.NOT_DOWNLOADED)
             }
             it - download
         }
@@ -706,7 +706,7 @@ internal class Downloader(
             store.removeAll(downloads)
             downloads.forEach { download ->
                 if (download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE) {
-                    download.status = Download.State.NOT_DOWNLOADED
+                    download.transition(Download.State.NOT_DOWNLOADED)
                 }
             }
             queue - downloads
@@ -726,7 +726,7 @@ internal class Downloader(
         _queueState.update {
             it.forEach { download ->
                 if (download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE) {
-                    download.status = Download.State.NOT_DOWNLOADED
+                    download.transition(Download.State.NOT_DOWNLOADED)
                 }
             }
             store.clear()

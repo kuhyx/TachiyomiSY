@@ -28,6 +28,8 @@ import exh.md.handlers.AzukiHandler
 import exh.md.handlers.BilibiliHandler
 import exh.md.handlers.ComikeyHandler
 import exh.md.handlers.FollowsHandler
+import exh.md.handlers.MangaDetailsExtras
+import exh.md.handlers.MangaDetailsPreferences
 import exh.md.handlers.MangaHandler
 import exh.md.handlers.MangaHotHandler
 import exh.md.handlers.MangaPlusHandler
@@ -213,14 +215,14 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> = runAsObservable { getMangaDetails(manga) }
 
     /** The SY details for [manga] from the MangaDex API, with this source's cover and title preferences. */
-    suspend fun getMangaDetails(manga: SManga): SManga = mangaHandler.getMangaDetails(
-        manga,
-        id,
-        coverQuality(),
-        tryUsingFirstVolumeCover(),
-        altTitlesInDesc(),
-        finalChapterInDesc(),
-        preferExtensionLangTitle(),
+    suspend fun getMangaDetails(manga: SManga): SManga = mangaHandler.getMangaDetails(manga, id, detailsPreferences())
+
+    private fun detailsPreferences() = MangaDetailsPreferences(
+        coverQuality = coverQuality(),
+        tryUsingFirstVolumeCover = tryUsingFirstVolumeCover(),
+        altTitlesInDesc = altTitlesInDesc(),
+        finalChapterInDesc = finalChapterInDesc(),
+        preferExtensionLangTitle = preferExtensionLangTitle(),
     )
 
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
@@ -257,13 +259,8 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
         apiMangaParser.parseIntoMetadata(
             metadata,
             input.first,
-            input.second,
-            input.third,
-            null,
-            coverQuality(),
-            altTitlesInDesc(),
-            finalChapterInDesc(),
-            preferExtensionLangTitle(),
+            MangaDetailsExtras(input.second, input.third, coverFileName = null),
+            detailsPreferences(),
         )
     }
 
@@ -302,17 +299,7 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
 
     suspend fun getMangaRelated(manga: SManga): MetadataMangasPage = similarHandler.getRelated(manga)
 
-    suspend fun getMangaMetadata(track: Track): SManga {
-        return mangaHandler.getMangaMetadata(
-            track,
-            id,
-            coverQuality(),
-            tryUsingFirstVolumeCover(),
-            altTitlesInDesc(),
-            finalChapterInDesc(),
-            preferExtensionLangTitle(),
-        )
-    }
+    suspend fun getMangaMetadata(track: Track): SManga = mangaHandler.getMangaMetadata(track, id, detailsPreferences())
 
     companion object {
         private const val dataSaverPref = "dataSaverV5"

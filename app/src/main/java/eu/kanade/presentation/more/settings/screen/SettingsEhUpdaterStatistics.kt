@@ -97,63 +97,27 @@ internal fun UpdaterStatisticsDialog(
 }
 
 private fun getRelativeTimeFromNow(then: Duration): RelativeTime {
-    val now = System.currentTimeMillis().milliseconds
-    var period: Duration = now - then
-    val relativeTime = RelativeTime()
-    while (period > 0.milliseconds) {
-        when {
-            period >= DAYS_PER_YEAR.days -> {
-                (period.inWholeDays / DAYS_PER_YEAR).let {
-                    relativeTime.years = it
-                    period -= (it * DAYS_PER_YEAR).days
-                }
-                continue
-            }
-            period >= DAYS_PER_MONTH.days -> {
-                (period.inWholeDays / DAYS_PER_MONTH).let {
-                    relativeTime.months = it
-                    period -= (it * DAYS_PER_MONTH).days
-                }
-            }
-            period >= DAYS_PER_WEEK.days -> {
-                (period.inWholeDays / DAYS_PER_WEEK).let {
-                    relativeTime.weeks = it
-                    period -= (it * DAYS_PER_WEEK).days
-                }
-            }
-            period >= 1.days -> {
-                period.inWholeDays.let {
-                    relativeTime.days = it
-                    period -= it.days
-                }
-            }
-            period >= 1.hours -> {
-                period.inWholeHours.let {
-                    relativeTime.hours = it
-                    period -= it.hours
-                }
-            }
-            period >= 1.minutes -> {
-                period.inWholeMinutes.let {
-                    relativeTime.minutes = it
-                    period -= it.minutes
-                }
-            }
-            period >= 1.seconds -> {
-                period.inWholeSeconds.let {
-                    relativeTime.seconds = it
-                    period -= it.seconds
-                }
-            }
-            period >= 1.milliseconds -> {
-                period.inWholeMilliseconds.let {
-                    relativeTime.milliseconds = it
-                }
-                period = Duration.ZERO
-            }
-        }
+    val remainder = PeriodRemainder(System.currentTimeMillis().milliseconds - then)
+    return RelativeTime(
+        years = remainder.take(DAYS_PER_YEAR.days),
+        months = remainder.take(DAYS_PER_MONTH.days),
+        weeks = remainder.take(DAYS_PER_WEEK.days),
+        days = remainder.take(1.days),
+        hours = remainder.take(1.hours),
+        minutes = remainder.take(1.minutes),
+        seconds = remainder.take(1.seconds),
+        milliseconds = remainder.take(1.milliseconds),
+    )
+}
+
+/** What is left of a period as its units are peeled off, largest first. */
+private class PeriodRemainder(private var period: Duration) {
+    /** How many whole [unit]s fit, taken off the remainder; null when none do. */
+    fun take(unit: Duration): Long? {
+        val count = (period / unit).toLong().takeIf { it > 0 } ?: return null
+        period -= unit * count.toInt()
+        return count
     }
-    return relativeTime
 }
 
 private fun getRelativeTimeString(relativeTime: RelativeTime, context: Context): String {
@@ -174,14 +138,14 @@ private fun getRelativeTimeString(relativeTime: RelativeTime, context: Context):
 }
 
 internal data class RelativeTime(
-    var years: Long? = null,
-    var months: Long? = null,
-    var weeks: Long? = null,
-    var days: Long? = null,
-    var hours: Long? = null,
-    var minutes: Long? = null,
-    var seconds: Long? = null,
-    var milliseconds: Long? = null,
+    val years: Long? = null,
+    val months: Long? = null,
+    val weeks: Long? = null,
+    val days: Long? = null,
+    val hours: Long? = null,
+    val minutes: Long? = null,
+    val seconds: Long? = null,
+    val milliseconds: Long? = null,
 )
 
 @Composable

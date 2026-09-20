@@ -6,7 +6,6 @@ import exh.log.xLogE
 import exh.md.dto.ChapterDataDto
 import exh.md.dto.ChapterDto
 import exh.md.dto.MangaDto
-import exh.md.dto.StatisticsMangaDto
 import exh.md.utils.MdConstants
 import exh.md.utils.MdUtil
 import exh.md.utils.asMdMap
@@ -38,13 +37,8 @@ internal class ApiMangaParser(
         manga: SManga,
         sourceId: Long,
         input: MangaDto,
-        simpleChapters: List<String>,
-        statistics: StatisticsMangaDto?,
-        coverFileName: String?,
-        coverQuality: String,
-        altTitlesInDesc: Boolean,
-        finalChapterInDesc: Boolean,
-        preferExtensionLangTitle: Boolean,
+        extras: MangaDetailsExtras,
+        preferences: MangaDetailsPreferences,
     ): SManga {
         val mangaId = getManga.await(manga.url, sourceId)?.id
         val metadata = if (mangaId != null) {
@@ -54,17 +48,7 @@ internal class ApiMangaParser(
             newMetaInstance()
         }
 
-        parseIntoMetadata(
-            metadata,
-            input,
-            simpleChapters,
-            statistics,
-            coverFileName,
-            coverQuality,
-            altTitlesInDesc,
-            finalChapterInDesc,
-            preferExtensionLangTitle,
-        )
+        parseIntoMetadata(metadata, input, extras, preferences)
         if (mangaId != null) {
             metadata.mangaId = mangaId
             insertFlatMetadata.await(metadata.flatten())
@@ -76,14 +60,14 @@ internal class ApiMangaParser(
     fun parseIntoMetadata(
         metadata: MangaDexSearchMetadata,
         mangaDto: MangaDto,
-        simpleChapters: List<String>,
-        statistics: StatisticsMangaDto?,
-        coverFileName: String?,
-        coverQuality: String,
-        altTitlesInDesc: Boolean,
-        finalChapterInDesc: Boolean,
-        preferExtensionLangTitle: Boolean,
+        extras: MangaDetailsExtras,
+        preferences: MangaDetailsPreferences,
     ) {
+        val (simpleChapters, statistics, coverFileName) = extras
+        val coverQuality = preferences.coverQuality
+        val altTitlesInDesc = preferences.altTitlesInDesc
+        val finalChapterInDesc = preferences.finalChapterInDesc
+        val preferExtensionLangTitle = preferences.preferExtensionLangTitle
         with(metadata) {
             try {
                 val mangaAttributesDto = mangaDto.data.attributes

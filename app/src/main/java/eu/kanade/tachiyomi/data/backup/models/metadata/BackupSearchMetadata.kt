@@ -11,10 +11,10 @@ private const val BACKUP_SEARCH_METADATA_EXTRA_VERSION = 4
 
 @Serializable
 internal data class BackupSearchMetadata(
-    @ProtoNumber(BACKUP_SEARCH_METADATA_UPLOADER) var uploader: String? = null,
-    @ProtoNumber(BACKUP_SEARCH_METADATA_EXTRA) var extra: String,
-    @ProtoNumber(BACKUP_SEARCH_METADATA_INDEXED_EXTRA) var indexedExtra: String? = null,
-    @ProtoNumber(BACKUP_SEARCH_METADATA_EXTRA_VERSION) var extraVersion: Int,
+    @ProtoNumber(BACKUP_SEARCH_METADATA_UPLOADER) val uploader: String? = null,
+    @ProtoNumber(BACKUP_SEARCH_METADATA_EXTRA) val extra: String,
+    @ProtoNumber(BACKUP_SEARCH_METADATA_INDEXED_EXTRA) val indexedExtra: String? = null,
+    @ProtoNumber(BACKUP_SEARCH_METADATA_EXTRA_VERSION) val extraVersion: Int,
 ) {
 
     companion object {

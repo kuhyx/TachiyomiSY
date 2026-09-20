@@ -18,14 +18,14 @@ private const val BACKUP_MERGED_MANGA_REFERENCE_MANGA_SOURCE_ID = 8
 
 @Serializable
 internal data class BackupMergedMangaReference(
-    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_IS_INFO_MANGA) var isInfoManga: Boolean,
-    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_GET_CHAPTER_UPDATES) var getChapterUpdates: Boolean,
-    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_CHAPTER_SORT_MODE) var chapterSortMode: Int,
-    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_CHAPTER_PRIORITY) var chapterPriority: Int,
-    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_DOWNLOAD_CHAPTERS) var downloadChapters: Boolean,
-    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_MERGE_URL) var mergeUrl: String,
-    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_MANGA_URL) var mangaUrl: String,
-    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_MANGA_SOURCE_ID) var mangaSourceId: Long,
+    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_IS_INFO_MANGA) val isInfoManga: Boolean,
+    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_GET_CHAPTER_UPDATES) val getChapterUpdates: Boolean,
+    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_CHAPTER_SORT_MODE) val chapterSortMode: Int,
+    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_CHAPTER_PRIORITY) val chapterPriority: Int,
+    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_DOWNLOAD_CHAPTERS) val downloadChapters: Boolean,
+    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_MERGE_URL) val mergeUrl: String,
+    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_MANGA_URL) val mangaUrl: String,
+    @ProtoNumber(BACKUP_MERGED_MANGA_REFERENCE_MANGA_SOURCE_ID) val mangaSourceId: Long,
 )
 
 internal fun BackupMergedMangaReference.getMergedMangaReference(): MergedMangaReference {

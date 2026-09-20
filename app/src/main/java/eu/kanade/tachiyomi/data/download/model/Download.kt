@@ -19,7 +19,11 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.milliseconds
 
-internal data class Download(
+/**
+ * One queued chapter download. A mutable state holder (the downloader advances [status] and
+ * [pages] in place), so not a data class; equality is still by chapter, as the queue expects.
+ */
+internal class Download(
     val source: HttpSource,
     val manga: Manga,
     val chapter: Chapter,
@@ -37,11 +41,8 @@ internal data class Download(
 
     @Transient
     val statusFlow = _statusFlow.asStateFlow()
-    var status: State
+    val status: State
         get() = _statusFlow.value
-        set(status) {
-            _statusFlow.value = status
-        }
 
     @Transient
     val progressFlow = flow {
@@ -64,6 +65,11 @@ internal data class Download(
             return pages.map(Page::progress).average().toInt()
         }
 
+    /** Moves the download to [state]; [statusFlow] observers see it at once. */
+    fun transition(state: State) {
+        _statusFlow.value = state
+    }
+
     enum class State(val value: Int) {
         NOT_DOWNLOADED(value = 0),
         QUEUE(value = 1),
@@ -71,6 +77,11 @@ internal data class Download(
         DOWNLOADED(value = 3),
         ERROR(value = 4),
     }
+
+    override fun equals(other: Any?): Boolean = this === other ||
+        (other is Download && source == other.source && manga == other.manga && chapter == other.chapter)
+
+    override fun hashCode(): Int = 31 * (31 * source.hashCode() + manga.hashCode()) + chapter.hashCode()
 
     companion object {
         suspend fun fromChapterId(
