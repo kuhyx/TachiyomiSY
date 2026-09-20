@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.extension.util.ExtensionInstallReceiver
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
-import eu.kanade.tachiyomi.util.system.toast
 import exh.log.xLogD
 import exh.source.BlacklistedSources
 import kotlinx.coroutines.CoroutineScope
@@ -21,14 +20,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import logcat.LogPriority
-import tachiyomi.core.common.util.lang.withUIContext
-import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.source.model.StubSource
-import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Locale
 
 /**
  * The manager of extensions installed as another apk which extend the available sources. It handles
@@ -49,7 +43,7 @@ internal class ExtensionManager(
     val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
 
     // API where all the available extensions can be found.
-    private val api = ExtensionApi()
+    internal val api = ExtensionApi()
 
     // The installer which installs, updates and uninstalls the extensions.
     internal val installer by lazy { ExtensionInstaller(context) }
@@ -74,11 +68,11 @@ internal class ExtensionManager(
         ExtensionInstallReceiver(InstallationListener()).register(context)
     }
 
-    private var subLanguagesEnabledOnFirstRun = preferences.enabledLanguages.isSet()
+    internal var subLanguagesEnabledOnFirstRun = preferences.enabledLanguages.isSet()
 
     internal var availableExtensionsSourcesData: Map<Long, StubSource> = emptyMap()
 
-    private fun setupAvailableSourcesMap(extensions: List<Extension.Available>) {
+    internal fun setupAvailableSourcesMap(extensions: List<Extension.Available>) {
         if (extensions.isEmpty()) return
         availableExtensionsSourcesData = extensions
             .flatMap { ext -> ext.sources.map { it.toStubSource() } }
@@ -125,95 +119,6 @@ internal class ExtensionManager(
     // EXH <--
 
     /**
-     * Finds the available extensions in the [api] and updates [availableExtensionMapFlow].
-     */
-    suspend fun findAvailableExtensions() {
-        val extensions: List<Extension.Available> = try {
-            api.findExtensions()
-        } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected)
-            withUIContext { context.toast(MR.strings.extension_api_error) }
-            return
-        }
-
-        enableAdditionalSubLanguages(extensions)
-
-        availableExtensionMapFlow.value = extensions.associateBy { it.pkgName }
-        updateInstalledStatuses(extensions)
-        setupAvailableSourcesMap(extensions)
-    }
-
-    // Enables the additional sub-languages in the app first run. This addresses
-    // the issue where users still need to enable some specific languages even when
-    // the device language is inside that major group. As an example, if a user
-    // has a zh device language, the app will also enable zh-Hans and zh-Hant.
-    // If the user have already changed the enabledLanguages preference value once,
-    // the new languages will not be added to respect the user enabled choices.
-    private fun enableAdditionalSubLanguages(extensions: List<Extension.Available>) {
-        if (subLanguagesEnabledOnFirstRun || extensions.isEmpty()) {
-            return
-        }
-
-        // Use the source lang as some aren't present on the extension level.
-        val availableLanguages = extensions
-            .flatMap(Extension.Available::sources)
-            .distinctBy(Extension.Available.Source::lang)
-            .map(Extension.Available.Source::lang)
-
-        val deviceLanguage = Locale.getDefault().language
-        val defaultLanguages = preferences.enabledLanguages.defaultValue()
-        val languagesToEnable = availableLanguages.filter {
-            it != deviceLanguage && it.startsWith(deviceLanguage)
-        }
-
-        preferences.enabledLanguages.set(defaultLanguages + languagesToEnable)
-        subLanguagesEnabledOnFirstRun = true
-    }
-
-    // Sets the update field of the installed extensions with the given [availableExtensions].
-    // @param availableExtensions The list of extensions given by the [api].
-    private fun updateInstalledStatuses(availableExtensions: List<Extension.Available>) {
-        if (availableExtensions.isEmpty()) {
-            preferences.extensionUpdatesCount.set(0)
-            return
-        }
-
-        val installedExtensionsMap = installedExtensionMapFlow.value.toMutableMap()
-        var changed = false
-        for ((pkgName, extension) in installedExtensionsMap) {
-            val availableExt = availableExtensions.find { it.pkgName == pkgName }
-
-            if (availableExt == null && !extension.isObsolete) {
-                installedExtensionsMap[pkgName] = extension.copy(isObsolete = true)
-                changed = true
-                // SY -->
-            } else if (extension.isBlacklisted() && !extension.isRedundant) {
-                installedExtensionsMap[pkgName] = extension.copy(isRedundant = true)
-                changed = true
-                // SY <--
-            } else if (availableExt != null) {
-                val hasUpdate = extension.updateExists(availableExt)
-                if (extension.hasUpdate != hasUpdate) {
-                    installedExtensionsMap[pkgName] = extension.copy(
-                        hasUpdate = hasUpdate,
-                        store = availableExt.store,
-                    )
-                } else {
-                    installedExtensionsMap[pkgName] = extension.copy(
-                        store = availableExt.store,
-                    )
-                }
-                changed = true
-            }
-        }
-        if (changed) {
-            installedExtensionMapFlow.value = installedExtensionsMap
-        }
-        updatePendingUpdatesCount()
-    }
-
-    /**
      * Listener which receives events of the extensions being installed, updated or removed.
      */
     private inner class InstallationListener : ExtensionInstallReceiver.Listener {
@@ -250,7 +155,7 @@ internal class ExtensionManager(
         }
     }
 
-    private fun Extension.Installed.updateExists(availableExtension: Extension.Available? = null): Boolean {
+    internal fun Extension.Installed.updateExists(availableExtension: Extension.Available? = null): Boolean {
         val availableExt = availableExtension
             ?: availableExtensionMapFlow.value[pkgName]
             ?: return false

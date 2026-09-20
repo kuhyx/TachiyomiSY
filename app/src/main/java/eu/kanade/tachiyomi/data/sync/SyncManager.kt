@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.restore.BackupRestoreJob
 import eu.kanade.tachiyomi.data.backup.restore.RestoreOptions
 import eu.kanade.tachiyomi.data.backup.restore.restorers.MangaRestorer
+import eu.kanade.tachiyomi.data.backup.restore.restorers.persistManga
 import eu.kanade.tachiyomi.data.sync.service.GoogleDriveSyncService
 import eu.kanade.tachiyomi.data.sync.service.SyncData
 import eu.kanade.tachiyomi.data.sync.service.SyncYomiSyncService
@@ -385,7 +386,7 @@ internal class SyncManager(
             localMangaMap[key]?.let { localManga ->
                 if (localManga.favorite != nonFavorite.favorite) {
                     val updatedManga = localManga.copy(favorite = nonFavorite.favorite)
-                    mangaRestorer.updateManga(updatedManga)
+                    mangaRestorer.persistManga(updatedManga)
                 }
             }
         }
