@@ -61,9 +61,6 @@ import tachiyomi.presentation.core.components.material.topSmallPaddingValues
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.plus
 import java.util.Locale
-import kotlin.reflect.KFunction
-import kotlin.reflect.KVisibility
-import kotlin.reflect.full.declaredFunctions
 
 internal class SettingsDebugScreen : Screen() {
 
@@ -76,12 +73,10 @@ internal class SettingsDebugScreen : Screen() {
         DisposableEffect(Unit) {
             onDispose { navigator.pop() }
         }
-        val functions by produceState<List<Pair<KFunction<*>, String>>?>(initialValue = null) {
+        val functions by produceState<List<Pair<DebugFunctions.Entry, String>>?>(initialValue = null) {
             value = withContext(Dispatchers.Default) {
-                DebugFunctions::class.declaredFunctions.filter {
-                    it.visibility == KVisibility.PUBLIC
-                }.map {
-                    it to it.name.replace("(.)(\\p{Upper})".toRegex(), "$1 $2")
+                DebugFunctions.entries().map {
+                    it to it.function.name.replace("(.)(\\p{Upper})".toRegex(), "$1 $2")
                         .lowercase(Locale.getDefault())
                         .capitalize(Locale.getDefault())
                 }
@@ -112,7 +107,7 @@ internal class SettingsDebugScreen : Screen() {
     @Composable
     fun FunctionList(
         paddingValues: PaddingValues,
-        functions: List<Pair<KFunction<*>, String>>,
+        functions: List<Pair<DebugFunctions.Entry, String>>,
         toggles: List<DebugToggle>,
         scope: CoroutineScope,
     ) {
@@ -133,14 +128,14 @@ internal class SettingsDebugScreen : Screen() {
                         modifier = Modifier.padding(16.dp),
                     )
                 }
-                items(functions) { (func, name) ->
+                items(functions) { (entry, name) ->
                     TextPreferenceWidget(
                         title = name,
                         onPreferenceClick = {
                             scope.launch(Dispatchers.Default) {
                                 val text = try {
                                     running = true
-                                    "Function returned result:\n\n${func.call(DebugFunctions)}"
+                                    "Function returned result:\n\n${entry.function.call(entry.owner)}"
                                 } catch (expected: Exception) {
                                     // Any failure ends here and the fallback below applies.
                                     "Function threw exception:\n\n${Log.getStackTraceString(expected)}"
