@@ -9,6 +9,11 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.browse.MigrateSearchScreen
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.SearchScreenModel
+import eu.kanade.tachiyomi.ui.browse.source.globalsearch.clearDialog
+import eu.kanade.tachiyomi.ui.browse.source.globalsearch.setMigrateDialog
+import eu.kanade.tachiyomi.ui.browse.source.globalsearch.setSourceFilter
+import eu.kanade.tachiyomi.ui.browse.source.globalsearch.toggleFilterResults
+import eu.kanade.tachiyomi.ui.browse.source.globalsearch.updateSearchQuery
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import mihon.feature.migration.dialog.MigrateMangaDialog
 import mihon.feature.migration.list.MigrationListScreen

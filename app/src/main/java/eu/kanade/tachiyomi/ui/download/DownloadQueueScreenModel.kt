@@ -7,28 +7,21 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadListBinding
-import eu.kanade.tachiyomi.source.model.Page
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlin.time.Duration.Companion.milliseconds
 
 private const val STOP_TIMEOUT_MS = 5000L
 
 internal class DownloadQueueScreenModel(
-    private val downloadManager: DownloadManager = Injekt.get(),
+    internal val downloadManager: DownloadManager = Injekt.get(),
 ) : ScreenModel {
 
     private val _state = MutableStateFlow(emptyList<DownloadHeaderItem>())
@@ -42,7 +35,7 @@ internal class DownloadQueueScreenModel(
     var adapter: DownloadAdapter? = null
 
     // Map of jobs for active downloads.
-    private val progressJobs = mutableMapOf<Download, Job>()
+    internal val progressJobs = mutableMapOf<Download, Job>()
 
     val listener = object : DownloadAdapter.DownloadItemListener {
         /**
@@ -146,26 +139,6 @@ internal class DownloadQueueScreenModel(
     fun getDownloadStatusFlow() = downloadManager.statusFlow()
     fun getDownloadProgressFlow() = downloadManager.progressFlow()
 
-    fun startDownloads() {
-        downloadManager.startDownloads()
-    }
-
-    fun pauseDownloads() {
-        downloadManager.pauseDownloads()
-    }
-
-    fun clearQueue() {
-        downloadManager.clearQueue()
-    }
-
-    fun reorder(downloads: List<Download>) {
-        downloadManager.reorderQueue(downloads)
-    }
-
-    fun cancel(downloads: List<Download>) {
-        downloadManager.cancelQueuedDownloads(downloads)
-    }
-
     fun <R : Comparable<R>> reorderQueue(selector: (DownloadItem) -> R, reverse: Boolean = false) {
         val adapter = adapter ?: return
         val newDownloads = mutableListOf<Download>()
@@ -180,80 +153,4 @@ internal class DownloadQueueScreenModel(
         }
         reorder(newDownloads)
     }
-
-    /**
-     * Called when the status of a download changes.
-     *
-     * @param download the download whose status has changed.
-     */
-    fun onStatusChange(download: Download) {
-        when (download.status) {
-            Download.State.DOWNLOADING -> {
-                launchProgressJob(download)
-                // Initial update of the downloaded pages
-                onUpdateDownloadedPages(download)
-            }
-            Download.State.DOWNLOADED -> {
-                cancelProgressJob(download)
-                onUpdateProgress(download)
-                onUpdateDownloadedPages(download)
-            }
-            Download.State.ERROR -> {
-                cancelProgressJob(download)
-            }
-            else -> {
-                /* unused */
-            }
-        }
-    }
-
-    // Observe the progress of a download and notify the view.
-    // @param download the download to observe its progress.
-    private fun launchProgressJob(download: Download) {
-        val job = screenModelScope.launch {
-            while (download.pages == null) {
-                delay(50.milliseconds)
-            }
-
-            val progressFlows = download.pages!!.map(Page::progressFlow)
-            combine(progressFlows, Array<Int>::sum)
-                .distinctUntilChanged()
-                .debounce(50.milliseconds)
-                .collectLatest {
-                    onUpdateProgress(download)
-                }
-        }
-
-        // Avoid leaking jobs
-        progressJobs.remove(download)?.cancel()
-
-        progressJobs[download] = job
-    }
-
-    // Unsubscribes the given download from the progress subscriptions.
-    // @param download the download to unsubscribe.
-    private fun cancelProgressJob(download: Download) {
-        progressJobs.remove(download)?.cancel()
-    }
-
-    // Called when the progress of a download changes.
-    // @param download the download whose progress has changed.
-    private fun onUpdateProgress(download: Download) {
-        getHolder(download)?.notifyProgress()
-    }
-
-    /**
-     * Called when a page of a download is downloaded.
-     *
-     * @param download the download whose page has been downloaded.
-     */
-    fun onUpdateDownloadedPages(download: Download) {
-        getHolder(download)?.notifyDownloadedPages()
-    }
-
-    // Returns the holder for the given download.
-    // @param download the download to find.
-    // @return the holder of the download or null if it's not bound.
-    private fun getHolder(download: Download): DownloadHolder? =
-        controllerBinding?.root?.findViewHolderForItemId(download.chapter.id) as? DownloadHolder
 }

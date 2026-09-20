@@ -28,7 +28,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import mihon.domain.manga.model.toDomainManga
 import tachiyomi.core.common.util.lang.launchIO
-import tachiyomi.core.common.util.lang.launchNonCancellable
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
@@ -58,9 +57,9 @@ internal open class FeedScreenModel(
     private val getFeedSavedSearchGlobal: GetFeedSavedSearchGlobal = Injekt.get(),
     private val getSavedSearchGlobalFeed: GetSavedSearchGlobalFeed = Injekt.get(),
     private val countFeedSavedSearchGlobal: CountFeedSavedSearchGlobal = Injekt.get(),
-    private val getSavedSearchBySourceId: GetSavedSearchBySourceId = Injekt.get(),
-    private val insertFeedSavedSearch: InsertFeedSavedSearch = Injekt.get(),
-    private val deleteFeedSavedSearchById: DeleteFeedSavedSearchById = Injekt.get(),
+    internal val getSavedSearchBySourceId: GetSavedSearchBySourceId = Injekt.get(),
+    internal val insertFeedSavedSearch: InsertFeedSavedSearch = Injekt.get(),
+    internal val deleteFeedSavedSearchById: DeleteFeedSavedSearchById = Injekt.get(),
 ) : StateScreenModel<FeedScreenState>(FeedScreenState()) {
 
     private val _events = Channel<Event>(Int.MAX_VALUE)
@@ -95,6 +94,14 @@ internal open class FeedScreenModel(
 
     private val filterSerializer = FilterSerializer()
 
+    /** Emits [event] to the tab; the extension files reach the private channel through it. */
+    internal suspend fun emit(event: Event) = _events.send(event)
+
+    /** Applies [func] to the state; the extension files reach the protected flow through it. */
+    internal fun updateState(func: (FeedScreenState) -> FeedScreenState) {
+        mutableState.update(func)
+    }
+
     fun init() {
         pushed = false
         screenModelScope.launchIO {
@@ -110,80 +117,7 @@ internal open class FeedScreenModel(
         }
     }
 
-    fun openAddDialog() {
-        screenModelScope.launchIO {
-            if (hasTooManyFeeds()) {
-                _events.send(Event.TooManyFeeds)
-                return@launchIO
-            }
-            mutableState.update { state ->
-                state.copy(
-                    dialog = Dialog.AddFeed(getEnabledSources()),
-                )
-            }
-        }
-    }
-
-    fun openAddSearchDialog(source: Source) {
-        screenModelScope.launchIO {
-            mutableState.update { state ->
-                state.copy(
-                    dialog = Dialog.AddFeedSearch(
-                        source,
-                        (if (source.supportsLatest) listOf(null) else emptyList()) +
-                            getSourceSavedSearches(source.id),
-                    ),
-                )
-            }
-        }
-    }
-
-    fun openDeleteDialog(feed: FeedSavedSearch) {
-        screenModelScope.launchIO {
-            mutableState.update { state ->
-                state.copy(
-                    dialog = Dialog.DeleteFeed(feed),
-                )
-            }
-        }
-    }
-
-    private suspend fun hasTooManyFeeds(): Boolean = countFeedSavedSearchGlobal.await() > MAX_FEEDS
-
-    fun getEnabledSources(): List<Source> {
-        val languages = sourcePreferences.enabledLanguages.get()
-        val pinnedSources = sourcePreferences.pinnedSources.get()
-        val disabledSources = sourcePreferences.disabledSources.get()
-            .mapNotNull { it.toLongOrNull() }
-
-        val list = sourceManager.getVisibleSources()
-            .filter { it.lang in languages }
-            .filterNot { it.id in disabledSources }
-            .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { "(${it.lang}) ${it.name}" })
-
-        return list.sortedBy { it.id.toString() !in pinnedSources }
-    }
-
-    suspend fun getSourceSavedSearches(sourceId: Long): List<SavedSearch> = getSavedSearchBySourceId.await(sourceId)
-
-    fun createFeed(source: Source, savedSearch: SavedSearch?) {
-        screenModelScope.launchNonCancellable {
-            insertFeedSavedSearch.await(
-                FeedSavedSearch(
-                    id = -1,
-                    source = source.id,
-                    savedSearch = savedSearch?.id,
-                    global = true,
-                ),
-            )
-        }
-    }
-
-    fun deleteFeed(feed: FeedSavedSearch) {
-        screenModelScope.launchNonCancellable {
-            deleteFeedSavedSearchById.await(feed.id)
-        }
-    }
+    internal suspend fun hasTooManyFeeds(): Boolean = countFeedSavedSearchGlobal.await() > MAX_FEEDS
 
     private suspend fun getSourcesToGetFeed(
         feedSavedSearch: List<FeedSavedSearch>,
@@ -282,10 +216,6 @@ internal open class FeedScreenModel(
     override fun onDispose() {
         super.onDispose()
         coroutineDispatcher.close()
-    }
-
-    fun dismissDialog() {
-        mutableState.update { it.copy(dialog = null) }
     }
 
     sealed class Dialog {

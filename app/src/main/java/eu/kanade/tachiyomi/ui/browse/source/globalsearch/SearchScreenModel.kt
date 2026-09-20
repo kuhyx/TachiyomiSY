@@ -20,8 +20,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mihon.domain.manga.model.toDomainManga
-import tachiyomi.core.common.preference.toggle
-import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.model.Manga
@@ -38,8 +36,8 @@ internal abstract class SearchScreenModel(
     private val sourceManager: SourceManager = Injekt.get(),
     private val extensionManager: ExtensionManager = Injekt.get(),
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
-    private val getManga: GetManga = Injekt.get(),
-    private val preferences: SourcePreferences = Injekt.get(),
+    internal val getManga: GetManga = Injekt.get(),
+    internal val preferences: SourcePreferences = Injekt.get(),
 ) : StateScreenModel<SearchScreenModel.State>(initialState) {
 
     private val coroutineDispatcher = Executors.newFixedThreadPool(SEARCH_THREADS).asCoroutineDispatcher()
@@ -68,6 +66,11 @@ internal abstract class SearchScreenModel(
                 mutableState.update { it.copy(onlyShowHasResults = state) }
             }
         }
+    }
+
+    /** Applies [func] to the state; the extension files reach the protected flow through it. */
+    internal fun updateState(func: (State) -> State) {
+        mutableState.update(func)
     }
 
     @Composable
@@ -107,19 +110,6 @@ internal abstract class SearchScreenModel(
             .map { it.id }
         return enabledSources.filter { it.id in filteredSourceIds }
         // SY <--
-    }
-
-    fun updateSearchQuery(query: String?) {
-        mutableState.update { it.copy(searchQuery = query) }
-    }
-
-    fun setSourceFilter(filter: SourceFilter) {
-        mutableState.update { it.copy(sourceFilter = filter) }
-        search()
-    }
-
-    fun toggleFilterResults() {
-        preferences.globalSearchFilterState.toggle()
     }
 
     fun search() {
@@ -195,19 +185,6 @@ internal abstract class SearchScreenModel(
 
     private fun updateItem(source: Source, result: SearchItemResult) {
         updateItems(state.value.items + (source to result))
-    }
-
-    fun setMigrateDialog(currentId: Long, target: Manga) {
-        screenModelScope.launchIO {
-            val current = getManga.await(currentId)
-            if (current != null) {
-                mutableState.update { it.copy(dialog = Dialog.Migrate(target, current)) }
-            }
-        }
-    }
-
-    fun clearDialog() {
-        mutableState.update { it.copy(dialog = null) }
     }
 
     @Immutable

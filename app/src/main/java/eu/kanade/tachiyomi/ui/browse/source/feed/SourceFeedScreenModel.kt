@@ -7,17 +7,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import dev.icerock.moko.resources.StringResource
 import eu.kanade.core.preference.asState
 import eu.kanade.domain.source.interactor.GetExhSavedSearch
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.browse.SourceFeedUI
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.online.all.MangaDex
-import exh.source.getMainSource
 import exh.source.mangaDexSourceIds
-import exh.util.nullIfBlank
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -32,7 +28,6 @@ import mihon.domain.manga.model.toDomainManga
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.launchNonCancellable
 import tachiyomi.core.common.util.lang.withIOContext
-import tachiyomi.core.common.util.lang.withUIContext
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.source.interactor.CountFeedSavedSearchBySourceId
@@ -44,7 +39,6 @@ import tachiyomi.domain.source.model.EXHSavedSearch
 import tachiyomi.domain.source.model.FeedSavedSearch
 import tachiyomi.domain.source.model.SavedSearch
 import tachiyomi.domain.source.service.SourceManager
-import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import xyz.nulldev.ts.api.http.serializer.FilterSerializer
@@ -97,13 +91,18 @@ internal open class SourceFeedScreenModel(
             .launchIn(screenModelScope)
     }
 
-    private val filterSerializer = FilterSerializer()
+    internal val filterSerializer = FilterSerializer()
+
+    /** Applies [func] to the state; the extension files reach the protected flow through it. */
+    internal fun updateState(func: (SourceFeedState) -> SourceFeedState) {
+        mutableState.update(func)
+    }
 
     fun setFilters(filters: FilterList) {
         mutableState.update { it.copy(filters = filters) }
     }
 
-    private suspend fun hasTooManyFeeds(): Boolean = countFeedSavedSearchBySourceId.await(source.id) > MAX_FEEDS
+    internal suspend fun hasTooManyFeeds(): Boolean = countFeedSavedSearchBySourceId.await(source.id) > MAX_FEEDS
 
     fun createFeed(savedSearchId: Long) {
         screenModelScope.launchNonCancellable {
@@ -197,92 +196,6 @@ internal open class SourceFeedScreenModel(
     private suspend fun loadSearches() =
         getExhSavedSearch.await(source.id, source::getFilterList)
             .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER, EXHSavedSearch::name))
-
-    fun onFilter(onBrowseClick: (query: String?, filters: String?) -> Unit) {
-        screenModelScope.launchIO {
-            val allDefault = state.value.filters == source.getFilterList()
-            dismissDialog()
-            if (allDefault) {
-                onBrowseClick(
-                    state.value.searchQuery?.nullIfBlank(),
-                    null,
-                )
-            } else {
-                onBrowseClick(
-                    state.value.searchQuery?.nullIfBlank(),
-                    Json.encodeToString(filterSerializer.serialize(state.value.filters)),
-                )
-            }
-        }
-    }
-
-    fun onSavedSearch(
-        search: EXHSavedSearch,
-        onBrowseClick: (query: String?, searchId: Long) -> Unit,
-        onToast: (StringResource) -> Unit,
-    ) {
-        screenModelScope.launchIO {
-            if (search.filterList == null && state.value.filters.isNotEmpty()) {
-                withUIContext {
-                    onToast(SYMR.strings.save_search_invalid)
-                }
-                return@launchIO
-            }
-
-            val allDefault = search.filterList != null && search.filterList == source.getFilterList()
-            dismissDialog()
-
-            if (!allDefault) {
-                onBrowseClick(
-                    state.value.searchQuery?.nullIfBlank(),
-                    search.id,
-                )
-            }
-        }
-    }
-
-    fun onSavedSearchAddToFeed(
-        search: EXHSavedSearch,
-        onToast: (StringResource) -> Unit,
-    ) {
-        screenModelScope.launchIO {
-            if (hasTooManyFeeds()) {
-                withUIContext {
-                    onToast(SYMR.strings.too_many_in_feed)
-                }
-                return@launchIO
-            }
-            openAddFeed(search.id, search.name)
-        }
-    }
-
-    fun onMangaDexRandom(onRandomFound: (String) -> Unit) {
-        screenModelScope.launchIO {
-            val random = source.getMainSource<MangaDex>()?.fetchRandomMangaUrl()
-                ?: return@launchIO
-            onRandomFound(random)
-        }
-    }
-
-    fun search(query: String?) {
-        mutableState.update { it.copy(searchQuery = query) }
-    }
-
-    fun openFilterSheet() {
-        mutableState.update { it.copy(dialog = Dialog.Filter) }
-    }
-
-    fun openDeleteFeed(feed: FeedSavedSearch) {
-        mutableState.update { it.copy(dialog = Dialog.DeleteFeed(feed)) }
-    }
-
-    fun openAddFeed(feedId: Long, name: String) {
-        mutableState.update { it.copy(dialog = Dialog.AddFeed(feedId, name)) }
-    }
-
-    fun dismissDialog() {
-        mutableState.update { it.copy(dialog = null) }
-    }
 
     sealed class Dialog {
         data object Filter : Dialog()

@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
@@ -37,7 +36,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class ExtensionsScreenModel(
     preferences: SourcePreferences = Injekt.get(),
     basePreferences: BasePreferences = Injekt.get(),
-    private val extensionManager: ExtensionManager = Injekt.get(),
+    internal val extensionManager: ExtensionManager = Injekt.get(),
     private val getExtensions: GetExtensionsByType = Injekt.get(),
 ) : StateScreenModel<ExtensionsScreenModel.State>(State()) {
 
@@ -106,6 +105,11 @@ internal class ExtensionsScreenModel(
             .launchIn(screenModelScope)
     }
 
+    /** Applies [func] to the state; the extension files reach the protected flow through it. */
+    internal fun updateState(func: (State) -> State) {
+        mutableState.update(func)
+    }
+
     fun searchQueryPredicate(query: String): (Extension) -> Boolean {
         val subqueries = query.split(",")
             .map { it.trim() }
@@ -142,51 +146,20 @@ internal class ExtensionsScreenModel(
         }
     }
 
-    fun updateAllExtensions() {
-        screenModelScope.launchIO {
-            state.value.items.values.flatten()
-                .map { it.extension }
-                .filterIsInstance<Extension.Installed>()
-                .filter { it.hasUpdate }
-                .forEach(::updateExtension)
-        }
-    }
-
-    fun installExtension(extension: Extension.Available) {
-        screenModelScope.launchIO {
-            extensionManager.installExtension(extension).collectToInstallUpdate(extension)
-        }
-    }
-
-    fun updateExtension(extension: Extension.Installed) {
-        screenModelScope.launchIO {
-            extensionManager.updateExtension(extension).collectToInstallUpdate(extension)
-        }
-    }
-
-    fun cancelInstallUpdateExtension(extension: Extension) {
-        extensionManager.cancelInstallUpdateExtension(extension)
-        removeDownloadState(extension)
-    }
-
     private fun addDownloadState(extension: Extension, installStep: InstallStep) {
         currentDownloads.update { it + Pair(extension.pkgName, installStep) }
     }
 
-    private fun removeDownloadState(extension: Extension) {
+    internal fun removeDownloadState(extension: Extension) {
         currentDownloads.update { it - extension.pkgName }
     }
 
-    private suspend fun Flow<InstallStep>.collectToInstallUpdate(extension: Extension) =
+    internal suspend fun Flow<InstallStep>.collectToInstallUpdate(extension: Extension) =
         this
             .onEach { installStep -> addDownloadState(extension, installStep) }
             .takeWhile { installStep -> installStep != InstallStep.Installed }
             .onCompletion { removeDownloadState(extension) }
             .collect()
-
-    fun uninstallExtension(extension: Extension) {
-        extensionManager.uninstallExtension(extension)
-    }
 
     fun findAvailableExtensions() {
         screenModelScope.launchIO {
@@ -198,12 +171,6 @@ internal class ExtensionsScreenModel(
             delay(1.seconds)
 
             mutableState.update { it.copy(isRefreshing = false) }
-        }
-    }
-
-    fun trustExtension(extension: Extension.Untrusted) {
-        screenModelScope.launch {
-            extensionManager.trust(extension)
         }
     }
 
