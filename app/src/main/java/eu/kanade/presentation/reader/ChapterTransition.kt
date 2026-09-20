@@ -20,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.ProvideTextStyle
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,13 +29,10 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import eu.kanade.tachiyomi.data.database.models.toDomainChapter
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
-import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.service.calculateChapterGap
 import tachiyomi.i18n.MR
@@ -274,25 +270,17 @@ private val CardColor: CardColors
 private val VerticalSpacerSize = 24.dp
 private const val DOWNLOADED_ICON_ID = "downloaded"
 
-private fun previewChapter(name: String, scanlator: String, chapterNumber: Double) = Chapter.create().copy(
-    id = 0L,
-    mangaId = 0L,
-    url = "",
-    name = name,
-    scanlator = scanlator,
-    chapterNumber = chapterNumber,
-)
-private val FakeChapter = previewChapter(
+internal val FakeChapter = previewChapter(
     name = "Vol.1, Ch.1 - Fake Chapter Title",
     scanlator = "Scanlator Name",
     chapterNumber = 1.0,
 )
-private val FakeGapChapter = previewChapter(
+internal val FakeGapChapter = previewChapter(
     name = "Vol.5, Ch.44 - Fake Gap Chapter Title",
     scanlator = "Scanlator Name",
     chapterNumber = 44.0,
 )
-private val FakeChapterLongTitle = previewChapter(
+internal val FakeChapterLongTitle = previewChapter(
     name = "Vol.1, Ch.0 - The Mundane Musings of a Metafictional Manga: A Chapter About a Chapter, Featuring" +
         " an Absurdly Long Title and a Surprisingly Normal Day in the Lives of Our Heroes, as They Grapple with the " +
         "Daily Challenges of Existence, from Paying Rent to Finding Love, All While Navigating the Strange World of " +
@@ -301,73 +289,3 @@ private val FakeChapterLongTitle = previewChapter(
     scanlator = "Long Long Funny Scanlator Sniper Group Name Reborn",
     chapterNumber = 1.0,
 )
-
-@PreviewLightDark
-@Composable
-internal fun TransitionTextPreview() {
-    TachiyomiPreviewTheme {
-        Surface(modifier = Modifier.padding(48.dp)) {
-            ChapterTransition(
-                transition = ChapterTransition.Next(ReaderChapter(FakeChapter), ReaderChapter(FakeChapter)),
-                currChapterDownloaded = false,
-                goingToChapterDownloaded = true,
-            )
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-internal fun TransitionTextLongTitlePreview() {
-    TachiyomiPreviewTheme {
-        Surface(modifier = Modifier.padding(48.dp)) {
-            ChapterTransition(
-                transition = ChapterTransition.Next(ReaderChapter(FakeChapterLongTitle), ReaderChapter(FakeChapter)),
-                currChapterDownloaded = true,
-                goingToChapterDownloaded = true,
-            )
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-internal fun TransitionTextWithGapPreview() {
-    TachiyomiPreviewTheme {
-        Surface(modifier = Modifier.padding(48.dp)) {
-            ChapterTransition(
-                transition = ChapterTransition.Next(ReaderChapter(FakeChapter), ReaderChapter(FakeGapChapter)),
-                currChapterDownloaded = true,
-                goingToChapterDownloaded = false,
-            )
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-internal fun TransitionTextNoNextPreview() {
-    TachiyomiPreviewTheme {
-        Surface(modifier = Modifier.padding(48.dp)) {
-            ChapterTransition(
-                transition = ChapterTransition.Next(ReaderChapter(FakeChapter), null),
-                currChapterDownloaded = true,
-                goingToChapterDownloaded = false,
-            )
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-internal fun TransitionNoPreviousPreview() {
-    TachiyomiPreviewTheme {
-        Surface(modifier = Modifier.padding(48.dp)) {
-            ChapterTransition(
-                transition = ChapterTransition.Prev(ReaderChapter(FakeChapter), null),
-                currChapterDownloaded = true,
-                goingToChapterDownloaded = false,
-            )
-        }
-    }
-}

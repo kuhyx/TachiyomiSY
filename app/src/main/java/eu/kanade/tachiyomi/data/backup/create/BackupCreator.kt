@@ -12,13 +12,6 @@ import eu.kanade.tachiyomi.data.backup.create.creators.PreferenceBackupCreator
 import eu.kanade.tachiyomi.data.backup.create.creators.SavedSearchBackupCreator
 import eu.kanade.tachiyomi.data.backup.create.creators.SourcesBackupCreator
 import eu.kanade.tachiyomi.data.backup.models.Backup
-import eu.kanade.tachiyomi.data.backup.models.BackupCategory
-import eu.kanade.tachiyomi.data.backup.models.BackupExtensionStore
-import eu.kanade.tachiyomi.data.backup.models.BackupManga
-import eu.kanade.tachiyomi.data.backup.models.BackupPreference
-import eu.kanade.tachiyomi.data.backup.models.BackupSavedSearch
-import eu.kanade.tachiyomi.data.backup.models.BackupSource
-import eu.kanade.tachiyomi.data.backup.models.BackupSourcePreferences
 import kotlinx.serialization.protobuf.ProtoBuf
 import logcat.LogPriority
 import okio.buffer
@@ -29,7 +22,6 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.backup.service.BackupPreferences
 import tachiyomi.domain.manga.interactor.GetFavorites
 import tachiyomi.domain.manga.interactor.GetMergedManga
-import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.repository.MangaRepository
 import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
@@ -49,13 +41,13 @@ internal class BackupCreator(
     private val backupPreferences: BackupPreferences = Injekt.get(),
     private val mangaRepository: MangaRepository = Injekt.get(),
 
-    private val categoriesBackupCreator: CategoriesBackupCreator = CategoriesBackupCreator(),
-    private val mangaBackupCreator: MangaBackupCreator = MangaBackupCreator(),
-    private val preferenceBackupCreator: PreferenceBackupCreator = PreferenceBackupCreator(),
-    private val extensionStoresBackupCreator: ExtensionStoresBackupCreator = ExtensionStoresBackupCreator(),
-    private val sourcesBackupCreator: SourcesBackupCreator = SourcesBackupCreator(),
+    internal val categoriesBackupCreator: CategoriesBackupCreator = CategoriesBackupCreator(),
+    internal val mangaBackupCreator: MangaBackupCreator = MangaBackupCreator(),
+    internal val preferenceBackupCreator: PreferenceBackupCreator = PreferenceBackupCreator(),
+    internal val extensionStoresBackupCreator: ExtensionStoresBackupCreator = ExtensionStoresBackupCreator(),
+    internal val sourcesBackupCreator: SourcesBackupCreator = SourcesBackupCreator(),
     // SY -->
-    private val savedSearchBackupCreator: SavedSearchBackupCreator = SavedSearchBackupCreator(),
+    internal val savedSearchBackupCreator: SavedSearchBackupCreator = SavedSearchBackupCreator(),
     private val getMergedManga: GetMergedManga = Injekt.get(),
     // SY <--
 ) {
@@ -143,44 +135,6 @@ internal class BackupCreator(
             }
     }
 
-    suspend fun backupCategories(options: BackupOptions): List<BackupCategory> {
-        if (!options.categories) return emptyList()
-
-        return categoriesBackupCreator()
-    }
-
-    suspend fun backupMangas(mangas: List<Manga>, options: BackupOptions): List<BackupManga> {
-        if (!options.libraryEntries) return emptyList()
-
-        return mangaBackupCreator(mangas, options)
-    }
-
-    fun backupSources(mangas: List<BackupManga>): List<BackupSource> = sourcesBackupCreator(mangas)
-
-    fun backupAppPreferences(options: BackupOptions): List<BackupPreference> {
-        if (!options.appSettings) return emptyList()
-
-        return preferenceBackupCreator.createApp(includePrivatePreferences = options.privateSettings)
-    }
-
-    fun backupSourcePreferences(options: BackupOptions): List<BackupSourcePreferences> {
-        if (!options.sourceSettings) return emptyList()
-
-        return preferenceBackupCreator.createSource(includePrivatePreferences = options.privateSettings)
-    }
-
-    suspend fun backupExtensionStores(options: BackupOptions): List<BackupExtensionStore> {
-        if (!options.extensionStores) return emptyList()
-
-        return extensionStoresBackupCreator()
-    }
-
-    // SY -->
-    suspend fun backupSavedSearches(options: BackupOptions): List<BackupSavedSearch> {
-        if (!options.savedSearches) return emptyList()
-
-        return savedSearchBackupCreator()
-    }
     // SY <--
 
     companion object {

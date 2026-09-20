@@ -6,6 +6,13 @@ import app.cash.sqldelight.async.coroutines.awaitAsList
 import eu.kanade.domain.sync.SyncPreferences
 import eu.kanade.tachiyomi.data.backup.create.BackupCreator
 import eu.kanade.tachiyomi.data.backup.create.BackupOptions
+import eu.kanade.tachiyomi.data.backup.create.backupAppPreferences
+import eu.kanade.tachiyomi.data.backup.create.backupCategories
+import eu.kanade.tachiyomi.data.backup.create.backupExtensionStores
+import eu.kanade.tachiyomi.data.backup.create.backupMangas
+import eu.kanade.tachiyomi.data.backup.create.backupSavedSearches
+import eu.kanade.tachiyomi.data.backup.create.backupSourcePreferences
+import eu.kanade.tachiyomi.data.backup.create.backupSources
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.backup.models.BackupChapter
 import eu.kanade.tachiyomi.data.backup.models.BackupManga

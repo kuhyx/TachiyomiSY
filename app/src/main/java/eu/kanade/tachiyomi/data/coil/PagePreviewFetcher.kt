@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.PagePreviewSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import exh.source.getMainSource
-import logcat.LogPriority
 import okhttp3.CacheControl
 import okhttp3.Call
 import okhttp3.Request
@@ -22,7 +21,6 @@ import okhttp3.Response
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import okio.Source
-import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.injectLazy
 import java.io.File
@@ -39,17 +37,17 @@ private const val IMAGE = "image/*"
 @Suppress("LongParameterList")
 internal class PagePreviewFetcher(
     private val page: PagePreview,
-    private val options: Options,
-    private val pagePreviewFile: () -> File,
-    private val isInCache: () -> Boolean,
-    private val writeToCache: (Source) -> Unit,
+    internal val options: Options,
+    internal val pagePreviewFile: () -> File,
+    internal val isInCache: () -> Boolean,
+    internal val writeToCache: (Source) -> Unit,
     private val diskCacheKeyLazy: Lazy<String>,
     private val sourceLazy: Lazy<PagePreviewSource?>,
     private val callFactoryLazy: Lazy<Call.Factory>,
-    private val imageLoader: ImageLoader,
+    internal val imageLoader: ImageLoader,
 ) : Fetcher {
 
-    private val diskCacheKey: String
+    internal val diskCacheKey: String
         get() = diskCacheKeyLazy.value
 
     override suspend fun fetch(): FetchResult = httpLoader()
@@ -160,71 +158,6 @@ internal class PagePreviewFetcher(
         request.cacheControl(getCacheControl())
 
         return request.build()
-    }
-
-    private fun moveSnapshotToPagePreviewCache(snapshot: DiskCache.Snapshot): File? {
-        return try {
-            imageLoader.diskCache?.run {
-                fileSystem.source(snapshot.data).use { input ->
-                    writeSourceToPagePreviewCache(input)
-                }
-                remove(diskCacheKey)
-            }
-            return if (isInCache()) {
-                pagePreviewFile()
-            } else {
-                null
-            }
-        } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected) { "Failed to write snapshot data to page preview cache $diskCacheKey" }
-            null
-        }
-    }
-
-    private fun writeResponseToPreviewCache(response: Response): File? {
-        if (!options.diskCachePolicy.writeEnabled) return null
-        return try {
-            response.peekBody(Long.MAX_VALUE).source().use { input ->
-                writeSourceToPagePreviewCache(input)
-            }
-            return if (isInCache()) {
-                pagePreviewFile()
-            } else {
-                null
-            }
-        } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected) { "Failed to write response data to page preview cache $diskCacheKey" }
-            null
-        }
-    }
-
-    private fun writeSourceToPagePreviewCache(input: Source) {
-        writeToCache(input)
-    }
-
-    private fun readFromDiskCache(): DiskCache.Snapshot? =
-        if (options.diskCachePolicy.readEnabled) imageLoader.diskCache?.openSnapshot(diskCacheKey) else null
-
-    private fun writeToDiskCache(
-        response: Response,
-    ): DiskCache.Snapshot? {
-        val diskCache = imageLoader.diskCache
-        val editor = diskCache?.openEditor(diskCacheKey) ?: return null
-        try {
-            diskCache.fileSystem.write(editor.data) {
-                response.body.source().readAll(this)
-            }
-            return editor.commitAndOpenSnapshot()
-        } catch (expected: Exception) {
-            // Rethrown (or wrapped) whatever the cause.
-            try {
-                editor.abort()
-            } catch (ignored: Exception) {
-            }
-            throw expected
-        }
     }
 
     private fun DiskCache.Snapshot.toImageSource(): ImageSource {

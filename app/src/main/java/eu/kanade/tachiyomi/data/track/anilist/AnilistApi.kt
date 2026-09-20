@@ -4,24 +4,14 @@ import android.net.Uri
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.anilist.dto.ALAddMangaResult
-import eu.kanade.tachiyomi.data.track.anilist.dto.ALCurrentUserResult
-import eu.kanade.tachiyomi.data.track.anilist.dto.ALIdSearchResult
-import eu.kanade.tachiyomi.data.track.anilist.dto.ALMangaMetadata
 import eu.kanade.tachiyomi.data.track.anilist.dto.ALOAuth
-import eu.kanade.tachiyomi.data.track.anilist.dto.ALSearchResult
 import eu.kanade.tachiyomi.data.track.anilist.dto.ALUserListMangaQueryResult
-import eu.kanade.tachiyomi.data.track.anilist.dto.ALUserViewerData
-import eu.kanade.tachiyomi.data.track.model.TrackMangaMetadata
-import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.network.jsonMime
 import eu.kanade.tachiyomi.network.parseAs
-import eu.kanade.tachiyomi.util.lang.htmlDecode
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
@@ -29,24 +19,21 @@ import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import kotlin.time.Duration.Companion.minutes
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-private const val VARIABLES = "variables"
-private const val MANGA_ID = "mangaId"
-private const val QUERY = "query"
+internal const val VARIABLES = "variables"
+internal const val MANGA_ID = "mangaId"
+internal const val QUERY = "query"
 
 // AniList tokens live a year.
 private const val YEAR_MILLIS = 365L * 24L * 60L * 60L * 1000L
 
 internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
-    private val json: Json by injectLazy()
+    internal val json: Json by injectLazy()
 
-    private val authClient = client.newBuilder()
+    internal val authClient = client.newBuilder()
         .addInterceptor(interceptor)
         .rateLimit(permits = 85, period = 1.minutes)
         .build()
@@ -145,71 +132,6 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
         }
     }
 
-    suspend fun search(search: String): List<TrackSearch> {
-        return withIOContext {
-            val query = $$"""
-            |query Search($query: String) {
-                |Page (perPage: 50) {
-                    |media(search: $query, type: MANGA, format_not_in: [NOVEL]) {
-                        |id
-                        |staff {
-                            |edges {
-                                |role
-                                |id
-                                |node {
-                                    |name {
-                                        |full
-                                        |userPreferred
-                                        |native
-                                    |}
-                                |}
-                            |}
-                        |}
-                        |title {
-                            |userPreferred
-                        |}
-                        |coverImage {
-                            |large
-                        |}
-                        |format
-                        |countryOfOrigin
-                        |status
-                        |chapters
-                        |description
-                        |startDate {
-                            |year
-                            |month
-                            |day
-                        |}
-                        |averageScore
-                    |}
-                |}
-            |}
-            |
-            """.trimMargin()
-            val payload = buildJsonObject {
-                put(QUERY, query)
-                putJsonObject(VARIABLES) {
-                    put(QUERY, search)
-                }
-            }
-            with(json) {
-                authClient.newCall(
-                    POST(
-                        API_URL,
-                        body = payload.toString().toRequestBody(jsonMime),
-                    ),
-                )
-                    .awaitSuccess()
-                    .parseAs<ALSearchResult>()
-                    .data
-                    .page
-                    .media
-                    .map { it.toALManga().toTrack() }
-            }
-        }
-    }
-
     suspend fun findLibManga(track: Track, userid: Int): Track? {
         return withIOContext {
             val query = $$"""
@@ -299,175 +221,11 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
     fun createOAuth(token: String): ALOAuth =
         ALOAuth(token, "Bearer", System.currentTimeMillis() + YEAR_MILLIS, YEAR_MILLIS)
 
-    suspend fun getCurrentUser(): ALUserViewerData {
-        return withIOContext {
-            val query = """
-                |query User {
-                |Viewer {
-                    |id
-                    |name
-                    |mediaListOptions {
-                        |scoreFormat
-                    |}
-                |}
-                |}
-                |
-            """.trimMargin()
-            val payload = buildJsonObject {
-                put(QUERY, query)
-            }
-            with(json) {
-                authClient.newCall(
-                    POST(
-                        API_URL,
-                        body = payload.toString().toRequestBody(jsonMime),
-                    ),
-                )
-                    .awaitSuccess()
-                    .parseAs<ALCurrentUserResult>()
-                    .data
-                    .viewer
-            }
-        }
-    }
-
-    suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata {
-        return withIOContext {
-            val query = """
-                |query (${'$'}mangaId: Int!) {
-                |Media (id: ${'$'}mangaId) {
-                    |id
-                    |title {
-                        |userPreferred
-                    |}
-                    |coverImage {
-                        |large
-                    |}
-                    |description
-                    |staff {
-                        |edges {
-                            |role
-                            |id
-                            |node {
-                                |name {
-                                    |userPreferred
-                                |}
-                            |}
-                        |}
-                    |}
-                |}
-                |}
-                |
-            """.trimMargin()
-            val payload = buildJsonObject {
-                put(QUERY, query)
-                putJsonObject(VARIABLES) {
-                    put(MANGA_ID, track.remoteId)
-                }
-            }
-            with(json) {
-                authClient.newCall(
-                    POST(
-                        API_URL,
-                        body = payload.toString().toRequestBody(jsonMime),
-                    ),
-                )
-                    .awaitSuccess()
-                    .parseAs<ALMangaMetadata>()
-                    .let {
-                        val media = it.data.media
-                        TrackMangaMetadata(
-                            remoteId = media.id,
-                            title = media.title.userPreferred,
-                            thumbnailUrl = media.coverImage.large,
-                            description = media.description?.htmlDecode()?.ifEmpty { null },
-                            authors = media.staff.edges
-                                .filter { it.role == "Story" || it.role == "Story & Art" }
-                                .map { it.node.name.userPreferred }
-                                .joinToString(", ")
-                                .ifEmpty { null },
-                            artists = media.staff.edges
-                                .filter { it.role == "Art" || it.role == "Story & Art" }
-                                .map { it.node.name.userPreferred }
-                                .joinToString(", ")
-                                .ifEmpty { null },
-                        )
-                    }
-            }
-        }
-    }
-
-    // SY -->
-    suspend fun searchById(id: String): TrackSearch {
-        return withIOContext {
-            val query = """
-                |query (${'$'}mangaId: Int!) {
-                |Media (id: ${'$'}mangaId) {
-                    |id
-                    |title {
-                        |userPreferred
-                    |}
-                    |coverImage {
-                        |large
-                    |}
-                    |format
-                    |status
-                    |chapters
-                    |description
-                    |startDate {
-                        |year
-                        |month
-                        |day
-                    |}
-                    |averageScore
-                |}
-                |}
-                |
-            """.trimMargin()
-            val payload = buildJsonObject {
-                put(QUERY, query)
-                putJsonObject(VARIABLES) {
-                    put(MANGA_ID, id)
-                }
-            }
-            with(json) {
-                authClient.newCall(
-                    POST(
-                        API_URL,
-                        body = payload.toString().toRequestBody(jsonMime),
-                    ),
-                )
-                    .awaitSuccess()
-                    .parseAs<ALIdSearchResult>()
-                    .data
-                    .media
-                    .toALManga()
-                    .toTrack()
-            }
-        }
-    }
     // SY <--
-
-    private fun createDate(dateValue: Long): JsonObject {
-        if (dateValue == 0L) {
-            return buildJsonObject {
-                put("year", JsonNull)
-                put("month", JsonNull)
-                put("day", JsonNull)
-            }
-        }
-
-        val dateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateValue), ZoneId.systemDefault())
-        return buildJsonObject {
-            put("year", dateTime.year)
-            put("month", dateTime.monthValue)
-            put("day", dateTime.dayOfMonth)
-        }
-    }
 
     companion object {
         private const val CLIENT_ID = "16329"
-        private const val API_URL = "https://graphql.anilist.co/"
+        internal const val API_URL = "https://graphql.anilist.co/"
         private const val BASE_URL = "https://anilist.co/api/v2/"
         private const val BASE_MANGA_URL = "https://anilist.co/manga/"
 
