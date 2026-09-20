@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import exh.md.network.MangaDexAuthInterceptor
 import exh.md.utils.FollowStatus
 import exh.md.utils.MdUtil
+import exh.md.utils.getEnabledMangaDex
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR

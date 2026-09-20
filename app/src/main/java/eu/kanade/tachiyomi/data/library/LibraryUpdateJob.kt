@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.util.system.workManager
 import exh.log.xLogE
 import exh.md.utils.FollowStatus
 import exh.md.utils.MdUtil
+import exh.md.utils.getEnabledMangaDex
 import exh.source.LIBRARY_UPDATE_EXCLUDED_SOURCES
 import exh.source.MERGED_SOURCE_ID
 import exh.source.mangaDexSourceIds

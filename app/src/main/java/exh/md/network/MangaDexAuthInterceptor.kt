@@ -6,6 +6,9 @@ import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALOAuth
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.isExpired
 import eu.kanade.tachiyomi.network.parseAs
 import exh.md.utils.MdUtil
+import exh.md.utils.loadOAuth
+import exh.md.utils.refreshTokenRequest
+import exh.md.utils.saveOAuth
 import exh.util.nullIfBlank
 import okhttp3.Interceptor
 import okhttp3.Response

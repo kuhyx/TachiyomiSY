@@ -3,6 +3,8 @@ package exh.uconfig
 import android.content.Context
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.source.online.all.EHentai
+import eu.kanade.tachiyomi.source.online.all.cookiesHeader
+import eu.kanade.tachiyomi.source.online.all.spPref
 import eu.kanade.tachiyomi.util.asJsoup
 import exh.log.maybeInjectEHLogger
 import exh.log.xLogD

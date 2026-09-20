@@ -29,7 +29,6 @@ import exh.md.handlers.BilibiliHandler
 import exh.md.handlers.ComikeyHandler
 import exh.md.handlers.FollowsHandler
 import exh.md.handlers.MangaDetailsExtras
-import exh.md.handlers.MangaDetailsPreferences
 import exh.md.handlers.MangaHandler
 import exh.md.handlers.MangaHotHandler
 import exh.md.handlers.MangaPlusHandler
@@ -66,7 +65,7 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
     NamespaceSource {
     override val lang: String = delegate.lang
 
-    private val mdLang by lazy {
+    internal val mdLang by lazy {
         MdLang.fromExt(lang) ?: MdLang.ENGLISH
     }
 
@@ -75,7 +74,7 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
     val trackPreferences: TrackPreferences by injectLazy()
     val mdList: MdList by lazy { Injekt.get<TrackerManager>().mdList }
 
-    private val sourcePreferences: SharedPreferences by lazy {
+    internal val sourcePreferences: SharedPreferences by lazy {
         context.getSharedPreferences("source_$id", 0x0000)
     }
 
@@ -164,18 +163,6 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
 
     override val twoFactorAuth = LoginSource.AuthSupport.NOT_SUPPORTED
 
-    private fun dataSaver() = sourcePreferences.getBoolean(getDataSaverPreferenceKey(mdLang.lang), false)
-    private fun usePort443Only() = sourcePreferences.getBoolean(getStandardHttpsPreferenceKey(mdLang.lang), false)
-    private fun blockedGroups() = sourcePreferences.getString(getBlockedGroupsPrefKey(mdLang.lang), "").orEmpty()
-    private fun blockedUploaders() = sourcePreferences.getString(getBlockedUploaderPrefKey(mdLang.lang), "").orEmpty()
-    private fun coverQuality() = sourcePreferences.getString(getCoverQualityPrefKey(mdLang.lang), "").orEmpty()
-    private fun tryUsingFirstVolumeCover() =
-        sourcePreferences.getBoolean(getTryUsingFirstVolumeCoverKey(mdLang.lang), false)
-    private fun altTitlesInDesc() = sourcePreferences.getBoolean(getAltTitlesInDescKey(mdLang.lang), false)
-    private fun finalChapterInDesc() = sourcePreferences.getBoolean(getFinalChapterInDescPrefKey(mdLang.lang), false)
-    private fun preferExtensionLangTitle() =
-        sourcePreferences.getBoolean(preferExtensionLangTitleKey(mdLang.extLang), true)
-
     // UrlImportableSource methods
     override suspend fun mapUrlToMangaUrl(uri: Uri): String? {
         val lcFirstPathSegment = uri.pathSegments.firstOrNull()?.lowercase() ?: return null
@@ -216,14 +203,6 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
 
     /** The SY details for [manga] from the MangaDex API, with this source's cover and title preferences. */
     suspend fun getMangaDetails(manga: SManga): SManga = mangaHandler.getMangaDetails(manga, id, detailsPreferences())
-
-    private fun detailsPreferences() = MangaDetailsPreferences(
-        coverQuality = coverQuality(),
-        tryUsingFirstVolumeCover = tryUsingFirstVolumeCover(),
-        altTitlesInDesc = altTitlesInDesc(),
-        finalChapterInDesc = finalChapterInDesc(),
-        preferExtensionLangTitle = preferExtensionLangTitle(),
-    )
 
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
     override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> =

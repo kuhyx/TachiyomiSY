@@ -26,48 +26,29 @@ import eu.kanade.tachiyomi.source.online.UrlImportableSource
 import eu.kanade.tachiyomi.util.asJsoup
 import exh.debug.DebugToggles
 import exh.eh.EHentaiUpdateHelper
-import exh.eh.GalleryEntry
-import exh.log.xLogD
-import exh.metadata.MetadataUtil
 import exh.metadata.metadata.EHentaiSearchMetadata
 import exh.source.ExhPreferences
 import exh.source.HELPER_DEPRECATION
-import exh.ui.login.EhLoginActivity
 import exh.util.UriFilter
 import exh.util.nullIfBlank
 import exh.util.urlImportSearchManga
 import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
 import okhttp3.CacheControl
 import okhttp3.CookieJar
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.nodes.TextNode
 import rx.Observable
 import tachiyomi.core.common.util.lang.runAsObservable
-import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URLEncoder
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 
 private const val UNUSED_METHOD_WAS_CALLED_SOMEHOW = "Unused method was called somehow!"
 private const val COOKIE = "Cookie"
@@ -101,9 +82,9 @@ internal class EHentai(
     override val lang = "all"
     override val supportsLatest = true
 
-    private val exhPreferences: ExhPreferences by injectLazy()
-    private val updateHelper: EHentaiUpdateHelper by injectLazy()
-    private val galleryListParser = EHentaiGalleryListParser()
+    internal val exhPreferences: ExhPreferences by injectLazy()
+    internal val updateHelper: EHentaiUpdateHelper by injectLazy()
+    internal val galleryListParser = EHentaiGalleryListParser()
     private val metadataParser = EHentaiMetadataParser(exh)
 
     /**
@@ -175,85 +156,6 @@ internal class EHentai(
         SMangaUpdate(mangaDetails?.await() ?: manga, chapterDetails?.await() ?: chapters)
     }
 
-    suspend fun getChapterList(manga: SManga): List<SChapter> = getChapterList(manga) {}
-
-    suspend fun getChapterList(manga: SManga, throttleFunc: suspend () -> Unit): List<SChapter> {
-        // Pull all the way to the root gallery
-        // We can't do this with RxJava or we run into stack overflows on shit like this:
-        //   https://exhentai.org/g/1073061/f9345f1c12/
-        var url = manga.url
-        var doc: Document
-
-        while (true) {
-            val gid = EHentaiSearchMetadata.galleryId(url).toInt()
-            val cachedParent = updateHelper.parentLookupTable.get(
-                gid,
-            )
-            if (cachedParent == null) {
-                throttleFunc()
-                doc = client.newCall(exGet(baseUrl + url)).awaitSuccess().asJsoup()
-
-                val parentLink = doc.select("#gdd .gdt1").find { el ->
-                    el.text().lowercase() == "parent:"
-                }!!.nextElementSibling()!!.selectFirst("a")?.attr("href")
-
-                if (parentLink != null) {
-                    updateHelper.parentLookupTable.put(
-                        gid,
-                        GalleryEntry(
-                            EHentaiSearchMetadata.galleryId(parentLink),
-                            EHentaiSearchMetadata.galleryToken(parentLink),
-                        ),
-                    )
-                    url = EHentaiSearchMetadata.normalizeUrl(parentLink)
-                } else {
-                    break
-                }
-            } else {
-                this@EHentai.xLogD("Parent cache hit: %s!", gid)
-                url = EHentaiSearchMetadata.idAndTokenToUrl(
-                    cachedParent.gId,
-                    cachedParent.gToken,
-                )
-            }
-        }
-        val newDisplay = doc.select("#gnd a")
-        // Build chapter for root gallery
-        val location = doc.location()
-        val self = SChapter(
-            url = EHentaiSearchMetadata.normalizeUrl(location),
-            name = "v1: " + doc.selectFirst("#gn")!!.text(),
-            chapterNumber = 1f,
-            dateUpload = ZonedDateTime.parse(
-                doc.select("#gdd .gdt1").find { el ->
-                    el.text().lowercase() == "posted:"
-                }!!.nextElementSibling()!!.text(),
-                MetadataUtil.EX_DATE_FORMAT.withZone(ZoneOffset.UTC),
-            )!!.toInstant().toEpochMilli(),
-            scanlator = EHentaiSearchMetadata.galleryId(location),
-        )
-        // Build and append the rest of the galleries
-        return if (DebugToggles.INCLUDE_ONLY_ROOT_WHEN_LOADING_EXH_VERSIONS.enabled) {
-            listOf(self)
-        } else {
-            newDisplay.mapIndexed { index, newGallery ->
-                val link = newGallery.attr("href")
-                val name = newGallery.text()
-                val posted = (newGallery.nextSibling() as TextNode).text().removePrefix(", added ")
-                SChapter(
-                    url = EHentaiSearchMetadata.normalizeUrl(link),
-                    name = "v${index + 2}: $name",
-                    chapterNumber = index + 2f,
-                    dateUpload = ZonedDateTime.parse(
-                        posted,
-                        MetadataUtil.EX_DATE_FORMAT.withZone(ZoneOffset.UTC),
-                    ).toInstant().toEpochMilli(),
-                    scanlator = EHentaiSearchMetadata.galleryId(link),
-                )
-            }.reversed() + self
-        }
-    }
-
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getChapterList"))
     override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> = runAsObservable { getChapterList(manga) }
 
@@ -269,22 +171,6 @@ internal class EHentai(
             nextUrl = nextPageUrl(jsoup)
         }
         return urls.mapIndexed { i, s -> Page(i, s) }
-    }
-
-    private fun parseChapterPage(response: Element) = with(response) {
-        select(".gdtm a").map {
-            Pair(it.child(0).attr("alt").toInt(), it.attr("href"))
-        }.plus(
-            select("#gdt a").map {
-                Pair(it.child(0).attr("title").removePrefix("Page ").substringBefore(":").toInt(), it.attr("href"))
-            },
-        ).sortedBy(Pair<Int, String>::first).map { it.second }
-    }
-
-    private fun chapterPageRequest(np: String): Request = exGet(url = np, additionalHeaders = headers)
-
-    private fun nextPageUrl(element: Element): String? = element.select("a[onclick=return false]").last()?.let {
-        return if (it.text() == ">") it.attr("href") else null
     }
 
     @Deprecated(HELPER_DEPRECATION)
@@ -380,7 +266,7 @@ internal class EHentai(
     @Deprecated(HELPER_DEPRECATION)
     override fun latestUpdatesParse(response: Response) = genericMangaParse(response)
 
-    private fun exGet(
+    internal fun exGet(
         url: String,
         next: Int? = null,
         prev: Int? = null,
@@ -484,110 +370,13 @@ internal class EHentai(
     @Deprecated("Use the non-RxJava API instead", replaceWith = ReplaceWith("getImageUrl"))
     override fun fetchImageUrl(page: Page): Observable<String> = runAsObservable { getImageUrl(page) }
 
-    private fun realImageUrlParse(response: Response, page: Page): String {
-        with(response.asJsoup()) {
-            val currentImage = getElementById("img")!!.attr("src")
-            // Each press of the retry button will choose another server
-            select("#loadfail").attr("onclick").nullIfBlank()?.let {
-                page.url = addParam(page.url, "nl", it.substring(it.indexOf('\'') + 1 until it.lastIndexOf('\'')))
-            }
-            if (currentImage == "https://ehgt.org/g/509.gif") {
-                throw IOException("Exceeded page quota")
-            }
-            return currentImage
-        }
-    }
-
     @Deprecated(HELPER_DEPRECATION)
     override fun imageUrlParse(response: Response): String {
         throw UnsupportedOperationException(UNUSED_METHOD_WAS_CALLED_SOMEHOW)
     }
 
-    suspend fun fetchFavorites(): Pair<List<ParsedManga>, List<String>> {
-        val favoriteUrl = "$baseUrl/favorites.php"
-        val result = mutableListOf<ParsedManga>()
-        var page = 1
-
-        var favNames: List<String>? = null
-
-        do {
-            val response2 = withIOContext {
-                client.newCall(
-                    exGet(
-                        favoriteUrl,
-                        next = page,
-                        cacheControl = CacheControl.FORCE_NETWORK,
-                    ),
-                ).await()
-            }
-            val doc = response2.asJsoup()
-
-            // Parse favorites
-            val parsed = galleryListParser.parse(doc)
-            result += parsed.first
-
-            // Parse fav names
-            if (favNames == null) {
-                favNames = doc.select(".fp:not(.fps)").mapNotNull {
-                    it.child(2).text()
-                }
-            }
-            // Next page
-
-            page = parsed.first.lastOrNull()?.manga?.url?.let { EHentaiSearchMetadata.galleryId(it) }?.toInt() ?: 0
-        } while (parsed.second != null)
-
-        return Pair(result.toList(), favNames.orEmpty())
-    }
-
-    fun spPref() = if (exh) {
-        exhPreferences.exhSettingsProfile
-    } else {
-        exhPreferences.ehSettingsProfile
-    }
-
-    private fun rawCookies(sp: Int): Map<String, String> {
-        val cookies: MutableMap<String, String> = mutableMapOf()
-        if (exhPreferences.enableExhentai.get()) {
-            cookies[EhLoginActivity.MEMBER_ID_COOKIE] = exhPreferences.memberIdVal.get()
-            cookies[EhLoginActivity.PASS_HASH_COOKIE] = exhPreferences.passHashVal.get()
-            cookies[EhLoginActivity.IGNEOUS_COOKIE] = exhPreferences.igneousVal.get()
-            cookies["sp"] = sp.toString()
-
-            val sessionKey = exhPreferences.exhSettingsKey.get()
-            if (sessionKey.isNotBlank()) {
-                cookies["sk"] = sessionKey
-            }
-
-            val sessionCookie = exhPreferences.exhSessionCookie.get()
-            if (sessionCookie.isNotBlank()) {
-                cookies["s"] = sessionCookie
-            }
-
-            val hathPerksCookie = exhPreferences.exhHathPerksCookies.get()
-            if (hathPerksCookie.isNotBlank()) {
-                cookies["hath_perks"] = hathPerksCookie
-            }
-        }
-
-        // Session-less extended display mode (for users without ExHentai)
-        cookies["sl"] = "dm_2"
-
-        // Ignore all content warnings
-        cookies["nw"] = "1"
-
-        return cookies
-    }
-
-    fun cookiesHeader(sp: Int = spPref().get()) = buildCookies(rawCookies(sp))
-
     // Headers
     override fun headersBuilder() = super.headersBuilder().add(COOKIE, cookiesHeader())
-
-    private fun addParam(url: String, param: String, value: String) = url.toUri()
-        .buildUpon()
-        .appendQueryParameter(param, value)
-        .toString()
 
     // Filters
     override fun getFilterList(): FilterList {
@@ -625,43 +414,6 @@ internal class EHentai(
     }
 
     override fun cleanMangaUrl(url: String): String = EHentaiSearchMetadata.normalizeUrl(super.cleanMangaUrl(url))
-
-    private fun getGalleryUrlFromPage(uri: Uri): String {
-        val lastSplit = uri.pathSegments.last().split("-")
-        val pageNum = lastSplit.last()
-        val gallery = lastSplit.first()
-        val pageToken = uri.pathSegments.elementAt(1)
-
-        val json = buildJsonObject {
-            put("method", "gtoken")
-            put(
-                "pagelist",
-                buildJsonArray {
-                    add(
-                        buildJsonArray {
-                            add(gallery.toInt())
-                            add(pageToken)
-                            add(pageNum.toInt())
-                        },
-                    )
-                },
-            )
-        }
-
-        val outJson = Json.decodeFromString<JsonObject>(
-            client.newCall(
-                Request.Builder()
-                    .url(EH_API_BASE)
-                    .post(json.toString().toRequestBody(JSON))
-                    .build(),
-            ).execute().body.string(),
-        )
-
-        val obj = outJson["tokenlist"]!!.jsonArray.first().jsonObject
-        return "${uri.scheme}://${uri.host}/g/${obj["gid"]!!.jsonPrimitive.int}/${
-            obj["token"]!!.jsonPrimitive.content
-        }/"
-    }
 
     override suspend fun getPagePreviewList(
         manga: SManga,
@@ -721,8 +473,8 @@ internal class EHentai(
         private val MATCH_SEEK_REGEX = """^\d{2,4}-\d{1,2}(-\d{1,2})?""".toRegex()
         private val MATCH_JUMP_REGEX = "^\\d+(\$|d\$|w\$|m\$|y\$|-\$)".toRegex()
 
-        private const val EH_API_BASE = "https://api.e-hentai.org/api.php"
-        private val JSON = "application/json; charset=utf-8".toMediaTypeOrNull()!!
+        internal const val EH_API_BASE = "https://api.e-hentai.org/api.php"
+        internal val JSON = "application/json; charset=utf-8".toMediaTypeOrNull()!!
 
         fun buildCookies(cookies: Map<String, String>) = cookies.entries.joinToString(separator = "; ") {
             "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}"

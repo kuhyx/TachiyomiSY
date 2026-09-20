@@ -14,6 +14,7 @@ import exh.md.dto.ResultDto
 import exh.md.utils.MdApi
 import exh.md.utils.MdConstants
 import exh.md.utils.MdUtil
+import exh.md.utils.encodeToBody
 import okhttp3.CacheControl
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl

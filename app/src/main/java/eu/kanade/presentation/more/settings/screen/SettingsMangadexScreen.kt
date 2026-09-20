@@ -40,6 +40,9 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import exh.md.utils.MdConstants
 import exh.md.utils.MdUtil
+import exh.md.utils.getEnabledMangaDex
+import exh.md.utils.getEnabledMangaDexs
+import exh.md.utils.getPkceChallengeCode
 import logcat.LogPriority
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.withUIContext

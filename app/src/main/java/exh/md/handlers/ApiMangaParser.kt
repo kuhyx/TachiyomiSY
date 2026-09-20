@@ -8,7 +8,12 @@ import exh.md.dto.ChapterDto
 import exh.md.dto.MangaDto
 import exh.md.utils.MdConstants
 import exh.md.utils.MdUtil
+import exh.md.utils.addAltTitleToDesc
+import exh.md.utils.addFinalChapterToDesc
 import exh.md.utils.asMdMap
+import exh.md.utils.cleanDescription
+import exh.md.utils.getFromLangMap
+import exh.md.utils.getTitleFromManga
 import exh.metadata.metadata.MangaDexSearchMetadata
 import exh.metadata.metadata.base.RaisedTag
 import exh.metadata.metadata.base.raise

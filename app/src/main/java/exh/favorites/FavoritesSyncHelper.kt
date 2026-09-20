@@ -7,6 +7,7 @@ import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.all.EHentai
+import eu.kanade.tachiyomi.source.online.all.fetchFavorites
 import eu.kanade.tachiyomi.util.system.toast
 import exh.GalleryAddEvent
 import exh.GalleryAdder

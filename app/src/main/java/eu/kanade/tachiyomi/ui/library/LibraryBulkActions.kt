@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.online.all.MergedSource
 import eu.kanade.tachiyomi.util.removeCovers
 import exh.md.utils.FollowStatus
 import exh.md.utils.MdUtil
+import exh.md.utils.getEnabledMangaDex
 import exh.source.isEhBasedManga
 import exh.source.mangaDexSourceIds
 import exh.source.nHentaiSourceIds
