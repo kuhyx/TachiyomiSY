@@ -12,8 +12,6 @@ import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceFactory
-import eu.kanade.tachiyomi.util.lang.Hash
-import eu.kanade.tachiyomi.util.storage.copyAndSetReadOnlyTo
 import eu.kanade.tachiyomi.util.system.ChildFirstPathClassLoader
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -43,7 +41,7 @@ internal object ExtensionLoader {
         preferences.showNsfwSource.get()
     }
 
-    private const val EXTENSION_FEATURE = "tachiyomi.extension"
+    internal const val EXTENSION_FEATURE = "tachiyomi.extension"
     private const val METADATA_SOURCE_CLASS = "tachiyomi.extension.class"
     private const val METADATA_SOURCE_FACTORY = "tachiyomi.extension.factory"
     private const val METADATA_NSFW = "tachiyomi.extension.nsfw"
@@ -55,62 +53,12 @@ internal object ExtensionLoader {
     private val SUPPORTED_LIB_VERSIONS = listOf(LIB_VERSION_1_4, LIB_VERSION_1_6)
 
     @Suppress("DEPRECATION")
-    private val PACKAGE_FLAGS = PackageManager.GET_CONFIGURATIONS or
+    internal val PACKAGE_FLAGS = PackageManager.GET_CONFIGURATIONS or
         PackageManager.GET_META_DATA or
         PackageManager.GET_SIGNATURES or
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) PackageManager.GET_SIGNING_CERTIFICATES else 0
 
-    private const val PRIVATE_EXTENSION_EXTENSION = "ext"
-
-    private fun getPrivateExtensionDir(context: Context) = File(context.filesDir, "exts")
-
-    fun installPrivateExtensionFile(context: Context, file: File): Boolean {
-        val extension = context.packageManager.getPackageArchiveInfo(file.absolutePath, PACKAGE_FLAGS)
-            ?.takeIf { isPackageAnExtension(it) }
-            ?: return false
-        val currentExtension = getExtensionPackageInfo(context, extension.packageName)
-
-        if (currentExtension != null) {
-            if (PackageInfoCompat.getLongVersionCode(extension) <
-                PackageInfoCompat.getLongVersionCode(currentExtension)
-            ) {
-                logcat(LogPriority.ERROR) { "Installed extension version is higher. Downgrading is not allowed." }
-                return false
-            }
-
-            val extensionSignatures = getSignatures(extension)
-            if (extensionSignatures.isNullOrEmpty()) {
-                logcat(LogPriority.ERROR) { "Extension to be installed is not signed." }
-                return false
-            }
-
-            if (!extensionSignatures.containsAll(getSignatures(currentExtension)!!)) {
-                logcat(LogPriority.ERROR) { "Installed extension signature is not matched." }
-                return false
-            }
-        }
-
-        val target = File(getPrivateExtensionDir(context), "${extension.packageName}.$PRIVATE_EXTENSION_EXTENSION")
-        return try {
-            target.delete()
-            file.copyAndSetReadOnlyTo(target, overwrite = true)
-            if (currentExtension != null) {
-                ExtensionInstallReceiver.notifyReplaced(context, extension.packageName)
-            } else {
-                ExtensionInstallReceiver.notifyAdded(context, extension.packageName)
-            }
-            true
-        } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected) { "Failed to copy extension file." }
-            target.delete()
-            false
-        }
-    }
-
-    fun uninstallPrivateExtension(context: Context, pkgName: String) {
-        File(getPrivateExtensionDir(context), "$pkgName.$PRIVATE_EXTENSION_EXTENSION").delete()
-    }
+    internal const val PRIVATE_EXTENSION_EXTENSION = "ext"
 
     /**
      * Return a list of all the available extensions initialized concurrently.
@@ -331,49 +279,6 @@ internal object ExtensionLoader {
         return LoadResult.Success(extension)
     }
 
-    // Choose which extension package to use based on version code.
-    // @param shared extension installed to system
-    // @param private extension installed to data directory
-    private fun selectExtensionPackage(shared: ExtensionInfo?, private: ExtensionInfo?): ExtensionInfo? {
-        when {
-            private == null && shared != null -> return shared
-            shared == null && private != null -> return private
-            shared == null && private == null -> return null
-        }
-
-        return if (PackageInfoCompat.getLongVersionCode(shared!!.packageInfo) >=
-            PackageInfoCompat.getLongVersionCode(private!!.packageInfo)
-        ) {
-            shared
-        } else {
-            private
-        }
-    }
-
-    // Returns true if the given package is an extension.
-    // @param pkgInfo The package info of the application.
-    private fun isPackageAnExtension(pkgInfo: PackageInfo): Boolean =
-        pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
-
-    // Returns the signatures of the package or null if it's not signed.
-    // @param pkgInfo The package info of the application.
-    // @return List SHA256 digest of the signatures
-    private fun getSignatures(pkgInfo: PackageInfo): List<String>? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val signingInfo = pkgInfo.signingInfo!!
-            if (signingInfo.hasMultipleSigners()) {
-                signingInfo.apkContentsSigners
-            } else {
-                signingInfo.signingCertificateHistory
-            }
-        } else {
-            @Suppress("DEPRECATION")
-            pkgInfo.signatures
-        }
-            ?.map { Hash.sha256(it.toByteArray()) }
-            ?.toList()
-    }
-
     // On Android 13+ the ApplicationInfo generated by getPackageArchiveInfo doesn't
     // have sourceDir which breaks assets loading (used for getting icon here).
     private fun ApplicationInfo.fixBasePaths(apkPath: String) {
@@ -385,7 +290,7 @@ internal object ExtensionLoader {
         }
     }
 
-    private data class ExtensionInfo(
+    internal data class ExtensionInfo(
         val packageInfo: PackageInfo,
         val isShared: Boolean,
     )

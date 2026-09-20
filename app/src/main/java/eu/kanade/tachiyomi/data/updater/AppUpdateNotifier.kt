@@ -11,6 +11,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.notification.cancelAppUpdateBroadcast
+import eu.kanade.tachiyomi.data.notification.downloadAppUpdateBroadcast
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notify
 import tachiyomi.core.common.i18n.stringResource

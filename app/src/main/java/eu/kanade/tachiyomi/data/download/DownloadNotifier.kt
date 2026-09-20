@@ -10,6 +10,10 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.notification.clearDownloadsPendingBroadcast
+import eu.kanade.tachiyomi.data.notification.openEntryPendingActivity
+import eu.kanade.tachiyomi.data.notification.pauseDownloadsPendingBroadcast
+import eu.kanade.tachiyomi.data.notification.resumeDownloadsBroadcast
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.cancelNotification
 import eu.kanade.tachiyomi.util.system.notificationBuilder

@@ -8,6 +8,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.notification.cancelRestorePendingBroadcast
+import eu.kanade.tachiyomi.data.notification.openErrorLogPendingActivity
+import eu.kanade.tachiyomi.data.notification.shareBackupPendingActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.cancelNotification
 import eu.kanade.tachiyomi.util.system.notificationBuilder

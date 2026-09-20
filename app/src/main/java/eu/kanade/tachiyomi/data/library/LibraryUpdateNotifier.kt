@@ -21,6 +21,11 @@ import eu.kanade.tachiyomi.data.download.Downloader
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.notification.cancelLibraryUpdateBroadcast
+import eu.kanade.tachiyomi.data.notification.downloadChaptersBroadcast
+import eu.kanade.tachiyomi.data.notification.markAsReadPendingBroadcast
+import eu.kanade.tachiyomi.data.notification.openChapterPendingActivity
+import eu.kanade.tachiyomi.data.notification.openErrorLogPendingActivity
 import eu.kanade.tachiyomi.source.UnmeteredSource
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.chop

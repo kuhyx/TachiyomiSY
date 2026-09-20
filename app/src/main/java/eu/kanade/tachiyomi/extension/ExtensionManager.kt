@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.extension.util.ExtensionInstallReceiver
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
+import eu.kanade.tachiyomi.extension.util.uninstallPrivateExtension
 import exh.log.xLogD
 import exh.source.BlacklistedSources
 import kotlinx.coroutines.CoroutineScope
