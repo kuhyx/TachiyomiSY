@@ -35,7 +35,7 @@ import java.time.ZonedDateTime
 import kotlin.time.Duration.Companion.minutes
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
+internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
     private val json: Json by injectLazy()
 

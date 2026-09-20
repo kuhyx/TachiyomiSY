@@ -9,7 +9,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 
-class UpcomingScreen : Screen() {
+internal class UpcomingScreen : Screen() {
 
     @Composable
     override fun Content() {

@@ -81,7 +81,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-object SettingsEhScreen : SearchableSettings {
+internal object SettingsEhScreen : SearchableSettings {
 
     @ReadOnlyComposable
     @Composable

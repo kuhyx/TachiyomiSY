@@ -21,7 +21,7 @@ import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 @Composable
-fun TextPreferenceWidget(
+internal fun TextPreferenceWidget(
     modifier: Modifier = Modifier,
     title: String? = null,
     subtitle: CharSequence? = null,

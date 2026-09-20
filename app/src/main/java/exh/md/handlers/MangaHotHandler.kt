@@ -11,7 +11,7 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Response
 
-class MangaHotHandler(currentClient: OkHttpClient, userAgent: String) {
+internal class MangaHotHandler(currentClient: OkHttpClient, userAgent: String) {
     val baseUrl = "https://mangahot.jp"
     private val apiUrl = "https://api.mangahot.jp"
     val headers = Headers.Builder()

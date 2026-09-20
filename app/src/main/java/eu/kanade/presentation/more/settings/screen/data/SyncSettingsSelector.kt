@@ -26,7 +26,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SyncSettingsSelector : Screen() {
+internal class SyncSettingsSelector : Screen() {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow

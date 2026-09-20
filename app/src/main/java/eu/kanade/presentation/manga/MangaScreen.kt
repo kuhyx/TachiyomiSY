@@ -111,7 +111,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 @Composable
-fun MangaScreen(
+internal fun MangaScreen(
     state: MangaScreenModel.State.Success,
     snackbarHostState: SnackbarHostState,
     nextUpdate: Instant?,
@@ -596,7 +596,7 @@ private fun MangaScreenSmallImpl(
 }
 
 @Composable
-fun MangaScreenLargeImpl(
+internal fun MangaScreenLargeImpl(
     state: MangaScreenModel.State.Success,
     snackbarHostState: SnackbarHostState,
     nextUpdate: Instant?,
@@ -1054,14 +1054,14 @@ private fun onChapterItemClick(
 }
 
 // SY -->
-typealias MetadataDescriptionComposable = @Composable (
+internal typealias MetadataDescriptionComposable = @Composable (
     state: MangaScreenModel.State.Success,
     openMetadataViewer: () -> Unit,
     search: (String) -> Unit,
 ) -> Unit
 
 @Composable
-fun metadataDescription(source: Source): MetadataDescriptionComposable? {
+internal fun metadataDescription(source: Source): MetadataDescriptionComposable? {
     val metadataSource = remember(source.id) { source.getMainSource<MetadataSource<*, *>>() }
     return remember(metadataSource) {
         when (metadataSource) {

@@ -35,7 +35,7 @@ import java.io.File
  * @param label Label to show to the user describing the content
  * @param content the actual text to copy to the board
  */
-fun Context.copyToClipboard(label: String, content: String) {
+internal fun Context.copyToClipboard(label: String, content: String) {
     if (content.isBlank()) return
 
     try {
@@ -53,14 +53,14 @@ fun Context.copyToClipboard(label: String, content: String) {
     }
 }
 
-val Context.powerManager: PowerManager
+internal val Context.powerManager: PowerManager
     get() = getSystemService()!!
 
-fun Context.openInBrowser(url: String, forceDefaultBrowser: Boolean = false) {
+internal fun Context.openInBrowser(url: String, forceDefaultBrowser: Boolean = false) {
     this.openInBrowser(url.toUri(), forceDefaultBrowser)
 }
 
-fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {
+internal fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {
     try {
         val intent = Intent(Intent.ACTION_VIEW, uri).apply {
             // Force default browser so that verified extensions don't re-open Tachiyomi
@@ -89,7 +89,7 @@ private fun Context.defaultBrowserPackageName(): String? {
         ?.takeUnless { it in DeviceUtil.invalidDefaultBrowsers }
 }
 
-fun Context.createFileInCacheDir(name: String): File {
+internal fun Context.createFileInCacheDir(name: String): File {
     val file = File(externalCacheDir, name)
     if (file.exists()) {
         file.delete()
@@ -104,7 +104,7 @@ fun Context.createFileInCacheDir(name: String): File {
  * Context wrapping method obtained from AppCompatDelegateImpl
  * https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:appcompat/appcompat/src/main/java/androidx/appcompat/app/AppCompatDelegateImpl.java;l=348;drc=e28752c96fc3fb4d3354781469a1af3dbded4898
  */
-fun Context.createReaderThemeContext(): Context {
+internal fun Context.createReaderThemeContext(): Context {
     val preferences = Injekt.get<UiPreferences>()
     val readerPreferences = Injekt.get<ReaderPreferences>()
     val themeMode = preferences.themeMode.get()
@@ -136,14 +136,14 @@ fun Context.createReaderThemeContext(): Context {
  *
  * @return document size of [uri] or null if size can't be obtained
  */
-fun Context.getUriSize(uri: Uri): Long? {
+internal fun Context.getUriSize(uri: Uri): Long? {
     return UniFile.fromUri(this, uri)?.length()?.takeIf { it >= 0 }
 }
 
 /**
  * Returns true if [packageName] is installed.
  */
-fun Context.isPackageInstalled(packageName: String): Boolean {
+internal fun Context.isPackageInstalled(packageName: String): Boolean {
     return try {
         packageManager.getApplicationInfo(packageName, 0)
         true
@@ -152,11 +152,11 @@ fun Context.isPackageInstalled(packageName: String): Boolean {
     }
 }
 
-val Context.hasMiuiPackageInstaller get() = isPackageInstalled("com.miui.packageinstaller")
+internal val Context.hasMiuiPackageInstaller get() = isPackageInstalled("com.miui.packageinstaller")
 
-val Context.isShizukuInstalled get() = isPackageInstalled("moe.shizuku.privileged.api") || Sui.isSui()
+internal val Context.isShizukuInstalled get() = isPackageInstalled("moe.shizuku.privileged.api") || Sui.isSui()
 
-fun Context.launchRequestPackageInstallsPermission() {
+internal fun Context.launchRequestPackageInstallsPermission() {
     val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
             data = "package:$packageName".toUri()

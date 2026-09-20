@@ -41,7 +41,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-data object MoreTab : Tab {
+internal data object MoreTab : Tab {
 
     override val options: TabOptions
         @Composable
@@ -128,7 +128,7 @@ private class MoreScreenModel(
     }
 }
 
-sealed interface DownloadQueueState {
+internal sealed interface DownloadQueueState {
     data object Stopped : DownloadQueueState
     data class Paused(val pending: Int) : DownloadQueueState
     data class Downloading(val pending: Int) : DownloadQueueState

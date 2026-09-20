@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.data.track.suwayomi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-enum class MangaStatus(
+internal enum class MangaStatus(
     val rawValue: String,
 ) {
     UNKNOWN("UNKNOWN"),
@@ -16,7 +16,7 @@ enum class MangaStatus(
 }
 
 @Serializable
-data class MangaFragment(
+internal data class MangaFragment(
     val artist: String?,
     val author: String?,
     val description: String?,
@@ -57,32 +57,32 @@ data class MangaFragment(
 }
 
 @Serializable
-data class GetMangaResult(
+internal data class GetMangaResult(
     val data: GetMangaData,
 )
 
 @Serializable
-data class GetMangaData(
+internal data class GetMangaData(
     @SerialName("manga") val entry: MangaFragment,
 )
 
 @Serializable
-data class GetMangaUnreadChaptersEntry(
+internal data class GetMangaUnreadChaptersEntry(
     val nodes: List<GetMangaUnreadChaptersNode>,
 )
 
 @Serializable
-data class GetMangaUnreadChaptersNode(
+internal data class GetMangaUnreadChaptersNode(
     val id: Int,
     val chapterNumber: Double,
 )
 
 @Serializable
-data class GetMangaUnreadChaptersResult(
+internal data class GetMangaUnreadChaptersResult(
     val data: GetMangaUnreadChaptersData,
 )
 
 @Serializable
-data class GetMangaUnreadChaptersData(
+internal data class GetMangaUnreadChaptersData(
     @SerialName("chapters") val entry: GetMangaUnreadChaptersEntry,
 )

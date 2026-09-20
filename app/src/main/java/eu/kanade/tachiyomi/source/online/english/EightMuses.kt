@@ -24,7 +24,7 @@ import org.jsoup.nodes.Element
 import rx.Observable
 import tachiyomi.core.common.util.lang.runAsObservable
 
-class EightMuses(delegate: HttpSource, val context: Context) :
+internal class EightMuses(delegate: HttpSource, val context: Context) :
     DelegatedHttpSource(delegate),
     MetadataSource<EightMusesSearchMetadata, Document>,
     UrlImportableSource,

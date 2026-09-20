@@ -6,7 +6,7 @@ import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-fun Source.getNameForMangaInfo(
+internal fun Source.getNameForMangaInfo(
     // SY -->
     mergeSources: List<Source>? = null,
     enabledLanguages: List<String> = Injekt.get<SourcePreferences>().enabledLanguages.get()
@@ -51,4 +51,4 @@ private fun getMergedSourcesString(
 }
 // SY <--
 
-fun Source.isLocalOrStub(): Boolean = isLocal() || this is StubSource
+internal fun Source.isLocalOrStub(): Boolean = isLocal() || this is StubSource

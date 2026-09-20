@@ -33,7 +33,7 @@ import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.presentation.core.util.plus
 
-class MetadataViewScreen(private val mangaId: Long, private val sourceId: Long) : Screen() {
+internal class MetadataViewScreen(private val mangaId: Long, private val sourceId: Long) : Screen() {
 
     @Composable
     override fun Content() {

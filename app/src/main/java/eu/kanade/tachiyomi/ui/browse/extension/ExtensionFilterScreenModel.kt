@@ -19,7 +19,7 @@ import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class ExtensionFilterScreenModel(
+internal class ExtensionFilterScreenModel(
     private val preferences: SourcePreferences = Injekt.get(),
     private val getExtensionLanguages: GetExtensionLanguages = Injekt.get(),
     private val toggleLanguage: ToggleLanguage = Injekt.get(),
@@ -54,11 +54,11 @@ class ExtensionFilterScreenModel(
     }
 }
 
-sealed interface ExtensionFilterEvent {
+internal sealed interface ExtensionFilterEvent {
     data object FailedFetchingLanguages : ExtensionFilterEvent
 }
 
-sealed interface ExtensionFilterState {
+internal sealed interface ExtensionFilterState {
 
     @Immutable
     data object Loading : ExtensionFilterState

@@ -21,7 +21,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.text.NumberFormat
 
-object SettingsReaderScreen : SearchableSettings {
+internal object SettingsReaderScreen : SearchableSettings {
 
     @ReadOnlyComposable
     @Composable

@@ -40,7 +40,7 @@ private val defaultModifier = Modifier
     .aspectRatio(1f)
 
 @Composable
-fun SourceIcon(
+internal fun SourceIcon(
     source: Source,
     modifier: Modifier = Modifier,
 ) {
@@ -80,7 +80,7 @@ fun SourceIcon(
 }
 
 @Composable
-fun ExtensionIcon(
+internal fun ExtensionIcon(
     extension: Extension,
     modifier: Modifier = Modifier,
     density: Int = DisplayMetrics.DENSITY_DEFAULT,
@@ -141,7 +141,7 @@ private fun Extension.getIcon(density: Int = DisplayMetrics.DENSITY_DEFAULT): St
     }
 }
 
-sealed class Result<out T> {
+internal sealed class Result<out T> {
     data object Loading : Result<Nothing>()
     data object Error : Result<Nothing>()
     data class Success<out T>(val value: T) : Result<T>()

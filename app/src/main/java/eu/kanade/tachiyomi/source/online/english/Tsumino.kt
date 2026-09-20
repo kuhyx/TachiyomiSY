@@ -26,7 +26,7 @@ import tachiyomi.core.common.util.lang.runAsObservable
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class Tsumino(delegate: HttpSource, val context: Context) :
+internal class Tsumino(delegate: HttpSource, val context: Context) :
     DelegatedHttpSource(delegate),
     MetadataSource<TsuminoSearchMetadata, Document>,
     UrlImportableSource,

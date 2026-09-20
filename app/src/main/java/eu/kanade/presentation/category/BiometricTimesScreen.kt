@@ -20,7 +20,7 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.plus
 
 @Composable
-fun BiometricTimesScreen(
+internal fun BiometricTimesScreen(
     state: BiometricTimesScreenState.Success,
     onClickCreate: () -> Unit,
     onClickDelete: (TimeRangeItem) -> Unit,

@@ -1,6 +1,6 @@
 package mihon.domain.migration.models
 
-enum class MigrationFlag(val flag: Int) {
+internal enum class MigrationFlag(val flag: Int) {
     CHAPTER(0b00001),
     CATEGORY(0b00010),
 

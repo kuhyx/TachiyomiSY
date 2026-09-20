@@ -42,7 +42,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.source.local.LocalSource
 
-data class MigrateSourceSearchScreen(
+internal data class MigrateSourceSearchScreen(
     private val currentManga: Manga,
     private val sourceId: Long,
     private val query: String?,

@@ -8,7 +8,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class HKRead(
+internal data class HKRead(
     val reference: String,
     val note: String?,
     val updated: Long,

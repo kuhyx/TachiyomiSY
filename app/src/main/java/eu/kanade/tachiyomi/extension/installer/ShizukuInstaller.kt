@@ -25,7 +25,7 @@ import rikka.shizuku.Shizuku
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
 
-class ShizukuInstaller(private val service: Service) : Installer(service) {
+internal class ShizukuInstaller(private val service: Service) : Installer(service) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -153,4 +153,4 @@ class ShizukuInstaller(private val service: Service) : Installer(service) {
 }
 
 private const val SHIZUKU_PERMISSION_REQUEST_CODE = 14045
-const val ACTION_INSTALL_RESULT = "${BuildConfig.APPLICATION_ID}.ACTION_INSTALL_RESULT"
+internal const val ACTION_INSTALL_RESULT = "${BuildConfig.APPLICATION_ID}.ACTION_INSTALL_RESULT"

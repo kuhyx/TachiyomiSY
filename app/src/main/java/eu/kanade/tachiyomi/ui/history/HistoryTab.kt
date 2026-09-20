@@ -42,7 +42,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-data object HistoryTab : Tab {
+internal data object HistoryTab : Tab {
 
     private val snackbarHostState = SnackbarHostState()
 

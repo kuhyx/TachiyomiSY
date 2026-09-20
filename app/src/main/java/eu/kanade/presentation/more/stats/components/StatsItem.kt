@@ -19,7 +19,7 @@ import tachiyomi.presentation.core.components.material.SECONDARY_ALPHA
 import tachiyomi.presentation.core.components.material.padding
 
 @Composable
-fun RowScope.StatsOverviewItem(
+internal fun RowScope.StatsOverviewItem(
     title: String,
     subtitle: String,
     icon: ImageVector,
@@ -34,7 +34,7 @@ fun RowScope.StatsOverviewItem(
 }
 
 @Composable
-fun RowScope.StatsItem(
+internal fun RowScope.StatsItem(
     title: String,
     subtitle: String,
 ) {

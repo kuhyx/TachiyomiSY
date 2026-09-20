@@ -23,7 +23,7 @@ import uy.kohesive.injekt.api.get
  *
  * @see setIncognito
  */
-class TachiyomiTextInputEditText @JvmOverloads constructor(
+internal class TachiyomiTextInputEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = R.attr.editTextStyle,

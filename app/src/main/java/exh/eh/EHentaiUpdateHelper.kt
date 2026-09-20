@@ -28,9 +28,9 @@ import tachiyomi.domain.manga.model.MangaUpdate
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 
-data class ChapterChain(val manga: Manga, val chapters: List<Chapter>, val history: List<History>)
+internal data class ChapterChain(val manga: Manga, val chapters: List<Chapter>, val history: List<History>)
 
-class EHentaiUpdateHelper(context: Context) {
+internal class EHentaiUpdateHelper(context: Context) {
     val parentLookupTable =
         MemAutoFlushingLookupTable(
             File(context.filesDir, "exh-plt.maftable"),
@@ -292,7 +292,7 @@ class EHentaiUpdateHelper(context: Context) {
     }
 }
 
-data class GalleryEntry(val gId: String, val gToken: String) {
+internal data class GalleryEntry(val gId: String, val gToken: String) {
     class Serializer : MemAutoFlushingLookupTable.EntrySerializer<GalleryEntry> {
         /**
          * Serialize an entry as a String.

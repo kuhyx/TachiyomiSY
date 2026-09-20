@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
  * | N | N | N |   N: Next
  * +---+---+---+
  */
-open class LNavigation : ViewerNavigation() {
+internal open class LNavigation : ViewerNavigation() {
 
     override var regionList: List<Region> = listOf(
         Region(

@@ -38,7 +38,7 @@ import uy.kohesive.injekt.api.get
  * downloaded chapters.
  */
 @OptIn(DelicateCoroutinesApi::class)
-class DownloadManager(
+internal class DownloadManager(
     private val context: Context,
     private val provider: DownloadProvider = Injekt.get(),
     private val cache: DownloadCache = Injekt.get(),

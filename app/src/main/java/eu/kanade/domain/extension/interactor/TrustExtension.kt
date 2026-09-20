@@ -6,7 +6,7 @@ import eu.kanade.domain.source.service.SourcePreferences
 import mihon.domain.extension.repository.ExtensionStoreRepository
 import tachiyomi.core.common.preference.getAndSet
 
-class TrustExtension(
+internal class TrustExtension(
     private val repository: ExtensionStoreRepository,
     private val preferences: SourcePreferences,
 ) {

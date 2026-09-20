@@ -61,7 +61,7 @@ import tachiyomi.presentation.core.util.selectedBackground
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class ClearDatabaseScreen : Screen() {
+internal class ClearDatabaseScreen : Screen() {
 
     @Composable
     override fun Content() {

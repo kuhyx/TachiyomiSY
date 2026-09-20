@@ -5,7 +5,7 @@ import androidx.core.content.edit
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 
-class DelayedTrackingStore(context: Context) {
+internal class DelayedTrackingStore(context: Context) {
 
     /**
      * Preference file where queued tracking updates are stored.

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 // Incomplete DTO with only our needed attributes
-data class BGMUser(
+internal data class BGMUser(
     val username: String,
     val nickname: String?,
 )

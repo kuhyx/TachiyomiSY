@@ -16,7 +16,7 @@ import tachiyomi.core.common.util.lang.launchIO
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class ExtensionStoresScreenModel(
+internal class ExtensionStoresScreenModel(
     private val getExtensionStores: GetExtensionStores = Injekt.get(),
     private val addExtensionStore: AddExtensionStore = Injekt.get(),
     private val removeExtensionStore: RemoveExtensionStore = Injekt.get(),
@@ -137,7 +137,7 @@ class ExtensionStoresScreenModel(
     }
 }
 
-sealed class ExtensionStoreDialog {
+internal sealed class ExtensionStoreDialog {
     data class Create(val processing: Boolean = false, val errorMessage: String? = null) : ExtensionStoreDialog()
     data class Delete(val store: ExtensionStore) : ExtensionStoreDialog()
     data class Confirm(
@@ -148,7 +148,7 @@ sealed class ExtensionStoreDialog {
     ) : ExtensionStoreDialog()
 }
 
-sealed class ExtensionStoreScreenState {
+internal sealed class ExtensionStoreScreenState {
 
     @Immutable
     data object Loading : ExtensionStoreScreenState()

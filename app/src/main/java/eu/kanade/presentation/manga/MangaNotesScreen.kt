@@ -14,7 +14,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun MangaNotesScreen(
+internal fun MangaNotesScreen(
     state: MangaNotesScreen.State,
     navigateUp: () -> Unit,
     onUpdate: (String) -> Unit,

@@ -31,7 +31,7 @@ import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class MangaUpdatesApi(
+internal class MangaUpdatesApi(
     interceptor: MangaUpdatesInterceptor,
     private val client: OkHttpClient,
 ) {

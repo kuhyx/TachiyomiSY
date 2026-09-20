@@ -6,7 +6,7 @@ import tachiyomi.domain.history.model.History
 import java.util.Date
 
 @Serializable
-data class BackupHistory(
+internal data class BackupHistory(
     @ProtoNumber(1) var url: String,
     @ProtoNumber(2) var lastRead: Long,
     @ProtoNumber(3) var readDuration: Long = 0,

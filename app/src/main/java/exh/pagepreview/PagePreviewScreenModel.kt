@@ -22,7 +22,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class PagePreviewScreenModel(
+internal class PagePreviewScreenModel(
     private val mangaId: Long,
     private val getPagePreviews: GetPagePreviews = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
@@ -91,7 +91,7 @@ class PagePreviewScreenModel(
     }
 }
 
-sealed class PagePreviewState {
+internal sealed class PagePreviewState {
     data object Loading : PagePreviewState()
 
     data class Success(

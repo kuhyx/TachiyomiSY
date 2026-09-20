@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import tachiyomi.domain.chapter.repository.ChapterRepository
 
-class GetAvailableScanlators(
+internal class GetAvailableScanlators(
     private val repository: ChapterRepository,
 ) {
 

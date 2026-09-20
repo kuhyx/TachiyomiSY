@@ -19,7 +19,7 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.sy.SYMR
 import kotlin.math.roundToInt
 
-object MetadataUIUtil {
+internal object MetadataUIUtil {
     fun getRatingString(
         context: Context,
         @FloatRange(from = 0.0, to = 10.0) rating: Float? = null,

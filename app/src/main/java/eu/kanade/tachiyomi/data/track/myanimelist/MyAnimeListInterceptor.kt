@@ -8,7 +8,7 @@ import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import java.io.IOException
 
-class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor {
+internal class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor {
 
     private val json: Json by injectLazy()
 
@@ -81,6 +81,6 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
     }
 }
 
-class MALTitleNotApproved : IOException("MAL: This title can't be added because it is waiting for approval.")
-class MALTokenRefreshFailed : IOException("MAL: Failed to refresh account token")
-class MALTokenExpired : IOException("MAL: Login has expired")
+internal class MALTitleNotApproved : IOException("MAL: This title can't be added because it is waiting for approval.")
+internal class MALTokenRefreshFailed : IOException("MAL: Failed to refresh account token")
+internal class MALTokenExpired : IOException("MAL: Login has expired")

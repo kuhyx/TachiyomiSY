@@ -9,7 +9,7 @@ import tachiyomi.domain.source.repository.SourceRepository
 import tachiyomi.source.local.isLocal
 import java.util.Collections
 
-class GetSourcesWithFavoriteCount(
+internal class GetSourcesWithFavoriteCount(
     private val repository: SourceRepository,
     private val preferences: SourcePreferences,
 ) {

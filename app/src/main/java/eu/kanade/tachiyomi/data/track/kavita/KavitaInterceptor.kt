@@ -4,7 +4,7 @@ import eu.kanade.tachiyomi.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class KavitaInterceptor(private val kavita: Kavita) : Interceptor {
+internal class KavitaInterceptor(private val kavita: Kavita) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()

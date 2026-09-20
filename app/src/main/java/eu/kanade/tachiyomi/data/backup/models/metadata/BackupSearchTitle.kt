@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
-data class BackupSearchTitle(
+internal data class BackupSearchTitle(
     @ProtoNumber(1) var title: String,
     @ProtoNumber(2) var type: Int,
 ) {

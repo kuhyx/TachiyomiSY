@@ -19,7 +19,7 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.plus
 
 @Composable
-fun SortTagScreen(
+internal fun SortTagScreen(
     state: SortTagScreenState.Success,
     onClickCreate: () -> Unit,
     onClickDelete: (String) -> Unit,

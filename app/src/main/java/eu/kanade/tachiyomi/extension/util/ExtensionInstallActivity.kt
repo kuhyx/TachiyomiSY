@@ -15,7 +15,7 @@ import kotlin.time.Duration.Companion.seconds
  * Activity used to install extensions, because we can only receive the result of the installation
  * with [startActivityForResult], which we need to update the UI.
  */
-class ExtensionInstallActivity : Activity() {
+internal class ExtensionInstallActivity : Activity() {
 
     // MIUI package installer bug workaround
     private var ignoreUntil = 0L

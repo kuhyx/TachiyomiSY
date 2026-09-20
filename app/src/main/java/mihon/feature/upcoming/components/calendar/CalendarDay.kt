@@ -25,7 +25,7 @@ import java.time.LocalDate
 private const val MAX_EVENTS = 3
 
 @Composable
-fun CalendarDay(
+internal fun CalendarDay(
     date: LocalDate,
     events: Int,
     onDayClick: () -> Unit,

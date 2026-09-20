@@ -5,7 +5,7 @@ import okhttp3.FormBody
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
-class EhUConfigBuilder {
+internal class EhUConfigBuilder {
     private val exhPreferences: ExhPreferences by injectLazy()
 
     fun build(hathPerks: EHHathPerksResponse): FormBody {
@@ -82,7 +82,7 @@ class EhUConfigBuilder {
     }
 }
 
-object Entry {
+internal object Entry {
     enum class UseHentaiAtHome(override val value: String) : ConfigItem {
         ANY("0"),
         DEFAULTONLY("1"),
@@ -350,7 +350,7 @@ object Entry {
     }
 }
 
-interface ConfigItem {
+internal interface ConfigItem {
     val key: String
     val value: String
 }

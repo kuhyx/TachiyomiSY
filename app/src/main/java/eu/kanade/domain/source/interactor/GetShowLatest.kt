@@ -4,7 +4,7 @@ import eu.kanade.domain.ui.UiPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class GetShowLatest(
+internal class GetShowLatest(
     private val preferences: UiPreferences,
 ) {
 

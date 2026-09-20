@@ -10,7 +10,7 @@ import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class GoogleDriveLoginActivity : BaseOAuthLoginActivity() {
+internal class GoogleDriveLoginActivity : BaseOAuthLoginActivity() {
     private val googleDriveService = Injekt.get<GoogleDriveService>()
     override fun handleResult(uri: Uri) {
         val code = uri.getQueryParameter("code")

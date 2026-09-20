@@ -27,7 +27,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 private val ReaderOrientationsWithoutDefault = ReaderOrientation.entries - ReaderOrientation.DEFAULT
 
 @Composable
-fun OrientationSelectDialog(
+internal fun OrientationSelectDialog(
     onDismissRequest: () -> Unit,
     screenModel: ReaderSettingsScreenModel,
     onChange: (StringResource) -> Unit,

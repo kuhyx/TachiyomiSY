@@ -6,7 +6,7 @@ import kotlinx.coroutines.launch
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 
-class TrackLoginActivity : BaseOAuthLoginActivity() {
+internal class TrackLoginActivity : BaseOAuthLoginActivity() {
 
     override fun handleResult(uri: Uri) {
         val data = when {

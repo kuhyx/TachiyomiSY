@@ -18,7 +18,7 @@ import tachiyomi.presentation.core.components.AdaptiveSheet as AdaptiveSheetImpl
 
 @OptIn(InternalVoyagerApi::class)
 @Composable
-fun NavigatorAdaptiveSheet(
+internal fun NavigatorAdaptiveSheet(
     screen: Screen,
     enableSwipeDismiss: (Navigator) -> Boolean = { true },
     onDismissRequest: () -> Unit,
@@ -60,7 +60,7 @@ fun NavigatorAdaptiveSheet(
  * Max width of the content is set to 460 dp.
  */
 @Composable
-fun AdaptiveSheet(
+internal fun AdaptiveSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     enableSwipeDismiss: Boolean = true,

@@ -7,7 +7,7 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 
-class ResetRotationSettingMigration : Migration {
+internal class ResetRotationSettingMigration : Migration {
     override val version: Float = 16f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

@@ -10,7 +10,7 @@ import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.data.updater.AppUpdateDownloadJob
 import eu.kanade.tachiyomi.util.system.openInBrowser
 
-class NewUpdateScreen(
+internal class NewUpdateScreen(
     private val versionName: String,
     private val changelogInfo: String,
     private val releaseLink: String,

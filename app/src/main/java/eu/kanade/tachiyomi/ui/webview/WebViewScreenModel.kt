@@ -16,7 +16,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class WebViewScreenModel(
+internal class WebViewScreenModel(
     val sourceId: Long?,
     private val sourceManager: SourceManager = Injekt.get(),
     private val network: NetworkHelper = Injekt.get(),

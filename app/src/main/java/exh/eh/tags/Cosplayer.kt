@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-object Cosplayer : TagList {
+internal object Cosplayer : TagList {
     override fun getTags1(): List<String> = listOf(
         "cosplayer:9797san",
         "cosplayer:a bao yeshi tu niang",

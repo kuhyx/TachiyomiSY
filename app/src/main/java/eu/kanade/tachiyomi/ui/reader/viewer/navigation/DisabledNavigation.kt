@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
  * | M | M | M |   N: Next
  * +---+---+---+
 */
-class DisabledNavigation : ViewerNavigation() {
+internal class DisabledNavigation : ViewerNavigation() {
 
     override var regionList: List<Region> = emptyList()
 }

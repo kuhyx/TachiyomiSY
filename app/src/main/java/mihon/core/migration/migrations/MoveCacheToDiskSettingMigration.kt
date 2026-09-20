@@ -7,7 +7,7 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 
-class MoveCacheToDiskSettingMigration : Migration {
+internal class MoveCacheToDiskSettingMigration : Migration {
     override val version: Float = 66f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

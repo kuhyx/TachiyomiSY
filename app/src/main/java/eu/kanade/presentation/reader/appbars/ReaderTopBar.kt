@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 import eu.kanade.presentation.components.AppBar
 
 @Composable
-fun ReaderTopBar(
+internal fun ReaderTopBar(
     mangaTitle: String?,
     chapterTitle: String?,
     navigateUp: () -> Unit,

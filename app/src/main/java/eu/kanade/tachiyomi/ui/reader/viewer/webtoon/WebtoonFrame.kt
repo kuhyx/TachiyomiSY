@@ -14,7 +14,7 @@ import android.widget.FrameLayout
  *
  * TODO consider integrating this class into [WebtoonViewer].
  */
-class WebtoonFrame(context: Context) : FrameLayout(context) {
+internal class WebtoonFrame(context: Context) : FrameLayout(context) {
 
     /**
      * Scale detector, either with pinch or quick scale.

@@ -13,7 +13,7 @@ import tachiyomi.domain.source.model.minus
 import tachiyomi.domain.source.repository.SourceRepository
 import tachiyomi.source.local.isLocal
 
-class GetEnabledSources(
+internal class GetEnabledSources(
     private val repository: SourceRepository,
     private val preferences: SourcePreferences,
 ) {

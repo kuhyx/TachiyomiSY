@@ -9,7 +9,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.manga.interactor.GetMangaBySource
 import tachiyomi.domain.manga.model.MangaUpdate
 
-class DelegateHBrowseMigration : Migration {
+internal class DelegateHBrowseMigration : Migration {
     override val version: Float = 4f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

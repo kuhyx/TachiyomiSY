@@ -29,7 +29,7 @@ import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 
-class SmartSearchScreen(
+internal class SmartSearchScreen(
     private val sourceId: Long,
     private val smartSearchConfig: SourcesScreen.SmartSearchConfig,
 ) : Screen() {

@@ -88,7 +88,7 @@ import tachiyomi.presentation.core.util.runOnEnterKeyPressed
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 @Composable
-fun TrackerSearch(
+internal fun TrackerSearch(
     state: TextFieldState,
     onDispatchQuery: () -> Unit,
     queryResult: Result<List<TrackSearch>>?,

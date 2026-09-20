@@ -59,7 +59,7 @@ import tachiyomi.presentation.core.util.secondaryItemAlpha
 import tachiyomi.presentation.core.util.showSoftKeyboard
 
 @Composable
-fun AppBar(
+internal fun AppBar(
     title: String?,
 
     modifier: Modifier = Modifier,
@@ -108,7 +108,7 @@ fun AppBar(
 }
 
 @Composable
-fun AppBar(
+internal fun AppBar(
     // Title
     titleContent: @Composable () -> Unit,
 
@@ -158,7 +158,7 @@ fun AppBar(
 }
 
 @Composable
-fun AppBarTitle(
+internal fun AppBarTitle(
     title: String?,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
@@ -186,7 +186,7 @@ fun AppBarTitle(
 }
 
 @Composable
-fun AppBarActions(
+internal fun AppBarActions(
     actions: List<AppBar.AppBarAction>,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -260,7 +260,7 @@ fun AppBarActions(
  * @param placeholderText If null, [MR.strings.action_search_hint] is used.
  */
 @Composable
-fun SearchToolbar(
+internal fun SearchToolbar(
     searchQuery: String?,
     onChangeSearchQuery: (String?) -> Unit,
     modifier: Modifier = Modifier,
@@ -399,7 +399,7 @@ fun SearchToolbar(
 }
 
 @Composable
-fun UpIcon(
+internal fun UpIcon(
     modifier: Modifier = Modifier,
     navigationIcon: ImageVector? = null,
 ) {
@@ -412,7 +412,7 @@ fun UpIcon(
     )
 }
 
-sealed interface AppBar {
+internal sealed interface AppBar {
     sealed interface AppBarAction
 
     data class Action(

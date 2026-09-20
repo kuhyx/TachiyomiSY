@@ -24,7 +24,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun GlobalSearchCardRow(
+internal fun GlobalSearchCardRow(
     titles: List<Manga>,
     getManga: @Composable (Manga) -> State<Manga>,
     onClick: (Manga) -> Unit,

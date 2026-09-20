@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.data.Database
 
-object MigrateUtils {
+internal object MigrateUtils {
     fun updateSourceId(migrationContext: MigrationContext, newId: Long, oldId: Long) {
         val database = migrationContext.get<Database>() ?: return
         runBlocking {

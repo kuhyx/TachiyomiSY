@@ -30,11 +30,11 @@ import kotlinx.coroutines.launch
 import tachiyomi.presentation.core.components.BaseSliderItem
 import tachiyomi.presentation.core.util.collectAsState
 
-val LocalPreferenceHighlighted = compositionLocalOf(structuralEqualityPolicy()) { false }
-val LocalPreferenceMinHeight = compositionLocalOf(structuralEqualityPolicy()) { 56.dp }
+internal val LocalPreferenceHighlighted = compositionLocalOf(structuralEqualityPolicy()) { false }
+internal val LocalPreferenceMinHeight = compositionLocalOf(structuralEqualityPolicy()) { 56.dp }
 
 @Composable
-fun StatusWrapper(
+internal fun StatusWrapper(
     item: Preference.PreferenceItem<*, *>,
     highlightKey: String?,
     content: @Composable () -> Unit,

@@ -8,7 +8,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun MigrationExitDialog(
+internal fun MigrationExitDialog(
     onDismissRequest: () -> Unit,
     exitMigration: () -> Unit,
 ) {

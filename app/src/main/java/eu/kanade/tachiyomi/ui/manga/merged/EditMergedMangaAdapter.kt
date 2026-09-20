@@ -8,7 +8,7 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
  * @param controller the context of the fragment containing this adapter.
  * @param isPriorityOrder if deduplication mode is based on priority
  */
-class EditMergedMangaAdapter(listener: EditMergedSettingsState, var isPriorityOrder: Boolean) :
+internal class EditMergedMangaAdapter(listener: EditMergedSettingsState, var isPriorityOrder: Boolean) :
     FlexibleAdapter<EditMergedMangaItem>(null, listener, true),
     EditMergedSettingsHeaderAdapter.SortingListener {
 

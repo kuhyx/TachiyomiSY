@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.preference.PreferenceDataStore
 
-class SharedPreferencesDataStore(private val prefs: SharedPreferences) : PreferenceDataStore() {
+internal class SharedPreferencesDataStore(private val prefs: SharedPreferences) : PreferenceDataStore() {
 
     override fun getBoolean(key: String?, defValue: Boolean): Boolean {
         return prefs.getBoolean(key, defValue)

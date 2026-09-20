@@ -30,7 +30,7 @@ import androidx.compose.material3.DropdownMenu as ComposeDropdownMenu
  * match non-Compose implementation.
  */
 @Composable
-fun DropdownMenu(
+internal fun DropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
@@ -51,7 +51,7 @@ fun DropdownMenu(
 }
 
 @Composable
-fun RadioMenuItem(
+internal fun RadioMenuItem(
     text: @Composable () -> Unit,
     isChecked: Boolean,
     modifier: Modifier = Modifier,
@@ -79,7 +79,7 @@ fun RadioMenuItem(
 }
 
 @Composable
-fun NestedMenuItem(
+internal fun NestedMenuItem(
     text: @Composable () -> Unit,
     children: @Composable ColumnScope.(() -> Unit) -> Unit,
     modifier: Modifier = Modifier,

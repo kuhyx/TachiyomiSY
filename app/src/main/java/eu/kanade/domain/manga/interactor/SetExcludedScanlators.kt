@@ -3,7 +3,7 @@ package eu.kanade.domain.manga.interactor
 import app.cash.sqldelight.async.coroutines.awaitAsList
 import tachiyomi.data.Database
 
-class SetExcludedScanlators(
+internal class SetExcludedScanlators(
     private val database: Database,
 ) {
 

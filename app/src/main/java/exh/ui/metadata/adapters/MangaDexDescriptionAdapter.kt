@@ -18,7 +18,7 @@ import exh.ui.metadata.adapters.MetadataUIUtil.getRatingString
 import kotlin.math.round
 
 @Composable
-fun MangaDexDescription(state: State.Success, openMetadataViewer: () -> Unit) {
+internal fun MangaDexDescription(state: State.Success, openMetadataViewer: () -> Unit) {
     val context = LocalContext.current
     AndroidView(
         modifier = Modifier.fillMaxWidth(),

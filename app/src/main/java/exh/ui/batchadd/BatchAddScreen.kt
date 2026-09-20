@@ -39,7 +39,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
 
-class BatchAddScreen : Screen() {
+internal class BatchAddScreen : Screen() {
 
     @Composable
     override fun Content() {

@@ -8,7 +8,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 
-class DownloadItem(
+internal class DownloadItem(
     val download: Download,
     header: DownloadHeaderItem,
 ) : AbstractSectionableItem<DownloadHolder, DownloadHeaderItem>(header) {

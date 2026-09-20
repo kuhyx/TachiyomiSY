@@ -7,7 +7,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SourcesBackupCreator(
+internal class SourcesBackupCreator(
     private val sourceManager: SourceManager = Injekt.get(),
 ) {
 

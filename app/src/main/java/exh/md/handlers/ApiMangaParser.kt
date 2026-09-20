@@ -22,7 +22,7 @@ import tachiyomi.domain.manga.interactor.InsertFlatMetadata
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
-class ApiMangaParser(
+internal class ApiMangaParser(
     private val lang: String,
 ) {
     private val getManga: GetManga by injectLazy()

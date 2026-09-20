@@ -10,7 +10,7 @@ import kotlinx.coroutines.supervisorScope
 import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.interactor.InsertTrack
 
-class RefreshTracks(
+internal class RefreshTracks(
     private val getTracks: GetTracks,
     private val trackerManager: TrackerManager,
     private val insertTrack: InsertTrack,

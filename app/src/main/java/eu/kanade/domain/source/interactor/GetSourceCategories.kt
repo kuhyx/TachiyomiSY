@@ -4,7 +4,7 @@ import eu.kanade.domain.source.service.SourcePreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class GetSourceCategories(
+internal class GetSourceCategories(
     private val preferences: SourcePreferences,
 ) {
 

@@ -3,7 +3,7 @@ package exh.md.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ChapterListDto(
+internal data class ChapterListDto(
     override val limit: Int,
     override val offset: Int,
     override val total: Int,
@@ -11,13 +11,13 @@ data class ChapterListDto(
 ) : ListCallDto<ChapterDataDto>
 
 @Serializable
-data class ChapterDto(
+internal data class ChapterDto(
     val result: String,
     val data: ChapterDataDto,
 )
 
 @Serializable
-data class ChapterDataDto(
+internal data class ChapterDataDto(
     val id: String,
     val type: String,
     val attributes: ChapterAttributesDto,
@@ -25,7 +25,7 @@ data class ChapterDataDto(
 )
 
 @Serializable
-data class ChapterAttributesDto(
+internal data class ChapterAttributesDto(
     val title: String?,
     val volume: String?,
     val chapter: String?,
@@ -40,7 +40,7 @@ data class ChapterAttributesDto(
 )
 
 @Serializable
-data class GroupListDto(
+internal data class GroupListDto(
     override val limit: Int,
     override val offset: Int,
     override val total: Int,
@@ -48,18 +48,18 @@ data class GroupListDto(
 ) : ListCallDto<GroupDataDto>
 
 @Serializable
-data class GroupDto(
+internal data class GroupDto(
     val result: String,
     val data: GroupDataDto,
 )
 
 @Serializable
-data class GroupDataDto(
+internal data class GroupDataDto(
     val id: String,
     val attributes: GroupAttributesDto,
 )
 
 @Serializable
-data class GroupAttributesDto(
+internal data class GroupAttributesDto(
     val name: String,
 )

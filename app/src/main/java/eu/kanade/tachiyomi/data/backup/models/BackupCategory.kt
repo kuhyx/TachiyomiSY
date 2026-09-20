@@ -5,7 +5,7 @@ import kotlinx.serialization.protobuf.ProtoNumber
 import tachiyomi.domain.category.model.Category
 
 @Serializable
-class BackupCategory(
+internal class BackupCategory(
     @ProtoNumber(1) var name: String,
     @ProtoNumber(2) var order: Long = 0,
     @ProtoNumber(3) var id: Long = 0,
@@ -29,7 +29,7 @@ class BackupCategory(
     )
 }
 
-val backupCategoryMapper = { category: Category ->
+internal val backupCategoryMapper = { category: Category ->
     BackupCategory(
         id = category.id,
         name = category.name,

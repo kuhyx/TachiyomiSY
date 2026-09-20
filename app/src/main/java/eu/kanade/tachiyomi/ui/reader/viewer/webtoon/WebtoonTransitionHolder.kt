@@ -23,7 +23,7 @@ import tachiyomi.i18n.MR
 /**
  * Holder of the webtoon viewer that contains a chapter transition.
  */
-class WebtoonTransitionHolder(
+internal class WebtoonTransitionHolder(
     val layout: LinearLayout,
     viewer: WebtoonViewer,
 ) : WebtoonBaseHolder(layout, viewer) {

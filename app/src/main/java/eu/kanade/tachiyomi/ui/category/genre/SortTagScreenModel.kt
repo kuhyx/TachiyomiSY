@@ -18,7 +18,7 @@ import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SortTagScreenModel(
+internal class SortTagScreenModel(
     private val getSortTag: GetSortTag = Injekt.get(),
     private val createSortTag: CreateSortTag = Injekt.get(),
     private val deleteSortTag: DeleteSortTag = Injekt.get(),
@@ -93,18 +93,18 @@ class SortTagScreenModel(
     }
 }
 
-sealed class SortTagEvent {
+internal sealed class SortTagEvent {
     sealed class LocalizedMessage(val stringRes: StringResource) : SortTagEvent()
     data object TagExists : LocalizedMessage(SYMR.strings.error_tag_exists)
     data object InternalError : LocalizedMessage(MR.strings.internal_error)
 }
 
-sealed class SortTagDialog {
+internal sealed class SortTagDialog {
     data object Create : SortTagDialog()
     data class Delete(val tag: String) : SortTagDialog()
 }
 
-sealed class SortTagScreenState {
+internal sealed class SortTagScreenState {
 
     @Immutable
     data object Loading : SortTagScreenState()

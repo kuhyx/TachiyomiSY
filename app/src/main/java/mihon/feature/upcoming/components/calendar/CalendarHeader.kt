@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun CalenderHeader(
+internal fun CalenderHeader(
     yearMonth: YearMonth,
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,

@@ -34,7 +34,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.seconds
 
-class ExtensionsScreenModel(
+internal class ExtensionsScreenModel(
     preferences: SourcePreferences = Injekt.get(),
     basePreferences: BasePreferences = Injekt.get(),
     private val extensionManager: ExtensionManager = Injekt.get(),
@@ -220,9 +220,9 @@ class ExtensionsScreenModel(
     }
 }
 
-typealias ItemGroups = Map<ExtensionUiModel.Header, List<ExtensionUiModel.Item>>
+internal typealias ItemGroups = Map<ExtensionUiModel.Header, List<ExtensionUiModel.Item>>
 
-object ExtensionUiModel {
+internal object ExtensionUiModel {
     sealed interface Header {
         data class Resource(val textRes: StringResource) : Header
         data class Text(val text: String) : Header

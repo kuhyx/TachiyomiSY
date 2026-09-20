@@ -18,7 +18,7 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.presentation.core.components.material.padding
 
 @Composable
-fun BaseMangaListItem(
+internal fun BaseMangaListItem(
     manga: Manga,
     modifier: Modifier = Modifier,
     onClickItem: () -> Unit = {},

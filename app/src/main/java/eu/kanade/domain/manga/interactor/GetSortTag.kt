@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import tachiyomi.domain.library.service.LibraryPreferences
 
-class GetSortTag(private val preferences: LibraryPreferences) {
+internal class GetSortTag(private val preferences: LibraryPreferences) {
 
     fun subscribe(): Flow<List<String>> {
         return preferences.sortTagsForLibrary.changes()

@@ -7,7 +7,7 @@ import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.util.lang.withIOContext
 
-class VerticalNavigatorMigration : Migration {
+internal class VerticalNavigatorMigration : Migration {
     override val version: Float = 79f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

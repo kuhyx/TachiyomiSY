@@ -7,7 +7,7 @@ import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.library.service.LibraryPreferences
 
-class MoveReadingButtonSettingMigration : Migration {
+internal class MoveReadingButtonSettingMigration : Migration {
     override val version: Float = 43f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

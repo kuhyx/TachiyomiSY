@@ -2,10 +2,10 @@ package exh.util
 
 import kotlin.math.floor
 
-fun Float.floor(): Int = floor(this).toInt()
+internal fun Float.floor(): Int = floor(this).toInt()
 
-fun Double.floor(): Int = floor(this).toInt()
+internal fun Double.floor(): Int = floor(this).toInt()
 
-fun Int.nullIfZero() = takeUnless { it == 0 }
+internal fun Int.nullIfZero() = takeUnless { it == 0 }
 
-fun Long.nullIfZero() = takeUnless { it == 0L }
+internal fun Long.nullIfZero() = takeUnless { it == 0L }

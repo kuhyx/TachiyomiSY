@@ -1,6 +1,6 @@
 package exh.md.utils
 
-object MdApi {
+internal object MdApi {
     const val baseUrl = "https://api.mangadex.org"
     const val manga = "$baseUrl/manga"
     const val cover = "$baseUrl/cover"

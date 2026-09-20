@@ -45,7 +45,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-class WorkerInfoScreen : Screen() {
+internal class WorkerInfoScreen : Screen() {
 
     companion object {
         const val TITLE = "Worker info"

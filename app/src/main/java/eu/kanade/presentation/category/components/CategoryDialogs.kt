@@ -37,7 +37,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun CategoryCreateDialog(
+internal fun CategoryCreateDialog(
     onDismissRequest: () -> Unit,
     onCreate: (String) -> Unit,
     categories: List<String>,
@@ -116,7 +116,7 @@ fun CategoryCreateDialog(
 }
 
 @Composable
-fun CategoryRenameDialog(
+internal fun CategoryRenameDialog(
     onDismissRequest: () -> Unit,
     onRename: (String) -> Unit,
     categories: List<String>,
@@ -180,7 +180,7 @@ fun CategoryRenameDialog(
 }
 
 @Composable
-fun CategoryDeleteDialog(
+internal fun CategoryDeleteDialog(
     onDismissRequest: () -> Unit,
     onDelete: () -> Unit,
     // SY -->
@@ -218,7 +218,7 @@ fun CategoryDeleteDialog(
 }
 
 @Composable
-fun ChangeCategoryDialog(
+internal fun ChangeCategoryDialog(
     initialSelection: List<CheckboxState<Category>>,
     onDismissRequest: () -> Unit,
     onEditCategories: () -> Unit,

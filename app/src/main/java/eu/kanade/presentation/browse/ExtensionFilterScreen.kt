@@ -17,7 +17,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 
 @Composable
-fun ExtensionFilterScreen(
+internal fun ExtensionFilterScreen(
     navigateUp: () -> Unit,
     state: ExtensionFilterState.Success,
     onClickToggle: (String) -> Unit,

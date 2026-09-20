@@ -63,7 +63,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun TrackInfoDialogHome(
+internal fun TrackInfoDialogHome(
     trackItems: List<TrackItem>,
     dateFormat: DateTimeFormatter,
     onStatusClick: (TrackItem) -> Unit,

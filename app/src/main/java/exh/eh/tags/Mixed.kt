@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-object Mixed : TagList {
+internal object Mixed : TagList {
     override fun getTags1(): List<String> = listOf(
         "mixed:animal on animal",
         "mixed:body swap",

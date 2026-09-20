@@ -1,6 +1,6 @@
 package exh.uconfig
 
-class EHHathPerksResponse {
+internal class EHHathPerksResponse {
     var moreThumbs = false
     var thumbsUp = false
     var allThumbs = false

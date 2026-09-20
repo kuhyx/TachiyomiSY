@@ -96,7 +96,7 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 // Follow-up: Consider gallery updating when doing tabbed browsing (https://github.com/kuhyx/TachiyomiSY/issues/20)
-class EHentai(
+internal class EHentai(
     override val id: Long,
     val exh: Boolean,
     val context: Context,

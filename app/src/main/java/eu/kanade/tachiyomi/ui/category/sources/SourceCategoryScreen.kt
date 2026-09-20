@@ -19,7 +19,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 
-class SourceCategoryScreen : Screen() {
+internal class SourceCategoryScreen : Screen() {
 
     @Composable
     override fun Content() {

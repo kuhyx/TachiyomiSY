@@ -52,7 +52,7 @@ import uy.kohesive.injekt.api.get
  * @param isWebtoon if true, [WebtoonSubsamplingImageView] will be used instead of [SubsamplingScaleImageView]
  * and [AppCompatImageView] will be used instead of [PhotoView]
  */
-open class ReaderPageImageView @JvmOverloads constructor(
+internal open class ReaderPageImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAttrs: Int = 0,

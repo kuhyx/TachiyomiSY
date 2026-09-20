@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
 
-object InternalResourceHelper {
+internal object InternalResourceHelper {
 
     fun getBoolean(context: Context, resName: String, defaultValue: Boolean): Boolean {
         val id = getResourceId(resName, "bool")

@@ -31,7 +31,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 
-class BackupCreateJob(private val context: Context, workerParams: WorkerParameters) :
+internal class BackupCreateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
     private val notifier = BackupNotifier(context)

@@ -27,7 +27,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.source.local.LocalSource
 
 @Composable
-fun BrowseSourceToolbar(
+internal fun BrowseSourceToolbar(
     searchQuery: String?,
     onSearchQueryChange: (String?) -> Unit,
     source: Source?,

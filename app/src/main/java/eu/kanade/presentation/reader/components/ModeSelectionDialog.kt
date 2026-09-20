@@ -26,7 +26,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun ModeSelectionDialog(
+internal fun ModeSelectionDialog(
     onApply: () -> Unit,
     onUseDefault: (() -> Unit)? = null,
     content: @Composable () -> Unit,

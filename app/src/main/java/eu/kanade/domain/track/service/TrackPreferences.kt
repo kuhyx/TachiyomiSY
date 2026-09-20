@@ -8,7 +8,7 @@ import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.preference.getEnum
 
-class TrackPreferences(
+internal class TrackPreferences(
     private val preferenceStore: PreferenceStore,
 ) {
 

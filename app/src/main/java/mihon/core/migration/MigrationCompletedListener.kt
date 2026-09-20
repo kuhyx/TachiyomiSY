@@ -1,3 +1,3 @@
 package mihon.core.migration
 
-typealias MigrationCompletedListener = () -> Unit
+internal typealias MigrationCompletedListener = () -> Unit

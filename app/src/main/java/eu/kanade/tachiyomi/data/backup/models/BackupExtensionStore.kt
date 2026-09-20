@@ -5,7 +5,7 @@ import kotlinx.serialization.protobuf.ProtoNumber
 import mihon.domain.extension.model.ExtensionStore
 
 @Serializable
-class BackupExtensionStore(
+internal class BackupExtensionStore(
     @ProtoNumber(1) var indexUrl: String,
     @ProtoNumber(2) var name: String,
     @ProtoNumber(3) var badgeLabel: String?,
@@ -16,7 +16,7 @@ class BackupExtensionStore(
     @ProtoNumber(8) var extensionListUrl: String?,
 )
 
-val backupExtensionStoreMapper = { store: ExtensionStore ->
+internal val backupExtensionStoreMapper = { store: ExtensionStore ->
     BackupExtensionStore(
         indexUrl = store.indexUrl,
         name = store.name,

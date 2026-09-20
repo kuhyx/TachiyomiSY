@@ -10,7 +10,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
 
-fun Manga.mangaType(context: Context): String {
+internal fun Manga.mangaType(context: Context): String {
     return context.stringResource(
         when (mangaType()) {
             MangaType.TYPE_WEBTOON -> SYMR.strings.entry_type_webtoon
@@ -25,7 +25,7 @@ fun Manga.mangaType(context: Context): String {
 /**
  * The type of comic the manga is (ie. manga, manhwa, manhua)
  */
-fun Manga.mangaType(sourceName: String? = Injekt.get<SourceManager>().get(source)?.name): MangaType {
+internal fun Manga.mangaType(sourceName: String? = Injekt.get<SourceManager>().get(source)?.name): MangaType {
     val currentTags = genre.orEmpty()
     return when {
         currentTags.any { tag -> isMangaTag(tag) } -> {
@@ -53,7 +53,7 @@ fun Manga.mangaType(sourceName: String? = Injekt.get<SourceManager>().get(source
  * The type the reader should use. Different from manga type as certain manga has different
  * read types
  */
-fun Manga.defaultReaderType(type: MangaType = mangaType()): Int? {
+internal fun Manga.defaultReaderType(type: MangaType = mangaType()): Int? {
     return if (type == MangaType.TYPE_MANHWA || type == MangaType.TYPE_WEBTOON) {
         ReadingMode.WEBTOON.flagValue
     } else {
@@ -157,7 +157,7 @@ private fun isManhuaSource(sourceName: String): Boolean {
         sourceName.contains("manhua", true)
 }
 
-enum class MangaType {
+internal enum class MangaType {
     TYPE_MANGA,
     TYPE_MANHWA,
     TYPE_MANHUA,

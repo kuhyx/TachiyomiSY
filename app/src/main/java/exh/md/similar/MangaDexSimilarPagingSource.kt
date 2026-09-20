@@ -17,7 +17,7 @@ import tachiyomi.i18n.sy.SYMR
 /**
  * MangaDexSimilarPagingSource inherited from the general Pager.
  */
-class MangaDexSimilarPagingSource(
+internal class MangaDexSimilarPagingSource(
     manga: Manga,
     private val mangaDex: MangaDex,
 ) : RecommendationPagingSource(manga, mangaDex) {

@@ -22,7 +22,7 @@ import tachiyomi.i18n.MR
 /**
  * Class used to show BigPictureStyle notifications
  */
-class SaveImageNotifier(private val context: Context) {
+internal class SaveImageNotifier(private val context: Context) {
 
     private val notificationBuilder = context.notificationBuilder(Notifications.CHANNEL_COMMON)
     private val notificationId: Int = Notifications.ID_DOWNLOAD_IMAGE

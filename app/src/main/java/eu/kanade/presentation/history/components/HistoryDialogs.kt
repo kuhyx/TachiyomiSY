@@ -19,7 +19,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun HistoryDeleteDialog(
+internal fun HistoryDeleteDialog(
     onDismissRequest: () -> Unit,
     onDelete: (Boolean) -> Unit,
 ) {
@@ -60,7 +60,7 @@ fun HistoryDeleteDialog(
 }
 
 @Composable
-fun HistoryDeleteAllDialog(
+internal fun HistoryDeleteAllDialog(
     onDismissRequest: () -> Unit,
     onDelete: () -> Unit,
 ) {

@@ -56,7 +56,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 
-class WebViewWindow(webContent: WebContent, val navigator: WebViewNavigator) {
+internal class WebViewWindow(webContent: WebContent, val navigator: WebViewNavigator) {
     var state by mutableStateOf(WebViewState(webContent))
     var popupMessage: Message? = null
         private set
@@ -68,7 +68,7 @@ class WebViewWindow(webContent: WebContent, val navigator: WebViewNavigator) {
 }
 
 @Composable
-fun WebViewScreenContent(
+internal fun WebViewScreenContent(
     onNavigateUp: () -> Unit,
     initialTitle: String?,
     url: String,

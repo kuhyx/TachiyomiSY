@@ -7,7 +7,7 @@ import exh.md.dto.SimilarMangaDto
 import exh.md.utils.MdUtil
 import okhttp3.OkHttpClient
 
-class SimilarService(
+internal class SimilarService(
     private val client: OkHttpClient,
 ) {
     suspend fun getSimilarManga(mangaId: String): SimilarMangaDto {

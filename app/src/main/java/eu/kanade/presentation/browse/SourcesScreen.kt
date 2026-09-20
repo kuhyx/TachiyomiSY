@@ -46,7 +46,7 @@ import tachiyomi.presentation.core.util.plus
 import tachiyomi.source.local.isLocal
 
 @Composable
-fun SourcesScreen(
+internal fun SourcesScreen(
     state: SourcesScreenModel.State,
     contentPadding: PaddingValues,
     onClickItem: (Source, Listing) -> Unit,
@@ -193,7 +193,7 @@ private fun SourcePinButton(
 }
 
 @Composable
-fun SourceOptionsDialog(
+internal fun SourceOptionsDialog(
     source: Source,
     onClickPin: () -> Unit,
     onClickDisable: () -> Unit,
@@ -257,14 +257,14 @@ fun SourceOptionsDialog(
     )
 }
 
-sealed interface SourceUiModel {
+internal sealed interface SourceUiModel {
     data class Item(val source: Source) : SourceUiModel
     data class Header(val language: String, val isCategory: Boolean) : SourceUiModel
 }
 
 // SY -->
 @Composable
-fun SourceCategoriesDialog(
+internal fun SourceCategoriesDialog(
     source: Source,
     categories: List<String>,
     onClickCategories: (List<String>) -> Unit,

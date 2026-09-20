@@ -24,7 +24,7 @@ import java.util.Calendar
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
-interface SecureActivityDelegate {
+internal interface SecureActivityDelegate {
     fun registerSecureActivity(activity: AppCompatActivity)
 
     companion object {
@@ -118,7 +118,7 @@ interface SecureActivityDelegate {
     }
 }
 
-class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObserver {
+internal class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObserver {
 
     private lateinit var activity: AppCompatActivity
 

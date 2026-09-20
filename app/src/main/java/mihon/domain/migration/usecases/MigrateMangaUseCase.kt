@@ -27,7 +27,7 @@ import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.interactor.InsertTrack
 import java.time.Instant
 
-class MigrateMangaUseCase(
+internal class MigrateMangaUseCase(
     private val sourcePreferences: SourcePreferences,
     private val trackerManager: TrackerManager,
     private val sourceManager: SourceManager,

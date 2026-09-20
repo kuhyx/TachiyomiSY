@@ -1,6 +1,6 @@
 package mihon.core.migration
 
-class MigrationStrategyFactory(
+internal class MigrationStrategyFactory(
     private val factory: MigrationJobFactory,
     private val migrationCompletedListener: MigrationCompletedListener,
 ) {

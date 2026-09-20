@@ -3,7 +3,7 @@ package exh.md.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SimilarMangaDto(
+internal data class SimilarMangaDto(
     val id: String,
     val title: Map<String, String>,
     val contentRating: String,
@@ -12,7 +12,7 @@ data class SimilarMangaDto(
 )
 
 @Serializable
-data class SimilarMangaMatchListDto(
+internal data class SimilarMangaMatchListDto(
     val id: String,
     val title: Map<String, String>,
     val contentRating: String,
@@ -20,23 +20,23 @@ data class SimilarMangaMatchListDto(
 )
 
 @Serializable
-data class RelationListDto(
+internal data class RelationListDto(
     val response: String,
     val data: List<RelationDto>,
 )
 
 @Serializable
-data class RelationDto(
+internal data class RelationDto(
     val attributes: RelationAttributesDto,
     val relationships: List<RelationMangaDto>,
 )
 
 @Serializable
-data class RelationMangaDto(
+internal data class RelationMangaDto(
     val id: String,
 )
 
 @Serializable
-data class RelationAttributesDto(
+internal data class RelationAttributesDto(
     val relation: String,
 )

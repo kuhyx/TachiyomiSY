@@ -33,7 +33,7 @@ import exh.util.SourceTagsUtil
 import androidx.compose.material3.SuggestionChipDefaults as SuggestionChipDefaultsM3
 
 @Immutable
-data class DisplayTag(
+internal data class DisplayTag(
     val namespace: String?,
     val text: String,
     val search: String,
@@ -42,7 +42,7 @@ data class DisplayTag(
 
 @Immutable
 @JvmInline
-value class SearchMetadataChips(
+internal value class SearchMetadataChips(
     val tags: Map<String, List<DisplayTag>>,
 ) {
     companion object {
@@ -92,7 +92,7 @@ value class SearchMetadataChips(
 }
 
 @Composable
-fun NamespaceTags(
+internal fun NamespaceTags(
     tags: SearchMetadataChips,
     onClick: (item: String) -> Unit,
 ) {
@@ -131,7 +131,7 @@ fun NamespaceTags(
 }
 
 @Composable
-fun TagsChip(
+internal fun TagsChip(
     text: String,
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
@@ -172,7 +172,7 @@ fun TagsChip(
 
 @PreviewLightDark
 @Composable
-fun NamespaceTagsPreview() {
+internal fun NamespaceTagsPreview() {
     TachiyomiPreviewTheme {
         Surface {
             NamespaceTags(

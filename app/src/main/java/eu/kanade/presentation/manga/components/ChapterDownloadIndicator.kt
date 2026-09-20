@@ -39,7 +39,7 @@ import tachiyomi.presentation.core.components.material.IconButtonTokens
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
-enum class ChapterDownloadAction {
+internal enum class ChapterDownloadAction {
     START,
     START_NOW,
     CANCEL,
@@ -47,7 +47,7 @@ enum class ChapterDownloadAction {
 }
 
 @Composable
-fun ChapterDownloadIndicator(
+internal fun ChapterDownloadIndicator(
     enabled: Boolean,
     downloadStateProvider: () -> Download.State,
     downloadProgressProvider: () -> Int,

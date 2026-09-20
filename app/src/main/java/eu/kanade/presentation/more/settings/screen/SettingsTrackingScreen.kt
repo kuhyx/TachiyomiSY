@@ -67,7 +67,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-object SettingsTrackingScreen : SearchableSettings {
+internal object SettingsTrackingScreen : SearchableSettings {
 
     @ReadOnlyComposable
     @Composable

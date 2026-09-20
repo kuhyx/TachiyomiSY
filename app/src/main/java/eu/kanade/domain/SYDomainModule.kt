@@ -76,7 +76,7 @@ import tachiyomi.domain.track.interactor.IsTrackUnfollowed
 import uy.kohesive.injekt.api.InjektRegistrar
 import xyz.nulldev.ts.api.http.serializer.FilterSerializer
 
-class SYDomainModule : InjektModule {
+internal class SYDomainModule : InjektModule {
 
     override fun InjektRegistrar.registerInjectables() {
         addFactory { GetShowLatest(get()) }

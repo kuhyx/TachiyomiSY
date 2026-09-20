@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
-data class BackupSearchTag(
+internal data class BackupSearchTag(
     @ProtoNumber(1) var namespace: String? = null,
     @ProtoNumber(2) var name: String,
     @ProtoNumber(3) var type: Int,

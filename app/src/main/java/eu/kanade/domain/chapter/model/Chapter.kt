@@ -6,7 +6,7 @@ import tachiyomi.domain.chapter.model.Chapter
 import eu.kanade.tachiyomi.data.database.models.Chapter as DbChapter
 
 // Follow-up: Remove when all deps are migrated (https://github.com/kuhyx/TachiyomiSY/issues/4)
-fun Chapter.toSChapter(): SChapter {
+internal fun Chapter.toSChapter(): SChapter {
     return SChapter.create().also {
         it.url = url
         it.name = name
@@ -17,7 +17,7 @@ fun Chapter.toSChapter(): SChapter {
     }
 }
 
-fun Chapter.copyFromSChapter(sChapter: SChapter): Chapter {
+internal fun Chapter.copyFromSChapter(sChapter: SChapter): Chapter {
     return this.copy(
         name = sChapter.name,
         url = sChapter.url,
@@ -28,7 +28,7 @@ fun Chapter.copyFromSChapter(sChapter: SChapter): Chapter {
     )
 }
 
-fun Chapter.toDbChapter(): DbChapter = ChapterImpl().also {
+internal fun Chapter.toDbChapter(): DbChapter = ChapterImpl().also {
     it.id = id
     it.manga_id = mangaId
     it.url = url

@@ -51,7 +51,7 @@ import tachiyomi.domain.manga.model.Manga as DomainManga
 /**
  * Presenter of [feedTab]
  */
-open class FeedScreenModel(
+internal open class FeedScreenModel(
     val sourceManager: SourceManager = Injekt.get(),
     val sourcePreferences: SourcePreferences = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
@@ -307,7 +307,7 @@ open class FeedScreenModel(
     }
 }
 
-data class FeedScreenState(
+internal data class FeedScreenState(
     val dialog: FeedScreenModel.Dialog? = null,
     val items: List<FeedItemUI>? = null,
 ) {

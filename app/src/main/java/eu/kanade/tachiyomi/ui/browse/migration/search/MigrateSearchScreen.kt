@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import mihon.feature.migration.dialog.MigrateMangaDialog
 import mihon.feature.migration.list.MigrationListScreen
 
-class MigrateSearchScreen(private val mangaId: Long) : Screen() {
+internal class MigrateSearchScreen(private val mangaId: Long) : Screen() {
 
     @Composable
     override fun Content() {

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import tachiyomi.core.common.preference.Preference
 
-class PreferenceMutableState<T>(
+internal class PreferenceMutableState<T>(
     private val preference: Preference<T>,
     scope: CoroutineScope,
 ) : MutableState<T> {
@@ -35,4 +35,4 @@ class PreferenceMutableState<T>(
     }
 }
 
-fun <T> Preference<T>.asState(scope: CoroutineScope) = PreferenceMutableState(this, scope)
+internal fun <T> Preference<T>.asState(scope: CoroutineScope) = PreferenceMutableState(this, scope)

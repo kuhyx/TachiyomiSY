@@ -8,7 +8,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun PreferenceScaffold(
+internal fun PreferenceScaffold(
     titleRes: StringResource,
     actions: @Composable RowScope.() -> Unit = {},
     onBackPressed: (() -> Unit)? = null,

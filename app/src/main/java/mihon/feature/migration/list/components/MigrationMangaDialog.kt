@@ -9,7 +9,7 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun MigrationMangaDialog(
+internal fun MigrationMangaDialog(
     onDismissRequest: () -> Unit,
     copy: Boolean,
     totalCount: Int,

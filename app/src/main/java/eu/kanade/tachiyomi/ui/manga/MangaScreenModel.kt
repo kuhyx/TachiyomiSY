@@ -140,7 +140,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.floor
 
-class MangaScreenModel(
+internal class MangaScreenModel(
     private val context: Context,
     private val lifecycle: Lifecycle,
     private val mangaId: Long,
@@ -1790,14 +1790,14 @@ class MangaScreenModel(
     }
 }
 
-data class MergedMangaData(
+internal data class MergedMangaData(
     val references: List<MergedMangaReference>,
     val manga: Map<Long, Manga>,
     val sources: List<Source>,
 )
 
 @Immutable
-sealed class ChapterList {
+internal sealed class ChapterList {
     @Immutable
     data class MissingCount(
         val id: String,
@@ -1821,7 +1821,7 @@ sealed class ChapterList {
 }
 
 // SY -->
-sealed interface PagePreviewState {
+internal sealed interface PagePreviewState {
     data object Unused : PagePreviewState
     data object Loading : PagePreviewState
     data class Success(val pagePreviews: List<PagePreview>) : PagePreviewState

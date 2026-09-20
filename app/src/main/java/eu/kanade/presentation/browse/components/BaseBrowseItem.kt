@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import tachiyomi.presentation.core.components.material.padding
 
 @Composable
-fun BaseBrowseItem(
+internal fun BaseBrowseItem(
     modifier: Modifier = Modifier,
     onClickItem: () -> Unit = {},
     onLongClickItem: () -> Unit = {},

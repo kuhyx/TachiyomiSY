@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.data.track.anilist.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ALSearchItem(
+internal data class ALSearchItem(
     val id: Long,
     val title: ALItemTitle,
     val coverImage: ItemCover,
@@ -39,34 +39,34 @@ data class ALSearchItem(
 }
 
 @Serializable
-data class ALItemTitle(
+internal data class ALItemTitle(
     val userPreferred: String,
 )
 
 @Serializable
-data class ItemCover(
+internal data class ItemCover(
     val large: String,
 )
 
 @Serializable
-data class ALStaff(
+internal data class ALStaff(
     val edges: List<ALEdge>,
 )
 
 @Serializable
-data class ALEdge(
+internal data class ALEdge(
     val role: String,
     val id: Int,
     val node: ALStaffNode,
 )
 
 @Serializable
-data class ALStaffNode(
+internal data class ALStaffNode(
     val name: ALStaffName,
 )
 
 @Serializable
-data class ALStaffName(
+internal data class ALStaffName(
     val userPreferred: String? = null,
     val native: String? = null,
     val full: String? = null,

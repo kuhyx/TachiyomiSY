@@ -95,7 +95,7 @@ private fun PagePreviewMore(
 }
 
 @Composable
-fun PagePreviews(
+internal fun PagePreviews(
     pagePreviewState: PagePreviewState,
     onOpenPage: (Int) -> Unit,
     onMorePreviewsClicked: () -> Unit,
@@ -125,7 +125,7 @@ fun PagePreviews(
     }
 }
 
-fun LazyListScope.PagePreviewItems(
+internal fun LazyListScope.PagePreviewItems(
     pagePreviewState: PagePreviewState,
     onOpenPage: (Int) -> Unit,
     onMorePreviewsClicked: () -> Unit,
@@ -166,7 +166,7 @@ fun LazyListScope.PagePreviewItems(
 }
 
 @Composable
-fun PagePreview(
+internal fun PagePreview(
     modifier: Modifier,
     page: PagePreview,
     onOpenPage: (Int) -> Unit,

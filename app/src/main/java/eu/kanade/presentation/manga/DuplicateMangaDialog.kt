@@ -78,7 +78,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 @Composable
-fun DuplicateMangaDialog(
+internal fun DuplicateMangaDialog(
     duplicates: List<MangaWithChapterCount>,
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,

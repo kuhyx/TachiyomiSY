@@ -21,7 +21,7 @@ import tachiyomi.domain.storage.service.StoragePreferences
 import tachiyomi.domain.updates.service.UpdatesPreferences
 import uy.kohesive.injekt.api.InjektRegistrar
 
-class PreferenceModule(val app: Application) : InjektModule {
+internal class PreferenceModule(val app: Application) : InjektModule {
 
     override fun InjektRegistrar.registerInjectables() {
         addSingletonFactory<PreferenceStore> {

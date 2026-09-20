@@ -7,7 +7,7 @@ import tachiyomi.domain.category.model.Category
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class CategoriesBackupCreator(
+internal class CategoriesBackupCreator(
     private val getCategories: GetCategories = Injekt.get(),
 ) {
 

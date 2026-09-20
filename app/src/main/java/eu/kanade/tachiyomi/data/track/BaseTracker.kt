@@ -23,7 +23,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-abstract class BaseTracker(
+internal abstract class BaseTracker(
     override val id: Long,
     override val name: String,
 ) : Tracker {

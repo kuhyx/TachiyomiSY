@@ -41,7 +41,7 @@ import java.util.Collections
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-class RecommendationSearchHelper(val context: Context) {
+internal class RecommendationSearchHelper(val context: Context) {
     private val getLibraryManga: GetLibraryManga by injectLazy()
     private val getTracks: GetTracks by injectLazy()
     private val networkToLocalManga: NetworkToLocalManga by injectLazy()
@@ -223,16 +223,16 @@ class RecommendationSearchHelper(val context: Context) {
 private typealias SearchResults = Results<MutableList<SManga>>
 
 // Contains the ranked search results for a single source
-typealias RankedSearchResults = Results<Map<SManga, Int>>
+internal typealias RankedSearchResults = Results<Map<SManga, Int>>
 
-data class Results<T>(
+internal data class Results<T>(
     val recSourceName: String,
     @StringRes val recSourceCategoryResId: Int,
     val recAssociatedSourceId: Long?,
     val results: T,
 ) : Serializable
 
-sealed interface SearchStatus {
+internal sealed interface SearchStatus {
     data object Idle : SearchStatus
     data object Initializing : SearchStatus
     data class Processing(val manga: SManga, val current: Int, val total: Int) : SearchStatus

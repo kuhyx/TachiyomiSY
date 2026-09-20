@@ -29,7 +29,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun GlobalSearchResultItem(
+internal fun GlobalSearchResultItem(
     title: String,
     // SY -->
     subtitle: String?,
@@ -79,7 +79,7 @@ fun GlobalSearchResultItem(
 }
 
 @Composable
-fun GlobalSearchLoadingResultItem() {
+internal fun GlobalSearchLoadingResultItem() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -95,7 +95,7 @@ fun GlobalSearchLoadingResultItem() {
 }
 
 @Composable
-fun GlobalSearchErrorResultItem(message: String?) {
+internal fun GlobalSearchErrorResultItem(message: String?) {
     Column(
         modifier = Modifier
             .padding(

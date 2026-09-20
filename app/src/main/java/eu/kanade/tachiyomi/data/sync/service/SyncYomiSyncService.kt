@@ -29,7 +29,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 
-class SyncYomiSyncService(
+internal class SyncYomiSyncService(
     context: Context,
     json: Json,
     syncPreferences: SyncPreferences,

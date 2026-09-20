@@ -7,7 +7,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import tachiyomi.core.common.util.system.logcat
 
-class MigrationJobFactory(
+internal class MigrationJobFactory(
     private val migrationContext: MigrationContext,
     private val scope: CoroutineScope,
 ) {

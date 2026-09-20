@@ -51,7 +51,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import kotlin.math.roundToInt
 
-enum class ChapterNavigatorType {
+internal enum class ChapterNavigatorType {
     HORIZONTAL_LTR,
     HORIZONTAL_RTL,
     VERTICAL_LEFT,
@@ -62,7 +62,7 @@ enum class ChapterNavigatorType {
 }
 
 @Composable
-fun ChapterNavigator(
+internal fun ChapterNavigator(
     type: ChapterNavigatorType,
     onNextChapter: () -> Unit,
     enabledNext: Boolean,
@@ -151,7 +151,7 @@ fun ChapterNavigator(
 }
 
 @Composable
-fun HorizontalChapterNavigator(
+internal fun HorizontalChapterNavigator(
     isRtl: Boolean,
     state: SliderState,
     onPageIndexChange: (Int) -> Unit,
@@ -241,7 +241,7 @@ fun HorizontalChapterNavigator(
 }
 
 @Composable
-fun VerticalChapterNavigator(
+internal fun VerticalChapterNavigator(
     state: SliderState,
     onPageIndexChange: (Int) -> Unit,
     onPageIndexChangeFinished: () -> Unit,

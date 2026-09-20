@@ -4,7 +4,7 @@ import dev.icerock.moko.resources.StringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
-enum class ReaderBottomButton(val value: String, val stringRes: StringResource) {
+internal enum class ReaderBottomButton(val value: String, val stringRes: StringResource) {
     ViewChapters("vc", MR.strings.action_view_chapters),
     WebView("wb", MR.strings.action_open_in_web_view),
     Browser("br", MR.strings.action_open_in_browser),

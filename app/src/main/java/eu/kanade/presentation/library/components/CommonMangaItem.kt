@@ -45,7 +45,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
 import tachiyomi.domain.manga.model.MangaCover as MangaCoverModel
 
-object CommonMangaItemDefaults {
+internal object CommonMangaItemDefaults {
     val GridHorizontalSpacer = 4.dp
     val GridVerticalSpacer = 4.dp
 
@@ -69,7 +69,7 @@ private const val GRID_SELECTED_COVER_ALPHA = 0.76f
  * Accepts null [title] for a cover-only view.
  */
 @Composable
-fun MangaCompactGridItem(
+internal fun MangaCompactGridItem(
     coverData: MangaCoverModel,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -174,7 +174,7 @@ private fun BoxScope.CoverTextOverlay(
  * Layout of grid list item with title below the cover.
  */
 @Composable
-fun MangaComfortableGridItem(
+internal fun MangaComfortableGridItem(
     coverData: MangaCoverModel,
     title: String,
     onClick: () -> Unit,
@@ -329,7 +329,7 @@ private fun Modifier.selectedOutline(
  * Layout of list item.
  */
 @Composable
-fun MangaListItem(
+internal fun MangaListItem(
     coverData: MangaCoverModel,
     title: String,
     onClick: () -> Unit,

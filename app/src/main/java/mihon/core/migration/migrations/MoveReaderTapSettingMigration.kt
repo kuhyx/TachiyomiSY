@@ -7,7 +7,7 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 
-class MoveReaderTapSettingMigration : Migration {
+internal class MoveReaderTapSettingMigration : Migration {
     override val version: Float = 32f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

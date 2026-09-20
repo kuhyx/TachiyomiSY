@@ -33,7 +33,7 @@ import rx.Observable
 import tachiyomi.core.common.util.lang.runAsObservable
 import tachiyomi.core.common.util.lang.withIOContext
 
-class NHentai(delegate: HttpSource, val context: Context) :
+internal class NHentai(delegate: HttpSource, val context: Context) :
     DelegatedHttpSource(delegate),
     MetadataSource<NHentaiSearchMetadata, Response>,
     UrlImportableSource,

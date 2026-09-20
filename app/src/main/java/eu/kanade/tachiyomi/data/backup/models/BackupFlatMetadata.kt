@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
-data class BackupFlatMetadata(
+internal data class BackupFlatMetadata(
     @ProtoNumber(1) var searchMetadata: BackupSearchMetadata,
     @ProtoNumber(2) var searchTags: List<BackupSearchTag> = emptyList(),
     @ProtoNumber(3) var searchTitles: List<BackupSearchTitle> = emptyList(),

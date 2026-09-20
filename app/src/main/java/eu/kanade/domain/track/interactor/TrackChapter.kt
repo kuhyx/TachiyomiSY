@@ -16,7 +16,7 @@ import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.interactor.InsertTrack
 
-class TrackChapter(
+internal class TrackChapter(
     private val getTracks: GetTracks,
     private val trackerManager: TrackerManager,
     private val insertTrack: InsertTrack,

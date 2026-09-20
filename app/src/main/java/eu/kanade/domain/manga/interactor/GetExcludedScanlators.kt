@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.map
 import tachiyomi.data.Database
 import tachiyomi.data.subscribeToList
 
-class GetExcludedScanlators(
+internal class GetExcludedScanlators(
     private val database: Database,
 ) {
 

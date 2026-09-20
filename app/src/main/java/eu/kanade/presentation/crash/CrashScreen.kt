@@ -23,7 +23,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.InfoScreen
 
 @Composable
-fun CrashScreen(
+internal fun CrashScreen(
     exception: Throwable?,
     onRestartClick: () -> Unit,
 ) {

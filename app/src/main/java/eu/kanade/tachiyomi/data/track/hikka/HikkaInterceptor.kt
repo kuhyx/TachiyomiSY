@@ -7,7 +7,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 
-class HikkaInterceptor(private val hikka: Hikka) : Interceptor {
+internal class HikkaInterceptor(private val hikka: Hikka) : Interceptor {
     private val json: Json by injectLazy()
     private var oauth: HKOAuth? = hikka.loadOAuth()
 

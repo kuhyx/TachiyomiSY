@@ -5,7 +5,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.crashlytics
 import eu.kanade.tachiyomi.BuildConfig
 
-class CrashlyticsPrinter(private val logLevel: Int) : Printer {
+internal class CrashlyticsPrinter(private val logLevel: Int) : Printer {
     /**
      * Print log in new line.
      *

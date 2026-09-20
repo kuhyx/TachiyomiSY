@@ -1,6 +1,6 @@
 package eu.kanade.domain.sync.models
 
-data class SyncSettings(
+internal data class SyncSettings(
     val libraryEntries: Boolean = true,
     val categories: Boolean = true,
     val chapters: Boolean = true,

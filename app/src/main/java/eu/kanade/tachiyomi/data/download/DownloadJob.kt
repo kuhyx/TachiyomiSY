@@ -32,7 +32,7 @@ import uy.kohesive.injekt.api.get
  * This worker is used to manage the downloader. The system can decide to stop the worker, in
  * which case the downloader is also stopped. It's also stopped while there's no network available.
  */
-class DownloadJob(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
+internal class DownloadJob(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
 
     private val downloadManager: DownloadManager = Injekt.get()
     private val downloadPreferences: DownloadPreferences = Injekt.get()

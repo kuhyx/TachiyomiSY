@@ -12,7 +12,7 @@ import tachiyomi.i18n.sy.SYMR
 import java.text.DecimalFormat
 import kotlin.coroutines.CoroutineContext
 
-class MigratingManga(
+internal class MigratingManga(
     val manga: Manga,
     val chapterInfo: ChapterInfo,
     val sourcesString: String,

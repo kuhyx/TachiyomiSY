@@ -1,3 +1,3 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
-sealed interface ReaderItem
+internal sealed interface ReaderItem

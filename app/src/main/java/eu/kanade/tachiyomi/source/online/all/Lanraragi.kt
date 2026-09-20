@@ -34,7 +34,7 @@ import java.time.Instant
 import java.time.ZoneOffset
 import kotlin.time.Duration.Companion.milliseconds
 
-class Lanraragi(delegate: HttpSource, val context: Context) :
+internal class Lanraragi(delegate: HttpSource, val context: Context) :
     DelegatedHttpSource(delegate),
     MetadataSource<LanraragiSearchMetadata, Response>,
     NamespaceSource,

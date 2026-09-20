@@ -30,7 +30,7 @@ import uy.kohesive.injekt.injectLazy
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 
-class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerParameters) :
+internal class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
     private val notifier = AppUpdateNotifier(context)

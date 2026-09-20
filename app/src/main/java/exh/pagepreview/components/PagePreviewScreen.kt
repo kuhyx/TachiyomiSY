@@ -46,7 +46,7 @@ import tachiyomi.presentation.core.util.plus
 import kotlin.math.roundToInt
 
 @Composable
-fun PagePreviewScreen(
+internal fun PagePreviewScreen(
     state: PagePreviewState,
     pageDialogOpen: Boolean,
     onPageSelected: (Int) -> Unit,
@@ -120,7 +120,7 @@ fun PagePreviewScreen(
 }
 
 @Composable
-fun PagePreviewPageDialog(
+internal fun PagePreviewPageDialog(
     currentPage: Int,
     pageCount: Int,
     onDismissPageDialog: () -> Unit,
@@ -176,7 +176,7 @@ fun PagePreviewPageDialog(
 }
 
 @Composable
-fun PagePreviewTopAppBar(
+internal fun PagePreviewTopAppBar(
     navigateUp: () -> Unit,
     title: String,
     onOpenPageDialog: () -> Unit,

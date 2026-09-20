@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.util.system.createReaderThemeContext
 /**
  * RecyclerView Adapter used by this [viewer] to where [ViewerChapters] updates are posted.
  */
-class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+internal class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     /**
      * List of currently set items.

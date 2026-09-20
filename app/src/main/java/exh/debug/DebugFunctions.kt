@@ -38,7 +38,7 @@ import uy.kohesive.injekt.injectLazy
 import java.util.UUID
 
 @Suppress("unused")
-object DebugFunctions {
+internal object DebugFunctions {
     private val app: Application by injectLazy()
     private val database: Database by injectLazy()
     private val sourceManager: SourceManager by injectLazy()

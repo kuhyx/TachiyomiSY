@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MUListItem(
+internal data class MUListItem(
     val series: MUSeries? = null,
     @SerialName("list_id")
     val listId: Long? = null,
@@ -14,7 +14,7 @@ data class MUListItem(
     val priority: Int? = null,
 )
 
-fun MUListItem.copyTo(track: Track): Track {
+internal fun MUListItem.copyTo(track: Track): Track {
     return track.apply {
         this.status = listId ?: READING_LIST
         this.last_chapter_read = this@copyTo.status?.chapter?.toDouble() ?: 0.0

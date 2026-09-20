@@ -50,7 +50,7 @@ import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.days
 
-class EHentaiUpdateWorker(private val context: Context, workerParams: WorkerParameters) :
+internal class EHentaiUpdateWorker(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
     private val exhPreferences: ExhPreferences by injectLazy()
     private val libraryPreferences: LibraryPreferences by injectLazy()
@@ -318,9 +318,9 @@ class EHentaiUpdateWorker(private val context: Context, workerParams: WorkerPara
     }
 }
 
-data class UpdateEntry(val manga: Manga, val meta: EHentaiSearchMetadata, val rootChapter: Chapter?)
+internal data class UpdateEntry(val manga: Manga, val meta: EHentaiSearchMetadata, val rootChapter: Chapter?)
 
-object EHentaiUpdateWorkerConstants {
+internal object EHentaiUpdateWorkerConstants {
     const val UPDATES_PER_ITERATION = 50
 
     val GALLERY_AGE_TIME = 365.days.inWholeMilliseconds

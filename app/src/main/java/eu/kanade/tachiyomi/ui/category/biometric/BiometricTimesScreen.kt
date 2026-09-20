@@ -22,7 +22,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
-class BiometricTimesScreen : Screen() {
+internal class BiometricTimesScreen : Screen() {
     @Composable
     override fun Content() {
         val context = LocalContext.current

@@ -44,7 +44,7 @@ import java.math.RoundingMode
 import java.text.NumberFormat
 
 @OptIn(DelicateCoroutinesApi::class)
-class LibraryUpdateNotifier(
+internal class LibraryUpdateNotifier(
     private val context: Context,
 
     private val securityPreferences: SecurityPreferences = Injekt.get(),

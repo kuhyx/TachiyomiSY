@@ -26,7 +26,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun ExtensionStoreCreateDialog(
+internal fun ExtensionStoreCreateDialog(
     onDismissRequest: () -> Unit,
     onCreate: (String) -> Unit,
     storeIndexUrls: Set<String>,
@@ -101,7 +101,7 @@ fun ExtensionStoreCreateDialog(
 }
 
 @Composable
-fun ExtensionStoreDeleteDialog(
+internal fun ExtensionStoreDeleteDialog(
     onDismissRequest: () -> Unit,
     onDelete: () -> Unit,
     storeName: String,
@@ -132,7 +132,7 @@ fun ExtensionStoreDeleteDialog(
 }
 
 @Composable
-fun ExtensionStoreConfirmDialog(
+internal fun ExtensionStoreConfirmDialog(
     onDismissRequest: () -> Unit,
     onCreate: () -> Unit,
     storeIndexUrl: String,

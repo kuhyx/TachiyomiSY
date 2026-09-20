@@ -4,24 +4,24 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ALCurrentUserResult(
+internal data class ALCurrentUserResult(
     val data: ALUserViewer,
 )
 
 @Serializable
-data class ALUserViewer(
+internal data class ALUserViewer(
     @SerialName("Viewer")
     val viewer: ALUserViewerData,
 )
 
 @Serializable
-data class ALUserViewerData(
+internal data class ALUserViewerData(
     val id: Int,
     val name: String,
     val mediaListOptions: ALUserListOptions,
 )
 
 @Serializable
-data class ALUserListOptions(
+internal data class ALUserListOptions(
     val scoreFormat: String,
 )

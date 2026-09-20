@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.util.lang.invert
 import tachiyomi.i18n.MR
 
-abstract class ViewerNavigation {
+internal abstract class ViewerNavigation {
 
     sealed class NavigationRegion(val nameRes: StringResource, val color: Int) {
         data object MENU : NavigationRegion(MR.strings.action_menu, Color.argb(0xCC, 0x95, 0x81, 0x8D))

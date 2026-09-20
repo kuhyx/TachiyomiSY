@@ -15,7 +15,7 @@ import tachiyomi.i18n.MR
 /**
  * Blank activity with a BiometricPrompt.
  */
-class UnlockActivity : BaseActivity() {
+internal class UnlockActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

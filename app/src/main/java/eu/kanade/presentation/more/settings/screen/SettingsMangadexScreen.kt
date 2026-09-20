@@ -52,7 +52,7 @@ import tachiyomi.presentation.core.util.secondaryItemAlpha
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-object SettingsMangadexScreen : SearchableSettings {
+internal object SettingsMangadexScreen : SearchableSettings {
 
     @ReadOnlyComposable
     @Composable

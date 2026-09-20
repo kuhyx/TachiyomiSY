@@ -4,29 +4,29 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ALSearchResult(
+internal data class ALSearchResult(
     val data: ALSearchPage,
 )
 
 @Serializable
-data class ALSearchPage(
+internal data class ALSearchPage(
     @SerialName("Page")
     val page: ALSearchMedia,
 )
 
 @Serializable
-data class ALSearchMedia(
+internal data class ALSearchMedia(
     val media: List<ALSearchItem>,
 )
 
 // SY -->
 @Serializable
-data class ALIdSearchResult(
+internal data class ALIdSearchResult(
     val data: ALIdSearchMedia,
 )
 
 @Serializable
-data class ALIdSearchMedia(
+internal data class ALIdSearchMedia(
     @SerialName("Media")
     val media: ALSearchItem,
 )

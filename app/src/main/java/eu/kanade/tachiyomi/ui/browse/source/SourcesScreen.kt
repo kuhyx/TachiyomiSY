@@ -7,7 +7,7 @@ import eu.kanade.presentation.browse.BrowseTabWrapper
 import eu.kanade.presentation.util.Screen
 import java.io.Serializable
 
-class SourcesScreen(private val smartSearchConfig: SmartSearchConfig?) : Screen() {
+internal class SourcesScreen(private val smartSearchConfig: SmartSearchConfig?) : Screen() {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow

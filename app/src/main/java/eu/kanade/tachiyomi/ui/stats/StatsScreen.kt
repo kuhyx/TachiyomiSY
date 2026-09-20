@@ -17,7 +17,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 
-class StatsScreen : Screen() {
+internal class StatsScreen : Screen() {
 
     @Composable
     override fun Content() {

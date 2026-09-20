@@ -4,7 +4,7 @@ import eu.kanade.domain.source.service.SourcePreferences
 import tachiyomi.core.common.preference.getAndSet
 import tachiyomi.domain.source.model.Source
 
-class SetSourceCategories(
+internal class SetSourceCategories(
     private val preferences: SourcePreferences,
 ) {
 

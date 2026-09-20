@@ -61,7 +61,7 @@ import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-object SettingsSecurityScreen : SearchableSettings {
+internal object SettingsSecurityScreen : SearchableSettings {
 
     @ReadOnlyComposable
     @Composable

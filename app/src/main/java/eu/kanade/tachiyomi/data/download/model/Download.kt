@@ -19,7 +19,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.milliseconds
 
-data class Download(
+internal data class Download(
     val source: HttpSource,
     val manga: Manga,
     val chapter: Chapter,

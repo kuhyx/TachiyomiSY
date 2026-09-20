@@ -26,7 +26,7 @@ import java.io.BufferedInputStream
 /**
  * A [Decoder] that uses built-in [ImageDecoder] to decode images that is not supported by the system.
  */
-class TachiyomiImageDecoder(private val resources: ImageSource, private val options: Options) : Decoder {
+internal class TachiyomiImageDecoder(private val resources: ImageSource, private val options: Options) : Decoder {
     private val context = Injekt.get<Application>()
 
     override suspend fun decode(): DecodeResult {

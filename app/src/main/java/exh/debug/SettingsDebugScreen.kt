@@ -65,7 +65,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.declaredFunctions
 
-class SettingsDebugScreen : Screen() {
+internal class SettingsDebugScreen : Screen() {
 
     data class DebugToggle(val name: String, val pref: PreferenceMutableState<Boolean>, val default: Boolean)
 

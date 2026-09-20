@@ -12,7 +12,7 @@ import java.util.Enumeration
  * - the child class loader
  * - the parent class loader.
  */
-class ChildFirstPathClassLoader(
+internal class ChildFirstPathClassLoader(
     dexPath: String,
     librarySearchPath: String?,
     parent: ClassLoader,

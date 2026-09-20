@@ -16,7 +16,7 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import kotlin.coroutines.resume
 
-object AuthenticatorUtil {
+internal object AuthenticatorUtil {
 
     /**
      * A check to avoid double authentication on older APIs when confirming settings changes since

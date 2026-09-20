@@ -18,7 +18,7 @@ import uy.kohesive.injekt.injectLazy
 import java.io.IOException
 import java.net.SocketTimeoutException
 
-class KavitaApi(private val client: OkHttpClient, interceptor: KavitaInterceptor) {
+internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaInterceptor) {
 
     private val json: Json by injectLazy()
 

@@ -18,7 +18,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.collectLatest
 import tachiyomi.presentation.core.screens.LoadingScreen
 
-class CategoryScreen : Screen() {
+internal class CategoryScreen : Screen() {
 
     @Composable
     override fun Content() {

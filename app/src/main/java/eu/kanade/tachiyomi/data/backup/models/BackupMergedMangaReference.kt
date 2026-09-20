@@ -8,7 +8,7 @@ import tachiyomi.domain.manga.model.MergedMangaReference
 * SY merged manga backup class
  */
 @Serializable
-data class BackupMergedMangaReference(
+internal data class BackupMergedMangaReference(
     @ProtoNumber(1) var isInfoManga: Boolean,
     @ProtoNumber(2) var getChapterUpdates: Boolean,
     @ProtoNumber(3) var chapterSortMode: Int,
@@ -35,7 +35,7 @@ data class BackupMergedMangaReference(
     }
 }
 
-val backupMergedMangaReferenceMapper =
+internal val backupMergedMangaReferenceMapper =
     {
             _: Long,
             isInfoManga: Boolean,

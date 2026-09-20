@@ -22,7 +22,7 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
-data class RecommendationSearchProgressProperties(
+internal data class RecommendationSearchProgressProperties(
     val title: String,
     val text: String,
     val positiveButtonText: String? = null,
@@ -32,7 +32,7 @@ data class RecommendationSearchProgressProperties(
 )
 
 @Composable
-fun RecommendationSearchProgressDialog(
+internal fun RecommendationSearchProgressDialog(
     status: SearchStatus,
     setStatusIdle: () -> Unit,
     setStatusCancelling: () -> Unit,

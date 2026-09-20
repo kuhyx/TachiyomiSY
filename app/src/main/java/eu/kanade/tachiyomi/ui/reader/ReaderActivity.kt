@@ -128,7 +128,7 @@ import uy.kohesive.injekt.api.get
 import java.io.ByteArrayOutputStream
 import kotlin.time.Duration.Companion.seconds
 
-class ReaderActivity : BaseActivity() {
+internal class ReaderActivity : BaseActivity() {
 
     companion object {
 

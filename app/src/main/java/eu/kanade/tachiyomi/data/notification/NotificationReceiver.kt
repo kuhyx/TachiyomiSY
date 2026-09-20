@@ -43,7 +43,7 @@ import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
  * NOTE: Use local broadcasts if possible.
  */
 @OptIn(DelicateCoroutinesApi::class)
-class NotificationReceiver : BroadcastReceiver() {
+internal class NotificationReceiver : BroadcastReceiver() {
 
     private val getManga: GetManga by injectLazy()
     private val getChapter: GetChapter by injectLazy()

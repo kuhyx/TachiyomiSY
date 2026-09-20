@@ -10,7 +10,7 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 import kotlin.random.Random
 
-class HistoryScreenModelStateProvider : PreviewParameterProvider<HistoryScreenModel.State> {
+internal class HistoryScreenModelStateProvider : PreviewParameterProvider<HistoryScreenModel.State> {
 
     private val multiPage = HistoryScreenModel.State(
         searchQuery = null,

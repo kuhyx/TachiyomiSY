@@ -17,7 +17,7 @@ import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class BiometricTimesScreenModel(
+internal class BiometricTimesScreenModel(
     private val preferences: SecurityPreferences = Injekt.get(),
 ) : StateScreenModel<BiometricTimesScreenState>(BiometricTimesScreenState.Loading) {
 
@@ -101,18 +101,18 @@ class BiometricTimesScreenModel(
     }
 }
 
-sealed class BiometricTimesEvent {
+internal sealed class BiometricTimesEvent {
     sealed class LocalizedMessage(val stringRes: StringResource) : BiometricTimesEvent()
     data object TimeConflicts : LocalizedMessage(SYMR.strings.biometric_lock_time_conflicts)
     data object InternalError : LocalizedMessage(MR.strings.internal_error)
 }
 
-sealed class BiometricTimesDialog {
+internal sealed class BiometricTimesDialog {
     data object Create : BiometricTimesDialog()
     data class Delete(val timeRange: TimeRangeItem) : BiometricTimesDialog()
 }
 
-sealed class BiometricTimesScreenState {
+internal sealed class BiometricTimesScreenState {
 
     @Immutable
     data object Loading : BiometricTimesScreenState()

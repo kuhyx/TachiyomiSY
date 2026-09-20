@@ -17,7 +17,7 @@ import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 
-class SortTagScreen : Screen() {
+internal class SortTagScreen : Screen() {
     @Composable
     override fun Content() {
         val context = LocalContext.current

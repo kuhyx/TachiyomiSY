@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-object Character : TagList {
+internal object Character : TagList {
     override fun getTags1(): List<String> = listOf(
         "character:.giffany",
         "character:001",

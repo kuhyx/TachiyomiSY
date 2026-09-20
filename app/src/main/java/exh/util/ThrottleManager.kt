@@ -5,7 +5,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-class ThrottleManager(
+internal class ThrottleManager(
     private val max: Duration = THROTTLE_MAX,
     private val inc: Duration = THROTTLE_INC,
     private val initial: Duration = Duration.ZERO,

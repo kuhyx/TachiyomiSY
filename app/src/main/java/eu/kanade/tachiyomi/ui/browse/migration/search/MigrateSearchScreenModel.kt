@@ -12,7 +12,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class MigrateSearchScreenModel(
+internal class MigrateSearchScreenModel(
     val mangaId: Long,
     getManga: GetManga = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),

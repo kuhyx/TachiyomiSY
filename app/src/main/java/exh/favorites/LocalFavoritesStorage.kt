@@ -22,7 +22,7 @@ import tachiyomi.domain.manga.model.Manga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class LocalFavoritesStorage(
+internal class LocalFavoritesStorage(
     private val getFavorites: GetFavorites = Injekt.get(),
     private val getCategories: GetCategories = Injekt.get(),
     private val deleteFavoriteEntries: DeleteFavoriteEntries = Injekt.get(),
@@ -138,7 +138,7 @@ class LocalFavoritesStorage(
     }
 }
 
-data class ChangeSet(
+internal data class ChangeSet(
     val added: List<FavoriteEntry>,
     val removed: List<FavoriteEntry>,
 )

@@ -24,7 +24,7 @@ import tachiyomi.domain.library.service.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class PreferenceRestorer(
+internal class PreferenceRestorer(
     private val context: Context,
     private val getCategories: GetCategories = Injekt.get(),
     private val preferenceStore: PreferenceStore = Injekt.get(),

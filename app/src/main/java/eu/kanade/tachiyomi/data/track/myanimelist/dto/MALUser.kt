@@ -3,6 +3,6 @@ package eu.kanade.tachiyomi.data.track.myanimelist.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MALUser(
+internal data class MALUser(
     val name: String,
 )

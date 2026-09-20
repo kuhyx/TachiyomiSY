@@ -18,7 +18,7 @@ import eu.kanade.tachiyomi.util.system.getUriSize
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 
-class PackageInstallerInstaller(private val service: Service) : Installer(service) {
+internal class PackageInstallerInstaller(private val service: Service) : Installer(service) {
 
     private val packageInstaller = service.packageManager.packageInstaller
 

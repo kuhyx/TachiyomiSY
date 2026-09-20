@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MALOAuth(
+internal data class MALOAuth(
     @SerialName("token_type")
     val tokenType: String,
     @SerialName("refresh_token")

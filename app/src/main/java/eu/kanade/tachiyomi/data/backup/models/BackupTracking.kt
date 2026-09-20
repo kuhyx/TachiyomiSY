@@ -5,7 +5,7 @@ import kotlinx.serialization.protobuf.ProtoNumber
 import tachiyomi.domain.track.model.Track
 
 @Serializable
-data class BackupTracking(
+internal data class BackupTracking(
     // in 1.x some of these values have different types or names
     @ProtoNumber(1) var syncId: Int,
     // LibraryId is not null in 1.x
@@ -54,7 +54,7 @@ data class BackupTracking(
     }
 }
 
-val backupTrackMapper = {
+internal val backupTrackMapper = {
         _: Long,
         _: Long,
         syncId: Long,

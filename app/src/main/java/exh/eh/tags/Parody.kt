@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-object Parody : TagList {
+internal object Parody : TagList {
     override fun getTags1(): List<String> = listOf(
         "parody:.hack",
         "parody:.hackg.u.",

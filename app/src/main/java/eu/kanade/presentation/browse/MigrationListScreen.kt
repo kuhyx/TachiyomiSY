@@ -40,7 +40,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
 
 @Composable
-fun MigrationListScreen(
+internal fun MigrationListScreen(
     items: List<MigratingManga>,
     migrationDone: Boolean,
     unfinishedCount: Int,

@@ -12,7 +12,7 @@ import tachiyomi.core.common.Constants
 /**
  * Class that manages [PendingIntent] of activity's
  */
-object NotificationHandler {
+internal object NotificationHandler {
     /**
      * Returns [PendingIntent] that starts a download activity.
      *

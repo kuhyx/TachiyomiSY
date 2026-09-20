@@ -28,7 +28,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun ReaderPageActionsDialog(
+internal fun ReaderPageActionsDialog(
     onDismissRequest: () -> Unit,
     // SY -->
     onSetAsCover: (useExtraPage: Boolean) -> Unit,

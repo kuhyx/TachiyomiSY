@@ -33,7 +33,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun ScanlatorFilterDialog(
+internal fun ScanlatorFilterDialog(
     availableScanlators: Set<String>,
     excludedScanlators: Set<String>,
     onDismissRequest: () -> Unit,

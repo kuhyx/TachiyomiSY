@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.GestureDetectorWithLongTap
  * events in order to work with child views that need to disable touch events on this parent. The
  * pager can also be declared to be vertical by creating it with [isHorizontal] to false.
  */
-open class Pager(
+internal open class Pager(
     context: Context,
     isHorizontal: Boolean = true,
 ) : DirectionalViewPager(context, isHorizontal) {

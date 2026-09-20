@@ -29,7 +29,7 @@ import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class ExtensionDetailsScreenModel(
+internal class ExtensionDetailsScreenModel(
     pkgName: String,
     context: Context,
     private val network: NetworkHelper = Injekt.get(),
@@ -151,6 +151,6 @@ class ExtensionDetailsScreenModel(
     }
 }
 
-sealed interface ExtensionDetailsEvent {
+internal sealed interface ExtensionDetailsEvent {
     data object Uninstalled : ExtensionDetailsEvent
 }

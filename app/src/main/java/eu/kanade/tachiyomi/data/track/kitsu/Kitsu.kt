@@ -14,7 +14,7 @@ import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
+internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
 
     companion object {
         const val READING = 1L

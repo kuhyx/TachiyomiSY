@@ -9,7 +9,7 @@ import java.io.Closeable
  * @param block a function to process with given Closeable resources.
  * @return the result of block function invoked on this resource.
  */
-inline fun <T : Closeable?> Array<T>.use(block: () -> Unit) {
+internal inline fun <T : Closeable?> Array<T>.use(block: () -> Unit) {
     var blockException: Throwable? = null
     try {
         return block()

@@ -6,7 +6,7 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import kotlin.uuid.ExperimentalUuidApi
 
-class InstallationIdMigration : Migration {
+internal class InstallationIdMigration : Migration {
     override val version: Float = Migration.ALWAYS
 
     @OptIn(ExperimentalUuidApi::class)

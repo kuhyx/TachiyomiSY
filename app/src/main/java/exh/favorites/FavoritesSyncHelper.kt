@@ -49,7 +49,7 @@ import uy.kohesive.injekt.injectLazy
 import kotlin.time.Duration.Companion.seconds
 
 // Follow-up: only apply database changes after sync (https://github.com/kuhyx/TachiyomiSY/issues/24)
-class FavoritesSyncHelper(val context: Context) {
+internal class FavoritesSyncHelper(val context: Context) {
     private val getLibraryManga: GetLibraryManga by injectLazy()
     private val getCategories: GetCategories by injectLazy()
     private val getManga: GetManga by injectLazy()
@@ -421,7 +421,7 @@ class FavoritesSyncHelper(val context: Context) {
 }
 
 @Serializable
-sealed class FavoritesSyncStatus {
+internal sealed class FavoritesSyncStatus {
     @Serializable
     sealed class SyncError : FavoritesSyncStatus() {
         @Serializable

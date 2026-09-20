@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import okhttp3.OkHttpClient
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-interface Tracker {
+internal interface Tracker {
 
     val id: Long
 

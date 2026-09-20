@@ -17,7 +17,7 @@ import tachiyomi.domain.source.interactor.InsertSavedSearch
 import tachiyomi.domain.source.model.FeedSavedSearch
 import tachiyomi.domain.source.model.SavedSearch
 
-class MoveLatestToFeedMigration : Migration {
+internal class MoveLatestToFeedMigration : Migration {
     override val version: Float = 31f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

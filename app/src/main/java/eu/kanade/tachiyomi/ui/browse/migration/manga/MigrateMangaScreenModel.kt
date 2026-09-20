@@ -21,7 +21,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class MigrateMangaScreenModel(
+internal class MigrateMangaScreenModel(
     private val sourceId: Long,
     private val sourceManager: SourceManager = Injekt.get(),
     private val getFavorites: GetFavorites = Injekt.get(),
@@ -87,6 +87,6 @@ class MigrateMangaScreenModel(
     }
 }
 
-sealed interface MigrationMangaEvent {
+internal sealed interface MigrationMangaEvent {
     data object FailedFetchingFavorites : MigrationMangaEvent
 }

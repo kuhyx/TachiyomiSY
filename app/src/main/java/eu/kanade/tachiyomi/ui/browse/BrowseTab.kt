@@ -36,7 +36,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-data object BrowseTab : Tab {
+internal data object BrowseTab : Tab {
 
     override val options: TabOptions
         @Composable

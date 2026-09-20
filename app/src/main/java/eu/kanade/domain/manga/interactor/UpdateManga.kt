@@ -7,7 +7,7 @@ import tachiyomi.domain.manga.repository.MangaRepository
 import java.time.Instant
 import java.time.ZonedDateTime
 
-class UpdateManga(
+internal class UpdateManga(
     private val mangaRepository: MangaRepository,
     private val fetchInterval: FetchInterval,
 ) {

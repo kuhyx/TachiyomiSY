@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 
 @Composable
-fun LogoHeader() {
+internal fun LogoHeader() {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,

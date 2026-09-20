@@ -97,7 +97,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
-data class TrackInfoDialogHomeScreen(
+internal data class TrackInfoDialogHomeScreen(
     private val mangaId: Long,
     private val mangaTitle: String,
     private val sourceId: Long,
@@ -748,7 +748,7 @@ private data class TrackDateRemoverScreen(
     }
 }
 
-data class TrackerSearchScreen(
+internal data class TrackerSearchScreen(
     private val mangaId: Long,
     private val initialQuery: String,
     private val currentUrl: String?,

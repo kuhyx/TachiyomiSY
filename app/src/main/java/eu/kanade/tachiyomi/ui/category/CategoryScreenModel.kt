@@ -19,7 +19,7 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class CategoryScreenModel(
+internal class CategoryScreenModel(
     private val getCategories: GetCategories = Injekt.get(),
     private val createCategoryWithName: CreateCategoryWithName = Injekt.get(),
     private val deleteCategory: DeleteCategory = Injekt.get(),
@@ -99,18 +99,18 @@ class CategoryScreenModel(
     }
 }
 
-sealed interface CategoryDialog {
+internal sealed interface CategoryDialog {
     data object Create : CategoryDialog
     data class Rename(val category: Category) : CategoryDialog
     data class Delete(val category: Category) : CategoryDialog
 }
 
-sealed interface CategoryEvent {
+internal sealed interface CategoryEvent {
     sealed class LocalizedMessage(val stringRes: StringResource) : CategoryEvent
     data object InternalError : LocalizedMessage(MR.strings.internal_error)
 }
 
-sealed interface CategoryScreenState {
+internal sealed interface CategoryScreenState {
 
     @Immutable
     data object Loading : CategoryScreenState

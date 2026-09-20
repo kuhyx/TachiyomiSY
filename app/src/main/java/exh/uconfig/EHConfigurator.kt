@@ -18,7 +18,7 @@ import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
-class EHConfigurator(val context: Context) {
+internal class EHConfigurator(val context: Context) {
     private val exhPreferences: ExhPreferences by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
 

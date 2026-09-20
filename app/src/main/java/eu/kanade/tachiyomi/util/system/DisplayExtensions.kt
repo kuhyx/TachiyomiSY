@@ -18,13 +18,13 @@ private const val TABLET_UI_MIN_SCREEN_WIDTH_PORTRAIT_DP = 700
 // make sure icons on the nav rail fit
 private const val TABLET_UI_MIN_SCREEN_WIDTH_LANDSCAPE_DP = 600
 
-fun Configuration.isTabletUi(): Boolean {
+internal fun Configuration.isTabletUi(): Boolean {
     return smallestScreenWidthDp >= TABLET_UI_REQUIRED_SCREEN_WIDTH_DP
 }
 
 // Follow-up: move the logic to `isTabletUi()` when main activity is rewritten in Compose
 // https://github.com/kuhyx/TachiyomiSY/issues/23
-fun Context.prepareTabletUiContext(): Context {
+internal fun Context.prepareTabletUiContext(): Context {
     val configuration = resources.configuration
     val expected = when (Injekt.get<UiPreferences>().tabletUiMode.get()) {
         TabletUiMode.AUTOMATIC ->
@@ -52,7 +52,7 @@ fun Context.prepareTabletUiContext(): Context {
 /**
  * Returns true if current context is in night mode
  */
-fun Context.isNightMode(): Boolean {
+internal fun Context.isNightMode(): Boolean {
     return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 }
 
@@ -61,7 +61,7 @@ fun Context.isNightMode(): Boolean {
  *
  * Only works on Android 9+.
  */
-fun Activity.hasDisplayCutout(): Boolean {
+internal fun Activity.hasDisplayCutout(): Boolean {
     return window.decorView.hasDisplayCutout()
 }
 
@@ -70,14 +70,14 @@ fun Activity.hasDisplayCutout(): Boolean {
  *
  * Only works on Android 9+.
  */
-fun View.hasDisplayCutout(): Boolean {
+internal fun View.hasDisplayCutout(): Boolean {
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && rootWindowInsets?.displayCutout != null
 }
 
 /**
  * Gets system's config_navBarNeedsScrim boolean flag added in Android 10, defaults to true.
  */
-fun Context.isNavigationBarNeedsScrim(): Boolean {
+internal fun Context.isNavigationBarNeedsScrim(): Boolean {
     return Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
         InternalResourceHelper.getBoolean(this, "config_navBarNeedsScrim", true)
 }

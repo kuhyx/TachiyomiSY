@@ -78,7 +78,7 @@ import xyz.nulldev.ts.api.http.serializer.FilterSerializer
 import java.time.Instant
 import eu.kanade.tachiyomi.source.model.Filter as SourceModelFilter
 
-open class BrowseSourceScreenModel(
+internal open class BrowseSourceScreenModel(
     private val sourceId: Long,
     listingQuery: String?,
     // SY -->

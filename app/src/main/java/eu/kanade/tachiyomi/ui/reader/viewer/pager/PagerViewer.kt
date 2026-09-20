@@ -30,7 +30,7 @@ import kotlin.math.min
  * Implementation of a [Viewer] to display pages with a [ViewPager].
  */
 @Suppress("LeakingThis")
-abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
+internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
 
     val downloadManager: DownloadManager by injectLazy()
 

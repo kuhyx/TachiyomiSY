@@ -30,7 +30,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
-class MdUtil {
+internal class MdUtil {
 
     companion object {
         const val cdnUrl = "https://uploads.mangadex.org"

@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.R
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-interface ThemingDelegate {
+internal interface ThemingDelegate {
     fun applyAppTheme(activity: Activity)
 
     companion object {
@@ -20,7 +20,7 @@ interface ThemingDelegate {
     }
 }
 
-class ThemingDelegateImpl : ThemingDelegate {
+internal class ThemingDelegateImpl : ThemingDelegate {
     override fun applyAppTheme(activity: Activity) {
         val uiPreferences = Injekt.get<UiPreferences>()
         ThemingDelegate.getThemeResIds(uiPreferences.appTheme.get(), uiPreferences.themeDarkAmoled.get())

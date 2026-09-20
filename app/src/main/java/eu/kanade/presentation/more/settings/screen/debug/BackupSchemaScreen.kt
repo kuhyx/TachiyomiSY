@@ -24,7 +24,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 
-class BackupSchemaScreen : Screen() {
+internal class BackupSchemaScreen : Screen() {
 
     companion object {
         const val TITLE = "Backup file schema"

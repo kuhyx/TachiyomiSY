@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.source.Source
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class GetExtensionSources(
+internal class GetExtensionSources(
     private val preferences: SourcePreferences,
 ) {
 
@@ -30,7 +30,7 @@ class GetExtensionSources(
     }
 }
 
-data class ExtensionSourceItem(
+internal data class ExtensionSourceItem(
     val source: Source,
     val enabled: Boolean,
     val labelAsName: Boolean,

@@ -4,7 +4,7 @@ import dev.icerock.moko.resources.StringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
-data class BackupOptions(
+internal data class BackupOptions(
     val libraryEntries: Boolean = true,
     val categories: Boolean = true,
     val chapters: Boolean = true,

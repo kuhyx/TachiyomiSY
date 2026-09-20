@@ -13,7 +13,7 @@ import eu.kanade.presentation.util.Screen
 import kotlinx.coroutines.flow.collectLatest
 import tachiyomi.presentation.core.screens.LoadingScreen
 
-data class ExtensionDetailsScreen(
+internal data class ExtensionDetailsScreen(
     private val pkgName: String,
 ) : Screen() {
 

@@ -4,7 +4,7 @@ import com.elvishew.xlog.XLog
 import logcat.LogPriority
 import logcat.LogcatLogger
 
-class XLogLogcatLogger : LogcatLogger {
+internal class XLogLogcatLogger : LogcatLogger {
 
     override fun log(priority: LogPriority, tag: String, message: String) {
         XLog.tag(tag).log(priority.toXLogLevel(), message)

@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import eu.kanade.presentation.theme.TachiyomiTheme
 import eu.kanade.tachiyomi.R
 
-inline fun ComponentActivity.setComposeContent(
+internal inline fun ComponentActivity.setComposeContent(
     parent: CompositionContext? = null,
     crossinline content: @Composable () -> Unit,
 ) {
@@ -39,7 +39,7 @@ inline fun ComponentActivity.setComposeContent(
     }
 }
 
-fun ComposeView.setComposeContent(
+internal fun ComposeView.setComposeContent(
     content: @Composable () -> Unit,
 ) {
     setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -62,7 +62,7 @@ fun ComposeView.setComposeContent(
  * @param initMenu function to execute when the menu after is inflated.
  * @param onMenuItemClick function to execute when a menu item is clicked.
  */
-inline fun View.popupMenu(
+internal inline fun View.popupMenu(
     @MenuRes menuRes: Int,
     noinline initMenu: (Menu.() -> Unit)? = null,
     noinline onMenuItemClick: MenuItem.() -> Unit,
@@ -82,7 +82,7 @@ inline fun View.popupMenu(
     return popup
 }
 
-fun View?.isVisibleOnScreen(): Boolean {
+internal fun View?.isVisibleOnScreen(): Boolean {
     if (this == null) {
         return false
     }

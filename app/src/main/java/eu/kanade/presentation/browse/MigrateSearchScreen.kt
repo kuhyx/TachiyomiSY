@@ -10,7 +10,7 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.presentation.core.components.material.Scaffold
 
 @Composable
-fun MigrateSearchScreen(
+internal fun MigrateSearchScreen(
     state: SearchScreenModel.State,
     fromSourceId: Long?,
     navigateUp: () -> Unit,

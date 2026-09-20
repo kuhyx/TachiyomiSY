@@ -19,7 +19,7 @@ import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class BatchAddScreenModel(
+internal class BatchAddScreenModel(
     private val exhPreferences: ExhPreferences = Injekt.get(),
 ) : StateScreenModel<BatchAddState>(BatchAddState()) {
     private val galleryAdder by lazy { GalleryAdder() }
@@ -139,7 +139,7 @@ class BatchAddScreenModel(
     }
 }
 
-data class BatchAddState(
+internal data class BatchAddState(
     val progressTotal: Int = 0,
     val progress: Int = 0,
     val galleries: String = "",

@@ -5,7 +5,7 @@ import tachiyomi.data.Database
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class ExtensionStoreRestorer(
+internal class ExtensionStoreRestorer(
     private val database: Database = Injekt.get(),
 ) {
 

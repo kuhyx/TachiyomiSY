@@ -71,7 +71,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.source.local.LocalSource
 
-data class BrowseSourceScreen(
+internal data class BrowseSourceScreen(
     val sourceId: Long,
     private val listingQuery: String?,
     // SY -->

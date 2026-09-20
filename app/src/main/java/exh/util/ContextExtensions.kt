@@ -13,28 +13,28 @@ import eu.kanade.tachiyomi.util.system.powerManager
 /**
  * Property to get the wifi manager from the context.
  */
-val Context.wifiManager: WifiManager
+internal val Context.wifiManager: WifiManager
     get() = applicationContext.getSystemService()!!
 
-val Context.clipboardManager: ClipboardManager
+internal val Context.clipboardManager: ClipboardManager
     get() = applicationContext.getSystemService()!!
 
-val Context.jobScheduler: JobScheduler
+internal val Context.jobScheduler: JobScheduler
     get() = applicationContext.getSystemService()!!
 
-val Context.isInNightMode: Boolean
+internal val Context.isInNightMode: Boolean
     get() {
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         return currentNightMode == Configuration.UI_MODE_NIGHT_YES
     }
 
-fun Context.createPartialWakeLock(tag: String): PowerManager.WakeLock =
+internal fun Context.createPartialWakeLock(tag: String): PowerManager.WakeLock =
     powerManager.newWakeLock(
         PowerManager.PARTIAL_WAKE_LOCK,
         tag,
     )
 
-fun Context.createWifiLock(tag: String): WifiManager.WifiLock =
+internal fun Context.createWifiLock(tag: String): WifiManager.WifiLock =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         wifiManager.createWifiLock(
             WifiManager.WIFI_MODE_FULL_LOW_LATENCY,

@@ -5,6 +5,6 @@ import android.net.Uri
 /**
  * Uri filter
  */
-interface UriFilter {
+internal interface UriFilter {
     fun addToUri(builder: Uri.Builder)
 }

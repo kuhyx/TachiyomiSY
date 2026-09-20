@@ -11,7 +11,7 @@ import exh.md.utils.MdUtil
 import exh.metadata.metadata.MangaDexSearchMetadata
 import tachiyomi.core.common.util.lang.withIOContext
 
-class SimilarHandler(
+internal class SimilarHandler(
     private val lang: String,
     private val service: MangaDexService,
     private val similarService: SimilarService,

@@ -24,7 +24,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.InfoScreen
 
 @Composable
-fun NewUpdateScreen(
+internal fun NewUpdateScreen(
     versionName: String,
     changelogInfo: String,
     onOpenInBrowser: () -> Unit,

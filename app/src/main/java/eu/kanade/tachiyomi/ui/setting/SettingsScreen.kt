@@ -23,7 +23,7 @@ import eu.kanade.presentation.util.Screen
 import eu.kanade.presentation.util.isTabletUi
 import tachiyomi.presentation.core.components.TwoPanelBox
 
-class SettingsScreen(
+internal class SettingsScreen(
     private val destination: Int? = null,
 ) : Screen() {
 

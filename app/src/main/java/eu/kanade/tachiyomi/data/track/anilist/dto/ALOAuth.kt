@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ALOAuth(
+internal data class ALOAuth(
     @SerialName("access_token")
     val accessToken: String,
     @SerialName("token_type")
@@ -14,4 +14,4 @@ data class ALOAuth(
     val expiresIn: Long,
 )
 
-fun ALOAuth.isExpired() = System.currentTimeMillis() > expires
+internal fun ALOAuth.isExpired() = System.currentTimeMillis() > expires

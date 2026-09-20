@@ -57,7 +57,7 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.runOnEnterKeyPressed
 import cafe.adriel.voyager.core.screen.Screen as VoyagerScreen
 
-class SettingsSearchScreen : Screen() {
+internal class SettingsSearchScreen : Screen() {
 
     @Composable
     override fun Content() {

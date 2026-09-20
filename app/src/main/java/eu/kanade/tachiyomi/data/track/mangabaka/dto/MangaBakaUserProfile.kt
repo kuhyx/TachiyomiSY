@@ -4,12 +4,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MangaBakaUserProfileResponse(
+internal data class MangaBakaUserProfileResponse(
     val data: MangaBakaUserProfile,
 )
 
 @Serializable
-data class MangaBakaUserProfile(
+internal data class MangaBakaUserProfile(
     // incomplete DTO since this is the only part we need
     val id: String,
     @SerialName("rating_steps")

@@ -6,7 +6,7 @@ import tachiyomi.core.common.preference.getAndSet
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.library.service.LibraryPreferences
 
-class RemoveBatteryNotLowRestrictionMigration : Migration {
+internal class RemoveBatteryNotLowRestrictionMigration : Migration {
     override val version: Float = 56f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

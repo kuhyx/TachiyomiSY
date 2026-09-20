@@ -26,7 +26,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun MangaNotesSection(
+internal fun MangaNotesSection(
     content: String,
     expanded: Boolean,
     onEditNotes: () -> Unit,

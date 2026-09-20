@@ -6,7 +6,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-data class LibraryItem(
+internal data class LibraryItem(
     val libraryManga: LibraryManga,
     val downloadCount: Int = -1,
     val unreadCount: Long = -1,

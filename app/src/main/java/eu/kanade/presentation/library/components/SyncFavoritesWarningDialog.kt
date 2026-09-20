@@ -19,7 +19,7 @@ import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun SyncFavoritesWarningDialog(
+internal fun SyncFavoritesWarningDialog(
     onDismissRequest: () -> Unit,
     onAccept: () -> Unit,
 ) {

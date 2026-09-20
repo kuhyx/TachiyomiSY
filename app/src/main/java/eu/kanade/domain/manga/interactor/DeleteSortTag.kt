@@ -2,7 +2,7 @@ package eu.kanade.domain.manga.interactor
 
 import tachiyomi.domain.library.service.LibraryPreferences
 
-class DeleteSortTag(
+internal class DeleteSortTag(
     private val preferences: LibraryPreferences,
     private val getSortTag: GetSortTag,
 ) {

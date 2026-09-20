@@ -34,15 +34,15 @@ import dev.icerock.moko.resources.StringResource
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
-val DownloadedOnlyBannerBackgroundColor
+internal val DownloadedOnlyBannerBackgroundColor
     @Composable get() = MaterialTheme.colorScheme.tertiary
-val IncognitoModeBannerBackgroundColor
+internal val IncognitoModeBannerBackgroundColor
     @Composable get() = MaterialTheme.colorScheme.primary
-val IndexingBannerBackgroundColor
+internal val IndexingBannerBackgroundColor
     @Composable get() = MaterialTheme.colorScheme.secondary
 
 @Composable
-fun WarningBanner(
+internal fun WarningBanner(
     textRes: StringResource,
     modifier: Modifier = Modifier,
 ) {
@@ -59,7 +59,7 @@ fun WarningBanner(
 }
 
 @Composable
-fun AppStateBanners(
+internal fun AppStateBanners(
     downloadedOnlyMode: Boolean,
     incognitoMode: Boolean,
     indexing: Boolean,

@@ -9,7 +9,7 @@ import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.PreferenceScaffold
 import eu.kanade.presentation.util.LocalBackPress
 
-interface SearchableSettings : Screen {
+internal interface SearchableSettings : Screen {
 
     @Composable
     @ReadOnlyComposable

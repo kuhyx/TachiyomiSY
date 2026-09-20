@@ -68,7 +68,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
 
 @Composable
-fun MigrationListScreenContent(
+internal fun MigrationListScreenContent(
     items: List<MigratingManga>,
     migrationComplete: Boolean,
     finishedCount: Int,
@@ -166,7 +166,7 @@ fun MigrationListScreenContent(
 }
 
 @Composable
-fun MigrationListItem(
+internal fun MigrationListItem(
     modifier: Modifier,
     manga: Manga,
     source: String,
@@ -246,7 +246,7 @@ fun MigrationListItem(
 }
 
 @Composable
-fun MigrationListItemResult(
+internal fun MigrationListItemResult(
     modifier: Modifier,
     result: MigratingManga.SearchResult,
     onItemClick: (Manga) -> Unit,

@@ -19,7 +19,7 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.presentation.core.components.material.Scaffold
 
 @Composable
-fun GlobalSearchScreen(
+internal fun GlobalSearchScreen(
     state: SearchScreenModel.State,
     navigateUp: () -> Unit,
     onChangeSearchQuery: (String?) -> Unit,

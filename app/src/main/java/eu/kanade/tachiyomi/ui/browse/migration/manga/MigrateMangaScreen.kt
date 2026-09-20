@@ -39,7 +39,7 @@ import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.selectedBackground
 import tachiyomi.presentation.core.util.shouldExpandFAB
 
-data class MigrateMangaScreen(
+internal data class MigrateMangaScreen(
     private val sourceId: Long,
 ) : Screen() {
 

@@ -27,7 +27,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.plus
 
-sealed class SourceFeedUI {
+internal sealed class SourceFeedUI {
     abstract val id: Long
 
     abstract val title: String
@@ -81,7 +81,7 @@ sealed class SourceFeedUI {
 }
 
 @Composable
-fun SourceFeedScreen(
+internal fun SourceFeedScreen(
     name: String,
     isLoading: Boolean,
     items: List<SourceFeedUI>,
@@ -135,7 +135,7 @@ fun SourceFeedScreen(
 }
 
 @Composable
-fun SourceFeedList(
+internal fun SourceFeedList(
     items: List<SourceFeedUI>,
     paddingValues: PaddingValues,
     getMangaState: @Composable ((Manga) -> State<Manga>),
@@ -182,7 +182,7 @@ fun SourceFeedList(
 }
 
 @Composable
-fun SourceFeedItem(
+internal fun SourceFeedItem(
     item: SourceFeedUI,
     getMangaState: @Composable ((Manga) -> State<Manga>),
     onClickManga: (Manga) -> Unit,
@@ -207,7 +207,7 @@ fun SourceFeedItem(
 }
 
 @Composable
-fun SourceFeedToolbar(
+internal fun SourceFeedToolbar(
     title: String,
     searchQuery: String?,
     onSearchQueryChange: (String?) -> Unit,

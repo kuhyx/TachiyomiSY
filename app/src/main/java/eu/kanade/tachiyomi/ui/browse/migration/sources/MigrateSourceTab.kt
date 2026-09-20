@@ -25,7 +25,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 @Composable
-fun Screen.migrateSourceTab(): TabContent {
+internal fun Screen.migrateSourceTab(): TabContent {
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.currentOrThrow
     val screenModel = rememberScreenModel { MigrateSourceScreenModel() }

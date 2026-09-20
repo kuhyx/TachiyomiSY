@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import okhttp3.Response
 import tachiyomi.core.common.preference.Preference
 
-interface DataSaver {
+internal interface DataSaver {
 
     fun compress(imageUrl: String): String
 
@@ -33,7 +33,7 @@ interface DataSaver {
     }
 }
 
-fun DataSaver(source: Source, preferences: SourcePreferences): DataSaver {
+internal fun DataSaver(source: Source, preferences: SourcePreferences): DataSaver {
     val dataSaver = preferences.dataSaver.get()
     if (dataSaver != NONE && source.id.toString() in preferences.dataSaverExcludedSources.get()) {
         return DataSaver.NoOp

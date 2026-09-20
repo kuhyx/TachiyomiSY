@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.data.track.komga
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SeriesDto(
+internal data class SeriesDto(
     val id: String,
     val libraryId: String,
     val name: String,
@@ -19,7 +19,7 @@ data class SeriesDto(
 )
 
 @Serializable
-data class SeriesMetadataDto(
+internal data class SeriesMetadataDto(
     val status: String,
     val created: String?,
     val lastModified: String?,
@@ -42,7 +42,7 @@ data class SeriesMetadataDto(
 )
 
 @Serializable
-data class BookMetadataAggregationDto(
+internal data class BookMetadataAggregationDto(
     val authors: List<AuthorDto> = emptyList(),
     val releaseDate: String?,
     val summary: String,
@@ -53,23 +53,23 @@ data class BookMetadataAggregationDto(
 )
 
 @Serializable
-data class AuthorDto(
+internal data class AuthorDto(
     val name: String,
     val role: String,
 )
 
 @Serializable
-data class ReadProgressUpdateDto(
+internal data class ReadProgressUpdateDto(
     val lastBookRead: Int,
 )
 
 @Serializable
-data class ReadProgressUpdateV2Dto(
+internal data class ReadProgressUpdateV2Dto(
     val lastBookNumberSortRead: Double,
 )
 
 @Serializable
-data class ReadListDto(
+internal data class ReadListDto(
     val id: String,
     val name: String,
     val bookIds: List<String>,
@@ -79,7 +79,7 @@ data class ReadListDto(
 )
 
 @Serializable
-data class ReadProgressDto(
+internal data class ReadProgressDto(
     val booksCount: Int,
     val booksReadCount: Int,
     val booksUnreadCount: Int,
@@ -97,7 +97,7 @@ data class ReadProgressDto(
 }
 
 @Serializable
-data class ReadProgressV2Dto(
+internal data class ReadProgressV2Dto(
     val booksCount: Int,
     val booksReadCount: Int,
     val booksUnreadCount: Int,

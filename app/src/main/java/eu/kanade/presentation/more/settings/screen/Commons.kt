@@ -13,7 +13,7 @@ import tachiyomi.presentation.core.i18n.stringResource
  */
 @ReadOnlyComposable
 @Composable
-fun getCategoriesLabel(
+internal fun getCategoriesLabel(
     allCategories: List<Category>,
     included: Set<String>,
     excluded: Set<String>,

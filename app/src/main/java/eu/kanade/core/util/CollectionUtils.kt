@@ -5,7 +5,7 @@ import androidx.compose.ui.util.fastForEach
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-fun <T : R, R : Any> List<T>.insertSeparators(
+internal fun <T : R, R : Any> List<T>.insertSeparators(
     generator: (before: T?, after: T?) -> R?,
 ): List<R> {
     if (isEmpty()) return emptyList()
@@ -23,7 +23,7 @@ fun <T : R, R : Any> List<T>.insertSeparators(
 /**
  * Similar to [eu.kanade.core.util.insertSeparators] but iterates from last to first element
  */
-fun <T : R, R : Any> List<T>.insertSeparatorsReversed(
+internal fun <T : R, R : Any> List<T>.insertSeparatorsReversed(
     generator: (before: T?, after: T?) -> R?,
 ): List<R> {
     if (isEmpty()) return emptyList()
@@ -38,7 +38,7 @@ fun <T : R, R : Any> List<T>.insertSeparatorsReversed(
     return newList.asReversed()
 }
 
-fun <E> HashSet<E>.addOrRemove(value: E, shouldAdd: Boolean) {
+internal fun <E> HashSet<E>.addOrRemove(value: E, shouldAdd: Boolean) {
     if (shouldAdd) {
         add(value)
     } else {
@@ -54,7 +54,7 @@ fun <E> HashSet<E>.addOrRemove(value: E, shouldAdd: Boolean) {
  * collections that are created by code we control and are known to support random access.
  */
 @OptIn(ExperimentalContracts::class)
-inline fun <T> List<T>.fastFilterNot(predicate: (T) -> Boolean): List<T> {
+internal inline fun <T> List<T>.fastFilterNot(predicate: (T) -> Boolean): List<T> {
     contract { callsInPlace(predicate) }
     return fastFilter { !predicate(it) }
 }
@@ -69,7 +69,7 @@ inline fun <T> List<T>.fastFilterNot(predicate: (T) -> Boolean): List<T> {
  * collections that are created by code we control and are known to support random access.
  */
 @OptIn(ExperimentalContracts::class)
-inline fun <T> List<T>.fastPartition(predicate: (T) -> Boolean): Pair<List<T>, List<T>> {
+internal inline fun <T> List<T>.fastPartition(predicate: (T) -> Boolean): Pair<List<T>, List<T>> {
     contract { callsInPlace(predicate) }
     val first = ArrayList<T>()
     val second = ArrayList<T>()
@@ -91,7 +91,7 @@ inline fun <T> List<T>.fastPartition(predicate: (T) -> Boolean): Pair<List<T>, L
  * collections that are created by code we control and are known to support random access.
  */
 @OptIn(ExperimentalContracts::class)
-inline fun <T> List<T>.fastCountNot(predicate: (T) -> Boolean): Int {
+internal inline fun <T> List<T>.fastCountNot(predicate: (T) -> Boolean): Int {
     contract { callsInPlace(predicate) }
     var count = size
     fastForEach { if (predicate(it)) --count }

@@ -12,7 +12,7 @@ import tachiyomi.core.common.preference.TriState
 import tachiyomi.core.common.preference.getEnum
 import tachiyomi.core.common.util.lang.withIOContext
 
-class RemoveUpdateCheckerJobsMigration : Migration {
+internal class RemoveUpdateCheckerJobsMigration : Migration {
     override val version: Float = 52f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

@@ -47,7 +47,7 @@ import androidx.compose.material3.SuggestionChipDefaults as SuggestionChipDefaul
 
 @ExperimentalMaterial3Api
 @Composable
-fun SuggestionChip(
+internal fun SuggestionChip(
     label: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -78,7 +78,7 @@ fun SuggestionChip(
 
 @ExperimentalMaterial3Api
 @Composable
-fun SuggestionChip(
+internal fun SuggestionChip(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     label: @Composable () -> Unit,
@@ -256,7 +256,7 @@ private fun ChipContent(
  * Contains the baseline values used by [SuggestionChip].
  */
 @ExperimentalMaterial3Api
-object SuggestionChipDefaults {
+internal object SuggestionChipDefaults {
 
     /**
      * Creates a [ChipColors] that represents the default container, label, and icon colors used in
@@ -408,7 +408,7 @@ object SuggestionChipDefaults {
  */
 @ExperimentalMaterial3Api
 @Immutable
-class ChipColors internal constructor(
+internal class ChipColors internal constructor(
     private val containerColor: Color,
     private val labelColor: Color,
     private val leadingIconContentColor: Color,
@@ -497,7 +497,7 @@ class ChipColors internal constructor(
  */
 @ExperimentalMaterial3Api
 @Immutable
-class ChipBorder internal constructor(
+internal class ChipBorder internal constructor(
     private val borderColor: Color,
     private val disabledBorderColor: Color,
     private val borderWidth: Dp,
@@ -539,7 +539,7 @@ class ChipBorder internal constructor(
  */
 @ExperimentalMaterial3Api
 @Immutable
-class ChipElevation internal constructor(
+internal class ChipElevation internal constructor(
     private val defaultElevation: Dp,
     private val pressedElevation: Dp,
     private val focusedElevation: Dp,

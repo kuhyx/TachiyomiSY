@@ -12,7 +12,7 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class Bangumi(id: Long) : BaseTracker(id, "Bangumi") {
+internal class Bangumi(id: Long) : BaseTracker(id, "Bangumi") {
 
     private val json: Json by injectLazy()
 

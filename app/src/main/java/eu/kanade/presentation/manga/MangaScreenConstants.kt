@@ -1,6 +1,6 @@
 package eu.kanade.presentation.manga
 
-enum class DownloadAction {
+internal enum class DownloadAction {
     NEXT_1_CHAPTER,
     NEXT_5_CHAPTERS,
     NEXT_10_CHAPTERS,
@@ -9,12 +9,12 @@ enum class DownloadAction {
     BOOKMARKED_CHAPTERS,
 }
 
-enum class EditCoverAction {
+internal enum class EditCoverAction {
     EDIT,
     DELETE,
 }
 
-enum class MangaScreenItem {
+internal enum class MangaScreenItem {
     INFO_BOX,
     ACTION_ROW,
 

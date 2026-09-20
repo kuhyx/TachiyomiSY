@@ -46,7 +46,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class InterceptActivity : BaseActivity() {
+internal class InterceptActivity : BaseActivity() {
     private var statusJob: Job? = null
 
     private val status: MutableStateFlow<InterceptResult> = MutableStateFlow(InterceptResult.Idle)
@@ -212,7 +212,7 @@ class InterceptActivity : BaseActivity() {
     }
 }
 
-sealed class InterceptResult {
+internal sealed class InterceptResult {
     data object Idle : InterceptResult()
     data object Loading : InterceptResult()
     data class Success(val mangaId: Long, val manga: Manga, val chapter: Chapter? = null) : InterceptResult()

@@ -1,6 +1,6 @@
 package mihon.core.migration
 
-interface Migration {
+internal interface Migration {
     val version: Float
 
     suspend operator fun invoke(migrationContext: MigrationContext): Boolean

@@ -21,7 +21,7 @@ import uy.kohesive.injekt.api.get
 /**
  * Configuration used by pager viewers.
  */
-class PagerConfig(
+internal class PagerConfig(
     private val viewer: PagerViewer,
     scope: CoroutineScope,
     readerPreferences: ReaderPreferences = Injekt.get(),

@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import kotlin.math.abs
 
 @Composable
-fun ReaderContentOverlay(
+internal fun ReaderContentOverlay(
     @IntRange(from = -100, to = 100) brightness: Int,
     @ColorInt color: Int?,
     colorBlendMode: BlendMode?,

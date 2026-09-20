@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import tachiyomi.presentation.core.components.material.padding
 
 @Composable
-fun SortTagListItem(
+internal fun SortTagListItem(
     modifier: Modifier,
     tag: String,
     canMoveUp: Boolean,

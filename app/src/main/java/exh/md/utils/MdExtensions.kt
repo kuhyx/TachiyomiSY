@@ -6,7 +6,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 
-suspend fun <T> mdListCall(request: suspend (offset: Int) -> ListCallDto<T>): List<T> {
+internal suspend fun <T> mdListCall(request: suspend (offset: Int) -> ListCallDto<T>): List<T> {
     val results = mutableListOf<T>()
     var offset = 0
 
@@ -19,7 +19,7 @@ suspend fun <T> mdListCall(request: suspend (offset: Int) -> ListCallDto<T>): Li
     return results
 }
 
-inline fun <reified T> JsonElement.asMdMap(): Map<String, T> {
+internal inline fun <reified T> JsonElement.asMdMap(): Map<String, T> {
     return runCatching {
         MdUtil.jsonParser.decodeFromJsonElement<Map<String, T>>(jsonObject)
     }.getOrElse { emptyMap() }

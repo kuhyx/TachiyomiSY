@@ -24,7 +24,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-open class RecommendsScreenModel(
+internal open class RecommendsScreenModel(
     private val args: RecommendsScreen.Args,
     sourceManager: SourceManager = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
@@ -137,7 +137,7 @@ open class RecommendsScreenModel(
     }
 }
 
-sealed interface RecommendationItemResult {
+internal sealed interface RecommendationItemResult {
     data object Loading : RecommendationItemResult
 
     data class Error(

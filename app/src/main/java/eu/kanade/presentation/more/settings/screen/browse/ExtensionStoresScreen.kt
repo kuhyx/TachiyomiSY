@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.util.system.copyToClipboard
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import tachiyomi.presentation.core.screens.LoadingScreen
 
-class ExtensionStoresScreen(
+internal class ExtensionStoresScreen(
     private val url: String? = null,
 ) : Screen() {
 

@@ -10,7 +10,7 @@ import okhttp3.OkHttpClient
 import tachiyomi.domain.track.model.Track
 import tachiyomi.i18n.MR
 
-data class DummyTracker(
+internal data class DummyTracker(
     override val id: Long,
     override val name: String,
     override val supportsReadingDates: Boolean = false,

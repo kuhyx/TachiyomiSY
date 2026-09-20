@@ -13,7 +13,7 @@ import tachiyomi.presentation.core.components.material.TextButton
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun MangaDexFilterHeader(
+internal fun MangaDexFilterHeader(
     openMangaDexRandom: () -> Unit,
     openMangaDexFollows: () -> Unit,
 ) {

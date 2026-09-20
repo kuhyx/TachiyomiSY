@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 
 @Composable
-fun ReaderPageIndicator(
+internal fun ReaderPageIndicator(
     currentPage: Int,
     totalPages: Int,
     modifier: Modifier = Modifier,

@@ -36,7 +36,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun WhatsNewDialog(onDismissRequest: () -> Unit) {
+internal fun WhatsNewDialog(onDismissRequest: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
@@ -92,21 +92,21 @@ fun WhatsNewDialog(onDismissRequest: () -> Unit) {
     )
 }
 
-data class DisplayChangelog(
+internal data class DisplayChangelog(
     val version: String,
     val changelog: List<AnnotatedString>,
 )
 
 @Serializable
 @XmlSerialName("changelog", "", "")
-data class Changelog(
+internal data class Changelog(
     val bulletedList: Boolean,
     val changelogs: List<ChangelogVersion>,
 )
 
 @Serializable
 @XmlSerialName("changelogversion", "", "")
-data class ChangelogVersion(
+internal data class ChangelogVersion(
     val versionName: String,
     val changeDate: String,
     val text: List<ChangelogText>,
@@ -114,13 +114,13 @@ data class ChangelogVersion(
 
 @Serializable
 @XmlSerialName("changelogtext", "", "")
-data class ChangelogText(
+internal data class ChangelogText(
     @XmlValue(true) val value: String,
 )
 
 private const val bullet = "\u2022"
 
-fun Changelog.toDisplayChangelog(): List<DisplayChangelog> {
+internal fun Changelog.toDisplayChangelog(): List<DisplayChangelog> {
     val prefix = if (bulletedList) bullet + "\t\t" else ""
     return changelogs.map { version ->
         DisplayChangelog(

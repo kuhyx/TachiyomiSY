@@ -37,7 +37,7 @@ import java.time.ZonedDateTime
 import java.util.Date
 import kotlin.math.max
 
-class MangaRestorer(
+internal class MangaRestorer(
     private var isSync: Boolean = false,
 
     private val database: Database = Injekt.get(),

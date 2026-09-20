@@ -23,7 +23,7 @@ import kotlin.time.Duration.Companion.seconds
  * @param modifier [Modifier] to be applied to the preferenceScreen layout
  */
 @Composable
-fun PreferenceScreen(
+internal fun PreferenceScreen(
     items: List<Preference>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),

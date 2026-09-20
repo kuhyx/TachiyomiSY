@@ -43,7 +43,7 @@ import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun ExhUtils(
+internal fun ExhUtils(
     isVisible: Boolean,
     onSetExhUtilsVisibility: (Boolean) -> Unit,
     backgroundColor: Color,

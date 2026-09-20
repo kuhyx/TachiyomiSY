@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import dev.icerock.moko.resources.StringResource
 import tachiyomi.i18n.MR
 
-enum class ReaderOrientation(
+internal enum class ReaderOrientation(
     val flag: Int,
     val stringRes: StringResource,
     val icon: ImageVector,

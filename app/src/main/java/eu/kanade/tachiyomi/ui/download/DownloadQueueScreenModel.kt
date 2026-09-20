@@ -25,7 +25,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.milliseconds
 
-class DownloadQueueScreenModel(
+internal class DownloadQueueScreenModel(
     private val downloadManager: DownloadManager = Injekt.get(),
 ) : ScreenModel {
 

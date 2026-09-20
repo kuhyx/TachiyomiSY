@@ -27,7 +27,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.icons.CustomIcons
 
 @Composable
-fun ExtensionStoresContent(
+internal fun ExtensionStoresContent(
     repos: List<ExtensionStore>,
     lazyListState: LazyListState,
     paddingValues: PaddingValues,

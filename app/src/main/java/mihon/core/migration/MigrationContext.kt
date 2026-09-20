@@ -2,7 +2,7 @@ package mihon.core.migration
 
 import uy.kohesive.injekt.Injekt
 
-class MigrationContext(
+internal class MigrationContext(
     val dryrun: Boolean,
     val previousVersion: Int,
 ) {

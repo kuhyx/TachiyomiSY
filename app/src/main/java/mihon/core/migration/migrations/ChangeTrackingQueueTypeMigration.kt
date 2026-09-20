@@ -7,7 +7,7 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 
-class ChangeTrackingQueueTypeMigration : Migration {
+internal class ChangeTrackingQueueTypeMigration : Migration {
     override val version: Float = 44f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

@@ -7,7 +7,7 @@ import tachiyomi.data.Database
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SavedSearchRestorer(
+internal class SavedSearchRestorer(
     private val database: Database = Injekt.get(),
 ) {
     suspend fun restoreSavedSearches(backupSavedSearches: List<BackupSavedSearch>) {

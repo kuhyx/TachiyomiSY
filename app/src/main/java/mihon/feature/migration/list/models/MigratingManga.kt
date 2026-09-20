@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import tachiyomi.domain.manga.model.Manga
 import kotlin.coroutines.CoroutineContext
 
-class MigratingManga(
+internal class MigratingManga(
     val manga: Manga,
     val chapterCount: Int,
     val latestChapter: Double?,

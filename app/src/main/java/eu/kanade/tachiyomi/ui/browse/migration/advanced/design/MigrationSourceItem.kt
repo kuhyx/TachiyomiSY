@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import kotlinx.parcelize.Parcelize
 import tachiyomi.domain.source.service.SourceManager
 
-class MigrationSourceItem(val source: HttpSource, var sourceEnabled: Boolean) : AbstractFlexibleItem<MigrationSourceHolder>() {
+internal class MigrationSourceItem(val source: HttpSource, var sourceEnabled: Boolean) : AbstractFlexibleItem<MigrationSourceHolder>() {
     override fun getLayoutRes() = R.layout.migration_source_item
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MigrationSourceHolder {

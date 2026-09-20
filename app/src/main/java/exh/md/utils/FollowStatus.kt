@@ -2,7 +2,7 @@ package exh.md.utils
 
 import java.util.Locale
 
-enum class FollowStatus(val long: Long) {
+internal enum class FollowStatus(val long: Long) {
     UNFOLLOWED(0L),
     READING(1L),
     COMPLETED(2L),

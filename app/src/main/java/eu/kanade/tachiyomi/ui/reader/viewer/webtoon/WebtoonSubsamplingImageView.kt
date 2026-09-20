@@ -9,7 +9,7 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
  * Implementation of subsampling scale image view that ignores all touch events, because the
  * webtoon viewer handles all the gestures.
  */
-class WebtoonSubsamplingImageView @JvmOverloads constructor(
+internal class WebtoonSubsamplingImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : SubsamplingScaleImageView(context, attrs) {

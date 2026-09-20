@@ -45,7 +45,7 @@ import tachiyomi.presentation.core.screens.LoadingScreen
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SourcePreferencesScreen(val sourceId: Long) : Screen() {
+internal class SourcePreferencesScreen(val sourceId: Long) : Screen() {
 
     @Composable
     override fun Content() {
@@ -118,7 +118,7 @@ class SourcePreferencesScreen(val sourceId: Long) : Screen() {
     }
 }
 
-class SourcePreferencesFragment : PreferenceFragmentCompat() {
+internal class SourcePreferencesFragment : PreferenceFragmentCompat() {
 
     override fun getContext(): Context? {
         val superCtx = super.getContext() ?: return null

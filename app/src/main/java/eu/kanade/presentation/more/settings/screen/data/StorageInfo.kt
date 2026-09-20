@@ -23,7 +23,7 @@ import tachiyomi.presentation.core.util.secondaryItemAlpha
 import java.io.File
 
 @Composable
-fun StorageInfo(
+internal fun StorageInfo(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current

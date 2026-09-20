@@ -17,7 +17,7 @@ import kotlin.math.abs
 /**
  * Implementation of a [RecyclerView] used by the webtoon reader.
  */
-class WebtoonRecyclerView @JvmOverloads constructor(
+internal class WebtoonRecyclerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0,

@@ -41,7 +41,7 @@ import tachiyomi.i18n.MR
  * @param viewer the webtoon viewer.
  * @constructor creates a new webtoon holder.
  */
-class WebtoonPageHolder(
+internal class WebtoonPageHolder(
     private val frame: ReaderPageImageView,
     viewer: WebtoonViewer,
 ) : WebtoonBaseHolder(frame, viewer) {

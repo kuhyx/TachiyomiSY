@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun DotSeparatorText(
+internal fun DotSeparatorText(
     modifier: Modifier = Modifier,
 ) {
     Text(
@@ -15,7 +15,7 @@ fun DotSeparatorText(
 }
 
 @Composable
-fun DotSeparatorNoSpaceText(
+internal fun DotSeparatorNoSpaceText(
     modifier: Modifier = Modifier,
 ) {
     Text(

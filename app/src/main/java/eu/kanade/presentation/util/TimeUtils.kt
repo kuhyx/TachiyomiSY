@@ -11,7 +11,7 @@ import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
-fun Duration.toDurationString(context: Context, fallback: String): String {
+internal fun Duration.toDurationString(context: Context, fallback: String): String {
     return toComponents { days, hours, minutes, seconds, _ ->
         buildList(4) {
             if (days != 0L) add(context.stringResource(MR.strings.day_short, days))
@@ -28,7 +28,7 @@ fun Duration.toDurationString(context: Context, fallback: String): String {
 
 @Composable
 @ReadOnlyComposable
-fun relativeTimeSpanString(epochMillis: Long): String {
+internal fun relativeTimeSpanString(epochMillis: Long): String {
     val now = Instant.now().toEpochMilli()
     return when {
         epochMillis <= 0L -> stringResource(MR.strings.relative_time_span_never)

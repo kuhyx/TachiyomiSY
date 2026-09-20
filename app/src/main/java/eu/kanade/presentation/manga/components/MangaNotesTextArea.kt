@@ -56,7 +56,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun MangaNotesTextArea(
+internal fun MangaNotesTextArea(
     state: MangaNotesScreen.State,
     onUpdate: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -187,7 +187,7 @@ fun MangaNotesTextArea(
 }
 
 @Composable
-fun MangaNotesTextAreaButton(
+internal fun MangaNotesTextAreaButton(
     onClick: () -> Unit,
     icon: ImageVector,
     isSelected: Boolean,

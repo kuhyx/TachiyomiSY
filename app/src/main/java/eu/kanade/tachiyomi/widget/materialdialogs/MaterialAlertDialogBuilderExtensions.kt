@@ -8,7 +8,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.kanade.tachiyomi.databinding.DialogStubTextinputBinding
 
-fun MaterialAlertDialogBuilder.setTextInput(
+internal fun MaterialAlertDialogBuilder.setTextInput(
     hint: String? = null,
     prefill: String? = null,
     onTextChanged: (String) -> Unit,

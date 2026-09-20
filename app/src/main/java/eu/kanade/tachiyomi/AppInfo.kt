@@ -6,7 +6,7 @@ import tachiyomi.core.common.util.system.ImageUtil
  * Used by extensions.
  */
 @Suppress("UNUSED")
-object AppInfo {
+internal object AppInfo {
     /**
      * Version code of the host application. May be useful for sharing as User-Agent information.
      * Note that this value differs between forks so logic should not rely on it.

@@ -23,9 +23,9 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-fun Source.isComickSource() = name == "Comick"
+internal fun Source.isComickSource() = name == "Comick"
 
-class ComickPagingSource(
+internal class ComickPagingSource(
     manga: Manga,
     private val comickSource: Source,
 ) : RecommendationPagingSource(manga, comickSource) {

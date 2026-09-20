@@ -23,7 +23,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 
 @Composable
-fun SourcesFilterScreen(
+internal fun SourcesFilterScreen(
     navigateUp: () -> Unit,
     state: SourcesFilterScreenModel.State.Success,
     onClickLanguage: (String) -> Unit,
@@ -138,7 +138,7 @@ private fun SourcesFilterHeader(
 
 // SY -->
 @Composable
-fun SourcesFilterToggle(
+internal fun SourcesFilterToggle(
     modifier: Modifier,
     isEnabled: Boolean,
     onClickItem: () -> Unit,

@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.data.track.hikka.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class HKClient(
+internal data class HKClient(
     val reference: String,
     val name: String,
     val description: String,

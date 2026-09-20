@@ -1,6 +1,6 @@
 package exh.util
 
-inline fun <T> ignore(expr: () -> T): T? {
+internal inline fun <T> ignore(expr: () -> T): T? {
     return try {
         expr()
     } catch (t: Throwable) {
@@ -8,7 +8,7 @@ inline fun <T> ignore(expr: () -> T): T? {
     }
 }
 
-fun <T : Throwable> T.withRootCause(cause: Throwable): T {
+internal fun <T : Throwable> T.withRootCause(cause: Throwable): T {
     val curCause = this.cause
 
     if (curCause == null) {

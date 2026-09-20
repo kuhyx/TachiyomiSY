@@ -12,7 +12,7 @@ import kotlinx.serialization.json.Json
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 
-class GlobalExceptionHandler private constructor(
+internal class GlobalExceptionHandler private constructor(
     private val applicationContext: Context,
     private val defaultHandler: Thread.UncaughtExceptionHandler,
     private val activityToBeLaunched: Class<*>,

@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.data.track.kitsu
 
 import eu.kanade.tachiyomi.data.database.models.Track
 
-fun Track.toApiStatus() = when (status) {
+internal fun Track.toApiStatus() = when (status) {
     Kitsu.READING -> "current"
     Kitsu.COMPLETED -> "completed"
     Kitsu.ON_HOLD -> "on_hold"
@@ -11,6 +11,6 @@ fun Track.toApiStatus() = when (status) {
     else -> throw Exception("Unknown status")
 }
 
-fun Track.toApiScore(): String? {
+internal fun Track.toApiScore(): String? {
     return if (score > 0) (score * 2).toInt().toString() else null
 }

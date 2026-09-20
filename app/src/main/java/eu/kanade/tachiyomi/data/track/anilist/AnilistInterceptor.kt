@@ -7,7 +7,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import java.io.IOException
 
-class AnilistInterceptor(val anilist: Anilist, private var token: String?) : Interceptor {
+internal class AnilistInterceptor(val anilist: Anilist, private var token: String?) : Interceptor {
 
     /**
      * OAuth object used for authenticated requests.

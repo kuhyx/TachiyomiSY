@@ -18,7 +18,7 @@ import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SourceCategoryScreenModel(
+internal class SourceCategoryScreenModel(
     private val getSourceCategories: GetSourceCategories = Injekt.get(),
     private val createSourceCategory: CreateSourceCategory = Injekt.get(),
     private val renameSourceCategory: RenameSourceCategory = Injekt.get(),
@@ -100,19 +100,19 @@ class SourceCategoryScreenModel(
     }
 }
 
-sealed class SourceCategoryEvent {
+internal sealed class SourceCategoryEvent {
     sealed class LocalizedMessage(val stringRes: StringResource) : SourceCategoryEvent()
     data object InvalidName : LocalizedMessage(SYMR.strings.invalid_category_name)
     data object InternalError : LocalizedMessage(MR.strings.internal_error)
 }
 
-sealed class SourceCategoryDialog {
+internal sealed class SourceCategoryDialog {
     data object Create : SourceCategoryDialog()
     data class Rename(val category: String) : SourceCategoryDialog()
     data class Delete(val category: String) : SourceCategoryDialog()
 }
 
-sealed class SourceCategoryScreenState {
+internal sealed class SourceCategoryScreenState {
 
     @Immutable
     data object Loading : SourceCategoryScreenState()

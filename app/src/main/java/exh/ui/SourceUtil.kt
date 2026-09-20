@@ -8,6 +8,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 @Composable
-fun ifSourcesLoaded(): Boolean {
+internal fun ifSourcesLoaded(): Boolean {
     return remember { Injekt.get<SourceManager>().isInitialized }.collectAsState().value
 }

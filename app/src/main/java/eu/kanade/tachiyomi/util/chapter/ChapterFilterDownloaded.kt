@@ -10,7 +10,7 @@ import uy.kohesive.injekt.api.get
 /**
  * Returns a copy of the list with not downloaded chapters removed.
  */
-fun List<Chapter>.filterDownloaded(manga: Manga/* SY --> */, mangaMap: Map<Long, Manga>?): List<Chapter> {
+internal fun List<Chapter>.filterDownloaded(manga: Manga/* SY --> */, mangaMap: Map<Long, Manga>?): List<Chapter> {
     if (manga.isLocal()) return this
 
     val downloadCache: DownloadCache = Injekt.get()

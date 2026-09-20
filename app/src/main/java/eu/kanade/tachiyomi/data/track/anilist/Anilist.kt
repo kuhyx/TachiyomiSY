@@ -14,7 +14,7 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker {
+internal class Anilist(id: Long) : BaseTracker(id, "AniList"), DeletableTracker {
 
     companion object {
         const val READING = 1L

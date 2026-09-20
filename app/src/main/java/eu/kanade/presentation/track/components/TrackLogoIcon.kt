@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.data.track.Tracker
 import tachiyomi.presentation.core.util.clickableNoIndication
 
 @Composable
-fun TrackLogoIcon(
+internal fun TrackLogoIcon(
     tracker: Tracker,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,

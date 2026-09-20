@@ -28,7 +28,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class ShikimoriApi(
+internal class ShikimoriApi(
     private val trackId: Long,
     private val client: OkHttpClient,
     interceptor: ShikimoriInterceptor,

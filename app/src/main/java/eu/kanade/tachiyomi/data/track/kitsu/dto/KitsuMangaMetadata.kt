@@ -3,22 +3,22 @@ package eu.kanade.tachiyomi.data.track.kitsu.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class KitsuMangaMetadata(
+internal data class KitsuMangaMetadata(
     val data: KitsuMangaMetadataData,
 )
 
 @Serializable
-data class KitsuMangaMetadataData(
+internal data class KitsuMangaMetadataData(
     val findLibraryEntryById: KitsuMangaMetadataById,
 )
 
 @Serializable
-data class KitsuMangaMetadataById(
+internal data class KitsuMangaMetadataById(
     val media: KitsuMangaMetadataMedia,
 )
 
 @Serializable
-data class KitsuMangaMetadataMedia(
+internal data class KitsuMangaMetadataMedia(
     val id: String,
     val titles: KitsuMangaTitle,
     val posterImage: KitsuMangaCover,
@@ -27,37 +27,37 @@ data class KitsuMangaMetadataMedia(
 )
 
 @Serializable
-data class KitsuMangaTitle(
+internal data class KitsuMangaTitle(
     val preferred: String,
 )
 
 @Serializable
-data class KitsuMangaCover(
+internal data class KitsuMangaCover(
     val original: KitsuMangaCoverUrl,
 )
 
 @Serializable
-data class KitsuMangaCoverUrl(
+internal data class KitsuMangaCoverUrl(
     val url: String,
 )
 
 @Serializable
-data class KitsuMangaDescription(
+internal data class KitsuMangaDescription(
     val en: String?,
 )
 
 @Serializable
-data class KitsuMangaStaff(
+internal data class KitsuMangaStaff(
     val nodes: List<KitsuMangaStaffNode>,
 )
 
 @Serializable
-data class KitsuMangaStaffNode(
+internal data class KitsuMangaStaffNode(
     val role: String,
     val person: KitsuMangaStaffPerson,
 )
 
 @Serializable
-data class KitsuMangaStaffPerson(
+internal data class KitsuMangaStaffPerson(
     val name: String,
 )

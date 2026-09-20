@@ -18,7 +18,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.source.local.isLocal
 
-class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+internal class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     AbstractComposeView(context, attrs) {
 
     private var data: Data? by mutableStateOf(null)

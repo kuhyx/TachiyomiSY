@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import tachiyomi.core.common.util.system.logcat
 
-data class ReaderChapter(val chapter: Chapter) {
+internal data class ReaderChapter(val chapter: Chapter) {
 
     val stateFlow = MutableStateFlow<State>(State.Wait)
     var state: State

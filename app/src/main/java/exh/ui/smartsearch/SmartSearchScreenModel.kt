@@ -12,7 +12,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SmartSearchScreenModel(
+internal class SmartSearchScreenModel(
     sourceId: Long,
     private val config: SourcesScreen.SmartSearchConfig,
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),

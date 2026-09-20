@@ -9,7 +9,7 @@ import tachiyomi.domain.source.model.Source
 import tachiyomi.domain.source.repository.SourceRepository
 import java.util.SortedMap
 
-class GetLanguagesWithSources(
+internal class GetLanguagesWithSources(
     private val repository: SourceRepository,
     private val preferences: SourcePreferences,
 ) {

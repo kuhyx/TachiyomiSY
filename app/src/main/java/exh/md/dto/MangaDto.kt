@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 @Serializable
-data class MangaListDto(
+internal data class MangaListDto(
     override val limit: Int,
     override val offset: Int,
     override val total: Int,
@@ -12,13 +12,13 @@ data class MangaListDto(
 ) : ListCallDto<MangaDataDto>
 
 @Serializable
-data class MangaDto(
+internal data class MangaDto(
     val result: String,
     val data: MangaDataDto,
 )
 
 @Serializable
-data class MangaDataDto(
+internal data class MangaDataDto(
     val id: String,
     val type: String,
     val attributes: MangaAttributesDto,
@@ -26,7 +26,7 @@ data class MangaDataDto(
 )
 
 @Serializable
-data class MangaAttributesDto(
+internal data class MangaAttributesDto(
     val title: JsonElement,
     val altTitles: List<Map<String, String>>,
     val description: JsonElement,
@@ -42,98 +42,98 @@ data class MangaAttributesDto(
 )
 
 @Serializable
-data class TagDto(
+internal data class TagDto(
     val id: String,
     val attributes: TagAttributesDto,
 )
 
 @Serializable
-data class TagAttributesDto(
+internal data class TagAttributesDto(
     val name: Map<String, String>,
 )
 
 @Serializable
-data class RelationshipDto(
+internal data class RelationshipDto(
     val id: String,
     val type: String,
     val attributes: IncludesAttributesDto? = null,
 )
 
 @Serializable
-data class IncludesAttributesDto(
+internal data class IncludesAttributesDto(
     val name: String? = null,
     val fileName: String? = null,
 )
 
 @Serializable
-data class AuthorListDto(
+internal data class AuthorListDto(
     val results: List<AuthorDto>,
 )
 
 @Serializable
-data class AuthorDto(
+internal data class AuthorDto(
     val result: String,
     val data: AuthorDataDto,
 )
 
 @Serializable
-data class AuthorDataDto(
+internal data class AuthorDataDto(
     val id: String,
     val attributes: AuthorAttributesDto,
 )
 
 @Serializable
-data class AuthorAttributesDto(
+internal data class AuthorAttributesDto(
     val name: String,
 )
 
 @Serializable
-data class ReadingStatusDto(
+internal data class ReadingStatusDto(
     val status: String?,
 )
 
 @Serializable
-data class ReadingStatusMapDto(
+internal data class ReadingStatusMapDto(
     val statuses: Map<String, String?>,
 )
 
 @Serializable
-data class ReadChapterDto(
+internal data class ReadChapterDto(
     val data: List<String>,
 )
 
 @Serializable
-data class CoverListDto(
+internal data class CoverListDto(
     val data: List<CoverDto>,
 )
 
 @Serializable
-data class CoverDto(
+internal data class CoverDto(
     val id: String,
     val attributes: CoverAttributesDto,
     val relationships: List<RelationshipDto>,
 )
 
 @Serializable
-data class CoverAttributesDto(
+internal data class CoverAttributesDto(
     val fileName: String,
 )
 
 @Serializable
-data class AggregateDto(
+internal data class AggregateDto(
     val result: String,
     val volumes: Map<String, AggregateVolume>,
 )
 
 @Serializable
-data class AggregateVolume(
+internal data class AggregateVolume(
     val volume: String,
     val count: String,
     val chapters: Map<String, AggregateChapter>,
 )
 
 @Serializable
-data class AggregateChapter(
+internal data class AggregateChapter(
     val chapter: String,
     val count: String,
 )

@@ -59,7 +59,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import kotlin.math.roundToInt
 
-object DownloadQueueScreen : Screen() {
+internal object DownloadQueueScreen : Screen() {
 
     @Composable
     override fun Content() {

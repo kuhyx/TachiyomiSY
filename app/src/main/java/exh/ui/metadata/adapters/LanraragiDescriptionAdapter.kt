@@ -16,7 +16,7 @@ import tachiyomi.core.common.i18n.pluralStringResource
 import tachiyomi.i18n.sy.SYMR
 
 @Composable
-fun LanraragiDescription(state: State.Success, openMetadataViewer: () -> Unit) {
+internal fun LanraragiDescription(state: State.Success, openMetadataViewer: () -> Unit) {
     val context = LocalContext.current
     AndroidView(
         modifier = Modifier.fillMaxWidth(),

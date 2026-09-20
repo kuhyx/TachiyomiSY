@@ -28,7 +28,7 @@ import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun <T> ListPreferenceWidget(
+internal fun <T> ListPreferenceWidget(
     value: T,
     title: String,
     subtitle: String?,

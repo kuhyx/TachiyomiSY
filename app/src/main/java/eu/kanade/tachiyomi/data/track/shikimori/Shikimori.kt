@@ -13,7 +13,7 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class Shikimori(id: Long) : BaseTracker(id, "Shikimori"), DeletableTracker {
+internal class Shikimori(id: Long) : BaseTracker(id, "Shikimori"), DeletableTracker {
 
     companion object {
         const val READING = 1L

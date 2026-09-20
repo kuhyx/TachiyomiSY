@@ -9,7 +9,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.core.common.preference.Preference as PreferenceData
 
-sealed class Preference {
+internal sealed class Preference {
     abstract val title: String
     abstract val enabled: Boolean
 

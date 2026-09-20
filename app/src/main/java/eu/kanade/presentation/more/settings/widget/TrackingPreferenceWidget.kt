@@ -26,7 +26,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun TrackingPreferenceWidget(
+internal fun TrackingPreferenceWidget(
     modifier: Modifier = Modifier,
     tracker: Tracker,
     isLoggedIn: Boolean,

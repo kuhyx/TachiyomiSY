@@ -9,7 +9,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.system.logcat
 import java.io.File
 
-class ClearBrokenPagePreviewCacheMigration : Migration {
+internal class ClearBrokenPagePreviewCacheMigration : Migration {
     override val version: Float = 58f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

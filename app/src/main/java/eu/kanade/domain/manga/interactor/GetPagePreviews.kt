@@ -10,7 +10,7 @@ import exh.source.getMainSource
 import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.manga.model.Manga
 
-class GetPagePreviews(
+internal class GetPagePreviews(
     private val pagePreviewCache: PagePreviewCache,
     private val getChaptersByMangaId: GetChaptersByMangaId,
 ) {

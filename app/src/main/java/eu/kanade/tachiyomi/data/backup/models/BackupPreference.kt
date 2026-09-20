@@ -4,34 +4,34 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
-data class BackupPreference(
+internal data class BackupPreference(
     @ProtoNumber(1) val key: String,
     @ProtoNumber(2) val value: PreferenceValue,
 )
 
 @Serializable
-data class BackupSourcePreferences(
+internal data class BackupSourcePreferences(
     @ProtoNumber(1) val sourceKey: String,
     @ProtoNumber(2) val prefs: List<BackupPreference>,
 )
 
 @Serializable
-sealed class PreferenceValue
+internal sealed class PreferenceValue
 
 @Serializable
-data class IntPreferenceValue(val value: Int) : PreferenceValue()
+internal data class IntPreferenceValue(val value: Int) : PreferenceValue()
 
 @Serializable
-data class LongPreferenceValue(val value: Long) : PreferenceValue()
+internal data class LongPreferenceValue(val value: Long) : PreferenceValue()
 
 @Serializable
-data class FloatPreferenceValue(val value: Float) : PreferenceValue()
+internal data class FloatPreferenceValue(val value: Float) : PreferenceValue()
 
 @Serializable
-data class StringPreferenceValue(val value: String) : PreferenceValue()
+internal data class StringPreferenceValue(val value: String) : PreferenceValue()
 
 @Serializable
-data class BooleanPreferenceValue(val value: Boolean) : PreferenceValue()
+internal data class BooleanPreferenceValue(val value: Boolean) : PreferenceValue()
 
 @Serializable
-data class StringSetPreferenceValue(val value: Set<String>) : PreferenceValue()
+internal data class StringSetPreferenceValue(val value: Set<String>) : PreferenceValue()

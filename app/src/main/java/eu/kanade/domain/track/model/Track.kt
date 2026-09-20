@@ -3,7 +3,7 @@ package eu.kanade.domain.track.model
 import tachiyomi.domain.track.model.Track
 import eu.kanade.tachiyomi.data.database.models.Track as DbTrack
 
-fun Track.copyPersonalFrom(other: Track): Track {
+internal fun Track.copyPersonalFrom(other: Track): Track {
     return this.copy(
         lastChapterRead = other.lastChapterRead,
         score = other.score,
@@ -14,7 +14,7 @@ fun Track.copyPersonalFrom(other: Track): Track {
     )
 }
 
-fun Track.toDbTrack(): DbTrack = DbTrack.create(trackerId).also {
+internal fun Track.toDbTrack(): DbTrack = DbTrack.create(trackerId).also {
     it.id = id
     it.manga_id = mangaId
     it.remote_id = remoteId
@@ -30,7 +30,7 @@ fun Track.toDbTrack(): DbTrack = DbTrack.create(trackerId).also {
     it.private = private
 }
 
-fun DbTrack.toDomainTrack(idRequired: Boolean = true): Track? {
+internal fun DbTrack.toDomainTrack(idRequired: Boolean = true): Track? {
     val trackId = id ?: if (!idRequired) -1 else return null
     return Track(
         id = trackId,

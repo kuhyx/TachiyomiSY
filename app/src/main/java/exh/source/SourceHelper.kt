@@ -24,7 +24,7 @@ private val DELEGATED_METADATA_SOURCES by lazy {
     )
 }
 
-fun handleSourceLibrary() {
+internal fun handleSourceLibrary() {
     metadataDelegatedSourceIds = AndroidSourceManager.currentDelegatedSources
         .filter {
             it.value.newSourceClass in DELEGATED_METADATA_SOURCES

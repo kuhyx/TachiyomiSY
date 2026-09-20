@@ -19,7 +19,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class MdList(id: Long) : BaseTracker(id, "MDList") {
+internal class MdList(id: Long) : BaseTracker(id, "MDList") {
 
     companion object {
         private val SCORE_LIST = IntRange(0, 10)

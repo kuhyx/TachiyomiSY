@@ -7,7 +7,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class BackupFileValidator(
+internal class BackupFileValidator(
     private val context: Context,
 
     private val sourceManager: SourceManager = Injekt.get(),

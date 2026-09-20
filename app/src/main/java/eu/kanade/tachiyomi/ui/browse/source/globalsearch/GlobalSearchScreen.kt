@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import exh.ui.ifSourcesLoaded
 import tachiyomi.presentation.core.screens.LoadingScreen
 
-class GlobalSearchScreen(
+internal class GlobalSearchScreen(
     val searchQuery: String = "",
     private val extensionFilter: String? = null,
 ) : Screen() {

@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.util.lang.htmlDecode
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-data class ALManga(
+internal data class ALManga(
     val remoteId: Long,
     val title: String,
     val imageUrl: String,
@@ -47,7 +47,7 @@ data class ALManga(
     }
 }
 
-data class ALUserManga(
+internal data class ALUserManga(
     val libraryId: Long,
     val listStatus: String,
     val scoreRaw: Int,

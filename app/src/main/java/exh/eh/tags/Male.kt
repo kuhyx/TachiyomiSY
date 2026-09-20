@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-object Male : TagList {
+internal object Male : TagList {
     override fun getTags1(): List<String> = listOf(
         "male:abortion",
         "male:absorption",

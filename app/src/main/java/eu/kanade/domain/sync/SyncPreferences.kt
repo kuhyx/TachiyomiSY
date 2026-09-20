@@ -6,7 +6,7 @@ import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import java.util.UUID
 
-class SyncPreferences(
+internal class SyncPreferences(
     private val preferenceStore: PreferenceStore,
 ) {
     val clientHost: Preference<String> = preferenceStore.getString("sync_client_host", "https://sync.tachiyomi.org")

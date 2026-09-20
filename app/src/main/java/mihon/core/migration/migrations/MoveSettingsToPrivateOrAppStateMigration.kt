@@ -8,7 +8,7 @@ import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.util.lang.withIOContext
 
-class MoveSettingsToPrivateOrAppStateMigration : Migration {
+internal class MoveSettingsToPrivateOrAppStateMigration : Migration {
     override val version: Float = 59f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

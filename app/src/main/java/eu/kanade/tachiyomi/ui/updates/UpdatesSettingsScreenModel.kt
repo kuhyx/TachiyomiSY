@@ -8,7 +8,7 @@ import tachiyomi.domain.updates.service.UpdatesPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class UpdatesSettingsScreenModel(
+internal class UpdatesSettingsScreenModel(
     val updatesPreferences: UpdatesPreferences = Injekt.get(),
 ) : ScreenModel {
 

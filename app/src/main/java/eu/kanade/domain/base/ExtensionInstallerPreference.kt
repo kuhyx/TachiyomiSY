@@ -9,7 +9,7 @@ import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.preference.getEnum
 
-class ExtensionInstallerPreference(
+internal class ExtensionInstallerPreference(
     private val context: Context,
     preferenceStore: PreferenceStore,
 ) : Preference<ExtensionInstaller> {

@@ -23,7 +23,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 @Composable
-fun NHentaiDescription(state: State.Success, openMetadataViewer: () -> Unit) {
+internal fun NHentaiDescription(state: State.Success, openMetadataViewer: () -> Unit) {
     val context = LocalContext.current
     AndroidView(
         modifier = Modifier.fillMaxWidth(),

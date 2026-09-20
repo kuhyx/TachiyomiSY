@@ -13,7 +13,7 @@ import tachiyomi.i18n.MR
 /**
  * Class to manage the basic information of all the notifications used in the app.
  */
-object Notifications {
+internal object Notifications {
 
     /**
      * Common notification channel and ids used anywhere.

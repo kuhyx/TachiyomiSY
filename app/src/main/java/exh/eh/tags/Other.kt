@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-object Other : TagList {
+internal object Other : TagList {
     override fun getTags1(): List<String> = listOf(
         "other:3d",
         "other:3d imageset",

@@ -28,7 +28,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 @Composable
-fun TachiyomiTheme(
+internal fun TachiyomiTheme(
     appTheme: AppTheme? = null,
     amoled: Boolean? = null,
     content: @Composable () -> Unit,
@@ -42,7 +42,7 @@ fun TachiyomiTheme(
 }
 
 @Composable
-fun TachiyomiPreviewTheme(
+internal fun TachiyomiPreviewTheme(
     appTheme: AppTheme = AppTheme.DEFAULT,
     isAmoled: Boolean = false,
     content: @Composable () -> Unit,

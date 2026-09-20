@@ -20,7 +20,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun BrowseSourceSimpleToolbar(
+internal fun BrowseSourceSimpleToolbar(
     navigateUp: () -> Unit,
     title: String,
     displayMode: LibraryDisplayMode?,

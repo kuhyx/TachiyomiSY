@@ -2,7 +2,7 @@ package exh.search
 
 import exh.util.plusAssign
 
-class Text : QueryComponent() {
+internal class Text : QueryComponent() {
     val components = mutableListOf<TextComponent>()
 
     private var query: String? = null

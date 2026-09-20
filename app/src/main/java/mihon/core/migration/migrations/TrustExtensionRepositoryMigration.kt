@@ -8,7 +8,7 @@ import mihon.domain.extension.repository.ExtensionStoreRepository
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.system.logcat
 
-class TrustExtensionRepositoryMigration : Migration {
+internal class TrustExtensionRepositoryMigration : Migration {
     override val version: Float = 67f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

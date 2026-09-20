@@ -7,7 +7,7 @@ import eu.davidea.flexibleadapter.items.AbstractExpandableHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 
-data class DownloadHeaderItem(
+internal data class DownloadHeaderItem(
     val id: Long,
     val name: String,
     val size: Int,

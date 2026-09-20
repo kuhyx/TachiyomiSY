@@ -30,7 +30,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 
 @Composable
-fun UpdatesFilterDialog(
+internal fun UpdatesFilterDialog(
     onDismissRequest: () -> Unit,
     screenModel: UpdatesSettingsScreenModel,
 ) {

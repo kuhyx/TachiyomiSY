@@ -25,20 +25,20 @@ internal fun Dimension.toPx(scale: Scale): Int = pxOrElse {
     }
 }
 
-fun ImageRequest.Builder.cropBorders(enable: Boolean) = apply {
+internal fun ImageRequest.Builder.cropBorders(enable: Boolean) = apply {
     extras[cropBordersKey] = enable
 }
 
-val Options.cropBorders: Boolean
+internal val Options.cropBorders: Boolean
     get() = getExtra(cropBordersKey)
 
 private val cropBordersKey = Extras.Key(default = false)
 
-fun ImageRequest.Builder.customDecoder(enable: Boolean) = apply {
+internal fun ImageRequest.Builder.customDecoder(enable: Boolean) = apply {
     extras[customDecoderKey] = enable
 }
 
-val Options.customDecoder: Boolean
+internal val Options.customDecoder: Boolean
     get() = getExtra(customDecoderKey)
 
 private val customDecoderKey = Extras.Key(default = false)

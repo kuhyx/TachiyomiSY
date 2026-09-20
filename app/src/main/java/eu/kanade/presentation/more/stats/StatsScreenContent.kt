@@ -29,7 +29,7 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 @Composable
-fun StatsScreenContent(
+internal fun StatsScreenContent(
     state: StatsScreenState.Success,
     paddingValues: PaddingValues,
 ) {

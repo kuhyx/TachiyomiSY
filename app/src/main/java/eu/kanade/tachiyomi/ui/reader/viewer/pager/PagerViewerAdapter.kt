@@ -18,7 +18,7 @@ import tachiyomi.core.common.util.system.logcat
 /**
  * Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.
  */
-class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
+internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
 
     /**
      * Paired list of currently set items.

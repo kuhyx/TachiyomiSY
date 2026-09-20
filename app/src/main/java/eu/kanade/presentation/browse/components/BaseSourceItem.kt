@@ -15,7 +15,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 @Composable
-fun BaseSourceItem(
+internal fun BaseSourceItem(
     source: Source,
     modifier: Modifier = Modifier,
     showLanguageInContent: Boolean = true,

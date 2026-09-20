@@ -6,9 +6,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 import java.util.Locale
 
-typealias SearchAction<T> = suspend (String) -> List<T>
+internal typealias SearchAction<T> = suspend (String) -> List<T>
 
-abstract class BaseSmartSearchEngine<T>(
+internal abstract class BaseSmartSearchEngine<T>(
     private val extraSearchParams: String? = null,
     private val eligibleThreshold: Double = MIN_ELIGIBLE_THRESHOLD,
 ) {
@@ -149,4 +149,4 @@ abstract class BaseSmartSearchEngine<T>(
     }
 }
 
-data class SearchEntry<T>(val entry: T, val distance: Double)
+internal data class SearchEntry<T>(val entry: T, val distance: Double)

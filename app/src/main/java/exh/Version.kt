@@ -1,1 +1,3 @@
-package exh const val syDebugVersion: String = "0"
+package exh
+
+internal const val syDebugVersion: String = "0"

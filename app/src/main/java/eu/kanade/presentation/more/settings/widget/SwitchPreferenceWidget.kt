@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 
 @Composable
-fun SwitchPreferenceWidget(
+internal fun SwitchPreferenceWidget(
     modifier: Modifier = Modifier,
     title: String,
     subtitle: CharSequence? = null,

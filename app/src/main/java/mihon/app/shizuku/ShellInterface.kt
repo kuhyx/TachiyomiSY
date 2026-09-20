@@ -56,7 +56,7 @@ import rikka.shizuku.SystemServiceHelper
 import java.io.OutputStream
 import kotlin.system.exitProcess
 
-class ShellInterface : IShellInterface.Stub() {
+internal class ShellInterface : IShellInterface.Stub() {
 
     private val context = createContext()
     private val userId = UserHandle::class.java

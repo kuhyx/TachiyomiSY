@@ -6,17 +6,17 @@ import kotlinx.serialization.Serializable
 private val TITLE_PRIORITIES = listOf("en", "ja-Latn", "ja", "ko-Latn", "ko", "zh-Latn", "zh")
 
 @Serializable
-data class MangaBakaItemResult(
+internal data class MangaBakaItemResult(
     val data: MangaBakaItem,
 )
 
 @Serializable
-data class MangaBakaSearchResult(
+internal data class MangaBakaSearchResult(
     val data: List<MangaBakaItem>,
 )
 
 @Serializable
-data class MangaBakaItem(
+internal data class MangaBakaItem(
     val id: Long,
     val cover: MangaBakaCover,
     val authors: List<String>?,
@@ -51,23 +51,23 @@ data class MangaBakaItem(
 }
 
 @Serializable
-data class MangaBakaCover(
+internal data class MangaBakaCover(
     val x250: MangaBakaScaledCover,
 )
 
 @Serializable
-data class MangaBakaScaledCover(
+internal data class MangaBakaScaledCover(
     val x1: String?,
 )
 
 @Serializable
-data class MangaBakaPublishData(
+internal data class MangaBakaPublishData(
     @SerialName("start_date")
     val startDate: String?,
 )
 
 @Serializable
-data class MangaBakaItemTitle(
+internal data class MangaBakaItemTitle(
     val language: String,
     val traits: List<String>,
     val title: String,

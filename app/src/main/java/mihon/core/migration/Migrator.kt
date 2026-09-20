@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 
-object Migrator {
+internal object Migrator {
 
     private var result: Deferred<Boolean>? = null
     val scope = CoroutineScope(Dispatchers.IO + Job())

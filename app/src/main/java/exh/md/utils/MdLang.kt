@@ -1,7 +1,7 @@
 package exh.md.utils
 
 @Suppress("unused")
-enum class MdLang(val lang: String, val extLang: String = lang) {
+internal enum class MdLang(val lang: String, val extLang: String = lang) {
     ENGLISH("en"),
     JAPANESE("ja"),
     POLISH("pl"),

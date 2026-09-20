@@ -75,7 +75,7 @@ import kotlin.time.Duration.Companion.seconds
  * Its queue contains the list of chapters to download.
  */
 @OptIn(DelicateCoroutinesApi::class)
-class Downloader(
+internal class Downloader(
     private val context: Context,
     private val provider: DownloadProvider,
     private val cache: DownloadCache,

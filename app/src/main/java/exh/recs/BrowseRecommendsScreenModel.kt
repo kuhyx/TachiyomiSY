@@ -15,7 +15,7 @@ import tachiyomi.domain.manga.model.Manga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class BrowseRecommendsScreenModel(
+internal class BrowseRecommendsScreenModel(
     private val args: BrowseRecommendsScreen.Args,
     private val getManga: GetManga = Injekt.get(),
 ) : BrowseSourceScreenModel(

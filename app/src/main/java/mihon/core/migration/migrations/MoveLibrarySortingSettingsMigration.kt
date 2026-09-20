@@ -9,7 +9,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.library.service.LibraryPreferences
 
-class MoveLibrarySortingSettingsMigration : Migration {
+internal class MoveLibrarySortingSettingsMigration : Migration {
     override val version: Float = 20f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

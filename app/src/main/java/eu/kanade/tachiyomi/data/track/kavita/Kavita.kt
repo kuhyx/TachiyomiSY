@@ -16,7 +16,7 @@ import uy.kohesive.injekt.injectLazy
 import java.security.MessageDigest
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
+internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
 
     companion object {
         const val UNREAD = 1L

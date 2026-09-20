@@ -29,7 +29,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 private val ReadingModesWithoutDefault = ReadingMode.entries - ReadingMode.DEFAULT
 
 @Composable
-fun ReadingModeSelectDialog(
+internal fun ReadingModeSelectDialog(
     onDismissRequest: () -> Unit,
     screenModel: ReaderSettingsScreenModel,
     onChange: (StringResource) -> Unit,

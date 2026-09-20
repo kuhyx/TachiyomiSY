@@ -4,7 +4,7 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import java.util.Locale
 
-class FilterHandler {
+internal class FilterHandler {
     internal fun getMDFilterList(): FilterList {
         val filters = mutableListOf(
             OriginalLanguageList(getOriginalLanguage()),

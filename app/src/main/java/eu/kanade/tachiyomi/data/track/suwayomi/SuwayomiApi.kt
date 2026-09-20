@@ -23,7 +23,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.injectLazy
 import java.security.MessageDigest
 
-class SuwayomiApi(private val trackId: Long) {
+internal class SuwayomiApi(private val trackId: Long) {
 
     private val json: Json by injectLazy()
 

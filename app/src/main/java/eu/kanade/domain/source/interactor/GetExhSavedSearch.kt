@@ -16,7 +16,7 @@ import tachiyomi.domain.source.model.EXHSavedSearch
 import tachiyomi.domain.source.model.SavedSearch
 import xyz.nulldev.ts.api.http.serializer.FilterSerializer
 
-class GetExhSavedSearch(
+internal class GetExhSavedSearch(
     private val getSavedSearchById: GetSavedSearchById,
     private val getSavedSearchBySourceId: GetSavedSearchBySourceId,
     private val filterSerializer: FilterSerializer,

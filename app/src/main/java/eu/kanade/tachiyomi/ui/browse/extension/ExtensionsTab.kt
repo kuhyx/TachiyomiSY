@@ -25,7 +25,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun extensionsTab(
+internal fun extensionsTab(
     extensionsScreenModel: ExtensionsScreenModel,
 ): TabContent {
     val navigator = LocalNavigator.currentOrThrow

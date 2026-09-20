@@ -5,12 +5,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MangaBakaListResult(
+internal data class MangaBakaListResult(
     val data: MangaBakaListEntry,
 )
 
 @Serializable
-data class MangaBakaListEntry(
+internal data class MangaBakaListEntry(
     val state: String,
     @SerialName("start_date")
     val startDate: String?,

@@ -60,7 +60,7 @@ import java.lang.ref.WeakReference
 
 private val lock = Any()
 
-class AppModule(val app: Application) : InjektModule {
+internal class AppModule(val app: Application) : InjektModule {
     // SY -->
     private val securityPreferences: SecurityPreferences by injectLazy()
     // SY <--
@@ -184,7 +184,7 @@ class AppModule(val app: Application) : InjektModule {
     }
 }
 
-fun initExpensiveComponents(app: Application) {
+internal fun initExpensiveComponents(app: Application) {
     // Asynchronously init expensive components for a faster cold start
     ContextCompat.getMainExecutor(app).execute {
         Injekt.get<NetworkHelper>()

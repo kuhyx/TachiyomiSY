@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-object Location : TagList {
+internal object Location : TagList {
     override fun getTags1(): List<String> = listOf(
         "location:bathing room",
         "location:beach",

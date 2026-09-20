@@ -6,7 +6,7 @@ import mihon.domain.extension.interactor.GetExtensionStores
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class ExtensionStoresBackupCreator(
+internal class ExtensionStoresBackupCreator(
     private val getExtensionStores: GetExtensionStores = Injekt.get(),
 ) {
 

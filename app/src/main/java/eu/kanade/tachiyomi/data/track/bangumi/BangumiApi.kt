@@ -32,7 +32,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class BangumiApi(
+internal class BangumiApi(
     private val trackId: Long,
     private val client: OkHttpClient,
     interceptor: BangumiInterceptor,

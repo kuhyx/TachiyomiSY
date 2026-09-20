@@ -9,10 +9,10 @@ import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import kotlin.time.Duration.Companion.seconds
 
-val Context.workManager: WorkManager
+internal val Context.workManager: WorkManager
     get() = WorkManager.getInstance(this)
 
-fun WorkManager.isRunning(tag: String): Boolean {
+internal fun WorkManager.isRunning(tag: String): Boolean {
     val list = this.getWorkInfosByTag(tag).get()
     return list.any { it.state == WorkInfo.State.RUNNING }
 }
@@ -26,7 +26,7 @@ fun WorkManager.isRunning(tag: String): Boolean {
  * Moving to foreground service context requires the worker to run a bit longer,
  * allowing Service.startForeground() to be called and avoiding system crash.
  */
-suspend fun CoroutineWorker.setForegroundSafely() {
+internal suspend fun CoroutineWorker.setForegroundSafely() {
     try {
         setForeground(getForegroundInfo())
         delay(0.5.seconds)

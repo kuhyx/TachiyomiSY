@@ -42,7 +42,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun TrackStatusSelector(
+internal fun TrackStatusSelector(
     selection: Long,
     onSelectionChange: (Long) -> Unit,
     selections: Map<Long, StringResource?>,
@@ -90,7 +90,7 @@ fun TrackStatusSelector(
 }
 
 @Composable
-fun TrackChapterSelector(
+internal fun TrackChapterSelector(
     selection: Int,
     onSelectionChange: (Int) -> Unit,
     range: Iterable<Int>,
@@ -113,7 +113,7 @@ fun TrackChapterSelector(
 }
 
 @Composable
-fun TrackScoreSelector(
+internal fun TrackScoreSelector(
     selection: String,
     onSelectionChange: (String) -> Unit,
     selections: List<String>,
@@ -136,7 +136,7 @@ fun TrackScoreSelector(
 }
 
 @Composable
-fun TrackDateSelector(
+internal fun TrackDateSelector(
     title: String,
     initialSelectedDateMillis: Long,
     selectableDates: SelectableDates,

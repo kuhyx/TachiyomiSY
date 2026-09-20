@@ -37,7 +37,7 @@ import kotlin.math.max
  * View of the ViewPager that contains a page of a chapter.
  */
 @SuppressLint("ViewConstructor")
-class PagerPageHolder(
+internal class PagerPageHolder(
     readerThemedContext: Context,
     val viewer: PagerViewer,
     val page: ReaderPage,

@@ -54,7 +54,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.time.ZonedDateTime
 
-class UpdatesScreenModel(
+internal class UpdatesScreenModel(
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val downloadCache: DownloadCache = Injekt.get(),
@@ -501,7 +501,7 @@ private fun TriState.toBooleanOrNull(): Boolean? {
 }
 
 @Immutable
-data class UpdatesItem(
+internal data class UpdatesItem(
     val update: UpdatesWithRelations,
     val downloadStateProvider: () -> Download.State,
     val downloadProgressProvider: () -> Int,

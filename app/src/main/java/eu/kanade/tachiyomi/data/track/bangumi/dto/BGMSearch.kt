@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class BGMSearchResult(
+internal data class BGMSearchResult(
     val total: Int,
     val limit: Int,
     val offset: Int,
@@ -14,7 +14,7 @@ data class BGMSearchResult(
 
 @Serializable
 // Incomplete DTO with only our needed attributes
-data class BGMSubject(
+internal data class BGMSubject(
     val id: Long,
     @SerialName("name_cn")
     val nameCn: String,
@@ -48,12 +48,12 @@ data class BGMSubject(
 
 @Serializable
 // Incomplete DTO with only our needed attributes
-data class BGMSubjectImages(
+internal data class BGMSubjectImages(
     val common: String?,
 )
 
 @Serializable
 // Incomplete DTO with only our needed attributes
-data class BGMSubjectRating(
+internal data class BGMSubjectRating(
     val score: Double?,
 )

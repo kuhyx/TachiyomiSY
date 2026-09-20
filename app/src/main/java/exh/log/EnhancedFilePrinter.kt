@@ -25,7 +25,7 @@ import com.elvishew.xlog.flattener.Flattener2 as Flattener
  *
  */
 @Suppress("unused")
-class EnhancedFilePrinter internal constructor(
+internal class EnhancedFilePrinter internal constructor(
     private val folder: UniFile,
     private val fileNameGenerator: FileNameGenerator,
     private val backupStrategy: BackupStrategy,

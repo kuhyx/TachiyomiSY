@@ -6,7 +6,7 @@ import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 
-class DeleteDownload(
+internal class DeleteDownload(
     private val sourceManager: SourceManager,
     private val downloadManager: DownloadManager,
 ) {

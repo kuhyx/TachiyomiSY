@@ -7,7 +7,7 @@ import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 import java.io.File
 
-class DeleteOldEhFavoritesDatabaseMigration : Migration {
+internal class DeleteOldEhFavoritesDatabaseMigration : Migration {
     override val version: Float = 24f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

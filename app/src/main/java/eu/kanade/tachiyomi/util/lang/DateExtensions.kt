@@ -15,17 +15,17 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 import kotlin.math.absoluteValue
 
-fun LocalDateTime.toDateTimestampString(dateTimeFormatter: DateTimeFormatter): String {
+internal fun LocalDateTime.toDateTimestampString(dateTimeFormatter: DateTimeFormatter): String {
     val date = dateTimeFormatter.format(this)
     val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(this)
     return "$date $time"
 }
 
-fun Date.toTimestampString(): String {
+internal fun Date.toTimestampString(): String {
     return DateFormat.getTimeInstance(DateFormat.SHORT).format(this)
 }
 
-fun Long.convertEpochMillisZone(
+internal fun Long.convertEpochMillisZone(
     from: ZoneId,
     to: ZoneId,
 ): Long {
@@ -35,15 +35,15 @@ fun Long.convertEpochMillisZone(
         .toEpochMilli()
 }
 
-fun Long.toLocalDate(): LocalDate {
+internal fun Long.toLocalDate(): LocalDate {
     return LocalDate.ofInstant(Instant.ofEpochMilli(this), ZoneId.systemDefault())
 }
 
-fun Instant.toLocalDate(zoneId: ZoneId = ZoneId.systemDefault()): LocalDate {
+internal fun Instant.toLocalDate(zoneId: ZoneId = ZoneId.systemDefault()): LocalDate {
     return LocalDate.ofInstant(this, zoneId)
 }
 
-fun LocalDate.toRelativeString(
+internal fun LocalDate.toRelativeString(
     context: Context,
     relative: Boolean = true,
     dateFormat: DateTimeFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT),

@@ -9,7 +9,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.release.interactor.GetApplicationRelease
 import uy.kohesive.injekt.injectLazy
 
-class AppUpdateChecker {
+internal class AppUpdateChecker {
 
     private val getApplicationRelease: GetApplicationRelease by injectLazy()
 
@@ -45,7 +45,7 @@ class AppUpdateChecker {
     }
 }
 
-val GITHUB_REPO: String by lazy {
+internal val GITHUB_REPO: String by lazy {
     // SY -->
     if (isPreviewBuildType) {
         "jobobby04/TachiyomiSYPreview"

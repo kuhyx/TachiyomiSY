@@ -18,7 +18,7 @@ import uy.kohesive.injekt.api.get
 import java.time.OffsetDateTime
 import java.time.ZoneId
 
-class CrashLogUtil(
+internal class CrashLogUtil(
     private val context: Context,
     private val extensionManager: ExtensionManager = Injekt.get(),
     private val preferences: BasePreferences = Injekt.get(),

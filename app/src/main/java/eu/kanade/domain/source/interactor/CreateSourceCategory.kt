@@ -3,7 +3,7 @@ package eu.kanade.domain.source.interactor
 import eu.kanade.domain.source.service.SourcePreferences
 import tachiyomi.core.common.preference.plusAssign
 
-class CreateSourceCategory(private val preferences: SourcePreferences) {
+internal class CreateSourceCategory(private val preferences: SourcePreferences) {
 
     fun await(category: String): Result {
         if (category.contains("|")) {

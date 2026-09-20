@@ -30,7 +30,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class HikkaApi(
+internal class HikkaApi(
     private val trackId: Long,
     private val client: OkHttpClient,
     interceptor: HikkaInterceptor,

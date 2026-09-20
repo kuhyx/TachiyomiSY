@@ -5,7 +5,7 @@ import exh.eh.EHentaiUpdateWorker
 import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 
-class SetupEHentaiUpdateMigration : Migration {
+internal class SetupEHentaiUpdateMigration : Migration {
     override val version: Float = Migration.ALWAYS
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean {

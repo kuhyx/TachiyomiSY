@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MURecord(
+internal data class MURecord(
     @SerialName("series_id")
     val seriesId: Long? = null,
     val title: String? = null,
@@ -24,7 +24,7 @@ data class MURecord(
     val authors: List<MUAuthor>? = null,
 )
 
-fun MURecord.toTrackSearch(id: Long): TrackSearch {
+internal fun MURecord.toTrackSearch(id: Long): TrackSearch {
     return TrackSearch.create(id).apply {
         remote_id = this@toTrackSearch.seriesId ?: 0L
         title = this@toTrackSearch.title?.htmlDecode() ?: ""
@@ -39,7 +39,7 @@ fun MURecord.toTrackSearch(id: Long): TrackSearch {
 }
 
 @Serializable
-data class MUAuthor(
+internal data class MUAuthor(
     val type: String? = null,
     val name: String? = null,
 )

@@ -36,7 +36,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
+internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
 
     private val json: Json by injectLazy()
 

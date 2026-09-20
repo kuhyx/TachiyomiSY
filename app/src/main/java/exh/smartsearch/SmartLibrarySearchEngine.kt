@@ -3,7 +3,7 @@ package exh.smartsearch
 import mihon.feature.migration.list.search.BaseSmartSearchEngine
 import tachiyomi.domain.library.model.LibraryManga
 
-class SmartLibrarySearchEngine(
+internal class SmartLibrarySearchEngine(
     extraSearchParams: String? = null,
 ) : BaseSmartSearchEngine<LibraryManga>(extraSearchParams, 0.7) {
 

@@ -5,7 +5,7 @@ import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.data.Database
 
-class DeleteOldMangaDexTracksMigration : Migration {
+internal class DeleteOldMangaDexTracksMigration : Migration {
     override val version: Float = 17f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

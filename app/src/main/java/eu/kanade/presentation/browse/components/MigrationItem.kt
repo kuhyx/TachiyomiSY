@@ -35,7 +35,7 @@ import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun MigrationItem(
+internal fun MigrationItem(
     modifier: Modifier,
     manga: Manga,
     sourcesString: String,

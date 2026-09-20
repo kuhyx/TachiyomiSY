@@ -9,7 +9,7 @@ import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun SourceFeedAddDialog(
+internal fun SourceFeedAddDialog(
     onDismissRequest: () -> Unit,
     name: String,
     addFeed: () -> Unit,
@@ -36,7 +36,7 @@ fun SourceFeedAddDialog(
 }
 
 @Composable
-fun SourceFeedDeleteDialog(
+internal fun SourceFeedDeleteDialog(
     onDismissRequest: () -> Unit,
     deleteFeed: () -> Unit,
 ) {

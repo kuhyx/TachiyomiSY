@@ -9,7 +9,7 @@ import coil3.fetch.SourceFetchResult
 import coil3.request.Options
 import okio.BufferedSource
 
-class BufferedSourceFetcher(
+internal class BufferedSourceFetcher(
     private val data: BufferedSource,
     private val options: Options,
 ) : Fetcher {

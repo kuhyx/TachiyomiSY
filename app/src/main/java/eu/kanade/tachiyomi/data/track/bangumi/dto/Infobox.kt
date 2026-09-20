@@ -12,7 +12,7 @@ import kotlinx.serialization.json.JsonPrimitive
 
 // infobox deserializer and related classes courtesy of
 // https://github.com/Snd-R/komf/blob/4c260a3dcd326a5e1d74ac9662eec8124ab7e461/komf-core/src/commonMain/kotlin/snd/komf/providers/bangumi/model/BangumiSubject.kt#L53-L89
-object InfoBoxSerializer : JsonContentPolymorphicSerializer<Infobox>(Infobox::class) {
+internal object InfoBoxSerializer : JsonContentPolymorphicSerializer<Infobox>(Infobox::class) {
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<Infobox> {
         if (element !is JsonObject) throw SerializationException("Expected JsonObject go ${element::class}")
         val value = element["value"]
@@ -26,7 +26,7 @@ object InfoBoxSerializer : JsonContentPolymorphicSerializer<Infobox>(Infobox::cl
 }
 
 @Serializable(with = InfoBoxSerializer::class)
-sealed interface Infobox {
+internal sealed interface Infobox {
     val key: String
 
     @Serializable
@@ -43,7 +43,7 @@ sealed interface Infobox {
 }
 
 @Serializable
-data class InfoboxNestedValue(
+internal data class InfoboxNestedValue(
     @SerialName("k")
     val key: String? = null,
     @SerialName("v")

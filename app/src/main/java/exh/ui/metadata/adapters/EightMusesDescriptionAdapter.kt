@@ -16,7 +16,7 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 
 @Composable
-fun EightMusesDescription(state: State.Success, openMetadataViewer: () -> Unit) {
+internal fun EightMusesDescription(state: State.Success, openMetadataViewer: () -> Unit) {
     val context = LocalContext.current
     AndroidView(
         modifier = Modifier.fillMaxWidth(),

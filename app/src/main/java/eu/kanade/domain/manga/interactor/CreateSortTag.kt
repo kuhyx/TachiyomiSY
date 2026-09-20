@@ -3,7 +3,7 @@ package eu.kanade.domain.manga.interactor
 import tachiyomi.core.common.preference.plusAssign
 import tachiyomi.domain.library.service.LibraryPreferences
 
-class CreateSortTag(
+internal class CreateSortTag(
     private val preferences: LibraryPreferences,
     private val getSortTag: GetSortTag,
 ) {

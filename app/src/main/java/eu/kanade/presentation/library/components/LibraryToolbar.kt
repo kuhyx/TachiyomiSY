@@ -26,7 +26,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.theme.active
 
 @Composable
-fun LibraryToolbar(
+internal fun LibraryToolbar(
     hasActiveFilters: Boolean,
     selectedCount: Int,
     title: LibraryToolbarTitle,
@@ -187,7 +187,7 @@ private fun LibrarySelectionToolbar(
 }
 
 @Immutable
-data class LibraryToolbarTitle(
+internal data class LibraryToolbarTitle(
     val text: String,
     val numberOfManga: Int? = null,
 )

@@ -14,15 +14,15 @@ import androidx.core.content.PermissionChecker
 import androidx.core.content.getSystemService
 import eu.kanade.tachiyomi.R
 
-val Context.notificationManager: NotificationManager
+internal val Context.notificationManager: NotificationManager
     get() = getSystemService()!!
 
-fun Context.notify(id: Int, channelId: String, block: (NotificationCompat.Builder.() -> Unit)? = null) {
+internal fun Context.notify(id: Int, channelId: String, block: (NotificationCompat.Builder.() -> Unit)? = null) {
     val notification = notificationBuilder(channelId, block).build()
     this.notify(id, notification)
 }
 
-fun Context.notify(id: Int, notification: Notification) {
+internal fun Context.notify(id: Int, notification: Notification) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
         PermissionChecker.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
         PermissionChecker.PERMISSION_GRANTED
@@ -33,7 +33,7 @@ fun Context.notify(id: Int, notification: Notification) {
     NotificationManagerCompat.from(this).notify(id, notification)
 }
 
-fun Context.notify(notificationWithIdAndTags: List<NotificationWithIdAndTag>) {
+internal fun Context.notify(notificationWithIdAndTags: List<NotificationWithIdAndTag>) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
         PermissionChecker.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
         PermissionChecker.PERMISSION_GRANTED
@@ -44,7 +44,7 @@ fun Context.notify(notificationWithIdAndTags: List<NotificationWithIdAndTag>) {
     NotificationManagerCompat.from(this).notify(notificationWithIdAndTags)
 }
 
-fun Context.cancelNotification(id: Int) {
+internal fun Context.cancelNotification(id: Int) {
     NotificationManagerCompat.from(this).cancel(id)
 }
 
@@ -55,7 +55,7 @@ fun Context.cancelNotification(id: Int) {
  * @param block the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
-fun Context.notificationBuilder(
+internal fun Context.notificationBuilder(
     channelId: String,
     block: (NotificationCompat.Builder.() -> Unit)? = null,
 ): NotificationCompat.Builder {
@@ -74,7 +74,7 @@ fun Context.notificationBuilder(
  * @param block the function that will execute inside the builder.
  * @return a notification channel group to be displayed or updated.
  */
-fun buildNotificationChannelGroup(
+internal fun buildNotificationChannelGroup(
     channelId: String,
     block: (NotificationChannelGroupCompat.Builder.() -> Unit),
 ): NotificationChannelGroupCompat {
@@ -91,7 +91,7 @@ fun buildNotificationChannelGroup(
  * @param block the function that will execute inside the builder.
  * @return a notification channel to be displayed or updated.
  */
-fun buildNotificationChannel(
+internal fun buildNotificationChannel(
     channelId: String,
     channelImportance: Int,
     block: (NotificationChannelCompat.Builder.() -> Unit),

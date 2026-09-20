@@ -21,7 +21,7 @@ import java.util.Date
 import kotlin.math.round
 
 @Composable
-fun TsuminoDescription(state: State.Success, openMetadataViewer: () -> Unit) {
+internal fun TsuminoDescription(state: State.Success, openMetadataViewer: () -> Unit) {
     val context = LocalContext.current
     AndroidView(
         modifier = Modifier.fillMaxWidth(),

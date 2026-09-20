@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 @Composable
-fun relativeDateText(
+internal fun relativeDateText(
     dateEpochMillis: Long,
 ): String {
     return relativeDateText(
@@ -27,7 +27,7 @@ fun relativeDateText(
 }
 
 @Composable
-fun relativeDateText(
+internal fun relativeDateText(
     localDate: LocalDate?,
 ): String {
     val context = LocalContext.current

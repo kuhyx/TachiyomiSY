@@ -13,7 +13,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.shouldExpandFAB
 
 @Composable
-fun CategoryFloatingActionButton(
+internal fun CategoryFloatingActionButton(
     lazyListState: LazyListState,
     onCreate: () -> Unit,
     modifier: Modifier = Modifier,

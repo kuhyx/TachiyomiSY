@@ -18,7 +18,7 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 @Composable
-fun MissingChapterCountListItem(
+internal fun MissingChapterCountListItem(
     count: Int,
     modifier: Modifier = Modifier,
 ) {

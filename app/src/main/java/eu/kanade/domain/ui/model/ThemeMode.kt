@@ -2,13 +2,13 @@ package eu.kanade.domain.ui.model
 
 import androidx.appcompat.app.AppCompatDelegate
 
-enum class ThemeMode {
+internal enum class ThemeMode {
     LIGHT,
     DARK,
     SYSTEM,
 }
 
-fun setAppCompatDelegateThemeMode(themeMode: ThemeMode) {
+internal fun setAppCompatDelegateThemeMode(themeMode: ThemeMode) {
     AppCompatDelegate.setDefaultNightMode(
         when (themeMode) {
             ThemeMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO

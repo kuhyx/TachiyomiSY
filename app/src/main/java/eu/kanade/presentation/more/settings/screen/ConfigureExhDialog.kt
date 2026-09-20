@@ -28,7 +28,7 @@ import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun ConfigureExhDialog(run: Boolean, onRunning: () -> Unit) {
+internal fun ConfigureExhDialog(run: Boolean, onRunning: () -> Unit) {
     val exhPreferences = remember {
         Injekt.get<ExhPreferences>()
     }

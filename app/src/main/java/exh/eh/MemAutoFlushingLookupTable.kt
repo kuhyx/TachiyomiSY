@@ -35,7 +35,7 @@ import kotlin.concurrent.thread
  *
  * @author nulldev
  */
-class MemAutoFlushingLookupTable<T>(
+internal class MemAutoFlushingLookupTable<T>(
     file: File,
     private val serializer: EntrySerializer<T>,
     private val debounceTimeMs: Long = 3000,

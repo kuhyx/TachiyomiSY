@@ -17,7 +17,7 @@ import uy.kohesive.injekt.api.get
 /**
  * This class is used to persist active downloads across application restarts.
  */
-class DownloadStore(
+internal class DownloadStore(
     context: Context,
     private val sourceManager: SourceManager = Injekt.get(),
     private val json: Json = Injekt.get(),

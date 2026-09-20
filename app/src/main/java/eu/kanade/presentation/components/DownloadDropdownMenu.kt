@@ -11,7 +11,7 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun DownloadDropdownMenu(
+internal fun DownloadDropdownMenu(
     modifier: Modifier = Modifier,
     expanded: Boolean,
     onDismissRequest: () -> Unit,

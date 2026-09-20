@@ -10,7 +10,7 @@ import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
 
 @Composable
-fun AroundLayout(
+internal fun AroundLayout(
     startLayout: @Composable () -> Unit,
     endLayout: @Composable () -> Unit,
     content: @Composable () -> Unit,

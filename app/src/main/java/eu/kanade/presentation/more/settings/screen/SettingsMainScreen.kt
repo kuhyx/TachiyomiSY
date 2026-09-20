@@ -53,7 +53,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import cafe.adriel.voyager.core.screen.Screen as VoyagerScreen
 
-object SettingsMainScreen : Screen() {
+internal object SettingsMainScreen : Screen() {
 
     @Composable
     override fun Content() {

@@ -39,7 +39,7 @@ import kotlin.system.measureTimeMillis
  *
  * @property context The application context.
  */
-class SyncManager(
+internal class SyncManager(
     private val context: Context,
     private val database: Database = Injekt.get(),
     private val syncPreferences: SyncPreferences = Injekt.get(),

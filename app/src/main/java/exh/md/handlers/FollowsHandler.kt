@@ -17,7 +17,7 @@ import exh.util.under
 import kotlinx.coroutines.async
 import tachiyomi.core.common.util.lang.withIOContext
 
-class FollowsHandler(
+internal class FollowsHandler(
     private val lang: String,
     private val service: MangaDexAuthService,
 ) {

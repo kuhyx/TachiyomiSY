@@ -25,7 +25,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.InfoScreen
 
 @Composable
-fun OnboardingScreen(
+internal fun OnboardingScreen(
     onComplete: () -> Unit,
     onRestoreBackup: () -> Unit,
 ) {

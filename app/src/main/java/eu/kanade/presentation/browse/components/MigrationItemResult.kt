@@ -31,7 +31,7 @@ import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun MigrationItemResult(
+internal fun MigrationItemResult(
     modifier: Modifier,
     migrationItem: MigratingManga,
     result: MigratingManga.SearchResult,

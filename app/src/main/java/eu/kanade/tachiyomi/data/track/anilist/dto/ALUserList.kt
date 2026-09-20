@@ -4,23 +4,23 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ALUserListMangaQueryResult(
+internal data class ALUserListMangaQueryResult(
     val data: ALUserListMangaPage,
 )
 
 @Serializable
-data class ALUserListMangaPage(
+internal data class ALUserListMangaPage(
     @SerialName("Page")
     val page: ALUserListMediaList,
 )
 
 @Serializable
-data class ALUserListMediaList(
+internal data class ALUserListMediaList(
     val mediaList: List<ALUserListItem>,
 )
 
 @Serializable
-data class ALUserListItem(
+internal data class ALUserListItem(
     val id: Long,
     val status: String,
     val scoreRaw: Int,

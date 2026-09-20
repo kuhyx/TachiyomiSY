@@ -22,7 +22,7 @@ import tachiyomi.presentation.core.components.material.padding
 private val UpcomingItemHeight = 96.dp
 
 @Composable
-fun UpcomingItem(
+internal fun UpcomingItem(
     upcoming: Manga,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,

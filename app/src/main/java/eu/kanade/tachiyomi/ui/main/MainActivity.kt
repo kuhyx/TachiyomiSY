@@ -114,7 +114,7 @@ import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.injectLazy
 import java.util.LinkedList
 
-class MainActivity : BaseActivity() {
+internal class MainActivity : BaseActivity() {
 
     private val libraryPreferences: LibraryPreferences by injectLazy()
     private val preferences: BasePreferences by injectLazy()

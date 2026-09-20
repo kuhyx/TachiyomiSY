@@ -5,7 +5,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import java.io.IOException
 
-class MangaUpdatesInterceptor(
+internal class MangaUpdatesInterceptor(
     mangaUpdates: MangaUpdates,
 ) : Interceptor {
 

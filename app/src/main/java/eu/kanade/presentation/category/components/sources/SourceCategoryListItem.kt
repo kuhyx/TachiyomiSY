@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import tachiyomi.presentation.core.components.material.padding
 
 @Composable
-fun SourceCategoryListItem(
+internal fun SourceCategoryListItem(
     modifier: Modifier,
     category: String,
     onRename: () -> Unit,

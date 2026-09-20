@@ -30,7 +30,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.Executors
 
-abstract class SearchScreenModel(
+internal abstract class SearchScreenModel(
     initialState: State = State(),
     sourcePreferences: SourcePreferences = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
@@ -224,12 +224,12 @@ abstract class SearchScreenModel(
     }
 }
 
-enum class SourceFilter {
+internal enum class SourceFilter {
     All,
     PinnedOnly,
 }
 
-sealed interface SearchItemResult {
+internal sealed interface SearchItemResult {
     data object Loading : SearchItemResult
 
     data class Error(

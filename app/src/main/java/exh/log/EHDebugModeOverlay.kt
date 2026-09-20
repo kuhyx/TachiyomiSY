@@ -45,7 +45,7 @@ import java.util.Locale
 import kotlin.time.Duration.Companion.nanoseconds
 
 @Composable
-fun DebugModeOverlay() {
+internal fun DebugModeOverlay() {
     Box(Modifier.fillMaxSize()) {
         Column(
             Modifier
@@ -116,7 +116,7 @@ private fun buildInfo(context: Context, sourceBlacklist: Boolean) = buildAnnotat
     appendItem("Source blacklist:", sourceBlacklist.asEnabledString(), newLine = false)
 }
 
-fun AnnotatedString.Builder.appendItem(title: String, item: String, newLine: Boolean = true) {
+internal fun AnnotatedString.Builder.appendItem(title: String, item: String, newLine: Boolean = true) {
     withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
         append(title)
     }

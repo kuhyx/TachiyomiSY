@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.ui.base.delegate.ThemingDelegate
 import eu.kanade.tachiyomi.ui.base.delegate.ThemingDelegateImpl
 import eu.kanade.tachiyomi.util.system.prepareTabletUiContext
 
-open class BaseActivity :
+internal open class BaseActivity :
     AppCompatActivity(),
     SecureActivityDelegate by SecureActivityDelegateImpl(),
     ThemingDelegate by ThemingDelegateImpl() {

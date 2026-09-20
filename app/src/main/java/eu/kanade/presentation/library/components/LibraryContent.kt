@@ -26,7 +26,7 @@ import tachiyomi.presentation.core.components.material.PullRefresh
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun LibraryContent(
+internal fun LibraryContent(
     categories: List<Category>,
     searchQuery: String?,
     selection: Set<Long>,

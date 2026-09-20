@@ -14,7 +14,7 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
+internal class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTracker {
 
     private val json: Json by injectLazy()
 

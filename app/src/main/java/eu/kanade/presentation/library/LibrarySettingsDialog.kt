@@ -48,7 +48,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 
 @Composable
-fun LibrarySettingsDialog(
+internal fun LibrarySettingsDialog(
     onDismissRequest: () -> Unit,
     screenModel: LibrarySettingsScreenModel,
     category: Category?,
@@ -355,7 +355,7 @@ private fun ColumnScope.DisplayPage(
 }
 
 // SY -->
-data class GroupMode(
+internal data class GroupMode(
     val int: Int,
     val nameRes: StringResource,
     val drawableRes: Int,

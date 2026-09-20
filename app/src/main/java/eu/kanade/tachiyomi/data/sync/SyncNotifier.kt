@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notify
 import uy.kohesive.injekt.injectLazy
 
-class SyncNotifier(private val context: Context) {
+internal class SyncNotifier(private val context: Context) {
 
     private val preferences: SecurityPreferences by injectLazy()
 

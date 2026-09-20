@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
-data class BackupSearchMetadata(
+internal data class BackupSearchMetadata(
     @ProtoNumber(1) var uploader: String? = null,
     @ProtoNumber(2) var extra: String,
     @ProtoNumber(3) var indexedExtra: String? = null,

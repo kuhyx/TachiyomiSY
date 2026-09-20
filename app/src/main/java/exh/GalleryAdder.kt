@@ -20,7 +20,7 @@ import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class GalleryAdder(
+internal class GalleryAdder(
     private val getManga: GetManga = Injekt.get(),
     private val updateManga: UpdateManga = Injekt.get(),
     private val updateMangaFromRemote: UpdateMangaFromRemote = Injekt.get(),
@@ -206,7 +206,7 @@ class GalleryAdder(
     }
 }
 
-sealed class GalleryAddEvent {
+internal sealed class GalleryAddEvent {
     abstract val logMessage: String
     abstract val galleryUrl: String
     open val galleryTitle: String? = null

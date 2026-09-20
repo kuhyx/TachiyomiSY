@@ -28,9 +28,9 @@ import soup.compose.material.motion.animation.rememberSlideDistance
 /**
  * For invoking back press to the parent activity
  */
-val LocalBackPress: ProvidableCompositionLocal<(() -> Unit)?> = staticCompositionLocalOf { null }
+internal val LocalBackPress: ProvidableCompositionLocal<(() -> Unit)?> = staticCompositionLocalOf { null }
 
-interface Tab : cafe.adriel.voyager.navigator.tab.Tab {
+internal interface Tab : cafe.adriel.voyager.navigator.tab.Tab {
     suspend fun onReselect(navigator: Navigator) {}
 
     // SY -->
@@ -39,7 +39,7 @@ interface Tab : cafe.adriel.voyager.navigator.tab.Tab {
     // SY <--
 }
 
-abstract class Screen : Screen {
+internal abstract class Screen : Screen {
 
     override val key: ScreenKey = uniqueScreenKey
 }
@@ -48,7 +48,7 @@ abstract class Screen : Screen {
  * A variant of ScreenModel.coroutineScope except with the IO dispatcher instead of the
  * main dispatcher.
  */
-val ScreenModel.ioCoroutineScope: CoroutineScope
+internal val ScreenModel.ioCoroutineScope: CoroutineScope
     get() = ScreenModelStore.getOrPutDependency(
         screenModel = this,
         name = "ScreenModelIoCoroutineScope",
@@ -56,12 +56,12 @@ val ScreenModel.ioCoroutineScope: CoroutineScope
         onDispose = { scope -> scope.cancel() },
     )
 
-interface AssistContentScreen {
+internal interface AssistContentScreen {
     fun onProvideAssistUrl(): String?
 }
 
 @Composable
-fun DefaultNavigatorScreenTransition(
+internal fun DefaultNavigatorScreenTransition(
     navigator: Navigator,
     modifier: Modifier = Modifier,
 ) {
@@ -79,7 +79,7 @@ fun DefaultNavigatorScreenTransition(
 }
 
 @Composable
-fun ScreenTransition(
+internal fun ScreenTransition(
     navigator: Navigator,
     transition: AnimatedContentTransitionScope<Screen>.() -> ContentTransform,
     modifier: Modifier = Modifier,

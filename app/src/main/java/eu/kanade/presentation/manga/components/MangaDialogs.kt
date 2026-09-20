@@ -32,7 +32,7 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.absoluteValue
 
 @Composable
-fun DeleteChaptersDialog(
+internal fun DeleteChaptersDialog(
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
 ) {
@@ -63,7 +63,7 @@ fun DeleteChaptersDialog(
 }
 
 @Composable
-fun SetIntervalDialog(
+internal fun SetIntervalDialog(
     interval: Int,
     nextUpdate: Instant?,
     onDismissRequest: () -> Unit,

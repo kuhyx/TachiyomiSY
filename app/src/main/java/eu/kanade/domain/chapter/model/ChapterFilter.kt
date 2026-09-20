@@ -15,7 +15,7 @@ import tachiyomi.source.local.isLocal
  * Applies the view filters to the list of chapters obtained from the database.
  * @return an observable of the list of chapters filtered and sorted.
  */
-fun List<Chapter>.applyFilters(
+internal fun List<Chapter>.applyFilters(
     manga: Manga,
     downloadManager: DownloadManager, /* SY --> */
     mergedManga: Map<Long, Manga>, /* SY <-- */
@@ -50,7 +50,7 @@ fun List<Chapter>.applyFilters(
  * Applies the view filters to the list of chapters obtained from the database.
  * @return an observable of the list of chapters filtered and sorted.
  */
-fun List<ChapterList.Item>.applyFilters(manga: Manga): Sequence<ChapterList.Item> {
+internal fun List<ChapterList.Item>.applyFilters(manga: Manga): Sequence<ChapterList.Item> {
     val isLocalManga = manga.isLocal()
     val unreadFilter = manga.unreadFilter
     val downloadedFilter = manga.downloadedFilter

@@ -7,7 +7,7 @@ import tachiyomi.data.source.BaseSourcePagingSource
 /**
  * LatestUpdatesPager inherited from the general Pager.
  */
-class MangaDexFollowsPagingSource(val mangadex: MangaDex) : BaseSourcePagingSource(mangadex) {
+internal class MangaDexFollowsPagingSource(val mangadex: MangaDex) : BaseSourcePagingSource(mangadex) {
 
     override suspend fun requestNextPage(currentPage: Int): MangasPage {
         return mangadex.fetchFollows(currentPage)

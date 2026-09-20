@@ -4,7 +4,7 @@ import eu.kanade.domain.source.service.SourcePreferences
 import tachiyomi.core.common.preference.getAndSet
 import tachiyomi.domain.source.model.Source
 
-class ToggleSource(
+internal class ToggleSource(
     private val preferences: SourcePreferences,
 ) {
 

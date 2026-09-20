@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.databinding.RecommendationSearchBottomSheetBinding
 import uy.kohesive.injekt.injectLazy
 
 @Composable
-fun RecommendationSearchBottomSheetDialog(
+internal fun RecommendationSearchBottomSheetDialog(
     onDismissRequest: () -> Unit,
     onSearchRequest: () -> Unit,
 ) {
@@ -29,7 +29,7 @@ fun RecommendationSearchBottomSheetDialog(
     }
 }
 
-class RecommendationSearchBottomSheetDialogState(private val onSearchRequest: () -> Unit) {
+internal class RecommendationSearchBottomSheetDialogState(private val onSearchRequest: () -> Unit) {
     private val preferences: SourcePreferences by injectLazy()
 
     fun initPreferences(binding: RecommendationSearchBottomSheetBinding) {

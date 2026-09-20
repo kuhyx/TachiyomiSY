@@ -33,7 +33,7 @@ import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Stable
-class EditMergedSettingsState(
+internal class EditMergedSettingsState(
     private val context: Context,
     private val onDeleteClick: (MergedMangaReference) -> Unit,
     private val onDismissRequest: () -> Unit,
@@ -170,7 +170,7 @@ class EditMergedSettingsState(
 }
 
 @Composable
-fun EditMergedSettingsDialog(
+internal fun EditMergedSettingsDialog(
     onDismissRequest: () -> Unit,
     mergedData: MergedMangaData,
     onDeleteClick: (MergedMangaReference) -> Unit,

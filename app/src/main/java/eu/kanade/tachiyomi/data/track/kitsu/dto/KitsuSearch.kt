@@ -9,22 +9,22 @@ import java.util.Date
 import java.util.Locale
 
 @Serializable
-data class KitsuSearchResult(
+internal data class KitsuSearchResult(
     val media: KitsuSearchResultData,
 )
 
 @Serializable
-data class KitsuSearchResultData(
+internal data class KitsuSearchResultData(
     val key: String,
 )
 
 @Serializable
-data class KitsuAlgoliaSearchResult(
+internal data class KitsuAlgoliaSearchResult(
     val hits: List<KitsuAlgoliaSearchItem>,
 )
 
 @Serializable
-data class KitsuAlgoliaSearchItem(
+internal data class KitsuAlgoliaSearchItem(
     val id: Long,
     val canonicalTitle: String,
     val chapterCount: Long?,

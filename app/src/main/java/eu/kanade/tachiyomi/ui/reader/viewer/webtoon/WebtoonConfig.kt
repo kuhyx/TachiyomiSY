@@ -19,7 +19,7 @@ import uy.kohesive.injekt.api.get
 /**
  * Configuration used by webtoon viewers.
  */
-class WebtoonConfig(
+internal class WebtoonConfig(
     scope: CoroutineScope,
     readerPreferences: ReaderPreferences = Injekt.get(),
 ) : ViewerConfig(readerPreferences, scope) {

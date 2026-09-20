@@ -7,7 +7,7 @@ import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.i18n.MR
 
-class BasePreferences(
+internal class BasePreferences(
     val context: Context,
     preferenceStore: PreferenceStore,
 ) {

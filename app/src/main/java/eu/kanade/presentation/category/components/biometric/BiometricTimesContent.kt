@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.ui.category.biometric.TimeRangeItem
 import tachiyomi.presentation.core.components.material.padding
 
 @Composable
-fun BiometricTimesContent(
+internal fun BiometricTimesContent(
     timeRanges: List<TimeRangeItem>,
     lazyListState: LazyListState,
     paddingValues: PaddingValues,

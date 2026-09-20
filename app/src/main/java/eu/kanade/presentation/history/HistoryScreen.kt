@@ -31,7 +31,7 @@ import tachiyomi.presentation.core.screens.LoadingScreen
 import java.time.LocalDate
 
 @Composable
-fun HistoryScreen(
+internal fun HistoryScreen(
     state: HistoryScreenModel.State,
     snackbarHostState: SnackbarHostState,
     onSearchQueryChange: (String?) -> Unit,
@@ -136,7 +136,7 @@ private fun HistoryScreenContent(
     }
 }
 
-sealed interface HistoryUiModel {
+internal sealed interface HistoryUiModel {
     data class Header(val date: LocalDate) : HistoryUiModel
     data class Item(val item: HistoryWithRelations) : HistoryUiModel
 }

@@ -3,7 +3,7 @@ package eu.kanade.domain.source.interactor
 import eu.kanade.domain.source.service.SourcePreferences
 import tachiyomi.core.common.preference.getAndSet
 
-class RenameSourceCategory(
+internal class RenameSourceCategory(
     private val preferences: SourcePreferences,
     private val createSourceCategory: CreateSourceCategory,
 ) {

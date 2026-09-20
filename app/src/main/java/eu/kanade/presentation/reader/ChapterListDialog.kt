@@ -34,7 +34,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 @Composable
-fun ChapterListDialog(
+internal fun ChapterListDialog(
     onDismissRequest: () -> Unit,
     screenModel: ReaderSettingsScreenModel,
     chapters: List<ReaderChapterItem>,

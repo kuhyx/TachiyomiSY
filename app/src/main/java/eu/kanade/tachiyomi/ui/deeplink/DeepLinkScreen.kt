@@ -19,7 +19,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 
-class DeepLinkScreen(
+internal class DeepLinkScreen(
     val query: String = "",
 ) : Screen() {
 

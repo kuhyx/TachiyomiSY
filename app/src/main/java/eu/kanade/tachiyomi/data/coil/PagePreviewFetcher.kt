@@ -35,7 +35,7 @@ import java.io.IOException
  * handled by Coil's [DiskCache].
  */
 @Suppress("LongParameterList")
-class PagePreviewFetcher(
+internal class PagePreviewFetcher(
     private val page: PagePreview,
     private val options: Options,
     private val pagePreviewFile: () -> File,

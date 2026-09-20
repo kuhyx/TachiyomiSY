@@ -27,7 +27,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.theme.active
 
 @Composable
-fun MangaToolbar(
+internal fun MangaToolbar(
     title: String,
     hasFilters: Boolean,
     navigateUp: () -> Unit,

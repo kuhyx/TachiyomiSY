@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 
-class GetIncognitoState(
+internal class GetIncognitoState(
     private val basePreferences: BasePreferences,
     private val sourcePreferences: SourcePreferences,
     private val extensionManager: ExtensionManager,

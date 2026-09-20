@@ -26,7 +26,7 @@ import java.io.IOException
  * @param context the application context.
  * @constructor creates an instance of the page preview cache.
  */
-class PagePreviewCache(private val context: Context) {
+internal class PagePreviewCache(private val context: Context) {
 
     companion object {
         /** Name of cache directory.  */

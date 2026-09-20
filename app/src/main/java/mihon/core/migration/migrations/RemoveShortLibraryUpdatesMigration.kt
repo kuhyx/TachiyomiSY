@@ -5,7 +5,7 @@ import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.library.service.LibraryPreferences
 
-class RemoveShortLibraryUpdatesMigration : Migration {
+internal class RemoveShortLibraryUpdatesMigration : Migration {
     override val version: Float = 22f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

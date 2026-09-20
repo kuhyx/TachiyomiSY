@@ -1,6 +1,6 @@
 package eu.kanade.presentation.more.stats.data
 
-sealed interface StatsData {
+internal sealed interface StatsData {
 
     data class Overview(
         val libraryMangaCount: Int,

@@ -20,7 +20,7 @@ import tachiyomi.i18n.sy.SYMR
 import kotlin.math.round
 
 @Composable
-fun PururinDescription(state: State.Success, openMetadataViewer: () -> Unit) {
+internal fun PururinDescription(state: State.Success, openMetadataViewer: () -> Unit) {
     val context = LocalContext.current
     AndroidView(
         modifier = Modifier.fillMaxWidth(),

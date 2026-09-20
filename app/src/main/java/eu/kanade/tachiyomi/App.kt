@@ -94,7 +94,7 @@ import java.security.Security
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factory {
+internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factory {
 
     private val basePreferences: BasePreferences by injectLazy()
     private val privacyPreferences: PrivacyPreferences by injectLazy()

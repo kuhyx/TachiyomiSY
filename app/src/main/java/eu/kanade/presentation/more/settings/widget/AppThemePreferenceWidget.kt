@@ -120,7 +120,7 @@ private fun AppThemesList(
 }
 
 @Composable
-fun AppThemePreviewItem(
+internal fun AppThemePreviewItem(
     selected: Boolean,
     onClick: () -> Unit,
 ) {

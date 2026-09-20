@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Serializable
-data class HKManga(
+internal data class HKManga(
     @SerialName("data_type")
     val dataType: String,
     @SerialName("title_original")

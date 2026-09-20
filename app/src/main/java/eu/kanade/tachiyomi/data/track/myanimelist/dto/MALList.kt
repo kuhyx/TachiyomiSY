@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MALListItem(
+internal data class MALListItem(
     @SerialName("num_chapters")
     val numChapters: Long,
     @SerialName("my_list_status")
@@ -12,7 +12,7 @@ data class MALListItem(
 )
 
 @Serializable
-data class MALListItemStatus(
+internal data class MALListItemStatus(
     @SerialName("is_rereading")
     val isRereading: Boolean,
     val status: String,

@@ -30,7 +30,7 @@ import java.util.Locale
 /**
  * LoginController
  */
-class EhLoginActivity : BaseActivity() {
+internal class EhLoginActivity : BaseActivity() {
     private val exhPreferences: ExhPreferences by injectLazy()
 
     override fun onCreate(savedInstanceState: Bundle?) {

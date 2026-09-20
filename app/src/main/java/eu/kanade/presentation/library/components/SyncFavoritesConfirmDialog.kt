@@ -10,7 +10,7 @@ import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun SyncFavoritesConfirmDialog(
+internal fun SyncFavoritesConfirmDialog(
     onDismissRequest: () -> Unit,
     onAccept: () -> Unit,
 ) {

@@ -11,7 +11,7 @@ import tachiyomi.core.common.preference.getEnumSet
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
-class ReaderPreferences(
+internal class ReaderPreferences(
     preferenceStore: PreferenceStore,
 ) {
 

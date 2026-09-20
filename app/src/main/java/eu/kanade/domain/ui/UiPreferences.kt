@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 
-class UiPreferences(
+internal class UiPreferences(
     preferenceStore: PreferenceStore,
 ) {
 

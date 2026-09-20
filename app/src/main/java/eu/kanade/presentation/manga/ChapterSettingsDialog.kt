@@ -49,7 +49,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 @Composable
-fun ChapterSettingsDialog(
+internal fun ChapterSettingsDialog(
     onDismissRequest: () -> Unit,
     manga: Manga? = null,
     onDownloadFilterChanged: (TriState) -> Unit,
@@ -166,7 +166,7 @@ private fun ColumnScope.FilterPage(
 }
 
 @Composable
-fun ScanlatorFilterItem(
+internal fun ScanlatorFilterItem(
     active: Boolean,
     onClick: () -> Unit,
 ) {

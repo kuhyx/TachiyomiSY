@@ -44,7 +44,7 @@ import java.time.LocalDate
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun UpdateScreen(
+internal fun UpdateScreen(
     state: UpdatesScreenModel.State,
     snackbarHostState: SnackbarHostState,
     lastUpdated: Long,
@@ -237,7 +237,7 @@ private fun UpdatesBottomBar(
     )
 }
 
-sealed interface UpdatesUiModel {
+internal sealed interface UpdatesUiModel {
     data class Header(val date: LocalDate) : UpdatesUiModel
     data class Item(val item: UpdatesItem) : UpdatesUiModel
 }

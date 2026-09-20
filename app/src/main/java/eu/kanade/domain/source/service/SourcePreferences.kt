@@ -9,7 +9,7 @@ import tachiyomi.core.common.preference.getEnum
 import tachiyomi.core.common.preference.getLongArray
 import tachiyomi.domain.library.model.LibraryDisplayMode
 
-class SourcePreferences(
+internal class SourcePreferences(
     preferenceStore: PreferenceStore,
 ) {
 

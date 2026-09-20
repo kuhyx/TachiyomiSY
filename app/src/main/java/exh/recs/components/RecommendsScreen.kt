@@ -20,7 +20,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun RecommendsScreen(
+internal fun RecommendsScreen(
     title: String,
     state: RecommendsScreenModel.State,
     navigateUp: () -> Unit,

@@ -32,13 +32,13 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.TabText
 import tachiyomi.presentation.core.i18n.stringResource
 
-object TabbedDialogPaddings {
+internal object TabbedDialogPaddings {
     val Horizontal = 24.dp
     val Vertical = 8.dp
 }
 
 @Composable
-fun TabbedDialog(
+internal fun TabbedDialog(
     onDismissRequest: () -> Unit,
     tabTitles: List<String>,
     modifier: Modifier = Modifier,

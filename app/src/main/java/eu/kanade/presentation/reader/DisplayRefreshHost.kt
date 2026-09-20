@@ -19,7 +19,7 @@ import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.milliseconds
 
 @Stable
-class DisplayRefreshHost {
+internal class DisplayRefreshHost {
 
     internal var currentDisplayRefresh by mutableStateOf(false)
     private val readerPreferences = Injekt.get<ReaderPreferences>()
@@ -47,7 +47,7 @@ class DisplayRefreshHost {
 }
 
 @Composable
-fun DisplayRefreshHost(
+internal fun DisplayRefreshHost(
     hostState: DisplayRefreshHost,
     modifier: Modifier = Modifier,
 ) {

@@ -6,7 +6,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
 @Serializable
-data class MangaBakaOAuth(
+internal data class MangaBakaOAuth(
     @SerialName("access_token")
     val accessToken: String,
     @SerialName("refresh_token")

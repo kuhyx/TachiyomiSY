@@ -26,7 +26,7 @@ import java.io.File
 import java.io.InputStream
 import java.time.Instant
 
-class ImageSaver(
+internal class ImageSaver(
     val context: Context,
 ) {
 
@@ -143,7 +143,7 @@ class ImageSaver(
     }
 }
 
-sealed class Image(
+internal sealed class Image(
     open val name: String,
     open val location: Location,
 ) {
@@ -174,7 +174,7 @@ sealed class Image(
         }
 }
 
-sealed interface Location {
+internal sealed interface Location {
     @ConsistentCopyVisibility
     data class Pictures private constructor(val relativePath: String) : Location {
         companion object {

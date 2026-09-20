@@ -12,7 +12,7 @@ import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import exh.pagepreview.components.PagePreviewScreen
 
-class PagePreviewScreen(private val mangaId: Long) : Screen() {
+internal class PagePreviewScreen(private val mangaId: Long) : Screen() {
 
     @Composable
     override fun Content() {

@@ -15,7 +15,7 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.screens.LoadingScreen
 
-class ExtensionFilterScreen : Screen() {
+internal class ExtensionFilterScreen : Screen() {
 
     @Composable
     override fun Content() {

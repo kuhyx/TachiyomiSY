@@ -5,7 +5,7 @@ import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.backup.service.BackupPreferences
 
-class AlwaysBackupMigration : Migration {
+internal class AlwaysBackupMigration : Migration {
     override val version: Float = 40f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

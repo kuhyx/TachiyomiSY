@@ -22,7 +22,7 @@ import tachiyomi.presentation.core.components.RotatingProgressIndicator
  *
  * By always rotating we give the feedback to the user that the application isn't 'stuck'.
  */
-class ReaderProgressIndicator @JvmOverloads constructor(
+internal class ReaderProgressIndicator @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,

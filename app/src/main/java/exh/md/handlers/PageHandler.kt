@@ -18,7 +18,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.isAccessible
 
-class PageHandler(
+internal class PageHandler(
     private val service: MangaDexService,
     private val mangaPlusHandler: MangaPlusHandler,
     private val comikeyHandler: ComikeyHandler,

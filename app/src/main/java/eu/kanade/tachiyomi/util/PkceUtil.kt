@@ -4,7 +4,7 @@ import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.Base64
 
-object PkceUtil {
+internal object PkceUtil {
 
     fun generateCodeVerifier(): String {
         val codeVerifier = ByteArray(50)
@@ -23,7 +23,7 @@ object PkceUtil {
     }
 }
 
-data class PkceCodes(
+internal data class PkceCodes(
     val codeVerifier: String,
     val codeChallenge: String,
 )

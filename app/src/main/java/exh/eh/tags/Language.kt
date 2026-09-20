@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-object Language : TagList {
+internal object Language : TagList {
     override fun getTags1(): List<String> = listOf(
         "language:arabic",
         "language:bulgarian",

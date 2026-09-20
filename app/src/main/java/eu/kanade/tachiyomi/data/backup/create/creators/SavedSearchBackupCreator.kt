@@ -7,7 +7,7 @@ import tachiyomi.data.Database
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SavedSearchBackupCreator(
+internal class SavedSearchBackupCreator(
     private val database: Database = Injekt.get(),
 ) {
 

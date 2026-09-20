@@ -23,7 +23,7 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.plus
 
 @Composable
-fun ExtensionStoresScreen(
+internal fun ExtensionStoresScreen(
     state: ExtensionStoreScreenState.Success,
     onClickCreate: () -> Unit,
     onCopy: (ExtensionStore) -> Unit,

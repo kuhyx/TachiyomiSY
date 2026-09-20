@@ -19,7 +19,7 @@ import tachiyomi.presentation.core.components.SettingsItemsPaddings
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun SavedSearchItem(
+internal fun SavedSearchItem(
     savedSearches: List<EXHSavedSearch>,
     onSavedSearch: (EXHSavedSearch) -> Unit,
     onSavedSearchPress: (EXHSavedSearch) -> Unit,

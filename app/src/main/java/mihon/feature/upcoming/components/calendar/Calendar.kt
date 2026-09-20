@@ -33,7 +33,7 @@ private val FontSize = 16.sp
 private const val DAYS_OF_WEEK = 7
 
 @Composable
-fun Calendar(
+internal fun Calendar(
     selectedYearMonth: YearMonth,
     events: Map<LocalDate, Int>,
     setSelectedYearMonth: (YearMonth) -> Unit,

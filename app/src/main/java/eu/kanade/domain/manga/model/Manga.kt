@@ -18,13 +18,13 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 // Follow-up: move these into the domain model (https://github.com/kuhyx/TachiyomiSY/issues/5)
-val Manga.readingMode: Long
+internal val Manga.readingMode: Long
     get() = viewerFlags and ReadingMode.MASK.toLong()
 
-val Manga.readerOrientation: Long
+internal val Manga.readerOrientation: Long
     get() = viewerFlags and ReaderOrientation.MASK.toLong()
 
-val Manga.downloadedFilter: TriState
+internal val Manga.downloadedFilter: TriState
     get() {
         if (Injekt.get<BasePreferences>().downloadedOnly.get()) return TriState.ENABLED_IS
         return when (downloadedFilterRaw) {
@@ -33,13 +33,13 @@ val Manga.downloadedFilter: TriState
             else -> TriState.DISABLED
         }
     }
-fun Manga.chaptersFiltered(): Boolean {
+internal fun Manga.chaptersFiltered(): Boolean {
     return unreadFilter != TriState.DISABLED ||
         downloadedFilter != TriState.DISABLED ||
         bookmarkedFilter != TriState.DISABLED
 }
 
-fun Manga.toSManga(): SManga = SManga.create().also {
+internal fun Manga.toSManga(): SManga = SManga.create().also {
     it.url = url
     // SY -->
     it.title = ogTitle
@@ -54,7 +54,7 @@ fun Manga.toSManga(): SManga = SManga.create().also {
     it.memo = memo
 }
 
-fun Manga.copyFrom(other: SManga): Manga {
+internal fun Manga.copyFrom(other: SManga): Manga {
     // SY -->
     val author = other.author ?: ogAuthor
     val artist = other.artist ?: ogArtist
@@ -83,14 +83,14 @@ fun Manga.copyFrom(other: SManga): Manga {
     )
 }
 
-fun Manga.hasCustomCover(coverCache: CoverCache = Injekt.get()): Boolean {
+internal fun Manga.hasCustomCover(coverCache: CoverCache = Injekt.get()): Boolean {
     return coverCache.getCustomCoverFile(id).exists()
 }
 
 /**
  * Creates a ComicInfo instance based on the manga and chapter metadata.
  */
-fun getComicInfo(
+internal fun getComicInfo(
     manga: Manga,
     chapter: Chapter,
     urls: List<String>,

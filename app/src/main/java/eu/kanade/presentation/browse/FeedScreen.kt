@@ -50,7 +50,7 @@ import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.plus
 import kotlin.time.Duration.Companion.seconds
 
-data class FeedItemUI(
+internal data class FeedItemUI(
     val feed: FeedSavedSearch,
     val savedSearch: SavedSearch?,
     val source: Source?,
@@ -60,7 +60,7 @@ data class FeedItemUI(
 )
 
 @Composable
-fun FeedScreen(
+internal fun FeedScreen(
     state: FeedScreenState,
     contentPadding: PaddingValues,
     onClickSavedSearch: (SavedSearch, Source) -> Unit,
@@ -129,7 +129,7 @@ fun FeedScreen(
 }
 
 @Composable
-fun FeedItem(
+internal fun FeedItem(
     item: FeedItemUI,
     getMangaState: @Composable ((Manga) -> State<Manga>),
     onClickManga: (Manga) -> Unit,
@@ -153,7 +153,7 @@ fun FeedItem(
 }
 
 @Composable
-fun FeedAddDialog(
+internal fun FeedAddDialog(
     sources: List<Source>,
     onDismiss: () -> Unit,
     onClickAdd: (Source?) -> Unit,
@@ -178,7 +178,7 @@ fun FeedAddDialog(
 }
 
 @Composable
-fun FeedAddSearchDialog(
+internal fun FeedAddSearchDialog(
     source: Source,
     savedSearches: List<SavedSearch?>,
     onDismiss: () -> Unit,
@@ -214,7 +214,7 @@ fun FeedAddSearchDialog(
 }
 
 @Composable
-fun <T> RadioSelector(
+internal fun <T> RadioSelector(
     options: List<T>,
     optionStrings: List<String> = remember { options.map { it.toString() } },
     selected: Int?,
@@ -238,7 +238,7 @@ fun <T> RadioSelector(
 }
 
 @Composable
-fun FeedDeleteConfirmDialog(
+internal fun FeedDeleteConfirmDialog(
     feed: FeedSavedSearch,
     onDismiss: () -> Unit,
     onClickDeleteConfirm: (FeedSavedSearch) -> Unit,

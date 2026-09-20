@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.screens.LoadingScreen
 
-class SourcesFilterScreen : Screen() {
+internal class SourcesFilterScreen : Screen() {
 
     @Composable
     override fun Content() {

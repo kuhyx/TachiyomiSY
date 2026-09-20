@@ -43,7 +43,7 @@ private val readerBarsSlideAnimationSpec = tween<IntOffset>(200)
 private val readerBarsFadeAnimationSpec = tween<Float>(150)
 
 @Composable
-fun ReaderAppBars(
+internal fun ReaderAppBars(
     visible: Boolean,
 
     mangaTitle: String?,

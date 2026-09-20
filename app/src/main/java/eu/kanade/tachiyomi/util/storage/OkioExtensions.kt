@@ -11,7 +11,7 @@ import java.io.OutputStream
  *
  * @param file the file where the source is copied.
  */
-fun BufferedSource.saveTo(file: File) {
+internal fun BufferedSource.saveTo(file: File) {
     try {
         // Create parent dirs if needed
         file.parentFile?.mkdirs()
@@ -30,7 +30,7 @@ fun BufferedSource.saveTo(file: File) {
  *
  * @param stream the stream where the source is copied.
  */
-fun BufferedSource.saveTo(stream: OutputStream) {
+internal fun BufferedSource.saveTo(stream: OutputStream) {
     use { input ->
         stream.sink().buffer().use {
             it.writeAll(input)

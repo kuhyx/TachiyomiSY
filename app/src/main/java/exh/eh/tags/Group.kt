@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-object Group : TagList {
+internal object Group : TagList {
     override fun getTags1(): List<String> = listOf(
         "group:---",
         "group:... mou ii desu.",

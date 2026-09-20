@@ -47,7 +47,7 @@ import tachiyomi.presentation.core.theme.header
 import tachiyomi.presentation.core.util.collectAsState
 
 @Composable
-fun MigrationConfigScreenSheet(
+internal fun MigrationConfigScreenSheet(
     preferences: SourcePreferences,
     onDismissRequest: () -> Unit,
     onStartMigration: (extraSearchQuery: String?) -> Unit,

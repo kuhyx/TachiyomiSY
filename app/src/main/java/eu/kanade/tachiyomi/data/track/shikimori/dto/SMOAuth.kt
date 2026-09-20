@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SMOAuth(
+internal data class SMOAuth(
     @SerialName("access_token")
     val accessToken: String,
     @SerialName("token_type")
@@ -18,4 +18,4 @@ data class SMOAuth(
 )
 
 // Access token lives 1 day
-fun SMOAuth.isExpired() = (System.currentTimeMillis() / 1000) > (createdAt + expiresIn - 3600)
+internal fun SMOAuth.isExpired() = (System.currentTimeMillis() / 1000) > (createdAt + expiresIn - 3600)

@@ -7,7 +7,7 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 
-class MoveCatalogueCoverOnlyGridSettingMigration : Migration {
+internal class MoveCatalogueCoverOnlyGridSettingMigration : Migration {
     override val version: Float = 29f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

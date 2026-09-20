@@ -16,7 +16,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class MetadataViewScreenModel(
+internal class MetadataViewScreenModel(
     val mangaId: Long,
     val sourceId: Long,
     private val getFlatMetadataById: GetFlatMetadataById = Injekt.get(),
@@ -46,7 +46,7 @@ class MetadataViewScreenModel(
     }
 }
 
-sealed class MetadataViewState {
+internal sealed class MetadataViewState {
     data object Loading : MetadataViewState()
     data class Success(val meta: RaisedSearchMetadata) : MetadataViewState()
     data object MetadataNotFound : MetadataViewState()

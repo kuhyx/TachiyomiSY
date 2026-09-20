@@ -3,7 +3,7 @@ package eu.kanade.presentation.more.stats
 import androidx.compose.runtime.Immutable
 import eu.kanade.presentation.more.stats.data.StatsData
 
-sealed interface StatsScreenState {
+internal sealed interface StatsScreenState {
     @Immutable
     data object Loading : StatsScreenState
 

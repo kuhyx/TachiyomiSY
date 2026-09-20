@@ -46,7 +46,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun EhLoginWebViewScreen(
+internal fun EhLoginWebViewScreen(
     onUp: () -> Unit,
     onPageFinished: (view: WebView, url: String) -> Unit,
     onClickRecheckLoginStatus: (loadUrl: (String) -> Unit) -> Unit,

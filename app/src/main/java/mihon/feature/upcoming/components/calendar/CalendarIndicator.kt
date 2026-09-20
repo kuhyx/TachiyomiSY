@@ -16,7 +16,7 @@ private const val INDICATOR_SCALE = 12
 private const val INDICATOR_ALPHA_MULTIPLIER = 0.3f
 
 @Composable
-fun CalendarIndicator(
+internal fun CalendarIndicator(
     index: Int,
     size: Dp,
     color: Color,

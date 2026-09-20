@@ -8,7 +8,7 @@ import tachiyomi.domain.source.model.Source
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-val Source.icon: ImageBitmap?
+internal val Source.icon: ImageBitmap?
     get() {
         return Injekt.get<ExtensionManager>().getAppIconForSource(id)
             ?.toBitmap()

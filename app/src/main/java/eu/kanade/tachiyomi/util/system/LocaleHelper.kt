@@ -10,7 +10,7 @@ import java.util.Locale
 /**
  * Utility class to change the application's language in runtime.
  */
-object LocaleHelper {
+internal object LocaleHelper {
 
     /**
      * Sorts by display name, except keeps the "all" (displayed as "Multi") locale at the top.

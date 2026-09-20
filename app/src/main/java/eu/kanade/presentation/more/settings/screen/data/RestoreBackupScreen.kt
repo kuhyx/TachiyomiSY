@@ -40,7 +40,7 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
-class RestoreBackupScreen(
+internal class RestoreBackupScreen(
     private val uri: String,
 ) : Screen() {
 

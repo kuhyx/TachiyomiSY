@@ -28,7 +28,7 @@ import tachiyomi.presentation.core.components.material.TabText
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun TabbedScreen(
+internal fun TabbedScreen(
     titleRes: StringResource,
     tabs: List<TabContent>,
     state: PagerState = rememberPagerState { tabs.size },
@@ -88,7 +88,7 @@ fun TabbedScreen(
     }
 }
 
-data class TabContent(
+internal data class TabContent(
     val titleRes: StringResource,
     val badgeNumber: Int? = null,
     val searchEnabled: Boolean = false,

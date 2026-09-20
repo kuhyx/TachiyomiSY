@@ -26,7 +26,7 @@ import uy.kohesive.injekt.injectLazy
 /**
  * General class for recommendation sources.
  */
-abstract class RecommendationPagingSource(
+internal abstract class RecommendationPagingSource(
     protected val manga: Manga,
     source: Source? = null,
 ) : BaseSourcePagingSource(source) {
@@ -69,7 +69,7 @@ abstract class RecommendationPagingSource(
 /**
  * General class for recommendation sources backed by trackers.
  */
-abstract class TrackerRecommendationPagingSource(
+internal abstract class TrackerRecommendationPagingSource(
     protected val endpoint: String,
     manga: Manga,
 ) : RecommendationPagingSource(manga) {

@@ -30,7 +30,7 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.plus
 
 @Composable
-fun CategoryScreen(
+internal fun CategoryScreen(
     state: CategoryScreenState.Success,
     onClickCreate: () -> Unit,
     onClickRename: (Category) -> Unit,

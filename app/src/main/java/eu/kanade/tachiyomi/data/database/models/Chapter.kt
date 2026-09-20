@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import java.io.Serializable
 import tachiyomi.domain.chapter.model.Chapter as DomainChapter
 
-interface Chapter : SChapter, Serializable {
+internal interface Chapter : SChapter, Serializable {
 
     var id: Long?
 
@@ -27,10 +27,10 @@ interface Chapter : SChapter, Serializable {
     var version: Long
 }
 
-val Chapter.isRecognizedNumber: Boolean
+internal val Chapter.isRecognizedNumber: Boolean
     get() = chapter_number >= 0f
 
-fun Chapter.toDomainChapter(): DomainChapter? {
+internal fun Chapter.toDomainChapter(): DomainChapter? {
     if (id == null || manga_id == null) return null
     return DomainChapter(
         id = id!!,

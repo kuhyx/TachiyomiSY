@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MALManga(
+internal data class MALManga(
     val id: Long,
     val title: String,
     val synopsis: String = "",
@@ -22,13 +22,13 @@ data class MALManga(
 )
 
 @Serializable
-data class MALAuthorNode(
+internal data class MALAuthorNode(
     val node: MALAuthor,
     val role: String,
 )
 
 @Serializable
-data class MALAuthor(
+internal data class MALAuthor(
     val id: Int,
     @SerialName("first_name")
     val firstName: String,
@@ -39,13 +39,13 @@ data class MALAuthor(
 }
 
 @Serializable
-data class MALMangaCovers(
+internal data class MALMangaCovers(
     val large: String = "",
     val medium: String,
 )
 
 @Serializable
-data class MALMangaMetadata(
+internal data class MALMangaMetadata(
     val id: Long,
     val title: String,
     val synopsis: String?,

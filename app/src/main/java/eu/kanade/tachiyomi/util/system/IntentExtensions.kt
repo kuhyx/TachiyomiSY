@@ -10,7 +10,7 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import java.io.Serializable
 
-fun Uri.toShareIntent(context: Context, type: String = "image/*", message: String? = null): Intent {
+internal fun Uri.toShareIntent(context: Context, type: String = "image/*", message: String? = null): Intent {
     val uri = this
 
     val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -33,11 +33,11 @@ fun Uri.toShareIntent(context: Context, type: String = "image/*", message: Strin
     }
 }
 
-inline fun <reified T> Intent.getParcelableExtraCompat(name: String): T? {
+internal inline fun <reified T> Intent.getParcelableExtraCompat(name: String): T? {
     return IntentCompat.getParcelableExtra(this, name, T::class.java)
 }
 
-inline fun <reified T : Serializable> Intent.getSerializableExtraCompat(name: String): T? {
+internal inline fun <reified T : Serializable> Intent.getSerializableExtraCompat(name: String): T? {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         getSerializableExtra(name, T::class.java)
     } else {

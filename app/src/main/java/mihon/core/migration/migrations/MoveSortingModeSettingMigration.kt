@@ -8,7 +8,7 @@ import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.library.service.LibraryPreferences
 
-class MoveSortingModeSettingMigration : Migration {
+internal class MoveSortingModeSettingMigration : Migration {
     override val version: Float = 39f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

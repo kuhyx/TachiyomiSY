@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.util.view.setComposeContent
 import tachiyomi.presentation.core.screens.LoadingScreen
 import uy.kohesive.injekt.injectLazy
 
-abstract class BaseOAuthLoginActivity : BaseActivity() {
+internal abstract class BaseOAuthLoginActivity : BaseActivity() {
 
     internal val trackerManager: TrackerManager by injectLazy()
 

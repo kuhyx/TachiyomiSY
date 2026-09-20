@@ -71,7 +71,7 @@ import tachiyomi.presentation.core.util.plus
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 @Composable
-fun ExtensionScreen(
+internal fun ExtensionScreen(
     state: ExtensionsScreenModel.State,
     contentPadding: PaddingValues,
     searchQuery: String?,

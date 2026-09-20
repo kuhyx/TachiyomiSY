@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class KitsuListSearchResult(
+internal data class KitsuListSearchResult(
     val data: List<KitsuListSearchItemData>,
     val included: List<KitsuListSearchItemIncluded> = emptyList(),
 ) {
@@ -49,13 +49,13 @@ data class KitsuListSearchResult(
 }
 
 @Serializable
-data class KitsuListSearchItemData(
+internal data class KitsuListSearchItemData(
     val id: Long,
     val attributes: KitsuListSearchItemDataAttributes,
 )
 
 @Serializable
-data class KitsuListSearchItemDataAttributes(
+internal data class KitsuListSearchItemDataAttributes(
     val status: String,
     val startedAt: String?,
     val finishedAt: String?,
@@ -65,13 +65,13 @@ data class KitsuListSearchItemDataAttributes(
 )
 
 @Serializable
-data class KitsuListSearchItemIncluded(
+internal data class KitsuListSearchItemIncluded(
     val id: Long,
     val attributes: KitsuListSearchItemIncludedAttributes,
 )
 
 @Serializable
-data class KitsuListSearchItemIncludedAttributes(
+internal data class KitsuListSearchItemIncludedAttributes(
     val canonicalTitle: String,
     val chapterCount: Long?,
     val mangaType: String?,

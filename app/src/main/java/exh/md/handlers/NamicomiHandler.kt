@@ -11,7 +11,7 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Response
 
-class NamicomiHandler(currentClient: OkHttpClient, userAgent: String) {
+internal class NamicomiHandler(currentClient: OkHttpClient, userAgent: String) {
     private val apiUrl = "https://api.namicomi.com"
 
     private val headers = Headers.Builder()

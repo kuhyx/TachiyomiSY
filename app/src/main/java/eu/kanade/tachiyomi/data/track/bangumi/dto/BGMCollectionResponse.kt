@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 // Incomplete DTO with only our needed attributes
-data class BGMCollectionResponse(
+internal data class BGMCollectionResponse(
     val rate: Int?,
     val type: Int?,
     @SerialName("ep_status")
@@ -28,7 +28,7 @@ data class BGMCollectionResponse(
 
 @Serializable
 // Incomplete DTO with only our needed attributes
-data class BGMSlimSubject(
+internal data class BGMSlimSubject(
     val volumes: Int?,
     val eps: Int?,
 )

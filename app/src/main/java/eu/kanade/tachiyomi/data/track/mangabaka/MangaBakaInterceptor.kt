@@ -6,7 +6,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 
-class MangaBakaInterceptor(private val mangaBaka: MangaBaka) : Interceptor {
+internal class MangaBakaInterceptor(private val mangaBaka: MangaBaka) : Interceptor {
 
     private val json: Json by injectLazy()
 

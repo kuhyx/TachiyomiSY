@@ -20,7 +20,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
-class MangaDexAuthService(
+internal class MangaDexAuthService(
     private val client: OkHttpClient,
     private val headers: Headers,
 ) {

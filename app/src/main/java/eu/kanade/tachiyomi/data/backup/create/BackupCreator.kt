@@ -40,7 +40,7 @@ import java.time.Instant
 import java.util.Date
 import java.util.Locale
 
-class BackupCreator(
+internal class BackupCreator(
     private val context: Context,
     private val isAutoBackup: Boolean,
 

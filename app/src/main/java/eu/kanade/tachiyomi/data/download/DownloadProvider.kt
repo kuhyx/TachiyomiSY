@@ -25,7 +25,7 @@ import java.io.IOException
  *
  * @param context the application context.
  */
-class DownloadProvider(
+internal class DownloadProvider(
     private val context: Context,
     private val storageManager: StorageManager = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),

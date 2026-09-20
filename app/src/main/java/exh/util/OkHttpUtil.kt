@@ -6,7 +6,7 @@ import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.jsoup.nodes.Document
 
-fun Response.interceptAsHtml(block: (Document) -> Unit): Response {
+internal fun Response.interceptAsHtml(block: (Document) -> Unit): Response {
     return if (body.contentType()?.type == "text" &&
         body.contentType()?.subtype == "html"
     ) {

@@ -20,7 +20,7 @@ import uy.kohesive.injekt.injectLazy
 import java.math.RoundingMode
 import java.text.NumberFormat
 
-class EHentaiUpdateNotifier(private val context: Context) {
+internal class EHentaiUpdateNotifier(private val context: Context) {
 
     private val securityPreferences: SecurityPreferences by injectLazy()
 

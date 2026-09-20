@@ -5,17 +5,17 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SMSearchResult(
+internal data class SMSearchResult(
     val data: SMMangaResults,
 )
 
 @Serializable
-data class SMMangaResults(
+internal data class SMMangaResults(
     val mangas: List<SMManga>,
 )
 
 @Serializable
-data class SMManga(
+internal data class SMManga(
     val id: Long,
     val name: String,
     val chapters: Long,
@@ -51,23 +51,23 @@ data class SMManga(
 }
 
 @Serializable
-data class SMPoster(
+internal data class SMPoster(
     val mainUrl: String,
 )
 
 @Serializable
-data class SMAiredDate(
+internal data class SMAiredDate(
     val date: String?,
 )
 
 @Serializable
-data class SMPersonRole(
+internal data class SMPersonRole(
     val person: SMPerson,
     @SerialName("rolesEn")
     val roles: List<String>,
 )
 
 @Serializable
-data class SMPerson(
+internal data class SMPerson(
     val name: String,
 )

@@ -34,7 +34,7 @@ import tachiyomi.domain.manga.model.MergedMangaReference
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.injectLazy
 
-class MergedSource : HttpSource() {
+internal class MergedSource : HttpSource() {
     private val getManga: GetManga by injectLazy()
     private val getMergedReferencesById: GetMergedReferencesById by injectLazy()
     private val syncChaptersWithSource: SyncChaptersWithSource by injectLazy()

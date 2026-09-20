@@ -49,7 +49,7 @@ import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
-class AndroidSourceManager(
+internal class AndroidSourceManager(
     private val context: Context,
     private val extensionManager: ExtensionManager,
     private val sourceRepository: StubSourceRepository,

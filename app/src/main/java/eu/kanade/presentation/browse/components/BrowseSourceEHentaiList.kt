@@ -54,7 +54,7 @@ import java.time.Instant
 import java.time.ZoneId
 
 @Composable
-fun BrowseSourceEHentaiList(
+internal fun BrowseSourceEHentaiList(
     mangaList: LazyPagingItems<StateFlow</* SY --> */Pair<Manga, RaisedSearchMetadata?>/* SY <-- */>>,
     contentPadding: PaddingValues,
     onMangaClick: (Manga) -> Unit,
@@ -93,7 +93,7 @@ fun BrowseSourceEHentaiList(
 }
 
 @Composable
-fun BrowseSourceEHentaiListItem(
+internal fun BrowseSourceEHentaiListItem(
     manga: Manga,
     // SY -->
     metadata: RaisedSearchMetadata?,

@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tachiyomi.domain.manga.model.Manga
 
-object LibraryExporter {
+internal object LibraryExporter {
 
     data class ExportOptions(
         val includeTitle: Boolean,

@@ -34,7 +34,7 @@ import kotlin.time.Duration
 /**
  * Implementation of a [Viewer] to display pages with a [RecyclerView].
  */
-class WebtoonViewer(
+internal class WebtoonViewer(
     val activity: ReaderActivity,
     val isContinuous: Boolean = true,
     private val tapByPage: Boolean = false,

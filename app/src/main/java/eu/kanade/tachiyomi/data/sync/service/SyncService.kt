@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @Serializable
-data class SyncData(
+internal data class SyncData(
     val deviceId: String = "",
     val backup: Backup? = null,
 )
@@ -30,9 +30,9 @@ data class SyncData(
  * overwrites the last good copy on the server and there is nothing left to
  * recover from.
  */
-class SyncCollapseException(message: String) : Exception(message)
+internal class SyncCollapseException(message: String) : Exception(message)
 
-abstract class SyncService(
+internal abstract class SyncService(
     val context: Context,
     val json: Json,
     val syncPreferences: SyncPreferences,

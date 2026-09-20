@@ -7,7 +7,7 @@ import exh.metadata.metadata.RankedSearchMetadata
 import exh.recs.batch.RankedSearchResults
 import tachiyomi.domain.manga.model.Manga
 
-class StaticResultPagingSource(
+internal class StaticResultPagingSource(
     val data: RankedSearchResults,
 ) : RecommendationPagingSource(Manga.create()) {
 

@@ -17,7 +17,7 @@ import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class OnboardingScreen : Screen() {
+internal class OnboardingScreen : Screen() {
 
     @Composable
     override fun Content() {

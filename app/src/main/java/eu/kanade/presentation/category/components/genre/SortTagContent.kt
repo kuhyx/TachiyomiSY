@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import tachiyomi.presentation.core.components.material.padding
 
 @Composable
-fun SortTagContent(
+internal fun SortTagContent(
     tags: List<String>,
     lazyListState: LazyListState,
     paddingValues: PaddingValues,

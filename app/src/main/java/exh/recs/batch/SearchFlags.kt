@@ -1,6 +1,6 @@
 package exh.recs.batch
 
-object SearchFlags {
+internal object SearchFlags {
 
     const val INCLUDE_SOURCES = 0b00001
     const val INCLUDE_TRACKERS = 0b00010

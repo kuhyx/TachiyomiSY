@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 @Serializable
-data class ALFuzzyDate(
+internal data class ALFuzzyDate(
     val year: Int?,
     val month: Int?,
     val day: Int?,

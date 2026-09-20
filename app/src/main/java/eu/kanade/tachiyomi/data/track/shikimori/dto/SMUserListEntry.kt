@@ -6,17 +6,17 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SMUserListResult(
+internal data class SMUserListResult(
     val data: SMUserListEntries,
 )
 
 @Serializable
-data class SMUserListEntries(
+internal data class SMUserListEntries(
     val mangas: List<SMUserListManga>,
 )
 
 @Serializable
-data class SMUserListManga(
+internal data class SMUserListManga(
     val id: String,
     val url: String,
     val name: String,
@@ -43,7 +43,7 @@ data class SMUserListManga(
 }
 
 @Serializable
-data class SMUserRate(
+internal data class SMUserRate(
     @SerialName("id")
     val rateId: String, // ID of the list entry (NOT the title)
     val chapters: Long, // the user's chapter progress

@@ -56,7 +56,7 @@ import uy.kohesive.injekt.injectLazy
 import kotlin.reflect.KClass
 
 @Suppress("OverridingDeprecatedMember")
-class MangaDex(delegate: HttpSource, val context: Context) :
+internal class MangaDex(delegate: HttpSource, val context: Context) :
     DelegatedHttpSource(delegate),
     MetadataSource<MangaDexSearchMetadata, Triple<MangaDto, List<String>, StatisticsMangaDto>>,
     UrlImportableSource,

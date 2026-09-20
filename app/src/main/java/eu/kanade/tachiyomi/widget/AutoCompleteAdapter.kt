@@ -5,7 +5,7 @@ import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.Filterable
 
-class AutoCompleteAdapter(context: Context, resource: Int, var objects: List<String>, val validPrefixes: List<String>) :
+internal class AutoCompleteAdapter(context: Context, resource: Int, var objects: List<String>, val validPrefixes: List<String>) :
     ArrayAdapter<String>(context, resource, objects),
     Filterable {
 

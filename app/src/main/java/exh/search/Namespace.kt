@@ -1,6 +1,6 @@
 package exh.search
 
-class Namespace(
+internal class Namespace(
     var namespace: String,
     var tag: Text? = null,
 ) : QueryComponent()

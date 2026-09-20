@@ -41,7 +41,7 @@ import tachiyomi.presentation.core.components.SettingsItemsPaddings
 import tachiyomi.presentation.core.util.runOnEnterKeyPressed
 
 @Composable
-fun AutoCompleteItem(
+internal fun AutoCompleteItem(
     name: String,
     state: List<String>,
     hint: String,
@@ -113,7 +113,7 @@ fun AutoCompleteItem(
 }
 
 @Composable
-fun AutoCompleteTextField(
+internal fun AutoCompleteTextField(
     label: String? = null,
     placeholder: String? = null,
     values: List<String>,

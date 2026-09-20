@@ -2,7 +2,7 @@ package exh.search
 
 import java.util.Locale
 
-class SearchEngine {
+internal class SearchEngine {
     private val queryCache = mutableMapOf<String, List<QueryComponent>>()
 
     fun textToSubQueries(

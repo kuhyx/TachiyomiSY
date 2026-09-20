@@ -110,7 +110,7 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 @Composable
-fun MangaInfoBox(
+internal fun MangaInfoBox(
     isTabletUi: Boolean,
     appBarPadding: Dp,
     manga: Manga,
@@ -171,7 +171,7 @@ fun MangaInfoBox(
 }
 
 @Composable
-fun MangaActionRow(
+internal fun MangaActionRow(
     favorite: Boolean,
     trackingCount: Int,
     nextUpdate: Instant?,
@@ -258,7 +258,7 @@ fun MangaActionRow(
 }
 
 @Composable
-fun ExpandableMangaDescription(
+internal fun ExpandableMangaDescription(
     defaultExpandState: Boolean,
     description: String?,
     tagsProvider: () -> List<String>?,

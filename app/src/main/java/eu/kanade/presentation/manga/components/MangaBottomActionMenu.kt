@@ -69,7 +69,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun MangaBottomActionMenu(
+internal fun MangaBottomActionMenu(
     visible: Boolean,
     modifier: Modifier = Modifier,
     onBookmarkClicked: (() -> Unit)? = null,
@@ -231,7 +231,7 @@ private fun RowScope.Button(
 }
 
 @Composable
-fun LibraryBottomActionMenu(
+internal fun LibraryBottomActionMenu(
     visible: Boolean,
     onChangeCategoryClicked: () -> Unit,
     onMarkAsReadClicked: () -> Unit,

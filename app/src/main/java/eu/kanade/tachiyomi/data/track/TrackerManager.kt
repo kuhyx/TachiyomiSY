@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.data.track.shikimori.Shikimori
 import eu.kanade.tachiyomi.data.track.suwayomi.Suwayomi
 import kotlinx.coroutines.flow.combine
 
-class TrackerManager {
+internal class TrackerManager {
 
     companion object {
         const val ANILIST = 2L

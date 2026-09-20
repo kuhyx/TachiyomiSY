@@ -10,7 +10,7 @@ import tachiyomi.i18n.MR
 import java.net.UnknownHostException
 
 context(context: Context)
-val Throwable.formattedMessage: String
+internal val Throwable.formattedMessage: String
     get() {
         when (this) {
             is HttpException -> return context.stringResource(MR.strings.exception_http, code)

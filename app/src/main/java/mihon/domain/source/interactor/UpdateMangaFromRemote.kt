@@ -24,7 +24,7 @@ import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.source.local.isLocal
 import java.time.Instant
 
-class UpdateMangaFromRemote(
+internal class UpdateMangaFromRemote(
     private val sourceManager: SourceManager,
     private val chapterRepository: ChapterRepository,
     private val mangaRepository: MangaRepository,

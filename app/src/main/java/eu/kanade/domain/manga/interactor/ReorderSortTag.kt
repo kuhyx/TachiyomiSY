@@ -2,7 +2,7 @@ package eu.kanade.domain.manga.interactor
 
 import tachiyomi.domain.library.service.LibraryPreferences
 
-class ReorderSortTag(
+internal class ReorderSortTag(
     private val preferences: LibraryPreferences,
     private val getSortTag: GetSortTag,
 ) {

@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
  * A loader used to load pages into the reader. Any open resources must be cleaned up when the
  * method [recycle] is called.
  */
-abstract class PageLoader {
+internal abstract class PageLoader {
 
     /**
      * Whether this loader has been already recycled.

@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-object Artist2 : TagList {
+internal object Artist2 : TagList {
     override fun getTags1(): List<String> = listOf(
         "artist:mame denkyuu",
         "artist:mamechi chisuke",

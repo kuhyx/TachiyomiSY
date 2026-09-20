@@ -11,7 +11,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.domain.manga.model.Manga as DomainManga
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class Suwayomi(id: Long) : BaseTracker(id, "Suwayomi"), EnhancedTracker {
+internal class Suwayomi(id: Long) : BaseTracker(id, "Suwayomi"), EnhancedTracker {
 
     val api by lazy { SuwayomiApi(id) }
 

@@ -5,7 +5,7 @@ package eu.kanade.tachiyomi.data.database.models
 import kotlinx.serialization.json.JsonObject
 import mihon.core.common.extensions.EMPTY
 
-class ChapterImpl : Chapter {
+internal class ChapterImpl : Chapter {
 
     override var id: Long? = null
 

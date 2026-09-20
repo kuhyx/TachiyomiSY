@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
-data class PagePreview(
+internal data class PagePreview(
     val index: Int,
     val imageUrl: String,
     val source: Long,

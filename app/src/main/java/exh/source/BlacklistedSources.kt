@@ -1,6 +1,6 @@
 package exh.source
 
-object BlacklistedSources {
+internal object BlacklistedSources {
     val EHENTAI_EXT_SOURCES = longArrayOf(
         8100626124886895451,
         57122881048805941,

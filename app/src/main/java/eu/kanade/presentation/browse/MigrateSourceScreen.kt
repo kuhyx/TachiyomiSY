@@ -44,7 +44,7 @@ import tachiyomi.presentation.core.util.plus
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
 @Composable
-fun MigrateSourceScreen(
+internal fun MigrateSourceScreen(
     state: MigrateSourceScreenModel.State,
     contentPadding: PaddingValues,
     onClickItem: (Source) -> Unit,

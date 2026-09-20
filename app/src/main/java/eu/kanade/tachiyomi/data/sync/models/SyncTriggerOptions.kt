@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.data.sync.models
 import dev.icerock.moko.resources.StringResource
 import tachiyomi.i18n.sy.SYMR
 
-data class SyncTriggerOptions(
+internal data class SyncTriggerOptions(
     val syncOnChapterRead: Boolean = false,
     val syncOnChapterOpen: Boolean = false,
     val syncOnAppStart: Boolean = false,

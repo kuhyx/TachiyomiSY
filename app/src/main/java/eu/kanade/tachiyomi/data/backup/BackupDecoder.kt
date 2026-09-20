@@ -14,7 +14,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.IOException
 
-class BackupDecoder(
+internal class BackupDecoder(
     private val context: Context,
     private val parser: ProtoBuf = Injekt.get(),
 ) {

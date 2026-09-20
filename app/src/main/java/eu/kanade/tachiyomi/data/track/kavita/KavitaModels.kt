@@ -5,7 +5,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SeriesDto(
+internal data class SeriesDto(
     val id: Int,
     val name: String,
     val originalName: String = "",
@@ -29,7 +29,7 @@ data class SeriesDto(
 }
 
 @Serializable
-data class VolumeDto(
+internal data class VolumeDto(
     val id: Int,
     val number: Int,
     val name: String,
@@ -42,7 +42,7 @@ data class VolumeDto(
 )
 
 @Serializable
-data class ChapterDto(
+internal data class ChapterDto(
     val id: Int? = -1,
     val range: String? = "",
     val number: String? = "-1",
@@ -56,13 +56,13 @@ data class ChapterDto(
 )
 
 @Serializable
-data class AuthenticationDto(
+internal data class AuthenticationDto(
     val username: String,
     val token: String,
     val apiKey: String,
 )
 
-class OAuth(
+internal class OAuth(
     val authentications: List<SourceAuth> = listOf(
         SourceAuth(1),
         SourceAuth(2),
@@ -79,7 +79,7 @@ class OAuth(
     }
 }
 
-data class SourceAuth(
+internal data class SourceAuth(
     var sourceId: Int,
     var apiUrl: String = "",
     var jwtToken: String = "",

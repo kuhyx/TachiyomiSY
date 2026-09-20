@@ -10,7 +10,7 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class MangaDexLoginActivity : BaseOAuthLoginActivity() {
+internal class MangaDexLoginActivity : BaseOAuthLoginActivity() {
 
     override fun handleResult(uri: Uri) {
         val code = uri.getQueryParameter("code")

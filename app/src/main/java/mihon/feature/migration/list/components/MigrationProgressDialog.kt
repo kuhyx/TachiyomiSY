@@ -13,7 +13,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun MigrationProgressDialog(
+internal fun MigrationProgressDialog(
     progress: Float,
     exitMigration: () -> Unit,
 ) {

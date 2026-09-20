@@ -18,7 +18,7 @@ import tachiyomi.domain.manga.model.Manga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class MangaNotesScreen(
+internal class MangaNotesScreen(
     private val manga: Manga,
 ) : Screen() {
     @Composable

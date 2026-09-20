@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import tachiyomi.i18n.MR
 
-enum class ReadingMode(
+internal enum class ReadingMode(
     val stringRes: StringResource,
     @DrawableRes val iconRes: Int,
     val flagValue: Int,

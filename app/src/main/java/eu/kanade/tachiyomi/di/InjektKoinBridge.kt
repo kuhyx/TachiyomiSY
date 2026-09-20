@@ -13,7 +13,7 @@ import org.koin.core.scope.Scope
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.InjektScope
 
-object InjektKoinBridge {
+internal object InjektKoinBridge {
     private val modules = mutableMapOf<InjektModule, Module>()
     fun getModule(injektModule: InjektModule) = modules.getOrPut(injektModule) { Module() }
 
@@ -40,25 +40,25 @@ object InjektKoinBridge {
     }
 }
 
-interface InjektModule {
+internal interface InjektModule {
     fun InjektRegistrar.registerInjectables()
 }
 
-inline fun <reified T> InjektModule.addSingleton(instance: T) {
+internal inline fun <reified T> InjektModule.addSingleton(instance: T) {
     val module = InjektKoinBridge.getModule(this)
     module.single<T> { instance }
 }
 
-inline fun <reified T> InjektModule.addSingletonFactory(crossinline instance: Scope.() -> T) {
+internal inline fun <reified T> InjektModule.addSingletonFactory(crossinline instance: Scope.() -> T) {
     val module = InjektKoinBridge.getModule(this)
     module.single<T> { instance() }
 }
 
-inline fun <reified T> InjektModule.addFactory(crossinline instance: Scope.() -> T) {
+internal inline fun <reified T> InjektModule.addFactory(crossinline instance: Scope.() -> T) {
     val module = InjektKoinBridge.getModule(this)
     module.factory<T> { instance() }
 }
 
-fun InjektScope.importModule(injektModule: InjektModule) {
+internal fun InjektScope.importModule(injektModule: InjektModule) {
     with(injektModule) { registrar.registerInjectables() }
 }

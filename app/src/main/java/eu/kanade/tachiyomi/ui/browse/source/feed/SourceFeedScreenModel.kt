@@ -52,7 +52,7 @@ import xyz.nulldev.ts.api.http.serializer.FilterSerializer
 import java.util.concurrent.Executors
 import tachiyomi.domain.manga.model.Manga as DomainManga
 
-open class SourceFeedScreenModel(
+internal open class SourceFeedScreenModel(
     val sourceId: Long,
     uiPreferences: UiPreferences = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
@@ -306,7 +306,7 @@ open class SourceFeedScreenModel(
 }
 
 @Immutable
-data class SourceFeedState(
+internal data class SourceFeedState(
     val searchQuery: String? = null,
     val items: List<SourceFeedUI> = emptyList(),
     val filters: FilterList = FilterList(),

@@ -11,7 +11,7 @@ import tachiyomi.data.awaitList
 import tachiyomi.data.category.CategoryMapper
 import tachiyomi.domain.library.service.LibraryPreferences
 
-class MoveSortingModeSettingsMigration : Migration {
+internal class MoveSortingModeSettingsMigration : Migration {
     override val version: Float = 38f
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {

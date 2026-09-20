@@ -23,7 +23,7 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
 
-class BackupRestoreJob(private val context: Context, workerParams: WorkerParameters) :
+internal class BackupRestoreJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
     private val notifier = BackupNotifier(context)

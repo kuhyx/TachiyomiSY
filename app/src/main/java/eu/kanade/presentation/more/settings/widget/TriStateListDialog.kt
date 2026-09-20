@@ -38,7 +38,7 @@ private enum class State {
 }
 
 @Composable
-fun <T> TriStateListDialog(
+internal fun <T> TriStateListDialog(
     title: String,
     message: String? = null,
     items: List<T>,

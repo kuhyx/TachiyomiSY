@@ -19,7 +19,7 @@ import eu.kanade.tachiyomi.ui.category.biometric.TimeRangeItem
 import tachiyomi.presentation.core.components.material.padding
 
 @Composable
-fun BiometricTimesListItem(
+internal fun BiometricTimesListItem(
     modifier: Modifier,
     timeRange: TimeRangeItem,
     onDelete: () -> Unit,

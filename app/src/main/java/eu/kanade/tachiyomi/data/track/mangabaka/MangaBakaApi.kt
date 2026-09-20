@@ -39,7 +39,7 @@ import java.util.Locale
 import kotlin.time.Instant
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-class MangaBakaApi(
+internal class MangaBakaApi(
     private val trackId: Long,
     baseClient: OkHttpClient,
     interceptor: MangaBakaInterceptor,

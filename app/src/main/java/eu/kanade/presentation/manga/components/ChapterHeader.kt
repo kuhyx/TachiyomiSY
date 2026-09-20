@@ -18,7 +18,7 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun ChapterHeader(
+internal fun ChapterHeader(
     enabled: Boolean,
     chapterCount: Int?,
     missingChapterCount: Int,

@@ -19,7 +19,7 @@ import uy.kohesive.injekt.injectLazy
 
 private const val READLIST_API = "/api/v1/readlists"
 
-class KomgaApi(
+internal class KomgaApi(
     private val trackId: Long,
     private val client: OkHttpClient,
 ) {

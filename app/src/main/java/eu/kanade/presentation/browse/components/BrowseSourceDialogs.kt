@@ -21,7 +21,7 @@ import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
 @Composable
-fun RemoveMangaDialog(
+internal fun RemoveMangaDialog(
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
     mangaToRemove: Manga,
@@ -53,7 +53,7 @@ fun RemoveMangaDialog(
 }
 
 @Composable
-fun SavedSearchDeleteDialog(
+internal fun SavedSearchDeleteDialog(
     onDismissRequest: () -> Unit,
     name: String,
     deleteSavedSearch: () -> Unit,
@@ -85,7 +85,7 @@ fun SavedSearchDeleteDialog(
 }
 
 @Composable
-fun SavedSearchCreateDialog(
+internal fun SavedSearchCreateDialog(
     onDismissRequest: () -> Unit,
     currentSavedSearches: List<String>,
     saveSearch: (String) -> Unit,

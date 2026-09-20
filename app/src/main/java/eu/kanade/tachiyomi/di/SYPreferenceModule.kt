@@ -5,7 +5,7 @@ import exh.pref.DelegateSourcePreferences
 import exh.source.ExhPreferences
 import uy.kohesive.injekt.api.InjektRegistrar
 
-class SYPreferenceModule(val application: Application) : InjektModule {
+internal class SYPreferenceModule(val application: Application) : InjektModule {
 
     override fun InjektRegistrar.registerInjectables() {
         addSingletonFactory {

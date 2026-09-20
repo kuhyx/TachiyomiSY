@@ -20,7 +20,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
 @Composable
-fun EHentaiDescription(state: State.Success, openMetadataViewer: () -> Unit, search: (String) -> Unit) {
+internal fun EHentaiDescription(state: State.Success, openMetadataViewer: () -> Unit, search: (String) -> Unit) {
     val context = LocalContext.current
     AndroidView(
         modifier = Modifier.fillMaxWidth(),

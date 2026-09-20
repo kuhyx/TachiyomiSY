@@ -68,10 +68,10 @@ import org.intellij.markdown.parser.markerblocks.providers.ListMarkerProvider
 import org.intellij.markdown.parser.markerblocks.providers.SetextHeaderProvider
 import tachiyomi.presentation.core.components.material.padding
 
-const val MARKDOWN_INLINE_IMAGE_TAG = "MARKDOWN_INLINE_IMAGE"
+internal const val MARKDOWN_INLINE_IMAGE_TAG = "MARKDOWN_INLINE_IMAGE"
 
 @Composable
-fun MarkdownRender(
+internal fun MarkdownRender(
     content: String,
     modifier: Modifier = Modifier,
     flavour: MarkdownFlavourDescriptor = SimpleMarkdownFlavourDescriptor,
@@ -112,7 +112,7 @@ private fun getMarkdownColors(): MarkdownColors {
 
 @Composable
 @ReadOnlyComposable
-fun getMarkdownLinkStyle() = MaterialTheme.typography.bodyMedium.copy(
+internal fun getMarkdownLinkStyle() = MaterialTheme.typography.bodyMedium.copy(
     color = MaterialTheme.colorScheme.primary,
     fontWeight = FontWeight.Bold,
 )
@@ -287,4 +287,4 @@ private class SimpleMarkdownMarkerProcessor(
     }
 }
 
-val DISALLOWED_MARKDOWN_TYPES = arrayOf(HTML_TAG)
+internal val DISALLOWED_MARKDOWN_TYPES = arrayOf(HTML_TAG)

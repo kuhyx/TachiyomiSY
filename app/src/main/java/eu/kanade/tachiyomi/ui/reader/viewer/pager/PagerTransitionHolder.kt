@@ -27,7 +27,7 @@ import tachiyomi.i18n.MR
  * View of the ViewPager that contains a chapter transition.
  */
 @SuppressLint("ViewConstructor")
-class PagerTransitionHolder(
+internal class PagerTransitionHolder(
     readerThemedContext: Context,
     val viewer: PagerViewer,
     val transition: ChapterTransition,

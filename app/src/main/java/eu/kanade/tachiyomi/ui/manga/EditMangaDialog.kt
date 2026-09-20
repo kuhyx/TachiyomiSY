@@ -61,7 +61,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 @Composable
-fun EditMangaDialog(
+internal fun EditMangaDialog(
     manga: Manga,
     onDismissRequest: () -> Unit,
     onPositiveClick: (

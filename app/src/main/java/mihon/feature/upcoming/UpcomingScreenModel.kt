@@ -17,7 +17,7 @@ import uy.kohesive.injekt.api.get
 import java.time.LocalDate
 import java.time.YearMonth
 
-class UpcomingScreenModel(
+internal class UpcomingScreenModel(
     private val getUpcomingManga: GetUpcomingManga = Injekt.get(),
 ) : StateScreenModel<UpcomingScreenModel.State>(State()) {
 

@@ -16,7 +16,7 @@ import rx.Observable
 import tachiyomi.core.common.util.lang.runAsObservable
 import tachiyomi.core.common.util.lang.withIOContext
 
-class MangaHandler(
+internal class MangaHandler(
     private val lang: String,
     private val service: MangaDexService,
     private val apiMangaParser: ApiMangaParser,

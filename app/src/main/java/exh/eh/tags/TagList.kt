@@ -1,6 +1,6 @@
 package exh.eh.tags
 
-interface TagList {
+internal interface TagList {
     fun getTags1(): List<String>
 
     fun getTags2(): List<String> = emptyList()

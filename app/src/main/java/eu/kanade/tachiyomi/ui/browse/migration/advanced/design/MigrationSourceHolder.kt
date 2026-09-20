@@ -10,7 +10,7 @@ import exh.util.capitalize
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
+internal class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
     FlexibleViewHolder(view, adapter) {
     val binding = MigrationSourceItemBinding.bind(view)
     init {

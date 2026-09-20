@@ -23,7 +23,7 @@ import tachiyomi.source.local.io.Format
 /**
  * Loader used to retrieve the [PageLoader] for a given chapter.
  */
-class ChapterLoader(
+internal class ChapterLoader(
     private val context: Context,
     private val downloadManager: DownloadManager,
     private val downloadProvider: DownloadProvider,

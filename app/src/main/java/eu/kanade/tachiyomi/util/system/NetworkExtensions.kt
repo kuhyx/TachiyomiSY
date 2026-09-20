@@ -7,13 +7,13 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.core.content.getSystemService
 
-val Context.connectivityManager: ConnectivityManager
+internal val Context.connectivityManager: ConnectivityManager
     get() = getSystemService()!!
 
-val Context.wifiManager: WifiManager
+internal val Context.wifiManager: WifiManager
     get() = getSystemService()!!
 
-fun Context.isOnline(): Boolean {
+internal fun Context.isOnline(): Boolean {
     val activeNetwork = connectivityManager.activeNetwork ?: return false
     val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
     val maxTransport = when {
@@ -27,7 +27,7 @@ fun Context.isOnline(): Boolean {
 /**
  * Returns true if device is connected to Wifi.
  */
-fun Context.isConnectedToWifi(): Boolean {
+internal fun Context.isConnectedToWifi(): Boolean {
     if (!wifiManager.isWifiEnabled) return false
 
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

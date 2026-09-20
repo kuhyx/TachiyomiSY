@@ -31,7 +31,7 @@ import tachiyomi.presentation.core.components.SectionCard
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 
-class CreateBackupScreen : Screen() {
+internal class CreateBackupScreen : Screen() {
 
     @Composable
     override fun Content() {

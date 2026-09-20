@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.stateIn
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class ReaderSettingsScreenModel(
+internal class ReaderSettingsScreenModel(
     readerState: StateFlow<ReaderViewModel.State>,
     val onChangeReadingMode: (ReadingMode) -> Unit,
     val onChangeOrientation: (ReaderOrientation) -> Unit,

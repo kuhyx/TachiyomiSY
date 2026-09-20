@@ -8,7 +8,7 @@ import tachiyomi.data.MemoColumnAdapter
 import tachiyomi.domain.chapter.model.Chapter
 
 @Serializable
-class BackupChapter(
+internal class BackupChapter(
     // in 1.x some of these values have different names
     // url is called key in 1.x
     @ProtoNumber(1) var url: String,
@@ -46,7 +46,7 @@ class BackupChapter(
     }
 }
 
-val backupChapterMapper = {
+internal val backupChapterMapper = {
         _: Long,
         _: Long,
         url: String,

@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.extension.model
 
-enum class InstallStep {
+internal enum class InstallStep {
     Idle,
     Pending,
     Downloading,

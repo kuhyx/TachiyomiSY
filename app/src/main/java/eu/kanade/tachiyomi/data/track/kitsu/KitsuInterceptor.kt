@@ -8,7 +8,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 
-class KitsuInterceptor(private val kitsu: Kitsu) : Interceptor {
+internal class KitsuInterceptor(private val kitsu: Kitsu) : Interceptor {
 
     private val json: Json by injectLazy()
 

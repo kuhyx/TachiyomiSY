@@ -40,7 +40,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
-fun UpcomingScreenContent(
+internal fun UpcomingScreenContent(
     state: UpcomingScreenModel.State,
     setSelectedYearMonth: (YearMonth) -> Unit,
     onClickUpcoming: (manga: Manga) -> Unit,
