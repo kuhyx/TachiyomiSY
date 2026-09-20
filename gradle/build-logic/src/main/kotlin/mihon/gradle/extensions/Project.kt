@@ -29,6 +29,12 @@ internal fun Project.android(block: CommonExtension.() -> Unit) {
  * test output otherwise, and the vintage engine reflects over each one. A Robolectric
  * shadow subclass (`ShadowView` names `ViewRootImpl$CalledFromWrongThreadException`,
  * hidden from android.jar) fails that reflection outside the sandbox.
+ *
+ * The test JVM's `java.io.tmpdir` is the task's own `build/tmp/<task>`: Robolectric extracts
+ * its native runtime (fonts, ICU data, `libandroid_runtime.so`, ~100 MiB) there once per
+ * sandbox and only deletes it at JVM exit. On `/tmp` (tmpfs) a whole-tree run held 3.1 GiB
+ * of that as unswappable shared memory inside the 8 GiB local cap and was OOM-killed
+ * (2026-09-20); on disk it is page cache the kernel can drop.
  */
 public fun Project.configureTest() {
     val isInScope = isInGateScope()
@@ -36,6 +42,7 @@ public fun Project.configureTest() {
         onlyIf("the module is in the gate's scope") { isInScope }
         useJUnitPlatform()
         include("**/*Test.class")
+        systemProperty("java.io.tmpdir", temporaryDir.absolutePath)
         testLogging {
             events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
         }

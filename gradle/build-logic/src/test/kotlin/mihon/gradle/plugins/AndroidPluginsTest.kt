@@ -2,6 +2,7 @@ package mihon.gradle.plugins
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import mihon.gradle.catalogProject
 import org.gradle.api.tasks.testing.Test
@@ -43,5 +44,15 @@ internal class AndroidPluginsTest {
         val test = project.tasks.register("unitTest", Test::class.java).get()
         (test.options is JUnitPlatformOptions) shouldBe true
         test.includes shouldBe setOf("**/*Test.class")
+    }
+
+    @JupiterTest
+    fun testTmpdirIsTheTaskTempDir() {
+        val project = catalogProject()
+        project.plugins.apply(PluginAndroidLibrary::class.java)
+        val test = project.tasks.register("unitTest", Test::class.java).get()
+        // Gradle keeps java.io.tmpdir with the JVM-managed properties, not in systemProperties.
+        test.allJvmArgs shouldContain "-Djava.io.tmpdir=${test.temporaryDir.absolutePath}"
+        test.temporaryDir.startsWith(project.layout.buildDirectory.get().asFile) shouldBe true
     }
 }
