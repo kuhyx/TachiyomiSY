@@ -43,7 +43,7 @@ internal fun MissingChapterCountListItem(
 
 @PreviewLightDark
 @Composable
-private fun Preview() {
+internal fun Preview() {
     TachiyomiPreviewTheme {
         Surface {
             MissingChapterCountListItem(count = 42)

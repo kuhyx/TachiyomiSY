@@ -37,7 +37,7 @@ internal fun TrackLogoIcon(
 
 @PreviewLightDark
 @Composable
-private fun TrackLogoIconPreviews(
+internal fun TrackLogoIconPreviews(
     @PreviewParameter(TrackLogoIconPreviewProvider::class)
     tracker: Tracker,
 ) {

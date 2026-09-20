@@ -45,7 +45,6 @@ internal class SortTagScreenModel(
         screenModelScope.launchIO {
             if (createSortTag.await(name) is CreateSortTag.Result.TagExists) {
                 _events.send(SortTagEvent.TagExists)
-            } else {
             }
         }
     }
@@ -60,7 +59,6 @@ internal class SortTagScreenModel(
         screenModelScope.launchIO {
             if (reorderSortTag.await(tag, index - 1) is ReorderSortTag.Result.InternalError) {
                 _events.send(SortTagEvent.InternalError)
-            } else {
             }
         }
     }
@@ -69,7 +67,6 @@ internal class SortTagScreenModel(
         screenModelScope.launchIO {
             if (reorderSortTag.await(tag, index + 1) is ReorderSortTag.Result.InternalError) {
                 _events.send(SortTagEvent.InternalError)
-            } else {
             }
         }
     }

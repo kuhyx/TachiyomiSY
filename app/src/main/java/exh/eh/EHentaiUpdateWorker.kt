@@ -14,7 +14,6 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import com.elvishew.xlog.Logger
 import com.elvishew.xlog.XLog
-import eu.kanade.domain.chapter.interactor.SyncChaptersWithSource
 import eu.kanade.tachiyomi.data.library.LibraryUpdateNotifier
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.source.online.all.EHentai
@@ -60,7 +59,6 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
     private val updateHelper: EHentaiUpdateHelper by injectLazy()
     private val logger: Logger by lazy { xLog() }
     private val updateMangaFromRemote: UpdateMangaFromRemote by injectLazy()
-    private val syncChaptersWithSource: SyncChaptersWithSource by injectLazy()
     private val getChaptersByMangaId: GetChaptersByMangaId by injectLazy()
     private val getFlatMetadataById: GetFlatMetadataById by injectLazy()
     private val insertFlatMetadata: InsertFlatMetadata by injectLazy()

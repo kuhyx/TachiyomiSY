@@ -416,7 +416,7 @@ private fun SearchResultItemDetails(
 
 @PreviewLightDark
 @Composable
-private fun TrackerSearchPreviews(
+internal fun TrackerSearchPreviews(
     @PreviewParameter(TrackerSearchPreviewProvider::class)
     content: @Composable () -> Unit,
 ) {

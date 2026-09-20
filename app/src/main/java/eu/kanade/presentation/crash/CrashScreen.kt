@@ -62,7 +62,7 @@ internal fun CrashScreen(
 
 @PreviewLightDark
 @Composable
-private fun CrashScreenPreview() {
+internal fun CrashScreenPreview() {
     TachiyomiPreviewTheme {
         CrashScreen(exception = RuntimeException("Dummy")) {}
     }

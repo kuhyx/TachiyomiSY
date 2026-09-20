@@ -49,7 +49,7 @@ internal fun LanguageBadge(
 
 @PreviewLightDark
 @Composable
-private fun BadgePreview() {
+internal fun BadgePreview() {
     TachiyomiPreviewTheme {
         Column {
             DownloadsBadge(count = 10)

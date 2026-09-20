@@ -81,7 +81,7 @@ internal fun MangaNotesSection(
 
 @PreviewLightDark
 @Composable
-private fun MangaNotesSectionPreview() {
+internal fun MangaNotesSectionPreview() {
     MangaNotesSection(
         onEditNotes = {},
         expanded = true,

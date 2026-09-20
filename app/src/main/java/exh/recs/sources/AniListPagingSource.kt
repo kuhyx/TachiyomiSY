@@ -65,7 +65,6 @@ internal class AniListPagingSource(manga: Manga) : TrackerRecommendationPagingSo
     private suspend fun getRecs(
         query: String,
         variables: JsonObject,
-        queryParam: String? = null,
         filter: List<JsonElement>.() -> List<JsonElement> = { this },
     ): List<SManga> {
         val payload = buildJsonObject {
@@ -179,7 +178,6 @@ internal class AniListPagingSource(manga: Manga) : TrackerRecommendationPagingSo
             put("search", search)
         }
         return getRecs(
-            queryParam = search,
             query = query,
             variables = variables,
             filter = {

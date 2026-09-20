@@ -614,7 +614,6 @@ internal class ReaderActivity : BaseActivity() {
             ReadingMode.fromPreference(viewModel.getMangaReadingMode()),
         )
         val verticalNavigatorOnLeft by readerPreferences.verticalNavigatorOnLeft.collectAsState()
-        val verticalNavigatorHeight by readerPreferences.verticalNavigatorHeight.collectAsState()
 
         ReaderAppBars(
             visible = state.menuVisible,
@@ -642,7 +641,6 @@ internal class ReaderActivity : BaseActivity() {
                     ChapterNavigatorType.VERTICAL_RIGHT
                 }
             },
-            verticalNavigatorHeight = verticalNavigatorHeight / 100f,
             onNextChapter = ::loadNextChapter,
             enabledNext = state.viewerChapters?.nextChapter != null,
             onPreviousChapter = ::loadPreviousChapter,

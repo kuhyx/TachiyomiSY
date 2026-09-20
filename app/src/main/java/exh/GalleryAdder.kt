@@ -191,15 +191,16 @@ internal class GalleryAdder(
         var result: T? = null
         var lastError: Exception? = null
 
-        for (i in 1..retryCount) {
-            try {
-                result = block()
-                break
-            } catch (e: Exception) {
-                if (e is EHentai.GalleryNotFoundException) {
-                    throw e
+        repeat(retryCount) {
+            if (result == null) {
+                try {
+                    result = block()
+                } catch (e: Exception) {
+                    if (e is EHentai.GalleryNotFoundException) {
+                        throw e
+                    }
+                    lastError = e
                 }
-                lastError = e
             }
         }
 

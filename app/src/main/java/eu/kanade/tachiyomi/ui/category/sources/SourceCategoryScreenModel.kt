@@ -50,7 +50,6 @@ internal class SourceCategoryScreenModel(
         screenModelScope.launchIO {
             if (createSourceCategory.await(name) is CreateSourceCategory.Result.InvalidName) {
                 _events.send(SourceCategoryEvent.InvalidName)
-            } else {
             }
         }
     }
@@ -76,7 +75,6 @@ internal class SourceCategoryScreenModel(
         screenModelScope.launchIO {
             if (renameSourceCategory.await(categoryOld, categoryNew) is CreateSourceCategory.Result.InvalidName) {
                 _events.send(SourceCategoryEvent.InvalidName)
-            } else {
             }
         }
     }

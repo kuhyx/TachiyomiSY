@@ -50,8 +50,6 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
 
     private fun getReaderId(url: String): String = READER_ID_REGEX.find(url)?.groupValues?.get(1) ?: ""
 
-    private fun getThumbnailId(url: String): String = THUMBNAIL_ID_REGEX.find(url)?.groupValues?.get(1) ?: ""
-
     // Helper
     private suspend fun getRandomID(query: String): String {
         val searchRandom = client.newCall(GET("$baseUrl/api/search/random?count=1&$query", headers)).awaitSuccess()
@@ -229,6 +227,5 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
         }
 
         private val READER_ID_REGEX = Regex("""/reader\?id=(\w{40})""")
-        private val THUMBNAIL_ID_REGEX = Regex("""/(\w{40})/thumbnail""")
     }
 }

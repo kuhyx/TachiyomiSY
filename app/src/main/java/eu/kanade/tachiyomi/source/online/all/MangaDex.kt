@@ -148,8 +148,6 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
             azukHandler,
             mangaHotHandler,
             namicomiHandler,
-            trackPreferences,
-            mdList,
         )
     }
 

@@ -39,7 +39,7 @@ internal fun SwitchPreferenceWidget(
 
 @PreviewLightDark
 @Composable
-private fun SwitchPreferenceWidgetPreview() {
+internal fun SwitchPreferenceWidgetPreview() {
     TachiyomiPreviewTheme {
         Surface {
             Column {

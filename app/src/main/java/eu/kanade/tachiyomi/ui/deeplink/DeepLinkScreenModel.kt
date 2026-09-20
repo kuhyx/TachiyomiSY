@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.deeplink
 import androidx.compose.runtime.Immutable
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.ResolvableSource
 import eu.kanade.tachiyomi.source.online.UriType
@@ -38,7 +37,7 @@ internal class DeepLinkScreenModel(
             }
 
             val chapter = if (source?.getUriType(query) == UriType.Chapter && manga != null) {
-                source.getChapter(query)?.let { getChapterFromSChapter(it, manga, source) }
+                source.getChapter(query)?.let { getChapterFromSChapter(it, manga) }
             } else {
                 null
             }
@@ -57,7 +56,7 @@ internal class DeepLinkScreenModel(
         }
     }
 
-    private suspend fun getChapterFromSChapter(sChapter: SChapter, manga: Manga, source: Source): Chapter? {
+    private suspend fun getChapterFromSChapter(sChapter: SChapter, manga: Manga): Chapter? {
         val localChapter = getChapterByUrlAndMangaId.await(sChapter.url, manga.id)
 
         return localChapter

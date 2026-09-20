@@ -64,7 +64,7 @@ internal fun NewUpdateScreen(
 
 @PreviewLightDark
 @Composable
-private fun NewUpdateScreenPreview() {
+internal fun NewUpdateScreenPreview() {
     TachiyomiPreviewTheme {
         NewUpdateScreen(
             versionName = "v0.99.9",

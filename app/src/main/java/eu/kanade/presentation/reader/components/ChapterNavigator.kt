@@ -314,7 +314,7 @@ internal fun VerticalChapterNavigator(
 
 @Preview
 @Composable
-private fun ChapterNavigatorPreview() {
+internal fun ChapterNavigatorPreview() {
     var currentPage by remember { mutableIntStateOf(1) }
     TachiyomiPreviewTheme {
         ChapterNavigator(

@@ -385,7 +385,7 @@ private fun TrackInfoItemMenu(
 
 @PreviewLightDark
 @Composable
-private fun TrackInfoDialogHomePreviews(
+internal fun TrackInfoDialogHomePreviews(
     @PreviewParameter(TrackInfoDialogHomePreviewProvider::class)
     content: @Composable () -> Unit,
 ) {

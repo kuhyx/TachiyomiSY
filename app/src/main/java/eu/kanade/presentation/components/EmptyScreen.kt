@@ -13,7 +13,7 @@ import tachiyomi.presentation.core.screens.EmptyScreenAction
 
 @PreviewLightDark
 @Composable
-private fun NoActionPreview() {
+internal fun NoActionPreview() {
     TachiyomiPreviewTheme {
         Surface {
             EmptyScreen(
@@ -25,7 +25,7 @@ private fun NoActionPreview() {
 
 @PreviewLightDark
 @Composable
-private fun WithActionPreview() {
+internal fun WithActionPreview() {
     TachiyomiPreviewTheme {
         Surface {
             EmptyScreen(

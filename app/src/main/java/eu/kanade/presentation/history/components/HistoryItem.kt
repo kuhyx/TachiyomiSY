@@ -106,7 +106,7 @@ internal fun HistoryItem(
 
 @PreviewLightDark
 @Composable
-private fun HistoryItemPreviews(
+internal fun HistoryItemPreviews(
     @PreviewParameter(HistoryWithRelationsProvider::class)
     historyWithRelations: HistoryWithRelations,
 ) {

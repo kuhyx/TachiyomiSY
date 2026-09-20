@@ -60,7 +60,7 @@ internal const val GETTING_STARTED_URL = "https://mihon.app/docs/guides/getting-
 
 @PreviewLightDark
 @Composable
-private fun GuidesStepPreview() {
+internal fun GuidesStepPreview() {
     TachiyomiPreviewTheme {
         GuidesStep(
             onRestoreBackup = {},

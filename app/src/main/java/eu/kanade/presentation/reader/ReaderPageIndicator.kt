@@ -57,7 +57,7 @@ internal fun ReaderPageIndicator(
 
 @PreviewLightDark
 @Composable
-private fun ReaderPageIndicatorPreview() {
+internal fun ReaderPageIndicatorPreview() {
     TachiyomiPreviewTheme {
         Surface {
             ReaderPageIndicator(currentPage = 10, totalPages = 69)

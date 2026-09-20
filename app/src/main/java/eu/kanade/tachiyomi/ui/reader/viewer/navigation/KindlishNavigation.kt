@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.reader.viewer.navigation
 
 import android.graphics.RectF
 import eu.kanade.tachiyomi.ui.reader.viewer.ONE_THIRD
-import eu.kanade.tachiyomi.ui.reader.viewer.TWO_THIRDS
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 
 /**

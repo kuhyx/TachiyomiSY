@@ -59,7 +59,6 @@ internal fun ReaderAppBars(
     onShare: (() -> Unit)?,
 
     chapterNavigatorType: ChapterNavigatorType,
-    verticalNavigatorHeight: Float,
     onNextChapter: () -> Unit,
     enabledNext: Boolean,
     onPreviousChapter: () -> Unit,

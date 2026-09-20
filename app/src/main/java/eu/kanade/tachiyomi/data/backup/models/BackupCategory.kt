@@ -7,9 +7,7 @@ import tachiyomi.domain.category.model.Category
 private const val BACKUP_CATEGORY_NAME = 1
 private const val BACKUP_CATEGORY_ORDER = 2
 private const val BACKUP_CATEGORY_ID = 3
-private const val BACKUP_CATEGORY_UPDATE_INTERVAL = 3
 private const val BACKUP_CATEGORY_FLAGS = 100
-private const val BACKUP_CATEGORY_MANGA_ORDER = 600
 private const val BACKUP_CATEGORY_VERSION = 601
 private const val BACKUP_CATEGORY_UID = 602
 private const val BACKUP_CATEGORY_LAST_MODIFIED_AT = 603
@@ -19,10 +17,10 @@ internal class BackupCategory(
     @ProtoNumber(BACKUP_CATEGORY_NAME) var name: String,
     @ProtoNumber(BACKUP_CATEGORY_ORDER) var order: Long = 0,
     @ProtoNumber(BACKUP_CATEGORY_ID) var id: Long = 0,
-    // @ProtoNumber(BACKUP_CATEGORY_UPDATE_INTERVAL) val updateInterval: Int = 0, 1.x value not used in 0.x
+    // @ProtoNumber(3) val updateInterval: Int = 0, 1.x value not used in 0.x
     @ProtoNumber(BACKUP_CATEGORY_FLAGS) var flags: Long = 0,
     // SY specific values
-    /*@ProtoNumber(BACKUP_CATEGORY_MANGA_ORDER) var mangaOrder: List<Long> = emptyList(),*/
+    /*@ProtoNumber(600) var mangaOrder: List<Long> = emptyList(),*/
     @ProtoNumber(BACKUP_CATEGORY_VERSION) var version: Long = 0,
     @ProtoNumber(BACKUP_CATEGORY_UID) var uid: Long = 0,
     @ProtoNumber(BACKUP_CATEGORY_LAST_MODIFIED_AT) var lastModifiedAt: Long = 0,

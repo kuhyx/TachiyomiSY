@@ -16,18 +16,13 @@ private const val BACKUP_MANGA_DESCRIPTION = 6
 private const val BACKUP_MANGA_GENRE = 7
 private const val BACKUP_MANGA_STATUS = 8
 private const val BACKUP_MANGA_THUMBNAIL_URL = 9
-private const val BACKUP_MANGA_CUSTOM_COVER = 10
-private const val BACKUP_MANGA_LAST_UPDATE = 11
-private const val BACKUP_MANGA_LAST_INIT = 12
 private const val BACKUP_MANGA_DATE_ADDED = 13
 private const val BACKUP_MANGA_VIEWER = 14
-private const val BACKUP_MANGA_FLAGS = 15
 private const val BACKUP_MANGA_CHAPTERS = 16
 private const val BACKUP_MANGA_CATEGORIES = 17
 private const val BACKUP_MANGA_TRACKING = 18
 private const val BACKUP_MANGA_FAVORITE = 100
 private const val BACKUP_MANGA_CHAPTER_FLAGS = 101
-private const val BACKUP_MANGA_BROKEN_HISTORY = 102
 private const val BACKUP_MANGA_VIEWER_FLAGS = 103
 private const val BACKUP_MANGA_HISTORY = 104
 private const val BACKUP_MANGA_UPDATE_STRATEGY = 105
@@ -63,19 +58,19 @@ internal class BackupManga(
     @ProtoNumber(BACKUP_MANGA_STATUS) var status: Int = 0,
     // thumbnailUrl is called cover in 1.x
     @ProtoNumber(BACKUP_MANGA_THUMBNAIL_URL) var thumbnailUrl: String? = null,
-    // @ProtoNumber(BACKUP_MANGA_CUSTOM_COVER) val customCover: String = "", 1.x value, not used in 0.x
-    // @ProtoNumber(BACKUP_MANGA_LAST_UPDATE) val lastUpdate: Long = 0, 1.x value, not used in 0.x
-    // @ProtoNumber(BACKUP_MANGA_LAST_INIT) val lastInit: Long = 0, 1.x value, not used in 0.x
+    // @ProtoNumber(10) val customCover: String = "", 1.x value, not used in 0.x
+    // @ProtoNumber(11) val lastUpdate: Long = 0, 1.x value, not used in 0.x
+    // @ProtoNumber(12) val lastInit: Long = 0, 1.x value, not used in 0.x
     @ProtoNumber(BACKUP_MANGA_DATE_ADDED) var dateAdded: Long = 0,
     @ProtoNumber(BACKUP_MANGA_VIEWER) var viewer: Int = 0, // Replaced by viewer_flags
-    // @ProtoNumber(BACKUP_MANGA_FLAGS) val flags: Int = 0, 1.x value, not used in 0.x
+    // @ProtoNumber(15) val flags: Int = 0, 1.x value, not used in 0.x
     @ProtoNumber(BACKUP_MANGA_CHAPTERS) var chapters: List<BackupChapter> = emptyList(),
     @ProtoNumber(BACKUP_MANGA_CATEGORIES) var categories: List<Long> = emptyList(),
     @ProtoNumber(BACKUP_MANGA_TRACKING) var tracking: List<BackupTracking> = emptyList(),
     // Bump by 100 for values that are not saved/implemented in 1.x but are used in 0.x
     @ProtoNumber(BACKUP_MANGA_FAVORITE) var favorite: Boolean = true,
     @ProtoNumber(BACKUP_MANGA_CHAPTER_FLAGS) var chapterFlags: Int = 0,
-    // @ProtoNumber(BACKUP_MANGA_BROKEN_HISTORY) var brokenHistory, legacy history model with non-compliant proto number
+    // @ProtoNumber(102) var brokenHistory, legacy history model with non-compliant proto number
     @ProtoNumber(BACKUP_MANGA_VIEWER_FLAGS) var viewerFlags: Int? = null,
     @ProtoNumber(BACKUP_MANGA_HISTORY) var history: List<BackupHistory> = emptyList(),
     @ProtoNumber(BACKUP_MANGA_UPDATE_STRATEGY) var updateStrategy: UpdateStrategy = UpdateStrategy.ALWAYS_UPDATE,

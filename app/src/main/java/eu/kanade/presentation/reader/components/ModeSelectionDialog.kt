@@ -69,7 +69,7 @@ internal fun ModeSelectionDialog(
 
 @PreviewLightDark
 @Composable
-private fun Preview() {
+internal fun Preview() {
     TachiyomiPreviewTheme {
         Surface {
             Column {

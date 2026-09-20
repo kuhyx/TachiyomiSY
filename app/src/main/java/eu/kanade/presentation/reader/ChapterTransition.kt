@@ -304,7 +304,7 @@ private val FakeChapterLongTitle = previewChapter(
 
 @PreviewLightDark
 @Composable
-private fun TransitionTextPreview() {
+internal fun TransitionTextPreview() {
     TachiyomiPreviewTheme {
         Surface(modifier = Modifier.padding(48.dp)) {
             ChapterTransition(
@@ -318,7 +318,7 @@ private fun TransitionTextPreview() {
 
 @PreviewLightDark
 @Composable
-private fun TransitionTextLongTitlePreview() {
+internal fun TransitionTextLongTitlePreview() {
     TachiyomiPreviewTheme {
         Surface(modifier = Modifier.padding(48.dp)) {
             ChapterTransition(
@@ -332,7 +332,7 @@ private fun TransitionTextLongTitlePreview() {
 
 @PreviewLightDark
 @Composable
-private fun TransitionTextWithGapPreview() {
+internal fun TransitionTextWithGapPreview() {
     TachiyomiPreviewTheme {
         Surface(modifier = Modifier.padding(48.dp)) {
             ChapterTransition(
@@ -346,7 +346,7 @@ private fun TransitionTextWithGapPreview() {
 
 @PreviewLightDark
 @Composable
-private fun TransitionTextNoNextPreview() {
+internal fun TransitionTextNoNextPreview() {
     TachiyomiPreviewTheme {
         Surface(modifier = Modifier.padding(48.dp)) {
             ChapterTransition(
@@ -360,7 +360,7 @@ private fun TransitionTextNoNextPreview() {
 
 @PreviewLightDark
 @Composable
-private fun TransitionTextNoPreviousPreview() {
+internal fun TransitionTextNoPreviousPreview() {
     TachiyomiPreviewTheme {
         Surface(modifier = Modifier.padding(48.dp)) {
             ChapterTransition(

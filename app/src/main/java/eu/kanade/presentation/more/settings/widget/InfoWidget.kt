@@ -42,7 +42,7 @@ internal fun InfoWidget(text: String) {
 
 @PreviewLightDark
 @Composable
-private fun InfoWidgetPreview() {
+internal fun InfoWidgetPreview() {
     TachiyomiPreviewTheme {
         Surface {
             InfoWidget(text = stringResource(MR.strings.download_ahead_info))

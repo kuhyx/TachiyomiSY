@@ -224,7 +224,7 @@ private fun BaseSelector(
 
 @PreviewLightDark
 @Composable
-private fun TrackStatusSelectorPreviews() {
+internal fun TrackStatusSelectorPreviews() {
     TachiyomiPreviewTheme {
         Surface {
             TrackStatusSelector(

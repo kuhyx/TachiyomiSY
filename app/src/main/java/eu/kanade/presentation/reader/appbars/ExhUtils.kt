@@ -247,7 +247,7 @@ internal fun ExhUtils(
 
 @Composable
 @PreviewLightDark
-private fun ExhUtilsPreview() {
+internal fun ExhUtilsPreview() {
     Surface {
         ExhUtils(
             isVisible = true,

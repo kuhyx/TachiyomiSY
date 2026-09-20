@@ -1,7 +1,5 @@
 package eu.kanade.tachiyomi.source.online.all
 
-import eu.kanade.domain.chapter.interactor.SyncChaptersWithSource
-import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.manga.model.toSManga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
@@ -22,9 +20,7 @@ import mihon.domain.chapter.interactor.FilterChaptersForDownload
 import mihon.domain.source.interactor.UpdateMangaFromRemote
 import okhttp3.Response
 import tachiyomi.core.common.util.lang.withIOContext
-import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.chapter.model.Chapter
-import tachiyomi.domain.download.service.DownloadPreferences
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.GetMergedReferencesById
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
@@ -38,14 +34,10 @@ private const val MAX_CONCURRENT_SOURCES = 5
 internal class MergedSource : UnsupportedHelpersHttpSource() {
     private val getManga: GetManga by injectLazy()
     private val getMergedReferencesById: GetMergedReferencesById by injectLazy()
-    private val syncChaptersWithSource: SyncChaptersWithSource by injectLazy()
     private val networkToLocalManga: NetworkToLocalManga by injectLazy()
-    private val updateManga: UpdateManga by injectLazy()
     private val updateMangaFromRemote: UpdateMangaFromRemote by injectLazy()
-    private val getCategories: GetCategories by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
     private val downloadManager: DownloadManager by injectLazy()
-    private val downloadPreferences: DownloadPreferences by injectLazy()
     private val filterChaptersForDownload: FilterChaptersForDownload by injectLazy()
 
     override val id: Long = MERGED_SOURCE_ID

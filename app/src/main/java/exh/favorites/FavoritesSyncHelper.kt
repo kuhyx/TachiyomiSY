@@ -258,16 +258,14 @@ internal class FavoritesSyncHelper(val context: Context) {
     private suspend fun explicitlyRetryExhRequest(retryCount: Int, request: Request): Boolean {
         var success = false
 
-        for (i in 1..retryCount) {
-            try {
-                val resp = withIOContext { exh.client.newCall(request).await() }
-
-                if (resp.isSuccessful) {
-                    success = true
-                    break
+        repeat(retryCount) {
+            if (!success) {
+                try {
+                    val resp = withIOContext { exh.client.newCall(request).await() }
+                    success = resp.isSuccessful
+                } catch (e: Exception) {
+                    logger.w(context.stringResource(SYMR.strings.favorites_sync_network_error), e)
                 }
-            } catch (e: Exception) {
-                logger.w(context.stringResource(SYMR.strings.favorites_sync_network_error), e)
             }
         }
 

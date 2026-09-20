@@ -76,7 +76,7 @@ internal fun TextPreferenceWidget(
 
 @PreviewLightDark
 @Composable
-private fun TextPreferenceWidgetPreview() {
+internal fun TextPreferenceWidgetPreview() {
     TachiyomiPreviewTheme {
         Surface {
             Column {

@@ -48,7 +48,6 @@ internal class CategoryScreenModel(
         screenModelScope.launch {
             if (createCategoryWithName.await(name) is CreateCategoryWithName.Result.InternalError) {
                 _events.send(CategoryEvent.InternalError)
-            } else {
             }
         }
     }
@@ -57,7 +56,6 @@ internal class CategoryScreenModel(
         screenModelScope.launch {
             if (deleteCategory.await(categoryId = categoryId) is DeleteCategory.Result.InternalError) {
                 _events.send(CategoryEvent.InternalError)
-            } else {
             }
         }
     }
@@ -66,7 +64,6 @@ internal class CategoryScreenModel(
         screenModelScope.launch {
             if (reorderCategory.await(category, newIndex) is ReorderCategory.Result.InternalError) {
                 _events.send(CategoryEvent.InternalError)
-            } else {
             }
         }
     }
@@ -75,7 +72,6 @@ internal class CategoryScreenModel(
         screenModelScope.launch {
             if (renameCategory.await(category, name) is RenameCategory.Result.InternalError) {
                 _events.send(CategoryEvent.InternalError)
-            } else {
             }
         }
     }

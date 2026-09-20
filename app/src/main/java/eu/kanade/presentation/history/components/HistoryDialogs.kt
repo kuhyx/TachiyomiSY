@@ -90,7 +90,7 @@ internal fun HistoryDeleteAllDialog(
 
 @PreviewLightDark
 @Composable
-private fun HistoryDeleteDialogPreview() {
+internal fun HistoryDeleteDialogPreview() {
     TachiyomiPreviewTheme {
         HistoryDeleteDialog(
             onDismissRequest = {},
