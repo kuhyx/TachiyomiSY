@@ -27,7 +27,8 @@
 -keep,allowoptimization class eu.kanade.tachiyomi.AppInfo { public protected *; }
 
 # Debug functions
--keep,allowoptimization class exh.debug.DebugFunctions { public *; }
+# Every group the debug menu enumerates by reflection (DebugFunctions.entries()).
+-keep,allowoptimization class exh.debug.Debug*Functions { public *; }
 
 -keepclassmembers class * implements java.io.Serializable {
     java.lang.Object writeReplace();
