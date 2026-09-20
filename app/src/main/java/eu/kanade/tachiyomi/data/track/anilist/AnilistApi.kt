@@ -206,9 +206,9 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
     suspend fun findLibManga(track: Track, userid: Int): Track? {
         return withIOContext {
             val query = $$"""
-            |query ($id: Int!, $mangaId: Int!) {
+            |query ($id: Int!, $manga_id: Int!) {
                 |Page {
-                    |mediaList(userId: $id, type: MANGA, mediaId: $mangaId) {
+                    |mediaList(userId: $id, type: MANGA, mediaId: $manga_id) {
                         |id
                         |status
                         |scoreRaw: score(format: POINT_100)

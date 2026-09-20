@@ -22,14 +22,14 @@ internal data class ALManga(
     val staff: ALStaff,
 ) {
     fun toTrack() = TrackSearch.create(TrackerManager.ANILIST).apply {
-        remoteId = remoteId
+        remoteId = this@ALManga.remoteId
         title = this@ALManga.title
-        totalChapters = totalChapters
+        totalChapters = this@ALManga.totalChapters
         coverUrl = imageUrl
         summary = description?.htmlDecode() ?: ""
         score = averageScore.toDouble()
         trackingUrl = AnilistApi.mangaUrl(remoteId)
-        publishingStatus = publishingStatus
+        publishingStatus = this@ALManga.publishingStatus
         publishingType = format
         if (startDateFuzzy != 0L) {
             startDate = try {
@@ -65,7 +65,7 @@ internal data class ALUserManga(
         startedReadingDate = startDateFuzzy
         finishedReadingDate = completedDateFuzzy
         lastChapterRead = chaptersRead.toDouble()
-        libraryId = libraryId
+        libraryId = this@ALUserManga.libraryId
         totalChapters = manga.totalChapters
         private = this@ALUserManga.private
     }

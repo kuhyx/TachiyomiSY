@@ -27,7 +27,7 @@ internal data class SMUserListManga(
     fun toTrack(trackId: Long): Track {
         return Track.create(trackId).apply {
             title = name
-            totalChapters = totalChapters
+            totalChapters = this@SMUserListManga.totalChapters
             trackingUrl = url
             if (userRate != null) {
                 // null if not in user's list, must not throw here because it'd break adding titles
