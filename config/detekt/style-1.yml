@@ -23,7 +23,10 @@ style:
     active: true
     conversionFunctionPrefix:
       - 'to'
-    allowOperators: false
+    # `operator fun contains`/`plus`/... on a value type is part of its value semantics, not
+    # behaviour hung on a record (TimeRange's `in`); an extension operator would read the same
+    # at the call site but hide the contract from the class. Decided 2026-09-20.
+    allowOperators: true
   DataClassShouldBeImmutable:
     active: true
   DestructuringDeclarationWithTooManyEntries:

@@ -67,7 +67,6 @@ internal sealed class Preference {
         /**
          * A [PreferenceItem] that displays a list of entries as a dialog.
          */
-        @Suppress("UNCHECKED_CAST")
         data class ListPreference<T>(
             val preference: PreferenceData<T>,
             val entries: Map<T, String>,
@@ -78,14 +77,7 @@ internal sealed class Preference {
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (value: T) -> Boolean = { true },
-        ) : PreferenceItem<T, Boolean>() {
-            internal fun internalSet(value: Any) = preference.set(value as T)
-            internal suspend fun internalOnValueChanged(value: Any) = onValueChanged(value as T)
-
-            @Composable
-            internal fun internalSubtitleProvider(value: Any?, entries: Map<out Any?, String>) =
-                subtitleProvider(value as T, entries as Map<T, String>)
-        }
+        ) : PreferenceItem<T, Boolean>()
 
         /**
          * [ListPreference] but with no connection to a [PreferenceData].
@@ -106,7 +98,6 @@ internal sealed class Preference {
          * A [PreferenceItem] that displays a list of entries as a dialog.
          * Multiple entries can be selected at the same time.
          */
-        @Suppress("UNCHECKED_CAST")
         data class MultiSelectListPreference<T>(
             val preference: PreferenceData<Set<T>>,
             val entries: Map<T, String>,
@@ -125,14 +116,7 @@ internal sealed class Preference {
             override val icon: ImageVector? = null,
             override val enabled: Boolean = true,
             override val onValueChanged: suspend (value: Set<T>) -> Boolean = { true },
-        ) : PreferenceItem<Set<T>, Boolean>() {
-            internal fun internalSet(value: Set<Any?>) = preference.set(value as Set<T>)
-            internal suspend fun internalOnValueChanged(value: Set<Any?>) = onValueChanged(value as Set<T>)
-
-            @Composable
-            internal fun internalSubtitleProvider(value: Set<Any?>, entries: Map<out Any?, String>) =
-                subtitleProvider(value as Set<T>, entries as Map<T, String>)
-        }
+        ) : PreferenceItem<Set<T>, Boolean>()
 
         /**
          * A [PreferenceItem] that shows a EditText in the dialog.

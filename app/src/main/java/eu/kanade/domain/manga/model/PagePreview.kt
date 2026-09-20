@@ -18,5 +18,5 @@ internal data class PagePreview(
     @Transient
     val progress = _progress.asStateFlow()
 
-    fun getPagePreviewInfo() = PagePreviewInfo(index, imageUrl, _progress)
+    fun toPagePreviewInfo() = PagePreviewInfo(index, imageUrl, _progress)
 }
