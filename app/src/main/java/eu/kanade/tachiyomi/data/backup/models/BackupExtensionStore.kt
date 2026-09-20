@@ -15,14 +15,14 @@ private const val BACKUP_EXTENSION_STORE_EXTENSION_LIST_URL = 8
 
 @Serializable
 internal data class BackupExtensionStore(
-    @ProtoNumber(BACKUP_EXTENSION_STORE_INDEX_URL) var indexUrl: String,
-    @ProtoNumber(BACKUP_EXTENSION_STORE_NAME) var name: String,
-    @ProtoNumber(BACKUP_EXTENSION_STORE_BADGE_LABEL) var badgeLabel: String?,
-    @ProtoNumber(BACKUP_EXTENSION_STORE_SIGNING_KEY) var signingKey: String,
-    @ProtoNumber(BACKUP_EXTENSION_STORE_CONTACT_WEBSITE) var contactWebsite: String,
-    @ProtoNumber(BACKUP_EXTENSION_STORE_CONTACT_DISCORD) var contactDiscord: String?,
-    @ProtoNumber(BACKUP_EXTENSION_STORE_IS_LEGACY) var isLegacy: Boolean?,
-    @ProtoNumber(BACKUP_EXTENSION_STORE_EXTENSION_LIST_URL) var extensionListUrl: String?,
+    @ProtoNumber(BACKUP_EXTENSION_STORE_INDEX_URL) val indexUrl: String,
+    @ProtoNumber(BACKUP_EXTENSION_STORE_NAME) val name: String,
+    @ProtoNumber(BACKUP_EXTENSION_STORE_BADGE_LABEL) val badgeLabel: String?,
+    @ProtoNumber(BACKUP_EXTENSION_STORE_SIGNING_KEY) val signingKey: String,
+    @ProtoNumber(BACKUP_EXTENSION_STORE_CONTACT_WEBSITE) val contactWebsite: String,
+    @ProtoNumber(BACKUP_EXTENSION_STORE_CONTACT_DISCORD) val contactDiscord: String?,
+    @ProtoNumber(BACKUP_EXTENSION_STORE_IS_LEGACY) val isLegacy: Boolean?,
+    @ProtoNumber(BACKUP_EXTENSION_STORE_EXTENSION_LIST_URL) val extensionListUrl: String?,
 )
 
 internal val backupExtensionStoreMapper = { store: ExtensionStore ->

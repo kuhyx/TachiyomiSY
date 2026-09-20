@@ -155,7 +155,7 @@ internal class DownloadCache(
                     chapterName,
                     chapterScanlator,
                     chapterUrl,
-                ).any { it in mangaDir.chapterDirs }
+                ).any { it in mangaDir }
             }
         }
         return false
@@ -167,11 +167,7 @@ internal class DownloadCache(
     fun getTotalDownloadCount(): Int {
         renewCache()
 
-        return rootDownloadsDir.sourceDirs.values.sumOf { sourceDir ->
-            sourceDir.mangaDirs.values.sumOf { mangaDir ->
-                mangaDir.chapterDirs.size
-            }
-        }
+        return rootDownloadsDir.chapterCount()
     }
 
     /**
@@ -242,7 +238,7 @@ internal class DownloadCache(
                 ),
             ] ?: return
             provider.getValidChapterDirNames(chapter.name, chapter.scanlator, chapter.url).forEach {
-                if (it in mangaDir.chapterDirs) {
+                if (it in mangaDir) {
                     mangaDir.chapterDirs -= it
                 }
             }
@@ -257,7 +253,7 @@ internal class DownloadCache(
             val sourceDir = rootDownloadsDir.sourceDirs[manga.source] ?: return
             val mangaDir = sourceDir.mangaDirs[provider.getMangaDirName(manga.ogTitle)] ?: return
             folders.forEach { chapter ->
-                if (chapter in mangaDir.chapterDirs) {
+                if (chapter in mangaDir) {
                     mangaDir.chapterDirs -= chapter
                 }
             }
@@ -282,7 +278,7 @@ internal class DownloadCache(
             ] ?: return
             chapters.forEach { chapter ->
                 provider.getValidChapterDirNames(chapter.name, chapter.scanlator, chapter.url).forEach {
-                    if (it in mangaDir.chapterDirs) {
+                    if (it in mangaDir) {
                         mangaDir.chapterDirs -= it
                     }
                 }
@@ -477,31 +473,37 @@ internal class DownloadCache(
  * Class to store the files under the root downloads directory.
  */
 @Serializable
-private data class RootDirectory(
+private class RootDirectory(
     @Serializable(with = UniFileAsStringSerializer::class)
     val dir: UniFile?,
     var sourceDirs: Map<Long, SourceDirectory> = mapOf(),
-)
+) {
+    fun chapterCount(): Int = sourceDirs.values.sumOf { it.chapterCount() }
+}
 
 /**
  * Class to store the files under a source directory.
  */
 @Serializable
-private data class SourceDirectory(
+private class SourceDirectory(
     @Serializable(with = UniFileAsStringSerializer::class)
     val dir: UniFile?,
     var mangaDirs: Map<String, MangaDirectory> = mapOf(),
-)
+) {
+    fun chapterCount(): Int = mangaDirs.values.sumOf { it.chapterDirs.size }
+}
 
 /**
  * Class to store the files under a manga directory.
  */
 @Serializable
-private data class MangaDirectory(
+private class MangaDirectory(
     @Serializable(with = UniFileAsStringSerializer::class)
     val dir: UniFile?,
     var chapterDirs: MutableSet<String> = mutableSetOf(),
-)
+) {
+    operator fun contains(chapterDirName: String): Boolean = chapterDirName in chapterDirs
+}
 
 private object UniFileAsStringSerializer : KSerializer<UniFile?> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UniFile", PrimitiveKind.STRING)
