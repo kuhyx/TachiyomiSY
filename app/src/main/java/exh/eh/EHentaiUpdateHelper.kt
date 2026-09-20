@@ -75,11 +75,7 @@ internal class EHentaiUpdateHelper(context: Context) {
                     val history = async(Dispatchers.IO) {
                         getHistoryByMangaId.await(mangaId)
                     }
-                    ChapterChain(
-                        manga.await() ?: return@coroutineScope null,
-                        chapterList.await(),
-                        history.await(),
-                    )
+                    manga.await()?.let { ChapterChain(it, chapterList.await(), history.await()) }
                 }
             }
             .filter { it.manga.source == sourceId }

@@ -81,7 +81,7 @@ internal suspend fun getTrackers(
     showTrackerSelectionDialogue: MutableState<Boolean>,
 ) {
     tracks.value = getTracks.await(manga.id).mapNotNull { track ->
-        track to (trackerManager.get(track.trackerId) ?: return@mapNotNull null)
+        trackerManager.get(track.trackerId)?.let { track to it }
     }
         .filterNot { (_, tracker) -> tracker is EnhancedTracker }
 

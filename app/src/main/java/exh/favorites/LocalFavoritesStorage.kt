@@ -104,13 +104,8 @@ internal class LocalFavoritesStorage(
         val dbCategories = getCategories.await()
             .filterNot(Category::isSystemCategory)
 
-        return filter(::validateDbManga).mapNotNull {
-            val category = getCategories.await(it.id)
-
-            dbCategories.indexOf(
-                category.firstOrNull()
-                    ?: return@mapNotNull null,
-            ) to it
+        return filter(::validateDbManga).mapNotNull { manga ->
+            getCategories.await(manga.id).firstOrNull()?.let { dbCategories.indexOf(it) to manga }
         }
     }
 
@@ -123,11 +118,7 @@ internal class LocalFavoritesStorage(
                 gid = EHentaiSearchMetadata.galleryId(manga.url),
                 token = EHentaiSearchMetadata.galleryToken(manga.url),
                 category = categoryId,
-            ).also {
-                if (it.category > MAX_CATEGORIES) {
-                    return@mapNotNull null
-                }
-            }
+            ).takeIf { it.category <= MAX_CATEGORIES }
         }
 
     private fun validateDbManga(manga: Manga) =

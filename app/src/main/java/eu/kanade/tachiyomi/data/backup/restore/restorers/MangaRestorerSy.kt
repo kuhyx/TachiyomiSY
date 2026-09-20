@@ -9,6 +9,7 @@ import tachiyomi.data.awaitOneOrNull
 import tachiyomi.data.manga.MangaMapper
 import tachiyomi.data.manga.MergedMangaMapper
 import tachiyomi.domain.manga.model.CustomMangaInfo
+import tachiyomi.domain.manga.model.Manga
 import uy.kohesive.injekt.api.get
 
 // Restore the categories from Json.
@@ -39,22 +40,31 @@ internal suspend fun MangaRestorer.restoreMergedReferencesFor(
                 backupMergedMangaReference.mangaSourceId,
             )
                 .awaitOneOrNull(MangaMapper::mapManga)
-                ?: return@forEach
-            backupMergedMangaReference.getMergedMangaReference().run {
-                database.mergedQueries.insert(
-                    infoManga = isInfoManga,
-                    getChapterUpdates = getChapterUpdates,
-                    chapterSortMode = chapterSortMode.toLong(),
-                    chapterPriority = chapterPriority.toLong(),
-                    downloadChapters = downloadChapters,
-                    mergeId = mergeMangaId,
-                    mergeUrl = mergeUrl,
-                    mangaId = mergedManga.id,
-                    mangaUrl = mangaUrl,
-                    mangaSource = mangaSourceId,
-                )
+            if (mergedManga != null) {
+                insertMergedReference(backupMergedMangaReference, mergedManga, mergeMangaId)
             }
         }
+    }
+}
+
+private suspend fun MangaRestorer.insertMergedReference(
+    backupMergedMangaReference: BackupMergedMangaReference,
+    mergedManga: Manga,
+    mergeMangaId: Long,
+) {
+    backupMergedMangaReference.getMergedMangaReference().run {
+        database.mergedQueries.insert(
+            infoManga = isInfoManga,
+            getChapterUpdates = getChapterUpdates,
+            chapterSortMode = chapterSortMode.toLong(),
+            chapterPriority = chapterPriority.toLong(),
+            downloadChapters = downloadChapters,
+            mergeId = mergeMangaId,
+            mergeUrl = mergeUrl,
+            mangaId = mergedManga.id,
+            mangaUrl = mangaUrl,
+            mangaSource = mangaSourceId,
+        )
     }
 }
 

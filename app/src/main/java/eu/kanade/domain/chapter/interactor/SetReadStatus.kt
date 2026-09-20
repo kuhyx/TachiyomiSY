@@ -32,6 +32,11 @@ internal class SetReadStatus(
     }
 
     suspend fun await(read: Boolean, vararg chapters: Chapter): Result = withNonCancellableContext {
+        markRead(read, chapters.toList())
+    }
+
+    // Writes the read flag, then drops the downloads of everything just marked read (when configured).
+    private suspend fun markRead(read: Boolean, chapters: List<Chapter>): Result {
         val chaptersToUpdate = chapters.filter {
             when (read) {
                 true -> !it.read
@@ -39,7 +44,7 @@ internal class SetReadStatus(
             }
         }
         if (chaptersToUpdate.isEmpty()) {
-            return@withNonCancellableContext Result.NoChapters
+            return Result.NoChapters
         }
 
         try {
@@ -49,7 +54,7 @@ internal class SetReadStatus(
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.
             logcat(LogPriority.ERROR, expected)
-            return@withNonCancellableContext Result.InternalError(expected)
+            return Result.InternalError(expected)
         }
 
         if (read && downloadPreferences.removeAfterMarkedAsRead.get()) {
@@ -63,7 +68,7 @@ internal class SetReadStatus(
                 }
         }
 
-        Result.Success
+        return Result.Success
     }
 
     suspend fun await(mangaId: Long, read: Boolean): Result = withNonCancellableContext {
@@ -76,8 +81,8 @@ internal class SetReadStatus(
     }
 
     // SY -->
-    private suspend fun awaitMerged(mangaId: Long, read: Boolean) = withNonCancellableContext f@{
-        return@f await(
+    private suspend fun awaitMerged(mangaId: Long, read: Boolean) = withNonCancellableContext {
+        await(
             read = read,
             chapters = getMergedChaptersByMangaId
                 .await(mangaId, dedupe = false)

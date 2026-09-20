@@ -51,16 +51,14 @@ internal object DebugEhFunctions {
             allManga.forEach { manga ->
                 throttleManager.throttle()
 
-                updateMangaFromRemote(
-                    when (manga.source) {
-                        EH_SOURCE_ID -> eh
-                        EXH_SOURCE_ID -> ex
-                        else -> return@forEach
-                    },
-                    manga,
-                    fetchDetails = true,
-                    fetchChapters = false,
-                )
+                val source = when (manga.source) {
+                    EH_SOURCE_ID -> eh
+                    EXH_SOURCE_ID -> ex
+                    else -> null
+                }
+                if (source != null) {
+                    updateMangaFromRemote(source, manga, fetchDetails = true, fetchChapters = false)
+                }
             }
         }
     }
@@ -80,10 +78,7 @@ internal object DebugEhFunctions {
         return runBlocking {
             getExhFavoriteMangaWithMetadata.await()
                 .count { manga ->
-                    val meta = getFlatMetadataById.await(manga.id)
-                        ?.raise(EHentaiSearchMetadata::class)
-                        ?: return@count false
-                    meta.aged
+                    getFlatMetadataById.await(manga.id)?.raise(EHentaiSearchMetadata::class)?.aged == true
                 }
         }
     }

@@ -16,13 +16,10 @@ internal class GetSortTag(private val preferences: LibraryPreferences) {
     companion object {
         fun getSortTags(preferences: LibraryPreferences) = preferences.sortTagsForLibrary.get()
 
-        fun mapSortTags(tags: Set<String>) = tags.mapNotNull {
-            val index = it.indexOf('|')
-            if (index != -1) {
-                (it.substring(0, index).toIntOrNull() ?: return@mapNotNull null) to it.substring(index + 1)
-            } else {
-                null
-            }
+        fun mapSortTags(tags: Set<String>) = tags.mapNotNull { tag ->
+            val index = tag.indexOf('|')
+            val order = if (index != -1) tag.substring(0, index).toIntOrNull() else null
+            order?.let { it to tag.substring(index + 1) }
         }
             .sortedBy { it.first }
             .map { it.second }

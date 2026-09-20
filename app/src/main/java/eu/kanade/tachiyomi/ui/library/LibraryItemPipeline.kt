@@ -186,8 +186,9 @@ internal class LibraryItemPipeline(
                 .asSequence()
                 .mapNotNull {
                     val list = it.split("|")
-                    (list.getOrNull(0)?.toIntOrNull() ?: return@mapNotNull null) to
-                        (list.getOrNull(1) ?: return@mapNotNull null)
+                    val order = list.getOrNull(0)?.toIntOrNull()
+                    val tag = list.getOrNull(1)
+                    if (order != null && tag != null) order to tag else null
                 }
                 .sortedBy { it.first }
                 .map { it.second }

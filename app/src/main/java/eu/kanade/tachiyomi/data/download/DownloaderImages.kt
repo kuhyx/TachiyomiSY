@@ -47,8 +47,8 @@ internal suspend fun Downloader.getOrDownloadImage(
     val filename = "%0${digitCount}d".format(Locale.ENGLISH, page.number)
 
     // Try to find the image file
-    val imageFile = tmpDir.listFiles()?.firstOrNull {
-        isDownloadedPageImage(it.name ?: return@firstOrNull false, filename)
+    val imageFile = tmpDir.listFiles()?.firstOrNull { file ->
+        file.name?.let { isDownloadedPageImage(it, filename) } == true
     }
 
     try {

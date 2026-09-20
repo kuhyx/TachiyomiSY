@@ -141,24 +141,18 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
     private suspend fun collectUpdateEntries(metadataManga: List<Manga>): List<UpdateEntry> {
         val curTime = System.currentTimeMillis()
         return metadataManga.asFlow().cancellable().mapNotNull { manga ->
-            val meta = getFlatMetadataById.await(manga.id)
-                ?: return@mapNotNull null
-
-            val raisedMeta = meta.raise(EHentaiSearchMetadata::class)
-
-            // Don't update galleries too frequently
-            val checkedRecently = curTime - raisedMeta.lastUpdateCheck < MIN_BACKGROUND_UPDATE_FREQ &&
-                DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY.enabled
-            if (raisedMeta.aged || checkedRecently) {
-                null
-            } else {
-                val chapter = getChaptersByMangaId.await(manga.id).minByOrNull {
-                    it.dateUpload
-                }
-
-                UpdateEntry(manga, raisedMeta, chapter)
-            }
+            getFlatMetadataById.await(manga.id)
+                ?.let { updateEntryOrNull(manga, it.raise(EHentaiSearchMetadata::class), curTime) }
         }.toList().sortedBy { it.meta.lastUpdateCheck }
+    }
+
+    // Null when the gallery is aged out or was checked too recently (galleries aren't polled often).
+    private suspend fun updateEntryOrNull(manga: Manga, meta: EHentaiSearchMetadata, curTime: Long): UpdateEntry? {
+        val checkedRecently = curTime - meta.lastUpdateCheck < MIN_BACKGROUND_UPDATE_FREQ &&
+            DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY.enabled
+        if (meta.aged || checkedRecently) return null
+        val chapter = getChaptersByMangaId.await(manga.id).minByOrNull { it.dateUpload }
+        return UpdateEntry(manga, meta, chapter)
     }
 
     // Mutable bookkeeping for one updater run.

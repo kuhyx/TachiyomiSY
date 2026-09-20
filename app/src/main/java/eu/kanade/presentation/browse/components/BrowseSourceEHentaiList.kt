@@ -72,18 +72,21 @@ internal fun BrowseSourceEHentaiList(
         }
 
         items(count = mangaList.itemCount) { index ->
-            val pair by mangaList[index]?.collectAsState() ?: return@items
-            val manga = pair.first
-            val metadata = pair.second
+            // SY -->
+            mangaList[index]?.let { flow ->
+                val pair by flow.collectAsState()
+                val (manga, metadata) = pair
 
-            BrowseSourceEHentaiListItem(
-                manga = manga,
-                // SY -->
-                metadata = metadata,
-                // SY <--
-                onClick = { onMangaClick(manga) },
-                onLongClick = { onMangaLongClick(manga) },
-            )
+                BrowseSourceEHentaiListItem(
+                    manga = manga,
+                    // SY -->
+                    metadata = metadata,
+                    // SY <--
+                    onClick = { onMangaClick(manga) },
+                    onLongClick = { onMangaLongClick(manga) },
+                )
+            }
+            // SY <--
         }
 
         item {

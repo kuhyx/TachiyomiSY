@@ -42,19 +42,20 @@ internal fun BrowseSourceList(
 
         items(count = mangaList.itemCount) { index ->
             // SY -->
-            val pair by mangaList[index]?.collectAsState() ?: return@items
-            val manga = pair.first
-            val metadata = pair.second
-            // SY <--
+            mangaList[index]?.let { flow ->
+                val pair by flow.collectAsState()
+                val (manga, metadata) = pair
 
-            BrowseSourceListItem(
-                manga = manga,
-                // SY -->
-                metadata = metadata,
-                // SY <--
-                onClick = { onMangaClick(manga) },
-                onLongClick = { onMangaLongClick(manga) },
-            )
+                BrowseSourceListItem(
+                    manga = manga,
+                    // SY -->
+                    metadata = metadata,
+                    // SY <--
+                    onClick = { onMangaClick(manga) },
+                    onLongClick = { onMangaLongClick(manga) },
+                )
+            }
+            // SY <--
         }
 
         item {
@@ -89,19 +90,15 @@ private fun BrowseSourceListItem(
             // SY -->
             if (metadata is MangaDexSearchMetadata) {
                 metadata.followStatus?.let { followStatus ->
-                    val text = LocalResources.current
-                        .let {
-                            remember {
-                                it.getStringArray(R.array.md_follows_options)
-                                    .getOrNull(followStatus)
-                            }
-                        }
-                        ?: return@let
-                    Badge(
-                        text = text,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        textColor = MaterialTheme.colorScheme.onTertiary,
-                    )
+                    val resources = LocalResources.current
+                    val text = remember { resources.getStringArray(R.array.md_follows_options).getOrNull(followStatus) }
+                    if (text != null) {
+                        Badge(
+                            text = text,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            textColor = MaterialTheme.colorScheme.onTertiary,
+                        )
+                    }
                 }
                 metadata.relation?.let {
                     Badge(
