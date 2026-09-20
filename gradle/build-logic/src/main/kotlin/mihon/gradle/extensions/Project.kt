@@ -22,7 +22,8 @@ internal fun Project.android(block: CommonExtension.() -> Unit) {
 }
 
 /**
- * JUnit Platform for every test task, logging each outcome.
+ * JUnit Platform for every test task, logging each outcome; skipped outside the gate's scope
+ * ([GATE_MODULES_PROPERTY]).
  *
  * Only `*Test` classes are offered to the engines: the platform gets every class in the
  * test output otherwise, and the vintage engine reflects over each one. A Robolectric
@@ -30,7 +31,9 @@ internal fun Project.android(block: CommonExtension.() -> Unit) {
  * hidden from android.jar) fails that reflection outside the sandbox.
  */
 public fun Project.configureTest() {
+    val isInScope = isInGateScope()
     tasks.withType(Test::class.java).configureEach {
+        onlyIf("the module is in the gate's scope") { isInScope }
         useJUnitPlatform()
         include("**/*Test.class")
         testLogging {

@@ -16,6 +16,15 @@
 #: source-local i18n i18n-sy baseline-profile app.
 readonly CAPPED_MODULES=(gradle/build-logic source-api core-metadata core/common domain data i18n i18n-sy baseline-profile source-local presentation-widget presentation-core)
 
+# Every Gradle module directory, relative to the repo root, one per line.
+module_dirs() {
+    local dir
+    while IFS= read -r dir; do
+        dir="${dir#"$REPO_ROOT"/}"
+        echo "${dir%/build.gradle.kts}"
+    done < <(find "$REPO_ROOT" -mindepth 2 -maxdepth 4 -name build.gradle.kts -not -path '*/build/*' | sort)
+}
+
 uncapped_module_pattern() {
     # ERE matching paths under modules NOT yet on the cap, e.g.
     # ^(app|core/common)/ -- a module dir is wherever a build.gradle.kts is.

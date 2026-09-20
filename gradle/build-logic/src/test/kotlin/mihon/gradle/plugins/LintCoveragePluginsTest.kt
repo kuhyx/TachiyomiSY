@@ -7,7 +7,9 @@ import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import mihon.gradle.catalogProject
+import mihon.gradle.extensions.GATE_MODULES_PROPERTY
 import org.gradle.api.Project
+import org.gradle.api.internal.TaskInternal
 import org.gradle.api.plugins.ExtensionAware
 import org.jetbrains.kotlin.gradle.dsl.HasConfigurableKotlinCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
@@ -73,5 +75,15 @@ internal class LintCoveragePluginsTest {
         project.plugins.hasPlugin("org.jetbrains.kotlinx.kover") shouldBe true
         (project.tasks.findByName("koverVerify") != null) shouldBe true
         project.tasks.getByName("check").dependsOn.contains("koverVerify") shouldBe true
+    }
+
+    @Test
+    fun coverageIsSkippedOutOfScope() {
+        val project = catalogProject()
+        project.extensions.extraProperties[GATE_MODULES_PROPERTY] = ":elsewhere"
+        project.plugins.apply(PluginCoverage::class.java)
+        project.plugins.apply("base")
+        val verify: TaskInternal = project.tasks.withType(TaskInternal::class.java).getByName("koverVerify")
+        verify.onlyIf.isSatisfiedBy(verify) shouldBe false
     }
 }

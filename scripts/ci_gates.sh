@@ -31,11 +31,14 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly REPO_ROOT
 # shellcheck source=scripts/capped_modules.sh
 source "$REPO_ROOT/scripts/capped_modules.sh"
+# shellcheck source=scripts/gate_modules.sh
+source "$REPO_ROOT/scripts/gate_modules.sh"
 RUN_GRADLE=1
 CHANGED_ONLY=0
 GRADLE_TASKS="${GRADLE_TASKS:-check}"
 #: Paths whose change makes the Gradle gate necessary.
 readonly BUILD_INPUTS=('*.kt' '*.kts' '*.java' '*.toml' '*.xml' '*.properties' '*.pro' 'gradlew')
+readonly GATE_MODULES_PROPERTY="mihon.gate.modules"
 
 resolve_utils_root() {
     if [[ -n "${UTILS_ROOT:-}" ]]; then
@@ -125,6 +128,15 @@ gradle_gate() {
     read -ra tasks <<< "$GRADLE_TASKS"
     # Locally the build runs under the shared resource cap; on a runner there
     # is nothing else to protect and the cap script does not exist.
+    local scope=()
+    if [[ "$CHANGED_ONLY" -eq 1 ]]; then
+        local modules
+        modules="$(gate_modules)"
+        if [[ -n "$modules" ]]; then
+            echo "  tests and coverage scoped to: $modules (CI runs every module)"
+            scope=("-P$GATE_MODULES_PROPERTY=$modules")
+        fi
+    fi
     if [[ -z "${CI:-}" && -x "$capped" ]]; then
         # The cap is whatever ceiling capped.sh currently allows, read from
         # the script so a raised ceiling speeds the gate up without a second
@@ -149,7 +161,7 @@ gradle_gate() {
             # core, three eighths of the cap for the daemon heap (measured
             # 2026-09-18 at half; lowered with the worker cap above).
             CAP_MEM="${mem_g}G" CAP_CPU_PCT="$cpu_pct" "$capped" \
-                "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint \
+                "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint "${scope[@]}" \
                 --max-workers="$workers" \
                 -Dorg.gradle.parallel=true \
                 -Dorg.gradle.jvmargs="-Xmx$((mem_g * 3 / 8))g -Dfile.encoding=UTF-8" \
@@ -160,7 +172,7 @@ gradle_gate() {
             # SIGTERMed; with these limits it peaks at 1.9 GiB. Slower, but
             # it finishes.
             CAP_MEM="${mem_g}G" CAP_CPU_PCT="$cpu_pct" "$capped" \
-                "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint \
+                "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint "${scope[@]}" \
                 --max-workers=2 \
                 -Dorg.gradle.parallel=false \
                 -Dorg.gradle.jvmargs="-Xmx2048m -Dfile.encoding=UTF-8" \
