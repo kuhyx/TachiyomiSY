@@ -51,13 +51,22 @@ internal class MangaCoverFetcher(
     private val url: String?,
     private val isLibraryManga: Boolean,
     private val options: Options,
-    private val coverFileLazy: Lazy<File?>,
-    private val customCoverFileLazy: Lazy<File>,
-    private val diskCacheKeyLazy: Lazy<String>,
-    private val sourceLazy: Lazy<HttpSource?>,
+    cover: CoverLookups,
     private val callFactoryLazy: Lazy<Call.Factory>,
     private val imageLoader: ImageLoader,
 ) : Fetcher {
+    private val coverFileLazy = cover.coverFile
+    private val customCoverFileLazy = cover.customCoverFile
+    private val diskCacheKeyLazy = cover.diskCacheKey
+    private val sourceLazy = cover.source
+
+    /** Where this cover may come from, each resolved only when the fetch gets that far. */
+    data class CoverLookups(
+        val coverFile: Lazy<File?>,
+        val customCoverFile: Lazy<File>,
+        val diskCacheKey: Lazy<String>,
+        val source: Lazy<HttpSource?>,
+    )
 
     private val diskCacheKey: String
         get() = diskCacheKeyLazy.value
@@ -314,10 +323,12 @@ internal class MangaCoverFetcher(
                 url = data.thumbnailUrl,
                 isLibraryManga = data.favorite,
                 options = options,
-                coverFileLazy = lazy { coverCache.getCoverFile(data.thumbnailUrl) },
-                customCoverFileLazy = lazy { coverCache.getCustomCoverFile(data.id) },
-                diskCacheKeyLazy = lazy { imageLoader.components.key(data, options)!! },
-                sourceLazy = lazy { sourceManager.get(data.source) as? HttpSource },
+                cover = CoverLookups(
+                    coverFile = lazy { coverCache.getCoverFile(data.thumbnailUrl) },
+                    customCoverFile = lazy { coverCache.getCustomCoverFile(data.id) },
+                    diskCacheKey = lazy { imageLoader.components.key(data, options)!! },
+                    source = lazy { sourceManager.get(data.source) as? HttpSource },
+                ),
                 callFactoryLazy = callFactoryLazy,
                 imageLoader = imageLoader,
             )
@@ -336,10 +347,12 @@ internal class MangaCoverFetcher(
                 url = data.url,
                 isLibraryManga = data.isMangaFavorite,
                 options = options,
-                coverFileLazy = lazy { coverCache.getCoverFile(data.url) },
-                customCoverFileLazy = lazy { coverCache.getCustomCoverFile(data.mangaId) },
-                diskCacheKeyLazy = lazy { imageLoader.components.key(data, options)!! },
-                sourceLazy = lazy { sourceManager.get(data.sourceId) as? HttpSource },
+                cover = CoverLookups(
+                    coverFile = lazy { coverCache.getCoverFile(data.url) },
+                    customCoverFile = lazy { coverCache.getCustomCoverFile(data.mangaId) },
+                    diskCacheKey = lazy { imageLoader.components.key(data, options)!! },
+                    source = lazy { sourceManager.get(data.sourceId) as? HttpSource },
+                ),
                 callFactoryLazy = callFactoryLazy,
                 imageLoader = imageLoader,
             )

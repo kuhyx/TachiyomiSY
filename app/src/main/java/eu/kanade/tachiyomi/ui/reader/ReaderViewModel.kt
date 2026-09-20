@@ -367,15 +367,16 @@ internal class ReaderViewModel @JvmOverloads constructor(
                     val context = Injekt.get<Application>()
                     // val source = sourceManager.getOrStub(manga.source)
                     loader = ChapterLoader(
-                        context = context,
-                        downloadManager = downloadManager,
-                        downloadProvider = downloadProvider,
+                        services = ChapterLoader.Services(
+                            context = context,
+                            downloadManager = downloadManager,
+                            downloadProvider = downloadProvider,
+                            sourceManager = sourceManager,
+                            readerPrefs = readerPreferences,
+                        ),
                         manga = manga,
                         source = source, /* SY --> */
-                        sourceManager = sourceManager,
-                        readerPrefs = readerPreferences,
-                        mergedReferences = mergedReferences,
-                        mergedManga = mergedManga, /* SY <-- */
+                        merged = ChapterLoader.MergedData(mergedReferences, mergedManga), /* SY <-- */
                     )
 
                     loadChapter(

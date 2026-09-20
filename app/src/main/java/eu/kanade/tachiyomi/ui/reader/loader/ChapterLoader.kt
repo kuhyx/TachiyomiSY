@@ -25,18 +25,35 @@ import java.io.IOException
  * Loader used to retrieve the [PageLoader] for a given chapter.
  */
 internal class ChapterLoader(
-    private val context: Context,
-    private val downloadManager: DownloadManager,
-    private val downloadProvider: DownloadProvider,
+    services: Services,
     private val manga: Manga,
     private val source: Source,
     // SY -->
-    private val sourceManager: SourceManager,
-    private val readerPrefs: ReaderPreferences,
-    private val mergedReferences: List<MergedMangaReference>,
-    private val mergedManga: Map<Long, Manga>,
+    merged: MergedData,
     // SY <--
 ) {
+    private val context = services.context
+    private val downloadManager = services.downloadManager
+    private val downloadProvider = services.downloadProvider
+    private val sourceManager = services.sourceManager
+    private val readerPrefs = services.readerPrefs
+    private val mergedReferences = merged.references
+    private val mergedManga = merged.manga
+
+    /** The app-wide services a loader needs, the same for every chapter. */
+    data class Services(
+        val context: Context,
+        val downloadManager: DownloadManager,
+        val downloadProvider: DownloadProvider,
+        val sourceManager: SourceManager,
+        val readerPrefs: ReaderPreferences,
+    )
+
+    /** The merged-manga references and their manga, so a merged chapter can find its real source. */
+    data class MergedData(
+        val references: List<MergedMangaReference>,
+        val manga: Map<Long, Manga>,
+    )
 
     /**
      * Assigns the chapter's page loader and loads the its pages. Returns immediately if the chapter

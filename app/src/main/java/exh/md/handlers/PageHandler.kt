@@ -17,13 +17,24 @@ import kotlin.reflect.jvm.isAccessible
 
 internal class PageHandler(
     private val service: MangaDexService,
-    private val mangaPlusHandler: MangaPlusHandler,
-    private val comikeyHandler: ComikeyHandler,
-    private val bilibiliHandler: BilibiliHandler,
-    private val azukiHandler: AzukiHandler,
-    private val mangaHotHandler: MangaHotHandler,
-    private val namicomiHandler: NamicomiHandler,
+    externalHandlers: ExternalHandlers,
 ) {
+    private val mangaPlusHandler = externalHandlers.mangaPlus
+    private val comikeyHandler = externalHandlers.comikey
+    private val bilibiliHandler = externalHandlers.bilibili
+    private val azukiHandler = externalHandlers.azuki
+    private val mangaHotHandler = externalHandlers.mangaHot
+    private val namicomiHandler = externalHandlers.namicomi
+
+    /** The handlers for chapters MangaDex hosts elsewhere, one per external site. */
+    data class ExternalHandlers(
+        val mangaPlus: MangaPlusHandler,
+        val comikey: ComikeyHandler,
+        val bilibili: BilibiliHandler,
+        val azuki: AzukiHandler,
+        val mangaHot: MangaHotHandler,
+        val namicomi: NamicomiHandler,
+    )
 
     suspend fun fetchPageList(
         chapter: SChapter,

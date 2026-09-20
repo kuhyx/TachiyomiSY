@@ -27,23 +27,42 @@ import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.interactor.InsertTrack
 import java.time.Instant
 
-internal class MigrateMangaUseCase(
-    private val sourcePreferences: SourcePreferences,
-    private val trackerManager: TrackerManager,
-    private val sourceManager: SourceManager,
-    private val downloadManager: DownloadManager,
-    private val updateManga: UpdateManga,
-    private val getChaptersByMangaId: GetChaptersByMangaId,
-    private val getHistoryByMangaId: GetHistory,
-    private val updateChapter: UpdateChapter,
-    private val updateHistory: UpsertHistory,
-    private val getCategories: GetCategories,
-    private val setMangaCategories: SetMangaCategories,
-    private val getTracks: GetTracks,
-    private val insertTrack: InsertTrack,
-    private val coverCache: CoverCache,
-    private val updateMangaFromRemote: UpdateMangaFromRemote,
-) {
+internal class MigrateMangaUseCase(collaborators: Collaborators) {
+    private val sourcePreferences = collaborators.sourcePreferences
+    private val trackerManager = collaborators.trackerManager
+    private val sourceManager = collaborators.sourceManager
+    private val downloadManager = collaborators.downloadManager
+    private val updateManga = collaborators.updateManga
+    private val getChaptersByMangaId = collaborators.getChaptersByMangaId
+    private val getHistoryByMangaId = collaborators.getHistoryByMangaId
+    private val updateChapter = collaborators.updateChapter
+    private val updateHistory = collaborators.updateHistory
+    private val getCategories = collaborators.getCategories
+    private val setMangaCategories = collaborators.setMangaCategories
+    private val getTracks = collaborators.getTracks
+    private val insertTrack = collaborators.insertTrack
+    private val coverCache = collaborators.coverCache
+    private val updateMangaFromRemote = collaborators.updateMangaFromRemote
+
+    /** Everything [MigrateMangaUseCase] talks to, resolved by the DI graph. */
+    data class Collaborators(
+        val sourcePreferences: SourcePreferences,
+        val trackerManager: TrackerManager,
+        val sourceManager: SourceManager,
+        val downloadManager: DownloadManager,
+        val updateManga: UpdateManga,
+        val getChaptersByMangaId: GetChaptersByMangaId,
+        val getHistoryByMangaId: GetHistory,
+        val updateChapter: UpdateChapter,
+        val updateHistory: UpsertHistory,
+        val getCategories: GetCategories,
+        val setMangaCategories: SetMangaCategories,
+        val getTracks: GetTracks,
+        val insertTrack: InsertTrack,
+        val coverCache: CoverCache,
+        val updateMangaFromRemote: UpdateMangaFromRemote,
+    )
+
     private val enhancedServices by lazy { trackerManager.trackers.filterIsInstance<EnhancedTracker>() }
 
     suspend operator fun invoke(

@@ -24,15 +24,26 @@ import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.source.local.isLocal
 import java.time.Instant
 
-internal class UpdateMangaFromRemote(
-    private val sourceManager: SourceManager,
-    private val chapterRepository: ChapterRepository,
-    private val mangaRepository: MangaRepository,
-    private val syncChaptersWithSource: SyncChaptersWithSource,
-    private val coverCache: CoverCache,
-    private val libraryPreferences: LibraryPreferences,
-    private val downloadManager: DownloadManager,
-) {
+internal class UpdateMangaFromRemote(collaborators: Collaborators) {
+    private val sourceManager = collaborators.sourceManager
+    private val chapterRepository = collaborators.chapterRepository
+    private val mangaRepository = collaborators.mangaRepository
+    private val syncChaptersWithSource = collaborators.syncChaptersWithSource
+    private val coverCache = collaborators.coverCache
+    private val libraryPreferences = collaborators.libraryPreferences
+    private val downloadManager = collaborators.downloadManager
+
+    /** Everything [UpdateMangaFromRemote] talks to, resolved by the DI graph. */
+    data class Collaborators(
+        val sourceManager: SourceManager,
+        val chapterRepository: ChapterRepository,
+        val mangaRepository: MangaRepository,
+        val syncChaptersWithSource: SyncChaptersWithSource,
+        val coverCache: CoverCache,
+        val libraryPreferences: LibraryPreferences,
+        val downloadManager: DownloadManager,
+    )
+
     suspend operator fun invoke(
         manga: Manga,
         fetchDetails: Boolean = false,

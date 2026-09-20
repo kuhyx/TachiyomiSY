@@ -137,7 +137,10 @@ internal class DomainModule : InjektModule {
         addFactory { SetExcludedScanlators(get()) }
         addFactory {
             MigrateMangaUseCase(
-                get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
+                MigrateMangaUseCase.Collaborators(
+                    get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
+                    get(),
+                ),
             )
         }
 
@@ -162,7 +165,11 @@ internal class DomainModule : InjektModule {
         addFactory { UpdateChapter(get()) }
         addFactory { SetReadStatus(get(), get(), get(), get(), get()) }
         addFactory { ShouldUpdateDbChapter() }
-        addFactory { SyncChaptersWithSource(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+        addFactory {
+            SyncChaptersWithSource(
+                SyncChaptersWithSource.Collaborators(get(), get(), get(), get(), get(), get(), get(), get(), get()),
+            )
+        }
         addFactory { GetAvailableScanlators(get()) }
         addFactory { FilterChaptersForDownload(get(), get(), get(), get()) }
 
@@ -205,6 +212,8 @@ internal class DomainModule : InjektModule {
         addFactory { ToggleIncognito(get()) }
         addFactory { GetIncognitoState(get(), get(), get()) }
 
-        addFactory { UpdateMangaFromRemote(get(), get(), get(), get(), get(), get(), get()) }
+        addFactory {
+            UpdateMangaFromRemote(UpdateMangaFromRemote.Collaborators(get(), get(), get(), get(), get(), get(), get()))
+        }
     }
 }

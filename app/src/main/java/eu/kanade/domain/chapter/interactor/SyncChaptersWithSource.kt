@@ -27,17 +27,29 @@ import java.lang.Long.max
 import java.time.ZonedDateTime
 import java.util.TreeSet
 
-internal class SyncChaptersWithSource(
-    private val downloadManager: DownloadManager,
-    private val downloadProvider: DownloadProvider,
-    private val chapterRepository: ChapterRepository,
-    private val shouldUpdateDbChapter: ShouldUpdateDbChapter,
-    private val updateManga: UpdateManga,
-    private val updateChapter: UpdateChapter,
-    private val getChaptersByMangaId: GetChaptersByMangaId,
-    private val getExcludedScanlators: GetExcludedScanlators,
-    private val libraryPreferences: LibraryPreferences,
-) {
+internal class SyncChaptersWithSource(collaborators: Collaborators) {
+    private val downloadManager = collaborators.downloadManager
+    private val downloadProvider = collaborators.downloadProvider
+    private val chapterRepository = collaborators.chapterRepository
+    private val shouldUpdateDbChapter = collaborators.shouldUpdateDbChapter
+    private val updateManga = collaborators.updateManga
+    private val updateChapter = collaborators.updateChapter
+    private val getChaptersByMangaId = collaborators.getChaptersByMangaId
+    private val getExcludedScanlators = collaborators.getExcludedScanlators
+    private val libraryPreferences = collaborators.libraryPreferences
+
+    /** Everything [SyncChaptersWithSource] talks to, resolved by the DI graph. */
+    data class Collaborators(
+        val downloadManager: DownloadManager,
+        val downloadProvider: DownloadProvider,
+        val chapterRepository: ChapterRepository,
+        val shouldUpdateDbChapter: ShouldUpdateDbChapter,
+        val updateManga: UpdateManga,
+        val updateChapter: UpdateChapter,
+        val getChaptersByMangaId: GetChaptersByMangaId,
+        val getExcludedScanlators: GetExcludedScanlators,
+        val libraryPreferences: LibraryPreferences,
+    )
 
     /**
      * Method to synchronize db chapters with source ones.

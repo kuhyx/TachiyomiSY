@@ -143,12 +143,14 @@ internal class MangaDex(delegate: HttpSource, val context: Context) :
     private val pageHandler by lazy {
         PageHandler(
             mangadexService,
-            mangaPlusHandler,
-            comikeyHandler,
-            bilibiliHandler,
-            azukHandler,
-            mangaHotHandler,
-            namicomiHandler,
+            PageHandler.ExternalHandlers(
+                mangaPlus = mangaPlusHandler,
+                comikey = comikeyHandler,
+                bilibili = bilibiliHandler,
+                azuki = azukHandler,
+                mangaHot = mangaHotHandler,
+                namicomi = namicomiHandler,
+            ),
         )
     }
 

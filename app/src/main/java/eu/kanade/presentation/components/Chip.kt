@@ -280,14 +280,18 @@ internal object SuggestionChipDefaults {
         disabledIconContentColor: Color = MaterialTheme.colorScheme.onSurface
             .copy(alpha = 0.38f),
     ): ChipColors = ChipColors(
-        containerColor = containerColor,
-        labelColor = labelColor,
-        leadingIconContentColor = iconContentColor,
-        trailingIconContentColor = Color.Unspecified,
-        disabledContainerColor = disabledContainerColor,
-        disabledLabelColor = disabledLabelColor,
-        disabledLeadingIconContentColor = disabledIconContentColor,
-        disabledTrailingIconContentColor = Color.Unspecified,
+        enabled = ChipStateColors(
+            container = containerColor,
+            label = labelColor,
+            leadingIconContent = iconContentColor,
+            trailingIconContent = Color.Unspecified,
+        ),
+        disabled = ChipStateColors(
+            container = disabledContainerColor,
+            label = disabledLabelColor,
+            leadingIconContent = disabledIconContentColor,
+            trailingIconContent = Color.Unspecified,
+        ),
     )
 
     /**
@@ -360,14 +364,18 @@ internal object SuggestionChipDefaults {
             .copy(alpha = 0.38f),
         disabledIconContentColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
     ): ChipColors = ChipColors(
-        containerColor = containerColor,
-        labelColor = labelColor,
-        leadingIconContentColor = iconContentColor,
-        trailingIconContentColor = Color.Unspecified,
-        disabledContainerColor = disabledContainerColor,
-        disabledLabelColor = disabledLabelColor,
-        disabledLeadingIconContentColor = disabledIconContentColor,
-        disabledTrailingIconContentColor = Color.Unspecified,
+        enabled = ChipStateColors(
+            container = containerColor,
+            label = labelColor,
+            leadingIconContent = iconContentColor,
+            trailingIconContent = Color.Unspecified,
+        ),
+        disabled = ChipStateColors(
+            container = disabledContainerColor,
+            label = disabledLabelColor,
+            leadingIconContent = disabledIconContentColor,
+            trailingIconContent = Color.Unspecified,
+        ),
     )
 
     /**
@@ -409,14 +417,8 @@ internal object SuggestionChipDefaults {
 @ExperimentalMaterial3Api
 @Immutable
 internal class ChipColors internal constructor(
-    private val containerColor: Color,
-    private val labelColor: Color,
-    private val leadingIconContentColor: Color,
-    private val trailingIconContentColor: Color,
-    private val disabledContainerColor: Color,
-    private val disabledLabelColor: Color,
-    private val disabledLeadingIconContentColor: Color,
-    private val disabledTrailingIconContentColor: Color,
+    private val enabled: ChipStateColors,
+    private val disabled: ChipStateColors,
 ) {
     /**
      * Represents the container color for this chip, depending on [enabled].
@@ -425,7 +427,7 @@ internal class ChipColors internal constructor(
      */
     @Composable
     internal fun containerColor(enabled: Boolean): State<Color> =
-        rememberUpdatedState(if (enabled) containerColor else disabledContainerColor)
+        rememberUpdatedState(colors(enabled).container)
 
     /**
      * Represents the label color for this chip, depending on [enabled].
@@ -434,7 +436,7 @@ internal class ChipColors internal constructor(
      */
     @Composable
     internal fun labelColor(enabled: Boolean): State<Color> =
-        rememberUpdatedState(if (enabled) labelColor else disabledLabelColor)
+        rememberUpdatedState(colors(enabled).label)
 
     /**
      * Represents the leading icon's content color for this chip, depending on [enabled].
@@ -442,11 +444,8 @@ internal class ChipColors internal constructor(
      * @param enabled whether the chip is enabled
      */
     @Composable
-    internal fun leadingIconContentColor(enabled: Boolean): State<Color> {
-        return rememberUpdatedState(
-            if (enabled) leadingIconContentColor else disabledLeadingIconContentColor,
-        )
-    }
+    internal fun leadingIconContentColor(enabled: Boolean): State<Color> =
+        rememberUpdatedState(colors(enabled).leadingIconContent)
 
     /**
      * Represents the trailing icon's content color for this chip, depending on [enabled].
@@ -454,41 +453,25 @@ internal class ChipColors internal constructor(
      * @param enabled whether the chip is enabled
      */
     @Composable
-    internal fun trailingIconContentColor(enabled: Boolean): State<Color> {
-        return rememberUpdatedState(
-            if (enabled) trailingIconContentColor else disabledTrailingIconContentColor,
-        )
-    }
+    internal fun trailingIconContentColor(enabled: Boolean): State<Color> =
+        rememberUpdatedState(colors(enabled).trailingIconContent)
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || other !is ChipColors) return false
+    private fun colors(enabled: Boolean): ChipStateColors = if (enabled) this.enabled else disabled
 
-        if (containerColor != other.containerColor) return false
-        if (labelColor != other.labelColor) return false
-        if (leadingIconContentColor != other.leadingIconContentColor) return false
-        if (trailingIconContentColor != other.trailingIconContentColor) return false
-        if (disabledContainerColor != other.disabledContainerColor) return false
-        if (disabledLabelColor != other.disabledLabelColor) return false
-        if (disabledLeadingIconContentColor != other.disabledLeadingIconContentColor) return false
-        if (disabledTrailingIconContentColor != other.disabledTrailingIconContentColor) return false
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is ChipColors && enabled == other.enabled && disabled == other.disabled)
 
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = containerColor.hashCode()
-        result = 31 * result + labelColor.hashCode()
-        result = 31 * result + leadingIconContentColor.hashCode()
-        result = 31 * result + trailingIconContentColor.hashCode()
-        result = 31 * result + disabledContainerColor.hashCode()
-        result = 31 * result + disabledLabelColor.hashCode()
-        result = 31 * result + disabledLeadingIconContentColor.hashCode()
-        result = 31 * result + disabledTrailingIconContentColor.hashCode()
-
-        return result
-    }
+    override fun hashCode(): Int = 31 * enabled.hashCode() + disabled.hashCode()
 }
+
+/** The four colours a chip draws with in one state (enabled or disabled). */
+@Immutable
+internal data class ChipStateColors(
+    val container: Color,
+    val label: Color,
+    val leadingIconContent: Color,
+    val trailingIconContent: Color,
+)
 
 /**
  * Represents the border stroke used in a chip in different states.
