@@ -104,19 +104,19 @@ internal class FavoritesSyncHelper(val context: Context) {
         val libraryManga = getLibraryManga.await()
         val seenManga = HashSet<Long>(libraryManga.size)
         libraryManga.forEach { (manga) ->
-            if (!manga.isEhBasedManga()) return@forEach
+            if (manga.isEhBasedManga()) {
+                if (manga.id in seenManga) {
+                    val inCategories = getCategories.await(manga.id)
+                    status.value = FavoritesSyncStatus.BadLibraryState
+                        .MangaInMultipleCategories(manga.id, manga.title, inCategories.map { it.name })
 
-            if (manga.id in seenManga) {
-                val inCategories = getCategories.await(manga.id)
-                status.value = FavoritesSyncStatus.BadLibraryState
-                    .MangaInMultipleCategories(manga.id, manga.title, inCategories.map { it.name })
-
-                logger.w(
-                    context.stringResource(SYMR.strings.favorites_sync_gallery_multiple_categories_error, manga.id),
-                )
-                return
-            } else {
-                seenManga += manga.id
+                    logger.w(
+                        context.stringResource(SYMR.strings.favorites_sync_gallery_multiple_categories_error, manga.id),
+                    )
+                    return
+                } else {
+                    seenManga += manga.id
+                }
             }
         }
 

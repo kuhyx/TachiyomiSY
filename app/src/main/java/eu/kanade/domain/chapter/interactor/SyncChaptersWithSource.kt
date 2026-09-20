@@ -208,21 +208,23 @@ internal class SyncChaptersWithSource(collaborators: Collaborators) {
                 chapter = chapter.copy(read = true)
             }
 
-            if (!chapter.isRecognizedNumber || chapter.chapterNumber !in deletedChapterNumbers) return@map chapter
+            if (!chapter.isRecognizedNumber || chapter.chapterNumber !in deletedChapterNumbers) {
+                chapter
+            } else {
+                chapter = chapter.copy(
+                    read = chapter.chapterNumber in deletedReadChapterNumbers,
+                    bookmark = chapter.chapterNumber in deletedBookmarkedChapterNumbers,
+                )
 
-            chapter = chapter.copy(
-                read = chapter.chapterNumber in deletedReadChapterNumbers,
-                bookmark = chapter.chapterNumber in deletedBookmarkedChapterNumbers,
-            )
+                // Try to to use the fetch date of the original entry to not pollute 'Updates' tab
+                deletedChapterNumberDateFetchMap[chapter.chapterNumber]?.let {
+                    chapter = chapter.copy(dateFetch = it)
+                }
 
-            // Try to to use the fetch date of the original entry to not pollute 'Updates' tab
-            deletedChapterNumberDateFetchMap[chapter.chapterNumber]?.let {
-                chapter = chapter.copy(dateFetch = it)
+                changedOrDuplicateReadUrls.add(chapter.url)
+
+                chapter
             }
-
-            changedOrDuplicateReadUrls.add(chapter.url)
-
-            chapter
         }
 
         // --> EXH (carry over reading progress)

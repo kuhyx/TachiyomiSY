@@ -250,43 +250,61 @@ private class ClearDatabaseScreenModel : StateScreenModel<ClearDatabaseScreenMod
     }
 
     fun toggleSelection(source: Source) = mutableState.update { state ->
-        if (state !is State.Ready) return@update state
-        val mutableList = state.selection.toMutableList()
-        if (mutableList.contains(source.id)) {
-            mutableList.remove(source.id)
+        if (state !is State.Ready) {
+            state
         } else {
-            mutableList.add(source.id)
+            val mutableList = state.selection.toMutableList()
+            if (mutableList.contains(source.id)) {
+                mutableList.remove(source.id)
+            } else {
+                mutableList.add(source.id)
+            }
+            state.copy(selection = mutableList)
         }
-        state.copy(selection = mutableList)
     }
 
     fun clearSelection() = mutableState.update { state ->
-        if (state !is State.Ready) return@update state
-        state.copy(selection = emptyList())
+        if (state !is State.Ready) {
+            state
+        } else {
+            state.copy(selection = emptyList())
+        }
     }
 
     fun selectAll() = mutableState.update { state ->
-        if (state !is State.Ready) return@update state
-        state.copy(selection = state.items.fastMap { it.id })
+        if (state !is State.Ready) {
+            state
+        } else {
+            state.copy(selection = state.items.fastMap { it.id })
+        }
     }
 
     fun invertSelection() = mutableState.update { state ->
-        if (state !is State.Ready) return@update state
-        state.copy(
-            selection = state.items
-                .fastMap { it.id }
-                .filterNot { it in state.selection },
-        )
+        if (state !is State.Ready) {
+            state
+        } else {
+            state.copy(
+                selection = state.items
+                    .fastMap { it.id }
+                    .filterNot { it in state.selection },
+            )
+        }
     }
 
     fun showConfirmation() = mutableState.update { state ->
-        if (state !is State.Ready) return@update state
-        state.copy(showConfirmation = true)
+        if (state !is State.Ready) {
+            state
+        } else {
+            state.copy(showConfirmation = true)
+        }
     }
 
     fun hideConfirmation() = mutableState.update { state ->
-        if (state !is State.Ready) return@update state
-        state.copy(showConfirmation = false)
+        if (state !is State.Ready) {
+            state
+        } else {
+            state.copy(showConfirmation = false)
+        }
     }
 
     sealed interface State {

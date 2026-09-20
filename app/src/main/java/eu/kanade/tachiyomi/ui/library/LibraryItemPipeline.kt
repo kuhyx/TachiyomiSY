@@ -286,18 +286,18 @@ internal class LibraryItemPipeline(
             val sort = groupSort ?: key.sort
             if (sort.type == LibrarySort.Type.Random) {
                 // SY <--
-                return@mapValues value.shuffled(Random(libraryPreferences.randomSortSeed.get()))
+                value.shuffled(Random(libraryPreferences.randomSortSeed.get()))
+            } else {
+                val manga = value.mapNotNull { favoritesById[it] }
+
+                // SY -->
+                val comparator = sort.comparator()
+                    // SY <--
+                    .let { if (/* SY --> */ sort.isAscending /* SY <-- */) it else it.reversed() }
+                    .thenComparator(sortAlphabetically)
+
+                manga.sortedWith(comparator).map { it.id }
             }
-
-            val manga = value.mapNotNull { favoritesById[it] }
-
-            // SY -->
-            val comparator = sort.comparator()
-                // SY <--
-                .let { if (/* SY --> */ sort.isAscending /* SY <-- */) it else it.reversed() }
-                .thenComparator(sortAlphabetically)
-
-            manga.sortedWith(comparator).map { it.id }
         }
     }
 

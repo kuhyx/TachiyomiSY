@@ -146,14 +146,14 @@ internal class ReaderProgress(
      */
     suspend fun updateHistory() {
         model.getCurrentChapter()?.let { readerChapter ->
-            if (model.incognitoMode) return@let
+            if (!model.incognitoMode) {
+                val chapterId = readerChapter.chapter.id!!
+                val endTime = Date()
+                val sessionReadDuration = chapterReadStartTime?.let { endTime.time - it } ?: 0
 
-            val chapterId = readerChapter.chapter.id!!
-            val endTime = Date()
-            val sessionReadDuration = chapterReadStartTime?.let { endTime.time - it } ?: 0
-
-            upsertHistory.await(HistoryUpdate(chapterId, endTime, sessionReadDuration))
-            chapterReadStartTime = null
+                upsertHistory.await(HistoryUpdate(chapterId, endTime, sessionReadDuration))
+                chapterReadStartTime = null
+            }
         }
     }
 

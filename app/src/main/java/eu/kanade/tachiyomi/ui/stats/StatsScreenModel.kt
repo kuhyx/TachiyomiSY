@@ -137,8 +137,11 @@ internal class StatsScreenModel(
             val trackList = tracks.mapNotNull { track ->
                 track.takeIf { it.score > 0.0 }
             }
-            if (trackList.isEmpty()) return@mapNotNull null
-            mangaId to trackList
+            if (trackList.isEmpty()) {
+                null
+            } else {
+                mangaId to trackList
+            }
         }.toMap()
     }
 

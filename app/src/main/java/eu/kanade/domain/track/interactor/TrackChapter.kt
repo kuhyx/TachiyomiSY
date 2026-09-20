@@ -33,28 +33,29 @@ internal class TrackChapter(
                     val unfollowedMdList = service is MdList && track.status == FollowStatus.UNFOLLOWED.long
                     // SY <--
                     if (service == null || !service.isLoggedIn || unfollowedMdList) {
-                        return@mapNotNull null
-                    }
-                    if (chapterNumber <= track.lastChapterRead) {
-                        return@mapNotNull null
-                    }
-
-                    async {
-                        runCatching {
-                            try {
-                                val updatedTrack = service.refresh(track.toDbTrack())
-                                    .toDomainTrack(idRequired = true)!!
-                                    .copy(lastChapterRead = chapterNumber)
-                                service.update(updatedTrack.toDbTrack(), true)
-                                insertTrack.await(updatedTrack)
-                                delayedTrackingStore.remove(track.id)
-                            } catch (expected: Exception) {
-                                // Rethrown (or wrapped) whatever the cause.
-                                delayedTrackingStore.add(track.id, chapterNumber)
-                                if (setupJobOnFailure) {
-                                    DelayedTrackingUpdateJob.setupTask(context)
+                        null
+                    } else {
+                        if (chapterNumber <= track.lastChapterRead) {
+                            null
+                        } else {
+                            async {
+                                runCatching {
+                                    try {
+                                        val updatedTrack = service.refresh(track.toDbTrack())
+                                            .toDomainTrack(idRequired = true)!!
+                                            .copy(lastChapterRead = chapterNumber)
+                                        service.update(updatedTrack.toDbTrack(), true)
+                                        insertTrack.await(updatedTrack)
+                                        delayedTrackingStore.remove(track.id)
+                                    } catch (expected: Exception) {
+                                        // Rethrown (or wrapped) whatever the cause.
+                                        delayedTrackingStore.add(track.id, chapterNumber)
+                                        if (setupJobOnFailure) {
+                                            DelayedTrackingUpdateJob.setupTask(context)
+                                        }
+                                        throw expected
+                                    }
                                 }
-                                throw expected
                             }
                         }
                     }

@@ -78,18 +78,18 @@ internal suspend fun MangaRestorer.restoreHistory(manga: Manga, backupHistory: L
                 .awaitAsList()
                 .find { it.manga_id == manga.id }
             // No chapter means the entry is skipped; otherwise it becomes a new history entry.
-            return@mapNotNull chapter?.let { item.copy(chapterId = it._id) }
+            chapter?.let { item.copy(chapterId = it._id) }
+        } else {
+            // Update history entry
+            item.copy(
+                id = dbHistory._id,
+                chapterId = dbHistory.chapter_id,
+                readAt = max(item.readAt?.time ?: 0L, dbHistory.last_read?.time ?: 0L)
+                    .takeIf { it > 0L }
+                    ?.let { Date(it) },
+                readDuration = max(item.readDuration, dbHistory.time_read) - dbHistory.time_read,
+            )
         }
-
-        // Update history entry
-        item.copy(
-            id = dbHistory._id,
-            chapterId = dbHistory.chapter_id,
-            readAt = max(item.readAt?.time ?: 0L, dbHistory.last_read?.time ?: 0L)
-                .takeIf { it > 0L }
-                ?.let { Date(it) },
-            readDuration = max(item.readDuration, dbHistory.time_read) - dbHistory.time_read,
-        )
     }
 
     if (toUpdate.isEmpty()) return

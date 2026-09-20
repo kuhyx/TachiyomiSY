@@ -120,22 +120,24 @@ internal class ExtensionsScreenModel(
 
         return { extension ->
             subqueries.any { subquery ->
-                if (extension.name.contains(subquery, ignoreCase = true)) return@any true
+                if (extension.name.contains(subquery, ignoreCase = true)) {
+                    true
+                } else {
+                    when (extension) {
+                        is Extension.Installed -> extension.sources.any { source ->
+                            source.name.contains(subquery, ignoreCase = true) ||
+                                (source as? HttpSource)?.getHomeUrl()?.contains(subquery, ignoreCase = true) == true ||
+                                source.id == subquery.toLongOrNull()
+                        }
 
-                when (extension) {
-                    is Extension.Installed -> extension.sources.any { source ->
-                        source.name.contains(subquery, ignoreCase = true) ||
-                            (source as? HttpSource)?.getHomeUrl()?.contains(subquery, ignoreCase = true) == true ||
-                            source.id == subquery.toLongOrNull()
+                        is Extension.Available -> extension.sources.any {
+                            it.name.contains(subquery, ignoreCase = true) ||
+                                it.baseUrl.contains(subquery, ignoreCase = true) ||
+                                it.id == subquery.toLongOrNull()
+                        }
+
+                        else -> false
                     }
-
-                    is Extension.Available -> extension.sources.any {
-                        it.name.contains(subquery, ignoreCase = true) ||
-                            it.baseUrl.contains(subquery, ignoreCase = true) ||
-                            it.id == subquery.toLongOrNull()
-                    }
-
-                    else -> false
                 }
             }
         }

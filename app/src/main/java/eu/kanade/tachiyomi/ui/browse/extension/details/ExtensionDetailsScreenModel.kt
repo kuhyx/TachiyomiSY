@@ -52,35 +52,37 @@ internal class ExtensionDetailsScreenModel(
                     .collectLatest { extension ->
                         if (extension == null) {
                             _events.send(ExtensionDetailsEvent.Uninstalled)
-                            return@collectLatest
-                        }
-                        mutableState.update { state ->
-                            state.copy(extension = extension)
+                        } else {
+                            mutableState.update { state ->
+                                state.copy(extension = extension)
+                            }
                         }
                     }
             }
             launch {
                 state.collectLatest { state ->
-                    if (state.extension == null) return@collectLatest
-                    getExtensionSources.subscribe(state.extension)
-                        .map {
-                            it.sortedWith(
-                                compareBy(
-                                    { !it.enabled },
-                                    { item ->
-                                        item.source.name.takeIf { item.labelAsName }
-                                            ?: LocaleHelper.getSourceDisplayName(item.source.lang, context).lowercase()
-                                    },
-                                ),
-                            )
-                        }
-                        .catch { throwable ->
-                            logcat(LogPriority.ERROR, throwable)
-                            mutableState.update { it.copy(loadedSources = listOf()) }
-                        }
-                        .collectLatest { sources ->
-                            mutableState.update { it.copy(loadedSources = sources) }
-                        }
+                    if (state.extension != null) {
+                        getExtensionSources.subscribe(state.extension)
+                            .map {
+                                it.sortedWith(
+                                    compareBy(
+                                        { !it.enabled },
+                                        { item ->
+                                            item.source.name.takeIf { item.labelAsName }
+                                                ?: LocaleHelper.getSourceDisplayName(item.source.lang, context)
+                                                    .lowercase()
+                                        },
+                                    ),
+                                )
+                            }
+                            .catch { throwable ->
+                                logcat(LogPriority.ERROR, throwable)
+                                mutableState.update { it.copy(loadedSources = listOf()) }
+                            }
+                            .collectLatest { sources ->
+                                mutableState.update { it.copy(loadedSources = sources) }
+                            }
+                    }
                 }
             }
             launch {

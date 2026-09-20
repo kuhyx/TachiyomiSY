@@ -105,37 +105,37 @@ internal class RecommendationSearchHelper(val context: Context) {
                 ).mapNotNull { source ->
                     // Apply source filters
                     if (source is TrackerRecommendationPagingSource && !SearchFlags.hasIncludeTrackers(flags)) {
-                        return@mapNotNull null
-                    }
+                        null
+                    } else {
+                        if (source.associatedSourceId != null && !SearchFlags.hasIncludeSources(flags)) {
+                            null
+                        } else {
+                            // Parallelize fetching recommendations from all sources in the current context
+                            CoroutineScope(currentCoroutineContext()).async(Dispatchers.IO) {
+                                val recSourceId = source::class.qualifiedName!!
 
-                    if (source.associatedSourceId != null && !SearchFlags.hasIncludeSources(flags)) {
-                        return@mapNotNull null
-                    }
+                                try {
+                                    val page = source.requestNextPage(1)
 
-                    // Parallelize fetching recommendations from all sources in the current context
-                    CoroutineScope(currentCoroutineContext()).async(Dispatchers.IO) {
-                        val recSourceId = source::class.qualifiedName!!
+                                    // Try to filter out mangas that are already in the library
+                                    val mangas = page.mangas
+                                        .filterLibraryItemsIfEnabled(source, libraryManga, tracks)
 
-                        try {
-                            val page = source.requestNextPage(1)
-
-                            // Try to filter out mangas that are already in the library
-                            val mangas = page.mangas
-                                .filterLibraryItemsIfEnabled(source, libraryManga, tracks)
-
-                            // Add or update the result collection for the current source
-                            resultsMap.getOrPut(recSourceId) {
-                                SearchResults(
-                                    recSourceName = source.name,
-                                    recSourceCategoryResId = source.category.resourceId,
-                                    recAssociatedSourceId = source.associatedSourceId,
-                                    results = mutableListOf(),
-                                )
-                            }.results.addAll(mangas)
-                        } catch (_: NoResultsException) {
-                        } catch (expected: Exception) {
-                            // Logged whatever the cause; the caller carries on.
-                            logger.e("Error while fetching recommendations for $recSourceId", expected)
+                                    // Add or update the result collection for the current source
+                                    resultsMap.getOrPut(recSourceId) {
+                                        SearchResults(
+                                            recSourceName = source.name,
+                                            recSourceCategoryResId = source.category.resourceId,
+                                            recAssociatedSourceId = source.associatedSourceId,
+                                            results = mutableListOf(),
+                                        )
+                                    }.results.addAll(mangas)
+                                } catch (_: NoResultsException) {
+                                } catch (expected: Exception) {
+                                    // Logged whatever the cause; the caller carries on.
+                                    logger.e("Error while fetching recommendations for $recSourceId", expected)
+                                }
+                            }
                         }
                     }
                 }

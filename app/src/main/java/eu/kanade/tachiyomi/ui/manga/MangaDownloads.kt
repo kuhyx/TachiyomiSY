@@ -202,8 +202,10 @@ internal class MangaDownloads(
         val state = model.successState ?: return
         if (state.source is MergedSource) {
             chapters.groupBy { it.mangaId }.forEach { map ->
-                val manga = state.mergedData?.manga?.get(map.key) ?: return@forEach
-                downloadManager.downloadChapters(manga, map.value)
+                val manga = state.mergedData?.manga?.get(map.key)
+                if (manga != null) {
+                    downloadManager.downloadChapters(manga, map.value)
+                }
             }
         } else {
             /* SY <-- */

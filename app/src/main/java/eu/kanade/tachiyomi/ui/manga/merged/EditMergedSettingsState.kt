@@ -103,17 +103,19 @@ internal class EditMergedSettingsState(
             ?: return
         mergedMangas = mergedMangas.map { pair ->
             val (manga, reference) = pair
-            if (reference.id != adapterReference.id) return@map pair
+            if (reference.id != adapterReference.id) {
+                pair
+            } else {
+                mergedMangaAdapter?.allBoundViewHolders?.firstOrNull {
+                    it is EditMergedMangaHolder && it.reference?.id == reference.id
+                }?.let {
+                    if (it is EditMergedMangaHolder) {
+                        it.updateChapterUpdatesIcon(!reference.getChapterUpdates)
+                    }
+                } ?: context.toast(SYMR.strings.merged_chapter_updates_error)
 
-            mergedMangaAdapter?.allBoundViewHolders?.firstOrNull {
-                it is EditMergedMangaHolder && it.reference?.id == reference.id
-            }?.let {
-                if (it is EditMergedMangaHolder) {
-                    it.updateChapterUpdatesIcon(!reference.getChapterUpdates)
-                }
-            } ?: context.toast(SYMR.strings.merged_chapter_updates_error)
-
-            manga to reference.copy(getChapterUpdates = !reference.getChapterUpdates)
+                manga to reference.copy(getChapterUpdates = !reference.getChapterUpdates)
+            }
         }
     }
 
@@ -133,17 +135,19 @@ internal class EditMergedSettingsState(
             ?: return
         mergedMangas = mergedMangas.map { pair ->
             val (manga, reference) = pair
-            if (reference.id != adapterReference.id) return@map pair
+            if (reference.id != adapterReference.id) {
+                pair
+            } else {
+                mergedMangaAdapter?.allBoundViewHolders?.firstOrNull {
+                    it is EditMergedMangaHolder && it.reference?.id == reference.id
+                }?.let {
+                    if (it is EditMergedMangaHolder) {
+                        it.updateDownloadChaptersIcon(!reference.downloadChapters)
+                    }
+                } ?: context.toast(SYMR.strings.merged_toggle_download_chapters_error)
 
-            mergedMangaAdapter?.allBoundViewHolders?.firstOrNull {
-                it is EditMergedMangaHolder && it.reference?.id == reference.id
-            }?.let {
-                if (it is EditMergedMangaHolder) {
-                    it.updateDownloadChaptersIcon(!reference.downloadChapters)
-                }
-            } ?: context.toast(SYMR.strings.merged_toggle_download_chapters_error)
-
-            manga to reference.copy(downloadChapters = !reference.downloadChapters)
+                manga to reference.copy(downloadChapters = !reference.downloadChapters)
+            }
         }
     }
 

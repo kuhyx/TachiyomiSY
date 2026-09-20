@@ -19,13 +19,13 @@ internal fun UpdatesScreenModel.updateDownloadState(download: Download) {
     updateState { state ->
         val newItems = state.items.toMutableList().also { list ->
             val modifiedIndex = list.indexOfFirst { it.update.chapterId == download.chapter.id }
-            if (modifiedIndex < 0) return@also
-
-            val item = list[modifiedIndex]
-            list[modifiedIndex] = item.copy(
-                downloadStateProvider = { download.status },
-                downloadProgressProvider = { download.progress },
-            )
+            if (!(modifiedIndex < 0)) {
+                val item = list[modifiedIndex]
+                list[modifiedIndex] = item.copy(
+                    downloadStateProvider = { download.status },
+                    downloadProgressProvider = { download.progress },
+                )
+            }
         }
         state.copy(items = newItems)
     }

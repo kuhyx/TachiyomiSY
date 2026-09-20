@@ -707,23 +707,16 @@ internal class MangaScreenModel(
                     } else {
                         before to after
                     }
-                    if (higherChapter == null) return@insertSeparators null
-
-                    if (lowerChapter == null) {
-                        floor(higherChapter.chapter.chapterNumber)
-                            .toInt()
-                            .minus(1)
-                            .coerceAtLeast(0)
-                    } else {
-                        calculateChapterGap(higherChapter.chapter, lowerChapter.chapter)
-                    }
-                        .takeIf { it > 0 }
-                        ?.let { missingCount ->
-                            ChapterList.MissingCount(
-                                id = "${lowerChapter?.id}-${higherChapter.id}",
-                                count = missingCount,
-                            )
+                    higherChapter?.let { higher ->
+                        val gap = if (lowerChapter == null) {
+                            floor(higher.chapter.chapterNumber).toInt().minus(1).coerceAtLeast(0)
+                        } else {
+                            calculateChapterGap(higher.chapter, lowerChapter.chapter)
                         }
+                        gap.takeIf { it > 0 }?.let { missingCount ->
+                            ChapterList.MissingCount(id = "${lowerChapter?.id}-${higher.id}", count = missingCount)
+                        }
+                    }
                 }
             }
 

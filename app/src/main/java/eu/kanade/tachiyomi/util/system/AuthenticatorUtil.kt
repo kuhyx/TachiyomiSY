@@ -54,32 +54,31 @@ internal object AuthenticatorUtil {
     ): Boolean = suspendCancellableCoroutine { cont ->
         if (!isAuthenticationSupported()) {
             cont.resume(true)
-            return@suspendCancellableCoroutine
+        } else {
+            startAuthentication(
+                title,
+                subtitle,
+                callback = object : AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(
+                        activity: FragmentActivity?,
+                        result: BiometricPrompt.AuthenticationResult,
+                    ) {
+                        super.onAuthenticationSucceeded(activity, result)
+                        cont.resume(true)
+                    }
+
+                    override fun onAuthenticationError(
+                        activity: FragmentActivity?,
+                        errorCode: Int,
+                        errString: CharSequence,
+                    ) {
+                        super.onAuthenticationError(activity, errorCode, errString)
+                        activity?.toast(errString.toString())
+                        cont.resume(false)
+                    }
+                },
+            )
         }
-
-        startAuthentication(
-            title,
-            subtitle,
-            callback = object : AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(
-                    activity: FragmentActivity?,
-                    result: BiometricPrompt.AuthenticationResult,
-                ) {
-                    super.onAuthenticationSucceeded(activity, result)
-                    cont.resume(true)
-                }
-
-                override fun onAuthenticationError(
-                    activity: FragmentActivity?,
-                    errorCode: Int,
-                    errString: CharSequence,
-                ) {
-                    super.onAuthenticationError(activity, errorCode, errString)
-                    activity?.toast(errString.toString())
-                    cont.resume(false)
-                }
-            },
-        )
     }
 
     /**

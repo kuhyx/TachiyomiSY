@@ -188,8 +188,9 @@ internal open class SourceFeedScreenModel(
         return produceState(initialValue = initialManga) {
             getManga.subscribe(initialManga.url, initialManga.source)
                 .collectLatest { manga ->
-                    if (manga == null) return@collectLatest
-                    value = manga
+                    if (manga != null) {
+                        value = manga
+                    }
                 }
         }
     }

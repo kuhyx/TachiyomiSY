@@ -54,10 +54,14 @@ internal fun UpdatesScreenModel.deleteChapters(updatesItem: List<UpdatesItem>) {
             .groupBy { it.update.mangaId }
             .entries
             .forEach { (mangaId, updates) ->
-                val manga = getManga.await(mangaId) ?: return@forEach
-                val source = sourceManager.get(manga.source) ?: return@forEach
-                val chapters = updates.mapNotNull { getChapter.await(it.update.chapterId) }
-                downloadManager.deleteChapters(chapters, manga, source)
+                val manga = getManga.await(mangaId)
+                if (manga != null) {
+                    val source = sourceManager.get(manga.source)
+                    if (source != null) {
+                        val chapters = updates.mapNotNull { getChapter.await(it.update.chapterId) }
+                        downloadManager.deleteChapters(chapters, manga, source)
+                    }
+                }
             }
     }
     toggleAllSelection(false)

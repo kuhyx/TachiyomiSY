@@ -57,19 +57,20 @@ internal fun LibraryScreenModel.cleanTitles() {
                         it
                     }
                 }
-        if (manga.title == editedTitle) return@fastForEach
-        val mangaInfo = CustomMangaInfo(
-            id = manga.id,
-            title = editedTitle.nullIfBlank(),
-            author = manga.author.takeUnless { it == manga.ogAuthor },
-            artist = manga.artist.takeUnless { it == manga.ogArtist },
-            thumbnailUrl = manga.thumbnailUrl.takeUnless { it == manga.ogThumbnailUrl },
-            description = manga.description.takeUnless { it == manga.ogDescription },
-            genre = manga.genre.takeUnless { it == manga.ogGenre },
-            status = manga.status.takeUnless { it == manga.ogStatus },
-        )
+        if (manga.title != editedTitle) {
+            val mangaInfo = CustomMangaInfo(
+                id = manga.id,
+                title = editedTitle.nullIfBlank(),
+                author = manga.author.takeUnless { it == manga.ogAuthor },
+                artist = manga.artist.takeUnless { it == manga.ogArtist },
+                thumbnailUrl = manga.thumbnailUrl.takeUnless { it == manga.ogThumbnailUrl },
+                description = manga.description.takeUnless { it == manga.ogDescription },
+                genre = manga.genre.takeUnless { it == manga.ogGenre },
+                status = manga.status.takeUnless { it == manga.ogStatus },
+            )
 
-        setCustomMangaInfo.set(mangaInfo)
+            setCustomMangaInfo.set(mangaInfo)
+        }
     }
     clearSelection()
 }

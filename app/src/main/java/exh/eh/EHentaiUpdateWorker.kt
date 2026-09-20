@@ -150,14 +150,14 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
             val checkedRecently = curTime - raisedMeta.lastUpdateCheck < MIN_BACKGROUND_UPDATE_FREQ &&
                 DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY.enabled
             if (raisedMeta.aged || checkedRecently) {
-                return@mapNotNull null
-            }
+                null
+            } else {
+                val chapter = getChaptersByMangaId.await(manga.id).minByOrNull {
+                    it.dateUpload
+                }
 
-            val chapter = getChaptersByMangaId.await(manga.id).minByOrNull {
-                it.dateUpload
+                UpdateEntry(manga, raisedMeta, chapter)
             }
-
-            UpdateEntry(manga, raisedMeta, chapter)
         }.toList().sortedBy { it.meta.lastUpdateCheck }
     }
 

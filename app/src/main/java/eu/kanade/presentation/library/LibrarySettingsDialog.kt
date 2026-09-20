@@ -252,29 +252,29 @@ private fun ColumnScope.SortPage(
                     screenModel.setSort(category, mode, LibrarySort.Direction.Ascending)
                 },
             )
-            return@map
+        } else {
+            SortItem(
+                label = stringResource(titleRes),
+                sortDescending = sortDescending.takeIf { sortingMode == mode },
+                onClick = {
+                    val isTogglingDirection = sortingMode == mode
+                    val direction = if (isTogglingDirection) {
+                        if (sortDescending) {
+                            LibrarySort.Direction.Ascending
+                        } else {
+                            LibrarySort.Direction.Descending
+                        }
+                    } else {
+                        if (sortDescending) {
+                            LibrarySort.Direction.Descending
+                        } else {
+                            LibrarySort.Direction.Ascending
+                        }
+                    }
+                    screenModel.setSort(category, mode, direction)
+                },
+            )
         }
-        SortItem(
-            label = stringResource(titleRes),
-            sortDescending = sortDescending.takeIf { sortingMode == mode },
-            onClick = {
-                val isTogglingDirection = sortingMode == mode
-                val direction = if (isTogglingDirection) {
-                    if (sortDescending) {
-                        LibrarySort.Direction.Ascending
-                    } else {
-                        LibrarySort.Direction.Descending
-                    }
-                } else {
-                    if (sortDescending) {
-                        LibrarySort.Direction.Descending
-                    } else {
-                        LibrarySort.Direction.Ascending
-                    }
-                }
-                screenModel.setSort(category, mode, direction)
-            },
-        )
     }
 }
 

@@ -157,8 +157,9 @@ internal class MigrationConfigScreen(private val mangaIds: Collection<Long>) : S
             val reorderableState = rememberReorderableLazyListState(lazyListState, contentPadding) { from, to ->
                 val fromIndex = selectedSources.indexOfFirst { it.id == from.key }
                 val toIndex = selectedSources.indexOfFirst { it.id == to.key }
-                if (fromIndex == -1 || toIndex == -1) return@rememberReorderableLazyListState
-                screenModel.orderSource(fromIndex, toIndex)
+                if (!(fromIndex == -1 || toIndex == -1)) {
+                    screenModel.orderSource(fromIndex, toIndex)
+                }
             }
 
             FastScrollLazyColumn(

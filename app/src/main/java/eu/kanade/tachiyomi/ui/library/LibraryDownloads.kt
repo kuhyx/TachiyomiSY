@@ -49,27 +49,26 @@ internal class LibraryDownloads(
                             downloadManager.downloadChapters(mergedManga, downloadChapters)
                         }
                     }
+            } else {
+                // SY <--
 
-                return@forEach
+                val chapters = getNextChapters.await(manga.id)
+                    .fastFilterNot { chapter ->
+                        downloadManager.getQueuedDownloadOrNull(chapter.id) != null ||
+                            downloadManager.isChapterDownloaded(
+                                chapter.name,
+                                chapter.scanlator,
+                                chapter.url,
+                                // SY -->
+                                manga.ogTitle,
+                                // SY <--
+                                manga.source,
+                            )
+                    }
+                    .let { if (amount != null) it.take(amount) else it }
+
+                downloadManager.downloadChapters(manga, chapters)
             }
-            // SY <--
-
-            val chapters = getNextChapters.await(manga.id)
-                .fastFilterNot { chapter ->
-                    downloadManager.getQueuedDownloadOrNull(chapter.id) != null ||
-                        downloadManager.isChapterDownloaded(
-                            chapter.name,
-                            chapter.scanlator,
-                            chapter.url,
-                            // SY -->
-                            manga.ogTitle,
-                            // SY <--
-                            manga.source,
-                        )
-                }
-                .let { if (amount != null) it.take(amount) else it }
-
-            downloadManager.downloadChapters(manga, chapters)
         }
     }
 
@@ -98,25 +97,24 @@ internal class LibraryDownloads(
                             downloadManager.downloadChapters(mergedManga, downloadChapters)
                         }
                     }
+            } else {
+                // SY <--
 
-                return@forEach
+                val chapters = getBookmarkedChaptersByMangaId.await(manga.id)
+                    .fastFilterNot { chapter ->
+                        downloadManager.getQueuedDownloadOrNull(chapter.id) != null ||
+                            downloadManager.isChapterDownloaded(
+                                chapter.name,
+                                chapter.scanlator,
+                                chapter.url,
+                                // SY -->
+                                manga.ogTitle,
+                                // SY <--
+                                manga.source,
+                            )
+                    }
+                downloadManager.downloadChapters(manga, chapters)
             }
-            // SY <--
-
-            val chapters = getBookmarkedChaptersByMangaId.await(manga.id)
-                .fastFilterNot { chapter ->
-                    downloadManager.getQueuedDownloadOrNull(chapter.id) != null ||
-                        downloadManager.isChapterDownloaded(
-                            chapter.name,
-                            chapter.scanlator,
-                            chapter.url,
-                            // SY -->
-                            manga.ogTitle,
-                            // SY <--
-                            manga.source,
-                        )
-                }
-            downloadManager.downloadChapters(manga, chapters)
         }
     }
 }

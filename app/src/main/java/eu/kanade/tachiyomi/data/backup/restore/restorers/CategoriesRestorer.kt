@@ -49,19 +49,19 @@ internal class CategoriesRestorer(
                             isSyncing = 1,
                             categoryId = dbCategory.id,
                         )
-                        return@map dbCategory
+                        dbCategory
+                    } else {
+                        val order = nextOrder++
+                        database.categoriesQueries.insert(
+                            backupCategory.name,
+                            order,
+                            backupCategory.flags,
+                            backupCategory.version,
+                            backupCategory.uid,
+                            backupCategory.lastModifiedAt,
+                        ).awaitAsOne()
+                            .let { id -> backupCategory.toCategory(id).copy(order = order) }
                     }
-
-                    val order = nextOrder++
-                    database.categoriesQueries.insert(
-                        backupCategory.name,
-                        order,
-                        backupCategory.flags,
-                        backupCategory.version,
-                        backupCategory.uid,
-                        backupCategory.lastModifiedAt,
-                    ).awaitAsOne()
-                        .let { id -> backupCategory.toCategory(id).copy(order = order) }
                 }
             // SY <--
 
