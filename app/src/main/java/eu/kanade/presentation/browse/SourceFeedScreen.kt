@@ -62,7 +62,9 @@ internal fun SourceFeedScreen(
     ) { paddingValues ->
         Crossfade(targetState = isLoading, label = "source_feed") { state ->
             when (state) {
-                true -> LoadingScreen()
+                true -> {
+                    LoadingScreen()
+                }
                 false -> {
                     SourceFeedList(
                         items = items,

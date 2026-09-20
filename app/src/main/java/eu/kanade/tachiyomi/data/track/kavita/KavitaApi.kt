@@ -44,7 +44,9 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
             with(json) {
                 client.newCall(request).execute().use {
                     when (it.code) {
-                        200 -> return it.parseAs<AuthenticationDto>().token
+                        200 -> {
+                            return it.parseAs<AuthenticationDto>().token
+                        }
                         401 -> {
                             logcat(LogPriority.WARN) {
                                 "Unauthorized / API key not valid: API URL: $apiUrl, empty API key: ${apiKey.isEmpty()}"

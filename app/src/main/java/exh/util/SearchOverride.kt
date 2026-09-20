@@ -37,5 +37,7 @@ internal suspend fun UrlImportableSource.urlImportFetchSearchMangaSuspend(
                 false,
             )
         }
-        else -> fail()
+        else -> {
+            fail()
+        }
     }

@@ -125,17 +125,11 @@ internal open class SourceFeedScreenModel(
         val savedSearches = getSavedSearchBySourceIdFeed.await(source.id)
             .associateBy { it.id }
 
-        return (
-            listOfNotNull(
-                if (source.supportsLatest) {
-                    SourceFeedUI.Latest(null)
-                } else {
-                    null
-                },
-                SourceFeedUI.Browse(null),
-            ) + feedSavedSearch
-                .map { SourceFeedUI.SourceSavedSearch(it, savedSearches[it.savedSearch]!!, null) }
-            )
+        val fixed = listOfNotNull(
+            if (source.supportsLatest) SourceFeedUI.Latest(null) else null,
+            SourceFeedUI.Browse(null),
+        )
+        return fixed + feedSavedSearch.map { SourceFeedUI.SourceSavedSearch(it, savedSearches[it.savedSearch]!!, null) }
     }
 
     // Initiates get manga per feed.

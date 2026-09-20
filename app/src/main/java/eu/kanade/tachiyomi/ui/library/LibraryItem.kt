@@ -29,13 +29,13 @@ internal data class LibraryItem(
             return id == constraint.substringAfter("id:").toLongOrNull()
         }
         return libraryManga.manga.title.contains(constraint, true) ||
-            (libraryManga.manga.author?.contains(constraint, true) ?: false) ||
-            (libraryManga.manga.artist?.contains(constraint, true) ?: false) ||
-            (libraryManga.manga.description?.contains(constraint, true) ?: false) ||
+            libraryManga.manga.author?.contains(constraint, true) ?: false ||
+            libraryManga.manga.artist?.contains(constraint, true) ?: false ||
+            libraryManga.manga.description?.contains(constraint, true) ?: false ||
             constraint.split(",").map { it.trim() }.all { subconstraint ->
                 checkNegatableConstraint(subconstraint) {
                     sourceName.contains(it, true) ||
-                        (libraryManga.manga.genre?.any { genre -> genre.equals(it, true) } ?: false)
+                        libraryManga.manga.genre?.any { genre -> genre.equals(it, true) } ?: false
                 }
             }
     }

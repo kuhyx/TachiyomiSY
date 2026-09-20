@@ -439,7 +439,8 @@ internal class DownloadManager(
         // Assume there's only 1 version of the chapter name formats present
         val oldDownload = oldNames.asSequence()
             .mapNotNull { mangaDir.findFile(it) }
-            .firstOrNull() ?: return
+            .firstOrNull()
+            ?: return
 
         var newName = provider.getChapterDirName(newChapter.name, newChapter.scanlator, newChapter.url)
         if (oldDownload.isFile && oldDownload.extension == "cbz") {

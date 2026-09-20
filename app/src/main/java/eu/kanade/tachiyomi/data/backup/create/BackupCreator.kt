@@ -113,7 +113,10 @@ internal class BackupCreator(
                     // Force overwrite old file
                     (it as? FileOutputStream)?.channel?.truncate(0)
                 }
-                .sink().gzip().buffer().use {
+                .sink()
+                .gzip()
+                .buffer()
+                .use {
                     it.write(byteArray)
                 }
             val fileUri = file.uri

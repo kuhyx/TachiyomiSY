@@ -667,26 +667,38 @@ internal class EHentai(
                     if (left != null && right != null) {
                         ignore {
                             when (left.removeSuffix(":").lowercase()) {
-                                "posted" -> datePosted = ZonedDateTime.parse(
-                                    right,
-                                    MetadataUtil.EX_DATE_FORMAT.withZone(ZoneOffset.UTC),
-                                ).toInstant().toEpochMilli()
+                                "posted" -> {
+                                    datePosted = ZonedDateTime.parse(
+                                        right,
+                                        MetadataUtil.EX_DATE_FORMAT.withZone(ZoneOffset.UTC),
+                                    ).toInstant().toEpochMilli()
+                                }
                                 // Example gallery with parent: https://e-hentai.org/g/1390451/7f181c2426/
                                 // Example JP gallery: https://exhentai.org/g/1375385/03519d541b/
                                 // Parent is older variation of the gallery
-                                "parent" -> parent = if (!right.equals("None", true)) {
-                                    rightElement.child(0).attr("href")
-                                } else {
-                                    null
+                                "parent" -> {
+                                    parent = if (!right.equals("None", true)) {
+                                        rightElement.child(0).attr("href")
+                                    } else {
+                                        null
+                                    }
                                 }
-                                "visible" -> visible = right.nullIfBlank()
+                                "visible" -> {
+                                    visible = right.nullIfBlank()
+                                }
                                 "language" -> {
                                     language = right.removeSuffix(TR_SUFFIX).trimOrNull()
                                     translated = right.endsWith(TR_SUFFIX, true)
                                 }
-                                "file size" -> size = MetadataUtil.parseHumanReadableByteCount(right)?.toLong()
-                                "length" -> length = right.removeSuffix("pages").trimOrNull()?.toInt()
-                                "favorited" -> favorites = right.removeSuffix("times").trimOrNull()?.toInt()
+                                "file size" -> {
+                                    size = MetadataUtil.parseHumanReadableByteCount(right)?.toLong()
+                                }
+                                "length" -> {
+                                    length = right.removeSuffix("pages").trimOrNull()?.toInt()
+                                }
+                                "favorited" -> {
+                                    favorites = right.removeSuffix("times").trimOrNull()?.toInt()
+                                }
                             }
                         }
                     }
@@ -1003,7 +1015,7 @@ internal class EHentai(
             if (entry.or) stringBuilder.append("~")
             val namespace = entry.search.first?.let { "$it:" }.orEmpty()
             if (entry.search.second.contains(" ")) {
-                stringBuilder.append(("""$namespace"${entry.search.second}$""""))
+                stringBuilder.append("""$namespace"${entry.search.second}$"""")
             } else {
                 stringBuilder.append("$namespace${entry.search.second}$")
             }
@@ -1097,7 +1109,9 @@ internal class EHentai(
                 // Is page, fetch gallery token and use that
                 getGalleryUrlFromPage(uri)
             }
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 

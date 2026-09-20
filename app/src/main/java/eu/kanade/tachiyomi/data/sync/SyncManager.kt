@@ -355,7 +355,7 @@ internal class SyncManager(
         }
 
         val minutes = elapsedTimeMillis / 60_000
-        val seconds = (elapsedTimeMillis % 60_000) / 1000
+        val seconds = elapsedTimeMillis % 60_000 / 1000
         logcat(LogPriority.DEBUG, logTag) {
             "Filtering completed in ${minutes}m ${seconds}s. Favorites found: ${favorites.size}, " +
                 "Non-favorites found: ${nonFavorites.size}"

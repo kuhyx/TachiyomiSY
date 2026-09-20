@@ -119,9 +119,11 @@ internal data object UpdatesTab : Tab {
         LaunchedEffect(Unit) {
             screenModel.events.collectLatest { event ->
                 when (event) {
-                    Event.InternalError -> screenModel.snackbarHostState.showSnackbar(
-                        context.stringResource(MR.strings.internal_error),
-                    )
+                    Event.InternalError -> {
+                        screenModel.snackbarHostState.showSnackbar(
+                            context.stringResource(MR.strings.internal_error),
+                        )
+                    }
                     is Event.LibraryUpdateTriggered -> {
                         val msg = if (event.started) {
                             MR.strings.updating_library

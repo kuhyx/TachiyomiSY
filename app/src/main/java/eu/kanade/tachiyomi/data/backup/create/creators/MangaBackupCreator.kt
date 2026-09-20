@@ -137,7 +137,7 @@ private fun Manga.toBackupManga(/* SY --> */customMangaInfo: CustomMangaInfo?/* 
         favorite = this.favorite,
         source = this.source,
         dateAdded = this.dateAdded,
-        viewer = (this.viewerFlags.toInt() and ReadingMode.MASK),
+        viewer = this.viewerFlags.toInt() and ReadingMode.MASK,
         viewerFlags = this.viewerFlags.toInt(),
         chapterFlags = this.chapterFlags.toInt(),
         updateStrategy = this.updateStrategy,

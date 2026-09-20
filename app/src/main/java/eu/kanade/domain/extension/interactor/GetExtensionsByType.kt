@@ -22,7 +22,7 @@ internal class GetExtensionsByType(
             extensionManager.availableExtensionsFlow,
         ) { enabledLanguages, allInstalled, allUntrusted, allAvailable ->
             val (updates, installed) = allInstalled
-                .filter { (showNsfwSources || !it.isNsfw) }
+                .filter { showNsfwSources || !it.isNsfw }
                 .sortedWith(
                     compareBy<Extension.Installed> {
                         !it.isObsolete /* SY --> */ && !it.isRedundant /* SY <-- */

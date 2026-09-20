@@ -195,7 +195,9 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                 )
                     .awaitSuccess()
                     .parseAs<ALSearchResult>()
-                    .data.page.media
+                    .data
+                    .page
+                    .media
                     .map { it.toALManga().toTrack() }
             }
         }
@@ -274,7 +276,9 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                 )
                     .awaitSuccess()
                     .parseAs<ALUserListMangaQueryResult>()
-                    .data.page.mediaList
+                    .data
+                    .page
+                    .mediaList
                     .map { it.toALUserManga() }
                     .firstOrNull()
                     ?.toTrack()
@@ -291,7 +295,7 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
     suspend fun getCurrentUser(): ALUserViewerData {
         return withIOContext {
             val query = """
-            |query User {
+                |query User {
                 |Viewer {
                     |id
                     |name
@@ -299,8 +303,8 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                         |scoreFormat
                     |}
                 |}
-            |}
-            |
+                |}
+                |
             """.trimMargin()
             val payload = buildJsonObject {
                 put("query", query)
@@ -314,7 +318,8 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                 )
                     .awaitSuccess()
                     .parseAs<ALCurrentUserResult>()
-                    .data.viewer
+                    .data
+                    .viewer
             }
         }
     }
@@ -322,7 +327,7 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
     suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata {
         return withIOContext {
             val query = """
-            |query (${'$'}mangaId: Int!) {
+                |query (${'$'}mangaId: Int!) {
                 |Media (id: ${'$'}mangaId) {
                     |id
                     |title {
@@ -344,8 +349,8 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                         |}
                     |}
                 |}
-            |}
-            |
+                |}
+                |
             """.trimMargin()
             val payload = buildJsonObject {
                 put("query", query)
@@ -389,7 +394,7 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
     suspend fun searchById(id: String): TrackSearch {
         return withIOContext {
             val query = """
-            |query (${'$'}mangaId: Int!) {
+                |query (${'$'}mangaId: Int!) {
                 |Media (id: ${'$'}mangaId) {
                     |id
                     |title {
@@ -409,8 +414,8 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                     |}
                     |averageScore
                 |}
-            |}
-            |
+                |}
+                |
             """.trimMargin()
             val payload = buildJsonObject {
                 put("query", query)
@@ -427,7 +432,8 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                 )
                     .awaitSuccess()
                     .parseAs<ALIdSearchResult>()
-                    .data.media
+                    .data
+                    .media
                     .toALManga()
                     .toTrack()
             }

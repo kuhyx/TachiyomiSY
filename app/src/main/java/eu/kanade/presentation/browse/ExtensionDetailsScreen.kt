@@ -242,9 +242,9 @@ private fun DetailsHeader(
                     val extDebugInfo = buildString {
                         append(
                             """
-                            Extension name: ${extension.name} (lang: ${extension.lang}; package: ${extension.pkgName})
-                            Extension version: ${extension.versionName} (lib: ${extension.libVersion}; version code: ${extension.versionCode})
-                            NSFW: ${extension.isNsfw}
+                                Extension name: ${extension.name} (lang: ${extension.lang}; package: ${extension.pkgName})
+                                Extension version: ${extension.versionName} (lib: ${extension.libVersion}; version code: ${extension.versionCode})
+                                NSFW: ${extension.isNsfw}
                             """.trimIndent(),
                         )
 
@@ -252,9 +252,9 @@ private fun DetailsHeader(
                             append("\n\n")
                             appendLine(
                                 """
-                                Update available: ${extension.hasUpdate}
-                                Orphaned: ${extension.isObsolete}
-                                Shared: ${extension.isShared}
+                                    Update available: ${extension.hasUpdate}
+                                    Orphaned: ${extension.isObsolete}
+                                    Shared: ${extension.isShared}
                                 """.trimIndent(),
                             )
                             val store = extension.store

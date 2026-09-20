@@ -42,35 +42,39 @@ internal fun MigrationItemResult(
 ) {
     Box(modifier.height(IntrinsicSize.Min)) {
         when (result) {
-            MigratingManga.SearchResult.Searching -> Box(
-                modifier = Modifier
-                    .widthIn(max = 150.dp)
-                    .fillMaxSize()
-                    .aspectRatio(MangaCover.Book.ratio),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-            MigratingManga.SearchResult.NotFound -> Column(
-                Modifier
-                    .widthIn(max = 150.dp)
-                    .fillMaxSize()
-                    .padding(top = 4.dp),
-            ) {
-                Image(
-                    painter = rememberResourceBitmapPainter(id = R.drawable.cover_error),
-                    contentDescription = null,
+            MigratingManga.SearchResult.Searching -> {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(MangaCover.Book.ratio)
-                        .clip(MaterialTheme.shapes.extraSmall),
-                    contentScale = ContentScale.Crop,
-                )
-                Text(
-                    text = stringResource(SYMR.strings.no_alternatives_found),
-                    modifier = Modifier.padding(top = 4.dp, bottom = 1.dp, start = 8.dp),
-                    style = MaterialTheme.typography.titleSmall,
-                )
+                        .widthIn(max = 150.dp)
+                        .fillMaxSize()
+                        .aspectRatio(MangaCover.Book.ratio),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            MigratingManga.SearchResult.NotFound -> {
+                Column(
+                    Modifier
+                        .widthIn(max = 150.dp)
+                        .fillMaxSize()
+                        .padding(top = 4.dp),
+                ) {
+                    Image(
+                        painter = rememberResourceBitmapPainter(id = R.drawable.cover_error),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(MangaCover.Book.ratio)
+                            .clip(MaterialTheme.shapes.extraSmall),
+                        contentScale = ContentScale.Crop,
+                    )
+                    Text(
+                        text = stringResource(SYMR.strings.no_alternatives_found),
+                        modifier = Modifier.padding(top = 4.dp, bottom = 1.dp, start = 8.dp),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                }
             }
             is MigratingManga.SearchResult.Result -> {
                 val item by produceState<Triple<Manga, MigratingManga.ChapterInfo, String>?>(

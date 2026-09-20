@@ -62,11 +62,15 @@ internal fun FeedScreen(
     getMangaState: @Composable (Manga) -> State<Manga>,
 ) {
     when {
-        state.isLoading -> LoadingScreen()
-        state.isEmpty -> EmptyScreen(
-            SYMR.strings.feed_tab_empty,
-            modifier = Modifier.padding(contentPadding),
-        )
+        state.isLoading -> {
+            LoadingScreen()
+        }
+        state.isEmpty -> {
+            EmptyScreen(
+                SYMR.strings.feed_tab_empty,
+                modifier = Modifier.padding(contentPadding),
+            )
+        }
         else -> {
             var refreshing by remember { mutableStateOf(false) }
             LaunchedEffect(refreshing) {

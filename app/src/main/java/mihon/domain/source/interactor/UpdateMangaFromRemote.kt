@@ -131,9 +131,15 @@ internal class UpdateMangaFromRemote(
 
         val coverLastModified = when {
             // Never refresh covers if the url is empty to avoid "losing" existing covers
-            remoteManga.thumbnail_url.isNullOrEmpty() -> null
-            !manualFetch && localManga.thumbnailUrl == remoteManga.thumbnail_url -> null
-            localManga.isLocal() -> Instant.now().toEpochMilli()
+            remoteManga.thumbnail_url.isNullOrEmpty() -> {
+                null
+            }
+            !manualFetch && localManga.thumbnailUrl == remoteManga.thumbnail_url -> {
+                null
+            }
+            localManga.isLocal() -> {
+                Instant.now().toEpochMilli()
+            }
             localManga.hasCustomCover(coverCache) -> {
                 coverCache.deleteFromCache(localManga, false)
                 null

@@ -40,7 +40,8 @@ internal class NamicomiHandler(currentClient: OkHttpClient, userAgent: String) {
 
         return data
             .jsonObject[quality]!!
-            .jsonArray.mapIndexed { index, element ->
+            .jsonArray
+            .mapIndexed { index, element ->
                 val fileName = element.jsonObject["filename"]!!.jsonPrimitive.content
                 val url = "$baseUrl/chapter/$chapterId/$hash/$quality/$fileName"
                 Page(index, url, url)

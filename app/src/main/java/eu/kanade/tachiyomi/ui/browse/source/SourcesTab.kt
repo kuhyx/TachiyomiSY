@@ -59,7 +59,9 @@ internal fun Screen.sourcesTab(
                         ),
                     )
                 }
-                else -> it
+                else -> {
+                    it
+                }
             }
         },
         // SY <--
@@ -117,7 +119,9 @@ internal fun Screen.sourcesTab(
                         onDismissRequest = screenModel::closeDialog,
                     )
                 }
-                null -> Unit
+                null -> {
+                    // Nothing to show.
+                }
             }
 
             val internalErrString = stringResource(MR.strings.internal_error)

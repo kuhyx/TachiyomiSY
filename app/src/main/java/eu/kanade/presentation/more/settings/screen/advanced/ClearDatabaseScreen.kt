@@ -72,7 +72,9 @@ internal class ClearDatabaseScreen : Screen() {
         val scope = rememberCoroutineScope()
 
         when (val s = state) {
-            is ClearDatabaseScreenModel.State.Loading -> LoadingScreen()
+            is ClearDatabaseScreenModel.State.Loading -> {
+                LoadingScreen()
+            }
             is ClearDatabaseScreenModel.State.Ready -> {
                 if (s.showConfirmation) {
                     var keepReadManga by remember { mutableStateOf(true) }

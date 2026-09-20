@@ -202,7 +202,9 @@ internal class HistoryScreenModel(
                 }
 
                 // Choose a category
-                else -> showChangeCategoryDialog(manga)
+                else -> {
+                    showChangeCategoryDialog(manga)
+                }
             }
 
             // Sync with tracking services if applicable

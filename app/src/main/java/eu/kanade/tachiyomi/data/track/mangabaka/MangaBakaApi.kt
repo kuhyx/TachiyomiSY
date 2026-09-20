@@ -259,7 +259,8 @@ internal class MangaBakaApi(
 
             with(json) {
                 client.newCall(POST("${OAUTH_URL}/token", body = formBody))
-                    .awaitSuccess().parseAs()
+                    .awaitSuccess()
+                    .parseAs()
             }
         }
     }

@@ -88,7 +88,8 @@ internal object MdUtil {
                 ?.fileName
                 ?.let { coverFileName ->
                     cdnCoverUrl(json.id, coverFileName)
-                }.orEmpty(),
+                }
+                .orEmpty(),
         )
     }
 

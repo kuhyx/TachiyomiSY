@@ -192,16 +192,14 @@ internal object SettingsTrackingScreen : SearchableSettings {
             ),
             Preference.PreferenceGroup(
                 title = stringResource(MR.strings.enhanced_services),
-                preferenceItems = (
-                    enhancedTrackers.first
-                        .map { service ->
-                            Preference.PreferenceItem.TrackerPreference(
-                                tracker = service,
-                                login = { (service as EnhancedTracker).loginNoop() },
-                                logout = service::logout,
-                            )
-                        } + listOf(Preference.PreferenceItem.InfoPreference(enhancedTrackerInfo))
-                    ),
+                preferenceItems = enhancedTrackers.first
+                    .map { service ->
+                        Preference.PreferenceItem.TrackerPreference(
+                            tracker = service,
+                            login = { (service as EnhancedTracker).loginNoop() },
+                            logout = service::logout,
+                        )
+                    } + listOf(Preference.PreferenceItem.InfoPreference(enhancedTrackerInfo)),
             ),
         )
     }

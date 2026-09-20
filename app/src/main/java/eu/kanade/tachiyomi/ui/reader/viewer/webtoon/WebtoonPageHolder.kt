@@ -124,16 +124,24 @@ internal class WebtoonPageHolder(
             }
             page.statusFlow.collectLatest { state ->
                 when (state) {
-                    Page.State.Queue -> setQueued()
-                    Page.State.LoadPage -> setLoading()
+                    Page.State.Queue -> {
+                        setQueued()
+                    }
+                    Page.State.LoadPage -> {
+                        setLoading()
+                    }
                     Page.State.DownloadImage -> {
                         setDownloading()
                         page.progressFlow.collectLatest { value ->
                             progressIndicator.setProgress(value)
                         }
                     }
-                    Page.State.Ready -> setImage()
-                    is Page.State.Error -> setError(state.error)
+                    Page.State.Ready -> {
+                        setImage()
+                    }
+                    is Page.State.Error -> {
+                        setError(state.error)
+                    }
                 }
             }
         }

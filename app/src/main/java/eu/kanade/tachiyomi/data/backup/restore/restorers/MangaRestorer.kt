@@ -194,7 +194,9 @@ internal class MangaRestorer(
                 val dbChapter = dbChaptersByUrl[chapter.url]
 
                 when {
-                    dbChapter == null -> chapter // New chapter
+                    dbChapter == null -> {
+                        chapter // New chapter
+                    }
                     chapter.forComparison() == dbChapter.forComparison() -> {
                         if (isSync && chapter.version != dbChapter.version) {
                             chapter.copy(id = dbChapter.id)
@@ -202,7 +204,9 @@ internal class MangaRestorer(
                             null // Same state; skip
                         }
                     }
-                    else -> updateChapterBasedOnSyncState(chapter, dbChapter)
+                    else -> {
+                        updateChapterBasedOnSyncState(chapter, dbChapter)
+                    }
                 }
             }
             .partition { it.id > 0 }

@@ -120,7 +120,8 @@ internal class ShikimoriApi(
                 )
                     .awaitSuccess()
                     .parseAs<SMSearchResult>()
-                    .data.mangas
+                    .data
+                    .mangas
                     .map { it.toTrack(trackId) }
             }
         }
@@ -160,7 +161,8 @@ internal class ShikimoriApi(
                 )
                     .awaitSuccess()
                     .parseAs<SMUserListResult>()
-                    .data.mangas
+                    .data
+                    .mangas
                     .firstOrNull()
 
                 // Shikimori has no user list query that allows query by ID, so we go via the "mangas" query & include
@@ -177,12 +179,12 @@ internal class ShikimoriApi(
     suspend fun getCurrentUser(): SMUser {
         return with(json) {
             val query = """
-            |{
+                |{
                 |currentUser {
                     |id
                     |nickname
                 |}
-            |}
+                |}
             """.trimMargin()
             val payload = buildJsonObject {
                 put("query", query)
@@ -195,7 +197,8 @@ internal class ShikimoriApi(
             )
                 .awaitSuccess()
                 .parseAs<SMUserResult>()
-                .data.currentUser
+                .data
+                .currentUser
         }
     }
 

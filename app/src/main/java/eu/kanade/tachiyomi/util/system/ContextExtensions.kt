@@ -85,7 +85,8 @@ private fun Context.defaultBrowserPackageName(): String? {
         packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
     }
     return resolveInfo
-        ?.activityInfo?.packageName
+        ?.activityInfo
+        ?.packageName
         ?.takeUnless { it in DeviceUtil.invalidDefaultBrowsers }
 }
 

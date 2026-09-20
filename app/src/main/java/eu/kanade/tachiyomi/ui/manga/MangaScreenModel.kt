@@ -821,7 +821,9 @@ internal class MangaScreenModel(
                     }
 
                     // Choose a category
-                    else -> showChangeCategoryDialog()
+                    else -> {
+                        showChangeCategoryDialog()
+                    }
                 }
 
                 // Finally match with enhanced tracking when available
@@ -1099,7 +1101,9 @@ internal class MangaScreenModel(
                     action = downloadAction,
                 )
             }
-            LibraryPreferences.ChapterSwipeAction.Disabled -> error("A disabled swipe action cannot be performed")
+            LibraryPreferences.ChapterSwipeAction.Disabled -> {
+                error("A disabled swipe action cannot be performed")
+            }
         }
     }
 
@@ -1554,7 +1558,9 @@ internal class MangaScreenModel(
                                 trackerManager.mdList.isLoggedIn && mdTrack == null -> {
                                     trackItems + createMdListTrack()
                                 }
-                                else -> trackItems
+                                else -> {
+                                    trackItems
+                                }
                             }
                         } else {
                             trackItems
@@ -1660,7 +1666,9 @@ internal class MangaScreenModel(
     fun showEditMangaInfoDialog() {
         mutableState.update { state ->
             when (state) {
-                State.Loading -> state
+                State.Loading -> {
+                    state
+                }
                 is State.Success -> {
                     state.copy(dialog = Dialog.EditMangaInfo(state.manga))
                 }
@@ -1672,7 +1680,9 @@ internal class MangaScreenModel(
         val mergedData = successState?.mergedData ?: return
         mutableState.update { state ->
             when (state) {
-                State.Loading -> state
+                State.Loading -> {
+                    state
+                }
                 is State.Success -> {
                     state.copy(dialog = Dialog.EditMergedSettings(mergedData))
                 }

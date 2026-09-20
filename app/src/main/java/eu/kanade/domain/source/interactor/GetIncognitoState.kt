@@ -28,7 +28,7 @@ internal class GetIncognitoState(
             sourcePreferences.incognitoExtensions.changes(),
             extensionManager.getExtensionPackageAsFlow(sourceId),
         ) { incognito, incognitoExtensions, extensionPackage ->
-            incognito || (extensionPackage in incognitoExtensions)
+            incognito || extensionPackage in incognitoExtensions
         }
             .distinctUntilChanged()
     }

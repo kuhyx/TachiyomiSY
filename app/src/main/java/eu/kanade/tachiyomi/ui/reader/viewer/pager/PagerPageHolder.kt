@@ -104,16 +104,24 @@ internal class PagerPageHolder(
             }
             page.statusFlow.collectLatest { state ->
                 when (state) {
-                    Page.State.Queue -> setQueued()
-                    Page.State.LoadPage -> setLoading()
+                    Page.State.Queue -> {
+                        setQueued()
+                    }
+                    Page.State.LoadPage -> {
+                        setLoading()
+                    }
                     Page.State.DownloadImage -> {
                         setDownloading()
                         page.progressFlow.collectLatest { value ->
                             progressIndicator?.setProgress(value)
                         }
                     }
-                    Page.State.Ready -> setImage()
-                    is Page.State.Error -> setError(state.error)
+                    Page.State.Ready -> {
+                        setImage()
+                    }
+                    is Page.State.Error -> {
+                        setError(state.error)
+                    }
                 }
             }
         }
@@ -368,7 +376,7 @@ internal class PagerPageHolder(
             }
         }
 
-        val sideMargin = if ((viewer.config.centerMarginType and PagerConfig.CenterMarginType.DOUBLE_PAGE_CENTER_MARGIN) >
+        val sideMargin = if (viewer.config.centerMarginType and PagerConfig.CenterMarginType.DOUBLE_PAGE_CENTER_MARGIN >
             0 &&
             viewer.config.doublePages &&
             !viewer.config.imageCropBorders

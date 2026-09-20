@@ -66,12 +66,14 @@ internal class PagePreviewScreenModel(
                                         source,
                                     )
                                 }
-                                is PagePreviewState.Success -> it.copy(
-                                    page = page,
-                                    pagePreviews = previews.pagePreviews,
-                                    hasNextPage = previews.hasNextPage,
-                                    pageCount = previews.pageCount,
-                                )
+                                is PagePreviewState.Success -> {
+                                    it.copy(
+                                        page = page,
+                                        pagePreviews = previews.pagePreviews,
+                                        hasNextPage = previews.hasNextPage,
+                                        pageCount = previews.pageCount,
+                                    )
+                                }
                             }
                         }
                         GetPagePreviews.Result.Unused -> Unit

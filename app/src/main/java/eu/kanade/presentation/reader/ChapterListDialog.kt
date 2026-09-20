@@ -65,7 +65,8 @@ internal fun ChapterListDialog(
                     downloadManager.progressFlow()
                         .filter { it.chapter.id == chapterItem.chapter.id }
                         .map { it.progress }
-                        .collectAsState(0).value
+                        .collectAsState(0)
+                        .value
                 } ?: 0
                 val downloaded = if (chapterItem.manga.isLocal()) {
                     true

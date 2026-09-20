@@ -93,7 +93,8 @@ internal abstract class MangaUpdatesPagingSource(manga: Manga) : TrackerRecommen
                 .first()
                 .jsonObject["record"]!!
                 .jsonObject["series_id"]!!
-                .jsonPrimitive.content,
+                .jsonPrimitive
+                .content,
         )
     }
 }

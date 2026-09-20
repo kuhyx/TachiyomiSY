@@ -128,10 +128,8 @@ internal open class FeedScreenModel(
                 state.copy(
                     dialog = Dialog.AddFeedSearch(
                         source,
-                        (
-                            (if (source.supportsLatest) listOf(null) else emptyList()) +
-                                getSourceSavedSearches(source.id)
-                            ),
+                        (if (source.supportsLatest) listOf(null) else emptyList()) +
+                            getSourceSavedSearches(source.id),
                     ),
                 )
             }

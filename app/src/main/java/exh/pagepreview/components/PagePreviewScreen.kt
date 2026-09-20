@@ -63,14 +63,18 @@ internal fun PagePreviewScreen(
                 title = stringResource(SYMR.strings.page_previews),
                 onOpenPageDialog = onOpenPageDialog,
                 showOpenPageDialog = state is PagePreviewState.Success &&
-                    (state.pageCount != null && state.pageCount > 1 /* TODO support unknown pageCount || state.hasNextPage*/),
+                    state.pageCount != null && state.pageCount > 1 /* TODO support unknown pageCount || state.hasNextPage*/,
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { paddingValues ->
         when (state) {
-            is PagePreviewState.Error -> EmptyScreen(state.error.message.orEmpty())
-            PagePreviewState.Loading -> LoadingScreen()
+            is PagePreviewState.Error -> {
+                EmptyScreen(state.error.message.orEmpty())
+            }
+            PagePreviewState.Loading -> {
+                LoadingScreen()
+            }
             is PagePreviewState.Success -> {
                 BoxWithConstraints(Modifier.fillMaxSize()) {
                     val itemPerRowCount = remember(maxWidth) {

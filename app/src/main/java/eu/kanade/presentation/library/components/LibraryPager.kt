@@ -48,7 +48,7 @@ internal fun LibraryPager(
         state = state,
         verticalAlignment = Alignment.Top,
     ) { page ->
-        if (page !in ((state.currentPage - 1)..(state.currentPage + 1))) {
+        if (page !in state.currentPage - 1..(state.currentPage + 1)) {
             // To make sure only one offscreen page is being composed
             return@HorizontalPager
         }

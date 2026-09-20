@@ -40,7 +40,8 @@ internal object MdConstants {
                 .appendQueryParameter("redirect_uri", redirectUri)
                 .appendQueryParameter("code_challenge", codeChallenge)
                 .appendQueryParameter("code_challenge_method", "S256")
-                .build().toString()
+                .build()
+                .toString()
         }
     }
 }

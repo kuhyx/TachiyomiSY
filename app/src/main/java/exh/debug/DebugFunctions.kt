@@ -186,23 +186,23 @@ internal object DebugFunctions {
 
         if (info != null) {
             """
-            {
+                {
                 id: ${info.id},
                 isPeriodic: ${j.extras.getBoolean("EXTRA_IS_PERIODIC")},
                 state: ${info.state.name},
                 tags: [
                     ${info.tags.joinToString(separator = ",\n                    ")}
                 ],
-            }
+                }
             """.trimIndent()
         } else {
             """
-            {
+                {
                 info: ${j.id},
                 isPeriodic: ${j.isPeriodic},
                 isPersisted: ${j.isPersisted},
                 intervalMillis: ${j.intervalMillis},
-            }
+                }
             """.trimIndent()
         }
     }

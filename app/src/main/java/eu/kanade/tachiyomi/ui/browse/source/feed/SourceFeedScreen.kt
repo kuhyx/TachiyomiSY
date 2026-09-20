@@ -141,7 +141,9 @@ internal class SourceFeedScreen(val sourceId: Long) : Screen() {
                     },
                 )
             }
-            null -> Unit
+            null -> {
+                // Nothing to show.
+            }
         }
 
         BackHandler(state.searchQuery != null) {

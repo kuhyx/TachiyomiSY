@@ -192,7 +192,7 @@ internal class MigrationConfigScreen(private val mangaIds: Collection<Long>) : S
                     ) { index, item ->
                         SourceItemContainer(
                             firstItem = index == 0,
-                            lastItem = index == (sources.size - 1),
+                            lastItem = index == sources.size - 1,
                             source = item,
                             showLanguage = showLanguage,
                             dragEnabled = selectedSourceList && sources.size > 1,

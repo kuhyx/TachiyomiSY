@@ -214,10 +214,12 @@ internal class ReaderViewModel @JvmOverloads constructor(
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
         val chaptersForReader = when {
-            (readerPreferences.skipRead.get() || readerPreferences.skipFiltered.get()) -> {
+            readerPreferences.skipRead.get() || readerPreferences.skipFiltered.get() -> {
                 val filteredChapters = chapters.filterNot {
                     when {
-                        readerPreferences.skipRead.get() && it.read -> true
+                        readerPreferences.skipRead.get() && it.read -> {
+                            true
+                        }
                         readerPreferences.skipFiltered.get() -> {
                             (manga.unreadFilterRaw == Manga.CHAPTER_SHOW_READ && !it.read) ||
                                 (manga.unreadFilterRaw == Manga.CHAPTER_SHOW_UNREAD && it.read) ||
@@ -234,7 +236,9 @@ internal class ReaderViewModel @JvmOverloads constructor(
                                 (manga.bookmarkedFilterRaw == Manga.CHAPTER_SHOW_BOOKMARKED && !it.bookmark) ||
                                 (manga.bookmarkedFilterRaw == Manga.CHAPTER_SHOW_NOT_BOOKMARKED && it.bookmark)
                         }
-                        else -> false
+                        else -> {
+                            false
+                        }
                     }
                 }
 
@@ -244,7 +248,9 @@ internal class ReaderViewModel @JvmOverloads constructor(
                     filteredChapters + listOf(selectedChapter)
                 }
             }
-            else -> chapters
+            else -> {
+                chapters
+            }
         }
 
         chaptersForReader
@@ -865,8 +871,12 @@ internal class ReaderViewModel @JvmOverloads constructor(
                 manga.defaultReaderType(manga.mangaType(sourceName = sourceManager.get(manga.source)?.name))
                     ?: default
             }
-            resolveDefault && readingMode == ReadingMode.DEFAULT -> default
-            else -> manga.readingMode.toInt()
+            resolveDefault && readingMode == ReadingMode.DEFAULT -> {
+                default
+            }
+            else -> {
+                manga.readingMode.toInt()
+            }
         }
         // SY <--
     }
@@ -1087,9 +1097,9 @@ internal class ReaderViewModel @JvmOverloads constructor(
 
     // SY -->
     fun saveImages() {
-        val (firstPage, secondPage) = (state.value.dialog as? Dialog.PageActions ?: return)
+        val (firstPage, secondPage) = state.value.dialog as? Dialog.PageActions ?: return
         val viewer = state.value.viewer as? PagerViewer ?: return
-        val isLTR = (viewer !is R2LPagerViewer) xor (viewer.config.invertDoublePages)
+        val isLTR = (viewer !is R2LPagerViewer) xor viewer.config.invertDoublePages
         val bg = viewer.config.pageCanvasColor
 
         if (firstPage.status != Page.State.Ready) return
@@ -1195,9 +1205,9 @@ internal class ReaderViewModel @JvmOverloads constructor(
 
     // SY -->
     fun shareImages(copyToClipboard: Boolean) {
-        val (firstPage, secondPage) = (state.value.dialog as? Dialog.PageActions ?: return)
+        val (firstPage, secondPage) = state.value.dialog as? Dialog.PageActions ?: return
         val viewer = state.value.viewer as? PagerViewer ?: return
-        val isLTR = (viewer !is R2LPagerViewer) xor (viewer.config.invertDoublePages)
+        val isLTR = (viewer !is R2LPagerViewer) xor viewer.config.invertDoublePages
         val bg = viewer.config.pageCanvasColor
 
         if (firstPage.status != Page.State.Ready) return

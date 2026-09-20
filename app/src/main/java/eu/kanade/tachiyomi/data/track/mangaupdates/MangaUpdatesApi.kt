@@ -225,7 +225,8 @@ internal class MangaUpdatesApi(
                 // Extract the new id from the redirected URL
                 Regex("""/series/(\w+)(/([\w-]+)?)?/?${'$'}""")
                     .find(it)
-                    ?.groups?.get(1)
+                    ?.groups
+                    ?.get(1)
                     ?.value
             }
     // SY <--

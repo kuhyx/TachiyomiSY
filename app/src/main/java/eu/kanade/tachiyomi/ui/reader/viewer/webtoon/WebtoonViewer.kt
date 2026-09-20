@@ -349,18 +349,26 @@ internal class WebtoonViewer(
                     if (!config.volumeKeysInverted) scrollUp() else scrollDown()
                 }
             }
-            KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
+            KeyEvent.KEYCODE_MENU -> {
+                if (isUp) activity.toggleMenu()
+            }
 
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_UP,
             KeyEvent.KEYCODE_PAGE_UP,
-            -> if (isUp) scrollUp()
+            -> {
+                if (isUp) scrollUp()
+            }
 
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_DPAD_DOWN,
             KeyEvent.KEYCODE_PAGE_DOWN,
-            -> if (isUp) scrollDown()
-            else -> return false
+            -> {
+                if (isUp) scrollDown()
+            }
+            else -> {
+                return false
+            }
         }
         return true
     }

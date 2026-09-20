@@ -71,11 +71,13 @@ internal fun PreferenceScreen(
                 }
 
                 // Create Preference Item
-                is Preference.PreferenceItem<*, *> -> item {
-                    PreferenceItem(
-                        item = preference,
-                        highlightKey = highlightKey,
-                    )
+                is Preference.PreferenceItem<*, *> -> {
+                    item {
+                        PreferenceItem(
+                            item = preference,
+                            highlightKey = highlightKey,
+                        )
+                    }
                 }
             }
         }

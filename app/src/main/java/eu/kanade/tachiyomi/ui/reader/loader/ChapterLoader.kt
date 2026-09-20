@@ -131,23 +131,33 @@ internal class ChapterLoader(
                 }
             }
             // SY <--
-            isDownloaded -> DownloadPageLoader(
-                chapter,
-                manga,
-                source,
-                downloadManager,
-                downloadProvider,
-            )
-            source is LocalSource -> source.getFormat(chapter.chapter).let { format ->
-                when (format) {
-                    is Format.Directory -> DirectoryPageLoader(format.file)
-                    is Format.Archive -> ArchivePageLoader(format.file.archiveReader(context))
-                    is Format.Epub -> EpubPageLoader(format.file.archiveReader(context))
+            isDownloaded -> {
+                DownloadPageLoader(
+                    chapter,
+                    manga,
+                    source,
+                    downloadManager,
+                    downloadProvider,
+                )
+            }
+            source is LocalSource -> {
+                source.getFormat(chapter.chapter).let { format ->
+                    when (format) {
+                        is Format.Directory -> DirectoryPageLoader(format.file)
+                        is Format.Archive -> ArchivePageLoader(format.file.archiveReader(context))
+                        is Format.Epub -> EpubPageLoader(format.file.archiveReader(context))
+                    }
                 }
             }
-            source is HttpSource -> HttpPageLoader(chapter, source)
-            source is StubSource -> error(context.stringResource(MR.strings.source_not_installed, source.toString()))
-            else -> error(context.stringResource(MR.strings.loader_not_implemented_error))
+            source is HttpSource -> {
+                HttpPageLoader(chapter, source)
+            }
+            source is StubSource -> {
+                error(context.stringResource(MR.strings.source_not_installed, source.toString()))
+            }
+            else -> {
+                error(context.stringResource(MR.strings.loader_not_implemented_error))
+            }
         }
     }
 }

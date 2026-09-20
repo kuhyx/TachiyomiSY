@@ -34,7 +34,7 @@ internal class MoveSortingModeSettingsMigration : Migration {
         }
         database.transaction {
             database.categoriesQueries.getCategories().awaitList(CategoryMapper::mapCategory)
-                .filter { (it.flags and 0b00111100L) == 0b00100000L }
+                .filter { it.flags and 0b00111100L == 0b00100000L }
                 .forEach {
                     database.categoriesQueries.update(
                         categoryId = it.id,

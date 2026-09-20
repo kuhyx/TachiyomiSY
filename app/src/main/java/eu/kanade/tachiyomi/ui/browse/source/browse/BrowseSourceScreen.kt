@@ -353,18 +353,22 @@ internal data class BrowseSourceScreen(
                     },
                 )
             }
-            is BrowseSourceScreenModel.Dialog.CreateSavedSearch -> SavedSearchCreateDialog(
-                onDismissRequest = onDismissRequest,
-                currentSavedSearches = dialog.currentSavedSearches,
-                saveSearch = screenModel::saveSearch,
-            )
-            is BrowseSourceScreenModel.Dialog.DeleteSavedSearch -> SavedSearchDeleteDialog(
-                onDismissRequest = onDismissRequest,
-                name = dialog.name,
-                deleteSavedSearch = {
-                    screenModel.deleteSearch(dialog.idToDelete)
-                },
-            )
+            is BrowseSourceScreenModel.Dialog.CreateSavedSearch -> {
+                SavedSearchCreateDialog(
+                    onDismissRequest = onDismissRequest,
+                    currentSavedSearches = dialog.currentSavedSearches,
+                    saveSearch = screenModel::saveSearch,
+                )
+            }
+            is BrowseSourceScreenModel.Dialog.DeleteSavedSearch -> {
+                SavedSearchDeleteDialog(
+                    onDismissRequest = onDismissRequest,
+                    name = dialog.name,
+                    deleteSavedSearch = {
+                        screenModel.deleteSearch(dialog.idToDelete)
+                    },
+                )
+            }
             else -> {}
         }
 

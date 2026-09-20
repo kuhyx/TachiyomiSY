@@ -45,7 +45,8 @@ internal class MangaDexAuthInterceptor(
 
         val response = chain.proceed(authRequest)
         val tokenIsExpired = response.headers["www-authenticate"]
-            ?.contains("The access token expired") ?: false
+            ?.contains("The access token expired")
+            ?: false
 
         // Retry the request once with a new token in case it was not already refreshed
         // by the is expired check before.

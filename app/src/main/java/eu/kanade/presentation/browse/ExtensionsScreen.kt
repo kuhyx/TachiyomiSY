@@ -94,7 +94,9 @@ internal fun ExtensionScreen(
         enabled = !state.isLoading,
     ) {
         when {
-            state.isLoading -> LoadingScreen(Modifier.padding(contentPadding))
+            state.isLoading -> {
+                LoadingScreen(Modifier.padding(contentPadding))
+            }
             state.isEmpty -> {
                 val msg = if (!searchQuery.isNullOrEmpty()) {
                     MR.strings.no_results_found
@@ -217,8 +219,12 @@ private fun ExtensionContent(
                     item = item,
                     onClickItem = {
                         when (it) {
-                            is Extension.Available -> onInstallExtension(it)
-                            is Extension.Installed -> onOpenExtension(it)
+                            is Extension.Available -> {
+                                onInstallExtension(it)
+                            }
+                            is Extension.Installed -> {
+                                onOpenExtension(it)
+                            }
                             is Extension.Untrusted -> {
                                 trustState = it
                             }
@@ -235,7 +241,9 @@ private fun ExtensionContent(
                     onClickItemCancel = onClickItemCancel,
                     onClickItemAction = {
                         when (it) {
-                            is Extension.Available -> onInstallExtension(it)
+                            is Extension.Available -> {
+                                onInstallExtension(it)
+                            }
                             is Extension.Installed -> {
                                 if (it.hasUpdate) {
                                     onUpdateExtension(it)

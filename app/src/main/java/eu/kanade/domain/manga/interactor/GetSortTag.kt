@@ -24,6 +24,7 @@ internal class GetSortTag(private val preferences: LibraryPreferences) {
                 null
             }
         }
-            .sortedBy { it.first }.map { it.second }
+            .sortedBy { it.first }
+            .map { it.second }
     }
 }

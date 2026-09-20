@@ -108,7 +108,9 @@ internal fun MoreScreen(
                 TextPreferenceWidget(
                     title = stringResource(MR.strings.label_download_queue),
                     subtitle = when (downloadQueueState) {
-                        DownloadQueueState.Stopped -> null
+                        DownloadQueueState.Stopped -> {
+                            null
+                        }
                         is DownloadQueueState.Paused -> {
                             val pending = downloadQueueState.pending
                             if (pending == 0) {

@@ -412,38 +412,44 @@ internal class ReaderActivity : BaseActivity() {
                 )
             }
             // SY -->
-            ReaderViewModel.Dialog.AutoScrollHelp -> AlertDialog(
-                onDismissRequest = onDismissRequest,
-                confirmButton = {
-                    TextButton(onClick = onDismissRequest) {
-                        Text(text = stringResource(MR.strings.action_ok))
-                    }
-                },
-                title = { Text(text = stringResource(SYMR.strings.eh_autoscroll_help)) },
-                text = { Text(text = stringResource(SYMR.strings.eh_autoscroll_help_message)) },
-            )
+            ReaderViewModel.Dialog.AutoScrollHelp -> {
+                AlertDialog(
+                    onDismissRequest = onDismissRequest,
+                    confirmButton = {
+                        TextButton(onClick = onDismissRequest) {
+                            Text(text = stringResource(MR.strings.action_ok))
+                        }
+                    },
+                    title = { Text(text = stringResource(SYMR.strings.eh_autoscroll_help)) },
+                    text = { Text(text = stringResource(SYMR.strings.eh_autoscroll_help_message)) },
+                )
+            }
 
-            ReaderViewModel.Dialog.BoostPageHelp -> AlertDialog(
-                onDismissRequest = onDismissRequest,
-                confirmButton = {
-                    TextButton(onClick = onDismissRequest) {
-                        Text(text = stringResource(MR.strings.action_ok))
-                    }
-                },
-                title = { Text(text = stringResource(SYMR.strings.eh_boost_page_help)) },
-                text = { Text(text = stringResource(SYMR.strings.eh_boost_page_help_message)) },
-            )
+            ReaderViewModel.Dialog.BoostPageHelp -> {
+                AlertDialog(
+                    onDismissRequest = onDismissRequest,
+                    confirmButton = {
+                        TextButton(onClick = onDismissRequest) {
+                            Text(text = stringResource(MR.strings.action_ok))
+                        }
+                    },
+                    title = { Text(text = stringResource(SYMR.strings.eh_boost_page_help)) },
+                    text = { Text(text = stringResource(SYMR.strings.eh_boost_page_help_message)) },
+                )
+            }
 
-            ReaderViewModel.Dialog.RetryAllHelp -> AlertDialog(
-                onDismissRequest = onDismissRequest,
-                confirmButton = {
-                    TextButton(onClick = onDismissRequest) {
-                        Text(text = stringResource(MR.strings.action_ok))
-                    }
-                },
-                title = { Text(text = stringResource(SYMR.strings.eh_retry_all_help)) },
-                text = { Text(text = stringResource(SYMR.strings.eh_retry_all_help_message)) },
-            )
+            ReaderViewModel.Dialog.RetryAllHelp -> {
+                AlertDialog(
+                    onDismissRequest = onDismissRequest,
+                    confirmButton = {
+                        TextButton(onClick = onDismissRequest) {
+                            Text(text = stringResource(MR.strings.action_ok))
+                        }
+                    },
+                    title = { Text(text = stringResource(SYMR.strings.eh_retry_all_help)) },
+                    text = { Text(text = stringResource(SYMR.strings.eh_retry_all_help_message)) },
+                )
+            }
             // SY <--
             null -> {}
         }
@@ -694,7 +700,8 @@ internal class ReaderActivity : BaseActivity() {
         readerPreferences.autoscrollInterval.changes()
             .combine(viewModel.state.map { it.autoScroll }.distinctUntilChanged()) { interval, enabled ->
                 interval.toDouble() to enabled
-            }.mapLatest { (intervalFloat, enabled) ->
+            }
+            .mapLatest { (intervalFloat, enabled) ->
                 if (enabled) {
                     repeatOnLifecycle(Lifecycle.State.STARTED) {
                         val interval = intervalFloat.seconds
@@ -702,7 +709,9 @@ internal class ReaderActivity : BaseActivity() {
                             if (!viewModel.state.value.menuVisible) {
                                 viewModel.state.value.viewer.let { v ->
                                     when (v) {
-                                        is PagerViewer -> v.moveToNext()
+                                        is PagerViewer -> {
+                                            v.moveToNext()
+                                        }
                                         is WebtoonViewer -> {
                                             if (readerPreferences.smoothAutoScroll.get()) {
                                                 v.linearScroll(interval)
@@ -779,7 +788,7 @@ internal class ReaderActivity : BaseActivity() {
         } else if (curPage.status == Page.State.Ready) {
             toast(SYMR.strings.eh_boost_page_downloaded)
         } else {
-            val loader = (viewModel.state.value.viewerChapters?.currChapter?.pageLoader as? HttpPageLoader)
+            val loader = viewModel.state.value.viewerChapters?.currChapter?.pageLoader as? HttpPageLoader
             if (loader != null) {
                 loader.boostPage(curPage)
                 toast(SYMR.strings.eh_boost_boosted)
@@ -966,7 +975,8 @@ internal class ReaderActivity : BaseActivity() {
                 currentChapter.requestedPage +
                     (
                         currentChapter.pages?.take(currentChapter.requestedPage)
-                            ?.count { it.fullPage || it.isolatedPage } ?: 0
+                            ?.count { it.fullPage || it.isolatedPage }
+                            ?: 0
                         )
                 ) % 2 != 0
         }
@@ -1368,7 +1378,9 @@ internal class ReaderActivity : BaseActivity() {
                     0.01f
                 }
 
-                else -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                else -> {
+                    WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                }
             }
             window.attributes = window.attributes.apply { screenBrightness = readerBrightness }
 

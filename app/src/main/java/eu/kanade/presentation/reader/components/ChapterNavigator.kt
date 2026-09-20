@@ -323,7 +323,7 @@ private fun ChapterNavigatorPreview() {
             enabledPrevious = true,
             currentPage = currentPage,
             totalPages = 10,
-            onPageIndexChange = { currentPage = (it + 1) },
+            onPageIndexChange = { currentPage = it + 1 },
             onPageIndexChangeFinished = {},
             // SY -->
             currentPageText = "1",

@@ -44,7 +44,9 @@ internal class MangaDexLoginHelper(
         }.exceptionOrNull()
 
         return when (error == null) {
-            true -> true
+            true -> {
+                true
+            }
             false -> {
                 logcat(LogPriority.ERROR, error) { "Error logging in" }
                 mdList.logout()

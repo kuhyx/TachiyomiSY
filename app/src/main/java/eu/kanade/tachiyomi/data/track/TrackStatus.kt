@@ -107,7 +107,9 @@ internal enum class TrackStatus(val int: Int, val res: StringResource) {
                         else -> null
                     }
                 }
-                else -> null
+                else -> {
+                    null
+                }
             }
         }
     }

@@ -337,7 +337,7 @@ internal fun SearchToolbar(
                     placeholder = {
                         Text(
                             modifier = Modifier.secondaryItemAlpha(),
-                            text = (placeholderText ?: stringResource(MR.strings.action_search_hint)),
+                            text = placeholderText ?: stringResource(MR.strings.action_search_hint),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.titleMedium.copy(

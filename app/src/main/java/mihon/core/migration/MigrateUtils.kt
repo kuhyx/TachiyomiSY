@@ -42,9 +42,11 @@ internal object MigrateUtils {
                         preferenceStore.getBoolean(newKey(key)).set(value)
                         preferenceStore.getBoolean(key).delete()
                     }
-                    is Set<*> -> (value as? Set<String>)?.let {
-                        preferenceStore.getStringSet(newKey(key)).set(value)
-                        preferenceStore.getStringSet(key).delete()
+                    is Set<*> -> {
+                        (value as? Set<String>)?.let {
+                            preferenceStore.getStringSet(newKey(key)).set(value)
+                            preferenceStore.getStringSet(key).delete()
+                        }
                     }
                 }
             }

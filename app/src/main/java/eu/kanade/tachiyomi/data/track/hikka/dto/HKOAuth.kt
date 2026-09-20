@@ -13,6 +13,6 @@ internal data class HKOAuth(
     fun isExpired(): Boolean {
         val currentTime = System.currentTimeMillis() / 1000
         val buffer = 5 * 60 // safety margin
-        return currentTime >= (expiration - buffer)
+        return currentTime >= expiration - buffer
     }
 }

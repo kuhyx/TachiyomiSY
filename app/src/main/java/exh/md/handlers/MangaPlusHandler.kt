@@ -25,7 +25,8 @@ internal class MangaPlusHandler(currentClient: OkHttpClient) {
         .add("Origin", WEB_URL)
         .add("Referer", WEB_URL)
         .add("User-Agent", USER_AGENT)
-        .add("SESSION-TOKEN", UUID.randomUUID().toString()).build()
+        .add("SESSION-TOKEN", UUID.randomUUID().toString())
+        .build()
 
     val client: OkHttpClient = currentClient.newBuilder()
         .addInterceptor(::imageIntercept)

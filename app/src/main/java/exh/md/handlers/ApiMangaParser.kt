@@ -91,7 +91,8 @@ internal class ApiMangaParser(
                 title = MdUtil.getTitleFromManga(mangaAttributesDto, lang, preferExtensionLangTitle)
                 altTitles = mangaAttributesDto.altTitles
                     .filter { it.containsKey(lang) || it.containsKey("${mangaAttributesDto.originalLanguage}-ro") }
-                    .mapNotNull { it.values.singleOrNull() }.nullIfEmpty()
+                    .mapNotNull { it.values.singleOrNull() }
+                    .nullIfEmpty()
 
                 val mangaRelationshipsDto = mangaDto.data.relationships
                 cover = if (!coverFileName.isNullOrEmpty()) {

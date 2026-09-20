@@ -58,8 +58,12 @@ internal class HBrowse(delegate: HttpSource, val context: Context) :
             tags.clear()
             ((tables[""] ?: error("")) + (tables["categories"] ?: error(""))).forEach { (k, v) ->
                 when (val lowercaseNs = k.lowercase()) {
-                    "title" -> title = v.text()
-                    "length" -> length = v.text().substringBefore(" ").toInt()
+                    "title" -> {
+                        title = v.text()
+                    }
+                    "length" -> {
+                        length = v.text().substringBefore(" ").toInt()
+                    }
                     else -> {
                         v.getElementsByTag("a").forEach {
                             tags += RaisedTag(

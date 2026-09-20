@@ -52,8 +52,12 @@ internal class PackageInstallerInstaller(private val service: Service) : Install
                 PackageInstaller.STATUS_FAILURE_ABORTED -> {
                     continueQueue(InstallStep.Idle)
                 }
-                PackageInstaller.STATUS_SUCCESS -> continueQueue(InstallStep.Installed)
-                else -> continueQueue(InstallStep.Error)
+                PackageInstaller.STATUS_SUCCESS -> {
+                    continueQueue(InstallStep.Installed)
+                }
+                else -> {
+                    continueQueue(InstallStep.Error)
+                }
             }
         }
     }

@@ -61,7 +61,8 @@ internal class EHConfigurator(val context: Context) {
                 .url(HATH_PERKS_URL)
                 .build(),
         )
-            .awaitSuccess().asJsoup()
+            .awaitSuccess()
+            .asJsoup()
 
         val hathPerks = EHHathPerksResponse()
 

@@ -59,7 +59,9 @@ internal fun extensionsTab(
                 searchQuery = state.searchQuery,
                 onLongClickItem = { extension ->
                     when (extension) {
-                        is Extension.Available -> extensionsScreenModel.installExtension(extension)
+                        is Extension.Available -> {
+                            extensionsScreenModel.installExtension(extension)
+                        }
                         else -> {
                             if (context.isPackageInstalled(extension.pkgName)) {
                                 extensionsScreenModel.uninstallExtension(extension)

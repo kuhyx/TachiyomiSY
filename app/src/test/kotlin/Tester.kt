@@ -36,8 +36,11 @@ internal class Tester {
     @Test
     fun stripBackup() {
         val bytes = File("D:\\Downloads\\pacthiyomi_2023-05-08_13-30.proto (1).gz")
-            .inputStream().source().buffer()
-            .gzip().buffer()
+            .inputStream()
+            .source()
+            .buffer()
+            .gzip()
+            .buffer()
             .readByteArray()
         val backup = ProtoBuf.decodeFromByteArray(Backup.serializer(), bytes)
         val newBytes = ProtoBuf.encodeToByteArray(

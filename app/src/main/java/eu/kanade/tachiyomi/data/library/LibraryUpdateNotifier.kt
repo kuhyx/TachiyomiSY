@@ -116,7 +116,8 @@ internal class LibraryUpdateNotifier(
         val maxUpdatesFromSource = mangaToUpdate
             .groupBy { it.manga.source }
             .filterKeys { sourceManager.get(it) !is UnmeteredSource }
-            .maxOfOrNull { it.value.size } ?: 0
+            .maxOfOrNull { it.value.size }
+            ?: 0
 
         if (maxUpdatesFromSource <= MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD) {
             return

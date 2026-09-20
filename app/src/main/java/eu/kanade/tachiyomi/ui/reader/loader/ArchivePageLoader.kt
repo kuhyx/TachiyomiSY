@@ -82,7 +82,9 @@ internal class ArchivePageLoader(private val reader: ArchiveReader) : PageLoader
                             }
                         }
 
-                        else -> null
+                        else -> {
+                            null
+                        }
                     }
                 val imageBytes by lazy { runBlocking { imageBytesDeferred?.await() } }
                 // SY <--

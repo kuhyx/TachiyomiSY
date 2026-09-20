@@ -100,7 +100,7 @@ internal abstract class BaseSmartSearchEngine<T>(
         var depth = 0
 
         return buildString {
-            for (char in (if (readForward) text else text.reversed())) {
+            for (char in if (readForward) text else text.reversed()) {
                 when (char) {
                     in openingChars -> depth++
                     in closingChars -> if (depth > 0) depth-- // Avoid depth going negative on mismatched closing

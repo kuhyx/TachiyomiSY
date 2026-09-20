@@ -605,10 +605,7 @@ internal object SettingsAdvancedScreen : SearchableSettings {
                                     }?.first
                                 if (manga == null) {
                                     // download is orphaned delete it
-                                    foldersCleared += 1 + (
-                                        mangaFolder.listFiles()
-                                            .orEmpty().size
-                                        )
+                                    foldersCleared += 1 + mangaFolder.listFiles().orEmpty().size
                                     mangaFolder.delete()
                                 } else {
                                     val chapterList = Injekt.get<GetChaptersByMangaId>().await(manga.id)

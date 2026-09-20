@@ -105,7 +105,9 @@ internal class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<
                 val view = LinearLayout(readerThemedContext)
                 WebtoonTransitionHolder(view, viewer)
             }
-            else -> error("Unknown view type")
+            else -> {
+                error("Unknown view type")
+            }
         }
     }
 

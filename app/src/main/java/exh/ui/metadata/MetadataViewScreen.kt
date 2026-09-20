@@ -50,16 +50,19 @@ internal class MetadataViewScreen(private val mangaId: Long, private val sourceI
                 )
             },
         ) { paddingValues ->
-            when (
-                @Suppress("NAME_SHADOWING")
-                val state = state
-            ) {
-                MetadataViewState.Loading -> LoadingScreen()
-                MetadataViewState.MetadataNotFound -> EmptyScreen(MR.strings.no_results_found)
-                MetadataViewState.SourceNotFound -> EmptyScreen(MR.strings.source_empty_screen)
+            when (val viewState = state) {
+                MetadataViewState.Loading -> {
+                    LoadingScreen()
+                }
+                MetadataViewState.MetadataNotFound -> {
+                    EmptyScreen(MR.strings.no_results_found)
+                }
+                MetadataViewState.SourceNotFound -> {
+                    EmptyScreen(MR.strings.source_empty_screen)
+                }
                 is MetadataViewState.Success -> {
                     val context = LocalContext.current
-                    val items = remember(state.meta) { state.meta.getExtraInfoPairs(context) }
+                    val items = remember(viewState.meta) { viewState.meta.getExtraInfoPairs(context) }
                     ScrollbarLazyColumn(
                         contentPadding =
                         paddingValues + WindowInsets.navigationBars.asPaddingValues() + topSmallPaddingValues,

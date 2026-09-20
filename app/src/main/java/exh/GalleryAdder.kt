@@ -90,7 +90,8 @@ internal class GalleryAdder(
                             } catch (e: Exception) {
                                 false
                             }
-                    } ?: return GalleryAddEvent.Fail.UnknownSource(url, context)
+                    }
+                    ?: return GalleryAddEvent.Fail.UnknownSource(url, context)
             }
 
             val realChapterUrl = try {

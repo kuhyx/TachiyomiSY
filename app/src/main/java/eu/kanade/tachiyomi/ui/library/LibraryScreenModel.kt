@@ -524,12 +524,14 @@ internal class LibraryScreenModel(
                     manga1.libraryManga.manga.lastUpdate.compareTo(manga2.libraryManga.manga.lastUpdate)
                 }
 
-                LibrarySort.Type.UnreadCount -> when {
-                    // Ensure unread content comes first
-                    manga1.libraryManga.unreadCount == manga2.libraryManga.unreadCount -> 0
-                    manga1.libraryManga.unreadCount == 0L -> if (sort.isAscending) 1 else -1
-                    manga2.libraryManga.unreadCount == 0L -> if (sort.isAscending) -1 else 1
-                    else -> manga1.libraryManga.unreadCount.compareTo(manga2.libraryManga.unreadCount)
+                LibrarySort.Type.UnreadCount -> {
+                    when {
+                        // Ensure unread content comes first
+                        manga1.libraryManga.unreadCount == manga2.libraryManga.unreadCount -> 0
+                        manga1.libraryManga.unreadCount == 0L -> if (sort.isAscending) 1 else -1
+                        manga2.libraryManga.unreadCount == 0L -> if (sort.isAscending) -1 else 1
+                        else -> manga1.libraryManga.unreadCount.compareTo(manga2.libraryManga.unreadCount)
+                    }
                 }
 
                 LibrarySort.Type.TotalChapters -> {
@@ -615,7 +617,7 @@ internal class LibraryScreenModel(
                 unreadBadge = it[1] as Boolean,
                 localBadge = it[2] as Boolean,
                 languageBadge = it[3] as Boolean,
-                skipOutsideReleasePeriod = LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in (it[4] as Set<*>),
+                skipOutsideReleasePeriod = LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in it[4] as Set<*>,
                 globalFilterDownloaded = it[5] as Boolean,
                 filterDownloaded = it[6] as TriState,
                 filterUnread = it[7] as TriState,
@@ -846,7 +848,9 @@ internal class LibraryScreenModel(
         }.fastForEach { manga ->
             val editedTitle =
                 manga.title.replace("\\[.*?]".toRegex(), "").trim().replace("\\(.*?\\)".toRegex(), "").trim()
-                    .replace("\\{.*?\\}".toRegex(), "").trim().let {
+                    .replace("\\{.*?\\}".toRegex(), "")
+                    .trim()
+                    .let {
                         if (it.contains("|")) {
                             it.replace(".*\\|".toRegex(), "").trim()
                         } else {
@@ -1088,19 +1092,19 @@ internal class LibraryScreenModel(
                     is Text -> {
                         val query = queryComponent.asQuery()
                         manga.title.contains(query, true) ||
-                            (manga.author?.contains(query, true) == true) ||
-                            (manga.artist?.contains(query, true) == true) ||
-                            (manga.description?.contains(query, true) == true) ||
-                            (source?.name?.contains(query, true) == true) ||
+                            manga.author?.contains(query, true) == true ||
+                            manga.artist?.contains(query, true) == true ||
+                            manga.description?.contains(query, true) == true ||
+                            source?.name?.contains(query, true) == true ||
                             (sourceIdString != null && sourceIdString == query) ||
                             (
                                 loggedInTrackServices.isNotEmpty() &&
                                     tracks != null &&
                                     filterTracks(query, tracks, context)
                                 ) ||
-                            (genre.fastAny { it.contains(query, true) }) ||
-                            (searchTags?.fastAny { it.name.contains(query, true) } == true) ||
-                            (searchTitles?.fastAny { it.title.contains(query, true) } == true)
+                            genre.fastAny { it.contains(query, true) } ||
+                            searchTags?.fastAny { it.name.contains(query, true) } == true ||
+                            searchTitles?.fastAny { it.title.contains(query, true) } == true
                     }
 
                     is Namespace -> {
@@ -1115,7 +1119,9 @@ internal class LibraryScreenModel(
                             }
                     }
 
-                    else -> true
+                    else -> {
+                        true
+                    }
                 }
 
                 true -> when (queryComponent) {
@@ -1123,20 +1129,20 @@ internal class LibraryScreenModel(
                         val query = queryComponent.asQuery()
                         query.isBlank() ||
                             (
-                                (!manga.title.contains(query, true)) &&
-                                    (manga.author?.contains(query, true) != true) &&
-                                    (manga.artist?.contains(query, true) != true) &&
-                                    (manga.description?.contains(query, true) != true) &&
-                                    (source?.name?.contains(query, true) != true) &&
-                                    (sourceIdString != null && sourceIdString != query) &&
+                                !manga.title.contains(query, true) &&
+                                    manga.author?.contains(query, true) != true &&
+                                    manga.artist?.contains(query, true) != true &&
+                                    manga.description?.contains(query, true) != true &&
+                                    source?.name?.contains(query, true) != true &&
+                                    sourceIdString != null && sourceIdString != query &&
                                     (
                                         loggedInTrackServices.isEmpty() ||
                                             tracks == null ||
                                             !filterTracks(query, tracks, context)
                                         ) &&
-                                    (!genre.fastAny { it.contains(query, true) }) &&
-                                    (searchTags?.fastAny { it.name.contains(query, true) } != true) &&
-                                    (searchTitles?.fastAny { it.title.contains(query, true) } != true)
+                                    !genre.fastAny { it.contains(query, true) } &&
+                                    searchTags?.fastAny { it.name.contains(query, true) } != true &&
+                                    searchTitles?.fastAny { it.title.contains(query, true) } != true
                                 )
                     }
 
@@ -1159,7 +1165,9 @@ internal class LibraryScreenModel(
                             }
                     }
 
-                    else -> true
+                    else -> {
+                        true
+                    }
                 }
             }
         }
@@ -1403,7 +1411,9 @@ internal class LibraryScreenModel(
                 }
             }
 
-            else -> emptyMap()
+            else -> {
+                emptyMap()
+            }
         }.toSortedMap(compareBy { it.order })
             .mapValues { (_, libraryItem) -> libraryItem.fastMap { it.id } }
     }

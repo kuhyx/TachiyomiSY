@@ -63,7 +63,7 @@ private fun StorageInfo(
                 .clip(MaterialTheme.shapes.small)
                 .fillMaxWidth()
                 .height(12.dp),
-            progress = { (1 - (available / total.toFloat())) },
+            progress = { 1 - (available / total.toFloat()) },
         )
 
         Text(

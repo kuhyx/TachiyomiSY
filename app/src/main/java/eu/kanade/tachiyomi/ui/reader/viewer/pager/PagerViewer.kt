@@ -189,9 +189,12 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
                         page.number > (currentPage as ReaderPage).number
                     }
                 }
-                currentPage is ChapterTransition.Prev && page is ReaderPage ->
+                currentPage is ChapterTransition.Prev && page is ReaderPage -> {
                     false
-                else -> true
+                }
+                else -> {
+                    true
+                }
             }
             currentPage = page
             when (page) {
@@ -415,12 +418,24 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
                     if (ctrlPressed) moveToPrevious() else moveLeft()
                 }
             }
-            KeyEvent.KEYCODE_DPAD_DOWN -> if (isUp) moveDown()
-            KeyEvent.KEYCODE_DPAD_UP -> if (isUp) moveUp()
-            KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) moveDown()
-            KeyEvent.KEYCODE_PAGE_UP -> if (isUp) moveUp()
-            KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
-            else -> return false
+            KeyEvent.KEYCODE_DPAD_DOWN -> {
+                if (isUp) moveDown()
+            }
+            KeyEvent.KEYCODE_DPAD_UP -> {
+                if (isUp) moveUp()
+            }
+            KeyEvent.KEYCODE_PAGE_DOWN -> {
+                if (isUp) moveDown()
+            }
+            KeyEvent.KEYCODE_PAGE_UP -> {
+                if (isUp) moveUp()
+            }
+            KeyEvent.KEYCODE_MENU -> {
+                if (isUp) activity.toggleMenu()
+            }
+            else -> {
+                return false
+            }
         }
         return true
     }

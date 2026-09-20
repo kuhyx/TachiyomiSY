@@ -34,7 +34,8 @@ internal class MangaHotHandler(currentClient: OkHttpClient, userAgent: String) {
     fun pageListParse(response: Response): List<Page> {
         return Json.parseToJsonElement(response.body.string())
             .jsonObject["content"]!!.jsonObject["contentUrls"]!!
-            .jsonArray.mapIndexed { index, element ->
+            .jsonArray
+            .mapIndexed { index, element ->
                 val url = element.jsonPrimitive.content
                 Page(index, url, url)
             }

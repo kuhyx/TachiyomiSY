@@ -116,7 +116,7 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
 
         var useSecondPage = false
         if (shifted != viewer.config.shiftDoublePage || (doubledUp != viewer.config.doublePages && doubledUp)) {
-            if (shifted && (doubledUp == viewer.config.doublePages)) {
+            if (shifted && doubledUp == viewer.config.doublePages) {
                 useSecondPage = true
             }
             shifted = viewer.config.shiftDoublePage
@@ -345,7 +345,9 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
                 }
                 joinedItems.indexOfFirst { it.first == page || it.second == page }
             }
-            else -> joinedItems.indexOfFirst { it.first == newPage || it.second == newPage }
+            else -> {
+                joinedItems.indexOfFirst { it.first == newPage || it.second == newPage }
+            }
         }
 
         viewer.pager.setCurrentItem(index, false)
@@ -357,7 +359,7 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
         val oldFirstPage = oldCurrent?.first as? ReaderPage
         val oldPage = oldSecondPage ?: oldFirstPage
 
-        setJoinedItems(oldSecondPage == current || (current.index + 1) < (oldPage?.index ?: 0))
+        setJoinedItems(oldSecondPage == current || current.index + 1 < (oldPage?.index ?: 0))
 
         // The listener may be removed when we split a page, so the ui may not have updated properly
         // This case usually happens when we load a new chapter and the first 2 pages need to split og

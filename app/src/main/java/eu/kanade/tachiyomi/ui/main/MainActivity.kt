@@ -465,16 +465,26 @@ internal class MainActivity : BaseActivity() {
         }
 
         val tabToOpen = when (intent.action) {
-            Constants.SHORTCUT_LIBRARY -> HomeScreen.Tab.Library()
+            Constants.SHORTCUT_LIBRARY -> {
+                HomeScreen.Tab.Library()
+            }
             Constants.SHORTCUT_MANGA -> {
                 val idToOpen = intent.extras?.getLong(Constants.MANGA_EXTRA) ?: return false
                 navigator.popUntilRoot()
                 HomeScreen.Tab.Library(idToOpen)
             }
-            Constants.SHORTCUT_UPDATES -> HomeScreen.Tab.Updates
-            Constants.SHORTCUT_HISTORY -> HomeScreen.Tab.History
-            Constants.SHORTCUT_SOURCES -> HomeScreen.Tab.Browse(false)
-            Constants.SHORTCUT_EXTENSIONS -> HomeScreen.Tab.Browse(true)
+            Constants.SHORTCUT_UPDATES -> {
+                HomeScreen.Tab.Updates
+            }
+            Constants.SHORTCUT_HISTORY -> {
+                HomeScreen.Tab.History
+            }
+            Constants.SHORTCUT_SOURCES -> {
+                HomeScreen.Tab.Browse(false)
+            }
+            Constants.SHORTCUT_EXTENSIONS -> {
+                HomeScreen.Tab.Browse(true)
+            }
             Constants.SHORTCUT_DOWNLOADS -> {
                 navigator.popUntilRoot()
                 HomeScreen.Tab.More(toDownloads = true)
@@ -520,7 +530,9 @@ internal class MainActivity : BaseActivity() {
                 }
                 null
             }
-            else -> return false
+            else -> {
+                return false
+            }
         }
 
         if (tabToOpen != null) {

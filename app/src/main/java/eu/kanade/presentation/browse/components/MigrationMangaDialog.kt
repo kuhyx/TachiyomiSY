@@ -44,7 +44,7 @@ internal fun MigrationMangaDialog(
                     if (copy) SYMR.plurals.copy_entry else SYMR.plurals.migrate_entry,
                     count = mangaSet,
                     mangaSet,
-                    (if (mangaSkipped > 0) " " + stringResource(SYMR.strings.skipping_, mangaSkipped) else ""),
+                    if (mangaSkipped > 0) " " + stringResource(SYMR.strings.skipping_, mangaSkipped) else "",
                 ),
             )
         },

@@ -64,7 +64,9 @@ internal class SimilarHandler(
                 MangaDexSearchMetadata().also {
                     it.relation = relatedListDto.data
                         .firstOrNull { it.relationships.any { it.id == MdUtil.getMangaId(manga.url) } }
-                        ?.attributes?.relation?.let(MangaDexRelation::fromDex)
+                        ?.attributes
+                        ?.relation
+                        ?.let(MangaDexRelation::fromDex)
                 }
             },
         )

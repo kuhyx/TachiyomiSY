@@ -27,7 +27,7 @@ internal class SearchEngine {
             namespace != null -> {
                 var query =
                     """
-                    (SELECT ${"manga_id"} AS $COL_MANGA_ID FROM ${"search_tags"}
+                        (SELECT ${"manga_id"} AS $COL_MANGA_ID FROM ${"search_tags"}
                         WHERE ${"namespace"} IS NOT NULL
                         AND ${"namespace"} LIKE ?
                     """.trimIndent()
@@ -43,20 +43,22 @@ internal class SearchEngine {
                 // Match title + tags
                 val tagQuery =
                     """
-                    SELECT ${"manga_id"} AS $COL_MANGA_ID FROM ${"search_tags"}
+                        SELECT ${"manga_id"} AS $COL_MANGA_ID FROM ${"search_tags"}
                         WHERE ${componentTagQuery!!.first}
                     """.trimIndent() to componentTagQuery.second
 
                 val titleQuery =
                     """
-                    SELECT ${"manga_id"} AS $COL_MANGA_ID FROM ${"search_titles"}
+                        SELECT ${"manga_id"} AS $COL_MANGA_ID FROM ${"search_titles"}
                         WHERE ${"title"} LIKE ?
                     """.trimIndent() to listOf(component.asLenientTitleQuery())
 
                 "(${tagQuery.first} UNION ${titleQuery.first})".trimIndent() to
-                    (tagQuery.second + titleQuery.second)
+                    tagQuery.second + titleQuery.second
             }
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 
@@ -96,23 +98,22 @@ internal class SearchEngine {
         val completeParams = mutableListOf<String>()
         var baseQuery =
             """
-            SELECT ${"manga_id"}
-            FROM ${"search_metadata"} meta
+                SELECT ${"manga_id"}
+                FROM ${"search_metadata"} meta
             """.trimIndent()
 
         include.forEachIndexed { index, pair ->
-            baseQuery += "\n" + (
+            baseQuery += "\n" +
                 """
-                INNER JOIN ${pair.first} i$index
-                ON i$index.$COL_MANGA_ID = meta.${"manga_id"}
+                    INNER JOIN ${pair.first} i$index
+                    ON i$index.$COL_MANGA_ID = meta.${"manga_id"}
                 """.trimIndent()
-                )
             completeParams += pair.second
         }
 
         exclude.forEach {
             wheres += """
-            (meta.${"manga_id"} NOT IN ${it.first})
+                (meta.${"manga_id"} NOT IN ${it.first})
             """.trimIndent()
             whereParams += it.second
         }

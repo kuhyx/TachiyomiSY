@@ -622,7 +622,8 @@ private fun descriptionAnnotator(loadImages: Boolean, linkStyle: SpanStyle) = re
                 val textNode = inlineLink?.findChildOfType(MarkdownElementTypes.LINK_TITLE)
                     ?: inlineLink?.findChildOfType(MarkdownElementTypes.LINK_TEXT)
                 val altText = textNode?.findChildOfType(MarkdownTokenTypes.TEXT)
-                    ?.getUnescapedTextInNode(content).orEmpty()
+                    ?.getUnescapedTextInNode(content)
+                    .orEmpty()
 
                 withLink(LinkAnnotation.Url(url = url)) {
                     pushStyle(linkStyle)

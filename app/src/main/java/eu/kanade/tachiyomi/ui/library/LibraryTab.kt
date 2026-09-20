@@ -281,15 +281,17 @@ internal data object LibraryTab : Tab {
 
         val onDismissRequest = screenModel::closeDialog
         when (val dialog = state.dialog) {
-            is LibraryScreenModel.Dialog.SettingsSheet -> run {
-                LibrarySettingsDialog(
-                    onDismissRequest = onDismissRequest,
-                    screenModel = settingsScreenModel,
-                    category = state.activeCategory,
-                    // SY -->
-                    hasCategories = state.libraryData.categories.fastAny { !it.isSystemCategory },
-                    // SY <--
-                )
+            is LibraryScreenModel.Dialog.SettingsSheet -> {
+                run {
+                    LibrarySettingsDialog(
+                        onDismissRequest = onDismissRequest,
+                        screenModel = settingsScreenModel,
+                        category = state.activeCategory,
+                        // SY -->
+                        hasCategories = state.libraryData.categories.fastAny { !it.isSystemCategory },
+                        // SY <--
+                    )
+                }
             }
 
             is LibraryScreenModel.Dialog.ChangeCategory -> {

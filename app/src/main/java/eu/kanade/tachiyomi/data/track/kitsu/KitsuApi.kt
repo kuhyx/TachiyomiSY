@@ -248,7 +248,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
     suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata {
         return withIOContext {
             val query = """
-            |query(${'$'}libraryId: ID!, ${'$'}staffCount: Int) {
+                |query(${'$'}libraryId: ID!, ${'$'}staffCount: Int) {
                 |findLibraryEntryById(id: ${'$'}libraryId) {
                     |media {
                         |id
@@ -271,7 +271,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
                         |}
                     |}
                 |}
-            |}
+                |}
             """.trimMargin()
             val payload = buildJsonObject {
                 put("query", query)

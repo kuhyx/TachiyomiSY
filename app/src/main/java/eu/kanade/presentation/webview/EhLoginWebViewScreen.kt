@@ -73,11 +73,13 @@ internal fun EhLoginWebViewScreen(
                     navigationIcon = Icons.Outlined.Close,
                 )
                 when (val loadingState = state.loadingState) {
-                    is LoadingState.Initializing -> LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter),
-                    )
+                    is LoadingState.Initializing -> {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter),
+                        )
+                    }
                     is LoadingState.Loading -> {
                         val animatedProgress by animateFloatAsState(
                             loadingState.progress,

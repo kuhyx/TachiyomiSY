@@ -83,7 +83,8 @@ internal class EightMuses(delegate: HttpSource, val context: Context) :
 
             thumbnailUrl = parseSelf(input).let { it.albums + it.images }.firstOrNull()
                 ?.selectFirst(".lazyload")
-                ?.attr("data-src")?.let {
+                ?.attr("data-src")
+                ?.let {
                     baseUrl + it
                 }
 

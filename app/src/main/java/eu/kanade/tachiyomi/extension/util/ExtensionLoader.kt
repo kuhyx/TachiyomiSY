@@ -60,7 +60,7 @@ internal object ExtensionLoader {
     private val PACKAGE_FLAGS = PackageManager.GET_CONFIGURATIONS or
         PackageManager.GET_META_DATA or
         PackageManager.GET_SIGNATURES or
-        (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) PackageManager.GET_SIGNING_CERTIFICATES else 0)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) PackageManager.GET_SIGNING_CERTIFICATES else 0
 
     private const val PRIVATE_EXTENSION_EXTENSION = "ext"
 
@@ -68,7 +68,8 @@ internal object ExtensionLoader {
 
     fun installPrivateExtensionFile(context: Context, file: File): Boolean {
         val extension = context.packageManager.getPackageArchiveInfo(file.absolutePath, PACKAGE_FLAGS)
-            ?.takeIf { isPackageAnExtension(it) } ?: return false
+            ?.takeIf { isPackageAnExtension(it) }
+            ?: return false
         val currentExtension = getExtensionPackageInfoFromPkgName(context, extension.packageName)
 
         if (currentExtension != null) {

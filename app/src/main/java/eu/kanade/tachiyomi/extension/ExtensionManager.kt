@@ -396,7 +396,7 @@ internal class ExtensionManager(
             ?: availableExtensionMapFlow.value[pkgName]
             ?: return false
 
-        return (availableExt.versionCode > versionCode || availableExt.libVersion > libVersion)
+        return availableExt.versionCode > versionCode || availableExt.libVersion > libVersion
     }
 
     private fun updatePendingUpdatesCount() {

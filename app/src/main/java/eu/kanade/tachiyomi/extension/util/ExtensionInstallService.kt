@@ -46,8 +46,12 @@ internal class ExtensionInstallService : Service() {
 
         if (installer == null) {
             installer = when (installerUsed) {
-                BasePreferences.ExtensionInstaller.PACKAGEINSTALLER -> PackageInstallerInstaller(this)
-                BasePreferences.ExtensionInstaller.SHIZUKU -> ShizukuInstaller(this)
+                BasePreferences.ExtensionInstaller.PACKAGEINSTALLER -> {
+                    PackageInstallerInstaller(this)
+                }
+                BasePreferences.ExtensionInstaller.SHIZUKU -> {
+                    ShizukuInstaller(this)
+                }
                 else -> {
                     logcat(LogPriority.ERROR) { "Not implemented for installer $installerUsed" }
                     stopSelf()

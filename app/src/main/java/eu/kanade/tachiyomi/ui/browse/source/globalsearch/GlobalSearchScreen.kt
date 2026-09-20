@@ -47,7 +47,9 @@ internal class GlobalSearchScreen(
 
             LaunchedEffect(state.items) {
                 when (val result = state.items.values.singleOrNull()) {
-                    SearchItemResult.Loading -> return@LaunchedEffect
+                    SearchItemResult.Loading -> {
+                        return@LaunchedEffect
+                    }
                     is SearchItemResult.Success -> {
                         val manga = result.result.singleOrNull()
                         if (manga != null) {
@@ -57,7 +59,9 @@ internal class GlobalSearchScreen(
                             showSingleLoadingScreen = false
                         }
                     }
-                    else -> showSingleLoadingScreen = false
+                    else -> {
+                        showSingleLoadingScreen = false
+                    }
                 }
             }
         } else {

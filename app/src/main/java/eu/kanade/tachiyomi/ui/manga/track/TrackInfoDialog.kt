@@ -293,7 +293,8 @@ internal data class TrackInfoDialogHomeScreen(
                 val getFlatMetadataById = Injekt.get<GetFlatMetadataById>()
 
                 val metadataSource = sourceManager.get(sourceId)
-                    ?.getMainSource<MetadataSource<*, *>>() ?: return null
+                    ?.getMainSource<MetadataSource<*, *>>()
+                    ?: return null
 
                 return getFlatMetadataById.await(mangaId)?.run {
                     raise(metadataSource.metaClass) as? TrackerIdMetadata

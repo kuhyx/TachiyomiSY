@@ -173,9 +173,15 @@ internal object HomeScreen : Screen() {
                 launch {
                     openTabEvent.receiveAsFlow().collectLatest {
                         tabNavigator.current = when (it) {
-                            is Tab.Library -> LibraryTab
-                            Tab.Updates -> UpdatesTab
-                            Tab.History -> HistoryTab
+                            is Tab.Library -> {
+                                LibraryTab
+                            }
+                            Tab.Updates -> {
+                                UpdatesTab
+                            }
+                            Tab.History -> {
+                                HistoryTab
+                            }
                             is Tab.Browse -> {
                                 if (it.toExtensions) {
                                     BrowseTab.showExtension()
@@ -183,7 +189,9 @@ internal object HomeScreen : Screen() {
                                 BrowseTab
                             }
 
-                            is Tab.More -> MoreTab
+                            is Tab.More -> {
+                                MoreTab
+                            }
                         }
 
                         if (it is Tab.Library && it.mangaIdToOpen != null) {

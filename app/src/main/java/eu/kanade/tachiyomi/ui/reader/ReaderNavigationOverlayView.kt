@@ -73,7 +73,7 @@ internal class ReaderNavigationOverlayView(context: Context, attributeSet: Attri
 
             // Don't want scale anymore because it messes with drawText
             // Translate origin to rect start (left, top)
-            canvas.withTranslation(x = (width * rect.left), y = (height * rect.top)) {
+            canvas.withTranslation(x = width * rect.left, y = height * rect.top) {
                 // Calculate center of rect width on screen
                 val x = width * (abs(rect.left - rect.right) / 2)
 

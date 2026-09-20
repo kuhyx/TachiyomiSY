@@ -54,11 +54,15 @@ internal fun SourcesScreen(
     onLongClickItem: (Source) -> Unit,
 ) {
     when {
-        state.isLoading -> LoadingScreen(Modifier.padding(contentPadding))
-        state.isEmpty -> EmptyScreen(
-            MR.strings.source_empty_screen,
-            modifier = Modifier.padding(contentPadding),
-        )
+        state.isLoading -> {
+            LoadingScreen(Modifier.padding(contentPadding))
+        }
+        state.isEmpty -> {
+            EmptyScreen(
+                MR.strings.source_empty_screen,
+                modifier = Modifier.padding(contentPadding),
+            )
+        }
         else -> {
             ScrollbarLazyColumn(
                 contentPadding = contentPadding + topSmallPaddingValues,
@@ -88,17 +92,19 @@ internal fun SourcesScreen(
                                 // SY <--
                             )
                         }
-                        is SourceUiModel.Item -> SourceItem(
-                            modifier = Modifier.animateItem(),
-                            source = model.source,
-                            // SY -->
-                            showLatest = state.showLatest,
-                            showPin = state.showPin,
-                            // SY <--
-                            onClickItem = onClickItem,
-                            onLongClickItem = onLongClickItem,
-                            onClickPin = onClickPin,
-                        )
+                        is SourceUiModel.Item -> {
+                            SourceItem(
+                                modifier = Modifier.animateItem(),
+                                source = model.source,
+                                // SY -->
+                                showLatest = state.showLatest,
+                                showPin = state.showPin,
+                                // SY <--
+                                onClickItem = onClickItem,
+                                onLongClickItem = onLongClickItem,
+                                onClickPin = onClickPin,
+                            )
+                        }
                     }
                 }
             }

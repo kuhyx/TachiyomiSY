@@ -29,7 +29,8 @@ internal class BackupFileValidator(
         val sources = backup.backupSources.associate { it.sourceId to it.name }
         val missingSources = sources
             .filter { sourceManager.get(it.key) == null }
-            .values.map {
+            .values
+            .map {
                 val id = it.toLongOrNull()
                 if (id == null) {
                     it

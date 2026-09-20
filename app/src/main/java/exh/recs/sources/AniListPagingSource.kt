@@ -102,7 +102,7 @@ internal class AniListPagingSource(manga: Manga) : TrackerRecommendationPagingSo
     override suspend fun getRecsById(id: String): List<SManga> {
         val query =
             """
-            |query Recommendations(${'$'}id: Int!) {
+                |query Recommendations(${'$'}id: Int!) {
                 |Page {
                     |media(id: ${'$'}id, type: MANGA) {
                         |recommendations {
@@ -126,8 +126,8 @@ internal class AniListPagingSource(manga: Manga) : TrackerRecommendationPagingSo
                         |}
                     |}
                 |}
-            |}
-            |
+                |}
+                |
             """.trimMargin()
         val variables = buildJsonObject {
             put("id", id)
@@ -142,7 +142,7 @@ internal class AniListPagingSource(manga: Manga) : TrackerRecommendationPagingSo
     override suspend fun getRecsBySearch(search: String): List<SManga> {
         val query =
             """
-            |query Recommendations(${'$'}search: String!) {
+                |query Recommendations(${'$'}search: String!) {
                 |Page {
                     |media(search: ${'$'}search, type: MANGA) {
                         |title {
@@ -172,8 +172,8 @@ internal class AniListPagingSource(manga: Manga) : TrackerRecommendationPagingSo
                         |}
                     |}
                 |}
-            |}
-            |
+                |}
+                |
             """.trimMargin()
         val variables = buildJsonObject {
             put("search", search)

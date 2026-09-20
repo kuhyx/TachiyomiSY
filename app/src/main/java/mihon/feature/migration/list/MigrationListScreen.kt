@@ -95,7 +95,9 @@ internal class MigrationListScreen(private val mangaIds: Collection<Long>, priva
                     exitMigration = navigator::pop,
                 )
             }
-            null -> Unit
+            null -> {
+                // Nothing to show.
+            }
         }
 
         BackHandler(true) {

@@ -19,7 +19,7 @@ internal data class MALOAuth(
     val createdAt: Long = System.currentTimeMillis() / 1000,
 ) {
     // Assumes expired a minute earlier
-    private val adjustedExpiresIn: Long = (expiresIn - 60)
+    private val adjustedExpiresIn: Long = expiresIn - 60
 
     fun isExpired() = createdAt + adjustedExpiresIn < System.currentTimeMillis() / 1000
 }

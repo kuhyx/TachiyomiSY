@@ -66,7 +66,9 @@ internal fun RecommendationSearchProgressDialog(
                     negativeButton = setStatusCancelling,
                 )
             }
-            else -> null
+            else -> {
+                null
+            }
         }
     }
     val dialog = properties

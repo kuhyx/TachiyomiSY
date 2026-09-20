@@ -211,7 +211,9 @@ internal abstract class SyncService(
                         remote
                     }
                 }
-                else -> null // No manga found for key
+                else -> {
+                    null // No manga found for key
+                }
             }
         }
 
@@ -546,7 +548,9 @@ internal abstract class SyncService(
                             mergeIndividualPreferences(localSourcePreference.prefs, remoteSourcePreference.prefs)
                         BackupSourcePreferences(sourceKey, mergedPrefs)
                     }
-                    else -> null
+                    else -> {
+                        null
+                    }
                 }
             }
 

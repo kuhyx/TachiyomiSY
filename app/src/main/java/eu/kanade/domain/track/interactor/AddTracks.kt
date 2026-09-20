@@ -45,7 +45,8 @@ internal class AddTracks(
                     .sortedBy { it.chapterNumber }
                     .takeWhile { it.read }
                     .lastOrNull()
-                    ?.chapterNumber ?: -1.0
+                    ?.chapterNumber
+                    ?: -1.0
 
                 if (latestLocalReadChapterNumber > track.lastChapterRead) {
                     track = track.copy(

@@ -282,19 +282,21 @@ internal class MangaScreen(
                     onDismissRequest = onDismissRequest,
                 )
             }
-            MangaScreenModel.Dialog.SettingsSheet -> ChapterSettingsDialog(
-                onDismissRequest = onDismissRequest,
-                manga = successState.manga,
-                onDownloadFilterChanged = screenModel::setDownloadedFilter,
-                onUnreadFilterChanged = screenModel::setUnreadFilter,
-                onBookmarkedFilterChanged = screenModel::setBookmarkedFilter,
-                onSortModeChanged = screenModel::setSorting,
-                onDisplayModeChanged = screenModel::setDisplayMode,
-                onSetAsDefault = screenModel::setCurrentSettingsAsDefault,
-                onResetToDefault = screenModel::resetToDefaultSettings,
-                scanlatorFilterActive = successState.scanlatorFilterActive,
-                onScanlatorFilterClicked = { showScanlatorsDialog = true },
-            )
+            MangaScreenModel.Dialog.SettingsSheet -> {
+                ChapterSettingsDialog(
+                    onDismissRequest = onDismissRequest,
+                    manga = successState.manga,
+                    onDownloadFilterChanged = screenModel::setDownloadedFilter,
+                    onUnreadFilterChanged = screenModel::setUnreadFilter,
+                    onBookmarkedFilterChanged = screenModel::setBookmarkedFilter,
+                    onSortModeChanged = screenModel::setSorting,
+                    onDisplayModeChanged = screenModel::setDisplayMode,
+                    onSetAsDefault = screenModel::setCurrentSettingsAsDefault,
+                    onResetToDefault = screenModel::resetToDefaultSettings,
+                    scanlatorFilterActive = successState.scanlatorFilterActive,
+                    onScanlatorFilterClicked = { showScanlatorsDialog = true },
+                )
+            }
             MangaScreenModel.Dialog.TrackSheet -> {
                 NavigatorAdaptiveSheet(
                     screen = TrackInfoDialogHomeScreen(

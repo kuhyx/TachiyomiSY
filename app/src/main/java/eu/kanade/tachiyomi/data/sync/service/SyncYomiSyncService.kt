@@ -145,7 +145,8 @@ internal class SyncYomiSyncService(
 
         if (response.isSuccessful) {
             val newETag = response.headers["ETag"]
-                .takeIf { it?.isNotEmpty() == true } ?: throw SyncYomiException("Missing ETag")
+                .takeIf { it?.isNotEmpty() == true }
+                ?: throw SyncYomiException("Missing ETag")
 
             val byteArray = response.body.byteStream().use {
                 return@use it.readBytes()
@@ -208,7 +209,8 @@ internal class SyncYomiSyncService(
 
         if (response.isSuccessful) {
             val newETag = response.headers["ETag"]
-                .takeIf { it?.isNotEmpty() == true } ?: throw SyncYomiException("Missing ETag")
+                .takeIf { it?.isNotEmpty() == true }
+                ?: throw SyncYomiException("Missing ETag")
             syncPreferences.lastSyncEtag.set(newETag)
             logcat(LogPriority.DEBUG) { "SyncYomi sync completed" }
             return true

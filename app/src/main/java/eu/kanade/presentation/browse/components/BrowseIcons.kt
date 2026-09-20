@@ -112,12 +112,14 @@ internal fun ExtensionIcon(
                 )
             }
         }
-        is Extension.Untrusted -> Image(
-            imageVector = Icons.Filled.Dangerous,
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
-            modifier = modifier.then(defaultModifier),
-        )
+        is Extension.Untrusted -> {
+            Image(
+                imageVector = Icons.Filled.Dangerous,
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
+                modifier = modifier.then(defaultModifier),
+            )
+        }
     }
 }
 

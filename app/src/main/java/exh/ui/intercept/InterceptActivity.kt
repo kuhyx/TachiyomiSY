@@ -97,14 +97,18 @@ internal class InterceptActivity : BaseActivity() {
                         )
                         CircularProgressIndicator(modifier = Modifier.size(56.dp))
                     }
-                    is InterceptResult.Success -> Text(
-                        text = stringResource(SYMR.strings.launching_app),
-                        style = MaterialTheme.typography.titleLarge,
-                    )
-                    is InterceptResult.Failure -> Text(
-                        text = stringResource(SYMR.strings.error_with_reason, status.reason),
-                        style = MaterialTheme.typography.titleLarge,
-                    )
+                    is InterceptResult.Success -> {
+                        Text(
+                            text = stringResource(SYMR.strings.launching_app),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    }
+                    is InterceptResult.Failure -> {
+                        Text(
+                            text = stringResource(SYMR.strings.error_with_reason, status.reason),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    }
                 }
             }
         }
@@ -148,7 +152,9 @@ internal class InterceptActivity : BaseActivity() {
                             .setOnDismissListener { finish() }
                             .show()
                     }
-                    else -> Unit
+                    else -> {
+                        // Nothing to show.
+                    }
                 }
             }
             .launchIn(lifecycleScope)

@@ -127,7 +127,9 @@ internal class PageHandler(
             page.imageUrl?.contains("namicomi", true) == true -> {
                 mangaHotHandler.client.newCachelessCallWithProgress(GET(page.imageUrl!!, mangaHotHandler.headers), page, existingSize)
             }
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 
@@ -136,7 +138,9 @@ internal class PageHandler(
             page.url.contains("/bfs/comic/") -> {
                 bilibiliHandler.getImageUrl(page)
             }
-            else -> superMethod(page)
+            else -> {
+                superMethod(page)
+            }
         }
     }
 }

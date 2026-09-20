@@ -18,4 +18,4 @@ internal data class SMOAuth(
 )
 
 // Access token lives 1 day
-internal fun SMOAuth.isExpired() = (System.currentTimeMillis() / 1000) > (createdAt + expiresIn - 3600)
+internal fun SMOAuth.isExpired() = System.currentTimeMillis() / 1000 > createdAt + expiresIn - 3600
