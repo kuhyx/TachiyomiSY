@@ -19,6 +19,8 @@ import uy.kohesive.injekt.injectLazy
 import java.io.IOException
 import java.util.UUID
 
+private const val REFERER = "Referer"
+
 private const val HEX_RADIX = 16
 
 internal class MangaPlusHandler(currentClient: OkHttpClient) {
@@ -26,7 +28,7 @@ internal class MangaPlusHandler(currentClient: OkHttpClient) {
 
     val headers = Headers.Builder()
         .add("Origin", WEB_URL)
-        .add("Referer", WEB_URL)
+        .add(REFERER, WEB_URL)
         .add("User-Agent", USER_AGENT)
         .add("SESSION-TOKEN", UUID.randomUUID().toString())
         .build()
@@ -44,7 +46,7 @@ internal class MangaPlusHandler(currentClient: OkHttpClient) {
 
     private fun pageListRequest(chapterId: String, dataSaver: Boolean): Request {
         val newHeaders = headers.newBuilder()
-            .set("Referer", "$WEB_URL/viewer/$chapterId")
+            .set(REFERER, "$WEB_URL/viewer/$chapterId")
             .build()
 
         val url = "$API_URL/manga_viewer".toHttpUrl().newBuilder()
@@ -71,7 +73,7 @@ internal class MangaPlusHandler(currentClient: OkHttpClient) {
             throw IOException("error getting images")
         }
 
-        val referer = response.request.header("Referer")!!
+        val referer = response.request.header(REFERER)!!
 
         return result.success.mangaViewer!!.pages
             .mapNotNull(MangaPlusPage::mangaPage)

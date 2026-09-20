@@ -35,6 +35,8 @@ import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.io.IOException
 
+private const val IMAGE = "image/*"
+
 /**
  * A [Fetcher] that fetches cover image for [Manga] object.
  *
@@ -87,7 +89,7 @@ internal class MangaCoverFetcher(
                 fileSystem = FileSystem.SYSTEM,
                 diskCacheKey = diskCacheKey,
             ),
-            mimeType = "image/*",
+            mimeType = IMAGE,
             dataSource = DataSource.DISK,
         )
     }
@@ -99,7 +101,7 @@ internal class MangaCoverFetcher(
             .buffer()
         return SourceFetchResult(
             source = ImageSource(source = source, fileSystem = FileSystem.SYSTEM),
-            mimeType = "image/*",
+            mimeType = IMAGE,
             dataSource = DataSource.DISK,
         )
     }
@@ -128,7 +130,7 @@ internal class MangaCoverFetcher(
                 // Read from snapshot
                 return SourceFetchResult(
                     source = snapshot.toImageSource(),
-                    mimeType = "image/*",
+                    mimeType = IMAGE,
                     dataSource = DataSource.DISK,
                 )
             }
@@ -148,7 +150,7 @@ internal class MangaCoverFetcher(
                 if (snapshot != null) {
                     return SourceFetchResult(
                         source = snapshot.toImageSource(),
-                        mimeType = "image/*",
+                        mimeType = IMAGE,
                         dataSource = DataSource.NETWORK,
                     )
                 }
@@ -156,7 +158,7 @@ internal class MangaCoverFetcher(
                 // Read from response if cache is unused or unusable
                 return SourceFetchResult(
                     source = ImageSource(source = responseBody.source(), fileSystem = FileSystem.SYSTEM),
-                    mimeType = "image/*",
+                    mimeType = IMAGE,
                     dataSource = if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK,
                 )
             } catch (expected: Exception) {

@@ -7,6 +7,9 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import java.util.Locale
 
+private const val ZH_CN = "zh-CN"
+private const val ZH_TW = "zh-TW"
+
 /**
  * Utility class to change the application's language in runtime.
  */
@@ -45,8 +48,8 @@ internal object LocaleHelper {
 
     fun getDisplayName(lang: String): String {
         val normalizedLang = when (lang) {
-            "zh-CN" -> "zh-Hans"
-            "zh-TW" -> "zh-Hant"
+            ZH_CN -> "zh-Hans"
+            ZH_TW -> "zh-Hant"
             else -> lang
         }
 
@@ -57,8 +60,8 @@ internal object LocaleHelper {
         return when (lang) {
             null -> ""
             "es-419" -> "es-la"
-            "zh-CN" -> "zh-hans"
-            "zh-TW" -> "zh-hant"
+            ZH_CN -> "zh-hans"
+            ZH_TW -> "zh-hant"
             else -> lang
         }
             .let { if (uppercase) it.uppercase(Locale.ENGLISH) else it }
@@ -76,8 +79,8 @@ internal object LocaleHelper {
 
         val locale = when (lang) {
             "" -> LocaleListCompat.getAdjustedDefault()[0]
-            "zh-CN" -> Locale.forLanguageTag("zh-Hans")
-            "zh-TW" -> Locale.forLanguageTag("zh-Hant")
+            ZH_CN -> Locale.forLanguageTag("zh-Hans")
+            ZH_TW -> Locale.forLanguageTag("zh-Hant")
             else -> Locale.forLanguageTag(lang)
         }
         return locale!!.getDisplayName(locale).replaceFirstChar { it.uppercase(locale) }

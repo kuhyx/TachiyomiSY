@@ -18,6 +18,8 @@ import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
+private const val SET_COOKIE = "Set-Cookie"
+
 // e-hentai keeps three settings profiles per account.
 private const val MAX_PROFILES = 3
 
@@ -139,13 +141,13 @@ internal class EHConfigurator(val context: Context) {
         // Persist slot + sk
         source.spPref().set(slot)
 
-        val keyCookie = response.headers.toMultimap()["Set-Cookie"]?.find {
+        val keyCookie = response.headers.toMultimap()[SET_COOKIE]?.find {
             it.startsWith("sk=")
         }?.removePrefix("sk=")?.substringBefore(';')
-        val sessionCookie = response.headers.toMultimap()["Set-Cookie"]?.find {
+        val sessionCookie = response.headers.toMultimap()[SET_COOKIE]?.find {
             it.startsWith("s=")
         }?.removePrefix("s=")?.substringBefore(';')
-        val hathPerksCookie = response.headers.toMultimap()["Set-Cookie"]?.find {
+        val hathPerksCookie = response.headers.toMultimap()[SET_COOKIE]?.find {
             it.startsWith("hath_perks=")
         }?.removePrefix("hath_perks=")?.substringBefore(';')
 

@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.sync.SyncDataJob
 import eu.kanade.tachiyomi.source.AndroidSourceManager
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.all.NHentai
 import eu.kanade.tachiyomi.util.system.workManager
 import exh.eh.EHentaiUpdateWorker
@@ -150,7 +151,7 @@ internal object DebugFunctions {
     fun clearSavedSearches() = runBlocking { database.saved_searchQueries.deleteAll() }
 
     fun listAllSources() = sourceManager.getAll().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.uppercase()})"
+        describe(it)
     }
 
     fun listAllSourcesClassName() = sourceManager.getAll().joinToString("\n") {
@@ -158,14 +159,14 @@ internal object DebugFunctions {
     }
 
     fun listVisibleSources() = sourceManager.getVisibleSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.uppercase()})"
+        describe(it)
     }
 
     fun listAllHttpSources() = sourceManager.getOnlineSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.uppercase()})"
+        describe(it)
     }
     fun listVisibleHttpSources() = sourceManager.getVisibleOnlineSources().joinToString("\n") {
-        "${it.id}: ${it.name} (${it.lang.uppercase()})"
+        describe(it)
     }
 
     fun convertEhentaiToExhentai() = convertSources(EH_SOURCE_ID, EXH_SOURCE_ID)
@@ -320,3 +321,5 @@ internal object DebugFunctions {
         LibraryUpdateJob.stop(context)
     }
 }
+
+private fun describe(source: Source) = "${source.id}: ${source.name} (${source.lang.uppercase()})"

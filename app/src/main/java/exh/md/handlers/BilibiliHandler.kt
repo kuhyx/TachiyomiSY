@@ -23,12 +23,16 @@ import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import kotlin.time.Duration.Companion.seconds
 
+private const val CONTENT_LENGTH = "Content-Length"
+private const val CONTENT_TYPE = "Content-Type"
+private const val REFERER = "Referer"
+
 internal class BilibiliHandler(currentClient: OkHttpClient) {
     val baseUrl = "https://www.bilibilicomics.com"
     val headers = Headers.Builder()
         .add("Accept", ACCEPT_JSON)
         .add("Origin", baseUrl)
-        .add("Referer", "$baseUrl/")
+        .add(REFERER, "$baseUrl/")
         .build()
 
     val client: OkHttpClient = currentClient.newBuilder()
@@ -81,9 +85,9 @@ internal class BilibiliHandler(currentClient: OkHttpClient) {
         val requestBody = jsonPayload.toString().toRequestBody(JSON_MEDIA_TYPE)
 
         val newHeaders = headers.newBuilder()
-            .add("Content-Length", requestBody.contentLength().toString())
-            .add("Content-Type", requestBody.contentType().toString())
-            .set("Referer", baseUrl + mangaUrl)
+            .add(CONTENT_LENGTH, requestBody.contentLength().toString())
+            .add(CONTENT_TYPE, requestBody.contentType().toString())
+            .set(REFERER, baseUrl + mangaUrl)
             .build()
 
         return POST(
@@ -129,9 +133,9 @@ internal class BilibiliHandler(currentClient: OkHttpClient) {
 
         val newHeaders = headers
             .newBuilder()
-            .add("Content-Length", requestBody.contentLength().toString())
-            .add("Content-Type", requestBody.contentType().toString())
-            .set("Referer", baseUrl + chapterUrl)
+            .add(CONTENT_LENGTH, requestBody.contentLength().toString())
+            .add(CONTENT_TYPE, requestBody.contentType().toString())
+            .set(REFERER, baseUrl + chapterUrl)
             .build()
 
         return POST(
@@ -164,8 +168,8 @@ internal class BilibiliHandler(currentClient: OkHttpClient) {
         val requestBody = jsonPayload.toString().toRequestBody(JSON_MEDIA_TYPE)
 
         val newHeaders = headers.newBuilder()
-            .add("Content-Length", requestBody.contentLength().toString())
-            .add("Content-Type", requestBody.contentType().toString())
+            .add(CONTENT_LENGTH, requestBody.contentLength().toString())
+            .add(CONTENT_TYPE, requestBody.contentType().toString())
             .build()
 
         return POST(

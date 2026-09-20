@@ -25,6 +25,8 @@ import tachiyomi.core.common.util.lang.runAsObservable
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+private const val DATA_DEFINE = "data-define"
+
 internal class Tsumino(delegate: HttpSource, val context: Context) :
     DelegatedHttpSource(delegate),
     MetadataSource<TsuminoSearchMetadata, Document>,
@@ -76,7 +78,7 @@ internal class Tsumino(delegate: HttpSource, val context: Context) :
                 title = it.trim()
             }
 
-            input.getElementById("Artist")?.children()?.first()?.attr("data-define")?.trim()?.let { artistString ->
+            input.getElementById("Artist")?.children()?.first()?.attr(DATA_DEFINE)?.trim()?.let { artistString ->
                 artistString.split("|").trimAll().dropBlank().forEach {
                     tags.add(RaisedTag("artist", it, TAG_TYPE_DEFAULT))
                 }
@@ -106,29 +108,29 @@ internal class Tsumino(delegate: HttpSource, val context: Context) :
                 }
             }
 
-            input.getElementById("Category")?.children()?.first()?.attr("data-define")?.let {
+            input.getElementById("Category")?.children()?.first()?.attr(DATA_DEFINE)?.let {
                 category = it.trim()
                 tags.add(RaisedTag("genre", it, TAG_TYPE_VIRTUAL))
             }
 
-            input.getElementById("Collection")?.children()?.first()?.attr("data-define")?.let {
+            input.getElementById("Collection")?.children()?.first()?.attr(DATA_DEFINE)?.let {
                 collection = it.trim()
                 tags.add(RaisedTag("collection", it, TAG_TYPE_DEFAULT))
             }
 
-            input.getElementById("Group")?.children()?.first()?.attr("data-define")?.let {
+            input.getElementById("Group")?.children()?.first()?.attr(DATA_DEFINE)?.let {
                 group = it.trim()
                 tags.add(RaisedTag("group", it, TAG_TYPE_DEFAULT))
             }
 
             parody = input.getElementById("Parody")?.children()?.map {
-                val entry = it.attr("data-define").trim()
+                val entry = it.attr(DATA_DEFINE).trim()
                 tags.add(RaisedTag("parody", entry, TAG_TYPE_DEFAULT))
                 entry
             }.orEmpty()
 
             character = input.getElementById("Character")?.children()?.map {
-                val entry = it.attr("data-define").trim()
+                val entry = it.attr(DATA_DEFINE).trim()
                 tags.add(RaisedTag("character", entry, TAG_TYPE_DEFAULT))
                 entry
             }.orEmpty()
@@ -136,7 +138,7 @@ internal class Tsumino(delegate: HttpSource, val context: Context) :
             input.getElementById("Tag")?.children()?.let { tagElements ->
                 tags.addAll(
                     tagElements.map {
-                        RaisedTag("tags", it.attr("data-define").trim(), TAG_TYPE_DEFAULT)
+                        RaisedTag("tags", it.attr(DATA_DEFINE).trim(), TAG_TYPE_DEFAULT)
                     },
                 )
             }

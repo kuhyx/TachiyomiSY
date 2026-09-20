@@ -9,16 +9,19 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.library.service.LibraryPreferences
 
+private const val LIBRARY_SORTING_ASCENDING = "library_sorting_ascending"
+private const val ALPHABETICAL = "ALPHABETICAL"
+
 private const val VERSION = 20f
 
 // The integer sorting-mode preference indexed these names; 5 was unused and falls back to alphabetical.
 private val LEGACY_SORTING_MODES = listOf(
-    "ALPHABETICAL",
+    ALPHABETICAL,
     "LAST_READ",
     "LAST_MANGA_UPDATE",
     "UNREAD_COUNT",
     "TOTAL_CHAPTERS",
-    "ALPHABETICAL",
+    ALPHABETICAL,
     "LATEST_CHAPTER",
     "DRAG_AND_DROP",
     "DATE_ADDED",
@@ -41,9 +44,9 @@ internal class MoveLibrarySortingSettingsMigration : Migration {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         try {
             val oldSortingMode = prefs.getInt(libraryPreferences.sortingMode.key(), 0 /* ALPHABETICAL */)
-            val oldSortingDirection = prefs.getBoolean("library_sorting_ascending", true)
+            val oldSortingDirection = prefs.getBoolean(LIBRARY_SORTING_ASCENDING, true)
 
-            val newSortingMode = LEGACY_SORTING_MODES.getOrElse(oldSortingMode) { "ALPHABETICAL" }
+            val newSortingMode = LEGACY_SORTING_MODES.getOrElse(oldSortingMode) { ALPHABETICAL }
 
             val newSortingDirection = if (oldSortingDirection == true) {
                 "ASCENDING"
@@ -53,12 +56,12 @@ internal class MoveLibrarySortingSettingsMigration : Migration {
 
             prefs.edit(commit = true) {
                 remove(libraryPreferences.sortingMode.key())
-                remove("library_sorting_ascending")
+                remove(LIBRARY_SORTING_ASCENDING)
             }
 
             prefs.edit {
                 putString(libraryPreferences.sortingMode.key(), newSortingMode)
-                putString("library_sorting_ascending", newSortingDirection)
+                putString(LIBRARY_SORTING_ASCENDING, newSortingDirection)
             }
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.

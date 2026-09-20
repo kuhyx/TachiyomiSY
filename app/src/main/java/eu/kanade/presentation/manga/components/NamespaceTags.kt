@@ -32,6 +32,8 @@ import exh.source.EXH_SOURCE_ID
 import exh.util.SourceTagsUtil
 import androidx.compose.material3.SuggestionChipDefaults as SuggestionChipDefaultsM3
 
+private const val FEMALE = "Female"
+
 @Immutable
 internal data class DisplayTag(
     val namespace: String?,
@@ -196,17 +198,17 @@ internal fun NamespaceTagsPreview() {
                                     EHentaiSearchMetadata.TAG_TYPE_LIGHT,
                                 ),
                                 RaisedTag(
-                                    "Female",
+                                    FEMALE,
                                     "Test",
                                     EHentaiSearchMetadata.TAG_TYPE_NORMAL,
                                 ),
                                 RaisedTag(
-                                    "Female",
+                                    FEMALE,
                                     "Test2",
                                     EHentaiSearchMetadata.TAG_TYPE_WEAK,
                                 ),
                                 RaisedTag(
-                                    "Female",
+                                    FEMALE,
                                     "Test3",
                                     EHentaiSearchMetadata.TAG_TYPE_LIGHT,
                                 ),

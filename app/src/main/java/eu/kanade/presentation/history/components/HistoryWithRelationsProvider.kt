@@ -4,6 +4,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import tachiyomi.domain.history.model.HistoryWithRelations
 import java.util.Date
 
+private const val HTTPS_EXAMPLE_COM_COVER_PNG = "https://example.com/cover.png"
+private const val TEST_TITLE = "Test Title"
+
 // 2023-10-14, a fixed instant so the preview renders the same every time.
 private const val PREVIEW_READ_AT = 1_697_247_357L
 
@@ -14,7 +17,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
         chapterId = 2L,
         mangaId = 3L,
         // SY -->
-        ogTitle = "Test Title",
+        ogTitle = TEST_TITLE,
         // SY <--
         chapterNumber = 10.2,
         readAt = Date(PREVIEW_READ_AT),
@@ -23,7 +26,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
             mangaId = 3L,
             sourceId = 4L,
             isMangaFavorite = false,
-            ogUrl = "https://example.com/cover.png",
+            ogUrl = HTTPS_EXAMPLE_COM_COVER_PNG,
             lastModified = 5L,
         ),
     )
@@ -33,7 +36,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
         chapterId = 2L,
         mangaId = 3L,
         // SY -->
-        ogTitle = "Test Title",
+        ogTitle = TEST_TITLE,
         // SY <--
         chapterNumber = 10.2,
         readAt = null,
@@ -42,7 +45,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
             mangaId = 3L,
             sourceId = 4L,
             isMangaFavorite = false,
-            ogUrl = "https://example.com/cover.png",
+            ogUrl = HTTPS_EXAMPLE_COM_COVER_PNG,
             lastModified = 5L,
         ),
     )
@@ -52,7 +55,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
         chapterId = 2L,
         mangaId = 3L,
         // SY -->
-        ogTitle = "Test Title",
+        ogTitle = TEST_TITLE,
         // SY <--
         chapterNumber = -2.0,
         readAt = Date(PREVIEW_READ_AT),
@@ -61,7 +64,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
             mangaId = 3L,
             sourceId = 4L,
             isMangaFavorite = false,
-            ogUrl = "https://example.com/cover.png",
+            ogUrl = HTTPS_EXAMPLE_COM_COVER_PNG,
             lastModified = 5L,
         ),
     )

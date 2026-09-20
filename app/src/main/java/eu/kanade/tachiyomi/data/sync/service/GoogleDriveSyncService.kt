@@ -40,6 +40,11 @@ import java.io.PipedOutputStream
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
+private const val APPLICATION_OCTET_STREAM = "application/octet-stream"
+private const val CLIENT_SECRETS_JSON = "client_secrets.json"
+private const val UNKNOWN_ERROR = "Unknown error"
+private const val DEVICE_ID = "deviceId"
+
 internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferences: SyncPreferences) : SyncService(
     context,
     json,
@@ -129,7 +134,7 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
                 GZIPInputStream(inputStream).use { gzipInputStream ->
                     val byteArray = gzipInputStream.readBytes()
                     val backup = protoBuf.decodeFromByteArray(Backup.serializer(), byteArray)
-                    val deviceId = fileList[0].appProperties["deviceId"] ?: ""
+                    val deviceId = fileList[0].appProperties[DEVICE_ID] ?: ""
                     return SyncData(deviceId = deviceId, backup = backup)
                 }
             }
@@ -161,14 +166,14 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
                         }
                     }
 
-                    val mediaContent = InputStreamContent("application/octet-stream", pis)
+                    val mediaContent = InputStreamContent(APPLICATION_OCTET_STREAM, pis)
 
                     if (fileList.isNotEmpty()) {
                         val fileId = fileList[0].id
                         val fileMetadata = File().apply {
                             name = remoteFileName
-                            mimeType = "application/octet-stream"
-                            appProperties = mapOf("deviceId" to syncData.deviceId)
+                            mimeType = APPLICATION_OCTET_STREAM
+                            appProperties = mapOf(DEVICE_ID to syncData.deviceId)
                         }
                         drive.files().update(fileId, fileMetadata, mediaContent).execute()
                         logcat(LogPriority.DEBUG) {
@@ -177,9 +182,9 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
                     } else {
                         val fileMetadata = File().apply {
                             name = remoteFileName
-                            mimeType = "application/octet-stream"
+                            mimeType = APPLICATION_OCTET_STREAM
                             parents = listOf("appDataFolder")
-                            appProperties = mapOf("deviceId" to syncData.deviceId)
+                            appProperties = mapOf(DEVICE_ID to syncData.deviceId)
                         }
                         val uploadedFile = drive.files().create(fileMetadata, mediaContent)
                             .setFields("id")
@@ -297,7 +302,7 @@ internal class GoogleDriveService(private val context: Context) {
         val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
         val secrets = GoogleClientSecrets.load(
             jsonFactory,
-            context.assets.open("client_secrets.json").reader(),
+            context.assets.open(CLIENT_SECRETS_JSON).reader(),
         )
 
         val flow = GoogleAuthorizationCodeFlow.Builder(
@@ -318,7 +323,7 @@ internal class GoogleDriveService(private val context: Context) {
         val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
         val secrets = GoogleClientSecrets.load(
             jsonFactory,
-            context.assets.open("client_secrets.json").reader(),
+            context.assets.open(CLIENT_SECRETS_JSON).reader(),
         )
 
         val credential = googleCredential(jsonFactory, secrets)
@@ -341,18 +346,18 @@ internal class GoogleDriveService(private val context: Context) {
                 this@GoogleDriveService.logcat(LogPriority.ERROR, throwable = e) {
                     "Refresh token is invalid, prompt user to sign in again"
                 }
-                throw e.message?.let { Exception(it, e) } ?: Exception("Unknown error", e)
+                throw e.message?.let { Exception(it, e) } ?: Exception(UNKNOWN_ERROR, e)
             } else {
                 // Token refresh failed; handle this situation
                 this@GoogleDriveService.logcat(LogPriority.ERROR) { "Failed to refresh access token ${e.message}" }
                 this@GoogleDriveService.logcat(LogPriority.ERROR) { "Google Drive sync will be disabled" }
-                throw e.message?.let { Exception(it, e) } ?: Exception("Unknown error", e)
+                throw e.message?.let { Exception(it, e) } ?: Exception(UNKNOWN_ERROR, e)
             }
         } catch (e: IOException) {
             // Token refresh failed; handle this situation
             this@GoogleDriveService.logcat(LogPriority.ERROR, throwable = e) { "Failed to refresh access token" }
             this@GoogleDriveService.logcat(LogPriority.ERROR) { "Google Drive sync will be disabled" }
-            throw e.message?.let { Exception(it, e) } ?: Exception("Unknown error", e)
+            throw e.message?.let { Exception(it, e) } ?: Exception(UNKNOWN_ERROR, e)
         }
     }
 
@@ -363,7 +368,7 @@ internal class GoogleDriveService(private val context: Context) {
         val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
         val secrets = GoogleClientSecrets.load(
             jsonFactory,
-            context.assets.open("client_secrets.json").reader(),
+            context.assets.open(CLIENT_SECRETS_JSON).reader(),
         )
 
         val credential = googleCredential(jsonFactory, secrets)
@@ -410,7 +415,7 @@ internal class GoogleDriveService(private val context: Context) {
         val jsonFactory: JsonFactory = GsonFactory.getDefaultInstance()
         val secrets = GoogleClientSecrets.load(
             jsonFactory,
-            context.assets.open("client_secrets.json").reader(),
+            context.assets.open(CLIENT_SECRETS_JSON).reader(),
         )
 
         val tokenResponse: GoogleTokenResponse = GoogleAuthorizationCodeTokenRequest(
@@ -441,7 +446,7 @@ internal class GoogleDriveService(private val context: Context) {
             // Logged whatever the cause; the caller carries on.
             logcat(LogPriority.ERROR, throwable = expected) { "Failed to handle authorization code" }
             activity.runOnUiThread {
-                onFailure(expected.localizedMessage ?: "Unknown error")
+                onFailure(expected.localizedMessage ?: UNKNOWN_ERROR)
             }
         }
     }

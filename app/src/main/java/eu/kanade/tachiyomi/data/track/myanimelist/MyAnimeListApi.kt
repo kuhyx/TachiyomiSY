@@ -33,6 +33,9 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val CLIENT_ID_KEY = "client_id"
+private const val FIELDS = "fields"
+
 private const val MAX_QUERY_CHARS = 64
 
 internal class MyAnimeListApi(
@@ -48,7 +51,7 @@ internal class MyAnimeListApi(
     suspend fun getAccessToken(authCode: String): MALOAuth {
         return withIOContext {
             val formBody: RequestBody = FormBody.Builder()
-                .add("client_id", CLIENT_ID)
+                .add(CLIENT_ID_KEY, CLIENT_ID)
                 .add("code", authCode)
                 .add("code_verifier", codeVerifier)
                 .add("grant_type", "authorization_code")
@@ -78,11 +81,11 @@ internal class MyAnimeListApi(
 
     suspend fun search(query: String): List<TrackSearch> {
         return withIOContext {
-            val url = "$BASE_API_URL/manga".toUri().buildUpon()
+            val url = MANGA_API_URL.toUri().buildUpon()
                 // MAL API throws a 400 when the query is over 64 characters...
                 .appendQueryParameter("q", query.take(MAX_QUERY_CHARS))
                 .appendQueryParameter("nsfw", "true")
-                .appendQueryParameter("fields", SEARCH_FIELDS)
+                .appendQueryParameter(FIELDS, SEARCH_FIELDS)
                 .build()
             with(json) {
                 authClient.newCall(GET(url.toString()))
@@ -97,9 +100,9 @@ internal class MyAnimeListApi(
 
     suspend fun getMangaDetails(id: Int): TrackSearch {
         return withIOContext {
-            val url = "$BASE_API_URL/manga".toUri().buildUpon()
+            val url = MANGA_API_URL.toUri().buildUpon()
                 .appendPath(id.toString())
-                .appendQueryParameter("fields", SEARCH_FIELDS)
+                .appendQueryParameter(FIELDS, SEARCH_FIELDS)
                 .build()
             with(json) {
                 authClient.newCall(GET(url.toString()))
@@ -162,9 +165,9 @@ internal class MyAnimeListApi(
 
     suspend fun findListItem(track: Track): Track? {
         return withIOContext {
-            val uri = "$BASE_API_URL/manga".toUri().buildUpon()
+            val uri = MANGA_API_URL.toUri().buildUpon()
                 .appendPath(track.remoteId.toString())
-                .appendQueryParameter("fields", "num_chapters,my_list_status{start_date,finish_date}")
+                .appendQueryParameter(FIELDS, "num_chapters,my_list_status{start_date,finish_date}")
                 .build()
             with(json) {
                 authClient.newCall(GET(uri.toString()))
@@ -197,10 +200,10 @@ internal class MyAnimeListApi(
 
     suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata? {
         return withIOContext {
-            val url = "$BASE_API_URL/manga".toUri().buildUpon()
+            val url = MANGA_API_URL.toUri().buildUpon()
                 .appendPath(track.remoteId.toString())
                 .appendQueryParameter(
-                    "fields",
+                    FIELDS,
                     "id,title,synopsis,main_picture,authors{first_name,last_name}",
                 )
                 .build()
@@ -233,7 +236,7 @@ internal class MyAnimeListApi(
     private suspend fun getListPage(offset: Int): MALSearchResult {
         return withIOContext {
             val urlBuilder = "$BASE_API_URL/users/@me/mangalist".toUri().buildUpon()
-                .appendQueryParameter("fields", SEARCH_FIELDS)
+                .appendQueryParameter(FIELDS, SEARCH_FIELDS)
                 .appendQueryParameter("limit", LIST_PAGINATION_AMOUNT.toString())
             if (offset > 0) {
                 urlBuilder.appendQueryParameter("offset", offset.toString())
@@ -303,6 +306,7 @@ internal class MyAnimeListApi(
 
         private const val BASE_OAUTH_URL = "https://myanimelist.net/v1/oauth2"
         private const val BASE_API_URL = "https://api.myanimelist.net/v2"
+        private const val MANGA_API_URL = "$BASE_API_URL/manga"
 
         private const val SEARCH_FIELDS =
             "id,title,synopsis,num_chapters,mean,main_picture,status,media_type,start_date," +
@@ -313,19 +317,19 @@ internal class MyAnimeListApi(
         private var codeVerifier: String = ""
 
         fun authUrl(): Uri = "$BASE_OAUTH_URL/authorize".toUri().buildUpon()
-            .appendQueryParameter("client_id", CLIENT_ID)
+            .appendQueryParameter(CLIENT_ID_KEY, CLIENT_ID)
             .appendQueryParameter("code_challenge", getPkceChallengeCode())
             .appendQueryParameter("response_type", "code")
             .build()
 
-        fun mangaUrl(id: Long): Uri = "$BASE_API_URL/manga".toUri().buildUpon()
+        fun mangaUrl(id: Long): Uri = MANGA_API_URL.toUri().buildUpon()
             .appendPath(id.toString())
             .appendPath("my_list_status")
             .build()
 
         fun refreshTokenRequest(oauth: MALOAuth): Request {
             val formBody: RequestBody = FormBody.Builder()
-                .add("client_id", CLIENT_ID)
+                .add(CLIENT_ID_KEY, CLIENT_ID)
                 .add("refresh_token", oauth.refreshToken)
                 .add("grant_type", "refresh_token")
                 .build()

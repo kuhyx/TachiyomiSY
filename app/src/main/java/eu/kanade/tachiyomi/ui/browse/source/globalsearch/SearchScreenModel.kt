@@ -57,7 +57,7 @@ internal abstract class SearchScreenModel(
     open val sortComparator = { map: Map<Source, SearchItemResult> ->
         compareBy<Source>(
             { (map[it] as? SearchItemResult.Success)?.isEmpty ?: true },
-            { "${it.id}" !in pinnedSources },
+            { it.id.toString() !in pinnedSources },
             { "${it.name.lowercase()} (${it.lang})" },
         )
     }
@@ -83,10 +83,10 @@ internal abstract class SearchScreenModel(
 
     open fun getEnabledSources(): List<Source> {
         return sourceManager.getVisibleSources()
-            .filter { it.lang in enabledLanguages && "${it.id}" !in disabledSources }
+            .filter { it.lang in enabledLanguages && it.id.toString() !in disabledSources }
             .sortedWith(
                 compareBy(
-                    { "${it.id}" !in pinnedSources },
+                    { it.id.toString() !in pinnedSources },
                     { "${it.name.lowercase()} (${it.lang})" },
                 ),
             )

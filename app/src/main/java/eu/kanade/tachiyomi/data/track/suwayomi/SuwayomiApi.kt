@@ -23,6 +23,10 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.injectLazy
 
+private const val VARIABLES = "variables"
+private const val MANGA_ID = "mangaId"
+private const val QUERY = "query"
+
 private const val CHAPTER_EPSILON = 0.001
 
 internal class SuwayomiApi(private val trackId: Long) {
@@ -51,9 +55,9 @@ internal class SuwayomiApi(private val trackId: Long) {
         |$$MangaFragment
         """.trimMargin()
         val payload = buildJsonObject {
-            put("query", query)
-            putJsonObject("variables") {
-                put("mangaId", mangaId)
+            put(QUERY, query)
+            putJsonObject(VARIABLES) {
+                put(MANGA_ID, mangaId)
             }
         }
         val manga = with(json) {
@@ -102,9 +106,9 @@ internal class SuwayomiApi(private val trackId: Long) {
         |}
         """.trimMargin()
         val chaptersPayload = buildJsonObject {
-            put("query", chaptersQuery)
-            putJsonObject("variables") {
-                put("mangaId", mangaId)
+            put(QUERY, chaptersQuery)
+            putJsonObject(VARIABLES) {
+                put(MANGA_ID, mangaId)
             }
         }
         val chaptersToMark = with(json) {
@@ -143,8 +147,8 @@ internal class SuwayomiApi(private val trackId: Long) {
             """.trimMargin()
         }
         val markPayload = buildJsonObject {
-            put("query", markQuery)
-            putJsonObject("variables") {
+            put(QUERY, markQuery)
+            putJsonObject(VARIABLES) {
                 putJsonArray("chapters") {
                     addAll(chaptersToMark)
                 }
@@ -168,9 +172,9 @@ internal class SuwayomiApi(private val trackId: Long) {
         |}
         """.trimMargin()
         val trackPayload = buildJsonObject {
-            put("query", trackQuery)
-            putJsonObject("variables") {
-                put("mangaId", mangaId)
+            put(QUERY, trackQuery)
+            putJsonObject(VARIABLES) {
+                put(MANGA_ID, mangaId)
             }
         }
         with(json) {

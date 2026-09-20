@@ -28,6 +28,10 @@ import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val VARIABLES = "variables"
+private const val CLIENT_ID_KEY = "client_id"
+private const val QUERY = "query"
+
 internal class ShikimoriApi(
     private val trackId: Long,
     private val client: OkHttpClient,
@@ -106,9 +110,9 @@ internal class ShikimoriApi(
             |}
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
-                putJsonObject("variables") {
-                    put("query", search)
+                put(QUERY, query)
+                putJsonObject(VARIABLES) {
+                    put(QUERY, search)
                 }
             }
             with(json) {
@@ -147,8 +151,8 @@ internal class ShikimoriApi(
             """.trimMargin()
 
             val payload = buildJsonObject {
-                put("query", query)
-                putJsonObject("variables") {
+                put(QUERY, query)
+                putJsonObject(VARIABLES) {
                     put("id", track.remoteId.toString())
                 }
             }
@@ -189,7 +193,7 @@ internal class ShikimoriApi(
                 |}
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
+                put(QUERY, query)
             }
             authClient.newCall(
                 POST(
@@ -225,8 +229,8 @@ internal class ShikimoriApi(
                 |}
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
-                putJsonObject("variables") {
+                put(QUERY, query)
+                putJsonObject(VARIABLES) {
                     put("ids", "${track.remoteId}")
                 }
             }
@@ -279,7 +283,7 @@ internal class ShikimoriApi(
         OAUTH_URL,
         body = FormBody.Builder()
             .add("grant_type", "authorization_code")
-            .add("client_id", CLIENT_ID)
+            .add(CLIENT_ID_KEY, CLIENT_ID)
             .add("client_secret", CLIENT_SECRET)
             .add("code", code)
             .add("redirect_uri", REDIRECT_URL)
@@ -299,7 +303,7 @@ internal class ShikimoriApi(
         private const val CLIENT_SECRET = "NajpZcOBKB9sJtgNcejf8OB9jBN1OYYoo-k4h2WWZus"
 
         fun authUrl(): Uri = LOGIN_URL.toUri().buildUpon()
-            .appendQueryParameter("client_id", CLIENT_ID)
+            .appendQueryParameter(CLIENT_ID_KEY, CLIENT_ID)
             .appendQueryParameter("redirect_uri", REDIRECT_URL)
             .appendQueryParameter("response_type", "code")
             .build()
@@ -308,7 +312,7 @@ internal class ShikimoriApi(
             OAUTH_URL,
             body = FormBody.Builder()
                 .add("grant_type", "refresh_token")
-                .add("client_id", CLIENT_ID)
+                .add(CLIENT_ID_KEY, CLIENT_ID)
                 .add("client_secret", CLIENT_SECRET)
                 .add("refresh_token", token)
                 .build(),

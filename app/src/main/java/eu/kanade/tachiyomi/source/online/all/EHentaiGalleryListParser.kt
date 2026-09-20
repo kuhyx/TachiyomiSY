@@ -17,6 +17,9 @@ import java.io.IOException
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
+private const val TITLE = "title"
+private const val STYLE = "style"
+
 internal const val REVERSE_PARAM = "TEH_REVERSE"
 private const val TOPLIST_LAST_PAGE = 200L
 private const val BORDER_COLOR_START = 14
@@ -60,17 +63,17 @@ internal class EHentaiGalleryListParser {
             val infoElement = body.selectFirst(".gl3e")
 
             // why is column2 null
-            val favElement = column2.children().find { it.attr("style").startsWith("border-color") }
+            val favElement = column2.children().find { it.attr(STYLE).startsWith("border-color") }
             val infoElements = infoElement?.select("div")
             val parsedTags = mutableListOf<RaisedTag>()
 
             EHentai.ParsedManga(
                 fav = FAVORITES_BORDER_HEX_COLORS.indexOf(
-                    favElement?.attr("style")?.substring(BORDER_COLOR_START, BORDER_COLOR_END),
+                    favElement?.attr(STYLE)?.substring(BORDER_COLOR_START, BORDER_COLOR_END),
                 ),
                 manga = SManga.create().apply {
                     // Get title
-                    title = thumbnailElement.attr("title")
+                    title = thumbnailElement.attr(TITLE)
                     url = EHentaiSearchMetadata.normalizeUrl(linkElement.attr("href"))
                     // Get image
                     thumbnail_url = thumbnailElement.attr("src")
@@ -97,10 +100,10 @@ internal class EHentaiGalleryListParser {
                         val tagElements = tagElement.select("div")
                         tagElements.forEach { element ->
                             if (element.className() == "gt") {
-                                val namespace = element.attr("title").substringBefore(":").trimOrNull() ?: "misc"
+                                val namespace = element.attr(TITLE).substringBefore(":").trimOrNull() ?: "misc"
                                 parsedTags += RaisedTag(
                                     namespace,
-                                    element.attr("title").substringAfter(":").trim(),
+                                    element.attr(TITLE).substringAfter(":").trim(),
                                     TAG_TYPE_NORMAL,
                                 )
                             }
@@ -201,7 +204,7 @@ internal class EHentaiGalleryListParser {
     }
 
     private fun getRating(element: Element?): Double? {
-        val ratingStyle = element?.attr("style")?.nullIfBlank()
+        val ratingStyle = element?.attr(STYLE)?.nullIfBlank()
         val matches = ratingStyle?.let { style ->
             RATING_REGEX.findAll(style).mapNotNull { it.groupValues.getOrNull(1)?.toIntOrNull() }.toList()
         }

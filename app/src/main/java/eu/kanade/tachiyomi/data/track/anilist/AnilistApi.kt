@@ -35,6 +35,10 @@ import java.time.ZonedDateTime
 import kotlin.time.Duration.Companion.minutes
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val VARIABLES = "variables"
+private const val MANGA_ID = "mangaId"
+private const val QUERY = "query"
+
 // AniList tokens live a year.
 private const val YEAR_MILLIS = 365L * 24L * 60L * 60L * 1000L
 
@@ -59,9 +63,9 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
             |
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
-                putJsonObject("variables") {
-                    put("mangaId", track.remoteId)
+                put(QUERY, query)
+                putJsonObject(VARIABLES) {
+                    put(MANGA_ID, track.remoteId)
                     put("progress", track.lastChapterRead.toInt())
                     put("status", track.toApiStatus())
                     put("private", track.private)
@@ -103,8 +107,8 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
             |
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
-                putJsonObject("variables") {
+                put(QUERY, query)
+                putJsonObject(VARIABLES) {
                     put("listId", track.libraryId)
                     put("progress", track.lastChapterRead.toInt())
                     put("status", track.toApiStatus())
@@ -131,8 +135,8 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
             |
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
-                putJsonObject("variables") {
+                put(QUERY, query)
+                putJsonObject(VARIABLES) {
                     put("listId", track.libraryId)
                 }
             }
@@ -184,9 +188,9 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
             |
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
-                putJsonObject("variables") {
-                    put("query", search)
+                put(QUERY, query)
+                putJsonObject(VARIABLES) {
+                    put(QUERY, search)
                 }
             }
             with(json) {
@@ -264,8 +268,8 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
             |
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
-                putJsonObject("variables") {
+                put(QUERY, query)
+                putJsonObject(VARIABLES) {
                     put("id", userid)
                     put("manga_id", track.remoteId)
                 }
@@ -310,7 +314,7 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                 |
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
+                put(QUERY, query)
             }
             with(json) {
                 authClient.newCall(
@@ -356,9 +360,9 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                 |
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
-                putJsonObject("variables") {
-                    put("mangaId", track.remoteId)
+                put(QUERY, query)
+                putJsonObject(VARIABLES) {
+                    put(MANGA_ID, track.remoteId)
                 }
             }
             with(json) {
@@ -421,9 +425,9 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                 |
             """.trimMargin()
             val payload = buildJsonObject {
-                put("query", query)
-                putJsonObject("variables") {
-                    put("mangaId", id)
+                put(QUERY, query)
+                putJsonObject(VARIABLES) {
+                    put(MANGA_ID, id)
                 }
             }
             with(json) {

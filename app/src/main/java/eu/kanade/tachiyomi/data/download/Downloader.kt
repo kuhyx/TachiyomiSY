@@ -500,8 +500,8 @@ internal class Downloader(
         page.status = Page.State.DownloadImage
         page.progress = 0
         return flow {
-            val file = tmpDir.findFile("$filename.tmp")
-                ?: tmpDir.createFile("$filename.tmp")!!
+            val file = tmpDir.findFile(inProgressFileName(filename))
+                ?: tmpDir.createFile(inProgressFileName(filename))!!
 
             try {
                 source.getImage(page, dataSaver = dataSaver).use {
@@ -543,8 +543,8 @@ internal class Downloader(
     // @param filename the filename of the image.
     private fun copyImageFromCache(cacheFile: File, tmpDir: UniFile, filename: String): UniFile {
         // Delete temp file if it exists
-        tmpDir.findFile("$filename.tmp")?.delete()
-        val tmpFile = tmpDir.createFile("$filename.tmp")!!
+        tmpDir.findFile(inProgressFileName(filename))?.delete()
+        val tmpFile = tmpDir.createFile(inProgressFileName(filename))!!
         cacheFile.inputStream().use { input ->
             tmpFile.openOutputStream().use { output ->
                 input.copyTo(output)
@@ -768,3 +768,5 @@ private const val DOWNLOAD_RETRIES = 3
 
 // java.net.HttpURLConnection stops at 5xx; 416 says the resumed range is past the file's end.
 private const val HTTP_RANGE_NOT_SATISFIABLE = 416
+
+private fun inProgressFileName(filename: String) = "$filename.tmp"

@@ -37,6 +37,9 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val CONTENT_TYPE = "Content-Type"
+private const val MANGA = "manga"
+
 private const val STAFF_COUNT = 25
 
 internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
@@ -65,7 +68,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
                         putJsonObject("media") {
                             putJsonObject("data") {
                                 put("id", track.remoteId)
-                                put("type", "manga")
+                                put("type", MANGA)
                             }
                         }
                     }
@@ -75,8 +78,8 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
             with(json) {
                 authClient.newCall(
                     POST(
-                        "${BASE_URL}library-entries",
-                        headers = headersOf("Content-Type", VND_API_JSON),
+                        LIBRARY_ENTRIES_URL,
+                        headers = headersOf(CONTENT_TYPE, VND_API_JSON),
                         body = data.toString().toRequestBody(VND_JSON_MEDIA_TYPE),
                     ),
                 )
@@ -111,7 +114,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
                 Request.Builder()
                     .url("${BASE_URL}library-entries/${track.libraryId}")
                     .headers(
-                        headersOf("Content-Type", VND_API_JSON),
+                        headersOf(CONTENT_TYPE, VND_API_JSON),
                     )
                     .patch(data.toString().toRequestBody(VND_JSON_MEDIA_TYPE))
                     .build(),
@@ -127,7 +130,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
             authClient.newCall(
                 DELETE(
                     "${BASE_URL}library-entries/${track.libraryId}",
-                    headers = headersOf("Content-Type", VND_API_JSON),
+                    headers = headersOf(CONTENT_TYPE, VND_API_JSON),
                 ),
             )
                 .awaitSuccess()
@@ -177,9 +180,9 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
 
     suspend fun findLibManga(track: Track, userId: String): Track? {
         return withIOContext {
-            val url = "${BASE_URL}library-entries".toUri().buildUpon()
+            val url = LIBRARY_ENTRIES_URL.toUri().buildUpon()
                 .encodedQuery("filter[manga_id]=${track.remoteId}&filter[user_id]=$userId")
-                .appendQueryParameter("include", "manga")
+                .appendQueryParameter("include", MANGA)
                 .build()
             with(json) {
                 authClient.newCall(GET(url.toString()))
@@ -198,9 +201,9 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
 
     suspend fun getLibManga(track: Track): Track {
         return withIOContext {
-            val url = "${BASE_URL}library-entries".toUri().buildUpon()
+            val url = LIBRARY_ENTRIES_URL.toUri().buildUpon()
                 .encodedQuery("filter[id]=${track.libraryId}")
-                .appendQueryParameter("include", "manga")
+                .appendQueryParameter("include", MANGA)
                 .build()
             with(json) {
                 authClient.newCall(GET(url.toString()))
@@ -321,6 +324,8 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
         private const val CLIENT_SECRET = "54d7307928f63414defd96399fc31ba847961ceaecef3a5fd93144e960c0e151"
 
         private const val BASE_URL = "https://kitsu.app/api/edge/"
+
+        private const val LIBRARY_ENTRIES_URL = "${BASE_URL}library-entries"
         private const val GRAPHQL_URL = "https://kitsu.app/api/graphql"
         private const val LOGIN_URL = "https://kitsu.app/api/oauth/token"
         private const val BASE_MANGA_URL = "https://kitsu.app/manga/"

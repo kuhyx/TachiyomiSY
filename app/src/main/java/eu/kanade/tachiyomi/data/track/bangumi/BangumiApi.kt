@@ -34,6 +34,10 @@ import uy.kohesive.injekt.injectLazy
 import java.net.HttpURLConnection
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val REDIRECT_URI = "redirect_uri"
+private const val CONTENT_TYPE = "Content-Type"
+private const val CLIENT_ID_KEY = "client_id"
+
 private const val MAX_RATING = 10
 
 internal class BangumiApi(
@@ -58,7 +62,7 @@ internal class BangumiApi(
                 .toString()
                 .toRequestBody()
             // Returns with 202 Accepted on success with no body
-            authClient.newCall(POST(url, body = body, headers = headersOf("Content-Type", APP_JSON)))
+            authClient.newCall(POST(url, body = body, headers = headersOf(CONTENT_TYPE, APP_JSON)))
                 .awaitSuccess()
             track
         }
@@ -79,7 +83,7 @@ internal class BangumiApi(
             val request = Request.Builder()
                 .url(url)
                 .patch(body)
-                .headers(headersOf("Content-Type", APP_JSON))
+                .headers(headersOf(CONTENT_TYPE, APP_JSON))
                 .build()
             // Returns with 204 No Content
             authClient.newCall(request)
@@ -108,7 +112,7 @@ internal class BangumiApi(
                 .toString()
                 .toRequestBody()
             with(json) {
-                authClient.newCall(POST(url, body = body, headers = headersOf("Content-Type", APP_JSON)))
+                authClient.newCall(POST(url, body = body, headers = headersOf(CONTENT_TYPE, APP_JSON)))
                     .awaitSuccess()
                     .parseAs<BGMSearchResult>()
                     .data
@@ -176,10 +180,10 @@ internal class BangumiApi(
         return withIOContext {
             val body = FormBody.Builder()
                 .add("grant_type", "authorization_code")
-                .add("client_id", CLIENT_ID)
+                .add(CLIENT_ID_KEY, CLIENT_ID)
                 .add("client_secret", CLIENT_SECRET)
                 .add("code", code)
-                .add("redirect_uri", REDIRECT_URL)
+                .add(REDIRECT_URI, REDIRECT_URL)
                 .build()
             with(json) {
                 client.newCall(POST(OAUTH_URL, body = body))
@@ -213,19 +217,19 @@ internal class BangumiApi(
 
         fun authUrl(): Uri =
             LOGIN_URL.toUri().buildUpon()
-                .appendQueryParameter("client_id", CLIENT_ID)
+                .appendQueryParameter(CLIENT_ID_KEY, CLIENT_ID)
                 .appendQueryParameter("response_type", "code")
-                .appendQueryParameter("redirect_uri", REDIRECT_URL)
+                .appendQueryParameter(REDIRECT_URI, REDIRECT_URL)
                 .build()
 
         fun refreshTokenRequest(token: String) = POST(
             OAUTH_URL,
             body = FormBody.Builder()
                 .add("grant_type", "refresh_token")
-                .add("client_id", CLIENT_ID)
+                .add(CLIENT_ID_KEY, CLIENT_ID)
                 .add("client_secret", CLIENT_SECRET)
                 .add("refresh_token", token)
-                .add("redirect_uri", REDIRECT_URL)
+                .add(REDIRECT_URI, REDIRECT_URL)
                 .build(),
         )
     }

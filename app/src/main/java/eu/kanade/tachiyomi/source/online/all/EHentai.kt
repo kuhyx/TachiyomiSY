@@ -69,6 +69,9 @@ import java.net.URLEncoder
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
+private const val UNUSED_METHOD_WAS_CALLED_SOMEHOW = "Unused method was called somehow!"
+private const val COOKIE = "Cookie"
+
 // Follow-up: Consider gallery updating when doing tabbed browsing (https://github.com/kuhyx/TachiyomiSY/issues/20)
 // Positions inside e-hentai's gallery-list markup and its rating sprite.
 private const val FIRST_GALLERY_YEAR = 2007
@@ -114,8 +117,8 @@ internal class EHentai(
             val newReq = chain
                 .request()
                 .newBuilder()
-                .removeHeader("Cookie")
-                .addHeader("Cookie", cookiesHeader())
+                .removeHeader(COOKIE)
+                .addHeader(COOKIE, cookiesHeader())
                 .build()
 
             chain.proceed(newReq)
@@ -467,11 +470,11 @@ internal class EHentai(
 
     @Deprecated(HELPER_DEPRECATION)
     override fun chapterListParse(response: Response) =
-        throw UnsupportedOperationException("Unused method was called somehow!")
+        throw UnsupportedOperationException(UNUSED_METHOD_WAS_CALLED_SOMEHOW)
 
     @Deprecated(HELPER_DEPRECATION)
     override fun pageListParse(response: Response) =
-        throw UnsupportedOperationException("Unused method was called somehow!")
+        throw UnsupportedOperationException(UNUSED_METHOD_WAS_CALLED_SOMEHOW)
 
     override suspend fun getImageUrl(page: Page): String {
         val imageUrlResponse = client.newCall(GET(page.url, headers)).awaitSuccess()
@@ -497,7 +500,7 @@ internal class EHentai(
 
     @Deprecated(HELPER_DEPRECATION)
     override fun imageUrlParse(response: Response): String {
-        throw UnsupportedOperationException("Unused method was called somehow!")
+        throw UnsupportedOperationException(UNUSED_METHOD_WAS_CALLED_SOMEHOW)
     }
 
     suspend fun fetchFavorites(): Pair<List<ParsedManga>, List<String>> {
@@ -579,7 +582,7 @@ internal class EHentai(
     fun cookiesHeader(sp: Int = spPref().get()) = buildCookies(rawCookies(sp))
 
     // Headers
-    override fun headersBuilder() = super.headersBuilder().add("Cookie", cookiesHeader())
+    override fun headersBuilder() = super.headersBuilder().add(COOKIE, cookiesHeader())
 
     private fun addParam(url: String, param: String, value: String) = url.toUri()
         .buildUpon()

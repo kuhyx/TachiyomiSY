@@ -3,18 +3,20 @@ package eu.kanade.tachiyomi.data.track.hikka
 import eu.kanade.tachiyomi.data.database.models.Track
 import java.util.UUID
 
+private const val READING = "reading"
+
 internal fun Track.toApiStatus() = when (status) {
-    Hikka.READING -> "reading"
+    Hikka.READING -> READING
     Hikka.COMPLETED -> "completed"
     Hikka.ON_HOLD -> "on_hold"
     Hikka.DROPPED -> "dropped"
     Hikka.PLAN_TO_READ -> "planned"
-    Hikka.REREADING -> "reading"
+    Hikka.REREADING -> READING
     else -> throw IllegalArgumentException("Hikka: Unknown status: $status")
 }
 
 internal fun toTrackStatus(status: String) = when (status) {
-    "reading" -> Hikka.READING
+    READING -> Hikka.READING
     "completed" -> Hikka.COMPLETED
     "on_hold" -> Hikka.ON_HOLD
     "dropped" -> Hikka.DROPPED

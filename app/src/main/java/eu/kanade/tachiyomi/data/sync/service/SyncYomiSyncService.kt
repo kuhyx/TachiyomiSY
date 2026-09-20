@@ -29,6 +29,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 
+private const val X_API_TOKEN = "X-API-Token"
+
 private const val UPLOAD_TIMEOUT_SECONDS = 30L
 
 internal class SyncYomiSyncService(
@@ -118,7 +120,7 @@ internal class SyncYomiSyncService(
         val apiKey = syncPreferences.clientAPIKey.get()
         val downloadUrl = "$host/api/sync/content"
 
-        val headersBuilder = Headers.Builder().add("X-API-Token", apiKey)
+        val headersBuilder = Headers.Builder().add(X_API_TOKEN, apiKey)
         val lastETag = syncPreferences.lastSyncEtag.get()
         if (lastETag != "") {
             headersBuilder.add("If-None-Match", lastETag)
@@ -182,7 +184,7 @@ internal class SyncYomiSyncService(
         val uploadUrl = "$host/api/sync/content"
         val timeout = UPLOAD_TIMEOUT_SECONDS
 
-        val headersBuilder = Headers.Builder().add("X-API-Token", apiKey)
+        val headersBuilder = Headers.Builder().add(X_API_TOKEN, apiKey)
         if (eTag.isNotEmpty()) {
             headersBuilder.add("If-Match", eTag)
         }
@@ -235,7 +237,7 @@ internal class SyncYomiSyncService(
                 val apiKey = syncPreferences.clientAPIKey.get()
                 val url = "$host/api/sync/event"
 
-                val headersBuilder = Headers.Builder().add("X-API-Token", apiKey)
+                val headersBuilder = Headers.Builder().add(X_API_TOKEN, apiKey)
                 val headers = headersBuilder.build()
 
                 val bodyObj = SyncEvent(

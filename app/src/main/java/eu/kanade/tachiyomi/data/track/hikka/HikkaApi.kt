@@ -112,7 +112,7 @@ internal class HikkaApi(
     suspend fun getRead(track: Track): HKRead? {
         return withIOContext {
             val slug = track.trackingUrl.split("/")[SLUG_URL_SEGMENT]
-            val url = "$BASE_API_URL/read/manga/$slug".toUri().buildUpon().build()
+            val url = readMangaUrl(slug).toUri().buildUpon().build()
             with(json) {
                 try {
                     authClient.newCall(GET(url.toString()))
@@ -148,7 +148,7 @@ internal class HikkaApi(
         return withIOContext {
             val slug = track.remoteUrl.split("/")[SLUG_URL_SEGMENT]
 
-            val url = "$BASE_API_URL/read/manga/$slug".toUri().buildUpon()
+            val url = readMangaUrl(slug).toUri().buildUpon()
                 .build()
 
             authClient.newCall(DELETE(url.toString()))
@@ -160,7 +160,7 @@ internal class HikkaApi(
         return withIOContext {
             val slug = track.trackingUrl.split("/")[SLUG_URL_SEGMENT]
 
-            val url = "$BASE_API_URL/read/manga/$slug".toUri().buildUpon()
+            val url = readMangaUrl(slug).toUri().buildUpon()
                 .build()
 
             var rereads = getRead(track)?.rereads ?: 0
@@ -192,12 +192,15 @@ internal class HikkaApi(
 
     companion object {
         const val BASE_API_URL = "https://api.hikka.io"
+
         const val BASE_URL = "https://hikka.io"
         private const val SCOPE = "readlist,read:user-details"
         private const val CLIENT_REFERENCE = "598ef1f5-b9d2-4e66-8b65-06949d5e14fc"
         private const val CLIENT_SECRET = "OKwzrNOZxq40psFgfcCUYddnvaeZWDnd34rt7fdcB5GmHoBBQuNTWX" +
             "61sZs8KECEWVXtMUDtq8QC4t9WX4DwWWYLXEVlgnlUXGT1fWCb-18c" +
             "Zd2m8Co-8HN6JQcjoP-B"
+
+        private fun readMangaUrl(slug: String) = "$BASE_API_URL/read/manga/$slug"
 
         fun authUrl(): Uri = "$BASE_URL/oauth".toUri().buildUpon()
             .appendQueryParameter("reference", CLIENT_REFERENCE)

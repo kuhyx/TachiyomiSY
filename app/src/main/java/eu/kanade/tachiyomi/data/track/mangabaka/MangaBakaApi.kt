@@ -41,6 +41,14 @@ import java.util.Locale
 import kotlin.time.Instant
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val PROGRESS_CHAPTER = "progress_chapter"
+private const val REDIRECT_URI_KEY = "redirect_uri"
+private const val FINISH_DATE = "finish_date"
+private const val START_DATE = "start_date"
+private const val CLIENT_ID_KEY = "client_id"
+private const val RATING = "rating"
+private const val STATE = "state"
+
 private const val MAX_RATING = 100
 private const val OAUTH_STATE_BYTES = 16
 
@@ -70,21 +78,21 @@ internal class MangaBakaApi(
 
     suspend fun addLibManga(track: Track): Track {
         return withIOContext {
-            val url = "$LIBRARY_API_URL/${track.remoteId}"
+            val url = libraryEntryUrl(track.remoteId)
             val body = buildJsonObject {
                 put("is_private", track.private)
-                put("state", track.toApiStatus())
+                put(STATE, track.toApiStatus())
                 if (track.lastChapterRead > 0.0) {
-                    put("progress_chapter", track.lastChapterRead)
+                    put(PROGRESS_CHAPTER, track.lastChapterRead)
                 }
                 if (track.score > 0) {
-                    put("rating", track.score.toInt().coerceIn(0, MAX_RATING))
+                    put(RATING, track.score.toInt().coerceIn(0, MAX_RATING))
                 }
                 if (track.startedReadingDate > 0) {
-                    put("start_date", track.startedReadingDate.toLocalDate().toString())
+                    put(START_DATE, track.startedReadingDate.toLocalDate().toString())
                 }
                 if (track.finishedReadingDate > 0) {
-                    put("finish_date", track.finishedReadingDate.toLocalDate().toString())
+                    put(FINISH_DATE, track.finishedReadingDate.toLocalDate().toString())
                 }
             }
                 .toString()
@@ -101,7 +109,7 @@ internal class MangaBakaApi(
 
     suspend fun deleteLibManga(track: DomainTrack) {
         withIOContext {
-            val url = "$LIBRARY_API_URL/${track.remoteId}"
+            val url = libraryEntryUrl(track.remoteId)
 
             authClient
                 .newCall(DELETE(url))
@@ -113,7 +121,7 @@ internal class MangaBakaApi(
         return withIOContext {
             with(json) {
                 try {
-                    val url = "$LIBRARY_API_URL/${track.remoteId}"
+                    val url = libraryEntryUrl(track.remoteId)
                     val userData = authClient.newCall(GET(url))
                         .awaitSuccess()
                         .parseAs<MangaBakaListResult>()
@@ -148,29 +156,29 @@ internal class MangaBakaApi(
 
     suspend fun updateLibManga(track: Track): Track {
         return withIOContext {
-            val url = "$LIBRARY_API_URL/${track.remoteId}"
+            val url = libraryEntryUrl(track.remoteId)
             val body = buildJsonObject {
-                put("state", track.toApiStatus())
+                put(STATE, track.toApiStatus())
                 put("is_private", track.private)
                 if (track.lastChapterRead > 0.0) {
-                    put("progress_chapter", track.lastChapterRead)
+                    put(PROGRESS_CHAPTER, track.lastChapterRead)
                 } else {
-                    put("progress_chapter", null)
+                    put(PROGRESS_CHAPTER, null)
                 }
                 if (track.score > 0) {
-                    put("rating", track.score.toInt().coerceIn(0, MAX_RATING))
+                    put(RATING, track.score.toInt().coerceIn(0, MAX_RATING))
                 } else {
-                    put("rating", null)
+                    put(RATING, null)
                 }
                 if (track.startedReadingDate > 0) {
-                    put("start_date", track.startedReadingDate.toLocalDate().toString())
+                    put(START_DATE, track.startedReadingDate.toLocalDate().toString())
                 } else {
-                    put("start_date", null)
+                    put(START_DATE, null)
                 }
                 if (track.finishedReadingDate > 0) {
-                    put("finish_date", track.finishedReadingDate.toLocalDate().toString())
+                    put(FINISH_DATE, track.finishedReadingDate.toLocalDate().toString())
                 } else {
-                    put("finish_date", null)
+                    put(FINISH_DATE, null)
                 }
             }
                 .toString()
@@ -254,12 +262,12 @@ internal class MangaBakaApi(
     suspend fun getAccessToken(code: String): MangaBakaOAuth {
         return withIOContext {
             val formBody = FormBody.Builder()
-                .add("client_id", CLIENT_ID)
+                .add(CLIENT_ID_KEY, CLIENT_ID)
                 .add("code", code)
                 .add("code_verifier", codeVerifier)
                 .add("code_challenge_method", "S256")
                 .add("grant_type", "authorization_code")
-                .add("redirect_uri", REDIRECT_URI)
+                .add(REDIRECT_URI_KEY, REDIRECT_URI)
                 .add("scope", SCOPES)
                 .build()
 
@@ -279,6 +287,7 @@ internal class MangaBakaApi(
         private const val BASE_URL = "https://mangabaka.org"
         private const val API_BASE_URL = "https://api.mangabaka.org"
         private const val LIBRARY_API_URL = "$API_BASE_URL/v1/my/library"
+
         private const val OAUTH_URL = "$BASE_URL/auth/oauth2"
         private const val SCOPES = "library.read library.write offline_access openid"
 
@@ -289,23 +298,25 @@ internal class MangaBakaApi(
         private var codeVerifier: String = ""
         private var oauthStateParam: String = ""
 
+        private fun libraryEntryUrl(remoteId: Long) = "$LIBRARY_API_URL/$remoteId"
+
         fun authUrl(): Uri = "$OAUTH_URL/authorize".toUri().buildUpon() //
-            .appendQueryParameter("client_id", CLIENT_ID)
+            .appendQueryParameter(CLIENT_ID_KEY, CLIENT_ID)
             .appendQueryParameter("code_challenge", getPkceS256ChallengeCode())
             .appendQueryParameter("code_challenge_method", "S256")
             .appendQueryParameter("response_type", "code")
             .appendQueryParameter("scope", SCOPES)
-            .appendQueryParameter("redirect_uri", REDIRECT_URI)
-            .appendQueryParameter("state", getOAuthStateParam())
+            .appendQueryParameter(REDIRECT_URI_KEY, REDIRECT_URI)
+            .appendQueryParameter(STATE, getOAuthStateParam())
             .build()
 
         fun refreshTokenRequest(token: String) = POST(
             "$OAUTH_URL/token",
             body = FormBody.Builder()
                 .add("grant_type", "refresh_token")
-                .add("client_id", CLIENT_ID)
+                .add(CLIENT_ID_KEY, CLIENT_ID)
                 .add("refresh_token", token)
-                .add("redirect_uri", REDIRECT_URI)
+                .add(REDIRECT_URI_KEY, REDIRECT_URI)
                 .build(),
         )
 

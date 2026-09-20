@@ -120,7 +120,7 @@ internal class MangaUpdatesApi(
     private suspend fun getSeriesRating(track: Track): MURating? {
         return try {
             with(json) {
-                authClient.newCall(GET("$BASE_URL/v1/series/${track.remoteId}/rating"))
+                authClient.newCall(GET(ratingUrl(track)))
                     .awaitSuccess()
                     .parseAs<MURating>()
             }
@@ -138,14 +138,14 @@ internal class MangaUpdatesApi(
             }
             authClient.newCall(
                 PUT(
-                    url = "$BASE_URL/v1/series/${track.remoteId}/rating",
+                    url = ratingUrl(track),
                     body = body.toString().toRequestBody(CONTENT_TYPE),
                 ),
             )
                 .awaitSuccess()
         } else {
             authClient.newCall(
-                DELETE(url = "$BASE_URL/v1/series/${track.remoteId}/rating"),
+                DELETE(url = ratingUrl(track)),
             )
                 .awaitSuccess()
         }
@@ -237,5 +237,7 @@ internal class MangaUpdatesApi(
         private const val BASE_URL = "https://api.mangaupdates.com"
 
         private val CONTENT_TYPE = "application/json".toMediaType()
+
+        private fun ratingUrl(track: Track) = "$BASE_URL/v1/series/${track.remoteId}/rating"
     }
 }

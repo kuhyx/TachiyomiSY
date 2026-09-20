@@ -25,6 +25,10 @@ import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 
+private const val CONTENT_RATING = "contentRating[]"
+private const val INCLUDES = "includes[]"
+private const val LIMIT = "limit"
+
 internal class MangaDexService(
     private val client: OkHttpClient,
     private val headers: Headers,
@@ -39,8 +43,8 @@ internal class MangaDexService(
                     MdApi.manga.toHttpUrl()
                         .newBuilder()
                         .apply {
-                            addQueryParameter("includes[]", MdConstants.Types.coverArt)
-                            addQueryParameter("limit", ids.size.toString())
+                            addQueryParameter(INCLUDES, MdConstants.Types.coverArt)
+                            addQueryParameter(LIMIT, ids.size.toString())
                             ids.forEach {
                                 addQueryParameter("ids[]", it)
                             }
@@ -63,9 +67,9 @@ internal class MangaDexService(
                         .newBuilder()
                         .apply {
                             addPathSegment(id)
-                            addQueryParameter("includes[]", MdConstants.Types.coverArt)
-                            addQueryParameter("includes[]", MdConstants.Types.author)
-                            addQueryParameter("includes[]", MdConstants.Types.artist)
+                            addQueryParameter(INCLUDES, MdConstants.Types.coverArt)
+                            addQueryParameter(INCLUDES, MdConstants.Types.author)
+                            addQueryParameter(INCLUDES, MdConstants.Types.artist)
                         }
                         .build(),
                     headers = headers,
@@ -132,14 +136,14 @@ internal class MangaDexService(
             .apply {
                 addPathSegment(id)
                 addPathSegment("feed")
-                addQueryParameter("limit", "500")
-                addQueryParameter("includes[]", MdConstants.Types.scanlator)
+                addQueryParameter(LIMIT, "500")
+                addQueryParameter(INCLUDES, MdConstants.Types.scanlator)
                 addQueryParameter("order[volume]", "desc")
                 addQueryParameter("order[chapter]", "desc")
-                addQueryParameter("contentRating[]", "safe")
-                addQueryParameter("contentRating[]", "suggestive")
-                addQueryParameter("contentRating[]", "erotica")
-                addQueryParameter("contentRating[]", "pornographic")
+                addQueryParameter(CONTENT_RATING, "safe")
+                addQueryParameter(CONTENT_RATING, "suggestive")
+                addQueryParameter(CONTENT_RATING, "erotica")
+                addQueryParameter(CONTENT_RATING, "pornographic")
                 addQueryParameter("translatedLanguage[]", translatedLanguage)
                 addQueryParameter("offset", offset.toString())
                 blockedGroups.splitString().forEach {
@@ -228,7 +232,7 @@ internal class MangaDexService(
                             addQueryParameter("order[volume]", "asc")
                             addQueryParameter("manga[]", mangaData.id)
                             addQueryParameter("locales[]", mangaData.attributes.originalLanguage)
-                            addQueryParameter("limit", "1")
+                            addQueryParameter(LIMIT, "1")
                         }
                         .build(),
                     headers = headers,
