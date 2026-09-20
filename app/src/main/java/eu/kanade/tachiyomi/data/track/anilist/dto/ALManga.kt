@@ -40,9 +40,11 @@ internal data class ALManga(
             }
         }
         staff.edges.forEach {
-            val name = it.node.name() ?: return@forEach
-            if ("Story" in it.role) authors += name
-            if ("Art" in it.role) artists += name
+            val name = it.node.name()
+            if (name != null) {
+                if ("Story" in it.role) authors += name
+                if ("Art" in it.role) artists += name
+            }
         }
     }
 }

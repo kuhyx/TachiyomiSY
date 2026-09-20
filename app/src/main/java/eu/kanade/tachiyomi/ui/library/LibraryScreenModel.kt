@@ -406,14 +406,16 @@ internal class LibraryScreenModel(
         // SY <--
 
         val filterFnTracking: (LibraryItem) -> Boolean = tracking@{ item ->
-            if (isNotLoggedInAnyTrack || trackFiltersIsIgnored) return@tracking true
+            if (isNotLoggedInAnyTrack || trackFiltersIsIgnored) {
+                true
+            } else {
+                val mangaTracks = trackMap[item.id].orEmpty().map { it.trackerId }
 
-            val mangaTracks = trackMap[item.id].orEmpty().map { it.trackerId }
+                val isExcluded = excludedTracks.isNotEmpty() && mangaTracks.fastAny { it in excludedTracks }
+                val isIncluded = includedTracks.isEmpty() || mangaTracks.fastAny { it in includedTracks }
 
-            val isExcluded = excludedTracks.isNotEmpty() && mangaTracks.fastAny { it in excludedTracks }
-            val isIncluded = includedTracks.isEmpty() || mangaTracks.fastAny { it in includedTracks }
-
-            !isExcluded && isIncluded
+                !isExcluded && isIncluded
+            }
         }
 
         return fastFilter {
@@ -759,19 +761,21 @@ internal class LibraryScreenModel(
                         .let { if (amount != null) it.take(amount) else it }
                         .groupBy { it.mangaId }
                         .forEach ab@{ (mangaId, chapters) ->
-                            val mergedManga = mergedMangas[mangaId] ?: return@ab
-                            val downloadChapters = chapters.fastFilterNot { chapter ->
-                                downloadManager.queueState.value.fastAny { chapter.id == it.chapter.id } ||
-                                    downloadManager.isChapterDownloaded(
-                                        chapter.name,
-                                        chapter.scanlator,
-                                        chapter.url,
-                                        mergedManga.ogTitle,
-                                        mergedManga.source,
-                                    )
-                            }
+                            val mergedManga = mergedMangas[mangaId]
+                            if (mergedManga != null) {
+                                val downloadChapters = chapters.fastFilterNot { chapter ->
+                                    downloadManager.queueState.value.fastAny { chapter.id == it.chapter.id } ||
+                                        downloadManager.isChapterDownloaded(
+                                            chapter.name,
+                                            chapter.scanlator,
+                                            chapter.url,
+                                            mergedManga.ogTitle,
+                                            mergedManga.source,
+                                        )
+                                }
 
-                            downloadManager.downloadChapters(mergedManga, downloadChapters)
+                                downloadManager.downloadChapters(mergedManga, downloadChapters)
+                            }
                         }
 
                     return@forEach
@@ -809,19 +813,21 @@ internal class LibraryScreenModel(
                     getBookmarkedChaptersByMangaId.await(manga.id)
                         .groupBy { it.mangaId }
                         .forEach ab@{ (mangaId, chapters) ->
-                            val mergedManga = mergedMangas[mangaId] ?: return@ab
-                            val downloadChapters = chapters.fastFilterNot { chapter ->
-                                downloadManager.queueState.value.fastAny { chapter.id == it.chapter.id } ||
-                                    downloadManager.isChapterDownloaded(
-                                        chapter.name,
-                                        chapter.scanlator,
-                                        chapter.url,
-                                        mergedManga.ogTitle,
-                                        mergedManga.source,
-                                    )
-                            }
+                            val mergedManga = mergedMangas[mangaId]
+                            if (mergedManga != null) {
+                                val downloadChapters = chapters.fastFilterNot { chapter ->
+                                    downloadManager.queueState.value.fastAny { chapter.id == it.chapter.id } ||
+                                        downloadManager.isChapterDownloaded(
+                                            chapter.name,
+                                            chapter.scanlator,
+                                            chapter.url,
+                                            mergedManga.ogTitle,
+                                            mergedManga.source,
+                                        )
+                                }
 
-                            downloadManager.downloadChapters(mergedManga, downloadChapters)
+                                downloadManager.downloadChapters(mergedManga, downloadChapters)
+                            }
                         }
 
                     return@forEach

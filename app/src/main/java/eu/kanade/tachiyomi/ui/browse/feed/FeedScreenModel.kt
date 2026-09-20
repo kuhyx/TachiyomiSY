@@ -98,13 +98,15 @@ internal open class FeedScreenModel(
     fun init() {
         pushed = false
         screenModelScope.launchIO {
-            val newItems = state.value.items?.map { it.copy(results = null) } ?: return@launchIO
-            mutableState.update { state ->
-                state.copy(
-                    items = newItems,
-                )
+            val newItems = state.value.items?.map { it.copy(results = null) }
+            if (newItems != null) {
+                mutableState.update { state ->
+                    state.copy(
+                        items = newItems,
+                    )
+                }
+                getFeed(newItems)
             }
-            getFeed(newItems)
         }
     }
 

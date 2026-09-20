@@ -199,8 +199,10 @@ internal abstract class SearchScreenModel(
 
     fun setMigrateDialog(currentId: Long, target: Manga) {
         screenModelScope.launchIO {
-            val current = getManga.await(currentId) ?: return@launchIO
-            mutableState.update { it.copy(dialog = Dialog.Migrate(target, current)) }
+            val current = getManga.await(currentId)
+            if (current != null) {
+                mutableState.update { it.copy(dialog = Dialog.Migrate(target, current)) }
+            }
         }
     }
 

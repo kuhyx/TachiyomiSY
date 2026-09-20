@@ -232,9 +232,11 @@ internal class NotificationReceiver : BroadcastReceiver() {
     // @param mangaId id of manga
     private fun downloadChapters(chapterUrls: Array<String>, mangaId: Long) {
         launchIO {
-            val manga = getManga.await(mangaId) ?: return@launchIO
-            val chapters = chapterUrls.mapNotNull { getChapter.await(it, mangaId) }
-            downloadManager.downloadChapters(manga, chapters)
+            val manga = getManga.await(mangaId)
+            if (manga != null) {
+                val chapters = chapterUrls.mapNotNull { getChapter.await(it, mangaId) }
+                downloadManager.downloadChapters(manga, chapters)
+            }
         }
     }
 

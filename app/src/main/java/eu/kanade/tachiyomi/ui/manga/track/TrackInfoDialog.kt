@@ -246,12 +246,14 @@ internal data class TrackInfoDialogHomeScreen(
         fun registerEnhancedTracking(item: TrackItem) {
             item.tracker as EnhancedTracker
             screenModelScope.launchNonCancellable {
-                val manga = Injekt.get<GetManga>().await(mangaId) ?: return@launchNonCancellable
-                try {
-                    val matchResult = item.tracker.match(manga) ?: error("No match for ${manga.title}")
-                    item.tracker.register(matchResult, mangaId)
-                } catch (_: Exception) {
-                    withUIContext { Injekt.get<Application>().toast(MR.strings.error_no_match) }
+                val manga = Injekt.get<GetManga>().await(mangaId)
+                if (manga != null) {
+                    try {
+                        val matchResult = item.tracker.match(manga) ?: error("No match for ${manga.title}")
+                        item.tracker.register(matchResult, mangaId)
+                    } catch (_: Exception) {
+                        withUIContext { Injekt.get<Application>().toast(MR.strings.error_no_match) }
+                    }
                 }
             }
         }
@@ -777,10 +779,12 @@ internal data class TrackerSearchScreen(
             selected = state.selected,
             onSelectedChange = screenModel::updateSelection,
             onConfirmSelection = f@{ private: Boolean ->
-                val selected = state.selected ?: return@f
-                selected.private = private
-                screenModel.registerTracking(selected)
-                navigator.pop()
+                val selected = state.selected
+                if (selected != null) {
+                    selected.private = private
+                    screenModel.registerTracking(selected)
+                    navigator.pop()
+                }
             },
             onDismissRequest = navigator::pop,
             supportsPrivateTracking = screenModel.supportsPrivateTracking,

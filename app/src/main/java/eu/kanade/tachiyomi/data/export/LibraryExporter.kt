@@ -52,11 +52,14 @@ internal object LibraryExporter {
         }
         return rows.joinToString("\r\n") { columns ->
             columns.joinToString(",") columns@{ column ->
-                if (column.isNullOrBlank()) return@columns ""
-                if (escapeRequired.any { column.contains(it) }) {
-                    column.replace("\"", "\"\"").let { "\"$it\"" }
+                if (column.isNullOrBlank()) {
+                    ""
                 } else {
-                    column
+                    if (escapeRequired.any { column.contains(it) }) {
+                        column.replace("\"", "\"\"").let { "\"$it\"" }
+                    } else {
+                        column
+                    }
                 }
             }
         }

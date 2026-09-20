@@ -209,10 +209,11 @@ internal class AndroidSourceManager(
     private fun registerStubSource(source: StubSource) {
         scope.launch {
             val dbSource = sourceRepository.getStubSource(source.id)
-            if (dbSource == source) return@launch
-            sourceRepository.upsertStubSource(source.id, source.lang, source.name)
-            if (dbSource != null) {
-                downloadManager.renameSource(dbSource, source)
+            if (dbSource != source) {
+                sourceRepository.upsertStubSource(source.id, source.lang, source.name)
+                if (dbSource != null) {
+                    downloadManager.renameSource(dbSource, source)
+                }
             }
         }
     }

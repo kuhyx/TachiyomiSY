@@ -169,9 +169,11 @@ internal class ShikimoriApi(
                 // userRate data which will be null if the title is not in the user's list.
                 // If it was removed on Shikimori and is still linked in the app, notify user via returning null here
                 // which throws an exception at the Shikimori.refresh call
-                if (isRefresh && listResult?.userRate == null) return@with null
-
-                listResult?.toTrack(trackId)
+                if (isRefresh && listResult?.userRate == null) {
+                    null
+                } else {
+                    listResult?.toTrack(trackId)
+                }
             }
         }
     }

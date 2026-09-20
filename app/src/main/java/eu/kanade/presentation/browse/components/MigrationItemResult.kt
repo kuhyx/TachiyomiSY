@@ -83,12 +83,16 @@ internal fun MigrationItemResult(
                     result,
                 ) {
                     value = withIOContext {
-                        val manga = getManga(result) ?: return@withIOContext null
-                        Triple(
-                            manga,
-                            getChapterInfo(result),
-                            getSourceName(manga),
-                        )
+                        val manga = getManga(result)
+                        if (manga == null) {
+                            null
+                        } else {
+                            Triple(
+                                manga,
+                                getChapterInfo(result),
+                                getSourceName(manga),
+                            )
+                        }
                     }
                 }
                 if (item != null) {

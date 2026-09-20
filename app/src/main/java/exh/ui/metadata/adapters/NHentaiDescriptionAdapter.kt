@@ -47,9 +47,10 @@ internal fun NHentaiDescription(state: State.Success, openMetadataViewer: () -> 
             }
 
             meta.favoritesCount?.let {
-                if (it == 0L) return@let
-                binding.favorites.text = it.toString()
-                binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
+                if (it != 0L) {
+                    binding.favorites.text = it.toString()
+                    binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
+                }
             }
 
             binding.whenPosted.text = MetadataUtil.EX_DATE_FORMAT

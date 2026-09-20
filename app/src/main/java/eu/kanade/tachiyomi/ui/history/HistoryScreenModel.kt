@@ -120,8 +120,9 @@ internal class HistoryScreenModel(
     fun removeAllHistory() {
         screenModelScope.launchIO {
             val result = removeHistory.awaitAll()
-            if (!result) return@launchIO
-            _events.send(Event.HistoryCleared)
+            if (result) {
+                _events.send(Event.HistoryCleared)
+            }
         }
     }
 

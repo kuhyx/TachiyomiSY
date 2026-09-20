@@ -132,14 +132,16 @@ internal data class BrowseSourceScreen(
 
         val onHelpClick = { uriHandler.openUri(LocalSource.HELP_URL) }
         val onWebViewClick = f@{
-            val source = screenModel.source as? HttpSource ?: return@f
-            navigator.push(
-                WebViewScreen(
-                    url = source.getHomeUrl(),
-                    initialTitle = source.name,
-                    sourceId = source.id,
-                ),
-            )
+            val source = screenModel.source as? HttpSource
+            if (source != null) {
+                navigator.push(
+                    WebViewScreen(
+                        url = source.getHomeUrl(),
+                        initialTitle = source.name,
+                        sourceId = source.id,
+                    ),
+                )
+            }
         }
 
         LaunchedEffect(screenModel.source) {

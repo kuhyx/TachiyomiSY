@@ -73,15 +73,19 @@ internal class MigrationListScreenModel(
             val manga = mangaIds
                 .map {
                     async {
-                        val manga = getManga.await(it) ?: return@async null
-                        val chapterInfo = getChapterInfo(it)
-                        MigratingManga(
-                            manga = manga,
-                            chapterCount = chapterInfo.chapterCount,
-                            latestChapter = chapterInfo.latestChapter,
-                            source = sourceManager.getOrStub(manga.source).getNameForMangaInfo(),
-                            parentContext = screenModelScope.coroutineContext,
-                        )
+                        val manga = getManga.await(it)
+                        if (manga == null) {
+                            null
+                        } else {
+                            val chapterInfo = getChapterInfo(it)
+                            MigratingManga(
+                                manga = manga,
+                                chapterCount = chapterInfo.chapterCount,
+                                latestChapter = chapterInfo.latestChapter,
+                                source = sourceManager.getOrStub(manga.source).getNameForMangaInfo(),
+                                parentContext = screenModelScope.coroutineContext,
+                            )
+                        }
                     }
                 }
                 .awaitAll()
@@ -233,19 +237,23 @@ internal class MigrationListScreenModel(
         migratingManga.searchResult.value = SearchResult.Searching
         screenModelScope.launchIO {
             val result = migratingManga.migrationScope.async {
-                val manga = getManga.await(target) ?: return@async null
-                try {
-                    val source = sourceManager.get(manga.source)!!
-                    updateMangaFromRemote(
-                        source = source,
-                        manga = manga,
-                        fetchChapters = true,
-                        // SY -->
-                        throttleFunc = throttleManager::throttle,
-                        // SY <--
-                    ).getOrThrow().manga
-                } catch (_: Exception) {
+                val manga = getManga.await(target)
+                if (manga == null) {
                     null
+                } else {
+                    try {
+                        val source = sourceManager.get(manga.source)!!
+                        updateMangaFromRemote(
+                            source = source,
+                            manga = manga,
+                            fetchChapters = true,
+                            // SY -->
+                            throttleFunc = throttleManager::throttle,
+                            // SY <--
+                        ).getOrThrow().manga
+                    } catch (_: Exception) {
+                        null
+                    }
                 }
             }
                 .await()
@@ -324,20 +332,26 @@ internal class MigrationListScreenModel(
 
     fun migrateNow(mangaId: Long, replace: Boolean) {
         screenModelScope.launchIO {
-            val manga = items.find { it.manga.id == mangaId } ?: return@launchIO
-            val target = (manga.searchResult.value as? SearchResult.Success)?.manga ?: return@launchIO
-            migrateManga(current = manga.manga, target = target, replace = replace)
+            val manga = items.find { it.manga.id == mangaId }
+            if (manga != null) {
+                val target = (manga.searchResult.value as? SearchResult.Success)?.manga
+                if (target != null) {
+                    migrateManga(current = manga.manga, target = target, replace = replace)
 
-            removeManga(mangaId)
+                    removeManga(mangaId)
+                }
+            }
         }
     }
 
     fun removeManga(mangaId: Long) {
         screenModelScope.launchIO {
-            val item = items.find { it.manga.id == mangaId } ?: return@launchIO
-            removeManga(item)
-            item.migrationScope.cancel()
-            updateMigrationProgress()
+            val item = items.find { it.manga.id == mangaId }
+            if (item != null) {
+                removeManga(item)
+                item.migrationScope.cancel()
+                updateMigrationProgress()
+            }
         }
     }
 

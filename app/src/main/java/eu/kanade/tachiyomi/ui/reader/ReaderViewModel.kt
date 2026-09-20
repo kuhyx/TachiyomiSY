@@ -491,8 +491,10 @@ internal class ReaderViewModel @JvmOverloads constructor(
 
     fun loadNewChapterFromDialog(chapter: Chapter) {
         viewModelScope.launchIO {
-            val newChapter = chapterList.firstOrNull { it.chapter.id == chapter.id } ?: return@launchIO
-            loadAdjacent(newChapter)
+            val newChapter = chapterList.firstOrNull { it.chapter.id == chapter.id }
+            if (newChapter != null) {
+                loadAdjacent(newChapter)
+            }
         }
     }
 
@@ -619,20 +621,20 @@ internal class ReaderViewModel @JvmOverloads constructor(
                 // SY <--
                 manga.source,
             )
-            if (!isNextChapterDownloaded) return@launchIO
+            if (isNextChapterDownloaded) {
+                val chaptersToDownload = getNextChapters.await(manga.id, nextChapter.id!!).run {
+                    if (readerPreferences.skipDupe.get()) {
+                        removeDuplicates(nextChapter.toDomainChapter()!!)
+                    } else {
+                        this
+                    }
+                }.take(downloadAheadAmount)
 
-            val chaptersToDownload = getNextChapters.await(manga.id, nextChapter.id!!).run {
-                if (readerPreferences.skipDupe.get()) {
-                    removeDuplicates(nextChapter.toDomainChapter()!!)
-                } else {
-                    this
-                }
-            }.take(downloadAheadAmount)
-
-            downloadManager.downloadChapters(
-                manga,
-                chaptersToDownload,
-            )
+                downloadManager.downloadChapters(
+                    manga,
+                    chaptersToDownload,
+                )
+            }
         }
     }
 

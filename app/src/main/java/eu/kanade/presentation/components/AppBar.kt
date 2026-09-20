@@ -289,11 +289,12 @@ internal fun SearchToolbar(
             val focusManager = LocalFocusManager.current
 
             val searchAndClearFocus: () -> Unit = f@{
-                if (searchQuery.isBlank()) return@f
-                onSearch(searchQuery)
-                focusManager.clearFocus()
-                keyboardController?.hide()
-                focusManager.moveFocus(FocusDirection.Next)
+                if (searchQuery.isNotBlank()) {
+                    onSearch(searchQuery)
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    focusManager.moveFocus(FocusDirection.Next)
+                }
             }
 
             // Callers own the query as a String; the field's own state is bridged both ways.

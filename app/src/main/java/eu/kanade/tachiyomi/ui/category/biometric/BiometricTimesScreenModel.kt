@@ -67,10 +67,12 @@ internal class BiometricTimesScreenModel(
     fun deleteTimeRanges(timeRange: TimeRangeItem) {
         // todo usecase
         screenModelScope.launchIO {
-            val state = state.value as? BiometricTimesScreenState.Success ?: return@launchIO
-            preferences.authenticatorTimeRanges.set(
-                state.timeRanges.filterNot { it == timeRange }.map { it.timeRange.toPreferenceString() }.toSet(),
-            )
+            val state = state.value as? BiometricTimesScreenState.Success
+            if (state != null) {
+                preferences.authenticatorTimeRanges.set(
+                    state.timeRanges.filterNot { it == timeRange }.map { it.timeRange.toPreferenceString() }.toSet(),
+                )
+            }
         }
     }
 

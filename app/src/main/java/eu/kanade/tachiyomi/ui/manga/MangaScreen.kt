@@ -314,8 +314,9 @@ internal class MangaScreen(
                 val manga by sm.state.collectAsState()
                 if (manga != null) {
                     val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-                        if (it == null) return@rememberLauncherForActivityResult
-                        sm.editCover(context, it)
+                        if (it != null) {
+                            sm.editCover(context, it)
+                        }
                     }
                     MangaCoverDialog(
                         manga = manga!!,

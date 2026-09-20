@@ -26,43 +26,43 @@ internal class TrackChapter(
     suspend fun await(context: Context, mangaId: Long, chapterNumber: Double, setupJobOnFailure: Boolean = true) {
         withNonCancellableContext {
             val tracks = getTracks.await(mangaId)
-            if (tracks.isEmpty()) return@withNonCancellableContext
+            if (tracks.isNotEmpty()) {
+                tracks.mapNotNull { track ->
+                    val service = trackerManager.get(track.trackerId)
+                    // SY --> an unfollowed MangaDex entry is never updated
+                    val unfollowedMdList = service is MdList && track.status == FollowStatus.UNFOLLOWED.long
+                    // SY <--
+                    if (service == null || !service.isLoggedIn || unfollowedMdList) {
+                        return@mapNotNull null
+                    }
+                    if (chapterNumber <= track.lastChapterRead) {
+                        return@mapNotNull null
+                    }
 
-            tracks.mapNotNull { track ->
-                val service = trackerManager.get(track.trackerId)
-                // SY --> an unfollowed MangaDex entry is never updated
-                val unfollowedMdList = service is MdList && track.status == FollowStatus.UNFOLLOWED.long
-                // SY <--
-                if (service == null || !service.isLoggedIn || unfollowedMdList) {
-                    return@mapNotNull null
-                }
-                if (chapterNumber <= track.lastChapterRead) {
-                    return@mapNotNull null
-                }
-
-                async {
-                    runCatching {
-                        try {
-                            val updatedTrack = service.refresh(track.toDbTrack())
-                                .toDomainTrack(idRequired = true)!!
-                                .copy(lastChapterRead = chapterNumber)
-                            service.update(updatedTrack.toDbTrack(), true)
-                            insertTrack.await(updatedTrack)
-                            delayedTrackingStore.remove(track.id)
-                        } catch (expected: Exception) {
-                            // Rethrown (or wrapped) whatever the cause.
-                            delayedTrackingStore.add(track.id, chapterNumber)
-                            if (setupJobOnFailure) {
-                                DelayedTrackingUpdateJob.setupTask(context)
+                    async {
+                        runCatching {
+                            try {
+                                val updatedTrack = service.refresh(track.toDbTrack())
+                                    .toDomainTrack(idRequired = true)!!
+                                    .copy(lastChapterRead = chapterNumber)
+                                service.update(updatedTrack.toDbTrack(), true)
+                                insertTrack.await(updatedTrack)
+                                delayedTrackingStore.remove(track.id)
+                            } catch (expected: Exception) {
+                                // Rethrown (or wrapped) whatever the cause.
+                                delayedTrackingStore.add(track.id, chapterNumber)
+                                if (setupJobOnFailure) {
+                                    DelayedTrackingUpdateJob.setupTask(context)
+                                }
+                                throw expected
                             }
-                            throw expected
                         }
                     }
                 }
+                    .awaitAll()
+                    .mapNotNull { it.exceptionOrNull() }
+                    .forEach { logcat(LogPriority.WARN, it) }
             }
-                .awaitAll()
-                .mapNotNull { it.exceptionOrNull() }
-                .forEach { logcat(LogPriority.WARN, it) }
         }
     }
 }
