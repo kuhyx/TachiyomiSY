@@ -13,7 +13,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -26,7 +25,6 @@ import mihon.feature.migration.list.models.MigratingManga
 import mihon.feature.migration.list.models.MigratingManga.SearchResult
 import mihon.feature.migration.list.search.SmartSourceSearchEngine
 import tachiyomi.core.common.util.lang.launchIO
-import tachiyomi.core.common.util.lang.withUIContext
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.manga.interactor.GetManga
@@ -42,18 +40,18 @@ internal class MigrationListScreenModel(
     mangaIds: Collection<Long>,
     extraSearchQuery: String?,
     private val preferences: SourcePreferences = Injekt.get(),
-    private val sourceManager: SourceManager = Injekt.get(),
-    private val getManga: GetManga = Injekt.get(),
+    internal val sourceManager: SourceManager = Injekt.get(),
+    internal val getManga: GetManga = Injekt.get(),
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
     private val getChaptersByMangaId: GetChaptersByMangaId = Injekt.get(),
-    private val migrateManga: MigrateMangaUseCase = Injekt.get(),
-    private val updateMangaFromRemote: UpdateMangaFromRemote = Injekt.get(),
+    internal val migrateManga: MigrateMangaUseCase = Injekt.get(),
+    internal val updateMangaFromRemote: UpdateMangaFromRemote = Injekt.get(),
 ) : StateScreenModel<MigrationListScreenModel.State>(State()) {
 
     private val smartSearchEngine = SmartSourceSearchEngine(extraSearchQuery)
 
     // SY -->
-    private val throttleManager = ThrottleManager()
+    internal val throttleManager = ThrottleManager()
     // SY <--
 
     val items
@@ -62,10 +60,10 @@ internal class MigrationListScreenModel(
     private val hideUnmatched = preferences.migrationHideUnmatched.get()
     private val hideWithoutUpdates = preferences.migrationHideWithoutUpdates.get()
 
-    private val navigateBackChannel = Channel<Unit>()
+    internal val navigateBackChannel = Channel<Unit>()
     val navigateBackEvent = navigateBackChannel.receiveAsFlow()
 
-    private var migrateJob: Job? = null
+    internal var migrateJob: Job? = null
 
     init {
         screenModelScope.launchIO {
@@ -98,7 +96,7 @@ internal class MigrationListScreenModel(
         )
     }
 
-    private suspend fun Manga.toSuccessSearchResult(): SearchResult.Success {
+    internal suspend fun Manga.toSuccessSearchResult(): SearchResult.Success {
         val chapterInfo = getChapterInfo(id)
         val source = sourceManager.getOrStub(source).getNameForMangaInfo()
         return SearchResult.Success(
@@ -224,7 +222,7 @@ internal class MigrationListScreenModel(
         }
     }
 
-    private suspend fun updateMigrationProgress() {
+    internal suspend fun updateMigrationProgress() {
         mutableState.update { state ->
             state.copy(
                 finishedCount = items.count { it.searchResult.value != SearchResult.Searching },
@@ -239,128 +237,9 @@ internal class MigrationListScreenModel(
     private fun migrationComplete() = items.all { it.searchResult.value != SearchResult.Searching } &&
         items.any { it.searchResult.value is SearchResult.Success }
 
-    fun useMangaForMigration(current: Long, target: Long, onMissingChapters: () -> Unit) {
-        val migratingManga = items.find { it.manga.id == current } ?: return
-        migratingManga.searchResult.value = SearchResult.Searching
-        screenModelScope.launchIO {
-            val result = migratingManga.migrationScope.async {
-                getManga.await(target)?.let { manga ->
-                    try {
-                        val source = sourceManager.get(manga.source)!!
-                        updateMangaFromRemote(
-                            source = source,
-                            manga = manga,
-                            fetchChapters = true,
-                            // SY -->
-                            throttleFunc = throttleManager::throttle,
-                            // SY <--
-                        ).getOrThrow().manga
-                    } catch (_: Exception) {
-                        null
-                    }
-                }
-            }
-                .await()
-
-            if (result == null) {
-                migratingManga.searchResult.value = SearchResult.NotFound
-                withUIContext { onMissingChapters() }
-                return@launchIO
-            }
-
-            migratingManga.searchResult.value = result.toSuccessSearchResult()
-            updateMigrationProgress()
-        }
-    }
-
-    fun migrateMangas() {
-        migrateMangas(replace = true)
-    }
-
-    fun copyMangas() {
-        migrateMangas(replace = false)
-    }
-
-    private fun migrateMangas(replace: Boolean) {
-        migrateJob = screenModelScope.launchIO {
-            mutableState.update { it.copy(dialog = Dialog.Progress(0f)) }
-            val items = items
-            try {
-                items.forEachIndexed { index, manga ->
-                    try {
-                        ensureActive()
-                        val target = manga.searchResult.value.let {
-                            if (it is SearchResult.Success) {
-                                it.manga
-                            } else {
-                                null
-                            }
-                        }
-                        if (target != null) {
-                            migrateManga(
-                                current = manga.manga,
-                                target = target,
-                                replace = replace,
-                                // SY -->
-                                throttleFunc = throttleManager::throttle,
-                                // SY <--
-                            )
-                        }
-                    } catch (cancelled: CancellationException) {
-                        throw cancelled
-                    } catch (expected: Exception) {
-                        // Logged whatever the cause; the caller carries on.
-                        logcat(LogPriority.WARN, throwable = expected)
-                    }
-                    mutableState.update {
-                        it.copy(dialog = Dialog.Progress((index.toFloat() / items.size).coerceAtMost(1f)))
-                    }
-                }
-
-                navigateBack()
-            } finally {
-                mutableState.update { it.copy(dialog = null) }
-                migrateJob = null
-            }
-        }
-    }
-
-    fun cancelMigrate() {
-        migrateJob?.cancel()
-        migrateJob = null
-    }
-
-    private suspend fun navigateBack() {
-        navigateBackChannel.send(Unit)
-    }
-
-    fun migrateNow(mangaId: Long, replace: Boolean) {
-        screenModelScope.launchIO {
-            val manga = items.find { it.manga.id == mangaId }
-            if (manga != null) {
-                val target = (manga.searchResult.value as? SearchResult.Success)?.manga
-                if (target != null) {
-                    migrateManga(current = manga.manga, target = target, replace = replace)
-
-                    removeManga(mangaId)
-                }
-            }
-        }
-    }
-
-    fun removeManga(mangaId: Long) {
-        screenModelScope.launchIO {
-            val item = items.find { it.manga.id == mangaId }
-            if (item != null) {
-                removeManga(item)
-                item.cancelMigration()
-                updateMigrationProgress()
-            }
-        }
-    }
-
-    private fun removeManga(item: MigratingManga) {
-        mutableState.update { it.copy(items = items.toMutableList().apply { remove(item) }) }
+    /** Applies [func] to the state; the extension files reach the protected flow through it. */
+    internal fun updateState(func: (State) -> State) {
+        mutableState.update(func)
     }
 
     override fun onDispose() {
@@ -368,28 +247,6 @@ internal class MigrationListScreenModel(
         items.forEach {
             it.cancelMigration()
         }
-    }
-
-    fun showMigrateDialog(copy: Boolean) {
-        mutableState.update { state ->
-            state.copy(
-                dialog = Dialog.Migrate(
-                    copy = copy,
-                    totalCount = items.size,
-                    skippedCount = items.count { it.searchResult.value == SearchResult.NotFound },
-                ),
-            )
-        }
-    }
-
-    fun showExitDialog() {
-        mutableState.update {
-            it.copy(dialog = Dialog.Exit)
-        }
-    }
-
-    fun dismissDialog() {
-        mutableState.update { it.copy(dialog = null) }
     }
 
     data class ChapterInfo(

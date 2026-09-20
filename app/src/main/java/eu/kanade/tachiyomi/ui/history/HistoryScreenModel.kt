@@ -44,18 +44,18 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 internal class HistoryScreenModel(
-    private val addTracks: AddTracks = Injekt.get(),
-    private val getCategories: GetCategories = Injekt.get(),
-    private val getDuplicateLibraryManga: GetDuplicateLibraryManga = Injekt.get(),
+    internal val addTracks: AddTracks = Injekt.get(),
+    internal val getCategories: GetCategories = Injekt.get(),
+    internal val getDuplicateLibraryManga: GetDuplicateLibraryManga = Injekt.get(),
     private val getHistory: GetHistory = Injekt.get(),
-    private val getManga: GetManga = Injekt.get(),
+    internal val getManga: GetManga = Injekt.get(),
     private val getNextChapters: GetNextChapters = Injekt.get(),
-    private val libraryPreferences: LibraryPreferences = Injekt.get(),
-    private val removeHistory: RemoveHistory = Injekt.get(),
-    private val setMangaCategories: SetMangaCategories = Injekt.get(),
-    private val updateManga: UpdateManga = Injekt.get(),
+    internal val libraryPreferences: LibraryPreferences = Injekt.get(),
+    internal val removeHistory: RemoveHistory = Injekt.get(),
+    internal val setMangaCategories: SetMangaCategories = Injekt.get(),
+    internal val updateManga: UpdateManga = Injekt.get(),
     val snackbarHostState: SnackbarHostState = SnackbarHostState(),
-    private val sourceManager: SourceManager = Injekt.get(),
+    internal val sourceManager: SourceManager = Injekt.get(),
 ) : StateScreenModel<HistoryScreenModel.State>(State()) {
 
     private val _events: Channel<Event> = Channel(Channel.UNLIMITED)
@@ -79,6 +79,9 @@ internal class HistoryScreenModel(
         }
     }
 
+    /** Emits [event] to the tab; the extension files reach the private channel through it. */
+    internal suspend fun emit(event: Event) = _events.send(event)
+
     private fun List<HistoryWithRelations>.toHistoryUiModels(): List<HistoryUiModel> {
         return map { HistoryUiModel.Item(it) }
             .insertSeparators { before, after ->
@@ -94,6 +97,11 @@ internal class HistoryScreenModel(
 
     suspend fun getNextChapter(): Chapter? = withIOContext { getNextChapters.await(onlyUnread = false).firstOrNull() }
 
+    /** Applies [func] to the state; the extension files reach the protected flow through it. */
+    internal fun updateState(func: (State) -> State) {
+        mutableState.update(func)
+    }
+
     fun getNextChapterForManga(mangaId: Long, chapterId: Long) {
         screenModelScope.launchIO {
             sendNextChapterEvent(getNextChapters.await(mangaId, chapterId, onlyUnread = false))
@@ -105,112 +113,12 @@ internal class HistoryScreenModel(
         _events.send(Event.OpenChapter(chapter))
     }
 
-    fun removeFromHistory(history: HistoryWithRelations) {
-        screenModelScope.launchIO {
-            removeHistory.await(history)
-        }
-    }
-
-    fun removeAllFromHistory(mangaId: Long) {
-        screenModelScope.launchIO {
-            removeHistory.await(mangaId)
-        }
-    }
-
-    fun removeAllHistory() {
-        screenModelScope.launchIO {
-            val result = removeHistory.awaitAll()
-            if (result) {
-                _events.send(Event.HistoryCleared)
-            }
-        }
-    }
-
     fun updateSearchQuery(query: String?) {
         mutableState.update { it.copy(searchQuery = query) }
     }
 
     fun setDialog(dialog: Dialog?) {
         mutableState.update { it.copy(dialog = dialog) }
-    }
-
-    /**
-     * Get user categories.
-     *
-     * @return List of categories, not including the default category
-     */
-    suspend fun getCategories(): List<Category> = getCategories.await().filterNot { it.isSystemCategory }
-
-    private fun moveMangaToCategory(mangaId: Long, categories: Category?) {
-        val categoryIds = listOfNotNull(categories).map { it.id }
-        moveMangaToCategory(mangaId, categoryIds)
-    }
-
-    private fun moveMangaToCategory(mangaId: Long, categoryIds: List<Long>) {
-        screenModelScope.launchIO {
-            setMangaCategories.await(mangaId, categoryIds)
-        }
-    }
-
-    fun addToLibraryInCategories(manga: Manga, categories: List<Long>) {
-        moveMangaToCategory(manga.id, categories)
-        if (manga.favorite) return
-
-        screenModelScope.launchIO {
-            updateManga.awaitUpdateFavorite(manga.id, true)
-        }
-    }
-
-    private suspend fun getMangaCategoryIds(manga: Manga): List<Long> {
-        return getCategories.await(manga.id)
-            .map { it.id }
-    }
-
-    fun addFavorite(mangaId: Long) {
-        screenModelScope.launchIO {
-            val manga = getManga.await(mangaId) ?: return@launchIO
-
-            val duplicates = getDuplicateLibraryManga(manga)
-            if (duplicates.isNotEmpty()) {
-                mutableState.update { it.copy(dialog = Dialog.DuplicateManga(manga, duplicates)) }
-                return@launchIO
-            }
-
-            addFavorite(manga)
-        }
-    }
-
-    fun addFavorite(manga: Manga) {
-        screenModelScope.launchIO {
-            // Move to default category if applicable
-            val categories = getCategories()
-            val defaultCategoryId = libraryPreferences.defaultCategory.get().toLong()
-            val defaultCategory = categories.find { it.id == defaultCategoryId }
-
-            when {
-                // Default category set
-                defaultCategory != null -> {
-                    val result = updateManga.awaitUpdateFavorite(manga.id, true)
-                    if (!result) return@launchIO
-                    moveMangaToCategory(manga.id, defaultCategory)
-                }
-
-                // Automatic 'Default' or no categories
-                defaultCategoryId == 0L || categories.isEmpty() -> {
-                    val result = updateManga.awaitUpdateFavorite(manga.id, true)
-                    if (!result) return@launchIO
-                    moveMangaToCategory(manga.id, null)
-                }
-
-                // Choose a category
-                else -> {
-                    showChangeCategoryDialog(manga)
-                }
-            }
-
-            // Sync with tracking services if applicable
-            addTracks.bindEnhancedTrackers(manga, sourceManager.getOrStub(manga.source))
-        }
     }
 
     fun showMigrateDialog(target: Manga, current: Manga) {
