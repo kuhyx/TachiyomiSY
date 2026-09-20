@@ -104,6 +104,12 @@ import uy.kohesive.injekt.api.InjektRegistrar
 internal class DomainModule : InjektModule {
 
     override fun InjektRegistrar.registerInjectables() {
+        registerLibraryAndManga()
+        registerTracksAndChapters()
+        registerSourcesAndSync()
+    }
+
+    private fun InjektRegistrar.registerLibraryAndManga() {
         addSingletonFactory<CategoryRepository> { CategoryRepositoryImpl(get()) }
         addFactory { GetCategories(get()) }
         addFactory { ResetCategoryFlags(get(), get()) }
@@ -146,7 +152,9 @@ internal class DomainModule : InjektModule {
 
         addSingletonFactory<ReleaseService> { ReleaseServiceImpl(get(), get()) }
         addFactory { GetApplicationRelease(get(), get()) }
+    }
 
+    private fun InjektRegistrar.registerTracksAndChapters() {
         addSingletonFactory<TrackRepository> { TrackRepositoryImpl(get()) }
         addFactory { TrackChapter(get(), get(), get(), get()) }
         addFactory { AddTracks(get(), get(), get(), get()) }
@@ -187,7 +195,9 @@ internal class DomainModule : InjektModule {
 
         addSingletonFactory<UpdatesRepository> { UpdatesRepositoryImpl(get()) }
         addFactory { GetUpdates(get()) }
+    }
 
+    private fun InjektRegistrar.registerSourcesAndSync() {
         addSingletonFactory<SourceRepository> { SourceRepositoryImpl(get(), get()) }
         addSingletonFactory<StubSourceRepository> { StubSourceRepositoryImpl(get()) }
         addFactory { GetEnabledSources(get(), get()) }

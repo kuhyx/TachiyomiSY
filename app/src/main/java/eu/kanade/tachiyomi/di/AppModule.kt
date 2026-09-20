@@ -115,7 +115,17 @@ internal class AppModule(val app: Application) : InjektModule {
 
     override fun InjektRegistrar.registerInjectables() {
         addSingleton(app)
+        registerSerialization()
+        registerStorage()
+        registerSourcesAndDownloads()
+        // SY -->
+        addSingletonFactory { EHentaiUpdateHelper(app) }
+        addSingletonFactory { PagePreviewCache(app) }
+        addSingletonFactory { GoogleDriveService(app) }
+        // SY <--
+    }
 
+    private fun InjektRegistrar.registerSerialization() {
         addSingletonFactory<SqlDriver> { synchronized(lock) { sqlDriver() } }
         addSingletonFactory {
             Database(
@@ -154,12 +164,23 @@ internal class AppModule(val app: Application) : InjektModule {
         addSingletonFactory<ProtoBuf> {
             ProtoBuf
         }
+    }
 
+    private fun InjektRegistrar.registerStorage() {
         addSingletonFactory { UniFileTempFileManager(app) }
 
         addSingletonFactory { ChapterCache(app, get(), get()) }
         addSingletonFactory { CoverCache(app) }
 
+        addSingletonFactory { ImageSaver(app) }
+
+        addSingletonFactory { AndroidStorageFolderProvider(app) }
+        addSingletonFactory { LocalSourceFileSystem(get()) }
+        addSingletonFactory { LocalCoverManager(app, get()) }
+        addSingletonFactory { StorageManager(app, get()) }
+    }
+
+    private fun InjektRegistrar.registerSourcesAndDownloads() {
         addSingletonFactory { NetworkHelper(app, get(), BuildConfig.DEBUG) }
         addSingletonFactory { JavaScriptEngine(app) }
 
@@ -172,21 +193,6 @@ internal class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { TrackerManager() }
         addSingletonFactory { DelayedTrackingStore(app) }
-
-        addSingletonFactory { ImageSaver(app) }
-
-        addSingletonFactory { AndroidStorageFolderProvider(app) }
-        addSingletonFactory { LocalSourceFileSystem(get()) }
-        addSingletonFactory { LocalCoverManager(app, get()) }
-        addSingletonFactory { StorageManager(app, get()) }
-
-        // SY -->
-        addSingletonFactory { EHentaiUpdateHelper(app) }
-
-        addSingletonFactory { PagePreviewCache(app) }
-
-        addSingletonFactory { GoogleDriveService(app) }
-        // SY <--
     }
 }
 

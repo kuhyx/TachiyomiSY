@@ -79,6 +79,11 @@ import xyz.nulldev.ts.api.http.serializer.FilterSerializer
 internal class SYDomainModule : InjektModule {
 
     override fun InjektRegistrar.registerInjectables() {
+        registerSourcesAndMetadata()
+        registerFavoritesAndFeeds()
+    }
+
+    private fun InjektRegistrar.registerSourcesAndMetadata() {
         addFactory { GetShowLatest(get()) }
         addFactory { ToggleExcludeFromDataSaver(get()) }
         addFactory { SetSourceCategories(get()) }
@@ -125,7 +130,9 @@ internal class SYDomainModule : InjektModule {
         addFactory { DeleteByMergeId(get()) }
         addFactory { DeleteMergeById(get()) }
         addFactory { GetMergedMangaForDownloading(get()) }
+    }
 
+    private fun InjektRegistrar.registerFavoritesAndFeeds() {
         addSingletonFactory<FavoritesEntryRepository> { FavoritesEntryRepositoryImpl(get()) }
         addFactory { GetFavoriteEntries(get()) }
         addFactory { InsertFavoriteEntries(get()) }

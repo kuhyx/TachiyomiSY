@@ -9,68 +9,7 @@ internal class EhUConfigBuilder {
     private val exhPreferences: ExhPreferences by injectLazy()
 
     fun build(hathPerks: EHHathPerksResponse): FormBody {
-        val configItems = mutableListOf<ConfigItem>()
-
-        configItems += when (
-            exhPreferences.imageQuality
-                .get()
-                .lowercase(Locale.getDefault())
-        ) {
-            "ovrs_2400" -> Entry.ImageSize.PX_2400
-            "ovrs_1600" -> Entry.ImageSize.PX_1600
-            "high" -> Entry.ImageSize.PX_1280
-            "med" -> Entry.ImageSize.PX_980
-            "low" -> Entry.ImageSize.PX_780
-            "auto" -> Entry.ImageSize.AUTO
-            else -> Entry.ImageSize.AUTO
-        }
-
-        configItems += when (exhPreferences.useHentaiAtHome.get()) {
-            2 -> Entry.UseHentaiAtHome.NO
-            1 -> Entry.UseHentaiAtHome.DEFAULTONLY
-            else -> Entry.UseHentaiAtHome.ANY
-        }
-
-        configItems += if (exhPreferences.useJapaneseTitle.get()) {
-            Entry.TitleDisplayLanguage.JAPANESE
-        } else {
-            Entry.TitleDisplayLanguage.DEFAULT
-        }
-
-        configItems += if (exhPreferences.exhUseOriginalImages.get()) {
-            Entry.UseOriginalImages.YES
-        } else {
-            Entry.UseOriginalImages.NO
-        }
-
-        configItems += when {
-            hathPerks.allThumbs -> Entry.ThumbnailRows.ROWS_40
-            hathPerks.thumbsUp -> Entry.ThumbnailRows.ROWS_20
-            hathPerks.moreThumbs -> Entry.ThumbnailRows.ROWS_10
-            else -> Entry.ThumbnailRows.ROWS_4
-        }
-
-        configItems += when {
-            hathPerks.pagingEnlargementIII -> Entry.SearchResultsCount.COUNT_200
-            hathPerks.pagingEnlargementII -> Entry.SearchResultsCount.COUNT_100
-            hathPerks.pagingEnlargementI -> Entry.SearchResultsCount.COUNT_50
-            else -> Entry.SearchResultsCount.COUNT_25
-        }
-
-        configItems += Entry.DisplayMode()
-        configItems += Entry.UseMPV()
-        configItems += Entry.ShowPopularRightNowPane()
-
-        configItems += Entry.TagFilteringThreshold(exhPreferences.ehTagFilterValue.get())
-        configItems += Entry.TagWatchingThreshold(exhPreferences.ehTagWatchingValue.get())
-
-        configItems += Entry.LanguageSystem().getLanguages(exhPreferences.exhSettingsLanguages.get().split("\n"))
-
-        configItems += Entry.Categories().categoryConfigs(
-            exhPreferences.exhEnabledCategories.get().split(",").map {
-                it.toBoolean()
-            },
-        )
+        val configItems = preferenceEntries() + perkEntries(hathPerks) + fixedEntries()
 
         // Actually build form body
         val formBody = FormBody.Builder()
@@ -80,6 +19,59 @@ internal class EhUConfigBuilder {
         formBody.add("apply", "Apply")
         return formBody.build()
     }
+
+    // The entries the user's preferences decide.
+    private fun preferenceEntries(): List<ConfigItem> = listOf(
+        when (exhPreferences.imageQuality.get().lowercase(Locale.getDefault())) {
+            "ovrs_2400" -> Entry.ImageSize.PX_2400
+            "ovrs_1600" -> Entry.ImageSize.PX_1600
+            "high" -> Entry.ImageSize.PX_1280
+            "med" -> Entry.ImageSize.PX_980
+            "low" -> Entry.ImageSize.PX_780
+            "auto" -> Entry.ImageSize.AUTO
+            else -> Entry.ImageSize.AUTO
+        },
+        when (exhPreferences.useHentaiAtHome.get()) {
+            2 -> Entry.UseHentaiAtHome.NO
+            1 -> Entry.UseHentaiAtHome.DEFAULTONLY
+            else -> Entry.UseHentaiAtHome.ANY
+        },
+        if (exhPreferences.useJapaneseTitle.get()) {
+            Entry.TitleDisplayLanguage.JAPANESE
+        } else {
+            Entry.TitleDisplayLanguage.DEFAULT
+        },
+        if (exhPreferences.exhUseOriginalImages.get()) {
+            Entry.UseOriginalImages.YES
+        } else {
+            Entry.UseOriginalImages.NO
+        },
+        Entry.TagFilteringThreshold(exhPreferences.ehTagFilterValue.get()),
+        Entry.TagWatchingThreshold(exhPreferences.ehTagWatchingValue.get()),
+    ) + Entry.LanguageSystem().getLanguages(exhPreferences.exhSettingsLanguages.get().split("\n")) +
+        Entry.Categories().categoryConfigs(exhPreferences.exhEnabledCategories.get().split(",").map { it.toBoolean() })
+
+    // The entries the account's Hath perks unlock.
+    private fun perkEntries(hathPerks: EHHathPerksResponse): List<ConfigItem> = listOf(
+        when {
+            hathPerks.allThumbs -> Entry.ThumbnailRows.ROWS_40
+            hathPerks.thumbsUp -> Entry.ThumbnailRows.ROWS_20
+            hathPerks.moreThumbs -> Entry.ThumbnailRows.ROWS_10
+            else -> Entry.ThumbnailRows.ROWS_4
+        },
+        when {
+            hathPerks.pagingEnlargementIII -> Entry.SearchResultsCount.COUNT_200
+            hathPerks.pagingEnlargementII -> Entry.SearchResultsCount.COUNT_100
+            hathPerks.pagingEnlargementI -> Entry.SearchResultsCount.COUNT_50
+            else -> Entry.SearchResultsCount.COUNT_25
+        },
+    )
+
+    private fun fixedEntries(): List<ConfigItem> = listOf(
+        Entry.DisplayMode(),
+        Entry.UseMPV(),
+        Entry.ShowPopularRightNowPane(),
+    )
 }
 
 internal object Entry {
