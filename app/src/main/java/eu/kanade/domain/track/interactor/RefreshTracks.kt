@@ -24,12 +24,12 @@ internal class RefreshTracks(
      */
     suspend fun await(mangaId: Long): List<Pair<Tracker?, Throwable>> {
         return supervisorScope {
-            return@supervisorScope getTracks.await(mangaId)
+            getTracks.await(mangaId)
                 .map { it to trackerManager.get(it.trackerId) }
                 .filter { (_, service) -> service?.isLoggedIn == true }
                 .map { (track, service) ->
                     async {
-                        return@async try {
+                        try {
                             val updatedTrack = service!!.refresh(track.toDbTrack()).toDomainTrack()!!
                             insertTrack.await(updatedTrack)
                             syncChapterProgressWithTrack.await(mangaId, updatedTrack, service)

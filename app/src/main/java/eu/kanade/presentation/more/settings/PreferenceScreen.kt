@@ -52,22 +52,22 @@ internal fun PreferenceScreen(
             when (preference) {
                 // Create Preference Group
                 is Preference.PreferenceGroup -> {
-                    if (!preference.enabled) return@fastForEachIndexed
-
-                    item {
-                        Column {
-                            PreferenceGroupHeader(title = preference.title)
+                    if (preference.enabled) {
+                        item {
+                            Column {
+                                PreferenceGroupHeader(title = preference.title)
+                            }
                         }
-                    }
-                    items(preference.preferenceItems) { item ->
-                        PreferenceItem(
-                            item = item,
-                            highlightKey = highlightKey,
-                        )
-                    }
-                    item {
-                        if (i < items.lastIndex) {
-                            Spacer(modifier = Modifier.height(12.dp))
+                        items(preference.preferenceItems) { item ->
+                            PreferenceItem(
+                                item = item,
+                                highlightKey = highlightKey,
+                            )
+                        }
+                        item {
+                            if (i < items.lastIndex) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                            }
                         }
                     }
                 }

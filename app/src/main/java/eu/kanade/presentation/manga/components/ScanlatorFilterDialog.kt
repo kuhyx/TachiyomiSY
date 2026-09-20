@@ -46,7 +46,7 @@ internal fun ScanlatorFilterDialog(
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(text = stringResource(MR.strings.exclude_scanlators)) },
-        text = textFunc@{
+        text = {
             if (sortedAvailableScanlators.isEmpty()) {
                 Text(text = stringResource(MR.strings.no_scanlators_found))
             } else {

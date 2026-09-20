@@ -13,12 +13,14 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.lang.withNonCancellableContext
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
+import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.history.interactor.GetHistory
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.track.interactor.InsertTrack
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.time.ZoneOffset
+import tachiyomi.domain.track.model.Track as DomainTrack
 
 internal class AddTracks(
     private val insertTrack: InsertTrack,
@@ -34,48 +36,59 @@ internal class AddTracks(
             val hasReadChapters = allChapters.any { it.read }
             tracker.bind(item, hasReadChapters)
 
-            var track = item.toDomainTrack(idRequired = false) ?: return@withIOContext
+            item.toDomainTrack(idRequired = false)
+                ?.let { bindTrack(tracker, it, mangaId, allChapters, hasReadChapters) }
+        }
+    }
 
-            insertTrack.await(track)
+    // Stores the bound track, pushes newer local progress and the first-read date to the tracker.
+    private suspend fun bindTrack(
+        tracker: Tracker,
+        boundTrack: DomainTrack,
+        mangaId: Long,
+        allChapters: List<Chapter>,
+        hasReadChapters: Boolean,
+    ) {
+        var track = boundTrack
+        insertTrack.await(track)
 
-            // Follow-up: merge into [SyncChapterProgressWithTrack]? (https://github.com/kuhyx/TachiyomiSY/issues/7)
-            // Update chapter progress if newer chapters marked read locally
-            if (hasReadChapters) {
-                val latestLocalReadChapterNumber = allChapters
-                    .sortedBy { it.chapterNumber }
-                    .takeWhile { it.read }
-                    .lastOrNull()
-                    ?.chapterNumber
-                    ?: -1.0
+        // Follow-up: merge into [SyncChapterProgressWithTrack]? (https://github.com/kuhyx/TachiyomiSY/issues/7)
+        // Update chapter progress if newer chapters marked read locally
+        if (hasReadChapters) {
+            val latestLocalReadChapterNumber = allChapters
+                .sortedBy { it.chapterNumber }
+                .takeWhile { it.read }
+                .lastOrNull()
+                ?.chapterNumber
+                ?: -1.0
 
-                if (latestLocalReadChapterNumber > track.lastChapterRead) {
-                    track = track.copy(
-                        lastChapterRead = latestLocalReadChapterNumber,
-                    )
-                    tracker.setRemoteLastChapterRead(track.toDbTrack(), latestLocalReadChapterNumber.toInt())
-                }
-
-                if (track.startDate <= 0) {
-                    val firstReadChapterDate = Injekt.get<GetHistory>().await(mangaId)
-                        .sortedBy { it.readAt }
-                        .firstOrNull()
-                        ?.readAt
-
-                    firstReadChapterDate?.let {
-                        val startDate = firstReadChapterDate.time.convertEpochMillisZone(
-                            ZoneOffset.systemDefault(),
-                            ZoneOffset.UTC,
-                        )
-                        track = track.copy(
-                            startDate = startDate,
-                        )
-                        tracker.setRemoteStartDate(track.toDbTrack(), startDate)
-                    }
-                }
+            if (latestLocalReadChapterNumber > track.lastChapterRead) {
+                track = track.copy(
+                    lastChapterRead = latestLocalReadChapterNumber,
+                )
+                tracker.setRemoteLastChapterRead(track.toDbTrack(), latestLocalReadChapterNumber.toInt())
             }
 
-            syncChapterProgressWithTrack.await(mangaId, track, tracker)
+            if (track.startDate <= 0) {
+                val firstReadChapterDate = Injekt.get<GetHistory>().await(mangaId)
+                    .sortedBy { it.readAt }
+                    .firstOrNull()
+                    ?.readAt
+
+                firstReadChapterDate?.let {
+                    val startDate = firstReadChapterDate.time.convertEpochMillisZone(
+                        ZoneOffset.systemDefault(),
+                        ZoneOffset.UTC,
+                    )
+                    track = track.copy(
+                        startDate = startDate,
+                    )
+                    tracker.setRemoteStartDate(track.toDbTrack(), startDate)
+                }
+            }
         }
+
+        syncChapterProgressWithTrack.await(mangaId, track, tracker)
     }
 
     suspend fun bindEnhancedTrackers(manga: Manga, source: Source) = withNonCancellableContext {

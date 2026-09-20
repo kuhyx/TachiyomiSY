@@ -70,6 +70,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -92,6 +93,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
+import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.findChildOfType
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
@@ -196,7 +198,7 @@ internal fun MangaActionRow(
 
     // Follow-up: show something better when using custom interval (https://github.com/kuhyx/TachiyomiSY/issues/12)
     val nextUpdateDays = remember(nextUpdate) {
-        return@remember nextUpdate?.let { Instant.now().until(it, ChronoUnit.DAYS).toInt().coerceAtLeast(0) }
+        nextUpdate?.let { Instant.now().until(it, ChronoUnit.DAYS).toInt().coerceAtLeast(0) }
     }
 
     Row(modifier = modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp)) {
@@ -610,29 +612,7 @@ private fun descriptionAnnotator(loadImages: Boolean, linkStyle: SpanStyle) = re
     markdownAnnotator(
         annotate = { content, child ->
             if (!loadImages && child.type == MarkdownElementTypes.IMAGE) {
-                val inlineLink = child.findChildOfType(MarkdownElementTypes.INLINE_LINK)
-
-                val url = inlineLink?.findChildOfType(MarkdownElementTypes.LINK_DESTINATION)
-                    ?.getUnescapedTextInNode(content)
-                    ?: inlineLink?.findChildOfType(MarkdownElementTypes.AUTOLINK)
-                        ?.findChildOfType(MarkdownTokenTypes.AUTOLINK)
-                        ?.getUnescapedTextInNode(content)
-                    ?: return@markdownAnnotator false
-
-                val textNode = inlineLink?.findChildOfType(MarkdownElementTypes.LINK_TITLE)
-                    ?: inlineLink?.findChildOfType(MarkdownElementTypes.LINK_TEXT)
-                val altText = textNode?.findChildOfType(MarkdownTokenTypes.TEXT)
-                    ?.getUnescapedTextInNode(content)
-                    .orEmpty()
-
-                withLink(LinkAnnotation.Url(url = url)) {
-                    pushStyle(linkStyle)
-                    appendInlineContent(MARKDOWN_INLINE_IMAGE_TAG)
-                    append(altText)
-                    pop()
-                }
-
-                true
+                annotateImageAsLink(content, child, linkStyle)
             } else {
                 if (child.type in DISALLOWED_MARKDOWN_TYPES) {
                     append(content.substring(child.startOffset, child.endOffset))
@@ -769,4 +749,35 @@ private fun RowScope.MangaActionButton(
             )
         }
     }
+}
+
+// Renders an image node as a link to it (images are off); false when the node has no destination.
+private fun AnnotatedString.Builder.annotateImageAsLink(
+    content: String,
+    child: ASTNode,
+    linkStyle: SpanStyle,
+): Boolean {
+    val inlineLink = child.findChildOfType(MarkdownElementTypes.INLINE_LINK)
+
+    val url = inlineLink?.findChildOfType(MarkdownElementTypes.LINK_DESTINATION)
+        ?.getUnescapedTextInNode(content)
+        ?: inlineLink?.findChildOfType(MarkdownElementTypes.AUTOLINK)
+            ?.findChildOfType(MarkdownTokenTypes.AUTOLINK)
+            ?.getUnescapedTextInNode(content)
+        ?: return false
+
+    val textNode = inlineLink?.findChildOfType(MarkdownElementTypes.LINK_TITLE)
+        ?: inlineLink?.findChildOfType(MarkdownElementTypes.LINK_TEXT)
+    val altText = textNode?.findChildOfType(MarkdownTokenTypes.TEXT)
+        ?.getUnescapedTextInNode(content)
+        .orEmpty()
+
+    withLink(LinkAnnotation.Url(url = url)) {
+        pushStyle(linkStyle)
+        appendInlineContent(MARKDOWN_INLINE_IMAGE_TAG)
+        append(altText)
+        pop()
+    }
+
+    return true
 }

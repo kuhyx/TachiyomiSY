@@ -72,7 +72,7 @@ internal fun SetIntervalDialog(
     var selectedInterval by rememberSaveable { mutableIntStateOf(if (interval < 0) -interval else 0) }
 
     val nextUpdateDays = remember(nextUpdate) {
-        return@remember nextUpdate?.let { Instant.now().until(it, ChronoUnit.DAYS).toInt().coerceAtLeast(0) }
+        nextUpdate?.let { Instant.now().until(it, ChronoUnit.DAYS).toInt().coerceAtLeast(0) }
     }
 
     AlertDialog(
