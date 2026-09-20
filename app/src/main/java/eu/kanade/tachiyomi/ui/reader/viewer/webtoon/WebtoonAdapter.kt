@@ -26,8 +26,7 @@ internal class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<
     var currentChapter: ReaderChapter? = null
 
     // Context that has been wrapped to use the correct theme values based on the
-    // current app theme and reader background color
-    // . */
+    // current app theme and reader background color.
     private var readerThemedContext = viewer.activity.createReaderThemeContext()
 
     /**

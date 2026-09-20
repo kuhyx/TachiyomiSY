@@ -39,13 +39,6 @@ import tachiyomi.presentation.core.components.material.IconButtonTokens
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
-internal enum class ChapterDownloadAction {
-    START,
-    START_NOW,
-    CANCEL,
-    DELETE,
-}
-
 @Composable
 internal fun ChapterDownloadIndicator(
     enabled: Boolean,

@@ -23,8 +23,8 @@ internal class FollowsHandler(
 ) {
 
     /**
-     * fetch follows page
-. */
+     * fetch follows page.
+     */
     suspend fun fetchFollows(page: Int): MetadataMangasPage {
         return withIOContext {
             val follows = service.userFollowList(MdUtil.mangaLimit * page)
@@ -42,8 +42,7 @@ internal class FollowsHandler(
     }
 
     // Parse follows api to manga page
-    // used when multiple follows
-    // . */
+    // used when multiple follows.
     private fun followsParseMangaPage(
         response: List<MangaDataDto>,
         statuses: Map<String, String?>,
@@ -62,8 +61,8 @@ internal class FollowsHandler(
     }
 
     /**
-     * Change the status of a manga
-. */
+     * Change the status of a manga.
+     */
     suspend fun updateFollowStatus(mangaId: String, followStatus: FollowStatus): Boolean {
         return withIOContext {
             val status = when (followStatus == FollowStatus.UNFOLLOWED) {
@@ -85,11 +84,11 @@ internal class FollowsHandler(
     /*suspend fun updateReadingProgress(track: Track): Boolean {
         return true
         return withIOContext {
-            val mangaID = getMangaId(track.tracking_url)
+            val mangaID = getMangaId(track.trackingUrl)
             val formBody = FormBody.Builder()
                 .add("volume", "0")
-                .add("chapter", track.last_chapter_read.toString())
-            XLog.d("chapter to update %s", track.last_chapter_read.toString())
+                .add("chapter", track.lastChapterRead.toString())
+            XLog.d("chapter to update %s", track.lastChapterRead.toString())
             val result = runCatching {
                 client.newCall(
                     POST(
@@ -113,7 +112,7 @@ internal class FollowsHandler(
 
     suspend fun updateRating(track: Track): Boolean {
         return withIOContext {
-            val mangaId = MdUtil.getMangaId(track.tracking_url)
+            val mangaId = MdUtil.getMangaId(track.trackingUrl)
             val result = runCatching {
                 if (track.score == 0.0) {
                     service.deleteMangaRating(mangaId)
@@ -126,8 +125,8 @@ internal class FollowsHandler(
     }
 
     /**
-     * fetch all manga from all possible pages
-. */
+     * fetch all manga from all possible pages.
+     */
     suspend fun fetchAllFollows(): List<Pair<SManga, MangaDexSearchMetadata>> {
         return withIOContext {
             val results = async {
@@ -155,7 +154,7 @@ internal class FollowsHandler(
             Track.create(TrackerManager.MDLIST).apply {
                 title = ""
                 status = followStatus.long
-                tracking_url = url
+                trackingUrl = url
                 score = rating?.rating?.toDouble() ?: 0.0
             }
         }

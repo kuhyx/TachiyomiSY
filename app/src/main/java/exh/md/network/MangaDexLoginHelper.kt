@@ -23,8 +23,8 @@ internal class MangaDexLoginHelper(
 ) {
 
     /**
-     *  Login given the generated authorization code
-. */
+     *  Login given the generated authorization code.
+     */
     suspend fun login(authorizationCode: String): Boolean {
         val loginFormBody = FormBody.Builder()
             .add("client_id", MdConstants.Login.clientId)

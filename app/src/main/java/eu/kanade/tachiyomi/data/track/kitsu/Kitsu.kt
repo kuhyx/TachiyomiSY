@@ -70,13 +70,13 @@ internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         if (track.status != COMPLETED) {
             if (didReadChapter) {
-                if (track.last_chapter_read.toLong() == track.total_chapters && track.total_chapters > 0) {
+                if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
                     track.status = COMPLETED
-                    track.finished_reading_date = System.currentTimeMillis()
+                    track.finishedReadingDate = System.currentTimeMillis()
                 } else {
                     track.status = READING
-                    if (track.last_chapter_read == 1.0) {
-                        track.started_reading_date = System.currentTimeMillis()
+                    if (track.lastChapterRead == 1.0) {
+                        track.startedReadingDate = System.currentTimeMillis()
                     }
                 }
             }
@@ -93,8 +93,8 @@ internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
         val remoteTrack = api.findLibManga(track, getUserId())
         return if (remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack, copyRemotePrivate = false)
-            track.remote_id = remoteTrack.remote_id
-            track.library_id = remoteTrack.library_id
+            track.remoteId = remoteTrack.remoteId
+            track.libraryId = remoteTrack.libraryId
 
             if (track.status != COMPLETED) {
                 track.status = if (hasReadChapters) READING else track.status
@@ -113,7 +113,7 @@ internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.getLibManga(track)
         track.copyPersonalFrom(remoteTrack)
-        track.total_chapters = remoteTrack.total_chapters
+        track.totalChapters = remoteTrack.totalChapters
         return track
     }
 

@@ -14,5 +14,9 @@ internal class SourcesScreen(private val smartSearchConfig: SmartSearchConfig?) 
         BrowseTabWrapper(sourcesTab(smartSearchConfig), onBackPressed = navigator::pop)
     }
 
-    data class SmartSearchConfig(val origTitle: String, val origMangaId: Long? = null) : Serializable
+    data class SmartSearchConfig(val origTitle: String, val origMangaId: Long? = null) : Serializable {
+        private companion object {
+            private const val serialVersionUID: Long = 1L
+        }
+    }
 }

@@ -45,7 +45,7 @@ internal class MangaUpdatesApi(
 
     suspend fun getSeriesListItem(track: Track): Pair<MUListItem, MURating?> {
         val listItem = with(json) {
-            authClient.newCall(GET("$BASE_URL/v1/lists/series/${track.remote_id}"))
+            authClient.newCall(GET("$BASE_URL/v1/lists/series/${track.remoteId}"))
                 .awaitSuccess()
                 .parseAs<MUListItem>()
         }
@@ -60,7 +60,7 @@ internal class MangaUpdatesApi(
         val body = buildJsonArray {
             addJsonObject {
                 putJsonObject("series") {
-                    put("id", track.remote_id)
+                    put("id", track.remoteId)
                 }
                 put("list_id", status)
             }
@@ -75,7 +75,7 @@ internal class MangaUpdatesApi(
             .let {
                 if (it.code == 200) {
                     track.status = status
-                    track.last_chapter_read = 1.0
+                    track.lastChapterRead = 1.0
                 }
             }
     }
@@ -84,11 +84,11 @@ internal class MangaUpdatesApi(
         val body = buildJsonArray {
             addJsonObject {
                 putJsonObject("series") {
-                    put("id", track.remote_id)
+                    put("id", track.remoteId)
                 }
                 put("list_id", track.status)
                 putJsonObject("status") {
-                    put("chapter", track.last_chapter_read.toInt())
+                    put("chapter", track.lastChapterRead.toInt())
                 }
             }
         }
@@ -119,7 +119,7 @@ internal class MangaUpdatesApi(
     private suspend fun getSeriesRating(track: Track): MURating? {
         return try {
             with(json) {
-                authClient.newCall(GET("$BASE_URL/v1/series/${track.remote_id}/rating"))
+                authClient.newCall(GET("$BASE_URL/v1/series/${track.remoteId}/rating"))
                     .awaitSuccess()
                     .parseAs<MURating>()
             }
@@ -136,14 +136,14 @@ internal class MangaUpdatesApi(
             }
             authClient.newCall(
                 PUT(
-                    url = "$BASE_URL/v1/series/${track.remote_id}/rating",
+                    url = "$BASE_URL/v1/series/${track.remoteId}/rating",
                     body = body.toString().toRequestBody(CONTENT_TYPE),
                 ),
             )
                 .awaitSuccess()
         } else {
             authClient.newCall(
-                DELETE(url = "$BASE_URL/v1/series/${track.remote_id}/rating"),
+                DELETE(url = "$BASE_URL/v1/series/${track.remoteId}/rating"),
             )
                 .awaitSuccess()
         }

@@ -64,15 +64,15 @@ internal class KomgaApi(
                     }
 
                 track.apply {
-                    cover_url = "$url/thumbnail"
-                    tracking_url = url
-                    total_chapters = progress.maxNumberSort.toLong()
+                    coverUrl = "$url/thumbnail"
+                    trackingUrl = url
+                    totalChapters = progress.maxNumberSort.toLong()
                     status = when (progress.booksCount) {
                         progress.booksUnreadCount -> Komga.UNREAD
                         progress.booksReadCount -> Komga.COMPLETED
                         else -> Komga.READING
                     }
-                    last_chapter_read = progress.lastReadContinuousNumberSort
+                    lastChapterRead = progress.lastReadContinuousNumberSort
                 }
             } catch (e: Exception) {
                 logcat(LogPriority.WARN, e) { "Could not get item: $url" }
@@ -81,26 +81,26 @@ internal class KomgaApi(
         }
 
     suspend fun updateProgress(track: Track): Track {
-        val payload = if (track.tracking_url.contains("/api/v1/series/")) {
-            json.encodeToString(ReadProgressUpdateV2Dto(track.last_chapter_read))
+        val payload = if (track.trackingUrl.contains("/api/v1/series/")) {
+            json.encodeToString(ReadProgressUpdateV2Dto(track.lastChapterRead))
         } else {
-            json.encodeToString(ReadProgressUpdateDto(track.last_chapter_read.toInt()))
+            json.encodeToString(ReadProgressUpdateDto(track.lastChapterRead.toInt()))
         }
         client.newCall(
             Request.Builder()
-                .url("${track.tracking_url.replace("/api/v1/series/", "/api/v2/series/")}/read-progress/tachiyomi")
+                .url("${track.trackingUrl.replace("/api/v1/series/", "/api/v2/series/")}/read-progress/tachiyomi")
                 .headers(headers)
                 .put(payload.toRequestBody("application/json".toMediaType()))
                 .build(),
         )
             .awaitSuccess()
-        return getTrackSearch(track.tracking_url)
+        return getTrackSearch(track.trackingUrl)
     }
 
     private fun SeriesDto.toTrack(): TrackSearch = TrackSearch.create(trackId).also {
         it.title = metadata.title
         it.summary = metadata.summary
-        it.publishing_status = metadata.status
+        it.publishingStatus = metadata.status
     }
 
     private fun ReadListDto.toTrack(): TrackSearch = TrackSearch.create(trackId).also {

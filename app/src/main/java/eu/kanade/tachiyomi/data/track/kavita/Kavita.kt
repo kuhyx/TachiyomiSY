@@ -55,7 +55,7 @@ internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         if (track.status != COMPLETED) {
             if (didReadChapter) {
-                if (track.last_chapter_read.toLong() == track.total_chapters && track.total_chapters > 0) {
+                if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
                     track.status = COMPLETED
                 } else {
                     track.status = READING
@@ -72,9 +72,9 @@ internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
     }
 
     override suspend fun refresh(track: Track): Track {
-        val remoteTrack = api.getTrackSearch(track.tracking_url)
+        val remoteTrack = api.getTrackSearch(track.trackingUrl)
         track.copyPersonalFrom(remoteTrack)
-        track.total_chapters = remoteTrack.total_chapters
+        track.totalChapters = remoteTrack.totalChapters
         return track
     }
 

@@ -301,17 +301,17 @@ internal class FavoritesSyncHelper(val context: Context) {
 
         // Apply additions
         throttleManager.resetThrottle()
-        changeSet.added.forEachIndexed { index, it ->
+        changeSet.added.forEachIndexed { index, gallery ->
             status.value = FavoritesSyncStatus.Processing.AddingGalleryToRemote(
                 index = index + 1,
                 total = changeSet.added.size,
                 isThrottling = needWarnThrottle(),
-                title = it.title,
+                title = gallery.title,
             )
 
             throttleManager.throttle()
 
-            addGalleryRemote(errorList, it)
+            addGalleryRemote(errorList, gallery)
         }
     }
 
@@ -322,12 +322,12 @@ internal class FavoritesSyncHelper(val context: Context) {
         val removedManga = mutableListOf<Manga>()
 
         // Apply removals
-        changeSet.removed.forEachIndexed { index, it ->
+        changeSet.removed.forEachIndexed { index, gallery ->
             status.value = FavoritesSyncStatus.Processing.RemovingGalleryFromLocal(
                 index = index + 1,
                 total = changeSet.removed.size,
             )
-            val url = it.getUrl()
+            val url = gallery.getUrl()
 
             // Consider both EX and EH sources
             listOf(
@@ -354,12 +354,12 @@ internal class FavoritesSyncHelper(val context: Context) {
 
         // Apply additions
         throttleManager.resetThrottle()
-        changeSet.added.forEachIndexed { index, it ->
+        changeSet.added.forEachIndexed { index, gallery ->
             status.value = FavoritesSyncStatus.Processing.AddingGalleryToLocal(
                 index = index + 1,
                 total = changeSet.added.size,
                 isThrottling = needWarnThrottle(),
-                title = it.title,
+                title = gallery.title,
             )
 
             throttleManager.throttle()
@@ -367,7 +367,7 @@ internal class FavoritesSyncHelper(val context: Context) {
             // Import using gallery adder
             val result = galleryAdder.addGallery(
                 context = context,
-                url = "${exh.baseUrl}${it.getUrl()}",
+                url = "${exh.baseUrl}${gallery.getUrl()}",
                 fav = true,
                 forceSource = exh,
                 throttleFunc = throttleManager::throttle,
@@ -376,20 +376,20 @@ internal class FavoritesSyncHelper(val context: Context) {
 
             if (result is GalleryAddEvent.Fail) {
                 if (result is GalleryAddEvent.Fail.NotFound) {
-                    logger.e(context.stringResource(SYMR.strings.favorites_sync_remote_not_exist, it.getUrl()))
+                    logger.e(context.stringResource(SYMR.strings.favorites_sync_remote_not_exist, gallery.getUrl()))
                     // Skip this gallery, it no longer exists
                     return@forEachIndexed
                 }
 
                 val error = when (result) {
                     is GalleryAddEvent.Fail.Error -> FavoritesSyncStatus.SyncError.GallerySyncError.GalleryAddFail(
-                        it.title, result.logMessage,
+                        gallery.title, result.logMessage,
                     )
                     is GalleryAddEvent.Fail.UnknownType -> FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail(
-                        it.title, result.galleryUrl,
+                        gallery.title, result.galleryUrl,
                     )
                     is GalleryAddEvent.Fail.UnknownSource -> FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail(
-                        it.title, result.galleryUrl,
+                        gallery.title, result.galleryUrl,
                     )
                 }
 
@@ -400,7 +400,7 @@ internal class FavoritesSyncHelper(val context: Context) {
                     throw IgnoredException(error)
                 }
             } else if (result is GalleryAddEvent.Success) {
-                insertedMangaCategories += categories[it.category].id to result.manga
+                insertedMangaCategories += categories[gallery.category].id to result.manga
             }
         }
 

@@ -21,18 +21,18 @@ internal data class KitsuListSearchResult(
         val manga = included[0].attributes
 
         return TrackSearch.create(TrackerManager.KITSU).apply {
-            remote_id = included[0].id
-            library_id = userData.id
+            remoteId = included[0].id
+            libraryId = userData.id
             title = manga.canonicalTitle
-            total_chapters = manga.chapterCount ?: 0
-            cover_url = manga.posterImage?.original ?: ""
+            totalChapters = manga.chapterCount ?: 0
+            coverUrl = manga.posterImage?.original ?: ""
             summary = manga.synopsis ?: ""
-            tracking_url = KitsuApi.mangaUrl(remote_id)
-            publishing_status = manga.status
-            publishing_type = manga.mangaType ?: ""
-            start_date = userDataAttrs.startedAt ?: ""
-            started_reading_date = KitsuDateHelper.parse(userDataAttrs.startedAt)
-            finished_reading_date = KitsuDateHelper.parse(userDataAttrs.finishedAt)
+            trackingUrl = KitsuApi.mangaUrl(remoteId)
+            publishingStatus = manga.status
+            publishingType = manga.mangaType ?: ""
+            startDate = userDataAttrs.startedAt ?: ""
+            startedReadingDate = KitsuDateHelper.parse(userDataAttrs.startedAt)
+            finishedReadingDate = KitsuDateHelper.parse(userDataAttrs.finishedAt)
             status = when (userDataAttrs.status) {
                 "current" -> Kitsu.READING
                 "completed" -> Kitsu.COMPLETED
@@ -42,7 +42,7 @@ internal data class KitsuListSearchResult(
                 else -> throw Exception("Unknown status")
             }
             score = userDataAttrs.ratingTwenty?.let { it / 2.0 } ?: 0.0
-            last_chapter_read = userDataAttrs.progress.toDouble()
+            lastChapterRead = userDataAttrs.progress.toDouble()
             private = userDataAttrs.private
         }
     }

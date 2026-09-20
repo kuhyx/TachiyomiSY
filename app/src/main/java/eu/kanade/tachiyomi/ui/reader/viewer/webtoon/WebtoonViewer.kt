@@ -283,8 +283,8 @@ internal class WebtoonViewer(
     }
 
     /**
-     * Scrolls one screen over a period of time
-. */
+     * Scrolls one screen over a period of time.
+     */
     fun linearScroll(duration: Duration) {
         recycler.smoothScrollBy(
             0,

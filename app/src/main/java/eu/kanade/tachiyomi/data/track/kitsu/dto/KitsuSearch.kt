@@ -37,16 +37,16 @@ internal data class KitsuAlgoliaSearchItem(
 ) {
     fun toTrack(): TrackSearch {
         return TrackSearch.create(TrackerManager.KITSU).apply {
-            remote_id = this@KitsuAlgoliaSearchItem.id
+            remoteId = this@KitsuAlgoliaSearchItem.id
             title = canonicalTitle
-            total_chapters = chapterCount ?: 0
-            cover_url = posterImage?.original ?: ""
+            totalChapters = chapterCount ?: 0
+            coverUrl = posterImage?.original ?: ""
             summary = synopsis ?: ""
-            tracking_url = KitsuApi.mangaUrl(remote_id)
+            trackingUrl = KitsuApi.mangaUrl(remoteId)
             score = averageRating ?: -1.0
-            publishing_status = if (endDate == null) "Publishing" else "Finished"
-            publishing_type = subtype ?: ""
-            start_date = startDate?.let {
+            publishingStatus = if (endDate == null) "Publishing" else "Finished"
+            publishingType = subtype ?: ""
+            startDate = this@KitsuAlgoliaSearchItem.startDate?.let {
                 val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                 outputDf.format(Date(it * 1000))
             } ?: ""

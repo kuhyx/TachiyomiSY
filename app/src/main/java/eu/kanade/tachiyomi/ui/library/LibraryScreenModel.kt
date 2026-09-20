@@ -284,7 +284,7 @@ internal class LibraryScreenModel(
             getLibraryItemPreferencesFlow(),
             getTrackingFiltersFlow(),
         ) { prefs, trackFilters ->
-            listOf(
+            val filters = listOf(
                 prefs.filterDownloaded,
                 prefs.filterUnread,
                 prefs.filterStarted,
@@ -294,9 +294,8 @@ internal class LibraryScreenModel(
                 // SY -->
                 prefs.filterLewd,
                 // SY <--
-                *trackFilters.values.toTypedArray(),
-            )
-                .any { it != TriState.DISABLED }
+            ) + trackFilters.values
+            filters.any { it != TriState.DISABLED }
         }
             .distinctUntilChanged()
             .onEach {
@@ -726,8 +725,8 @@ internal class LibraryScreenModel(
     }
 
     /**
-     * Queues the amount specified of unread chapters from the list of selected manga
-. */
+     * Queues the amount specified of unread chapters from the list of selected manga.
+     */
     fun performDownloadAction(action: DownloadAction) {
         when (action) {
             DownloadAction.NEXT_1_CHAPTER -> downloadNextChapters(1)
@@ -1201,8 +1200,8 @@ internal class LibraryScreenModel(
 
     /**
      * Selects all mangas between and including the given manga and the last pressed manga from the
-     * same category as the given manga
-. */
+     * same category as the given manga.
+     */
     fun toggleRangeSelection(category: Category, manga: LibraryManga) {
         mutableState.update { state ->
             val newSelection = state.selection.mutate { list ->

@@ -58,8 +58,7 @@ internal class BackupRestorer(
     private val restoreProgress = AtomicInt(0)
     private val errors = CopyOnWriteArrayList<Pair<Date, String>>()
 
-    // Mapping of source ID to source name from backup data
-    // . */
+    // Mapping of source ID to source name from backup data.
     private var sourceMapping: Map<Long, String> = emptyMap()
 
     suspend fun restore(uri: Uri, options: RestoreOptions) {

@@ -22,17 +22,17 @@ internal data class ALManga(
     val staff: ALStaff,
 ) {
     fun toTrack() = TrackSearch.create(TrackerManager.ANILIST).apply {
-        remote_id = remoteId
+        remoteId = remoteId
         title = this@ALManga.title
-        total_chapters = totalChapters
-        cover_url = imageUrl
+        totalChapters = totalChapters
+        coverUrl = imageUrl
         summary = description?.htmlDecode() ?: ""
         score = averageScore.toDouble()
-        tracking_url = AnilistApi.mangaUrl(remote_id)
-        publishing_status = publishingStatus
-        publishing_type = format
+        trackingUrl = AnilistApi.mangaUrl(remoteId)
+        publishingStatus = publishingStatus
+        publishingType = format
         if (startDateFuzzy != 0L) {
-            start_date = try {
+            startDate = try {
                 val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                 outputDf.format(startDateFuzzy)
             } catch (e: IllegalArgumentException) {
@@ -58,15 +58,15 @@ internal data class ALUserManga(
     val private: Boolean,
 ) {
     fun toTrack() = Track.create(TrackerManager.ANILIST).apply {
-        remote_id = manga.remoteId
+        remoteId = manga.remoteId
         title = manga.title
         status = toTrackStatus()
         score = scoreRaw.toDouble()
-        started_reading_date = startDateFuzzy
-        finished_reading_date = completedDateFuzzy
-        last_chapter_read = chaptersRead.toDouble()
-        library_id = libraryId
-        total_chapters = manga.totalChapters
+        startedReadingDate = startDateFuzzy
+        finishedReadingDate = completedDateFuzzy
+        lastChapterRead = chaptersRead.toDouble()
+        libraryId = libraryId
+        totalChapters = manga.totalChapters
         private = this@ALUserManga.private
     }
 

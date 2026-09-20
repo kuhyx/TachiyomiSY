@@ -49,7 +49,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
                     put("type", "libraryEntries")
                     putJsonObject("attributes") {
                         put("status", track.toApiStatus())
-                        put("progress", track.last_chapter_read.toInt())
+                        put("progress", track.lastChapterRead.toInt())
                         put("private", track.private)
                     }
                     putJsonObject("relationships") {
@@ -61,7 +61,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
                         }
                         putJsonObject("media") {
                             putJsonObject("data") {
-                                put("id", track.remote_id)
+                                put("id", track.remoteId)
                                 put("type", "manga")
                             }
                         }
@@ -80,7 +80,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
                     .awaitSuccess()
                     .parseAs<KitsuAddMangaResult>()
                     .let {
-                        track.library_id = it.data.id
+                        track.libraryId = it.data.id
                         track
                     }
             }
@@ -92,13 +92,13 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
             val data = buildJsonObject {
                 putJsonObject("data") {
                     put("type", "libraryEntries")
-                    put("id", track.library_id)
+                    put("id", track.libraryId)
                     putJsonObject("attributes") {
                         put("status", track.toApiStatus())
-                        put("progress", track.last_chapter_read.toInt())
+                        put("progress", track.lastChapterRead.toInt())
                         put("ratingTwenty", track.toApiScore())
-                        put("startedAt", KitsuDateHelper.convert(track.started_reading_date))
-                        put("finishedAt", KitsuDateHelper.convert(track.finished_reading_date))
+                        put("startedAt", KitsuDateHelper.convert(track.startedReadingDate))
+                        put("finishedAt", KitsuDateHelper.convert(track.finishedReadingDate))
                         put("private", track.private)
                     }
                 }
@@ -106,7 +106,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
 
             authClient.newCall(
                 Request.Builder()
-                    .url("${BASE_URL}library-entries/${track.library_id}")
+                    .url("${BASE_URL}library-entries/${track.libraryId}")
                     .headers(
                         headersOf("Content-Type", VND_API_JSON),
                     )
@@ -175,7 +175,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
     suspend fun findLibManga(track: Track, userId: String): Track? {
         return withIOContext {
             val url = "${BASE_URL}library-entries".toUri().buildUpon()
-                .encodedQuery("filter[manga_id]=${track.remote_id}&filter[user_id]=$userId")
+                .encodedQuery("filter[manga_id]=${track.remoteId}&filter[user_id]=$userId")
                 .appendQueryParameter("include", "manga")
                 .build()
             with(json) {
@@ -196,7 +196,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
     suspend fun getLibManga(track: Track): Track {
         return withIOContext {
             val url = "${BASE_URL}library-entries".toUri().buildUpon()
-                .encodedQuery("filter[id]=${track.library_id}")
+                .encodedQuery("filter[id]=${track.libraryId}")
                 .appendQueryParameter("include", "manga")
                 .build()
             with(json) {

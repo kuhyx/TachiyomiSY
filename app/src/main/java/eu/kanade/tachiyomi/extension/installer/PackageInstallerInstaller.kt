@@ -72,10 +72,10 @@ internal class PackageInstallerInstaller(private val service: Service) : Install
                 installParams.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
             }
             activeSession = entry to packageInstaller.createSession(installParams)
-            val fileSize = service.getUriSize(entry.uri) ?: throw IllegalStateException()
+            val fileSize = service.getUriSize(entry.uri) ?: error("No size for ${entry.uri}")
             installParams.setSize(fileSize)
 
-            val inputStream = service.contentResolver.openInputStream(entry.uri) ?: throw IllegalStateException()
+            val inputStream = service.contentResolver.openInputStream(entry.uri) ?: error("Cannot open ${entry.uri}")
             val session = packageInstaller.openSession(activeSession!!.second)
             val outputStream = session.openWrite(entry.downloadId.toString(), 0, fileSize)
             session.use {

@@ -174,8 +174,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
     // The chapter loader for the loaded manga. It'll be null until [manga] is set.
     private var loader: ChapterLoader? = null
 
-    // The time the chapter was started reading
-    // . */
+    // The time the chapter was started reading.
     private var chapterReadStartTime: Long? = null
 
     private var chapterToDownload: Download? = null
@@ -284,7 +283,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
                     // Restore from SavedState
                     currentChapter.requestedPage = chapterPageIndex
                 } else if (!currentChapter.chapter.read) {
-                    currentChapter.requestedPage = currentChapter.chapter.last_page_read
+                    currentChapter.requestedPage = currentChapter.chapter.lastPageRead
                 }
                 chapterId = currentChapter.chapter.id!!
             }
@@ -638,8 +637,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
     }
 
     // Removes [currentChapter] from download queue
-    // if setting is enabled and [currentChapter] is queued for download
-    // . */
+    // if setting is enabled and [currentChapter] is queued for download.
     private fun cancelQueuedDownloads(currentChapter: ReaderChapter): Download? {
         return downloadManager.getQueuedDownloadOrNull(currentChapter.chapter.id!!)?.also {
             downloadManager.cancelQueuedDownloads(listOf(it))
@@ -683,7 +681,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
         chapterPageIndex = pageIndex
 
         if (!incognitoMode && page.status !is Page.State.Error) {
-            readerChapter.chapter.last_page_read = pageIndex
+            readerChapter.chapter.lastPageRead = pageIndex
 
             // SY -->
             if (
@@ -703,13 +701,13 @@ internal class ReaderViewModel @JvmOverloads constructor(
                 ChapterUpdate(
                     id = readerChapter.chapter.id!!,
                     read = readerChapter.chapter.read,
-                    lastPageRead = readerChapter.chapter.last_page_read.toLong(),
+                    lastPageRead = readerChapter.chapter.lastPageRead.toLong(),
                 ),
             )
 
             // SY -->
             // Check if syncing is enabled for chapter open:
-            if (isSyncEnabled && syncTriggerOpt.syncOnChapterOpen && readerChapter.chapter.last_page_read == 0) {
+            if (isSyncEnabled && syncTriggerOpt.syncOnChapterOpen && readerChapter.chapter.lastPageRead == 0) {
                 SyncDataJob.startNow(Injekt.get<Application>())
             }
             // SY <--
@@ -722,7 +720,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
         if (manga?.isEhBasedManga() == true) {
             viewModelScope.launchNonCancellable {
                 val chapterUpdates = unfilteredChapterList
-                    .filter { it.sourceOrder > readerChapter.chapter.source_order }
+                    .filter { it.sourceOrder > readerChapter.chapter.sourceOrder }
                     .map { chapter ->
                         ChapterUpdate(
                             id = chapter.id,
@@ -884,7 +882,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
             if (currChapters != null) {
                 // Save current page
                 val currChapter = currChapters.currChapter
-                currChapter.requestedPage = currChapter.chapter.last_page_read
+                currChapter.requestedPage = currChapter.chapter.lastPageRead
 
                 mutableState.update {
                     it.copy(
@@ -920,7 +918,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
             if (currChapters != null) {
                 // Save current page
                 val currChapter = currChapters.currChapter
-                currChapter.requestedPage = currChapter.chapter.last_page_read
+                currChapter.requestedPage = currChapter.chapter.lastPageRead
 
                 mutableState.update {
                     it.copy(
@@ -949,8 +947,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
     }
     // SY <--
 
-    // Generate a filename for the given [manga] and [page]
-    // . */
+    // Generate a filename for the given [manga] and [page].
     private fun generateFilename(
         manga: Manga,
         page: ReaderPage,
@@ -1293,7 +1290,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
         val manga = if (mergedManga.isNullOrEmpty()) {
             manga
         } else {
-            mergedManga[chapter.chapter.manga_id]
+            mergedManga[chapter.chapter.mangaId]
         } ?: return
         // SY <--
 

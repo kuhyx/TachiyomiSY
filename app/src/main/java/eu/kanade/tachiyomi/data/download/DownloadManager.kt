@@ -285,8 +285,8 @@ internal class DownloadManager(
     // SY -->
 
     /**
-     * return the list of all manga folders
-. */
+     * return the list of all manga folders.
+     */
     fun getMangaFolders(source: Source): List<UniFile> = provider.findSourceDir(source)?.listFiles()?.toList().orEmpty()
 
     /**

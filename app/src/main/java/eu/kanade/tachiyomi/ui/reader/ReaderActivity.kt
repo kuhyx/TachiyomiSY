@@ -296,7 +296,7 @@ internal class ReaderActivity : BaseActivity() {
             .launchIn(lifecycleScope)
     }
 
-    private fun ReaderActivityBinding.setComposeOverlay(): Unit = composeOverlay.setComposeContent {
+    private fun ReaderActivityBinding.setComposeOverlay() = composeOverlay.setComposeContent {
         val state by viewModel.state.collectAsState()
         val showPageNumber by readerPreferences.showPageNumber.collectAsState()
         val settingsScreenModel = remember {
@@ -1306,8 +1306,7 @@ internal class ReaderActivity : BaseActivity() {
             // SY <--
         }
 
-        // Picks background color for [ReaderActivity] based on light/dark theme preference
-        // . */
+        // Picks background color for [ReaderActivity] based on light/dark theme preference.
         private fun automaticBackgroundColor(): Int {
             return if (baseContext.isNightMode()) {
                 grayBackgroundColor

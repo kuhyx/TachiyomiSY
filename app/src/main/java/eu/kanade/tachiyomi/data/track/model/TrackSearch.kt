@@ -8,45 +8,45 @@ internal class TrackSearch : Track {
 
     override var id: Long? = null
 
-    override var manga_id: Long = 0
+    override var mangaId: Long = 0
 
-    override var tracker_id: Long = 0
+    override var trackerId: Long = 0
 
-    override var remote_id: Long = 0
+    override var remoteId: Long = 0
 
-    override var library_id: Long? = null
+    override var libraryId: Long? = null
 
     override lateinit var title: String
 
-    override var last_chapter_read: Double = 0.0
+    override var lastChapterRead: Double = 0.0
 
-    override var total_chapters: Long = 0
+    override var totalChapters: Long = 0
 
     override var score: Double = -1.0
 
     override var status: Long = 0
 
-    override var started_reading_date: Long = 0
+    override var startedReadingDate: Long = 0
 
-    override var finished_reading_date: Long = 0
+    override var finishedReadingDate: Long = 0
 
     override var private: Boolean = false
 
-    override lateinit var tracking_url: String
+    override lateinit var trackingUrl: String
 
     var authors: List<String> = emptyList()
 
     var artists: List<String> = emptyList()
 
-    var cover_url: String = ""
+    var coverUrl: String = ""
 
     var summary: String = ""
 
-    var publishing_status: String = ""
+    var publishingStatus: String = ""
 
-    var publishing_type: String = ""
+    var publishingType: String = ""
 
-    var start_date: String = ""
+    var startDate: String = ""
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -54,23 +54,23 @@ internal class TrackSearch : Track {
 
         other as TrackSearch
 
-        if (manga_id != other.manga_id) return false
-        if (tracker_id != other.tracker_id) return false
-        if (remote_id != other.remote_id) return false
+        if (mangaId != other.mangaId) return false
+        if (trackerId != other.trackerId) return false
+        if (remoteId != other.remoteId) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = manga_id.hashCode()
-        result = 31 * result + tracker_id.hashCode()
-        result = 31 * result + remote_id.hashCode()
+        var result = mangaId.hashCode()
+        result = 31 * result + trackerId.hashCode()
+        result = 31 * result + remoteId.hashCode()
         return result
     }
 
     companion object {
         fun create(serviceId: Long): TrackSearch = TrackSearch().apply {
-            tracker_id = serviceId
+            trackerId = serviceId
         }
     }
 }

@@ -10,19 +10,19 @@ internal interface Chapter : SChapter, Serializable {
 
     var id: Long?
 
-    var manga_id: Long?
+    var mangaId: Long?
 
     var read: Boolean
 
     var bookmark: Boolean
 
-    var last_page_read: Int
+    var lastPageRead: Int
 
-    var date_fetch: Long
+    var dateFetch: Long
 
-    var source_order: Int
+    var sourceOrder: Int
 
-    var last_modified: Long
+    var lastModified: Long
 
     var version: Long
 }
@@ -31,21 +31,21 @@ internal val Chapter.isRecognizedNumber: Boolean
     get() = chapter_number >= 0f
 
 internal fun Chapter.toDomainChapter(): DomainChapter? {
-    if (id == null || manga_id == null) return null
+    if (id == null || mangaId == null) return null
     return DomainChapter(
         id = id!!,
-        mangaId = manga_id!!,
+        mangaId = mangaId!!,
         read = read,
         bookmark = bookmark,
-        lastPageRead = last_page_read.toLong(),
-        dateFetch = date_fetch,
-        sourceOrder = source_order.toLong(),
+        lastPageRead = lastPageRead.toLong(),
+        dateFetch = dateFetch,
+        sourceOrder = sourceOrder.toLong(),
         url = url,
         name = name,
         dateUpload = date_upload,
         chapterNumber = chapter_number.toDouble(),
         scanlator = scanlator,
-        lastModifiedAt = last_modified,
+        lastModifiedAt = lastModified,
         version = version,
         memo = memo,
     )

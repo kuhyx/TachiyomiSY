@@ -28,8 +28,8 @@ import java.net.HttpCookie
 import java.util.Locale
 
 /**
- * LoginController
-. */
+ * LoginController.
+ */
 internal class EhLoginActivity : BaseActivity() {
     private val exhPreferences: ExhPreferences by injectLazy()
 
@@ -129,8 +129,7 @@ internal class EhLoginActivity : BaseActivity() {
         }
     }
 
-    // Check if we are logged in
-    // . */
+    // Check if we are logged in.
     private fun checkLoginCookies(url: String): Boolean {
         getCookies(url)?.let { parsed ->
             return parsed.count {
@@ -144,8 +143,7 @@ internal class EhLoginActivity : BaseActivity() {
         return false
     }
 
-    // Parse cookies at ExHentai
-    // . */
+    // Parse cookies at ExHentai.
     private fun applyExHentaiCookies(url: String, customIgneous: String?): Boolean {
         getCookies(url)?.let { parsed ->
 

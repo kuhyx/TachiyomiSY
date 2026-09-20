@@ -30,7 +30,6 @@ import okhttp3.Headers.Companion.headersOf
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import tachiyomi.core.common.util.lang.withIOContext
-import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import java.math.RoundingMode
 import java.security.SecureRandom
@@ -65,21 +64,21 @@ internal class MangaBakaApi(
 
     suspend fun addLibManga(track: Track): Track {
         return withIOContext {
-            val url = "$LIBRARY_API_URL/${track.remote_id}"
+            val url = "$LIBRARY_API_URL/${track.remoteId}"
             val body = buildJsonObject {
                 put("is_private", track.private)
                 put("state", track.toApiStatus())
-                if (track.last_chapter_read > 0.0) {
-                    put("progress_chapter", track.last_chapter_read)
+                if (track.lastChapterRead > 0.0) {
+                    put("progress_chapter", track.lastChapterRead)
                 }
                 if (track.score > 0) {
                     put("rating", track.score.toInt().coerceIn(0, 100))
                 }
-                if (track.started_reading_date > 0) {
-                    put("start_date", track.started_reading_date.toLocalDate().toString())
+                if (track.startedReadingDate > 0) {
+                    put("start_date", track.startedReadingDate.toLocalDate().toString())
                 }
-                if (track.finished_reading_date > 0) {
-                    put("finish_date", track.finished_reading_date.toLocalDate().toString())
+                if (track.finishedReadingDate > 0) {
+                    put("finish_date", track.finishedReadingDate.toLocalDate().toString())
                 }
             }
                 .toString()
@@ -108,26 +107,26 @@ internal class MangaBakaApi(
         return withIOContext {
             with(json) {
                 try {
-                    val url = "$LIBRARY_API_URL/${track.remote_id}"
+                    val url = "$LIBRARY_API_URL/${track.remoteId}"
                     val userData = authClient.newCall(GET(url))
                         .awaitSuccess()
                         .parseAs<MangaBakaListResult>()
                         .data
 
-                    val additionalData = authClient.newCall(GET("$API_BASE_URL/v1/series/${track.remote_id}"))
+                    val additionalData = authClient.newCall(GET("$API_BASE_URL/v1/series/${track.remoteId}"))
                         .awaitSuccess()
                         .parseAs<MangaBakaItemResult>()
                         .data
 
                     Track.create(TrackerManager.MANGABAKA).apply {
-                        remote_id = track.remote_id
+                        remoteId = track.remoteId
                         title = additionalData.chooseBestTitle()
                         status = userData.getStatus()
                         score = userData.rating?.toDouble() ?: 0.0
-                        started_reading_date = userData.startDate?.let { Instant.parse(it).toEpochMilliseconds() } ?: 0
-                        finished_reading_date =
+                        startedReadingDate = userData.startDate?.let { Instant.parse(it).toEpochMilliseconds() } ?: 0
+                        finishedReadingDate =
                             userData.finishDate?.let { Instant.parse(it).toEpochMilliseconds() } ?: 0
-                        last_chapter_read = userData.progressChapter ?: 0.0
+                        lastChapterRead = userData.progressChapter ?: 0.0
                         private = userData.isPrivate
                     }
                 } catch (e: HttpException) {
@@ -143,12 +142,12 @@ internal class MangaBakaApi(
 
     suspend fun updateLibManga(track: Track): Track {
         return withIOContext {
-            val url = "$LIBRARY_API_URL/${track.remote_id}"
+            val url = "$LIBRARY_API_URL/${track.remoteId}"
             val body = buildJsonObject {
                 put("state", track.toApiStatus())
                 put("is_private", track.private)
-                if (track.last_chapter_read > 0.0) {
-                    put("progress_chapter", track.last_chapter_read)
+                if (track.lastChapterRead > 0.0) {
+                    put("progress_chapter", track.lastChapterRead)
                 } else {
                     put("progress_chapter", null)
                 }
@@ -157,13 +156,13 @@ internal class MangaBakaApi(
                 } else {
                     put("rating", null)
                 }
-                if (track.started_reading_date > 0) {
-                    put("start_date", track.started_reading_date.toLocalDate().toString())
+                if (track.startedReadingDate > 0) {
+                    put("start_date", track.startedReadingDate.toLocalDate().toString())
                 } else {
                     put("start_date", null)
                 }
-                if (track.finished_reading_date > 0) {
-                    put("finish_date", track.finished_reading_date.toLocalDate().toString())
+                if (track.finishedReadingDate > 0) {
+                    put("finish_date", track.finishedReadingDate.toLocalDate().toString())
                 } else {
                     put("finish_date", null)
                 }
@@ -197,15 +196,15 @@ internal class MangaBakaApi(
 
     private fun parseSearchItem(item: MangaBakaItem): TrackSearch {
         return TrackSearch.create(trackId).apply {
-            remote_id = item.id
+            remoteId = item.id
             title = item.chooseBestTitle()
             summary = item.description?.trim().orEmpty()
             score = item.rating?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)?.toDouble() ?: -1.0
-            cover_url = item.cover.x250.x1.orEmpty()
-            tracking_url = "$BASE_URL/${item.id}"
-            start_date = item.published.startDate.orEmpty()
-            publishing_status = item.status
-            publishing_type = item.type.replaceFirstChar { c ->
+            coverUrl = item.cover.x250.x1.orEmpty()
+            trackingUrl = "$BASE_URL/${item.id}"
+            startDate = item.published.startDate.orEmpty()
+            publishingStatus = item.status
+            publishingType = item.type.replaceFirstChar { c ->
                 if (c.isLowerCase()) c.titlecase(Locale.getDefault()) else c.toString()
             }
             authors = item.authors.orEmpty()

@@ -19,15 +19,6 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import kotlin.time.Duration.Companion.seconds
 
-internal data class SyncFavoritesProgressProperties(
-    val title: String,
-    val text: String,
-    val positiveButtonText: String? = null,
-    val positiveButton: (() -> Unit)? = null,
-    val negativeButtonText: String? = null,
-    val negativeButton: (() -> Unit)? = null,
-)
-
 @Composable
 internal fun SyncFavoritesProgressDialog(
     status: FavoritesSyncStatus,

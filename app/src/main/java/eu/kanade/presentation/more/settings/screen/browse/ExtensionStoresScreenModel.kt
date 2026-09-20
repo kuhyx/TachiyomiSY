@@ -104,8 +104,8 @@ internal class ExtensionStoresScreenModel(
     }
 
     /**
-     * Deletes the given repo from the database
-. */
+     * Deletes the given repo from the database.
+     */
     fun deleteRepo(baseUrl: String) {
         screenModelScope.launchIO {
             removeExtensionStore(baseUrl)

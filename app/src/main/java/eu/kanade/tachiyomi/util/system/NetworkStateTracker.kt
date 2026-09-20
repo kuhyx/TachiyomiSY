@@ -12,18 +12,6 @@ import android.os.Build
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 
-internal data class NetworkState(
-    val isConnected: Boolean,
-    val isValidated: Boolean,
-    val isWifi: Boolean,
-) {
-    val isOnline = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        isConnected && isValidated
-    } else {
-        isConnected
-    }
-}
-
 @Suppress("DEPRECATION")
 internal fun Context.activeNetworkState(): NetworkState {
     val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)

@@ -20,8 +20,8 @@ internal class GetExtensionsByType(
             extensionManager.installedExtensionsFlow,
             extensionManager.untrustedExtensionsFlow,
             extensionManager.availableExtensionsFlow,
-        ) { enabledLanguages, _installed, _untrusted, _available ->
-            val (updates, installed) = _installed
+        ) { enabledLanguages, allInstalled, allUntrusted, allAvailable ->
+            val (updates, installed) = allInstalled
                 .filter { (showNsfwSources || !it.isNsfw) }
                 .sortedWith(
                     compareBy<Extension.Installed> {
@@ -30,13 +30,13 @@ internal class GetExtensionsByType(
                 )
                 .partition { it.hasUpdate }
 
-            val untrusted = _untrusted
+            val untrusted = allUntrusted
                 .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
 
-            val available = _available
+            val available = allAvailable
                 .filter { extension ->
-                    _installed.none { it.pkgName == extension.pkgName } &&
-                        _untrusted.none { it.pkgName == extension.pkgName } &&
+                    allInstalled.none { it.pkgName == extension.pkgName } &&
+                        allUntrusted.none { it.pkgName == extension.pkgName } &&
                         (showNsfwSources || !extension.isNsfw)
                 }
                 .flatMap { ext ->

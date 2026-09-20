@@ -122,8 +122,8 @@ internal class EHentai(
     private val updateHelper: EHentaiUpdateHelper by injectLazy()
 
     /**
-     * Gallery list entry
-. */
+     * Gallery list entry.
+     */
     data class ParsedManga(val fav: Int, val manga: SManga, val metadata: EHentaiSearchMetadata)
 
     private fun extendedGenericMangaParse(doc: Document) = with(doc) {
@@ -315,8 +315,7 @@ internal class EHentai(
         }
     }
 
-    // Parse a list of galleries
-    // . */
+    // Parse a list of galleries.
     private fun genericMangaParse(
         response: Response,
     ) = extendedGenericMangaParse(response.asJsoup()).let { (parsedManga, nextPage) ->
@@ -630,8 +629,8 @@ internal class EHentai(
     }
 
     /**
-     * Parse gallery page to metadata model
-. */
+     * Parse gallery page to metadata model.
+     */
     @Deprecated(HELPER_DEPRECATION)
     override fun mangaDetailsParse(response: Response) = throw UnsupportedOperationException()
 
@@ -1193,8 +1192,7 @@ internal class EHentai(
             .awaitSuccess()
     }
 
-    // Parse normal previews with regular expressions
-    // . */
+    // Parse normal previews with regular expressions.
     private fun parseNormalPreview(element: Element): EHentaiThumbnailPreview {
         val imgElement = element.selectFirst("img")
         val index = imgElement?.attr("alt")?.toInt()
@@ -1301,7 +1299,7 @@ internal class EHentai(
         private const val BLANK_PREVIEW_THUMB = "https://$THUMB_DOMAIN/g/$BLANK_THUMB"
 
         private val MATCH_YEAR_REGEX = "^\\d{4}\$".toRegex()
-        private val MATCH_SEEK_REGEX = "^\\d{2,4}-\\d{1,2}(-\\d{1,2})?".toRegex()
+        private val MATCH_SEEK_REGEX = """^\d{2,4}-\d{1,2}(-\d{1,2})?""".toRegex()
         private val MATCH_JUMP_REGEX = "^\\d+(\$|d\$|w\$|m\$|y\$|-\$)".toRegex()
 
         private const val EH_API_BASE = "https://api.e-hentai.org/api.php"

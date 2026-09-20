@@ -56,8 +56,7 @@ internal class LibraryUpdateNotifier(
         maximumFractionDigits = 0
     }
 
-    // Pending intent of action that cancels the library update
-    // . */
+    // Pending intent of action that cancels the library update.
     private val cancelIntent by lazy {
         NotificationReceiver.cancelLibraryUpdatePendingBroadcast(context)
     }

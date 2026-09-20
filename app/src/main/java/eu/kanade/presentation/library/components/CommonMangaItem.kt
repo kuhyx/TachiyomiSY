@@ -45,14 +45,6 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
 import tachiyomi.domain.manga.model.MangaCover as MangaCoverModel
 
-internal object CommonMangaItemDefaults {
-    val GridHorizontalSpacer = 4.dp
-    val GridVerticalSpacer = 4.dp
-
-    @Suppress("ConstPropertyName")
-    const val BrowseFavoriteCoverAlpha = 0.34f
-}
-
 private val ContinueReadingButtonSizeSmall = 28.dp
 private val ContinueReadingButtonSizeLarge = 32.dp
 
@@ -117,8 +109,7 @@ internal fun MangaCompactGridItem(
     }
 }
 
-// Title overlay for [MangaCompactGridItem]
-// . */
+// Title overlay for [MangaCompactGridItem].
 @Composable
 private fun BoxScope.CoverTextOverlay(
     title: String,

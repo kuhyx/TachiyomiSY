@@ -71,13 +71,13 @@ internal class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTrac
         didReadChapter: Boolean,
     ): Track {
         if (track.status != COMPLETED && didReadChapter) {
-            if (track.total_chapters > 0 && track.last_chapter_read.toLong() == track.total_chapters) {
+            if (track.totalChapters > 0 && track.lastChapterRead.toLong() == track.totalChapters) {
                 track.status = COMPLETED
-                track.finished_reading_date = System.currentTimeMillis()
+                track.finishedReadingDate = System.currentTimeMillis()
             } else if (track.status != REREADING) {
                 track.status = READING
-                if (track.last_chapter_read == 1.0) {
-                    track.started_reading_date = System.currentTimeMillis()
+                if (track.lastChapterRead == 1.0) {
+                    track.startedReadingDate = System.currentTimeMillis()
                 }
             }
         }
@@ -93,7 +93,7 @@ internal class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTrac
         return if (remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack, copyRemotePrivate = false)
             track.title = remoteTrack.title
-            track.remote_id = remoteTrack.remote_id
+            track.remoteId = remoteTrack.remoteId
 
             if (track.status != COMPLETED) {
                 val isRereading = track.status == REREADING
@@ -123,7 +123,7 @@ internal class MangaBaka(id: Long) : BaseTracker(id, "MangaBaka"), DeletableTrac
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.findLibManga(track) ?: throw Exception("Could not find manga")
         track.copyPersonalFrom(remoteTrack)
-        track.remote_id = remoteTrack.remote_id
+        track.remoteId = remoteTrack.remoteId
         track.title = remoteTrack.title
         return track
     }

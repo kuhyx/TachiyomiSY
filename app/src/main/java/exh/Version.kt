@@ -1,3 +1,3 @@
 package exh
 
-internal const val syDebugVersion: String = "0"
+internal const val SY_DEBUG_VERSION: String = "0"

@@ -110,8 +110,8 @@ internal class Downloader(
         get() = downloaderJob?.isActive ?: false
 
     /**
-     * Whether the downloader is paused
-. */
+     * Whether the downloader is paused.
+     */
     @Volatile
     var isPaused: Boolean = false
 
@@ -169,8 +169,8 @@ internal class Downloader(
     }
 
     /**
-     * Pauses the downloader
-. */
+     * Pauses the downloader.
+     */
     fun pause() {
         cancelDownloaderJob()
         queueState.value

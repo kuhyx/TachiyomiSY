@@ -3,8 +3,8 @@ package eu.kanade.tachiyomi.util.chapter
 import tachiyomi.domain.chapter.model.Chapter
 
 /**
- * Returns a copy of the list with duplicate chapters removed
-. */
+ * Returns a copy of the list with duplicate chapters removed.
+ */
 internal fun List<Chapter>.removeDuplicates(currentChapter: Chapter): List<Chapter> {
     return groupBy { it.chapterNumber }
         .map { (_, chapters) ->

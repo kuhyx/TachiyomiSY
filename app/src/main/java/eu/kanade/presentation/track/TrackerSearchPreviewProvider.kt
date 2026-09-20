@@ -80,23 +80,23 @@ internal class TrackerSearchPreviewProvider : PreviewParameterProvider<@Composab
 
     private fun randTrackSearch() = TrackSearch().let {
         it.id = Random.nextLong()
-        it.manga_id = Random.nextLong()
-        it.tracker_id = Random.nextLong()
-        it.remote_id = Random.nextLong()
-        it.library_id = Random.nextLong()
+        it.mangaId = Random.nextLong()
+        it.trackerId = Random.nextLong()
+        it.remoteId = Random.nextLong()
+        it.libraryId = Random.nextLong()
         it.title = lorem((1..10).random()).joinToString()
-        it.last_chapter_read = (0..100).random().toDouble()
-        it.total_chapters = (100L..1000L).random()
+        it.lastChapterRead = (0..100).random().toDouble()
+        it.totalChapters = (100L..1000L).random()
         it.score = (0..10).random().toDouble()
         it.status = Random.nextLong()
-        it.started_reading_date = 0L
-        it.finished_reading_date = 0L
-        it.tracking_url = "https://example.com/tracker-example"
-        it.cover_url = "https://example.com/cover.png"
-        it.start_date = formatter.format(Date.from(Instant.now().minus((1L..365).random(), ChronoUnit.DAYS)))
+        it.startedReadingDate = 0L
+        it.finishedReadingDate = 0L
+        it.trackingUrl = "https://example.com/tracker-example"
+        it.coverUrl = "https://example.com/cover.png"
+        it.startDate = formatter.format(Date.from(Instant.now().minus((1L..365).random(), ChronoUnit.DAYS)))
         it.summary = lorem((0..40).random()).joinToString()
-        it.publishing_status = if (Random.nextBoolean()) "Finished" else ""
-        it.publishing_type = if (Random.nextBoolean()) "Oneshot" else ""
+        it.publishingStatus = if (Random.nextBoolean()) "Finished" else ""
+        it.publishingType = if (Random.nextBoolean()) "Oneshot" else ""
         it.artists = randomNames()
         it.authors = randomNames()
         it

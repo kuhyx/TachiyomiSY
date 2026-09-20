@@ -170,8 +170,7 @@ internal open class BrowseSourceScreenModel(
         // SY <--
     }
 
-    // Flow of Pager flow tied to [State.listing]
-    // . */
+    // Flow of Pager flow tied to [State.listing].
     private val hideInLibraryItems = sourcePreferences.hideInLibraryItems.get()
     val mangaPagerFlowFlow = state.map { it.listing }
         .distinctUntilChanged()

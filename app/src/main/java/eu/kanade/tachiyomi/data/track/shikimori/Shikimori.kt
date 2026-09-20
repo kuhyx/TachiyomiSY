@@ -42,7 +42,7 @@ internal class Shikimori(id: Long) : BaseTracker(id, "Shikimori"), DeletableTrac
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         if (track.status != COMPLETED) {
             if (didReadChapter) {
-                if (track.last_chapter_read.toLong() == track.total_chapters && track.total_chapters > 0) {
+                if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
                     track.status = COMPLETED
                 } else if (track.status != REREADING) {
                     track.status = READING
@@ -61,7 +61,7 @@ internal class Shikimori(id: Long) : BaseTracker(id, "Shikimori"), DeletableTrac
         val remoteTrack = api.findLibManga(track)
         return if (remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack)
-            track.library_id = remoteTrack.library_id
+            track.libraryId = remoteTrack.libraryId
 
             if (track.status != COMPLETED) {
                 val isRereading = track.status == REREADING
@@ -81,9 +81,9 @@ internal class Shikimori(id: Long) : BaseTracker(id, "Shikimori"), DeletableTrac
 
     override suspend fun refresh(track: Track): Track {
         api.findLibManga(track, isRefresh = true)?.let { remoteTrack ->
-            track.library_id = remoteTrack.library_id
+            track.libraryId = remoteTrack.libraryId
             track.copyPersonalFrom(remoteTrack)
-            track.total_chapters = remoteTrack.total_chapters
+            track.totalChapters = remoteTrack.totalChapters
         } ?: throw Exception("Could not find manga")
         return track
     }

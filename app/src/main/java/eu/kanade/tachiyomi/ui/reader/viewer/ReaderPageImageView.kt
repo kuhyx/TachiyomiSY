@@ -178,13 +178,13 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
     }
 
     /**
-     * Check if the image can be panned to the left
-. */
+     * Check if the image can be panned to the left.
+     */
     fun canPanLeft(): Boolean = canPan { it.left }
 
     /**
-     * Check if the image can be panned to the right
-. */
+     * Check if the image can be panned to the right.
+     */
     fun canPanRight(): Boolean = canPan { it.right }
 
     // Check whether the image can be panned.

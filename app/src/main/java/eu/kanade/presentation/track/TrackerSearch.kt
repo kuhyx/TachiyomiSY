@@ -245,8 +245,8 @@ private fun SearchResultItem(
     val context = LocalContext.current
     val clipboard: Clipboard = LocalClipboard.current
     val focusManager = LocalFocusManager.current
-    val type = trackSearch.publishing_type.toLowerCase(Locale.current).capitalize(Locale.current)
-    val status = trackSearch.publishing_status.toLowerCase(Locale.current).capitalize(Locale.current)
+    val type = trackSearch.publishingType.toLowerCase(Locale.current).capitalize(Locale.current)
+    val status = trackSearch.publishingStatus.toLowerCase(Locale.current).capitalize(Locale.current)
     val description = trackSearch.summary.trim()
     val shape = RoundedCornerShape(16.dp)
     val borderColor = if (selected) MaterialTheme.colorScheme.outline else Color.Transparent
@@ -283,7 +283,7 @@ private fun SearchResultItem(
         Column {
             Row {
                 MangaCover.Book(
-                    data = trackSearch.cover_url,
+                    data = trackSearch.coverUrl,
                     modifier = Modifier.height(96.dp),
                 )
                 Spacer(modifier = Modifier.width(12.dp))
@@ -308,7 +308,7 @@ private fun SearchResultItem(
                             }
                         },
                         onOpenInBrowser = {
-                            val url = trackSearch.tracking_url
+                            val url = trackSearch.trackingUrl
                             if (url.isNotBlank()) {
                                 context.openInBrowser(url)
                             }
@@ -329,10 +329,10 @@ private fun SearchResultItem(
                             text = type,
                         )
                     }
-                    if (trackSearch.start_date.isNotBlank()) {
+                    if (trackSearch.startDate.isNotBlank()) {
                         SearchResultItemDetails(
                             title = stringResource(MR.strings.label_started),
-                            text = trackSearch.start_date,
+                            text = trackSearch.startDate,
                         )
                     }
                     if (status.isNotBlank()) {

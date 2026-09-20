@@ -10,8 +10,8 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import tachiyomi.core.common.Constants
 
 /**
- * Class that manages [PendingIntent] of activity's
-. */
+ * Class that manages [PendingIntent] of activity's.
+ */
 internal object NotificationHandler {
     /**
      * Returns [PendingIntent] that starts a download activity.

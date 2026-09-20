@@ -378,32 +378,33 @@ internal class MangaScreen(
         context.startActivity(ReaderActivity.newIntent(context, chapter.mangaId, chapter.id))
     }
 
-    private fun getMangaUrl(manga_: Manga?, source_: Source?): String? {
-        val manga = manga_ ?: return null
-        val source = source_ as? HttpSource ?: return null
+    private fun getMangaUrl(manga: Manga?, source: Source?): String? {
+        val httpSource = source as? HttpSource
+        if (manga == null || httpSource == null) return null
 
         return try {
-            source.getMangaUrl(manga.toSManga())
-        } catch (e: Exception) {
+            httpSource.getMangaUrl(manga.toSManga())
+        } catch (expected: Exception) {
+            // A source may reject the manga; the caller treats "no URL" as the outcome.
             null
         }
     }
 
-    private fun openMangaInWebView(navigator: Navigator, manga_: Manga?, source_: Source?) {
-        getMangaUrl(manga_, source_)?.let { url ->
+    private fun openMangaInWebView(navigator: Navigator, manga: Manga?, source: Source?) {
+        getMangaUrl(manga, source)?.let { url ->
             navigator.push(
                 WebViewScreen(
                     url = url,
-                    initialTitle = manga_?.title,
-                    sourceId = source_?.id,
+                    initialTitle = manga?.title,
+                    sourceId = source?.id,
                 ),
             )
         }
     }
 
-    private fun shareManga(context: Context, manga_: Manga?, source_: Source?) {
+    private fun shareManga(context: Context, manga: Manga?, source: Source?) {
         try {
-            getMangaUrl(manga_, source_)?.let { url ->
+            getMangaUrl(manga, source)?.let { url ->
                 val intent = url.toUri().toShareIntent(context, type = "text/plain")
                 context.startActivity(intent)
             }
@@ -458,12 +459,11 @@ internal class MangaScreen(
         }
     }
 
-    // Copy Manga URL to Clipboard
-    // . */
-    private fun copyMangaUrl(context: Context, manga_: Manga?, source_: Source?) {
-        val manga = manga_ ?: return
-        val source = source_ as? HttpSource ?: return
-        val url = source.getMangaUrl(manga.toSManga())
+    // Copy Manga URL to Clipboard.
+    private fun copyMangaUrl(context: Context, manga: Manga?, source: Source?) {
+        val httpSource = source as? HttpSource
+        if (manga == null || httpSource == null) return
+        val url = httpSource.getMangaUrl(manga.toSManga())
         context.copyToClipboard(url, url)
     }
 

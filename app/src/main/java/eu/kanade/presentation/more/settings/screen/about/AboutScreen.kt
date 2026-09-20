@@ -36,7 +36,7 @@ import eu.kanade.tachiyomi.util.lang.toDateTimestampString
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import eu.kanade.tachiyomi.util.system.toast
-import exh.syDebugVersion
+import exh.SY_DEBUG_VERSION
 import kotlinx.coroutines.launch
 import logcat.LogPriority
 import tachiyomi.core.common.util.lang.withIOContext
@@ -262,7 +262,7 @@ internal object AboutScreen : Screen() {
             }
             // SY -->
             isPreviewBuildType -> {
-                "Preview r$syDebugVersion".let {
+                "Preview r$SY_DEBUG_VERSION".let {
                     if (withBuildDate) {
                         "$it (${BuildConfig.COMMIT_SHA}, ${getFormattedBuildTime()})"
                     } else {

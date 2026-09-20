@@ -1,10 +1,9 @@
 package eu.kanade.tachiyomi.data.updater
 
 import android.content.Context
-import android.os.Build
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
-import exh.syDebugVersion
+import exh.SY_DEBUG_VERSION
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.release.interactor.GetApplicationRelease
 import uy.kohesive.injekt.injectLazy
@@ -29,7 +28,7 @@ internal class AppUpdateChecker {
                     BuildConfig.VERSION_NAME,
                     GITHUB_REPO,
                     // SY -->
-                    syDebugVersion,
+                    SY_DEBUG_VERSION,
                     // SY <--
                     forceCheck,
                 ),

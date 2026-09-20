@@ -669,7 +669,7 @@ private fun MangaSummary(
                 Text(
                     // Shows at least 3 lines if no notes
                     // when there are notes show 6
-                    text = if (notes.isBlank()) "\n\n" else "\n\n\n\n\n",
+                    text = "\n".repeat(if (notes.isBlank()) 2 else 5),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             },

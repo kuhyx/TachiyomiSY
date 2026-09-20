@@ -9,8 +9,8 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
 /**
- * Returns a string of categories name for settings subtitle
-. */
+ * Returns a string of categories name for settings subtitle.
+ */
 @ReadOnlyComposable
 @Composable
 internal fun getCategoriesLabel(

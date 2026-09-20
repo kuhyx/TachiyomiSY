@@ -14,7 +14,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
         ogTitle = "Test Title",
         // SY <--
         chapterNumber = 10.2,
-        readAt = Date(1697247357L),
+        readAt = Date(1_697_247_357L),
         readDuration = 123L,
         coverData = tachiyomi.domain.manga.model.MangaCover(
             mangaId = 3L,
@@ -52,7 +52,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
         ogTitle = "Test Title",
         // SY <--
         chapterNumber = -2.0,
-        readAt = Date(1697247357L),
+        readAt = Date(1_697_247_357L),
         readDuration = 123L,
         coverData = tachiyomi.domain.manga.model.MangaCover(
             mangaId = 3L,

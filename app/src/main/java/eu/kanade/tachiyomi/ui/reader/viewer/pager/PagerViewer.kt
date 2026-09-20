@@ -165,16 +165,15 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      */
     override fun getView(): View = pager
 
-    // Returns the PagerPageHolder for the provided page
-    // . */
+    // Returns the PagerPageHolder for the provided page.
     private fun getPageHolder(page: ReaderPage): PagerPageHolder? =
         pager.children
             .filterIsInstance<PagerPageHolder>()
             .firstOrNull { it.item.first == page || it.item.second == page }
 
     /**
-     * Called when a new page (either a [ReaderPage] or [ChapterTransition]) is marked as active
-. */
+     * Called when a new page (either a [ReaderPage] or [ChapterTransition]) is marked as active.
+     */
     fun onPageChange(position: Int) {
         val pagePair = adapter.joinedItems.getOrNull(position)
         val page = pagePair?.first

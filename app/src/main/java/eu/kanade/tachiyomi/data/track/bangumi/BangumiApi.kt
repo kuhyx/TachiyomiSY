@@ -44,11 +44,11 @@ internal class BangumiApi(
 
     suspend fun addLibManga(track: Track): Track {
         return withIOContext {
-            val url = "$API_URL/v0/users/-/collections/${track.remote_id}"
+            val url = "$API_URL/v0/users/-/collections/${track.remoteId}"
             val body = buildJsonObject {
                 put("type", track.toApiStatus())
                 put("rate", track.score.toInt().coerceIn(0, 10))
-                put("ep_status", track.last_chapter_read.toInt())
+                put("ep_status", track.lastChapterRead.toInt())
                 put("private", track.private)
             }
                 .toString()
@@ -62,11 +62,11 @@ internal class BangumiApi(
 
     suspend fun updateLibManga(track: Track): Track {
         return withIOContext {
-            val url = "$API_URL/v0/users/-/collections/${track.remote_id}"
+            val url = "$API_URL/v0/users/-/collections/${track.remoteId}"
             val body = buildJsonObject {
                 put("type", track.toApiStatus())
                 put("rate", track.score.toInt().coerceIn(0, 10))
-                put("ep_status", track.last_chapter_read.toInt())
+                put("ep_status", track.lastChapterRead.toInt())
                 put("private", track.private)
             }
                 .toString()
@@ -116,7 +116,7 @@ internal class BangumiApi(
 
     suspend fun statusLibManga(track: Track, username: String): Track? {
         return withIOContext {
-            val url = "$API_URL/v0/users/$username/collections/${track.remote_id}"
+            val url = "$API_URL/v0/users/$username/collections/${track.remoteId}"
             with(json) {
                 try {
                     authClient.newCall(GET(url, cache = CacheControl.FORCE_NETWORK))
@@ -124,9 +124,9 @@ internal class BangumiApi(
                         .parseAs<BGMCollectionResponse>()
                         .let {
                             track.status = it.getStatus()
-                            track.last_chapter_read = it.epStatus?.toDouble() ?: 0.0
+                            track.lastChapterRead = it.epStatus?.toDouble() ?: 0.0
                             track.score = it.rate?.toDouble() ?: 0.0
-                            track.total_chapters = it.subject?.eps?.toLong() ?: 0L
+                            track.totalChapters = it.subject?.eps?.toLong() ?: 0L
                             track
                         }
                 } catch (e: HttpException) {

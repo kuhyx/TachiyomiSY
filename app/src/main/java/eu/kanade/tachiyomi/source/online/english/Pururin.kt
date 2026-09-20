@@ -34,8 +34,8 @@ internal class Pururin(delegate: HttpSource, val context: Context) :
     override val lang = "en"
 
     /**
-     * The class of the metadata used by this source
-. */
+     * The class of the metadata used by this source.
+     */
     override val metaClass = PururinSearchMetadata::class
     override fun newMetaInstance() = PururinSearchMetadata()
 

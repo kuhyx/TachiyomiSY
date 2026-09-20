@@ -186,11 +186,9 @@ private fun ExtensionDetails(
                 extIncognitoMode = incognitoMode,
                 onClickUninstall = onClickUninstall,
                 onClickAppInfo = {
-                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", extension.pkgName, null)
-                        context.startActivity(this)
-                    }
-                    Unit
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    intent.data = Uri.fromParts("package", extension.pkgName, null)
+                    context.startActivity(intent)
                 }.takeIf { extension.isShared },
                 onClickAgeRating = {
                     showNsfwWarning = true

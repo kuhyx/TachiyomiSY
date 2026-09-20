@@ -58,8 +58,8 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
             val payload = buildJsonObject {
                 put("query", query)
                 putJsonObject("variables") {
-                    put("mangaId", track.remote_id)
-                    put("progress", track.last_chapter_read.toInt())
+                    put("mangaId", track.remoteId)
+                    put("progress", track.lastChapterRead.toInt())
                     put("status", track.toApiStatus())
                     put("private", track.private)
                 }
@@ -74,7 +74,7 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                     .awaitSuccess()
                     .parseAs<ALAddMangaResult>()
                     .let {
-                        track.library_id = it.data.entry.id
+                        track.libraryId = it.data.entry.id
                         track
                     }
             }
@@ -102,12 +102,12 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
             val payload = buildJsonObject {
                 put("query", query)
                 putJsonObject("variables") {
-                    put("listId", track.library_id)
-                    put("progress", track.last_chapter_read.toInt())
+                    put("listId", track.libraryId)
+                    put("progress", track.lastChapterRead.toInt())
                     put("status", track.toApiStatus())
                     put("score", track.score.toInt())
-                    put("startedAt", createDate(track.started_reading_date))
-                    put("completedAt", createDate(track.finished_reading_date))
+                    put("startedAt", createDate(track.startedReadingDate))
+                    put("completedAt", createDate(track.finishedReadingDate))
                     put("private", track.private)
                 }
             }
@@ -204,9 +204,9 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
     suspend fun findLibManga(track: Track, userid: Int): Track? {
         return withIOContext {
             val query = $$"""
-            |query ($id: Int!, $manga_id: Int!) {
+            |query ($id: Int!, $mangaId: Int!) {
                 |Page {
-                    |mediaList(userId: $id, type: MANGA, mediaId: $manga_id) {
+                    |mediaList(userId: $id, type: MANGA, mediaId: $mangaId) {
                         |id
                         |status
                         |scoreRaw: score(format: POINT_100)
@@ -262,7 +262,7 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
                 put("query", query)
                 putJsonObject("variables") {
                     put("id", userid)
-                    put("manga_id", track.remote_id)
+                    put("manga_id", track.remoteId)
                 }
             }
             with(json) {
@@ -286,7 +286,7 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
         findLibManga(track, userId) ?: throw Exception("Could not find manga")
 
     fun createOAuth(token: String): ALOAuth =
-        ALOAuth(token, "Bearer", System.currentTimeMillis() + 31536000000, 31536000000)
+        ALOAuth(token, "Bearer", System.currentTimeMillis() + 31_536_000_000, 31_536_000_000)
 
     suspend fun getCurrentUser(): ALUserViewerData {
         return withIOContext {

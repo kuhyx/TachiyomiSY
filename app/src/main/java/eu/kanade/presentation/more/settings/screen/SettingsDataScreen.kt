@@ -614,7 +614,7 @@ internal object SettingsDataScreen : SearchableSettings {
                             )
                             GoogleDriveSyncService.DeleteSyncDataStatus.ERROR -> context.toast(
                                 SYMR.strings.google_drive_sync_data_purge_error,
-                                duration = 10000,
+                                duration = 10_000,
                             )
                         }
                     }
@@ -767,7 +767,7 @@ internal object SettingsDataScreen : SearchableSettings {
                         720 to stringResource(MR.strings.update_12hour),
                         1440 to stringResource(MR.strings.update_24hour),
                         2880 to stringResource(MR.strings.update_48hour),
-                        10080 to stringResource(MR.strings.update_weekly),
+                        10_080 to stringResource(MR.strings.update_weekly),
                     ),
                     onValueChanged = {
                         SyncDataJob.setupTask(context, it)

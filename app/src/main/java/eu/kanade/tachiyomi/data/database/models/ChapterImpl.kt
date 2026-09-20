@@ -9,7 +9,7 @@ internal class ChapterImpl : Chapter {
 
     override var id: Long? = null
 
-    override var manga_id: Long? = null
+    override var mangaId: Long? = null
 
     override lateinit var url: String
 
@@ -21,17 +21,17 @@ internal class ChapterImpl : Chapter {
 
     override var bookmark: Boolean = false
 
-    override var last_page_read: Int = 0
+    override var lastPageRead: Int = 0
 
-    override var date_fetch: Long = 0
+    override var dateFetch: Long = 0
 
     override var date_upload: Long = 0
 
     override var chapter_number: Float = 0f
 
-    override var source_order: Int = 0
+    override var sourceOrder: Int = 0
 
-    override var last_modified: Long = 0
+    override var lastModified: Long = 0
 
     override var version: Long = 0
 

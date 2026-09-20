@@ -264,8 +264,8 @@ private object SimpleMarkdownProcessFactory : MarkerProcessorFactory {
 
 /**
  * Like `CommonMarkFlavour`, but with html blocks and reference links removed and
- * table support added
-. */
+ * table support added.
+ */
 private class SimpleMarkdownMarkerProcessor(
     productionHolder: ProductionHolder,
     constraints: MarkdownConstraints,

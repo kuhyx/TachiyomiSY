@@ -17,6 +17,11 @@ val b = 1
 
 /** Already fine. */
 val c = 2
+
+/**
+ * Closed on its own line
+ */
+val d = 3
 """
 
 
@@ -41,3 +46,10 @@ def test_main(tmp_path: Path) -> None:
     log.write_text(f"{source}:2:2: The first sentence of this KDoc does not end with the correct punctuation. [EndOfSentenceFormat]\n")
     assert main(["kdoc_sentence_end.py", str(log)]) == 0
     assert " * by someone.\n" in source.read_text()
+
+
+def test_closing_line_is_not_text() -> None:
+    lines = SOURCE.splitlines(keepends=True)
+    assert rewrite(lines, 16) is True
+    assert lines[15] == " * Closed on its own line.\n"
+    assert lines[16] == " */\n"

@@ -20,8 +20,8 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 
 /**
- * Class used to show BigPictureStyle notifications
-. */
+ * Class used to show BigPictureStyle notifications.
+ */
 internal class SaveImageNotifier(private val context: Context) {
 
     private val notificationBuilder = context.notificationBuilder(Notifications.CHANNEL_COMMON)

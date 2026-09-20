@@ -64,12 +64,12 @@ import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import eu.kanade.tachiyomi.util.system.cancelNotification
 import eu.kanade.tachiyomi.util.system.notify
+import exh.SY_DEBUG_VERSION
 import exh.log.CrashlyticsPrinter
 import exh.log.EHLogLevel
 import exh.log.EnhancedFilePrinter
 import exh.log.XLogLogcatLogger
 import exh.log.xLogD
-import exh.syDebugVersion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -355,16 +355,13 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
             printers += CrashlyticsPrinter(LogLevel.ERROR)
         }
 
-        XLog.init(
-            logConfig,
-            *printers.toTypedArray(),
-        )
+        XLog.init(logConfig, FanOutPrinter(printers))
 
         xLogD("Application booting...")
         xLogD(
             """
                 App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TYPE}, ${BuildConfig.COMMIT_SHA}, ${BuildConfig.VERSION_CODE})
-                Preview build: $syDebugVersion
+                Preview build: $SY_DEBUG_VERSION
                 Android version: ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})
                 Android build ID: ${Build.DISPLAY}
                 Device brand: ${Build.BRAND}
@@ -405,3 +402,10 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
 }
 
 private const val ACTION_DISABLE_INCOGNITO_MODE = "tachi.action.DISABLE_INCOGNITO_MODE"
+
+/** One xlog [Printer] over several: the vararg `XLog.init` would otherwise need a spread copy. */
+private class FanOutPrinter(private val printers: List<Printer>) : Printer {
+    override fun println(logLevel: Int, tag: String, msg: String) {
+        printers.forEach { it.println(logLevel, tag, msg) }
+    }
+}

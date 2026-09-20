@@ -5,7 +5,8 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 
-object FirebaseConfig {
+/** Firebase analytics and crash reporting for the release build, initialised once from [init]. */
+internal object FirebaseConfig {
     private var analytics: FirebaseAnalytics? = null
     private var crashlytics: FirebaseCrashlytics? = null
 

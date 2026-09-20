@@ -101,7 +101,7 @@ internal class HikkaApi(
 
     suspend fun getRead(track: Track): HKRead? {
         return withIOContext {
-            val slug = track.tracking_url.split("/")[4]
+            val slug = track.trackingUrl.split("/")[4]
             val url = "$BASE_API_URL/read/manga/$slug".toUri().buildUpon().build()
             with(json) {
                 try {
@@ -121,7 +121,7 @@ internal class HikkaApi(
 
     suspend fun getManga(track: Track): TrackSearch {
         return withIOContext {
-            val slug = track.tracking_url.split("/")[4]
+            val slug = track.trackingUrl.split("/")[4]
             val url = "$BASE_API_URL/manga/$slug".toUri().buildUpon()
                 .build()
 
@@ -148,7 +148,7 @@ internal class HikkaApi(
 
     suspend fun addUserManga(track: Track): Track {
         return withIOContext {
-            val slug = track.tracking_url.split("/")[4]
+            val slug = track.trackingUrl.split("/")[4]
 
             val url = "$BASE_API_URL/read/manga/$slug".toUri().buildUpon()
                 .build()
@@ -160,13 +160,13 @@ internal class HikkaApi(
 
             val payload = buildJsonObject {
                 put("note", "")
-                put("chapters", track.last_chapter_read.toInt())
+                put("chapters", track.lastChapterRead.toInt())
                 put("volumes", 0)
                 put("rereads", rereads)
                 put("score", track.score.toInt())
                 put("status", track.toApiStatus())
-                put("start_date", if (track.started_reading_date > 0L) track.started_reading_date / 1000 else null)
-                put("end_date", if (track.finished_reading_date > 0L) track.finished_reading_date / 1000 else null)
+                put("start_date", if (track.startedReadingDate > 0L) track.startedReadingDate / 1000 else null)
+                put("end_date", if (track.finishedReadingDate > 0L) track.finishedReadingDate / 1000 else null)
             }
 
             with(json) {

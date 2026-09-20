@@ -9,8 +9,7 @@ import eu.kanade.tachiyomi.source.online.english.HBrowse
 import eu.kanade.tachiyomi.source.online.english.Pururin
 import eu.kanade.tachiyomi.source.online.english.Tsumino
 
-// Source helpers
-// . */
+// Source helpers.
 
 private val DELEGATED_METADATA_SOURCES by lazy {
     listOf(

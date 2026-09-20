@@ -228,7 +228,7 @@ internal class NHentai(delegate: HttpSource, val context: Context) :
     }
 
     companion object {
-        const val otherId = 7309872737163460316L
+        const val otherId = 7_309_872_737_163_460_316L
 
         private val jsonParser = Json {
             ignoreUnknownKeys = true

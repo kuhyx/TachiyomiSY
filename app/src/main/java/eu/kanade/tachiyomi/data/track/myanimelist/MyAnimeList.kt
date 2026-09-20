@@ -66,13 +66,13 @@ internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), Deletable
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         if (track.status != COMPLETED) {
             if (didReadChapter) {
-                if (track.last_chapter_read.toLong() == track.total_chapters && track.total_chapters > 0) {
+                if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
                     track.status = COMPLETED
-                    track.finished_reading_date = System.currentTimeMillis()
+                    track.finishedReadingDate = System.currentTimeMillis()
                 } else if (track.status != REREADING) {
                     track.status = READING
-                    if (track.last_chapter_read == 1.0) {
-                        track.started_reading_date = System.currentTimeMillis()
+                    if (track.lastChapterRead == 1.0) {
+                        track.startedReadingDate = System.currentTimeMillis()
                     }
                 }
             }
@@ -89,7 +89,7 @@ internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), Deletable
         val remoteTrack = api.findListItem(track)
         return if (remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack)
-            track.remote_id = remoteTrack.remote_id
+            track.remoteId = remoteTrack.remoteId
 
             if (track.status != COMPLETED) {
                 val isRereading = track.status == REREADING

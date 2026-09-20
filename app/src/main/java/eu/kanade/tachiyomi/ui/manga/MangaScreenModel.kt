@@ -242,8 +242,7 @@ internal class MangaScreenModel(
             this(pair.first, pair.second, flatMetadata)
     }
 
-    // Helper function to update the UI state only if it's currently in success state
-    // . */
+    // Helper function to update the UI state only if it's currently in success state.
     private inline fun updateSuccessState(func: (State.Success) -> State.Success) {
         mutableState.update {
             when (it) {
@@ -1100,7 +1099,7 @@ internal class MangaScreenModel(
                     action = downloadAction,
                 )
             }
-            LibraryPreferences.ChapterSwipeAction.Disabled -> throw IllegalStateException()
+            LibraryPreferences.ChapterSwipeAction.Disabled -> error("A disabled swipe action cannot be performed")
         }
     }
 

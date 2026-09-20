@@ -217,7 +217,7 @@ internal object SettingsReaderScreen : SearchableSettings {
                 Preference.PreferenceItem.ListPreference(
                     preference = navModePref,
                     entries = ReaderPreferences.TapZones
-                        .mapIndexed { index, it -> index to stringResource(it) }
+                        .mapIndexed { index, titleRes -> index to stringResource(titleRes) }
                         .toMap(),
                     title = stringResource(MR.strings.pref_viewer_nav),
                 ),
@@ -236,14 +236,14 @@ internal object SettingsReaderScreen : SearchableSettings {
                 Preference.PreferenceItem.ListPreference(
                     preference = imageScaleTypePref,
                     entries = ReaderPreferences.ImageScaleType
-                        .mapIndexed { index, it -> index + 1 to stringResource(it) }
+                        .mapIndexed { index, titleRes -> index + 1 to stringResource(titleRes) }
                         .toMap(),
                     title = stringResource(MR.strings.pref_image_scale_type),
                 ),
                 Preference.PreferenceItem.ListPreference(
                     preference = readerPreferences.zoomStart,
                     entries = ReaderPreferences.ZoomStart
-                        .mapIndexed { index, it -> index + 1 to stringResource(it) }
+                        .mapIndexed { index, titleRes -> index + 1 to stringResource(titleRes) }
                         .toMap(),
                     title = stringResource(MR.strings.pref_zoom_start),
                 ),
@@ -318,7 +318,7 @@ internal object SettingsReaderScreen : SearchableSettings {
                 Preference.PreferenceItem.ListPreference(
                     preference = navModePref,
                     entries = ReaderPreferences.TapZones
-                        .mapIndexed { index, it -> index to stringResource(it) }
+                        .mapIndexed { index, titleRes -> index to stringResource(titleRes) }
                         .toMap(),
                     title = stringResource(MR.strings.pref_viewer_nav),
                 ),
@@ -575,7 +575,7 @@ internal object SettingsReaderScreen : SearchableSettings {
                     title = stringResource(SYMR.strings.page_layout),
                     subtitle = stringResource(SYMR.strings.automatic_can_still_switch),
                     entries = ReaderPreferences.PageLayouts
-                        .mapIndexed { index, it -> index to stringResource(it) }
+                        .mapIndexed { index, titleRes -> index to stringResource(titleRes) }
                         .toMap(),
                 ),
                 Preference.PreferenceItem.SwitchPreference(
@@ -588,7 +588,7 @@ internal object SettingsReaderScreen : SearchableSettings {
                     title = stringResource(SYMR.strings.center_margin),
                     subtitle = stringResource(SYMR.strings.pref_center_margin_summary),
                     entries = ReaderPreferences.CenterMarginTypes
-                        .mapIndexed { index, it -> index + 1 to stringResource(it) }
+                        .mapIndexed { index, titleRes -> index + 1 to stringResource(titleRes) }
                         .toMap(),
                 ),
                 Preference.PreferenceItem.ListPreference(
@@ -596,7 +596,7 @@ internal object SettingsReaderScreen : SearchableSettings {
                     title = stringResource(SYMR.strings.pref_archive_reader_mode),
                     subtitle = stringResource(SYMR.strings.pref_archive_reader_mode_summary),
                     entries = ReaderPreferences.archiveModeTypes
-                        .mapIndexed { index, it -> index to stringResource(it) }
+                        .mapIndexed { index, titleRes -> index to stringResource(titleRes) }
                         .toMap(),
                 ),
             ),

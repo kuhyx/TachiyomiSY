@@ -153,8 +153,7 @@ internal class WebtoonPageHolder(
         removeErrorLayout()
     }
 
-    // Called when the page is downloading
-    // . */
+    // Called when the page is downloading.
     private fun setDownloading() {
         progressContainer.isVisible = true
         progressIndicator.show()

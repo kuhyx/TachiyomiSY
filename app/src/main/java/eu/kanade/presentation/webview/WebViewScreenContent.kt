@@ -43,7 +43,6 @@ import com.kevinnzou.web.LoadingState
 import com.kevinnzou.web.WebContent
 import com.kevinnzou.web.WebView
 import com.kevinnzou.web.WebViewNavigator
-import com.kevinnzou.web.WebViewState
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.WarningBanner
@@ -55,17 +54,6 @@ import kotlinx.coroutines.launch
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
-
-internal class WebViewWindow(webContent: WebContent, val navigator: WebViewNavigator) {
-    var state by mutableStateOf(WebViewState(webContent))
-    var popupMessage: Message? = null
-        private set
-    var webView: WebView? = null
-
-    constructor(popupMessage: Message, navigator: WebViewNavigator) : this(WebContent.NavigatorOnly, navigator) {
-        this.popupMessage = popupMessage
-    }
-}
 
 @Composable
 internal fun WebViewScreenContent(

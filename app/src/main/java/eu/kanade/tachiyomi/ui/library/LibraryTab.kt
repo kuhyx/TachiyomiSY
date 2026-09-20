@@ -243,19 +243,24 @@ internal data object LibraryTab : Tab {
                         showPageTabs = state.showCategoryTabs || !state.searchQuery.isNullOrEmpty(),
                         onChangeCurrentPage = screenModel::updateActiveCategoryIndex,
                         onClickManga = { navigator.push(MangaScreen(it)) },
-                        onContinueReadingClicked = { it: LibraryManga ->
-                            scope.launchIO {
-                                val chapter = screenModel.getNextUnreadChapter(it.manga)
-                                if (chapter != null) {
-                                    context.startActivity(
-                                        ReaderActivity.newIntent(context, chapter.mangaId, chapter.id),
-                                    )
-                                } else {
-                                    snackbarHostState.showSnackbar(context.stringResource(MR.strings.no_next_chapter))
+                        onContinueReadingClicked = if (state.showMangaContinueButton) {
+                            { libraryManga: LibraryManga ->
+                                scope.launchIO {
+                                    val chapter = screenModel.getNextUnreadChapter(libraryManga.manga)
+                                    if (chapter != null) {
+                                        context.startActivity(
+                                            ReaderActivity.newIntent(context, chapter.mangaId, chapter.id),
+                                        )
+                                    } else {
+                                        snackbarHostState.showSnackbar(
+                                            context.stringResource(MR.strings.no_next_chapter),
+                                        )
+                                    }
                                 }
                             }
-                            Unit
-                        }.takeIf { state.showMangaContinueButton },
+                        } else {
+                            null
+                        },
                         onToggleSelection = screenModel::toggleSelection,
                         onToggleRangeSelection = { category, manga ->
                             screenModel.toggleRangeSelection(category, manga)

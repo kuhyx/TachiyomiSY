@@ -83,7 +83,9 @@ internal data class DummyTracker(
 
     override fun getDisplayUsername(): String = "UserName"
 
-    override fun saveDisplayUsername(displayName: String): Unit = Unit
+    override fun saveDisplayUsername(displayName: String) {
+        // A dummy keeps no credentials.
+    }
 
     override fun getPassword(): String = "passw0rd"
 

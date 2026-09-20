@@ -59,20 +59,20 @@ internal class ExtensionsScreenModel(
                     .map { searchQueryPredicate(it ?: "") },
                 currentDownloads,
                 getExtensions.subscribe(),
-            ) { predicate, downloads, (_updates, _installed, _available, _untrusted) ->
+            ) { predicate, downloads, extensions ->
                 buildMap {
-                    val updates = _updates.filter(predicate).map(extensionMapper(downloads))
+                    val updates = extensions.updates.filter(predicate).map(extensionMapper(downloads))
                     if (updates.isNotEmpty()) {
                         put(ExtensionUiModel.Header.Resource(MR.strings.ext_updates_pending), updates)
                     }
 
-                    val installed = _installed.filter(predicate).map(extensionMapper(downloads))
-                    val untrusted = _untrusted.filter(predicate).map(extensionMapper(downloads))
+                    val installed = extensions.installed.filter(predicate).map(extensionMapper(downloads))
+                    val untrusted = extensions.untrusted.filter(predicate).map(extensionMapper(downloads))
                     if (installed.isNotEmpty() || untrusted.isNotEmpty()) {
                         put(ExtensionUiModel.Header.Resource(MR.strings.ext_installed), installed + untrusted)
                     }
 
-                    val languagesWithExtensions = _available
+                    val languagesWithExtensions = extensions.available
                         .filter(predicate)
                         .groupBy { it.lang }
                         .toSortedMap(LocaleHelper.comparator)

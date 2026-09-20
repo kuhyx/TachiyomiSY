@@ -75,10 +75,10 @@ internal class ExtensionDetailsScreenModel(
                         }
                         .catch { throwable ->
                             logcat(LogPriority.ERROR, throwable)
-                            mutableState.update { it.copy(_sources = listOf()) }
+                            mutableState.update { it.copy(loadedSources = listOf()) }
                         }
                         .collectLatest { sources ->
-                            mutableState.update { it.copy(_sources = sources) }
+                            mutableState.update { it.copy(loadedSources = sources) }
                         }
                 }
             }
@@ -140,14 +140,14 @@ internal class ExtensionDetailsScreenModel(
     data class State(
         val extension: Extension.Installed? = null,
         val isIncognito: Boolean = false,
-        private val _sources: List<ExtensionSourceItem>? = null,
+        private val loadedSources: List<ExtensionSourceItem>? = null,
     ) {
 
         val sources: List<ExtensionSourceItem>
-            get() = _sources ?: listOf()
+            get() = loadedSources ?: listOf()
 
         val isLoading: Boolean
-            get() = extension == null || _sources == null
+            get() = extension == null || loadedSources == null
     }
 }
 

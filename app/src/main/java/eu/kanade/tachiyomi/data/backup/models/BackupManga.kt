@@ -35,7 +35,7 @@ internal class BackupManga(
     @ProtoNumber(100) var favorite: Boolean = true,
     @ProtoNumber(101) var chapterFlags: Int = 0,
     // @ProtoNumber(102) var brokenHistory, legacy history model with non-compliant proto number
-    @ProtoNumber(103) var viewer_flags: Int? = null,
+    @ProtoNumber(103) var viewerFlags: Int? = null,
     @ProtoNumber(104) var history: List<BackupHistory> = emptyList(),
     @ProtoNumber(105) var updateStrategy: UpdateStrategy = UpdateStrategy.ALWAYS_UPDATE,
     @ProtoNumber(106) var lastModifiedAt: Long = 0,
@@ -77,7 +77,7 @@ internal class BackupManga(
             favorite = this@BackupManga.favorite,
             source = this@BackupManga.source,
             dateAdded = this@BackupManga.dateAdded,
-            viewerFlags = (this@BackupManga.viewer_flags ?: this@BackupManga.viewer).toLong(),
+            viewerFlags = (this@BackupManga.viewerFlags ?: this@BackupManga.viewer).toLong(),
             chapterFlags = this@BackupManga.chapterFlags.toLong(),
             updateStrategy = this@BackupManga.updateStrategy,
             lastModifiedAt = this@BackupManga.lastModifiedAt,

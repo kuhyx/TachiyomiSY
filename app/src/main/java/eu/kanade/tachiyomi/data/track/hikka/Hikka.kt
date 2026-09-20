@@ -76,13 +76,13 @@ internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
     ): Track {
         if (track.status != COMPLETED) {
             if (didReadChapter) {
-                if (track.last_chapter_read.toLong() == track.total_chapters && track.total_chapters > 0) {
+                if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
                     track.status = COMPLETED
-                    track.finished_reading_date = System.currentTimeMillis()
+                    track.finishedReadingDate = System.currentTimeMillis()
                 } else if (track.status != REREADING) {
                     track.status = READING
-                    if (track.last_chapter_read == 1.0) {
-                        track.started_reading_date = System.currentTimeMillis()
+                    if (track.lastChapterRead == 1.0) {
+                        track.startedReadingDate = System.currentTimeMillis()
                     }
                 }
             }
@@ -95,8 +95,8 @@ internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
         val remoteTrack = api.getManga(track)
 
         track.copyPersonalFrom(remoteTrack)
-        track.remote_id = remoteTrack.remote_id
-        track.library_id = remoteTrack.library_id
+        track.remoteId = remoteTrack.remoteId
+        track.libraryId = remoteTrack.libraryId
 
         if (track.status != COMPLETED) {
             val isRereading = track.status == REREADING
@@ -105,9 +105,9 @@ internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
 
         return if (readContent != null) {
             track.score = readContent.score.toDouble()
-            track.last_chapter_read = readContent.chapters.toDouble()
-            track.started_reading_date = (readContent.startDate ?: 0L) * 1000
-            track.finished_reading_date = (readContent.endDate ?: 0L) * 1000
+            track.lastChapterRead = readContent.chapters.toDouble()
+            track.startedReadingDate = (readContent.startDate ?: 0L) * 1000
+            track.finishedReadingDate = (readContent.endDate ?: 0L) * 1000
             update(track)
         } else {
             track.status = if (hasReadChapters) READING else PLAN_TO_READ
@@ -121,15 +121,15 @@ internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.getManga(track)
         track.copyPersonalFrom(remoteTrack)
-        track.total_chapters = remoteTrack.total_chapters
+        track.totalChapters = remoteTrack.totalChapters
 
         val readContent = api.getRead(track) ?: throw Exception("Could not find manga")
 
         track.score = readContent.score.toDouble()
-        track.last_chapter_read = readContent.chapters.toDouble()
+        track.lastChapterRead = readContent.chapters.toDouble()
         track.status = toTrackStatus(readContent.status)
-        track.started_reading_date = (readContent.startDate ?: 0L) * 1000
-        track.finished_reading_date = (readContent.endDate ?: 0L) * 1000
+        track.startedReadingDate = (readContent.startDate ?: 0L) * 1000
+        track.finishedReadingDate = (readContent.endDate ?: 0L) * 1000
 
         return track
     }

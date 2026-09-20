@@ -152,5 +152,5 @@ internal class ShizukuInstaller(private val service: Service) : Installer(servic
     }
 }
 
-private const val SHIZUKU_PERMISSION_REQUEST_CODE = 14045
+private const val SHIZUKU_PERMISSION_REQUEST_CODE = 14_045
 internal const val ACTION_INSTALL_RESULT = "${BuildConfig.APPLICATION_ID}.ACTION_INSTALL_RESULT"

@@ -202,8 +202,7 @@ internal data class TrackInfoDialogHomeScreen(
         }
     }
 
-    // Opens registered tracker url in browser
-    // . */
+    // Opens registered tracker url in browser.
     private fun openTrackerInBrowser(context: Context, trackItem: TrackItem) {
         val url = trackItem.track?.remoteUrl ?: return
         if (url.isNotBlank()) {
@@ -465,7 +464,7 @@ private data class TrackChapterSelectorScreen(
             val endRange = if (track.totalChapters > 0) {
                 track.totalChapters
             } else {
-                10000
+                10_000
             }
             return 0..endRange.toInt()
         }
@@ -815,7 +814,7 @@ internal data class TrackerSearchScreen(
                 mutableState.update { oldState ->
                     oldState.copy(
                         queryResult = result,
-                        selected = result.getOrNull()?.find { it.tracking_url == currentUrl },
+                        selected = result.getOrNull()?.find { it.trackingUrl == currentUrl },
                     )
                 }
             }

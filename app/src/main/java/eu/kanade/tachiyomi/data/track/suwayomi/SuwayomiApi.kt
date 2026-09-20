@@ -66,14 +66,14 @@ internal class SuwayomiApi(private val trackId: Long) {
         }
 
         TrackSearch.create(trackId).apply {
-            remote_id = mangaId
+            remoteId = mangaId
             title = manga.title
-            cover_url = "$baseUrl/${manga.thumbnailUrl}"
+            coverUrl = "$baseUrl/${manga.thumbnailUrl}"
             summary = manga.description.orEmpty()
-            tracking_url = "$baseUrl/manga/$mangaId"
-            total_chapters = manga.chapters.totalCount.toLong()
-            publishing_status = manga.status.name
-            last_chapter_read = manga.latestReadChapter?.chapterNumber ?: 0.0
+            trackingUrl = "$baseUrl/manga/$mangaId"
+            totalChapters = manga.chapters.totalCount.toLong()
+            publishingStatus = manga.status.name
+            lastChapterRead = manga.latestReadChapter?.chapterNumber ?: 0.0
             status = when (manga.unreadCount) {
                 manga.chapters.totalCount -> Suwayomi.UNREAD
                 0 -> Suwayomi.COMPLETED
@@ -83,7 +83,7 @@ internal class SuwayomiApi(private val trackId: Long) {
     }
 
     suspend fun updateProgress(track: Track, deleteDownloadsOnServer: Boolean = false): Track {
-        val mangaId = track.remote_id
+        val mangaId = track.remoteId
 
         // Follow-up: Include a filter on the chapter number here (https://github.com/kuhyx/TachiyomiSY/issues/19)
         // Below, we only consider older chapters; since v2.1.1985 filtering works properly in the query
@@ -115,7 +115,7 @@ internal class SuwayomiApi(private val trackId: Long) {
                 .data
                 .entry
                 .nodes
-                .mapNotNull { n -> n.id.takeIf { n.chapterNumber <= track.last_chapter_read + 0.001 } }
+                .mapNotNull { n -> n.id.takeIf { n.chapterNumber <= track.lastChapterRead + 0.001 } }
         }
 
         val markQuery = if (deleteDownloadsOnServer) {
@@ -179,7 +179,7 @@ internal class SuwayomiApi(private val trackId: Long) {
                 .awaitSuccess()
         }
 
-        return getTrackSearch(track.remote_id)
+        return getTrackSearch(track.remoteId)
     }
 
     private val sourceId by lazy {

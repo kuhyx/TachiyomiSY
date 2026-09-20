@@ -85,8 +85,7 @@ internal class EnhancedFilePrinter internal constructor(
         return currentTimeMillis - lastModified > maxTimeMillis
     }
 
-    // Clean log files if should clean follow strategy
-    // . */
+    // Clean log files if should clean follow strategy.
     private fun cleanLogFilesIfNecessary() {
         folder.listFiles().orEmpty()
             .asSequence()

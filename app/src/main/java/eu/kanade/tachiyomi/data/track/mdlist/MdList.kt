@@ -52,13 +52,13 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
         return withIOContext {
             val mdex = mdex ?: throw MangaDexNotFoundException()
 
-            val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
+            val remoteTrack = mdex.fetchTrackingInfo(track.trackingUrl)
             val followStatus = FollowStatus.fromLong(track.status)
 
             // this updates the follow status in the metadata
             // allow follow status to update
             if (remoteTrack.status != followStatus.long) {
-                if (mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), followStatus)) {
+                if (mdex.updateFollowStatus(MdUtil.getMangaId(track.trackingUrl), followStatus)) {
                     remoteTrack.status = followStatus.long
                 } else {
                     track.status = remoteTrack.status
@@ -72,21 +72,21 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
             // mangadex wont update chapters if manga is not follows this prevents unneeded network call
 
             /*if (followStatus != FollowStatus.UNFOLLOWED) {
-                if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
+                if (track.totalChapters != 0 && track.lastChapterRead == track.totalChapters) {
                     track.status = FollowStatus.COMPLETED.int
-                    mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), FollowStatus.COMPLETED)
+                    mdex.updateFollowStatus(MdUtil.getMangaId(track.trackingUrl), FollowStatus.COMPLETED)
                 }
-                if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
+                if (followStatus == FollowStatus.PLAN_TO_READ && track.lastChapterRead > 0) {
                     val newFollowStatus = FollowStatus.READING
                     track.status = FollowStatus.READING.int
-                    mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), newFollowStatus)
+                    mdex.updateFollowStatus(MdUtil.getMangaId(track.trackingUrl), newFollowStatus)
                     remoteTrack.status = newFollowStatus.int
                 }
 
                 mdex.updateReadingProgress(track)
-            } else if (track.last_chapter_read != 0) {
+            } else if (track.lastChapterRead != 0) {
                 // When followStatus has been changed to unfollowed 0 out read chapters since dex does
-                track.last_chapter_read = 0
+                track.lastChapterRead = 0
             }*/
             track
         }
@@ -113,10 +113,10 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
     override suspend fun refresh(track: Track): Track {
         return withIOContext {
             val mdex = mdex ?: throw MangaDexNotFoundException()
-            val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
+            val remoteTrack = mdex.fetchTrackingInfo(track.trackingUrl)
             track.copyPersonalFrom(remoteTrack)
-            /*if (track.total_chapters == 0 && mangaMetadata.status == SManga.COMPLETED) {
-                track.total_chapters = mangaMetadata.maxChapterNumber ?: 0
+            /*if (track.totalChapters == 0 && mangaMetadata.status == SManga.COMPLETED) {
+                track.totalChapters = mangaMetadata.maxChapterNumber ?: 0
             }*/
             track
         }
@@ -124,9 +124,9 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
 
     fun createInitialTracker(dbManga: Manga, mdManga: Manga = dbManga): Track {
         return Track.create(id).apply {
-            manga_id = dbManga.id
+            mangaId = dbManga.id
             status = FollowStatus.UNFOLLOWED.long
-            tracking_url = MdUtil.baseUrl + mdManga.url
+            trackingUrl = MdUtil.baseUrl + mdManga.url
             title = mdManga.title
         }
     }
@@ -144,13 +144,13 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
     }
 
     private fun toTrackSearch(mangaInfo: SManga): TrackSearch = TrackSearch.create(id).apply {
-        tracking_url = MdUtil.baseUrl + mangaInfo.url
+        trackingUrl = MdUtil.baseUrl + mangaInfo.url
         title = mangaInfo.title
-        cover_url = mangaInfo.thumbnail_url.orEmpty()
+        coverUrl = mangaInfo.thumbnail_url.orEmpty()
         summary = mangaInfo.description.orEmpty()
     }
 
-    override suspend fun login(username: String, password: String): Unit = throw Exception("not used")
+    override suspend fun login(username: String, password: String) = throw UnsupportedOperationException("MDList signs in through the MangaDex source")
 
     override fun logout() {
         super.logout()

@@ -77,7 +77,7 @@ internal abstract class BaseTracker(
     }
 
     override suspend fun register(item: Track, mangaId: Long) {
-        item.manga_id = mangaId
+        item.mangaId = mangaId
         try {
             addTracks.bind(this, item, mangaId)
         } catch (e: Throwable) {
@@ -87,24 +87,24 @@ internal abstract class BaseTracker(
 
     override suspend fun setRemoteStatus(track: Track, status: Long) {
         track.status = status
-        if (track.status == getCompletionStatus() && track.total_chapters != 0L) {
-            track.last_chapter_read = track.total_chapters.toDouble()
+        if (track.status == getCompletionStatus() && track.totalChapters != 0L) {
+            track.lastChapterRead = track.totalChapters.toDouble()
         }
         updateRemote(track)
     }
 
     override suspend fun setRemoteLastChapterRead(track: Track, chapterNumber: Int) {
         if (
-            track.last_chapter_read == 0.0 &&
-            track.last_chapter_read < chapterNumber &&
+            track.lastChapterRead == 0.0 &&
+            track.lastChapterRead < chapterNumber &&
             track.status != getRereadingStatus()
         ) {
             track.status = getReadingStatus()
         }
-        track.last_chapter_read = chapterNumber.toDouble()
-        if (track.total_chapters != 0L && track.last_chapter_read.toLong() == track.total_chapters) {
+        track.lastChapterRead = chapterNumber.toDouble()
+        if (track.totalChapters != 0L && track.lastChapterRead.toLong() == track.totalChapters) {
             track.status = getCompletionStatus()
-            track.finished_reading_date = System.currentTimeMillis()
+            track.finishedReadingDate = System.currentTimeMillis()
         }
         updateRemote(track)
     }
@@ -115,12 +115,12 @@ internal abstract class BaseTracker(
     }
 
     override suspend fun setRemoteStartDate(track: Track, epochMillis: Long) {
-        track.started_reading_date = epochMillis
+        track.startedReadingDate = epochMillis
         updateRemote(track)
     }
 
     override suspend fun setRemoteFinishDate(track: Track, epochMillis: Long) {
-        track.finished_reading_date = epochMillis
+        track.finishedReadingDate = epochMillis
         updateRemote(track)
     }
 
@@ -139,7 +139,7 @@ internal abstract class BaseTracker(
     }
     // SY <--
 
-    private suspend fun updateRemote(track: Track): Unit = withIOContext {
+    private suspend fun updateRemote(track: Track) = withIOContext {
         try {
             update(track)
             track.toDomainTrack(idRequired = false)?.let {

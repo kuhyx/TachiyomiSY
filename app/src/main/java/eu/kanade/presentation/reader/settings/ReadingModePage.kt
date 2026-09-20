@@ -78,22 +78,22 @@ private fun ColumnScope.PagerViewerSettings(screenModel: ReaderSettingsScreenMod
 
     val imageScaleType by screenModel.preferences.imageScaleType.collectAsState()
     SettingsChipRow(MR.strings.pref_image_scale_type) {
-        ReaderPreferences.ImageScaleType.mapIndexed { index, it ->
+        ReaderPreferences.ImageScaleType.mapIndexed { index, titleRes ->
             FilterChip(
                 selected = imageScaleType == index + 1,
                 onClick = { screenModel.preferences.imageScaleType.set(index + 1) },
-                label = { Text(stringResource(it)) },
+                label = { Text(stringResource(titleRes)) },
             )
         }
     }
 
     val zoomStart by screenModel.preferences.zoomStart.collectAsState()
     SettingsChipRow(MR.strings.pref_zoom_start) {
-        ReaderPreferences.ZoomStart.mapIndexed { index, it ->
+        ReaderPreferences.ZoomStart.mapIndexed { index, titleRes ->
             FilterChip(
                 selected = zoomStart == index + 1,
                 onClick = { screenModel.preferences.zoomStart.set(index + 1) },
-                label = { Text(stringResource(it)) },
+                label = { Text(stringResource(titleRes)) },
             )
         }
     }
@@ -101,11 +101,11 @@ private fun ColumnScope.PagerViewerSettings(screenModel: ReaderSettingsScreenMod
     // SY -->
     val pageLayout by screenModel.preferences.pageLayout.collectAsState()
     SettingsChipRow(SYMR.strings.page_layout) {
-        ReaderPreferences.PageLayouts.mapIndexed { index, it ->
+        ReaderPreferences.PageLayouts.mapIndexed { index, titleRes ->
             FilterChip(
                 selected = pageLayout == index,
                 onClick = { screenModel.preferences.pageLayout.set(index) },
-                label = { Text(stringResource(it)) },
+                label = { Text(stringResource(titleRes)) },
             )
         }
     }
@@ -165,11 +165,11 @@ private fun ColumnScope.PagerViewerSettings(screenModel: ReaderSettingsScreenMod
 
     val centerMarginType by screenModel.preferences.centerMarginType.collectAsState()
     SettingsChipRow(SYMR.strings.pref_center_margin) {
-        ReaderPreferences.CenterMarginTypes.mapIndexed { index, it ->
+        ReaderPreferences.CenterMarginTypes.mapIndexed { index, titleRes ->
             FilterChip(
                 selected = centerMarginType == index,
                 onClick = { screenModel.preferences.centerMarginType.set(index) },
-                label = { Text(stringResource(it)) },
+                label = { Text(stringResource(titleRes)) },
             )
         }
     }
@@ -276,11 +276,11 @@ private fun ColumnScope.TapZonesItems(
     onSelectInvertMode: (ReaderPreferences.TappingInvertMode) -> Unit,
 ) {
     SettingsChipRow(MR.strings.pref_viewer_nav) {
-        ReaderPreferences.TapZones.mapIndexed { index, it ->
+        ReaderPreferences.TapZones.mapIndexed { index, titleRes ->
             FilterChip(
                 selected = selected == index,
                 onClick = { onSelect(index) },
-                label = { Text(stringResource(it)) },
+                label = { Text(stringResource(titleRes)) },
             )
         }
     }

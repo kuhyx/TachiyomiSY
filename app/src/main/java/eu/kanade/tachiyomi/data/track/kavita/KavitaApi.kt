@@ -147,9 +147,9 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
 
             val track = seriesDto.toTrack()
             track.apply {
-                cover_url = seriesDto.thumbnail_url.toString()
-                tracking_url = url
-                total_chapters = getTotalChapters(url)
+                coverUrl = seriesDto.thumbnailUrl.toString()
+                trackingUrl = url
+                totalChapters = getTotalChapters(url)
 
                 title = seriesDto.name
                 status = when (seriesDto.pagesRead) {
@@ -157,7 +157,7 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
                     0 -> Kavita.UNREAD
                     else -> Kavita.READING
                 }
-                last_chapter_read = getLatestChapterRead(url)
+                lastChapterRead = getLatestChapterRead(url)
             }
         } catch (e: Exception) {
             logcat(LogPriority.WARN, e) { "Could not get item: $url" }
@@ -167,14 +167,14 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
 
     suspend fun updateProgress(track: Track): Track {
         val requestUrl = "${getApiFromUrl(
-            track.tracking_url,
+            track.trackingUrl,
         )}/Tachiyomi/mark-chapter-until-as-read?seriesId=${getIdFromUrl(
-            track.tracking_url,
-        )}&chapterNumber=${track.last_chapter_read}"
+            track.trackingUrl,
+        )}&chapterNumber=${track.lastChapterRead}"
         authClient.newCall(
             POST(requestUrl, body = "{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())),
         )
             .awaitSuccess()
-        return getTrackSearch(track.tracking_url)
+        return getTrackSearch(track.trackingUrl)
     }
 }

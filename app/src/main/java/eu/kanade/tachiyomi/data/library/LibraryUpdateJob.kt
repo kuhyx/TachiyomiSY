@@ -523,8 +523,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
 
     // SY -->
 
-    // filter all follows from Mangadex and only add reading or rereading manga to library
-    // . */
+    // filter all follows from Mangadex and only add reading or rereading manga to library.
     private suspend fun syncFollows() = coroutineScope {
         val preferences = Injekt.get<SourcePreferences>()
         var count = 0
@@ -577,8 +576,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
         notifier.cancelProgressNotification()
     }
 
-    // Method that updates the all mangas which are not tracked as "reading" on mangadex
-    // . */
+    // Method that updates the all mangas which are not tracked as "reading" on mangadex.
     private suspend fun pushFavorites() = coroutineScope {
         var count = 0
         val listManga = getFavorites.await().filter { it.source in mangaDexSourceIds }

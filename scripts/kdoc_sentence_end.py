@@ -16,7 +16,7 @@ from collections import defaultdict
 from pathlib import Path
 
 FINDING = re.compile(r"^(?P<path>/[^:]+):(?P<line>\d+):\d+: .*\[EndOfSentenceFormat\]$")
-TEXT_LINE = re.compile(r"^\s*(/\*\*|\*)\s*(?P<text>\S.*?)\s*$")
+TEXT_LINE = re.compile(r"^\s*(/\*\*|\*(?!/))\s*(?P<text>\S.*?)\s*$")
 ENDS_SENTENCE = re.compile(r"[.?!:]$")
 
 

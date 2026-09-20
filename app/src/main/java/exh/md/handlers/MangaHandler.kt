@@ -116,7 +116,7 @@ internal class MangaHandler(
         preferExtensionLangTitle: Boolean,
     ): SManga {
         return withIOContext {
-            val mangaId = MdUtil.getMangaId(track.tracking_url)
+            val mangaId = MdUtil.getMangaId(track.trackingUrl)
             val response = service.viewManga(mangaId)
             val coverFileName = if (tryUsingFirstVolumeCover) {
                 service.fetchFirstVolumeCover(response)
@@ -125,7 +125,7 @@ internal class MangaHandler(
             }
             apiMangaParser.parseToManga(
                 SManga.create().apply {
-                    url = track.tracking_url
+                    url = track.trackingUrl
                 },
                 sourceId,
                 response,

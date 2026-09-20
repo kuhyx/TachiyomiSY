@@ -11,8 +11,8 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
  * | N | M | N |   M: Menu
  * +---+---+---+
  * | N | P | N |   N: Next
- * +---+---+---+
-. */
+ * +---+---+---+.
+ */
 internal class EdgeNavigation : ViewerNavigation() {
 
     override var regionList: List<Region> = listOf(

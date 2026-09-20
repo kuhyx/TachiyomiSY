@@ -8,44 +8,44 @@ internal interface Track : Serializable {
 
     var id: Long?
 
-    var manga_id: Long
+    var mangaId: Long
 
-    var tracker_id: Long
+    var trackerId: Long
 
-    var remote_id: Long
+    var remoteId: Long
 
-    var library_id: Long?
+    var libraryId: Long?
 
     var title: String
 
-    var last_chapter_read: Double
+    var lastChapterRead: Double
 
-    var total_chapters: Long
+    var totalChapters: Long
 
     var score: Double
 
     var status: Long
 
-    var started_reading_date: Long
+    var startedReadingDate: Long
 
-    var finished_reading_date: Long
+    var finishedReadingDate: Long
 
-    var tracking_url: String
+    var trackingUrl: String
 
     var private: Boolean
 
     fun copyPersonalFrom(other: Track, copyRemotePrivate: Boolean = true) {
-        last_chapter_read = other.last_chapter_read
+        lastChapterRead = other.lastChapterRead
         score = other.score
         status = other.status
-        started_reading_date = other.started_reading_date
-        finished_reading_date = other.finished_reading_date
+        startedReadingDate = other.startedReadingDate
+        finishedReadingDate = other.finishedReadingDate
         if (copyRemotePrivate) private = other.private
     }
 
     companion object {
         fun create(serviceId: Long): Track = TrackImpl().apply {
-            tracker_id = serviceId
+            trackerId = serviceId
         }
     }
 }

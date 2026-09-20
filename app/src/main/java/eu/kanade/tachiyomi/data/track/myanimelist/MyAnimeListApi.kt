@@ -113,16 +113,16 @@ internal class MyAnimeListApi(
                 .add("status", track.toMyAnimeListStatus() ?: "reading")
                 .add("is_rereading", (track.status == MyAnimeList.REREADING).toString())
                 .add("score", track.score.toString())
-                .add("num_chapters_read", track.last_chapter_read.toInt().toString())
-            convertToIsoDate(track.started_reading_date)?.let {
+                .add("num_chapters_read", track.lastChapterRead.toInt().toString())
+            convertToIsoDate(track.startedReadingDate)?.let {
                 formBodyBuilder.add("start_date", it)
             }
-            convertToIsoDate(track.finished_reading_date)?.let {
+            convertToIsoDate(track.finishedReadingDate)?.let {
                 formBodyBuilder.add("finish_date", it)
             }
 
             val request = Request.Builder()
-                .url(mangaUrl(track.remote_id).toString())
+                .url(mangaUrl(track.remoteId).toString())
                 .put(formBodyBuilder.build())
                 .build()
             with(json) {
@@ -160,7 +160,7 @@ internal class MyAnimeListApi(
     suspend fun findListItem(track: Track): Track? {
         return withIOContext {
             val uri = "$BASE_API_URL/manga".toUri().buildUpon()
-                .appendPath(track.remote_id.toString())
+                .appendPath(track.remoteId.toString())
                 .appendQueryParameter("fields", "num_chapters,my_list_status{start_date,finish_date}")
                 .build()
             with(json) {
@@ -168,7 +168,7 @@ internal class MyAnimeListApi(
                     .awaitSuccess()
                     .parseAs<MALListItem>()
                     .let { item ->
-                        track.total_chapters = item.numChapters
+                        track.totalChapters = item.numChapters
                         item.myListStatus?.let { parseMangaItem(it, track) }
                     }
             }
@@ -252,25 +252,25 @@ internal class MyAnimeListApi(
         return track.apply {
             val isRereading = listStatus.isRereading
             status = if (isRereading) MyAnimeList.REREADING else getStatus(listStatus.status)
-            last_chapter_read = listStatus.numChaptersRead
+            lastChapterRead = listStatus.numChaptersRead
             score = listStatus.score.toDouble()
-            listStatus.startDate?.let { started_reading_date = parseDate(it) }
-            listStatus.finishDate?.let { finished_reading_date = parseDate(it) }
+            listStatus.startDate?.let { startedReadingDate = parseDate(it) }
+            listStatus.finishDate?.let { finishedReadingDate = parseDate(it) }
         }
     }
 
     private fun parseSearchItem(searchItem: MALManga): TrackSearch {
         return TrackSearch.create(trackId).apply {
-            remote_id = searchItem.id
+            remoteId = searchItem.id
             title = searchItem.title
             summary = searchItem.synopsis
-            total_chapters = searchItem.numChapters
+            totalChapters = searchItem.numChapters
             score = searchItem.mean
-            cover_url = searchItem.covers?.large.orEmpty()
-            tracking_url = "https://myanimelist.net/manga/$remote_id"
-            publishing_status = searchItem.status.replace("_", " ")
-            publishing_type = searchItem.mediaType.replace("_", " ")
-            start_date = searchItem.startDate ?: ""
+            coverUrl = searchItem.covers?.large.orEmpty()
+            trackingUrl = "https://myanimelist.net/manga/$remoteId"
+            publishingStatus = searchItem.status.replace("_", " ")
+            publishingType = searchItem.mediaType.replace("_", " ")
+            startDate = searchItem.startDate ?: ""
             artists = searchItem.authors
                 .filter { authorNode -> authorNode.role == "Art" }
                 .mapNotNull { authorNode -> authorNode.node.getFullName() }

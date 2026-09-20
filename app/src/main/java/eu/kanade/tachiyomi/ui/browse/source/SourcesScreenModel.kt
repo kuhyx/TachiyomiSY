@@ -116,15 +116,11 @@ internal class SourcesScreenModel(
                 isLoading = false,
                 items = byLang
                     .flatMap {
-                        listOf(
-                            SourceUiModel.Header(
-                                it.key.removePrefix(CATEGORY_KEY_PREFIX),
-                                it.value.firstOrNull()?.category != null,
-                            ),
-                            *it.value.map { source ->
-                                SourceUiModel.Item(source)
-                            }.toTypedArray(),
+                        val header = SourceUiModel.Header(
+                            it.key.removePrefix(CATEGORY_KEY_PREFIX),
+                            it.value.firstOrNull()?.category != null,
                         )
+                        listOf(header) + it.value.map { source -> SourceUiModel.Item(source) }
                     },
                 // SY -->
                 categories = categories

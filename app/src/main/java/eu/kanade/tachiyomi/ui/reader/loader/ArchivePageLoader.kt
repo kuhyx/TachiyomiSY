@@ -26,8 +26,8 @@ internal class ArchivePageLoader(private val reader: ArchiveReader) : PageLoader
     private val mutex = Mutex()
     private val context: Application by injectLazy()
     private val readerPreferences: ReaderPreferences by injectLazy()
-    private val tmpDir = File(context.externalCacheDir, "reader_${reader.archiveHashCode}").also {
-        it.deleteRecursively()
+    private val tmpDir = File(context.externalCacheDir, "reader_${reader.archiveHashCode}").apply {
+        deleteRecursively()
     }
 
     init {
@@ -44,7 +44,7 @@ internal class ArchivePageLoader(private val reader: ArchiveReader) : PageLoader
                     .sortedWith { f1, f2 -> f1.name.compareNaturalIgnoreCase(f2.name) }
                     .forEach { entry ->
                         File(tmpDir, entry.name.substringAfterLast("/"))
-                            .also { it.createNewFile() }
+                            .apply { createNewFile() }
                             .outputStream()
                             .use { output ->
                                 reader.getInputStream(entry.name)?.use { input ->

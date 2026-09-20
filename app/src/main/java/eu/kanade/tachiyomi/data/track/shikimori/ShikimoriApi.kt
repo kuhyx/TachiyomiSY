@@ -44,9 +44,9 @@ internal class ShikimoriApi(
                 val payload = buildJsonObject {
                     putJsonObject("user_rate") {
                         put("user_id", userId)
-                        put("target_id", track.remote_id)
+                        put("target_id", track.remoteId)
                         put("target_type", "Manga")
-                        put("chapters", track.last_chapter_read.toInt())
+                        put("chapters", track.lastChapterRead.toInt())
                         put("score", track.score.toInt())
                         put("status", track.toShikimoriStatus())
                     }
@@ -60,7 +60,7 @@ internal class ShikimoriApi(
                     .parseAs<SMAddMangaResponse>()
                     .let {
                         // save id of the entry for possible future delete request
-                        track.library_id = it.id
+                        track.libraryId = it.id
                     }
                 track
             }
@@ -148,7 +148,7 @@ internal class ShikimoriApi(
             val payload = buildJsonObject {
                 put("query", query)
                 putJsonObject("variables") {
-                    put("id", track.remote_id.toString())
+                    put("id", track.remoteId.toString())
                 }
             }
             with(json) {

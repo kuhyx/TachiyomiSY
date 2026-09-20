@@ -123,10 +123,10 @@ internal data class ChangelogText(
     @XmlValue(true) val value: String,
 )
 
-private const val bullet = "\u2022"
+private const val BULLET = "\u2022"
 
 internal fun Changelog.toDisplayChangelog(): List<DisplayChangelog> {
-    val prefix = if (bulletedList) bullet + "\t\t" else ""
+    val prefix = if (bulletedList) BULLET + "\t\t" else ""
     return changelogs.map { version ->
         DisplayChangelog(
             version = version.versionName,

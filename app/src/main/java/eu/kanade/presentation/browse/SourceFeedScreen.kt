@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import eu.kanade.presentation.browse.components.BrowseSourceFloatingActionButton
@@ -26,53 +25,6 @@ import tachiyomi.presentation.core.components.material.topSmallPaddingValues
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.plus
-
-internal sealed class SourceFeedUI {
-    abstract val id: Long
-
-    abstract val title: String
-        @Composable
-        @ReadOnlyComposable
-        get
-
-    abstract val results: List<Manga>?
-
-    abstract fun withResults(results: List<Manga>?): SourceFeedUI
-
-    data class Latest(override val results: List<Manga>?) : SourceFeedUI() {
-        override val id: Long = -1
-        override val title: String
-            @Composable
-            @ReadOnlyComposable
-            get() = stringResource(MR.strings.latest)
-
-        override fun withResults(results: List<Manga>?): SourceFeedUI = copy(results = results)
-    }
-    data class Browse(override val results: List<Manga>?) : SourceFeedUI() {
-        override val id: Long = -2
-        override val title: String
-            @Composable
-            @ReadOnlyComposable
-            get() = stringResource(MR.strings.browse)
-
-        override fun withResults(results: List<Manga>?): SourceFeedUI = copy(results = results)
-    }
-    data class SourceSavedSearch(
-        val feed: FeedSavedSearch,
-        val savedSearch: SavedSearch,
-        override val results: List<Manga>?,
-    ) : SourceFeedUI() {
-        override val id: Long
-            get() = feed.id
-
-        override val title: String
-            @Composable
-            @ReadOnlyComposable
-            get() = savedSearch.name
-
-        override fun withResults(results: List<Manga>?): SourceFeedUI = copy(results = results)
-    }
-}
 
 @Composable
 internal fun SourceFeedScreen(

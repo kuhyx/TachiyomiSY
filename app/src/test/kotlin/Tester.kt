@@ -52,7 +52,7 @@ class Tester {
     }
 
     @Test
-    fun localFavoritesStorageTester(): Unit = runBlocking {
+    fun localFavoritesStorageTester() = runBlocking {
         val favorites = listOf(
             Manga.create().copy(
                 id = 1,

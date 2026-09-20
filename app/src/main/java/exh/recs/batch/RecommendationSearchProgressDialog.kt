@@ -22,15 +22,6 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
-internal data class RecommendationSearchProgressProperties(
-    val title: String,
-    val text: String,
-    val positiveButtonText: String? = null,
-    val positiveButton: (() -> Unit)? = null,
-    val negativeButtonText: String? = null,
-    val negativeButton: (() -> Unit)? = null,
-)
-
 @Composable
 internal fun RecommendationSearchProgressDialog(
     status: SearchStatus,

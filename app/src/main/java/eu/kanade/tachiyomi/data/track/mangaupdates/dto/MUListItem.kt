@@ -17,6 +17,6 @@ internal data class MUListItem(
 internal fun MUListItem.copyTo(track: Track): Track {
     return track.apply {
         this.status = listId ?: READING_LIST
-        this.last_chapter_read = this@copyTo.status?.chapter?.toDouble() ?: 0.0
+        this.lastChapterRead = this@copyTo.status?.chapter?.toDouble() ?: 0.0
     }
 }

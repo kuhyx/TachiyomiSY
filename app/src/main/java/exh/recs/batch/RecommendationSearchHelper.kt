@@ -230,7 +230,11 @@ internal data class Results<T>(
     @StringRes val recSourceCategoryResId: Int,
     val recAssociatedSourceId: Long?,
     val results: T,
-) : Serializable
+) : Serializable {
+    private companion object {
+        private const val serialVersionUID: Long = 1L
+    }
+}
 
 internal sealed interface SearchStatus {
     data object Idle : SearchStatus

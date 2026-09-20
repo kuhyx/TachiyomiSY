@@ -61,8 +61,8 @@ internal open class GestureDetectorWithLongTap(
     }
 
     /**
-     * Custom listener to also include a long tap confirmed
-. */
+     * Custom listener to also include a long tap confirmed.
+     */
     open class Listener : SimpleOnGestureListener() {
         /**
          * Notified when a long tap occurs with the initial on down [ev] that triggered it.

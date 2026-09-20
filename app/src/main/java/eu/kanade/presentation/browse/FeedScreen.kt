@@ -50,15 +50,6 @@ import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.plus
 import kotlin.time.Duration.Companion.seconds
 
-internal data class FeedItemUI(
-    val feed: FeedSavedSearch,
-    val savedSearch: SavedSearch?,
-    val source: Source?,
-    val title: String,
-    val subtitle: String,
-    val results: List<Manga>?,
-)
-
 @Composable
 internal fun FeedScreen(
     state: FeedScreenState,

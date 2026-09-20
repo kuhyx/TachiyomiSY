@@ -16,11 +16,11 @@ internal class EhUConfigBuilder {
                 .get()
                 .lowercase(Locale.getDefault())
         ) {
-            "ovrs_2400" -> Entry.ImageSize.`2400`
-            "ovrs_1600" -> Entry.ImageSize.`1600`
-            "high" -> Entry.ImageSize.`1280`
-            "med" -> Entry.ImageSize.`980`
-            "low" -> Entry.ImageSize.`780`
+            "ovrs_2400" -> Entry.ImageSize.PX_2400
+            "ovrs_1600" -> Entry.ImageSize.PX_1600
+            "high" -> Entry.ImageSize.PX_1280
+            "med" -> Entry.ImageSize.PX_980
+            "low" -> Entry.ImageSize.PX_780
             "auto" -> Entry.ImageSize.AUTO
             else -> Entry.ImageSize.AUTO
         }
@@ -44,17 +44,17 @@ internal class EhUConfigBuilder {
         }
 
         configItems += when {
-            hathPerks.allThumbs -> Entry.ThumbnailRows.`40`
-            hathPerks.thumbsUp -> Entry.ThumbnailRows.`20`
-            hathPerks.moreThumbs -> Entry.ThumbnailRows.`10`
-            else -> Entry.ThumbnailRows.`4`
+            hathPerks.allThumbs -> Entry.ThumbnailRows.ROWS_40
+            hathPerks.thumbsUp -> Entry.ThumbnailRows.ROWS_20
+            hathPerks.moreThumbs -> Entry.ThumbnailRows.ROWS_10
+            else -> Entry.ThumbnailRows.ROWS_4
         }
 
         configItems += when {
-            hathPerks.pagingEnlargementIII -> Entry.SearchResultsCount.`200`
-            hathPerks.pagingEnlargementII -> Entry.SearchResultsCount.`100`
-            hathPerks.pagingEnlargementI -> Entry.SearchResultsCount.`50`
-            else -> Entry.SearchResultsCount.`25`
+            hathPerks.pagingEnlargementIII -> Entry.SearchResultsCount.COUNT_200
+            hathPerks.pagingEnlargementII -> Entry.SearchResultsCount.COUNT_100
+            hathPerks.pagingEnlargementI -> Entry.SearchResultsCount.COUNT_50
+            else -> Entry.SearchResultsCount.COUNT_25
         }
 
         configItems += Entry.DisplayMode()
@@ -92,14 +92,13 @@ internal object Entry {
         override val key = "uh"
     }
 
-    @Suppress("ktlint:standard:enum-entry-name-case")
     enum class ImageSize(override val value: String) : ConfigItem {
         AUTO("0"),
-        `2400`("5"),
-        `1600`("4"),
-        `1280`("3"),
-        `980`("2"),
-        `780`("1"),
+        PX_2400("5"),
+        PX_1600("4"),
+        PX_1280("3"),
+        PX_980("2"),
+        PX_780("1"),
         ;
 
         override val key = "xr"
@@ -119,23 +118,21 @@ internal object Entry {
         override val value = "2"
     }
 
-    @Suppress("ktlint:standard:enum-entry-name-case")
     enum class SearchResultsCount(override val value: String) : ConfigItem {
-        `25`("0"),
-        `50`("1"),
-        `100`("2"),
-        `200`("3"),
+        COUNT_25("0"),
+        COUNT_50("1"),
+        COUNT_100("2"),
+        COUNT_200("3"),
         ;
 
         override val key = "rc"
     }
 
-    @Suppress("ktlint:standard:enum-entry-name-case")
     enum class ThumbnailRows(override val value: String) : ConfigItem {
-        `4`("0"),
-        `10`("1"),
-        `20`("2"),
-        `40`("3"),
+        ROWS_4("0"),
+        ROWS_10("1"),
+        ROWS_20("2"),
+        ROWS_40("3"),
         ;
 
         override val key = "tr"

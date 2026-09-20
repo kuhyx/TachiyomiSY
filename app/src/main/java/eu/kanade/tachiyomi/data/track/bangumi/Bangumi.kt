@@ -31,7 +31,7 @@ internal class Bangumi(id: Long) : BaseTracker(id, "Bangumi") {
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         if (track.status != COMPLETED) {
             if (didReadChapter) {
-                if (track.last_chapter_read.toLong() == track.total_chapters && track.total_chapters > 0) {
+                if (track.lastChapterRead.toLong() == track.totalChapters && track.totalChapters > 0) {
                     track.status = COMPLETED
                 } else {
                     track.status = READING
@@ -46,10 +46,10 @@ internal class Bangumi(id: Long) : BaseTracker(id, "Bangumi") {
         val statusTrack = api.statusLibManga(track, getUsername())
         return if (statusTrack != null) {
             track.copyPersonalFrom(statusTrack, copyRemotePrivate = false)
-            track.library_id = statusTrack.library_id
+            track.libraryId = statusTrack.libraryId
             track.score = statusTrack.score
-            track.last_chapter_read = statusTrack.last_chapter_read
-            track.total_chapters = statusTrack.total_chapters
+            track.lastChapterRead = statusTrack.lastChapterRead
+            track.totalChapters = statusTrack.totalChapters
             if (track.status != COMPLETED) {
                 track.status = if (hasReadChapters) READING else statusTrack.status
             }

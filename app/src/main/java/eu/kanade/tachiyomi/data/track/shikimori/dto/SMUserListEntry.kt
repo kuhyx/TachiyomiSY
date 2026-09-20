@@ -27,14 +27,14 @@ internal data class SMUserListManga(
     fun toTrack(trackId: Long): Track {
         return Track.create(trackId).apply {
             title = name
-            total_chapters = totalChapters
-            tracking_url = url
+            totalChapters = totalChapters
+            trackingUrl = url
             if (userRate != null) {
                 // null if not in user's list, must not throw here because it'd break adding titles
                 // throws in the findLibManga method of ShikimoriApi if null and shouldn't be
-                remote_id = userRate.rateId.toLong()
-                library_id = userRate.rateId.toLong()
-                last_chapter_read = userRate.chapters.toDouble()
+                remoteId = userRate.rateId.toLong()
+                libraryId = userRate.rateId.toLong()
+                lastChapterRead = userRate.chapters.toDouble()
                 score = userRate.score
                 status = toTrackStatus(userRate.status)
             }

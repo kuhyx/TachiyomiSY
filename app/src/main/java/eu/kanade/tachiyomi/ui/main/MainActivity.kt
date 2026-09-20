@@ -85,6 +85,7 @@ import eu.kanade.tachiyomi.util.system.isBenchmarkBuildType
 import eu.kanade.tachiyomi.util.system.isNavigationBarNeedsScrim
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import eu.kanade.tachiyomi.util.view.setComposeContent
+import exh.SY_DEBUG_VERSION
 import exh.debug.DebugToggles
 import exh.eh.EHentaiUpdateWorker
 import exh.log.DebugModeOverlay
@@ -92,7 +93,6 @@ import exh.source.BlacklistedSources
 import exh.source.EH_SOURCE_ID
 import exh.source.EXH_SOURCE_ID
 import exh.source.ExhPreferences
-import exh.syDebugVersion
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -144,9 +144,7 @@ internal class MainActivity : BaseActivity() {
 
     private fun initWhenIdle(task: () -> Unit) {
         // Avoid sync issues by enforcing main thread
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            throw IllegalStateException("Can only be called on main thread!")
-        }
+        check(Looper.myLooper() == Looper.getMainLooper()) { "Can only be called on main thread!" }
 
         if (firstPaint) {
             task()
@@ -541,7 +539,7 @@ internal class MainActivity : BaseActivity() {
     // SY -->
     private fun addAnalytics() {
         if (!BuildConfig.DEBUG && isPreviewBuildType) {
-            Firebase.analytics.setUserProperty("preview_version", syDebugVersion)
+            Firebase.analytics.setUserProperty("preview_version", SY_DEBUG_VERSION)
         }
     }
     // SY <--

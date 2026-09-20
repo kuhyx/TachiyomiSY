@@ -3,8 +3,8 @@ package exh.util
 import android.net.Uri
 
 /**
- * Uri filter
-. */
+ * Uri filter.
+ */
 internal interface UriFilter {
     fun addToUri(builder: Uri.Builder)
 }

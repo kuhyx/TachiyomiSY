@@ -51,16 +51,6 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import kotlin.math.roundToInt
 
-internal enum class ChapterNavigatorType {
-    HORIZONTAL_LTR,
-    HORIZONTAL_RTL,
-    VERTICAL_LEFT,
-    VERTICAL_RIGHT,
-    ;
-
-    fun isHorizontal() = this in setOf(HORIZONTAL_LTR, HORIZONTAL_RTL)
-}
-
 @Composable
 internal fun ChapterNavigator(
     type: ChapterNavigatorType,

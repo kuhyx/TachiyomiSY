@@ -30,17 +30,17 @@ internal fun Chapter.copyFromSChapter(sChapter: SChapter): Chapter {
 
 internal fun Chapter.toDbChapter(): DbChapter = ChapterImpl().also {
     it.id = id
-    it.manga_id = mangaId
+    it.mangaId = mangaId
     it.url = url
     it.name = name
     it.scanlator = scanlator
     it.read = read
     it.bookmark = bookmark
-    it.last_page_read = lastPageRead.toInt()
-    it.date_fetch = dateFetch
+    it.lastPageRead = lastPageRead.toInt()
+    it.dateFetch = dateFetch
     it.date_upload = dateUpload
     it.chapter_number = chapterNumber.toFloat()
-    it.source_order = sourceOrder.toInt()
-    it.last_modified = lastModifiedAt
+    it.sourceOrder = sourceOrder.toInt()
+    it.lastModified = lastModifiedAt
     it.memo = memo
 }

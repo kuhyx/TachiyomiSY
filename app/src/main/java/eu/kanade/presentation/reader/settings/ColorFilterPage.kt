@@ -104,11 +104,11 @@ internal fun ColumnScope.ColorFilterPage(screenModel: ReaderSettingsScreenModel)
 
         val colorFilterMode by screenModel.preferences.colorFilterMode.collectAsState()
         SettingsChipRow(MR.strings.pref_color_filter_mode) {
-            ColorFilterMode.mapIndexed { index, it ->
+            ColorFilterMode.mapIndexed { index, mode ->
                 FilterChip(
                     selected = colorFilterMode == index,
                     onClick = { screenModel.preferences.colorFilterMode.set(index) },
-                    label = { Text(stringResource(it.first)) },
+                    label = { Text(stringResource(mode.first)) },
                 )
             }
         }
