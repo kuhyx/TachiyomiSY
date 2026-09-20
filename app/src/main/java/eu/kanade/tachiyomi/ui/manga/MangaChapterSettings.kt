@@ -2,8 +2,10 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
 import cafe.adriel.voyager.core.model.screenModelScope
+import eu.kanade.domain.manga.interactor.SetExcludedScanlators
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.preference.TriState
+import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.launchNonCancellable
 import tachiyomi.domain.chapter.interactor.SetMangaDefaultChapterFlags
 import tachiyomi.domain.library.service.LibraryPreferences
@@ -23,7 +25,16 @@ internal class MangaChapterSettings(
     private val libraryPreferences: LibraryPreferences,
     private val setMangaChapterFlags: SetMangaChapterFlags = Injekt.get(),
     private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags = Injekt.get(),
+    private val mangaId: Long,
+    private val setExcludedScanlators: SetExcludedScanlators = Injekt.get(),
 ) {
+    /** Persists the scanlators to hide for this manga. */
+    fun setExcludedScanlators(excludedScanlators: Set<String>) {
+        model.screenModelScope.launchIO {
+            setExcludedScanlators.await(mangaId, excludedScanlators)
+        }
+    }
+
     /**
      * Sets the read filter and requests an UI update.
      * @param state whether to display only unread chapters or all chapters.

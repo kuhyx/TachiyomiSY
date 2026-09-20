@@ -1,10 +1,12 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
+import cafe.adriel.voyager.core.model.screenModelScope
 import eu.kanade.domain.manga.model.copyFrom
 import eu.kanade.domain.manga.model.toSManga
 import exh.source.MERGED_SOURCE_ID
 import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.core.common.util.lang.launchNonCancellable
 import tachiyomi.core.common.util.lang.withNonCancellableContext
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.interactor.SetMangaCategories
@@ -206,4 +208,14 @@ internal class MangaMerger(
     suspend fun deleteMerge(reference: MergedMangaReference) {
         deleteMergeById.await(reference.id)
     }
+}
+
+/** Saves the edited merge references off the screen model's scope. */
+internal fun MangaScreenModel.updateMergeSettings(mergedMangaReferences: List<MergedMangaReference>) {
+    screenModelScope.launchNonCancellable { merger.updateMergeSettings(mergedMangaReferences) }
+}
+
+/** Removes one merged entry off the screen model's scope. */
+internal fun MangaScreenModel.deleteMerge(reference: MergedMangaReference) {
+    screenModelScope.launchNonCancellable { merger.deleteMerge(reference) }
 }

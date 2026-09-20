@@ -73,7 +73,7 @@ internal class MangaChapterActions(
                     -> ChapterDownloadAction.CANCEL
                     Download.State.DOWNLOADED -> ChapterDownloadAction.DELETE
                 }
-                model.runChapterDownloadActions(
+                model.downloads.runChapterDownloadActions(
                     items = listOf(chapterItem),
                     action = downloadAction,
                 )
