@@ -13,13 +13,13 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
 internal enum class TrackStatus(val int: Int, val res: StringResource) {
-    READING(1, MR.strings.reading),
-    REPEATING(2, MR.strings.repeating),
-    PLAN_TO_READ(3, MR.strings.plan_to_read),
-    PAUSED(4, MR.strings.on_hold),
-    COMPLETED(5, MR.strings.completed),
-    DROPPED(6, MR.strings.dropped),
-    OTHER(7, SYMR.strings.not_tracked),
+    READING(int = 1, MR.strings.reading),
+    REPEATING(int = 2, MR.strings.repeating),
+    PLAN_TO_READ(int = 3, MR.strings.plan_to_read),
+    PAUSED(int = 4, MR.strings.on_hold),
+    COMPLETED(int = 5, MR.strings.completed),
+    DROPPED(int = 6, MR.strings.dropped),
+    OTHER(int = 7, SYMR.strings.not_tracked),
     ;
 
     companion object {

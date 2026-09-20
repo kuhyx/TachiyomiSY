@@ -7,8 +7,10 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 
+private const val VERSION = 28f
+
 internal class MoveCoverOnlyGridSettingMigration : Migration {
-    override val version: Float = 28f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val context = migrationContext.get<Application>() ?: return@withIOContext false

@@ -26,6 +26,9 @@ import java.io.IOException
  * @param context the application context.
  * @constructor creates an instance of the page preview cache.
  */
+private const val DEFAULT_CACHE_SIZE_MIB = 75L
+private const val BYTES_PER_MEBIBYTE = 1024L * 1024L
+
 internal class PagePreviewCache(private val context: Context) {
 
     companion object {
@@ -43,7 +46,7 @@ internal class PagePreviewCache(private val context: Context) {
     private val json: Json by injectLazy()
 
     // Cache class used for cache management.
-    private var diskCache = setupDiskCache(75)
+    private var diskCache = setupDiskCache(DEFAULT_CACHE_SIZE_MIB)
 
     // Returns directory of cache.
     private val cacheDir: File
@@ -66,7 +69,7 @@ internal class PagePreviewCache(private val context: Context) {
             File(context.cacheDir, PARAMETER_CACHE_DIRECTORY),
             PARAMETER_APP_VERSION,
             PARAMETER_VALUE_COUNT,
-            cacheSize * 1024 * 1024,
+            cacheSize * BYTES_PER_MEBIBYTE,
         )
     }
     // <-- EH

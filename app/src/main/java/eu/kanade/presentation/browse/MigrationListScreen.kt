@@ -39,6 +39,8 @@ import tachiyomi.presentation.core.components.material.topSmallPaddingValues
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
 
+private const val ACTION_COLUMN_WEIGHT = 0.2f
+
 @Composable
 internal fun MigrationListScreen(
     items: List<MigratingManga>,
@@ -115,7 +117,7 @@ internal fun MigrationListScreen(
                     Icon(
                         Icons.AutoMirrored.Outlined.ArrowForward,
                         contentDescription = stringResource(SYMR.strings.migrating_to),
-                        modifier = Modifier.weight(0.2f),
+                        modifier = Modifier.weight(ACTION_COLUMN_WEIGHT),
                     )
 
                     MigrationItemResult(
@@ -134,7 +136,7 @@ internal fun MigrationListScreen(
 
                     MigrationActionIcon(
                         modifier = Modifier
-                            .weight(0.2f),
+                            .weight(ACTION_COLUMN_WEIGHT),
                         result = result,
                         skipManga = { skipManga(migrationItem.manga.id) },
                         searchManually = { searchManually(migrationItem) },

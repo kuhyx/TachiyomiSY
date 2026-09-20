@@ -67,6 +67,12 @@ import tachiyomi.presentation.core.components.material.topSmallPaddingValues
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
 
+private const val ACTION_COLUMN_WEIGHT = 0.2f
+private const val COVER_OVERLAY_HEIGHT = 0.4f
+
+// Lift the dropdown over the icon button that opened it.
+private const val MENU_ANCHOR_HEIGHT = 56
+
 @Composable
 internal fun MigrationListScreenContent(
     items: List<MigratingManga>,
@@ -138,7 +144,7 @@ internal fun MigrationListScreenContent(
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
                         contentDescription = null,
-                        modifier = Modifier.weight(0.2f),
+                        modifier = Modifier.weight(ACTION_COLUMN_WEIGHT),
                     )
 
                     val result by item.searchResult.collectAsState()
@@ -152,7 +158,7 @@ internal fun MigrationListScreenContent(
                     )
 
                     MigrationListItemAction(
-                        modifier = Modifier.weight(0.2f),
+                        modifier = Modifier.weight(ACTION_COLUMN_WEIGHT),
                         result = result,
                         onSearchManually = { onSearchManually(item) },
                         onSkip = { onSkip(item.manga.id) },
@@ -200,7 +206,7 @@ internal fun MigrationListItem(
                             1f to MaterialTheme.colorScheme.background,
                         ),
                     )
-                    .fillMaxHeight(0.4f)
+                    .fillMaxHeight(COVER_OVERLAY_HEIGHT)
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter),
             )
@@ -332,7 +338,7 @@ private fun MigrationListItemAction(
                 DropdownMenu(
                     expanded = menuExpanded,
                     onDismissRequest = closeMenu,
-                    offset = DpOffset(8.dp, (-56).dp),
+                    offset = DpOffset(8.dp, (-MENU_ANCHOR_HEIGHT).dp),
                 ) {
                     DropdownMenuItem(
                         text = { Text(stringResource(MR.strings.migrationListScreen_searchManuallyActionLabel)) },

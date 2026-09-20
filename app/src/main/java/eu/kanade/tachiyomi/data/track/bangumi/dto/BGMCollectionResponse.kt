@@ -16,14 +16,9 @@ internal data class BGMCollectionResponse(
     val private: Boolean = false,
     val subject: BGMSlimSubject? = null,
 ) {
-    fun getStatus(): Long = when (type) {
-        1 -> Bangumi.PLAN_TO_READ
-        2 -> Bangumi.COMPLETED
-        3 -> Bangumi.READING
-        4 -> Bangumi.ON_HOLD
-        5 -> Bangumi.DROPPED
-        else -> throw NotImplementedError("Unknown status: $type")
-    }
+    // Bangumi's collection types are numbered exactly like the tracker's status constants.
+    fun getStatus(): Long = type?.toLong()?.takeIf { it in Bangumi.PLAN_TO_READ..Bangumi.DROPPED }
+        ?: throw IllegalArgumentException("Unknown status: $type")
 }
 
 @Serializable

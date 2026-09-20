@@ -6,8 +6,10 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 
+private const val VERSION = 75f
+
 internal class RemoveDuplicateReaderPreferenceMigration : Migration {
-    override val version: Float = 75f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val prefs = migrationContext.get<SharedPreferences>() ?: return@withIOContext false

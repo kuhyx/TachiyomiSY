@@ -34,6 +34,14 @@ import kotlin.time.Duration
 /**
  * Implementation of a [Viewer] to display pages with a [RecyclerView].
  */
+// A side tap scrolls three quarters of the screen; the next chapter preloads five pages before the end.
+private const val SCROLL_DISTANCE_NUMERATOR = 3
+private const val SCROLL_DISTANCE_DENOMINATOR = 4
+private const val PRELOAD_PAGES_BEFORE_END = 5
+private const val REFRESH_RADIUS = 3
+private const val DEFAULT_CACHE_SIZE = 2
+private const val DOUBLED_CACHE_SIZE = 4
+
 internal class WebtoonViewer(
     val activity: ReaderActivity,
     val isContinuous: Boolean = true,
@@ -53,7 +61,8 @@ internal class WebtoonViewer(
     private val frame = WebtoonFrame(activity)
 
     // Distance to scroll when the user taps on one side of the recycler view.
-    private val scrollDistance = activity.resources.displayMetrics.heightPixels * 3 / 4
+    private val scrollDistance =
+        activity.resources.displayMetrics.heightPixels * SCROLL_DISTANCE_NUMERATOR / SCROLL_DISTANCE_DENOMINATOR
 
     // Layout manager of the recycler view.
     private val layoutManager = WebtoonLayoutManager(activity, scrollDistance)
@@ -207,7 +216,7 @@ internal class WebtoonViewer(
         activity.onPageSelected(page)
 
         // Preload next chapter once we're within the last 5 pages of the current chapter
-        val inPreloadRange = pages.size - page.number < 5
+        val inPreloadRange = pages.size - page.number < PRELOAD_PAGES_BEFORE_END
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
             logcat { "Request preload next chapter because we're at page ${page.number} of ${pages.size}" }
             val nextItem = adapter.items.getOrNull(adapter.items.size - 1)
@@ -385,11 +394,12 @@ internal class WebtoonViewer(
         val position = layoutManager.findLastEndVisibleItemPosition()
         adapter.refresh()
         adapter.notifyItemRangeChanged(
-            max(0, position - 3),
-            min(position + 3, adapter.itemCount - 1),
+            max(0, position - REFRESH_RADIUS),
+            min(position + REFRESH_RADIUS, adapter.itemCount - 1),
         )
     }
 }
 
 // Double the cache size to reduce rebinds/recycles incurred by the extra layout space on scroll direction changes
-private val RECYCLER_VIEW_CACHE_SIZE = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) 4 else 2
+private val RECYCLER_VIEW_CACHE_SIZE =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DOUBLED_CACHE_SIZE else DEFAULT_CACHE_SIZE

@@ -14,6 +14,9 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.IOException
 
+/** The two magic bytes every gzip stream starts with. */
+private const val MAGIC_GZIP = 0x1f8b
+
 internal class BackupDecoder(
     private val context: Context,
     private val parser: ProtoBuf = Injekt.get(),
@@ -30,8 +33,8 @@ internal class BackupDecoder(
             }
             val id1id2 = peeked.readShort()
             val backupString = when (id1id2.toInt()) {
-                0x1f8b -> {
-                    source.gzip().buffer() // 0x1f8b is gzip magic bytes
+                MAGIC_GZIP -> {
+                    source.gzip().buffer()
                 }
                 MAGIC_JSON_SIGNATURE1, MAGIC_JSON_SIGNATURE2, MAGIC_JSON_SIGNATURE3 -> {
                     throw IOException(context.stringResource(MR.strings.invalid_backup_file_json))

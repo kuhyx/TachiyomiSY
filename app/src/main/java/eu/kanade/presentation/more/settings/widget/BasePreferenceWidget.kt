@@ -34,6 +34,8 @@ import eu.kanade.presentation.more.settings.LocalPreferenceMinHeight
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
+private const val HIGHLIGHT_FADE_MS = 200
+
 @Composable
 internal fun BasePreferenceWidget(
     modifier: Modifier = Modifier,
@@ -112,7 +114,7 @@ internal fun Modifier.highlightBackground(highlighted: Boolean): Modifier {
                 ),
             )
         } else {
-            tween(200)
+            tween(HIGHLIGHT_FADE_MS)
         },
         label = "highlight",
     )

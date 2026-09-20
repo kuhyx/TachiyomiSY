@@ -8,21 +8,28 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 
+private const val VERSION = 17f
+
+/** The old rotation-type preference indexed these orientations, 1-based (0 was unused). */
+private val LEGACY_ROTATION_TYPES = listOf(
+    ReaderOrientation.FREE,
+    ReaderOrientation.FREE,
+    ReaderOrientation.PORTRAIT,
+    ReaderOrientation.LANDSCAPE,
+    ReaderOrientation.LOCKED_PORTRAIT,
+    ReaderOrientation.LOCKED_LANDSCAPE,
+)
+
 internal class ResetReaderSettingsMigration : Migration {
-    override val version: Float = 17f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val context = migrationContext.get<Application>() ?: return@withIOContext false
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         // Migrate Rotation and Viewer values to default values for viewer_flags
-        val newOrientation = when (prefs.getInt("pref_rotation_type_key", 1)) {
-            1 -> ReaderOrientation.FREE.flagValue
-            2 -> ReaderOrientation.PORTRAIT.flagValue
-            3 -> ReaderOrientation.LANDSCAPE.flagValue
-            4 -> ReaderOrientation.LOCKED_PORTRAIT.flagValue
-            5 -> ReaderOrientation.LOCKED_LANDSCAPE.flagValue
-            else -> ReaderOrientation.FREE.flagValue
-        }
+        val newOrientation = LEGACY_ROTATION_TYPES
+            .getOrElse(prefs.getInt("pref_rotation_type_key", 1)) { ReaderOrientation.FREE }
+            .flagValue
 
         // Reading mode flag and prefValue is the same value
         val newReadingMode = prefs.getInt("pref_default_viewer_key", 1)

@@ -20,6 +20,9 @@ import tachiyomi.i18n.sy.SYMR
 import java.util.Date
 import kotlin.math.round
 
+// Ratings are shown to two decimals.
+private const val HUNDREDTHS = 100.0
+
 @Composable
 internal fun TsuminoDescription(state: State.Success, openMetadataViewer: () -> Unit) {
     val context = LocalContext.current
@@ -52,7 +55,7 @@ internal fun TsuminoDescription(state: State.Success, openMetadataViewer: () -> 
             binding.ratingBar.rating = meta.averageRating ?: 0F
             @SuppressLint("SetTextI18n")
             binding.rating.text =
-                (round((meta.averageRating ?: 0F) * 100.0) / 100.0).toString() + " - " +
+                (round((meta.averageRating ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " +
                 MetadataUIUtil.getRatingString(context, meta.averageRating?.times(2))
 
             binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)

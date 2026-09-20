@@ -3,11 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.navigation.EdgeNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.navigation.KindlishNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.LNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.navigation.RightAndLeftNavigation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -121,15 +117,7 @@ internal class WebtoonConfig(
     override fun defaultNavigation(): ViewerNavigation = LNavigation()
 
     override fun updateNavigation(navigationMode: Int) {
-        this.navigator = when (navigationMode) {
-            0 -> defaultNavigation()
-            1 -> LNavigation()
-            2 -> KindlishNavigation()
-            3 -> EdgeNavigation()
-            4 -> RightAndLeftNavigation()
-            5 -> DisabledNavigation()
-            else -> defaultNavigation()
-        }
+        this.navigator = navigationFor(navigationMode)
         navigationModeChangedListener?.invoke()
     }
 }

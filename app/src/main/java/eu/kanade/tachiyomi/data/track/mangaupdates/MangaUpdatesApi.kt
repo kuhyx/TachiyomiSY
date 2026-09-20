@@ -29,6 +29,7 @@ import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
+import java.net.HttpURLConnection
 import tachiyomi.domain.track.model.Track as DomainTrack
 
 internal class MangaUpdatesApi(
@@ -73,7 +74,7 @@ internal class MangaUpdatesApi(
         )
             .awaitSuccess()
             .let {
-                if (it.code == 200) {
+                if (it.code == HttpURLConnection.HTTP_OK) {
                     track.status = status
                     track.lastChapterRead = 1.0
                 }

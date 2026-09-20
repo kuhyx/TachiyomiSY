@@ -52,6 +52,9 @@ import tachiyomi.presentation.core.util.secondaryItemAlpha
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+// md_follows_options minus its first entry: reading and re-reading are preselected.
+private const val RE_READING_INDEX = 5
+
 internal object SettingsMangadexScreen : SearchableSettings {
 
     @ReadOnlyComposable
@@ -194,7 +197,7 @@ internal object SettingsMangadexScreen : SearchableSettings {
         }
         val selection = remember {
             List(items.size) { index ->
-                index == 0 || index == 5
+                index == 0 || index == RE_READING_INDEX
             }.toMutableStateList()
         }
         AlertDialog(

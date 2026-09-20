@@ -3,6 +3,11 @@ package eu.kanade.tachiyomi.data.track.shikimori.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+private const val MILLIS_PER_SECOND = 1000L
+
+// Refresh an hour before the server would reject the token.
+private const val EXPIRY_MARGIN_SECONDS = 3600L
+
 @Serializable
 internal data class SMOAuth(
     @SerialName("access_token")
@@ -18,4 +23,4 @@ internal data class SMOAuth(
 )
 
 // Access token lives 1 day
-internal fun SMOAuth.isExpired() = System.currentTimeMillis() / 1000 > createdAt + expiresIn - 3600
+internal fun SMOAuth.isExpired() = System.currentTimeMillis() / MILLIS_PER_SECOND > createdAt + expiresIn - EXPIRY_MARGIN_SECONDS

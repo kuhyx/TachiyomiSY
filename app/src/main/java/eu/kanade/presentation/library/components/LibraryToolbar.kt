@@ -25,6 +25,9 @@ import tachiyomi.presentation.core.components.Pill
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.theme.active
 
+private const val PILL_ALPHA_DARK = 0.12f
+private const val PILL_ALPHA_LIGHT = 0.08f
+
 @Composable
 internal fun LibraryToolbar(
     hasActiveFilters: Boolean,
@@ -87,7 +90,7 @@ private fun LibraryRegularToolbar(
     // SY <--
     scrollBehavior: TopAppBarScrollBehavior?,
 ) {
-    val pillAlpha = if (isSystemInDarkTheme()) 0.12f else 0.08f
+    val pillAlpha = if (isSystemInDarkTheme()) PILL_ALPHA_DARK else PILL_ALPHA_LIGHT
     SearchToolbar(
         titleContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {

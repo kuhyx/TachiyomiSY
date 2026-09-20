@@ -32,6 +32,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val MAX_QUERY_CHARS = 64
+
 internal class MyAnimeListApi(
     private val trackId: Long,
     private val client: OkHttpClient,
@@ -77,7 +79,7 @@ internal class MyAnimeListApi(
         return withIOContext {
             val url = "$BASE_API_URL/manga".toUri().buildUpon()
                 // MAL API throws a 400 when the query is over 64 characters...
-                .appendQueryParameter("q", query.take(64))
+                .appendQueryParameter("q", query.take(MAX_QUERY_CHARS))
                 .appendQueryParameter("nsfw", "true")
                 .appendQueryParameter("fields", SEARCH_FIELDS)
                 .build()

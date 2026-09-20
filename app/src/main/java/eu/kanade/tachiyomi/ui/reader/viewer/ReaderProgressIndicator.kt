@@ -22,6 +22,8 @@ import tachiyomi.presentation.core.components.RotatingProgressIndicator
  *
  * By always rotating we give the feedback to the user that the application isn't 'stuck'.
  */
+private const val PERCENT = 100f
+
 internal class ReaderProgressIndicator @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -51,6 +53,6 @@ internal class ReaderProgressIndicator @JvmOverloads constructor(
     }
 
     fun setProgress(@IntRange(from = 0, to = 100) progress: Int) {
-        this.progress = progress / 100f
+        this.progress = progress / PERCENT
     }
 }

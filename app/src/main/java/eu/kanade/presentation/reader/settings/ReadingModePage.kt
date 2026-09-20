@@ -25,6 +25,11 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import java.text.NumberFormat
 
+private const val PERCENT = 100f
+
+// The navigation-mode preference value that turns tap zones off.
+private const val NAVIGATION_DISABLED = 5
+
 @Composable
 internal fun ColumnScope.ReadingModePage(screenModel: ReaderSettingsScreenModel) {
     HeadingItem(MR.strings.pref_category_for_this_series)
@@ -196,7 +201,7 @@ private fun ColumnScope.WebtoonViewerSettings(screenModel: ReaderSettingsScreenM
         value = webtoonSidePadding,
         valueRange = ReaderPreferences.let { it.WEBTOON_PADDING_MIN..it.WEBTOON_PADDING_MAX },
         label = stringResource(MR.strings.pref_webtoon_side_padding),
-        valueString = numberFormat.format(webtoonSidePadding / 100f),
+        valueString = numberFormat.format(webtoonSidePadding / PERCENT),
         onChange = {
             screenModel.preferences.webtoonSidePadding.set(it)
         },
@@ -285,7 +290,7 @@ private fun ColumnScope.TapZonesItems(
         }
     }
 
-    if (selected != 5) {
+    if (selected != NAVIGATION_DISABLED) {
         SettingsChipRow(MR.strings.pref_read_with_tapping_inverted) {
             ReaderPreferences.TappingInvertMode.entries.map {
                 FilterChip(

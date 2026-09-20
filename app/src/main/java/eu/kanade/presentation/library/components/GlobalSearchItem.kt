@@ -8,6 +8,8 @@ import androidx.compose.ui.zIndex
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
+private const val ABOVE_LIST_Z_INDEX = 99f
+
 @Composable
 internal fun GlobalSearchItem(
     searchQuery: String,
@@ -20,7 +22,7 @@ internal fun GlobalSearchItem(
     ) {
         Text(
             text = stringResource(MR.strings.action_global_search_query, searchQuery),
-            modifier = Modifier.zIndex(99f),
+            modifier = Modifier.zIndex(ABOVE_LIST_Z_INDEX),
         )
     }
 }

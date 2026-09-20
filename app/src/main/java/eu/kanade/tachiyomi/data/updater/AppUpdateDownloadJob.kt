@@ -30,6 +30,9 @@ import uy.kohesive.injekt.injectLazy
 import java.io.File
 import kotlin.coroutines.cancellation.CancellationException
 
+private const val PERCENT = 100
+private const val PROGRESS_TICK_MS = 200
+
 internal class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
@@ -79,9 +82,9 @@ internal class AppUpdateDownloadJob(private val context: Context, workerParams: 
             var lastTick = 0L
 
             override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-                val progress = (100 * (bytesRead.toFloat() / contentLength)).toInt()
+                val progress = (PERCENT * (bytesRead.toFloat() / contentLength)).toInt()
                 val currentTime = System.currentTimeMillis()
-                if (progress > savedProgress && currentTime - 200 > lastTick) {
+                if (progress > savedProgress && currentTime - PROGRESS_TICK_MS > lastTick) {
                     savedProgress = progress
                     lastTick = currentTime
                     notifier.onProgressChange(progress)

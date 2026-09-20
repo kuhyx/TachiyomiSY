@@ -41,6 +41,10 @@ import tachiyomi.i18n.MR
  * @param viewer the webtoon viewer.
  * @constructor creates a new webtoon holder.
  */
+private const val PERCENT = 100f
+private const val QUARTER_TURN_DEGREES = 90f
+private const val ERROR_LAYOUT_HEIGHT = 0.8
+
 internal class WebtoonPageHolder(
     private val frame: ReaderPageImageView,
     viewer: WebtoonViewer,
@@ -92,7 +96,7 @@ internal class WebtoonPageHolder(
                 bottomMargin = 15.dpToPx
             }
 
-            val margin = Resources.getSystem().displayMetrics.widthPixels * (viewer.config.sidePadding / 100f)
+            val margin = Resources.getSystem().displayMetrics.widthPixels * (viewer.config.sidePadding / PERCENT)
             marginEnd = margin.toInt()
             marginStart = margin.toInt()
         }
@@ -221,7 +225,7 @@ internal class WebtoonPageHolder(
     private fun rotateDualPage(imageSource: BufferedSource): BufferedSource {
         val isDoublePage = ImageUtil.isWideImage(imageSource)
         return if (isDoublePage) {
-            val rotation = if (viewer.config.dualPageRotateToFitInvert) -90f else 90f
+            val rotation = if (viewer.config.dualPageRotateToFitInvert) -QUARTER_TURN_DEGREES else QUARTER_TURN_DEGREES
             ImageUtil.rotateImage(imageSource, rotation)
         } else {
             imageSource
@@ -258,7 +262,7 @@ internal class WebtoonPageHolder(
     private fun initErrorLayout(error: Throwable?): ReaderErrorBinding {
         if (errorLayout == null) {
             errorLayout = ReaderErrorBinding.inflate(LayoutInflater.from(context), frame, true)
-            errorLayout?.root?.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, (parentHeight * 0.8).toInt())
+            errorLayout?.root?.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, (parentHeight * ERROR_LAYOUT_HEIGHT).toInt())
             errorLayout?.actionRetry?.setOnClickListener {
                 page?.let { it.chapter.pageLoader?.retryPage(it) }
             }

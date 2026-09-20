@@ -11,8 +11,14 @@ import tachiyomi.data.awaitList
 import tachiyomi.data.category.CategoryMapper
 import tachiyomi.domain.library.service.LibraryPreferences
 
+private const val VERSION = 38f
+
+// Bits 2-5 of a category's flags held its sort mode; 0b1000 in that field meant "date added".
+private const val SORT_MODE_MASK = 0b00111100L
+private const val SORT_BY_DATE_ADDED_FLAG = 0b00100000L
+
 internal class MoveSortingModeSettingsMigration : Migration {
-    override val version: Float = 38f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val context = migrationContext.get<Application>() ?: return@withIOContext false
@@ -34,7 +40,7 @@ internal class MoveSortingModeSettingsMigration : Migration {
         }
         database.transaction {
             database.categoriesQueries.getCategories().awaitList(CategoryMapper::mapCategory)
-                .filter { it.flags and 0b00111100L == 0b00100000L }
+                .filter { it.flags and SORT_MODE_MASK == SORT_BY_DATE_ADDED_FLAG }
                 .forEach {
                     database.categoriesQueries.update(
                         categoryId = it.id,

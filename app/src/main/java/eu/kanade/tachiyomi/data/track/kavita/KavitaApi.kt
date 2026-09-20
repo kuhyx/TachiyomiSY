@@ -16,6 +16,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.injectLazy
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
 
 internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaInterceptor) {
@@ -44,16 +45,16 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
             with(json) {
                 client.newCall(request).execute().use {
                     when (it.code) {
-                        200 -> {
+                        HttpURLConnection.HTTP_OK -> {
                             return it.parseAs<AuthenticationDto>().token
                         }
-                        401 -> {
+                        HttpURLConnection.HTTP_UNAUTHORIZED -> {
                             logcat(LogPriority.WARN) {
                                 "Unauthorized / API key not valid: API URL: $apiUrl, empty API key: ${apiKey.isEmpty()}"
                             }
                             throw IOException("Unauthorized / api key not valid")
                         }
-                        500 -> {
+                        HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                             logcat(
                                 LogPriority.WARN,
                             ) { "Error fetching JWT token. API URL: $apiUrl, empty API key: ${apiKey.isEmpty()}" }
@@ -121,10 +122,10 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
         try {
             with(json) {
                 authClient.newCall(GET(requestUrl)).execute().use {
-                    if (it.code == 200) {
+                    if (it.code == HttpURLConnection.HTTP_OK) {
                         return it.parseAs<ChapterDto>().number!!.replace(",", ".").toDouble()
                     }
-                    if (it.code == 204) {
+                    if (it.code == HttpURLConnection.HTTP_NO_CONTENT) {
                         return 0.0
                     }
                 }

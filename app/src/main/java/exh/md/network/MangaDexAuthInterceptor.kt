@@ -10,6 +10,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import tachiyomi.core.common.util.system.logcat
 import java.io.IOException
+import java.net.HttpURLConnection
 
 internal class MangaDexAuthInterceptor(
     private val trackPreferences: TrackPreferences,
@@ -50,7 +51,7 @@ internal class MangaDexAuthInterceptor(
 
         // Retry the request once with a new token in case it was not already refreshed
         // by the is expired check before.
-        if (response.code == 401 && tokenIsExpired) {
+        if (response.code == HttpURLConnection.HTTP_UNAUTHORIZED && tokenIsExpired) {
             val newToken = refreshToken(chain)
             setAuth(newToken)
 

@@ -65,9 +65,9 @@ internal data class AuthenticationDto(
 
 internal class OAuth(
     val authentications: List<SourceAuth> = listOf(
-        SourceAuth(1),
-        SourceAuth(2),
-        SourceAuth(3),
+        SourceAuth(sourceId = 1),
+        SourceAuth(sourceId = 2),
+        SourceAuth(sourceId = 3),
     ),
 ) {
     fun getToken(apiUrl: String): String? {

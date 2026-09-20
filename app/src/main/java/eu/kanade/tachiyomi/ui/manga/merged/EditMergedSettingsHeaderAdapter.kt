@@ -14,6 +14,16 @@ import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.injectLazy
 
+/** The dedupe spinner's rows, in order. */
+private val DEDUPE_MODES = listOf(
+    MergedMangaReference.CHAPTER_SORT_NO_DEDUPE,
+    MergedMangaReference.CHAPTER_SORT_PRIORITY,
+    MergedMangaReference.CHAPTER_SORT_MOST_CHAPTERS,
+    MergedMangaReference.CHAPTER_SORT_HIGHEST_CHAPTER_NUMBER,
+)
+
+private const val DISABLED_ALPHA = 0.5F
+
 internal class EditMergedSettingsHeaderAdapter(private val state: EditMergedSettingsState, adapter: EditMergedMangaAdapter) : RecyclerView.Adapter<EditMergedSettingsHeaderAdapter.HeaderViewHolder>() {
 
     private val sourceManager: SourceManager by injectLazy()
@@ -52,15 +62,7 @@ internal class EditMergedSettingsHeaderAdapter(private val state: EditMergedSett
             dedupeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             binding.dedupeModeSpinner.adapter = dedupeAdapter
             state.mergeReference?.let {
-                binding.dedupeModeSpinner.setSelection(
-                    when (it.chapterSortMode) {
-                        MergedMangaReference.CHAPTER_SORT_NO_DEDUPE -> 0
-                        MergedMangaReference.CHAPTER_SORT_PRIORITY -> 1
-                        MergedMangaReference.CHAPTER_SORT_MOST_CHAPTERS -> 2
-                        MergedMangaReference.CHAPTER_SORT_HIGHEST_CHAPTER_NUMBER -> 3
-                        else -> 0
-                    },
-                )
+                binding.dedupeModeSpinner.setSelection(DEDUPE_MODES.indexOf(it.chapterSortMode).coerceAtLeast(0))
             }
             binding.dedupeModeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
@@ -70,13 +72,7 @@ internal class EditMergedSettingsHeaderAdapter(private val state: EditMergedSett
                     id: Long,
                 ) {
                     state.mergeReference = state.mergeReference?.copy(
-                        chapterSortMode = when (position) {
-                            0 -> MergedMangaReference.CHAPTER_SORT_NO_DEDUPE
-                            1 -> MergedMangaReference.CHAPTER_SORT_PRIORITY
-                            2 -> MergedMangaReference.CHAPTER_SORT_MOST_CHAPTERS
-                            3 -> MergedMangaReference.CHAPTER_SORT_HIGHEST_CHAPTER_NUMBER
-                            else -> MergedMangaReference.CHAPTER_SORT_NO_DEDUPE
-                        },
+                        chapterSortMode = DEDUPE_MODES.getOrElse(position) { MergedMangaReference.CHAPTER_SORT_NO_DEDUPE },
                     )
                     xLogD(state.mergeReference?.chapterSortMode)
                     editMergedMangaItemSortingListener.onSetPrioritySort(canMove())
@@ -141,7 +137,7 @@ internal class EditMergedSettingsHeaderAdapter(private val state: EditMergedSett
                 binding.dedupeModeSpinner.isEnabled = isChecked
                 binding.dedupeModeSpinner.alpha = when (isChecked) {
                     true -> 1F
-                    false -> 0.5F
+                    false -> DISABLED_ALPHA
                 }
                 state.mergeReference = state.mergeReference?.copy(
                     chapterSortMode = when (isChecked) {
@@ -156,7 +152,7 @@ internal class EditMergedSettingsHeaderAdapter(private val state: EditMergedSett
             binding.dedupeModeSpinner.isEnabled = binding.dedupeSwitch.isChecked
             binding.dedupeModeSpinner.alpha = when (binding.dedupeSwitch.isChecked) {
                 true -> 1F
-                false -> 0.5F
+                false -> DISABLED_ALPHA
             }
         }
     }

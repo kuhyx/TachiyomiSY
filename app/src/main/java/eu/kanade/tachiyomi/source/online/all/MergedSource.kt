@@ -33,6 +33,8 @@ import tachiyomi.domain.manga.model.MergedMangaReference
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.injectLazy
 
+private const val MAX_CONCURRENT_SOURCES = 5
+
 internal class MergedSource : UnsupportedHelpersHttpSource() {
     private val getManga: GetManga by injectLazy()
     private val getMergedReferencesById: GetMergedReferencesById by injectLazy()
@@ -117,7 +119,7 @@ internal class MergedSource : UnsupportedHelpersHttpSource() {
             "Manga references are empty, chapters unavailable, merge is likely corrupted"
         }
 
-        val semaphore = Semaphore(5)
+        val semaphore = Semaphore(MAX_CONCURRENT_SOURCES)
         var exception: Exception? = null
         return supervisorScope {
             mangaReferences

@@ -14,6 +14,8 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val MILLIS_PER_SECOND = 1000L
+
 internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
 
     companion object {
@@ -106,8 +108,8 @@ internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
         return if (readContent != null) {
             track.score = readContent.score.toDouble()
             track.lastChapterRead = readContent.chapters.toDouble()
-            track.startedReadingDate = (readContent.startDate ?: 0L) * 1000
-            track.finishedReadingDate = (readContent.endDate ?: 0L) * 1000
+            track.startedReadingDate = (readContent.startDate ?: 0L) * MILLIS_PER_SECOND
+            track.finishedReadingDate = (readContent.endDate ?: 0L) * MILLIS_PER_SECOND
             update(track)
         } else {
             track.status = if (hasReadChapters) READING else PLAN_TO_READ
@@ -128,8 +130,8 @@ internal class Hikka(id: Long) : BaseTracker(id, "Hikka"), DeletableTracker {
         track.score = readContent.score.toDouble()
         track.lastChapterRead = readContent.chapters.toDouble()
         track.status = toTrackStatus(readContent.status)
-        track.startedReadingDate = (readContent.startDate ?: 0L) * 1000
-        track.finishedReadingDate = (readContent.endDate ?: 0L) * 1000
+        track.startedReadingDate = (readContent.startDate ?: 0L) * MILLIS_PER_SECOND
+        track.finishedReadingDate = (readContent.endDate ?: 0L) * MILLIS_PER_SECOND
 
         return track
     }

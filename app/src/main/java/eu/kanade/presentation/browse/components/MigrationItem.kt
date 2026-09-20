@@ -34,6 +34,8 @@ import tachiyomi.presentation.core.components.Badge
 import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.i18n.stringResource
 
+private const val COVER_OVERLAY_HEIGHT = 0.33f
+
 @Composable
 internal fun MigrationItem(
     modifier: Modifier,
@@ -69,7 +71,7 @@ internal fun MigrationItem(
                             1f to Color(color = 0xAA000000),
                         ),
                     )
-                    .fillMaxHeight(0.33f)
+                    .fillMaxHeight(COVER_OVERLAY_HEIGHT)
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter),
             )

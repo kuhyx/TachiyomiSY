@@ -29,12 +29,15 @@ import androidx.compose.material3.DropdownMenu as ComposeDropdownMenu
  * DropdownMenu but overlaps anchor and has width constraints to better
  * match non-Compose implementation.
  */
+// Lift the dropdown over the icon button that opened it.
+private const val MENU_ANCHOR_HEIGHT = 56
+
 @Composable
 internal fun DropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    offset: DpOffset = DpOffset(8.dp, (-56).dp),
+    offset: DpOffset = DpOffset(8.dp, (-MENU_ANCHOR_HEIGHT).dp),
     scrollState: ScrollState = rememberScrollState(),
     properties: PopupProperties = PopupProperties(focusable = true),
     content: @Composable ColumnScope.() -> Unit,

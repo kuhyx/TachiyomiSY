@@ -44,6 +44,8 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.time.Duration.Companion.nanoseconds
 
+private const val MILLIS_PER_SECOND = 1000f
+
 @Composable
 internal fun DebugModeOverlay() {
     Box(Modifier.fillMaxSize()) {
@@ -155,7 +157,7 @@ private class FpsState(private val interval: Int) :
             val duration = currentFrameTimeMillis - startFrameTimeMillis
             numFramesRendered++
             if (duration > interval) {
-                value = (numFramesRendered * 1000f / duration).toDouble()
+                value = (numFramesRendered * MILLIS_PER_SECOND / duration).toDouble()
                 startFrameTimeMillis = currentFrameTimeMillis
                 numFramesRendered = 0
             }

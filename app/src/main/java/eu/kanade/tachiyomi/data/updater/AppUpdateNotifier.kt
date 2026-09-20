@@ -18,6 +18,8 @@ import tachiyomi.domain.release.model.Release
 import tachiyomi.domain.release.model.getDownloadLink
 import tachiyomi.i18n.MR
 
+private const val PROGRESS_MAX = 100
+
 internal class AppUpdateNotifier(private val context: Context) {
 
     private val notificationBuilder = context.notificationBuilder(Notifications.CHANNEL_APP_UPDATE)
@@ -101,7 +103,7 @@ internal class AppUpdateNotifier(private val context: Context) {
      */
     fun onProgressChange(progress: Int) {
         with(notificationBuilder) {
-            setProgress(100, progress, false)
+            setProgress(PROGRESS_MAX, progress, false)
             setOnlyAlertOnce(true)
         }
         notificationBuilder.show()

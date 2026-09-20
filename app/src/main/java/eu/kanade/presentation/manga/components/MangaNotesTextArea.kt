@@ -55,6 +55,9 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import kotlin.time.Duration.Companion.seconds
 
+private const val UNORDERED_LIST_INDENT = 4
+private const val ORDERED_LIST_INDENT = 20
+
 @Composable
 internal fun MangaNotesTextArea(
     state: MangaNotesScreen.State,
@@ -79,8 +82,8 @@ internal fun MangaNotesTextArea(
     }
     LaunchedEffect(Unit) {
         richTextState.setMarkdown(state.notes)
-        richTextState.config.unorderedListIndent = 4
-        richTextState.config.orderedListIndent = 20
+        richTextState.config.unorderedListIndent = UNORDERED_LIST_INDENT
+        richTextState.config.orderedListIndent = ORDERED_LIST_INDENT
     }
     LaunchedEffect(primaryColor) {
         richTextState.config.linkColor = primaryColor

@@ -4,6 +4,11 @@ import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+private const val MILLIS_PER_SECOND = 1000L
+
+// Refresh an hour before the server would reject the token.
+private const val EXPIRY_MARGIN_SECONDS = 3600L
+
 @Serializable
 internal data class BGMOAuth(
     @SerialName("access_token")
@@ -12,7 +17,7 @@ internal data class BGMOAuth(
     val tokenType: String,
     @SerialName("created_at")
     @EncodeDefault
-    val createdAt: Long = System.currentTimeMillis() / 1000,
+    val createdAt: Long = System.currentTimeMillis() / MILLIS_PER_SECOND,
     @SerialName("expires_in")
     val expiresIn: Long,
     @SerialName("refresh_token")
@@ -22,4 +27,4 @@ internal data class BGMOAuth(
 )
 
 // Access token refresh before expired
-internal fun BGMOAuth.isExpired() = System.currentTimeMillis() / 1000 > createdAt + expiresIn - 3600
+internal fun BGMOAuth.isExpired() = System.currentTimeMillis() / MILLIS_PER_SECOND > createdAt + expiresIn - EXPIRY_MARGIN_SECONDS

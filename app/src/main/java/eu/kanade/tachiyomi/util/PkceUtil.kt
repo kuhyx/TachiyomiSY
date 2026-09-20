@@ -4,10 +4,12 @@ import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.Base64
 
+private const val CODE_VERIFIER_BYTES = 50
+
 internal object PkceUtil {
 
     fun generateCodeVerifier(): String {
-        val codeVerifier = ByteArray(50)
+        val codeVerifier = ByteArray(CODE_VERIFIER_BYTES)
         SecureRandom().nextBytes(codeVerifier)
         return Base64.getUrlEncoder()
             .withoutPadding()

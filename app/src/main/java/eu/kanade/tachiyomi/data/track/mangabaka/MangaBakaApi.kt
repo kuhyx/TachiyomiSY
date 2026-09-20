@@ -32,11 +32,15 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
 import java.math.RoundingMode
+import java.net.HttpURLConnection
 import java.security.SecureRandom
 import java.util.Base64
 import java.util.Locale
 import kotlin.time.Instant
 import tachiyomi.domain.track.model.Track as DomainTrack
+
+private const val MAX_RATING = 100
+private const val OAUTH_STATE_BYTES = 16
 
 internal class MangaBakaApi(
     private val trackId: Long,
@@ -72,7 +76,7 @@ internal class MangaBakaApi(
                     put("progress_chapter", track.lastChapterRead)
                 }
                 if (track.score > 0) {
-                    put("rating", track.score.toInt().coerceIn(0, 100))
+                    put("rating", track.score.toInt().coerceIn(0, MAX_RATING))
                 }
                 if (track.startedReadingDate > 0) {
                     put("start_date", track.startedReadingDate.toLocalDate().toString())
@@ -130,7 +134,7 @@ internal class MangaBakaApi(
                         private = userData.isPrivate
                     }
                 } catch (e: HttpException) {
-                    if (e.code == 404) {
+                    if (e.code == HttpURLConnection.HTTP_NOT_FOUND) {
                         null
                     } else {
                         throw e
@@ -152,7 +156,7 @@ internal class MangaBakaApi(
                     put("progress_chapter", null)
                 }
                 if (track.score > 0) {
-                    put("rating", track.score.toInt().coerceIn(0, 100))
+                    put("rating", track.score.toInt().coerceIn(0, MAX_RATING))
                 } else {
                     put("rating", null)
                 }
@@ -225,7 +229,7 @@ internal class MangaBakaApi(
                         .data
                         .let { parseSearchItem(it) }
                 } catch (e: HttpException) {
-                    if (e.code == 404) {
+                    if (e.code == HttpURLConnection.HTTP_NOT_FOUND) {
                         return@with null
                     }
                     throw e
@@ -304,7 +308,7 @@ internal class MangaBakaApi(
         )
 
         private fun getOAuthStateParam(): String {
-            val bytes = ByteArray(16)
+            val bytes = ByteArray(OAUTH_STATE_BYTES)
             SecureRandom().nextBytes(bytes)
             oauthStateParam = Base64.getUrlEncoder()
                 .withoutPadding()

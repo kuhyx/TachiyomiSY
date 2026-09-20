@@ -9,8 +9,25 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.library.service.LibraryPreferences
 
+private const val VERSION = 20f
+
+/** The integer sorting-mode preference indexed these names; 5 was unused and falls back to alphabetical. */
+private val LEGACY_SORTING_MODES = listOf(
+    "ALPHABETICAL",
+    "LAST_READ",
+    "LAST_MANGA_UPDATE",
+    "UNREAD_COUNT",
+    "TOTAL_CHAPTERS",
+    "ALPHABETICAL",
+    "LATEST_CHAPTER",
+    "DRAG_AND_DROP",
+    "DATE_ADDED",
+    "TAG_LIST",
+    "CHAPTER_FETCH_DATE",
+)
+
 internal class MoveLibrarySortingSettingsMigration : Migration {
-    override val version: Float = 20f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val context = migrationContext.get<Application>() ?: return@withIOContext false
@@ -20,19 +37,7 @@ internal class MoveLibrarySortingSettingsMigration : Migration {
             val oldSortingMode = prefs.getInt(libraryPreferences.sortingMode.key(), 0 /* ALPHABETICAL */)
             val oldSortingDirection = prefs.getBoolean("library_sorting_ascending", true)
 
-            val newSortingMode = when (oldSortingMode) {
-                0 -> "ALPHABETICAL"
-                1 -> "LAST_READ"
-                2 -> "LAST_MANGA_UPDATE"
-                3 -> "UNREAD_COUNT"
-                4 -> "TOTAL_CHAPTERS"
-                6 -> "LATEST_CHAPTER"
-                7 -> "DRAG_AND_DROP"
-                8 -> "DATE_ADDED"
-                9 -> "TAG_LIST"
-                10 -> "CHAPTER_FETCH_DATE"
-                else -> "ALPHABETICAL"
-            }
+            val newSortingMode = LEGACY_SORTING_MODES.getOrElse(oldSortingMode) { "ALPHABETICAL" }
 
             val newSortingDirection = when (oldSortingDirection) {
                 true -> "ASCENDING"

@@ -14,6 +14,10 @@ import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+// Kitsu scores in half stars from 1 to 10.
+private const val HALF_STARS_MAX = 20
+private const val HALF_STARS_PER_STAR = 2f
+
 internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
 
     companion object {
@@ -55,7 +59,7 @@ internal class Kitsu(id: Long) : BaseTracker(id, "Kitsu"), DeletableTracker {
 
     override fun getScoreList(): List<String> {
         val df = DecimalFormat("0.#")
-        return listOf("0") + IntRange(2, 20).map { df.format(it / 2f) }
+        return listOf("0") + IntRange(2, HALF_STARS_MAX).map { df.format(it / HALF_STARS_PER_STAR) }
     }
 
     override fun indexToScore(index: Int): Double = if (index > 0) (index + 1) / 2.0 else 0.0

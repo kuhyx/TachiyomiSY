@@ -32,6 +32,9 @@ import rx.Observable
 import tachiyomi.core.common.util.lang.runAsObservable
 import tachiyomi.core.common.util.lang.withIOContext
 
+// nhentai serves images and thumbnails from i1..i4 / t1..t4.
+private const val IMAGE_HOSTS = 4
+
 internal class NHentai(delegate: HttpSource, val context: Context) :
     DelegatedHttpSource(delegate),
     MetadataSource<NHentaiSearchMetadata, Response>,
@@ -207,8 +210,8 @@ internal class NHentai(delegate: HttpSource, val context: Context) :
             nhConfig = jsonParser.decodeFromString<JsonConfig>(body)
         } catch (_: Exception) {
             nhConfig = JsonConfig(
-                (1..4).map { n -> "https://i$n.nhentai.net" },
-                (1..4).map { n -> "https://t$n.nhentai.net" },
+                (1..IMAGE_HOSTS).map { n -> "https://i$n.nhentai.net" },
+                (1..IMAGE_HOSTS).map { n -> "https://t$n.nhentai.net" },
             )
         }
     }

@@ -26,6 +26,8 @@ import java.io.File
 import java.io.InputStream
 import java.time.Instant
 
+private const val JPEG_QUALITY_LOSSLESS = 100
+
 internal class ImageSaver(
     val context: Context,
 ) {
@@ -165,7 +167,7 @@ internal sealed class Image(
                 is Cover -> {
                     {
                         val baos = ByteArrayOutputStream()
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY_LOSSLESS, baos)
                         ByteArrayInputStream(baos.toByteArray())
                     }
                 }

@@ -16,6 +16,9 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+/** The Kavita extension ships three sources, kavita_1 to kavita_3. */
+private const val KAVITA_SOURCES = 3
+
 internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
 
     companion object {
@@ -109,7 +112,7 @@ internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {
 
     fun loadOAuth() {
         val oauth = OAuth()
-        for (id in 1..3) {
+        for (id in 1..KAVITA_SOURCES) {
             val authentication = oauth.authentications[id - 1]
             val sourceId = sourceIdOf(name = "kavita_$id", lang = "all", versionId = 1)
             val preferences = (sourceManager.get(sourceId) as ConfigurableSource).sourcePreferences()

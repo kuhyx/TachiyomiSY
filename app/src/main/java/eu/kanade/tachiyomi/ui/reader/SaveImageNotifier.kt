@@ -22,6 +22,9 @@ import tachiyomi.i18n.MR
 /**
  * Class used to show BigPictureStyle notifications.
  */
+private const val PREVIEW_WIDTH = 720
+private const val PREVIEW_HEIGHT = 1280
+
 internal class SaveImageNotifier(private val context: Context) {
 
     private val notificationBuilder = context.notificationBuilder(Notifications.CHANNEL_COMMON)
@@ -36,7 +39,7 @@ internal class SaveImageNotifier(private val context: Context) {
         val request = ImageRequest.Builder(context)
             .data(uri)
             .memoryCachePolicy(CachePolicy.DISABLED)
-            .size(720, 1280)
+            .size(PREVIEW_WIDTH, PREVIEW_HEIGHT)
             .target(
                 onSuccess = { showCompleteNotification(uri, it.asDrawable(context.resources).getBitmapOrNull()) },
                 onError = { onError(null) },

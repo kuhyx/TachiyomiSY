@@ -52,10 +52,10 @@ private fun DownloadDropdownMenuItems(
     onDownloadClicked: (DownloadAction) -> Unit,
 ) {
     val options = listOf(
-        DownloadAction.NEXT_1_CHAPTER to pluralStringResource(MR.plurals.download_amount, 1, 1),
-        DownloadAction.NEXT_5_CHAPTERS to pluralStringResource(MR.plurals.download_amount, 5, 5),
-        DownloadAction.NEXT_10_CHAPTERS to pluralStringResource(MR.plurals.download_amount, 10, 10),
-        DownloadAction.NEXT_25_CHAPTERS to pluralStringResource(MR.plurals.download_amount, 25, 25),
+        DownloadAction.NEXT_1_CHAPTER.countOption(),
+        DownloadAction.NEXT_5_CHAPTERS.countOption(),
+        DownloadAction.NEXT_10_CHAPTERS.countOption(),
+        DownloadAction.NEXT_25_CHAPTERS.countOption(),
         DownloadAction.UNREAD_CHAPTERS to stringResource(MR.strings.download_unread),
         DownloadAction.BOOKMARKED_CHAPTERS to stringResource(MR.strings.download_bookmarked),
     )
@@ -69,4 +69,10 @@ private fun DownloadDropdownMenuItems(
             },
         )
     }
+}
+
+@Composable
+private fun DownloadAction.countOption(): Pair<DownloadAction, String> {
+    val count = checkNotNull(nextChapters) { "$this is not a chapter-count action" }
+    return this to pluralStringResource(MR.plurals.download_amount, count, count)
 }

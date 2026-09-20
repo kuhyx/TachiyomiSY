@@ -45,6 +45,9 @@ import tachiyomi.presentation.core.components.material.Button
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 
+private const val HALF = 0.5F
+private const val ADVANCED_OPTIONS_WIDTH = 0.8F
+
 @Composable
 internal fun EhLoginWebViewScreen(
     onUp: () -> Unit,
@@ -142,10 +145,10 @@ internal fun EhLoginWebViewScreen(
                         .align(Alignment.BottomCenter),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Button(onClick = onUp, Modifier.weight(0.5F)) {
+                    Button(onClick = onUp, Modifier.weight(HALF)) {
                         Text(text = stringResource(MR.strings.action_cancel))
                     }
-                    Button(onClick = { showAdvancedOptions = true }, Modifier.weight(0.5F)) {
+                    Button(onClick = { showAdvancedOptions = true }, Modifier.weight(HALF)) {
                         Text(text = stringResource(MR.strings.pref_category_advanced))
                     }
                 }
@@ -160,7 +163,7 @@ internal fun EhLoginWebViewScreen(
                         fun loadUrl(url: String) {
                             state.content = WebContent.Url(url)
                         }
-                        Column(Modifier.fillMaxWidth(0.8F)) {
+                        Column(Modifier.fillMaxWidth(ADVANCED_OPTIONS_WIDTH)) {
                             Button(
                                 onClick = {
                                     onClickRecheckLoginStatus(::loadUrl)

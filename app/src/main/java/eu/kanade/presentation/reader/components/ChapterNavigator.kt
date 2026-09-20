@@ -51,6 +51,8 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import kotlin.math.roundToInt
 
+private const val QUARTER_TURN_DEGREES = 90f
+
 @Composable
 internal fun ChapterNavigator(
     type: ChapterNavigatorType,
@@ -263,7 +265,7 @@ internal fun VerticalChapterNavigator(
             Icon(
                 imageVector = Icons.Outlined.SkipPrevious,
                 contentDescription = stringResource(MR.strings.action_previous_chapter),
-                modifier = Modifier.rotate(90f),
+                modifier = Modifier.rotate(QUARTER_TURN_DEGREES),
             )
         }
 
@@ -304,7 +306,7 @@ internal fun VerticalChapterNavigator(
             Icon(
                 imageVector = Icons.Outlined.SkipNext,
                 contentDescription = stringResource(MR.strings.action_next_chapter),
-                modifier = Modifier.rotate(90f),
+                modifier = Modifier.rotate(QUARTER_TURN_DEGREES),
             )
         }
     }

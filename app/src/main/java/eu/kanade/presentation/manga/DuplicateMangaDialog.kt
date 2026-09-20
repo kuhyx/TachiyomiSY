@@ -77,6 +77,9 @@ import tachiyomi.presentation.core.util.secondaryItemAlpha
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+// Title, author, artist, status and source rows are separated by extra-small gaps.
+private const val TEXT_ROW_GAPS = 5
+
 @Composable
 internal fun DuplicateMangaDialog(
     duplicates: List<MangaWithChapterCount>,
@@ -384,7 +387,7 @@ private fun calculateMangaCardHeight(
     val sourceHeight = textMeasurer.measureHeight("", typography.labelSmall, 1, constraints)
 
     val totalHeight = coverHeight + titleHeight + authorHeight + artistHeight + statusHeight + sourceHeight
-    return with(density) { ((2 * smallPadding) + totalHeight + (5 * extraSmallPadding)).toDp() }
+    return with(density) { ((2 * smallPadding) + totalHeight + (TEXT_ROW_GAPS * extraSmallPadding)).toDp() }
 }
 
 private fun TextMeasurer.measureHeight(

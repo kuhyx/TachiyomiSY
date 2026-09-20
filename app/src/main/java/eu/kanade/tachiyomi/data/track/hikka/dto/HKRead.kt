@@ -7,6 +7,8 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+private const val MILLIS_PER_SECOND = 1000L
+
 @Serializable
 internal data class HKRead(
     val reference: String,
@@ -39,8 +41,8 @@ internal data class HKRead(
             score = this@HKRead.score.toDouble()
             status = toTrackStatus(this@HKRead.status)
 
-            startedReadingDate = this@HKRead.startDate?.let { it * 1000 } ?: 0L
-            finishedReadingDate = endDate?.let { it * 1000 } ?: 0L
+            startedReadingDate = this@HKRead.startDate?.let { it * MILLIS_PER_SECOND } ?: 0L
+            finishedReadingDate = endDate?.let { it * MILLIS_PER_SECOND } ?: 0L
         }
     }
 }

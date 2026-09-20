@@ -12,6 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import kotlin.math.abs
 
+private const val PERCENT = 100f
+
 @Composable
 internal fun ReaderContentOverlay(
     @IntRange(from = -100, to = 100) brightness: Int,
@@ -21,7 +23,7 @@ internal fun ReaderContentOverlay(
 ) {
     if (brightness < 0) {
         val brightnessAlpha = remember(brightness) {
-            abs(brightness) / 100f
+            abs(brightness) / PERCENT
         }
 
         Canvas(

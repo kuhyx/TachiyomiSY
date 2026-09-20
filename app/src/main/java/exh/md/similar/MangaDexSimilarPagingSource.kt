@@ -13,6 +13,7 @@ import kotlinx.coroutines.coroutineScope
 import tachiyomi.data.source.NoResultsException
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.sy.SYMR
+import java.net.HttpURLConnection
 
 /**
  * MangaDexSimilarPagingSource inherited from the general Pager.
@@ -46,7 +47,7 @@ internal class MangaDexSimilarPagingSource(
                 )
             } catch (e: HttpException) {
                 when (e.code) {
-                    404 -> throw NoResultsException()
+                    HttpURLConnection.HTTP_NOT_FOUND -> throw NoResultsException()
                     else -> throw e
                 }
             }

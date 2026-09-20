@@ -4,6 +4,9 @@ import eu.kanade.tachiyomi.source.online.all.NHentai
 import exh.source.BlacklistedSources
 import exh.source.EH_SOURCE_ID
 import exh.source.HBROWSE_SOURCE_ID
+import exh.source.LEGACY_HBROWSE_SOURCE_ID
+import exh.source.LEGACY_NHENTAI_SOURCE_ID
+import exh.source.LEGACY_TSUMINO_SOURCE_ID
 import exh.source.TSUMINO_SOURCE_ID
 import tachiyomi.domain.manga.model.Manga
 import java.net.URI
@@ -13,7 +16,7 @@ internal object EXHMigrations {
 
     fun migrateBackupEntry(manga: Manga): Manga {
         var newManga = manga
-        if (newManga.source == 6907L) {
+        if (newManga.source == LEGACY_NHENTAI_SOURCE_ID) {
             newManga = newManga.copy(
                 // Migrate the old source to the delegated one
                 source = NHentai.otherId,
@@ -23,13 +26,13 @@ internal object EXHMigrations {
         }
 
         // Migrate Tsumino source IDs
-        if (newManga.source == 6909L) {
+        if (newManga.source == LEGACY_TSUMINO_SOURCE_ID) {
             newManga = newManga.copy(
                 source = TSUMINO_SOURCE_ID,
             )
         }
 
-        if (newManga.source == 6912L) {
+        if (newManga.source == LEGACY_HBROWSE_SOURCE_ID) {
             newManga = newManga.copy(
                 source = HBROWSE_SOURCE_ID,
                 url = newManga.url + "/c00001/",

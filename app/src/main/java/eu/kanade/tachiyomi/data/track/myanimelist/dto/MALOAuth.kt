@@ -4,6 +4,11 @@ import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+private const val MILLIS_PER_SECOND = 1000L
+
+// Refresh a minute before the server would reject the token.
+private const val EXPIRY_MARGIN_SECONDS = 60L
+
 @Serializable
 internal data class MALOAuth(
     @SerialName("token_type")
@@ -16,10 +21,10 @@ internal data class MALOAuth(
     val expiresIn: Long,
     @SerialName("created_at")
     @EncodeDefault
-    val createdAt: Long = System.currentTimeMillis() / 1000,
+    val createdAt: Long = System.currentTimeMillis() / MILLIS_PER_SECOND,
 ) {
     // Assumes expired a minute earlier
-    private val adjustedExpiresIn: Long = expiresIn - 60
+    private val adjustedExpiresIn: Long = expiresIn - EXPIRY_MARGIN_SECONDS
 
-    fun isExpired() = createdAt + adjustedExpiresIn < System.currentTimeMillis() / 1000
+    fun isExpired() = createdAt + adjustedExpiresIn < System.currentTimeMillis() / MILLIS_PER_SECOND
 }

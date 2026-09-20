@@ -18,6 +18,8 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import uy.kohesive.injekt.injectLazy
 import java.util.UUID
 
+private const val HEX_RADIX = 16
+
 internal class MangaPlusHandler(currentClient: OkHttpClient) {
     val json: Json by injectLazy()
 
@@ -98,7 +100,7 @@ internal class MangaPlusHandler(currentClient: OkHttpClient) {
 
     private fun ByteArray.decodeXorCipher(key: String): ByteArray {
         val keyStream = key.chunked(2)
-            .map { it.toInt(16) }
+            .map { it.toInt(HEX_RADIX) }
 
         return mapIndexed { i, byte -> byte.toInt() xor keyStream[i % keyStream.size] }
             .map(Int::toByte)

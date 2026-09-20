@@ -15,6 +15,8 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 import kotlin.math.absoluteValue
 
+private const val DAYS_PER_WEEK = 7
+
 internal fun LocalDateTime.toDateTimestampString(dateTimeFormatter: DateTimeFormatter): String {
     val date = dateTimeFormatter.format(this)
     val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(this)
@@ -48,14 +50,14 @@ internal fun LocalDate.toRelativeString(
     val now = LocalDate.now()
     val difference = ChronoUnit.DAYS.between(this, now)
     return when {
-        difference < -7 -> dateFormat.format(this)
+        difference < -DAYS_PER_WEEK -> dateFormat.format(this)
         difference < 0 -> context.pluralStringResource(
             MR.plurals.upcoming_relative_time,
             difference.toInt().absoluteValue,
             difference.toInt().absoluteValue,
         )
         difference < 1 -> context.stringResource(MR.strings.relative_time_today)
-        difference < 7 -> context.pluralStringResource(
+        difference < DAYS_PER_WEEK -> context.pluralStringResource(
             MR.plurals.relative_time,
             difference.toInt(),
             difference.toInt(),

@@ -5,8 +5,10 @@ import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 
+private const val VERSION = 45f
+
 internal class LogoutFromMangaDexMigration : Migration {
-    override val version: Float = 45f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         // Force MangaDex log out due to login flow change

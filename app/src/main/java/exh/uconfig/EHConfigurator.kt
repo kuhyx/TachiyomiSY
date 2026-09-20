@@ -18,6 +18,9 @@ import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
+// e-hentai keeps three settings profiles per account.
+private const val MAX_PROFILES = 3
+
 internal class EHConfigurator(val context: Context) {
     private val exhPreferences: ExhPreferences by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
@@ -103,7 +106,7 @@ internal class EHConfigurator(val context: Context) {
         }
 
         // Find available profile slot
-        val availableProfiles = (1..3).toMutableList()
+        val availableProfiles = (1..MAX_PROFILES).toMutableList()
         lastDoc.select(PROFILE_SELECTOR).forEach {
             availableProfiles.remove(it.attr("value").toInt())
         }

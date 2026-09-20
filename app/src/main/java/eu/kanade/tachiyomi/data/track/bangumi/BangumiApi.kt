@@ -30,7 +30,10 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
+import java.net.HttpURLConnection
 import tachiyomi.domain.track.model.Track as DomainTrack
+
+private const val MAX_RATING = 10
 
 internal class BangumiApi(
     private val trackId: Long,
@@ -47,7 +50,7 @@ internal class BangumiApi(
             val url = "$API_URL/v0/users/-/collections/${track.remoteId}"
             val body = buildJsonObject {
                 put("type", track.toApiStatus())
-                put("rate", track.score.toInt().coerceIn(0, 10))
+                put("rate", track.score.toInt().coerceIn(0, MAX_RATING))
                 put("ep_status", track.lastChapterRead.toInt())
                 put("private", track.private)
             }
@@ -65,7 +68,7 @@ internal class BangumiApi(
             val url = "$API_URL/v0/users/-/collections/${track.remoteId}"
             val body = buildJsonObject {
                 put("type", track.toApiStatus())
-                put("rate", track.score.toInt().coerceIn(0, 10))
+                put("rate", track.score.toInt().coerceIn(0, MAX_RATING))
                 put("ep_status", track.lastChapterRead.toInt())
                 put("private", track.private)
             }
@@ -130,7 +133,7 @@ internal class BangumiApi(
                             track
                         }
                 } catch (e: HttpException) {
-                    if (e.code == 404) { // "subject is not collected by user"
+                    if (e.code == HttpURLConnection.HTTP_NOT_FOUND) { // "subject is not collected by user"
                         null
                     } else {
                         throw e

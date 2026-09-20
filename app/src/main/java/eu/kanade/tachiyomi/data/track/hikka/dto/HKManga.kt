@@ -9,6 +9,8 @@ import kotlinx.serialization.Serializable
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+private const val MILLIS_PER_SECOND = 1000L
+
 @Serializable
 internal data class HKManga(
     @SerialName("data_type")
@@ -50,7 +52,7 @@ internal data class HKManga(
             this@HKManga.startDate?.takeIf { it != 0L }?.let {
                 val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                 startDate = try {
-                    outputDf.format(it * 1000)
+                    outputDf.format(it * MILLIS_PER_SECOND)
                 } catch (_: Exception) {
                     ""
                 }
@@ -61,8 +63,8 @@ internal data class HKManga(
                 status = toTrackStatus(userProgress.status)
                 lastChapterRead = userProgress.chapters.toDouble()
                 score = userProgress.score.toDouble()
-                startedReadingDate = (userProgress.startDate ?: 0L) * 1000
-                finishedReadingDate = (userProgress.endDate ?: 0L) * 1000
+                startedReadingDate = (userProgress.startDate ?: 0L) * MILLIS_PER_SECOND
+                finishedReadingDate = (userProgress.endDate ?: 0L) * MILLIS_PER_SECOND
             }
         }
     }

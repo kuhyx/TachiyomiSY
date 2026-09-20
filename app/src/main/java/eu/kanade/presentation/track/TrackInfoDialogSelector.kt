@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
+import eu.kanade.tachiyomi.data.track.anilist.Anilist
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.WheelNumberPicker
@@ -230,13 +231,12 @@ private fun TrackStatusSelectorPreviews() {
                 selection = 1,
                 onSelectionChange = {},
                 selections = mapOf(
-                    // Anilist values
-                    1L to MR.strings.reading,
-                    2L to MR.strings.plan_to_read,
-                    3L to MR.strings.completed,
-                    4L to MR.strings.on_hold,
-                    5L to MR.strings.dropped,
-                    6L to MR.strings.repeating,
+                    Anilist.READING to MR.strings.reading,
+                    Anilist.PLAN_TO_READ to MR.strings.plan_to_read,
+                    Anilist.COMPLETED to MR.strings.completed,
+                    Anilist.ON_HOLD to MR.strings.on_hold,
+                    Anilist.DROPPED to MR.strings.dropped,
+                    Anilist.REREADING to MR.strings.repeating,
                 ),
                 onConfirm = {},
                 onDismissRequest = {},

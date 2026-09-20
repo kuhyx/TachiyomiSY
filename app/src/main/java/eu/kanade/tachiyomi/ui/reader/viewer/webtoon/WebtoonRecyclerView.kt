@@ -357,7 +357,8 @@ private const val FLING_ANIMATION_MS = 400L
 private const val FLING_DISTANCE_TIME_FACTOR = 0.4f
 
 // Rounds a touch coordinate to the nearest pixel.
-private fun Float.roundToPixel(): Int = (this + 0.5f).toInt()
+private fun Float.roundToPixel(): Int = (this + HALF).toInt()
+private const val HALF = 0.5f
 private const val MIN_RATE = 0.5f
 private const val DEFAULT_RATE = 1f
 private const val MAX_SCALE_RATE = 3f

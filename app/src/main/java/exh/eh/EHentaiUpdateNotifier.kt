@@ -20,6 +20,8 @@ import uy.kohesive.injekt.injectLazy
 import java.math.RoundingMode
 import java.text.NumberFormat
 
+private const val TITLE_CHARS = 40
+
 internal class EHentaiUpdateNotifier(private val context: Context) {
 
     private val securityPreferences: SecurityPreferences by injectLazy()
@@ -64,7 +66,7 @@ internal class EHentaiUpdateNotifier(private val context: Context) {
             )
 
         if (!securityPreferences.hideNotificationContent.get()) {
-            val updatingText = manga.title.chop(40)
+            val updatingText = manga.title.chop(TITLE_CHARS)
             progressNotificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(updatingText))
         }
 

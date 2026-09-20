@@ -6,9 +6,6 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.navigation.EdgeNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.navigation.KindlishNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.LNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.RightAndLeftNavigation
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +18,13 @@ import uy.kohesive.injekt.api.get
 /**
  * Configuration used by pager viewers.
  */
+// Reader theme and zoom-start preference values.
+private const val THEME_BLACK = 1
+private const val THEME_GRAY = 2
+private const val THEME_AUTOMATIC = 3
+private const val GRAY_BACKGROUND = 0x202125
+private const val ZOOM_START_RIGHT = 3
+
 internal class PagerConfig(
     private val viewer: PagerViewer,
     scope: CoroutineScope,
@@ -82,7 +86,7 @@ internal class PagerConfig(
             .register(
                 {
                     theme = it
-                    automaticBackground = it == 3
+                    automaticBackground = it == THEME_AUTOMATIC
                 },
                 { imagePropertyChangedListener?.invoke() },
             )
@@ -185,7 +189,7 @@ internal class PagerConfig(
             // Left
             2 -> ReaderPageImageView.ZoomStartPosition.LEFT
             // Right
-            3 -> ReaderPageImageView.ZoomStartPosition.RIGHT
+            ZOOM_START_RIGHT -> ReaderPageImageView.ZoomStartPosition.RIGHT
             // Center
             else -> ReaderPageImageView.ZoomStartPosition.CENTER
         }
@@ -204,15 +208,7 @@ internal class PagerConfig(
     }
 
     override fun updateNavigation(navigationMode: Int) {
-        navigator = when (navigationMode) {
-            0 -> defaultNavigation()
-            1 -> LNavigation()
-            2 -> KindlishNavigation()
-            3 -> EdgeNavigation()
-            4 -> RightAndLeftNavigation()
-            5 -> DisabledNavigation()
-            else -> defaultNavigation()
-        }
+        navigator = navigationFor(navigationMode)
         navigationModeChangedListener?.invoke()
     }
 
@@ -231,8 +227,8 @@ internal class PagerConfig(
 
     fun themeToColor(theme: Int) {
         pageCanvasColor = when (theme) {
-            1 -> Color.BLACK
-            2 -> 0x202125
+            THEME_BLACK -> Color.BLACK
+            THEME_GRAY -> GRAY_BACKGROUND
             else -> Color.WHITE
         }
     }

@@ -8,8 +8,10 @@ import tachiyomi.core.common.preference.minusAssign
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.library.service.LibraryPreferences
 
+private const val VERSION = 23f
+
 internal class MoveLibraryNonCompleteSettingMigration : Migration {
-    override val version: Float = 23f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val context = migrationContext.get<Application>() ?: return@withIOContext false

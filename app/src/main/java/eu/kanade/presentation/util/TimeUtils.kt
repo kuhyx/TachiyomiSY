@@ -11,9 +11,12 @@ import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
+// Days, hours, minutes, seconds.
+private const val MAX_PARTS = 4
+
 internal fun Duration.toDurationString(context: Context, fallback: String): String {
     return toComponents { days, hours, minutes, seconds, _ ->
-        buildList(4) {
+        buildList(MAX_PARTS) {
             if (days != 0L) add(context.stringResource(MR.strings.day_short, days))
             if (hours != 0) add(context.stringResource(MR.strings.hour_short, hours))
             if (minutes != 0 && (days == 0L || hours == 0)) {

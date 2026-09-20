@@ -15,6 +15,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 
+// Near-white text over a dark outline stays readable on any page.
+private val INDICATOR_TEXT_COLOR = Color(color = 0xFFEBEBEB)
+private val INDICATOR_STROKE_COLOR = Color(color = 0xFF2D2D2D)
+
 @Composable
 internal fun ReaderPageIndicator(
     currentPage: Int,
@@ -26,13 +30,13 @@ internal fun ReaderPageIndicator(
     val text = "$currentPage / $totalPages"
 
     val style = TextStyle(
-        color = Color(235, 235, 235),
+        color = INDICATOR_TEXT_COLOR,
         fontSize = MaterialTheme.typography.bodySmall.fontSize,
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.sp,
     )
     val strokeStyle = style.copy(
-        color = Color(45, 45, 45),
+        color = INDICATOR_STROKE_COLOR,
         drawStyle = Stroke(width = 4f),
     )
 

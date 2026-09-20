@@ -52,6 +52,9 @@ import xyz.nulldev.ts.api.http.serializer.FilterSerializer
 import java.util.concurrent.Executors
 import tachiyomi.domain.manga.model.Manga as DomainManga
 
+private const val FEED_THREADS = 5
+private const val MAX_FEEDS = 10
+
 internal open class SourceFeedScreenModel(
     val sourceId: Long,
     uiPreferences: UiPreferences = Injekt.get(),
@@ -71,7 +74,7 @@ internal open class SourceFeedScreenModel(
 
     val sourceIsMangaDex = sourceId in mangaDexSourceIds
 
-    private val coroutineDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
+    private val coroutineDispatcher = Executors.newFixedThreadPool(FEED_THREADS).asCoroutineDispatcher()
 
     val startExpanded by uiPreferences.expandFilters.asState(screenModelScope)
 
@@ -100,7 +103,7 @@ internal open class SourceFeedScreenModel(
         mutableState.update { it.copy(filters = filters) }
     }
 
-    private suspend fun hasTooManyFeeds(): Boolean = countFeedSavedSearchBySourceId.await(source.id) > 10
+    private suspend fun hasTooManyFeeds(): Boolean = countFeedSavedSearchBySourceId.await(source.id) > MAX_FEEDS
 
     fun createFeed(savedSearchId: Long) {
         screenModelScope.launchNonCancellable {

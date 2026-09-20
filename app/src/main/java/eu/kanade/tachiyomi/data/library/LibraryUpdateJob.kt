@@ -98,6 +98,11 @@ import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.incrementAndFetch
 
+// How many sources update at once, and the periodic-work flex window and retry backoff.
+private const val MAX_CONCURRENT_SOURCES = 5
+private const val FLEX_MINUTES = 10L
+private const val BACKOFF_MINUTES = 10L
+
 @OptIn(ExperimentalAtomicApi::class)
 internal class LibraryUpdateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -330,7 +335,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
     // progress.
     // @return an observable delivering the progress of each update.
     private suspend fun updateChapterList() {
-        val semaphore = Semaphore(5)
+        val semaphore = Semaphore(MAX_CONCURRENT_SOURCES)
         val progressCount = AtomicInt(0)
         val currentlyUpdatingManga = CopyOnWriteArrayList<Manga>()
         val newUpdates = CopyOnWriteArrayList<Pair<Manga, Array<Chapter>>>()
@@ -484,7 +489,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
     }
 
     private suspend fun updateCovers() {
-        val semaphore = Semaphore(5)
+        val semaphore = Semaphore(MAX_CONCURRENT_SOURCES)
         val progressCount = AtomicInt(0)
         val currentlyUpdatingManga = CopyOnWriteArrayList<Manga>()
 
@@ -741,13 +746,13 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                 val request = PeriodicWorkRequestBuilder<LibraryUpdateJob>(
                     interval.toLong(),
                     TimeUnit.HOURS,
-                    10,
+                    FLEX_MINUTES,
                     TimeUnit.MINUTES,
                 )
                     .addTag(TAG)
                     .addTag(WORK_NAME_AUTO)
                     .setConstraints(constraints)
-                    .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.MINUTES)
+                    .setBackoffCriteria(BackoffPolicy.LINEAR, BACKOFF_MINUTES, TimeUnit.MINUTES)
                     .build()
 
                 context.workManager.enqueueUniquePeriodicWork(

@@ -18,6 +18,8 @@ import tachiyomi.core.common.util.system.logcat
 /**
  * Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.
  */
+private const val SPLIT_DELAY_MS = 100L
+
 internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
 
     /**
@@ -364,7 +366,7 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
         // The listener may be removed when we split a page, so the ui may not have updated properly
         // This case usually happens when we load a new chapter and the first 2 pages need to split og
         viewer.scope.launchUI {
-            delay(100)
+            delay(SPLIT_DELAY_MS)
             viewer.onPageChange(viewer.pager.currentItem)
         }
     }

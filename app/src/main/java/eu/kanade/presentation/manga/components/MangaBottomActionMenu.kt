@@ -39,11 +39,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -92,7 +92,7 @@ internal fun MangaBottomActionMenu(
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             val haptic = LocalHapticFeedback.current
-            val confirm = remember { mutableStateListOf(false, false, false, false, false, false, false) }
+            val confirm = remember { List(ChapterAction.entries.size) { false }.toMutableStateList() }
             var resetJob by remember { mutableStateOf<Job?>(null) }
             val onLongClickItem: (Int) -> Unit = { toConfirmIndex ->
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -116,8 +116,8 @@ internal fun MangaBottomActionMenu(
                     Button(
                         title = stringResource(MR.strings.action_bookmark),
                         icon = Icons.Outlined.BookmarkAdd,
-                        toConfirm = confirm[0],
-                        onLongClick = { onLongClickItem(0) },
+                        toConfirm = confirm[ChapterAction.BOOKMARK.ordinal],
+                        onLongClick = { onLongClickItem(ChapterAction.BOOKMARK.ordinal) },
                         onClick = onBookmarkClicked,
                     )
                 }
@@ -125,8 +125,8 @@ internal fun MangaBottomActionMenu(
                     Button(
                         title = stringResource(MR.strings.action_remove_bookmark),
                         icon = Icons.Outlined.BookmarkRemove,
-                        toConfirm = confirm[1],
-                        onLongClick = { onLongClickItem(1) },
+                        toConfirm = confirm[ChapterAction.REMOVE_BOOKMARK.ordinal],
+                        onLongClick = { onLongClickItem(ChapterAction.REMOVE_BOOKMARK.ordinal) },
                         onClick = onRemoveBookmarkClicked,
                     )
                 }
@@ -134,8 +134,8 @@ internal fun MangaBottomActionMenu(
                     Button(
                         title = stringResource(MR.strings.action_mark_as_read),
                         icon = Icons.Outlined.DoneAll,
-                        toConfirm = confirm[2],
-                        onLongClick = { onLongClickItem(2) },
+                        toConfirm = confirm[ChapterAction.MARK_READ.ordinal],
+                        onLongClick = { onLongClickItem(ChapterAction.MARK_READ.ordinal) },
                         onClick = onMarkAsReadClicked,
                     )
                 }
@@ -143,8 +143,8 @@ internal fun MangaBottomActionMenu(
                     Button(
                         title = stringResource(MR.strings.action_mark_as_unread),
                         icon = Icons.Outlined.RemoveDone,
-                        toConfirm = confirm[3],
-                        onLongClick = { onLongClickItem(3) },
+                        toConfirm = confirm[ChapterAction.MARK_UNREAD.ordinal],
+                        onLongClick = { onLongClickItem(ChapterAction.MARK_UNREAD.ordinal) },
                         onClick = onMarkAsUnreadClicked,
                     )
                 }
@@ -152,8 +152,8 @@ internal fun MangaBottomActionMenu(
                     Button(
                         title = stringResource(MR.strings.action_mark_previous_as_read),
                         icon = ImageVector.vectorResource(R.drawable.ic_done_prev_24dp),
-                        toConfirm = confirm[4],
-                        onLongClick = { onLongClickItem(4) },
+                        toConfirm = confirm[ChapterAction.MARK_PREVIOUS_READ.ordinal],
+                        onLongClick = { onLongClickItem(ChapterAction.MARK_PREVIOUS_READ.ordinal) },
                         onClick = onMarkPreviousAsReadClicked,
                     )
                 }
@@ -161,8 +161,8 @@ internal fun MangaBottomActionMenu(
                     Button(
                         title = stringResource(MR.strings.action_download),
                         icon = Icons.Outlined.Download,
-                        toConfirm = confirm[5],
-                        onLongClick = { onLongClickItem(5) },
+                        toConfirm = confirm[ChapterAction.DOWNLOAD.ordinal],
+                        onLongClick = { onLongClickItem(ChapterAction.DOWNLOAD.ordinal) },
                         onClick = onDownloadClicked,
                     )
                 }
@@ -170,8 +170,8 @@ internal fun MangaBottomActionMenu(
                     Button(
                         title = stringResource(MR.strings.action_delete),
                         icon = Icons.Outlined.Delete,
-                        toConfirm = confirm[6],
-                        onLongClick = { onLongClickItem(6) },
+                        toConfirm = confirm[ChapterAction.DELETE.ordinal],
+                        onLongClick = { onLongClickItem(ChapterAction.DELETE.ordinal) },
                         onClick = onDeleteClicked,
                     )
                 }
@@ -259,7 +259,7 @@ internal fun LibraryBottomActionMenu(
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             val haptic = LocalHapticFeedback.current
-            val confirm = remember { mutableStateListOf(false, false, false, false, false, false) }
+            val confirm = remember { List(LibraryAction.entries.size) { false }.toMutableStateList() }
             var resetJob by remember { mutableStateOf<Job?>(null) }
             val onLongClickItem: (Int) -> Unit = { toConfirmIndex ->
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -291,8 +291,8 @@ internal fun LibraryBottomActionMenu(
                 Button(
                     title = stringResource(MR.strings.action_move_category),
                     icon = Icons.AutoMirrored.Outlined.Label,
-                    toConfirm = confirm[0],
-                    onLongClick = { onLongClickItem(0) },
+                    toConfirm = confirm[LibraryAction.MOVE_CATEGORY.ordinal],
+                    onLongClick = { onLongClickItem(LibraryAction.MOVE_CATEGORY.ordinal) },
                     onClick = onChangeCategoryClicked,
                 )
                 if (onDownloadClicked != null) {
@@ -300,8 +300,8 @@ internal fun LibraryBottomActionMenu(
                     Button(
                         title = stringResource(MR.strings.action_download),
                         icon = Icons.Outlined.Download,
-                        toConfirm = confirm[3],
-                        onLongClick = { onLongClickItem(3) },
+                        toConfirm = confirm[LibraryAction.DOWNLOAD.ordinal],
+                        onLongClick = { onLongClickItem(LibraryAction.DOWNLOAD.ordinal) },
                         onClick = { downloadExpanded = !downloadExpanded },
                     ) {
                         DownloadDropdownMenu(
@@ -315,16 +315,16 @@ internal fun LibraryBottomActionMenu(
                 Button(
                     title = stringResource(MR.strings.action_delete),
                     icon = Icons.Outlined.Delete,
-                    toConfirm = confirm[4],
-                    onLongClick = { onLongClickItem(4) },
+                    toConfirm = confirm[LibraryAction.DELETE.ordinal],
+                    onLongClick = { onLongClickItem(LibraryAction.DELETE.ordinal) },
                     onClick = onDeleteClicked,
                 )
                 // SY -->
                 Button(
                     title = stringResource(MR.strings.action_mark_as_read),
                     icon = Icons.Outlined.DoneAll,
-                    toConfirm = confirm[1],
-                    onLongClick = { onLongClickItem(1) },
+                    toConfirm = confirm[LibraryAction.MARK_READ.ordinal],
+                    onLongClick = { onLongClickItem(LibraryAction.MARK_READ.ordinal) },
                     onClick = onMarkAsReadClicked,
                 )
                 if (showOverflow) {
@@ -332,16 +332,16 @@ internal fun LibraryBottomActionMenu(
                         Button(
                             title = stringResource(MR.strings.action_mark_as_unread),
                             icon = Icons.Outlined.RemoveDone,
-                            toConfirm = confirm[2],
-                            onLongClick = { onLongClickItem(2) },
+                            toConfirm = confirm[LibraryAction.MARK_UNREAD.ordinal],
+                            onLongClick = { onLongClickItem(LibraryAction.MARK_UNREAD.ordinal) },
                             onClick = onMarkAsUnreadClicked,
                         )
                     }
                     Button(
                         title = stringResource(MR.strings.label_more),
                         icon = Icons.Outlined.MoreVert,
-                        toConfirm = confirm[5],
-                        onLongClick = { onLongClickItem(5) },
+                        toConfirm = confirm[LibraryAction.MORE.ordinal],
+                        onLongClick = { onLongClickItem(LibraryAction.MORE.ordinal) },
                         onClick = { overFlowOpen = true },
                     )
                     DropdownMenu(
@@ -389,8 +389,8 @@ internal fun LibraryBottomActionMenu(
                     Button(
                         title = stringResource(MR.strings.action_mark_as_unread),
                         icon = Icons.Outlined.RemoveDone,
-                        toConfirm = confirm[2],
-                        onLongClick = { onLongClickItem(2) },
+                        toConfirm = confirm[LibraryAction.MARK_UNREAD.ordinal],
+                        onLongClick = { onLongClickItem(LibraryAction.MARK_UNREAD.ordinal) },
                         onClick = onMarkAsUnreadClicked,
                     )
                 }
@@ -401,3 +401,24 @@ internal fun LibraryBottomActionMenu(
 }
 
 private val BottomBarMenuDpOffset = DpOffset(0.dp, 0.dp)
+
+/** The buttons of the chapter menu, in order; each has a long-press confirmation slot. */
+private enum class ChapterAction {
+    BOOKMARK,
+    REMOVE_BOOKMARK,
+    MARK_READ,
+    MARK_UNREAD,
+    MARK_PREVIOUS_READ,
+    DOWNLOAD,
+    DELETE,
+}
+
+/** The buttons of the library menu, in order; each has a long-press confirmation slot. */
+private enum class LibraryAction {
+    MOVE_CATEGORY,
+    MARK_READ,
+    MARK_UNREAD,
+    DOWNLOAD,
+    DELETE,
+    MORE,
+}

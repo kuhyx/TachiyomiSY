@@ -39,6 +39,8 @@ import tachiyomi.presentation.core.components.material.IconButtonTokens
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
+private const val HALF_PROGRESS = 0.5f
+
 @Composable
 internal fun ChapterDownloadIndicator(
     enabled: Boolean,
@@ -139,7 +141,7 @@ private fun DownloadingIndicator(
                 targetValue = downloadProgress / 100f,
                 animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
             )
-            arrowColor = if (animatedProgress < 0.5f) {
+            arrowColor = if (animatedProgress < HALF_PROGRESS) {
                 strokeColor
             } else {
                 MaterialTheme.colorScheme.background

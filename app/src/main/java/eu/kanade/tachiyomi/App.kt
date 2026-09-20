@@ -94,6 +94,10 @@ import java.security.Security
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+private const val CROSSFADE_MS = 300
+private const val IMAGE_FETCH_THREADS = 8
+private const val IMAGE_DECODE_THREADS = 3
+
 internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factory {
 
     private val basePreferences: BasePreferences by injectLazy()
@@ -258,13 +262,13 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
                     .build(),
             )
 
-            crossfade((300 * this@App.animatorDurationScale).toInt())
+            crossfade((CROSSFADE_MS * this@App.animatorDurationScale).toInt())
             allowRgb565(DeviceUtil.isLowRamDevice(this@App))
             if (networkPreferences.verboseLogging.get()) logger(DebugLogger())
 
             // Coil spawns a new thread for every image load by default
-            fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(8))
-            decoderCoroutineContext(Dispatchers.IO.limitedParallelism(3))
+            fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(IMAGE_FETCH_THREADS))
+            decoderCoroutineContext(Dispatchers.IO.limitedParallelism(IMAGE_DECODE_THREADS))
         }
             .build()
     }

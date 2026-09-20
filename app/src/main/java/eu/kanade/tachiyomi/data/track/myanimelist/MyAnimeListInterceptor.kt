@@ -7,6 +7,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import java.io.IOException
+import java.net.HttpURLConnection
 
 internal class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor {
 
@@ -59,7 +60,7 @@ internal class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : In
             throw MALTokenRefreshFailed()
         }
 
-        if (response.code == 401) {
+        if (response.code == HttpURLConnection.HTTP_UNAUTHORIZED) {
             myanimelist.setAuthExpired()
             throw MALTokenExpired()
         }

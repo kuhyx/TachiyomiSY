@@ -8,8 +8,10 @@ import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.library.service.LibraryPreferences
 
+private const val VERSION = 41f
+
 internal class ResetFilterAndSortSettingsMigration : Migration {
-    override val version: Float = 41f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val context = migrationContext.get<Application>() ?: return@withIOContext false

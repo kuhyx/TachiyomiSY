@@ -39,6 +39,9 @@ import kotlin.system.measureTimeMillis
  *
  * @property context The application context.
  */
+private const val MILLIS_PER_SECOND = 1000L
+private const val MILLIS_PER_MINUTE = 60L * MILLIS_PER_SECOND
+
 internal class SyncManager(
     private val context: Context,
     private val database: Database = Injekt.get(),
@@ -354,8 +357,8 @@ internal class SyncManager(
             }
         }
 
-        val minutes = elapsedTimeMillis / 60_000
-        val seconds = elapsedTimeMillis % 60_000 / 1000
+        val minutes = elapsedTimeMillis / MILLIS_PER_MINUTE
+        val seconds = elapsedTimeMillis % MILLIS_PER_MINUTE / MILLIS_PER_SECOND
         logcat(LogPriority.DEBUG, logTag) {
             "Filtering completed in ${minutes}m ${seconds}s. Favorites found: ${favorites.size}, " +
                 "Non-favorites found: ${nonFavorites.size}"

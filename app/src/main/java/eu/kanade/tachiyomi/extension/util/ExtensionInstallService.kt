@@ -19,6 +19,8 @@ import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
 
+private const val PROGRESS_MAX = 100
+
 internal class ExtensionInstallService : Service() {
 
     private var installer: Installer? = null
@@ -30,7 +32,7 @@ internal class ExtensionInstallService : Service() {
             setOngoing(true)
             setShowWhen(false)
             setContentTitle(stringResource(MR.strings.ext_install_service_notif))
-            setProgress(100, 100, true)
+            setProgress(PROGRESS_MAX, PROGRESS_MAX, true)
         }.build()
         startForeground(Notifications.ID_EXTENSION_INSTALLER, notification)
     }

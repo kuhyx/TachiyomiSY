@@ -23,6 +23,8 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.injectLazy
 
+private const val CHAPTER_EPSILON = 0.001
+
 internal class SuwayomiApi(private val trackId: Long) {
 
     private val json: Json by injectLazy()
@@ -115,7 +117,7 @@ internal class SuwayomiApi(private val trackId: Long) {
                 .data
                 .entry
                 .nodes
-                .mapNotNull { n -> n.id.takeIf { n.chapterNumber <= track.lastChapterRead + 0.001 } }
+                .mapNotNull { n -> n.id.takeIf { n.chapterNumber <= track.lastChapterRead + CHAPTER_EPSILON } }
         }
 
         val markQuery = if (deleteDownloadsOnServer) {

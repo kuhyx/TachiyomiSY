@@ -114,6 +114,8 @@ import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.injectLazy
 import java.util.LinkedList
 
+private const val BANNER_ALPHA = 0.8f
+
 internal class MainActivity : BaseActivity() {
 
     private val libraryPreferences: LibraryPreferences by injectLazy()
@@ -270,7 +272,7 @@ internal class MainActivity : BaseActivity() {
                                     .align(Alignment.BottomCenter)
                                     .fillMaxWidth()
                                     .windowInsetsBottomHeight(WindowInsets.navigationBars)
-                                    .alpha(0.8f)
+                                    .alpha(BANNER_ALPHA)
                                     .background(MaterialTheme.colorScheme.surfaceContainer),
                             )
                         }

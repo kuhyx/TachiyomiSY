@@ -20,6 +20,11 @@ import tachiyomi.presentation.core.components.SliderItem
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 
+// Bit offsets of the ARGB channels.
+private const val ALPHA_SHIFT = 24
+private const val RED_SHIFT = 16
+private const val GREEN_SHIFT = 8
+
 @Composable
 internal fun ColumnScope.ColorFilterPage(screenModel: ReaderSettingsScreenModel) {
     val customBrightness by screenModel.preferences.customBrightness.collectAsState()
@@ -60,7 +65,7 @@ internal fun ColumnScope.ColorFilterPage(screenModel: ReaderSettingsScreenModel)
             label = stringResource(MR.strings.color_filter_r_value),
             onChange = { newRValue ->
                 screenModel.preferences.colorFilterValue.getAndSet {
-                    getColorValue(it, newRValue, RED_MASK, 16)
+                    getColorValue(it, newRValue, RED_MASK, RED_SHIFT)
                 }
             },
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -72,7 +77,7 @@ internal fun ColumnScope.ColorFilterPage(screenModel: ReaderSettingsScreenModel)
             label = stringResource(MR.strings.color_filter_g_value),
             onChange = { newGValue ->
                 screenModel.preferences.colorFilterValue.getAndSet {
-                    getColorValue(it, newGValue, GREEN_MASK, 8)
+                    getColorValue(it, newGValue, GREEN_MASK, GREEN_SHIFT)
                 }
             },
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
@@ -96,7 +101,7 @@ internal fun ColumnScope.ColorFilterPage(screenModel: ReaderSettingsScreenModel)
             label = stringResource(MR.strings.color_filter_a_value),
             onChange = { newAValue ->
                 screenModel.preferences.colorFilterValue.getAndSet {
-                    getColorValue(it, newAValue, ALPHA_MASK, 24)
+                    getColorValue(it, newAValue, ALPHA_MASK, ALPHA_SHIFT)
                 }
             },
             pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,

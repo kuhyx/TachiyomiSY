@@ -56,6 +56,8 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.lang.ref.WeakReference
 
+private const val SQLCIPHER_MIN_PASSWORD_LENGTH = 25
+
 private val lock = Any()
 
 internal class AppModule(val app: Application) : InjektModule {
@@ -80,7 +82,7 @@ internal class AppModule(val app: Application) : InjektModule {
                         schema = Database.Schema.synchronous(),
                         context = app,
                         name = CbzCrypto.DATABASE_NAME,
-                        factory = SupportOpenHelperFactory(CbzCrypto.getDecryptedPasswordSql(), null, false, 25),
+                        factory = SupportOpenHelperFactory(CbzCrypto.getDecryptedPasswordSql(), null, false, SQLCIPHER_MIN_PASSWORD_LENGTH),
                         callback = object : AndroidSqliteDriver.Callback(Database.Schema.synchronous()) {
                             override fun onOpen(db: SupportSQLiteDatabase) {
                                 super.onOpen(db)

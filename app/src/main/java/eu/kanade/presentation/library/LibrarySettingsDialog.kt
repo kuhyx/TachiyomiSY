@@ -47,6 +47,9 @@ import tachiyomi.presentation.core.components.TriStateItem
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 
+// The SY-only fourth tab of the library settings sheet.
+private const val GROUP_PAGE = 3
+
 @Composable
 internal fun LibrarySettingsDialog(
     onDismissRequest: () -> Unit,
@@ -84,7 +87,7 @@ internal fun LibrarySettingsDialog(
                     screenModel = screenModel,
                 )
                 // SY -->
-                3 -> GroupPage(
+                GROUP_PAGE -> GroupPage(
                     screenModel = screenModel,
                     hasCategories = hasCategories,
                 )

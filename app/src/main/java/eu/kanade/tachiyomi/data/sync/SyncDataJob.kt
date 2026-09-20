@@ -25,6 +25,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 
+private const val FLEX_MINUTES = 10L
+
 internal class SyncDataJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
@@ -82,7 +84,7 @@ internal class SyncDataJob(private val context: Context, workerParams: WorkerPar
                 val request = PeriodicWorkRequestBuilder<SyncDataJob>(
                     interval.toLong(),
                     TimeUnit.MINUTES,
-                    10,
+                    FLEX_MINUTES,
                     TimeUnit.MINUTES,
                 )
                     .addTag(TAG_JOB)

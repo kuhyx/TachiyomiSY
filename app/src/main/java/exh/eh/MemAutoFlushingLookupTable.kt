@@ -34,6 +34,10 @@ import kotlin.concurrent.thread
  *
  * @author nulldev
  */
+// Each entry starts with two ints: the key, then the payload size.
+private const val ENTRY_HEADER_BYTES = 8
+private const val SIZE_OFFSET = 4
+
 internal class MemAutoFlushingLookupTable<T>(
     file: File,
     private val serializer: EntrySerializer<T>,
@@ -80,12 +84,12 @@ internal class MemAutoFlushingLookupTable<T>(
         launch {
             try {
                 atomicFile.openRead().source().buffer().use { input ->
-                    val bb = ByteBuffer.allocate(8)
+                    val bb = ByteBuffer.allocate(ENTRY_HEADER_BYTES)
 
                     while (true) {
-                        if (!input.requireBytes(bb.array(), 8)) break
+                        if (!input.requireBytes(bb.array(), ENTRY_HEADER_BYTES)) break
                         val k = bb.getInt(0)
-                        val size = bb.getInt(4)
+                        val size = bb.getInt(SIZE_OFFSET)
                         val strBArr = ByteArray(size)
                         if (!input.requireBytes(strBArr, size)) break
                         table.put(k, serializer.read(strBArr.decodeToString()))
@@ -129,7 +133,7 @@ internal class MemAutoFlushingLookupTable<T>(
             table.forEach { key, value ->
                 val v = serializer.write(value).encodeToByteArray()
                 bb.putInt(0, key)
-                bb.putInt(4, v.size)
+                bb.putInt(SIZE_OFFSET, v.size)
                 out.write(bb.array())
                 out.write(v)
             }

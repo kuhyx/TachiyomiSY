@@ -45,6 +45,8 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
 import tachiyomi.domain.manga.model.MangaCover as MangaCoverModel
 
+private const val COVER_OVERLAY_HEIGHT = 0.33f
+
 private val ContinueReadingButtonSizeSmall = 28.dp
 private val ContinueReadingButtonSizeLarge = 32.dp
 
@@ -124,7 +126,7 @@ private fun BoxScope.CoverTextOverlay(
                     1f to Color(color = 0xAA000000),
                 ),
             )
-            .fillMaxHeight(0.33f)
+            .fillMaxHeight(COVER_OVERLAY_HEIGHT)
             .fillMaxWidth()
             .align(Alignment.BottomCenter),
     )

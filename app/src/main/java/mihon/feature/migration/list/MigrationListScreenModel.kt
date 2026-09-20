@@ -38,6 +38,8 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+private const val MAX_CONCURRENT_SOURCES = 5
+
 internal class MigrationListScreenModel(
     mangaIds: Collection<Long>,
     extraSearchQuery: String?,
@@ -128,7 +130,7 @@ internal class MigrationListScreenModel(
             val result = try {
                 manga.migrationScope.async {
                     if (prioritizeByChapters) {
-                        val sourceSemaphore = Semaphore(5)
+                        val sourceSemaphore = Semaphore(MAX_CONCURRENT_SOURCES)
                         sources.map { source ->
                             async innerAsync@{
                                 sourceSemaphore.withPermit {

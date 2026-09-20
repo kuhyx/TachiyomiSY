@@ -9,6 +9,8 @@ import tachiyomi.core.common.preference.getEnum
 import tachiyomi.core.common.preference.getLongArray
 import tachiyomi.domain.library.model.LibraryDisplayMode
 
+private const val DEFAULT_DATA_SAVER_QUALITY = 80
+
 internal class SourcePreferences(
     preferenceStore: PreferenceStore,
 ) {
@@ -79,7 +81,7 @@ internal class SourcePreferences(
 
     val dataSaverIgnoreGif: Preference<Boolean> = preferenceStore.getBoolean("ignore_gif", true)
 
-    val dataSaverImageQuality: Preference<Int> = preferenceStore.getInt("data_saver_image_quality", 80)
+    val dataSaverImageQuality: Preference<Int> = preferenceStore.getInt("data_saver_image_quality", DEFAULT_DATA_SAVER_QUALITY)
 
     val dataSaverImageFormatJpeg: Preference<Boolean> = preferenceStore.getBoolean("data_saver_image_format_jpeg", false)
 

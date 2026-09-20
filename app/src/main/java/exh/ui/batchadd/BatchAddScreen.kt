@@ -39,6 +39,8 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
 
+private const val PROGRESS_WEIGHT = 0.15f
+
 internal class BatchAddScreen : Screen() {
 
     @Composable
@@ -115,7 +117,7 @@ internal class BatchAddScreen : Screen() {
                                     }
                                     Text(
                                         text = state.progress.toString() + "/" + state.progressTotal,
-                                        modifier = Modifier.weight(0.15f),
+                                        modifier = Modifier.weight(PROGRESS_WEIGHT),
                                         textAlign = TextAlign.Center,
                                         style = MaterialTheme.typography.bodyMedium,
                                     )

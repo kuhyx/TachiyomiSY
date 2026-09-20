@@ -57,6 +57,8 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.util.runOnEnterKeyPressed
 import cafe.adriel.voyager.core.screen.Screen as VoyagerScreen
 
+private const val MAX_RESULTS = 10
+
 internal class SettingsSearchScreen : Screen() {
 
     @Composable
@@ -210,7 +212,7 @@ private fun SearchResult(
                         )
                     }
             }
-            .take(10) // Just take top 10 result for quicker result
+            .take(MAX_RESULTS) // Just take the top results for a quicker answer
             .toList()
     }
 

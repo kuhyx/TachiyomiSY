@@ -16,7 +16,11 @@ import androidx.compose.ui.draw.alpha
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
 
-private val FADE_TIME = tween<Float>(500)
+private const val UNORDERED_LIST_INDENT = 4
+private const val ORDERED_LIST_INDENT = 20
+
+private const val FADE_MS = 500
+private val FADE_TIME = tween<Float>(FADE_MS)
 
 @Composable
 internal fun MangaNotesDisplay(
@@ -40,8 +44,8 @@ internal fun MangaNotesDisplay(
         alpha.animateTo(targetValue = 1f, animationSpec = FADE_TIME)
     }
     LaunchedEffect(Unit) {
-        richTextState.config.unorderedListIndent = 4
-        richTextState.config.orderedListIndent = 20
+        richTextState.config.unorderedListIndent = UNORDERED_LIST_INDENT
+        richTextState.config.orderedListIndent = ORDERED_LIST_INDENT
     }
     LaunchedEffect(primaryColor) {
         richTextState.config.linkColor = primaryColor

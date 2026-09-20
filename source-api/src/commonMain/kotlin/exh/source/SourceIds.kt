@@ -24,3 +24,15 @@ public const val HBROWSE_SOURCE_ID: Long = 1_401_584_337_232_758_222
 
 /** The virtual source of merged manga. */
 public const val MERGED_SOURCE_ID: Long = LEWD_SOURCE_SERIES + 69
+
+// The ids the built-in nhentai, Tsumino and HBrowse sources had before they became delegated
+// sources; migrations and backup restores rewrite them.
+
+/** nhentai before delegation. */
+public const val LEGACY_NHENTAI_SOURCE_ID: Long = LEWD_SOURCE_SERIES + 7
+
+/** Tsumino before delegation. */
+public const val LEGACY_TSUMINO_SOURCE_ID: Long = LEWD_SOURCE_SERIES + 9
+
+/** HBrowse before delegation. */
+public const val LEGACY_HBROWSE_SOURCE_ID: Long = LEWD_SOURCE_SERIES + 12

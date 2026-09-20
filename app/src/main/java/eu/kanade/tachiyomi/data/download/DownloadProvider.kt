@@ -25,6 +25,10 @@ import java.io.IOException
  *
  * @param context the application context.
  */
+// The name leaves room for "_" + a 6-character URL hash and the ".cbz" extension.
+private const val URL_HASH_CHARS = 6
+private const val RESERVED_NAME_BYTES = 1 + URL_HASH_CHARS + 4
+
 internal class DownloadProvider(
     private val context: Context,
     private val storageManager: StorageManager = Injekt.get(),
@@ -196,9 +200,8 @@ internal class DownloadProvider(
         if (!chapterScanlator.isNullOrBlank()) {
             dirName = chapterScanlator + "_" + dirName
         }
-        // Subtract 7 bytes for hash and underscore, 4 bytes for .cbz
-        dirName = DiskUtil.buildValidFilename(dirName, DiskUtil.MAX_FILE_NAME_BYTES - 11, disallowNonAsciiFilenames)
-        if (includeChapterUrlHash) dirName += "_" + md5(chapterUrl).take(6)
+        dirName = DiskUtil.buildValidFilename(dirName, DiskUtil.MAX_FILE_NAME_BYTES - RESERVED_NAME_BYTES, disallowNonAsciiFilenames)
+        if (includeChapterUrlHash) dirName += "_" + md5(chapterUrl).take(URL_HASH_CHARS)
         return dirName
     }
 

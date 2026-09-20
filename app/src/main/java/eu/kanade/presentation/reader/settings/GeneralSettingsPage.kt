@@ -20,11 +20,13 @@ import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 
+private const val AUTOMATIC_BACKGROUND = 3
+
 private val themes = listOf(
     MR.strings.black_background to 1,
     MR.strings.gray_background to 2,
     MR.strings.white_background to 0,
-    MR.strings.automatic_background to 3,
+    MR.strings.automatic_background to AUTOMATIC_BACKGROUND,
 )
 
 private val flashColors = listOf(

@@ -52,6 +52,10 @@ import uy.kohesive.injekt.api.get
  * @param isWebtoon if true, [WebtoonSubsamplingImageView] will be used instead of [SubsamplingScaleImageView]
  * and [AppCompatImageView] will be used instead of [PhotoView]
  */
+private const val ZOOM_ANIMATION_MS = 500L
+private const val DOUBLE_TAP_ANIMATION_MS = 250L
+private const val MIN_TILE_DPI = 180
+
 internal open class ReaderPageImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -130,7 +134,7 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
             sWidth > sHeight &&
             scale == minScale
         ) {
-            handler?.postDelayed(500) {
+            handler?.postDelayed(ZOOM_ANIMATION_MS) {
                 val point = when (config.zoomStartPosition) {
                     ZoomStartPosition.LEFT -> if (forward) PointF(0F, 0F) else PointF(sWidth.toFloat(), 0F)
                     ZoomStartPosition.RIGHT -> if (forward) PointF(sWidth.toFloat(), 0F) else PointF(0F, 0F)
@@ -139,7 +143,7 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
 
                 val targetScale = height.toFloat() / sHeight.toFloat()
                 (animateScaleAndCenter(targetScale, point) ?: return@postDelayed)
-                    .withDuration(500)
+                    .withDuration(ZOOM_ANIMATION_MS)
                     .withEasing(EASE_IN_OUT_QUAD)
                     .withInterruptible(true)
                     .start()
@@ -221,7 +225,7 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
             val target = fn(view.center ?: return, view)
             view.animateCenter(target)!!
                 .withEasing(EASE_OUT_QUAD)
-                .withDuration(250)
+                .withDuration(DOUBLE_TAP_ANIMATION_MS)
                 .withInterruptible(true)
                 .start()
         }
@@ -239,7 +243,7 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
             setMaxTileSize(ImageUtil.hardwareBitmapThreshold)
             setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER)
             setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
-            setMinimumTileDpi(180)
+            setMinimumTileDpi(MIN_TILE_DPI)
             setOnStateChangedListener(
                 object : SubsamplingScaleImageView.OnStateChangedListener {
                     override fun onScaleChanged(newScale: Float, origin: Int) {

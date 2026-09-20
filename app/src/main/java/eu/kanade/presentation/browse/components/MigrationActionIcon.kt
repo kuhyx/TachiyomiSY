@@ -22,6 +22,9 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
+// Lift the dropdown over the icon button that opened it.
+private const val MENU_ANCHOR_HEIGHT = 56
+
 @Composable
 internal fun MigrationActionIcon(
     modifier: Modifier,
@@ -52,7 +55,7 @@ internal fun MigrationActionIcon(
             DropdownMenu(
                 expanded = moreExpanded,
                 onDismissRequest = closeMenu,
-                offset = DpOffset(8.dp, (-56).dp),
+                offset = DpOffset(8.dp, (-MENU_ANCHOR_HEIGHT).dp),
             ) {
                 DropdownMenuItem(
                     text = { Text(stringResource(SYMR.strings.action_search_manually)) },

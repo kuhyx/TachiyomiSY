@@ -24,6 +24,8 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+private const val RECOMMENDATION_THREADS = 5
+
 internal open class RecommendsScreenModel(
     private val args: RecommendsScreen.Args,
     sourceManager: SourceManager = Injekt.get(),
@@ -31,7 +33,7 @@ internal open class RecommendsScreenModel(
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
 ) : StateScreenModel<RecommendsScreenModel.State>(State()) {
 
-    private val coroutineDispatcher = Dispatchers.IO.limitedParallelism(5)
+    private val coroutineDispatcher = Dispatchers.IO.limitedParallelism(RECOMMENDATION_THREADS)
 
     private val sortComparator = { map: Map<RecommendationPagingSource, RecommendationItemResult> ->
         compareBy<RecommendationPagingSource>(

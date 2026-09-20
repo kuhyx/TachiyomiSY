@@ -24,6 +24,9 @@ import java.util.regex.Pattern
  *
  * @param context context of application
  */
+private const val TITLE_CHARS = 15
+private const val CONTENT_TITLE_CHARS = 30
+
 internal class DownloadNotifier(private val context: Context) {
 
     private val preferences: SecurityPreferences by injectLazy()
@@ -95,13 +98,13 @@ internal class DownloadNotifier(private val context: Context) {
                 setContentTitle(downloadingProgressText)
                 setContentText(null)
             } else {
-                val title = download.manga.title.chop(15)
+                val title = download.manga.title.chop(TITLE_CHARS)
                 val quotedTitle = Pattern.quote(title)
                 val chapter = download.chapter.name.replaceFirst(
                     "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
                     "",
                 )
-                setContentTitle("$title - $chapter".chop(30))
+                setContentTitle("$title - $chapter".chop(CONTENT_TITLE_CHARS))
                 setContentText(downloadingProgressText)
             }
 

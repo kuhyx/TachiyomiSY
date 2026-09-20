@@ -43,6 +43,8 @@ import uy.kohesive.injekt.api.get
 import java.math.RoundingMode
 import java.text.NumberFormat
 
+private const val TITLE_CHARS = 40
+
 @OptIn(DelicateCoroutinesApi::class)
 internal class LibraryUpdateNotifier(
     private val context: Context,
@@ -97,7 +99,7 @@ internal class LibraryUpdateNotifier(
             )
 
         if (!securityPreferences.hideNotificationContent.get()) {
-            val updatingText = manga.joinToString("\n") { it.title.chop(40) }
+            val updatingText = manga.joinToString("\n") { it.title.chop(TITLE_CHARS) }
             progressNotificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(updatingText))
         }
 

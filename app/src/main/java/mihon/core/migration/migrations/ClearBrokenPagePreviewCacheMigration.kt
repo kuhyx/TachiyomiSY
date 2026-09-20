@@ -9,8 +9,10 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.system.logcat
 import java.io.File
 
+private const val VERSION = 58f
+
 internal class ClearBrokenPagePreviewCacheMigration : Migration {
-    override val version: Float = 58f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val context = migrationContext.get<Application>() ?: return@withIOContext false

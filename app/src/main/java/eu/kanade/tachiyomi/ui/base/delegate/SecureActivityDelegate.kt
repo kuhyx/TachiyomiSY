@@ -105,7 +105,7 @@ internal interface SecureActivityDelegate {
                     /* SY <-- */ when (val lockDelay = preferences.lockAppAfter.get()) {
                         -1 -> false // Never
                         0 -> true // Always
-                        else -> lastClosedPref.get() + lockDelay * 60_000 <= System.currentTimeMillis()
+                        else -> lastClosedPref.get() + lockDelay * MILLIS_PER_MINUTE <= System.currentTimeMillis()
                     }
             }
 
@@ -117,6 +117,8 @@ internal interface SecureActivityDelegate {
         }
     }
 }
+
+private const val MILLIS_PER_MINUTE = 60_000L
 
 internal class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObserver {
 

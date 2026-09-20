@@ -53,6 +53,8 @@ import tachiyomi.presentation.core.i18n.stringResource
 import java.time.Instant
 import java.time.ZoneId
 
+private const val HALF_STAR = 0.5F
+
 @Composable
 internal fun BrowseSourceEHentaiList(
     mangaList: LazyPagingItems<StateFlow</* SY --> */Pair<Manga, RaisedSearchMetadata?>/* SY <-- */>>,
@@ -156,7 +158,7 @@ internal fun BrowseSourceEHentaiListItem(
     val rating by produceState(0f, metadata) {
         value = withIOContext {
             val rating = metadata.averageRating?.toFloat()
-            rating?.div(0.5F)?.floor()?.let { 0.5F.times(it) } ?: 0f
+            rating?.div(HALF_STAR)?.floor()?.let { HALF_STAR.times(it) } ?: 0f
         }
     }
 

@@ -36,6 +36,8 @@ import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.fetchAndIncrement
 
+private const val MAX_CONCURRENT_SOURCES = 5
+
 @OptIn(ExperimentalAtomicApi::class)
 internal class MetadataUpdateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -91,7 +93,7 @@ internal class MetadataUpdateJob(private val context: Context, workerParams: Wor
     }
 
     private suspend fun updateMetadata() {
-        val semaphore = Semaphore(5)
+        val semaphore = Semaphore(MAX_CONCURRENT_SOURCES)
         val progressCount = AtomicInt(0)
         val currentlyUpdatingManga = CopyOnWriteArrayList<Manga>()
 

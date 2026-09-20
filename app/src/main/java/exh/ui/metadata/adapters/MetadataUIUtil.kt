@@ -23,20 +23,22 @@ internal object MetadataUIUtil {
     fun getRatingString(
         context: Context,
         @FloatRange(from = 0.0, to = 10.0) rating: Float? = null,
-    ) = when (rating?.roundToInt()) {
-        0 -> SYMR.strings.rating0
-        1 -> SYMR.strings.rating1
-        2 -> SYMR.strings.rating2
-        3 -> SYMR.strings.rating3
-        4 -> SYMR.strings.rating4
-        5 -> SYMR.strings.rating5
-        6 -> SYMR.strings.rating6
-        7 -> SYMR.strings.rating7
-        8 -> SYMR.strings.rating8
-        9 -> SYMR.strings.rating9
-        10 -> SYMR.strings.rating10
-        else -> SYMR.strings.no_rating
-    }.let { context.stringResource(it) }
+    ) = context.stringResource(RATING_LABELS.getOrNull(rating?.roundToInt() ?: -1) ?: SYMR.strings.no_rating)
+
+    /** One label per whole star, 0 to 10. */
+    private val RATING_LABELS = listOf(
+        SYMR.strings.rating0,
+        SYMR.strings.rating1,
+        SYMR.strings.rating2,
+        SYMR.strings.rating3,
+        SYMR.strings.rating4,
+        SYMR.strings.rating5,
+        SYMR.strings.rating6,
+        SYMR.strings.rating7,
+        SYMR.strings.rating8,
+        SYMR.strings.rating9,
+        SYMR.strings.rating10,
+    )
 
     fun getGenreAndColour(context: Context, genre: String) = when (genre) {
         "doujinshi", "Doujinshi" -> SourceTagsUtil.GenreColor.DOUJINSHI_COLOR to SYMR.strings.doujinshi

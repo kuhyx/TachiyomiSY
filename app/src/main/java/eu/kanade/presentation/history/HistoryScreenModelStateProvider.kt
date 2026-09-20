@@ -10,6 +10,9 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 import kotlin.random.Random
 
+private const val SHORT_SECTION = 3
+private const val LONG_SECTION = 7
+
 internal class HistoryScreenModelStateProvider : PreviewParameterProvider<HistoryScreenModel.State> {
 
     private val multiPage = HistoryScreenModel.State(
@@ -17,11 +20,11 @@ internal class HistoryScreenModelStateProvider : PreviewParameterProvider<Histor
         list =
         listOf(HistoryUiModelExamples.headerToday)
             .asSequence()
-            .plus(HistoryUiModelExamples.items().take(3))
+            .plus(HistoryUiModelExamples.items().take(SHORT_SECTION))
             .plus(HistoryUiModelExamples.header { it.minus(1, ChronoUnit.DAYS) })
             .plus(HistoryUiModelExamples.items().take(1))
             .plus(HistoryUiModelExamples.header { it.minus(2, ChronoUnit.DAYS) })
-            .plus(HistoryUiModelExamples.items().take(7))
+            .plus(HistoryUiModelExamples.items().take(LONG_SECTION))
             .toList(),
         dialog = null,
     )

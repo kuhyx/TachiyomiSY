@@ -48,6 +48,14 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 
+// Proportions of the miniature app preview each theme swatch shows.
+private const val PHONE_ASPECT_RATIO = 9f / 16f
+private const val PREVIEW_TITLE_HEIGHT = 0.8f
+private const val PREVIEW_TITLE_WEIGHT = 0.7f
+private const val PREVIEW_ACTION_WEIGHT = 0.3f
+private const val PREVIEW_COVER_WIDTH = 0.5f
+private const val PREVIEW_SUBTITLE_ALPHA = 0.6f
+
 @Composable
 internal fun AppThemePreferenceWidget(
     value: AppTheme,
@@ -127,7 +135,7 @@ internal fun AppThemePreviewItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(9f / 16f)
+            .aspectRatio(PHONE_ASPECT_RATIO)
             .border(
                 width = 4.dp,
                 color = if (selected) {
@@ -152,8 +160,8 @@ internal fun AppThemePreviewItem(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxHeight(0.8f)
-                    .weight(0.7f)
+                    .fillMaxHeight(PREVIEW_TITLE_HEIGHT)
+                    .weight(PREVIEW_TITLE_WEIGHT)
                     .padding(end = 4.dp)
                     .background(
                         color = MaterialTheme.colorScheme.onSurface,
@@ -162,7 +170,7 @@ internal fun AppThemePreviewItem(
             )
 
             Box(
-                modifier = Modifier.weight(0.3f),
+                modifier = Modifier.weight(PREVIEW_ACTION_WEIGHT),
                 contentAlignment = Alignment.CenterEnd,
             ) {
                 if (selected) {
@@ -183,7 +191,7 @@ internal fun AppThemePreviewItem(
                     color = DividerDefaults.color,
                     shape = MaterialTheme.shapes.small,
                 )
-                .fillMaxWidth(0.5f)
+                .fillMaxWidth(PREVIEW_COVER_WIDTH)
                 .aspectRatio(MangaCover.Book.ratio),
         ) {
             Row(
@@ -235,7 +243,7 @@ internal fun AppThemePreviewItem(
                     Box(
                         modifier = Modifier
                             .padding(start = 8.dp)
-                            .alpha(0.6f)
+                            .alpha(PREVIEW_SUBTITLE_ALPHA)
                             .height(17.dp)
                             .weight(1f)
                             .background(

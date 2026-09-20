@@ -109,6 +109,11 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
+private const val BACKDROP_ALPHA = 0.2f
+private const val TITLE_WIDTH_FRACTION = 0.65f
+private const val EMPTY_NOTES_LINES = 2
+private const val NOTES_LINES = 5
+
 @Composable
 internal fun MangaInfoBox(
     isTabletUi: Boolean,
@@ -142,7 +147,7 @@ internal fun MangaInfoBox(
                     )
                 }
                 .blur(4.dp)
-                .alpha(0.2f),
+                .alpha(BACKDROP_ALPHA),
         )
 
         // Manga & source info
@@ -394,7 +399,7 @@ private fun MangaAndSourceTitlesLarge(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         MangaCover.Book(
-            modifier = Modifier.fillMaxWidth(0.65f),
+            modifier = Modifier.fillMaxWidth(TITLE_WIDTH_FRACTION),
             data = ImageRequest.Builder(LocalContext.current)
                 .data(manga)
                 .crossfade(true)
@@ -670,7 +675,7 @@ private fun MangaSummary(
                 Text(
                     // Shows at least 3 lines if no notes
                     // when there are notes show 6
-                    text = "\n".repeat(if (notes.isBlank()) 2 else 5),
+                    text = "\n".repeat(if (notes.isBlank()) EMPTY_NOTES_LINES else NOTES_LINES),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             },

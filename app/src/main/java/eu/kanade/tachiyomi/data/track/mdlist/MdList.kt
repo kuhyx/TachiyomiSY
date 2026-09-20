@@ -33,15 +33,15 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
 
     override fun getStatusList(): List<Long> = FollowStatus.entries.map { it.long }
 
-    override fun getStatus(status: Long): StringResource? = when (status) {
-        0L -> SYMR.strings.md_follows_unfollowed
-        1L -> MR.strings.reading
-        2L -> MR.strings.completed
-        3L -> MR.strings.on_hold
-        4L -> MR.strings.plan_to_read
-        5L -> MR.strings.dropped
-        6L -> MR.strings.repeating
-        else -> null
+    override fun getStatus(status: Long): StringResource? = when (FollowStatus.entries.firstOrNull { it.long == status }) {
+        FollowStatus.UNFOLLOWED -> SYMR.strings.md_follows_unfollowed
+        FollowStatus.READING -> MR.strings.reading
+        FollowStatus.COMPLETED -> MR.strings.completed
+        FollowStatus.ON_HOLD -> MR.strings.on_hold
+        FollowStatus.PLAN_TO_READ -> MR.strings.plan_to_read
+        FollowStatus.DROPPED -> MR.strings.dropped
+        FollowStatus.RE_READING -> MR.strings.repeating
+        null -> null
     }
 
     override fun getScoreList() = SCORE_LIST

@@ -15,6 +15,8 @@ import eu.kanade.tachiyomi.util.view.popupMenu
  * @param view the inflated view for this holder.
  * @constructor creates a new download holder.
  */
+private const val PERCENT = 100
+
 internal class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     FlexibleViewHolder(view, adapter) {
 
@@ -47,7 +49,7 @@ internal class DownloadHolder(private val view: View, val adapter: DownloadAdapt
             binding.downloadProgress.max = 1
             binding.downloadProgressText.text = ""
         } else {
-            binding.downloadProgress.max = pages.size * 100
+            binding.downloadProgress.max = pages.size * PERCENT
             notifyProgress()
             notifyDownloadedPages()
         }
@@ -59,7 +61,7 @@ internal class DownloadHolder(private val view: View, val adapter: DownloadAdapt
     fun notifyProgress() {
         val pages = download.pages ?: return
         if (binding.downloadProgress.max == 1) {
-            binding.downloadProgress.max = pages.size * 100
+            binding.downloadProgress.max = pages.size * PERCENT
         }
         binding.downloadProgress.setProgressCompat(download.totalProgress, true)
     }

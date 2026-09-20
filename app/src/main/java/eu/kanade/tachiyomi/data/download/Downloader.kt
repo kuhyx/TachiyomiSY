@@ -66,6 +66,7 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import java.net.HttpURLConnection
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 
@@ -443,7 +444,7 @@ internal class Downloader(
             return
         }
 
-        val digitCount = (download.pages?.size ?: 0).toString().length.coerceAtLeast(3)
+        val digitCount = (download.pages?.size ?: 0).toString().length.coerceAtLeast(MIN_FILENAME_DIGITS)
         val filename = "%0${digitCount}d".format(Locale.ENGLISH, page.number)
 
         // Try to find the image file
@@ -465,7 +466,7 @@ internal class Downloader(
             splitTallImageIfNeeded(page, tmpDir)
 
             page.uri = file.uri
-            page.progress = 100
+            page.progress = PROGRESS_DONE
             page.status = Page.State.Ready
         } catch (e: Throwable) {
             if (e is CancellationException) throw e
@@ -500,13 +501,13 @@ internal class Downloader(
                         // If the server supports partial downloads (HTTP 206),
                         // append to the existing file.
                         // Otherwise, start from scratch and overwrite the file.
-                        stream = file.openOutputStream(it.code == 206),
+                        stream = file.openOutputStream(it.code == HttpURLConnection.HTTP_PARTIAL),
                     )
                     val extension = getImageExtension(it, file)
                     file.renameTo("$filename.$extension")
                 }
             } catch (e: HttpException) {
-                if (e.code == 416) {
+                if (e.code == HTTP_RANGE_NOT_SATISFIABLE) {
                     file.delete()
                 }
                 throw e
@@ -515,7 +516,7 @@ internal class Downloader(
         }
             // Retry 3 times, waiting 2, 4 and 8 seconds between attempts.
             .retryWhen { _, attempt ->
-                if (attempt < 3) {
+                if (attempt < DOWNLOAD_RETRIES) {
                     delay((2L shl attempt.toInt()).seconds)
                     if (source.isEhBasedSource()) {
                         page.imageUrl = source.getImageUrl(page)
@@ -752,3 +753,9 @@ internal class Downloader(
 
 // Arbitrary minimum required space to start a download: 200 MB
 private const val MIN_DISK_SPACE = 200L * 1024 * 1024
+private const val MIN_FILENAME_DIGITS = 3
+private const val PROGRESS_DONE = 100
+private const val DOWNLOAD_RETRIES = 3
+
+// java.net.HttpURLConnection stops at 5xx; 416 says the resumed range is past the file's end.
+private const val HTTP_RANGE_NOT_SATISFIABLE = 416

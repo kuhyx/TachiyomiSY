@@ -38,6 +38,8 @@ import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.incrementAndFetch
 
+private const val RESTORE_BATCH_SIZE = 100
+
 @OptIn(ExperimentalAtomicApi::class)
 internal class BackupRestorer(
     private val context: Context,
@@ -185,7 +187,7 @@ internal class BackupRestorer(
     ) {
         mangaRestorer.sortByNew(backupMangas)
             /* SY --> */.sortedBy { it.source == MERGED_SOURCE_ID } /* SY <-- */
-            .chunked(100)
+            .chunked(RESTORE_BATCH_SIZE)
             .forEach { chunk ->
                 database.transaction {
                     chunk.forEach {
@@ -241,7 +243,7 @@ internal class BackupRestorer(
         backupExtensionStores: List<BackupExtensionStore>,
     ) {
         backupExtensionStores
-            .chunked(100)
+            .chunked(RESTORE_BATCH_SIZE)
             .forEach { chunk ->
                 database.transaction {
                     chunk.forEach {

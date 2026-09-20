@@ -50,6 +50,8 @@ import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.days
 
+private const val FLEX_MINUTES = 10L
+
 internal class EHentaiUpdateWorker(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
     private val exhPreferences: ExhPreferences by injectLazy()
@@ -293,7 +295,7 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
                 val request = PeriodicWorkRequestBuilder<EHentaiUpdateWorker>(
                     interval.toLong(),
                     TimeUnit.HOURS,
-                    10,
+                    FLEX_MINUTES,
                     TimeUnit.MINUTES,
                 )
                     .addTag(TAG)

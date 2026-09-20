@@ -37,6 +37,9 @@ import java.io.File
  * extension will be used unless the version codes are different. In that case the
  * one with higher version code will be used.
  */
+private const val LIB_VERSION_1_4 = 1.4
+private const val LIB_VERSION_1_6 = 1.6
+
 internal object ExtensionLoader {
 
     private val preferences: SourcePreferences by injectLazy()
@@ -54,7 +57,7 @@ internal object ExtensionLoader {
     private const val METADATA_EXTENSION_LIB = "tachiyomix.extensionLib"
     private const val METADATA_CONTENT_WARNING = "tachiyomix.contentWarning"
 
-    private val SUPPORTED_LIB_VERSIONS = listOf(1.4, 1.6)
+    private val SUPPORTED_LIB_VERSIONS = listOf(LIB_VERSION_1_4, LIB_VERSION_1_6)
 
     @Suppress("DEPRECATION")
     private val PACKAGE_FLAGS = PackageManager.GET_CONFIGURATIONS or

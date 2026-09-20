@@ -12,8 +12,10 @@ import tachiyomi.core.common.preference.TriState
 import tachiyomi.core.common.preference.getEnum
 import tachiyomi.core.common.util.lang.withIOContext
 
+private const val VERSION = 52f
+
 internal class RemoveUpdateCheckerJobsMigration : Migration {
-    override val version: Float = 52f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val context = migrationContext.get<Application>() ?: return@withIOContext false

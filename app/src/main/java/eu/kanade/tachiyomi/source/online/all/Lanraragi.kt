@@ -30,9 +30,12 @@ import okhttp3.Response
 import rx.Observable
 import tachiyomi.core.common.util.lang.runAsObservable
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.time.Instant
 import java.time.ZoneOffset
 import kotlin.time.Duration.Companion.milliseconds
+
+private const val THUMBNAIL_JOB_POLLS = 3
 
 internal class Lanraragi(delegate: HttpSource, val context: Context) :
     DelegatedHttpSource(delegate),
@@ -198,7 +201,7 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
 
     override suspend fun fetchPreviewImage(page: PagePreviewInfo, cacheControl: CacheControl?): Response {
         return requestPreviewImage(page, cacheControl).let {
-            if (it.code == 202) {
+            if (it.code == HttpURLConnection.HTTP_ACCEPTED) {
                 val task = with(jsonParser) {
                     it.parseAs<ThumbnailTask>()
                 }
@@ -208,9 +211,9 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
                         delay(200.milliseconds)
                     }
                     val jobDone = minionJobDone(task.job)
-                } while (!jobDone && tries++ < 3)
+                } while (!jobDone && tries++ < THUMBNAIL_JOB_POLLS)
                 requestPreviewImage(page, cacheControl).apply {
-                    if (code == 202) {
+                    if (code == HttpURLConnection.HTTP_ACCEPTED) {
                         throw IOException("Thumbnail not ready")
                     }
                 }

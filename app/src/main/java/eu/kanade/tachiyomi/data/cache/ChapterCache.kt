@@ -31,6 +31,8 @@ import java.io.IOException
  *
  * @param context the application context.
  */
+private const val BYTES_PER_MEBIBYTE = 1024L * 1024L
+
 internal class ChapterCache(
     private val context: Context,
     private val json: Json,
@@ -78,7 +80,7 @@ internal class ChapterCache(
             File(context.cacheDir, "chapter_disk_cache"),
             PARAMETER_APP_VERSION,
             PARAMETER_VALUE_COUNT,
-            cacheSize * 1024 * 1024,
+            cacheSize * BYTES_PER_MEBIBYTE,
         )
     }
     // <-- EH

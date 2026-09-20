@@ -1,10 +1,11 @@
 package eu.kanade.presentation.manga
 
-internal enum class DownloadAction {
-    NEXT_1_CHAPTER,
-    NEXT_5_CHAPTERS,
-    NEXT_10_CHAPTERS,
-    NEXT_25_CHAPTERS,
+/** @property nextChapters how many unread chapters to queue, or null when the action is not a count. */
+internal enum class DownloadAction(val nextChapters: Int? = null) {
+    NEXT_1_CHAPTER(nextChapters = 1),
+    NEXT_5_CHAPTERS(nextChapters = 5),
+    NEXT_10_CHAPTERS(nextChapters = 10),
+    NEXT_25_CHAPTERS(nextChapters = 25),
     UNREAD_CHAPTERS,
     BOOKMARKED_CHAPTERS,
 }

@@ -8,6 +8,8 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 
+private const val MILLIS_PER_SECOND = 1000L
+
 internal class BangumiInterceptor(private val bangumi: Bangumi) : Interceptor {
 
     private val json: Json by injectLazy()
@@ -49,7 +51,7 @@ internal class BangumiInterceptor(private val bangumi: Bangumi) : Interceptor {
             BGMOAuth(
                 oauth.accessToken,
                 oauth.tokenType,
-                System.currentTimeMillis() / 1000,
+                System.currentTimeMillis() / MILLIS_PER_SECOND,
                 oauth.expiresIn,
                 oauth.refreshToken,
                 this.oauth?.userId,

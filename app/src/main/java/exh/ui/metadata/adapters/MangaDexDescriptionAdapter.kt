@@ -17,6 +17,9 @@ import exh.ui.metadata.adapters.MetadataUIUtil.bindDrawable
 import exh.ui.metadata.adapters.MetadataUIUtil.getRatingString
 import kotlin.math.round
 
+// Ratings are shown to two decimals.
+private const val HUNDREDTHS = 100.0
+
 @Composable
 internal fun MangaDexDescription(state: State.Success, openMetadataViewer: () -> Unit) {
     val context = LocalContext.current
@@ -35,7 +38,7 @@ internal fun MangaDexDescription(state: State.Success, openMetadataViewer: () ->
             binding.ratingBar.rating = ratingFloat?.div(2F) ?: 0F
             @SuppressLint("SetTextI18n")
             binding.rating.text =
-                (round((ratingFloat ?: 0F) * 100.0) / 100.0).toString() + " - " + getRatingString(context, ratingFloat)
+                (round((ratingFloat ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " + getRatingString(context, ratingFloat)
             binding.rating.isVisible = ratingFloat != null
             binding.ratingBar.isVisible = ratingFloat != null
 

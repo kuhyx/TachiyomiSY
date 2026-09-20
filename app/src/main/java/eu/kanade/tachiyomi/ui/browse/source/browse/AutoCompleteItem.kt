@@ -40,6 +40,8 @@ import kotlinx.coroutines.withContext
 import tachiyomi.presentation.core.components.SettingsItemsPaddings
 import tachiyomi.presentation.core.util.runOnEnterKeyPressed
 
+private const val MAX_SUGGESTIONS = 100
+
 @Composable
 internal fun AutoCompleteItem(
     name: String,
@@ -174,7 +176,7 @@ internal fun AutoCompleteTextField(
                 val (filter, prefix) = onValueFilter(value.text)
                 this@produceState.value = values.asSequence()
                     .filter(filter)
-                    .take(100)
+                    .take(MAX_SUGGESTIONS)
                     .let {
                         if (prefix != null) {
                             it.map { tag ->

@@ -3,13 +3,13 @@ package exh.md.utils
 import java.util.Locale
 
 internal enum class FollowStatus(val long: Long) {
-    UNFOLLOWED(0L),
-    READING(1L),
-    COMPLETED(2L),
-    ON_HOLD(3L),
-    PLAN_TO_READ(4L),
-    DROPPED(5L),
-    RE_READING(6L),
+    UNFOLLOWED(long = 0L),
+    READING(long = 1L),
+    COMPLETED(long = 2L),
+    ON_HOLD(long = 3L),
+    PLAN_TO_READ(long = 4L),
+    DROPPED(long = 5L),
+    RE_READING(long = 6L),
     ;
 
     fun toDex(): String = this.name.lowercase(Locale.US)

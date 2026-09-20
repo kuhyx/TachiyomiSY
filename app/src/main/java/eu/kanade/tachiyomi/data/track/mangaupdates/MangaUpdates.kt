@@ -15,6 +15,8 @@ import eu.kanade.tachiyomi.util.lang.htmlDecode
 import tachiyomi.i18n.MR
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val BASE_36 = 36
+
 internal class MangaUpdates(id: Long) : BaseTracker(id, "MangaUpdates"), DeletableTracker {
 
     companion object {
@@ -145,7 +147,7 @@ internal class MangaUpdates(id: Long) : BaseTracker(id, "MangaUpdates"), Deletab
             id
         }
 
-        return base36Id.toLong(36).let { longId ->
+        return base36Id.toLong(BASE_36).let { longId ->
             api.getSeries(longId).toTrackSearch(this.id)
         }
     }

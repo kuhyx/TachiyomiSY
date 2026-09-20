@@ -25,6 +25,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.milliseconds
 
+private const val STOP_TIMEOUT_MS = 5000L
+
 internal class DownloadQueueScreenModel(
     private val downloadManager: DownloadManager = Injekt.get(),
 ) : ScreenModel {
@@ -139,7 +141,7 @@ internal class DownloadQueueScreenModel(
     }
 
     val isDownloaderRunning = downloadManager.isDownloaderRunning
-        .stateIn(screenModelScope, SharingStarted.WhileSubscribed(5000), false)
+        .stateIn(screenModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), false)
 
     fun getDownloadStatusFlow() = downloadManager.statusFlow()
     fun getDownloadProgressFlow() = downloadManager.progressFlow()

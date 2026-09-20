@@ -97,6 +97,8 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
+private const val MAX_CHAPTERS = 10_000
+
 internal data class TrackInfoDialogHomeScreen(
     private val mangaId: Long,
     private val mangaTitle: String,
@@ -465,7 +467,7 @@ private data class TrackChapterSelectorScreen(
             val endRange = if (track.totalChapters > 0) {
                 track.totalChapters
             } else {
-                10_000
+                MAX_CHAPTERS
             }
             return 0..endRange.toInt()
         }

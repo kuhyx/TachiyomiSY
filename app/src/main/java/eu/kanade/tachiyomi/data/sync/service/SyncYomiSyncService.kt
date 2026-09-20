@@ -29,6 +29,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 
+private const val UPLOAD_TIMEOUT_SECONDS = 30L
+
 internal class SyncYomiSyncService(
     context: Context,
     json: Json,
@@ -178,7 +180,7 @@ internal class SyncYomiSyncService(
         val host = syncPreferences.clientHost.get()
         val apiKey = syncPreferences.clientAPIKey.get()
         val uploadUrl = "$host/api/sync/content"
-        val timeout = 30L
+        val timeout = UPLOAD_TIMEOUT_SECONDS
 
         val headersBuilder = Headers.Builder().add("X-API-Token", apiKey)
         if (eTag.isNotEmpty()) {

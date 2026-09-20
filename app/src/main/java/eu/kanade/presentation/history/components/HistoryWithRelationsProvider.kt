@@ -4,6 +4,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import tachiyomi.domain.history.model.HistoryWithRelations
 import java.util.Date
 
+// 2023-10-14, a fixed instant so the preview renders the same every time.
+private const val PREVIEW_READ_AT = 1_697_247_357L
+
 internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWithRelations> {
 
     private val simple = HistoryWithRelations(
@@ -14,7 +17,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
         ogTitle = "Test Title",
         // SY <--
         chapterNumber = 10.2,
-        readAt = Date(1_697_247_357L),
+        readAt = Date(PREVIEW_READ_AT),
         readDuration = 123L,
         coverData = tachiyomi.domain.manga.model.MangaCover(
             mangaId = 3L,
@@ -52,7 +55,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
         ogTitle = "Test Title",
         // SY <--
         chapterNumber = -2.0,
-        readAt = Date(1_697_247_357L),
+        readAt = Date(PREVIEW_READ_AT),
         readDuration = 123L,
         coverData = tachiyomi.domain.manga.model.MangaCover(
             mangaId = 3L,

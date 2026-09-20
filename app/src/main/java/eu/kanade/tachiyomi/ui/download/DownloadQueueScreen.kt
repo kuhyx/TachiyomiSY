@@ -59,6 +59,9 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import kotlin.math.roundToInt
 
+private const val PILL_ALPHA_DARK = 0.12f
+private const val PILL_ALPHA_LIGHT = 0.08f
+
 internal object DownloadQueueScreen : Screen() {
 
     @Composable
@@ -104,7 +107,7 @@ internal object DownloadQueueScreen : Screen() {
                                 overflow = TextOverflow.Ellipsis,
                             )
                             if (downloadCount > 0) {
-                                val pillAlpha = if (isSystemInDarkTheme()) 0.12f else 0.08f
+                                val pillAlpha = if (isSystemInDarkTheme()) PILL_ALPHA_DARK else PILL_ALPHA_LIGHT
                                 Pill(
                                     text = "$downloadCount",
                                     modifier = Modifier.padding(start = 4.dp),

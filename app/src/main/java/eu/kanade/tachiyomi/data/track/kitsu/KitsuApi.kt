@@ -36,6 +36,8 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+private const val STAFF_COUNT = 25
+
 internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
 
     private val json: Json by injectLazy()
@@ -277,7 +279,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
                 put("query", query)
                 putJsonObject("variables") {
                     put("libraryId", track.remoteId)
-                    put("staffCount", 25) // 25 based on nothing
+                    put("staffCount", STAFF_COUNT) // based on nothing
                 }
             }
             with(json) {

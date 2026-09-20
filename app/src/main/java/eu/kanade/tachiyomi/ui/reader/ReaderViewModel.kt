@@ -114,6 +114,11 @@ import java.util.Date
 /**
  * Presenter used by the activity to perform background operations.
  */
+private const val MAX_PAGE_INPUT = 9999
+
+// Download-ahead starts once a quarter of the chapter has been read.
+private const val DOWNLOAD_AHEAD_THRESHOLD = 0.25
+
 internal class ReaderViewModel @JvmOverloads constructor(
     private val savedState: SavedStateHandle,
     private val sourceManager: SourceManager = Injekt.get(),
@@ -302,7 +307,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
             .onEach { text ->
                 val parsed = text.toDoubleOrNull()
 
-                if (parsed == null || parsed <= 0 || parsed > 9999) {
+                if (parsed == null || parsed <= 0 || parsed > MAX_PAGE_INPUT) {
                     readerPreferences.autoscrollInterval.set(-1f)
                     mutableState.update { it.copy(isAutoScrollEnabled = false) }
                 } else {
@@ -599,7 +604,7 @@ internal class ReaderViewModel @JvmOverloads constructor(
             loadNewChapter(selectedChapter)
         }
 
-        val inDownloadRange = page.number.toDouble() / pages.size > 0.25
+        val inDownloadRange = page.number.toDouble() / pages.size > DOWNLOAD_AHEAD_THRESHOLD
         if (inDownloadRange) {
             downloadNextChapters()
         }

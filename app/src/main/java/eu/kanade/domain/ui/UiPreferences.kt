@@ -13,6 +13,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 
+private const val DEFAULT_PREVIEW_ROWS = 4
+
 internal class UiPreferences(
     preferenceStore: PreferenceStore,
 ) {
@@ -57,7 +59,7 @@ internal class UiPreferences(
 
     val mergeInOverflow: Preference<Boolean> = preferenceStore.getBoolean("merge_in_overflow", true)
 
-    val previewsRowCount: Preference<Int> = preferenceStore.getInt("pref_previews_row_count", 4)
+    val previewsRowCount: Preference<Int> = preferenceStore.getInt("pref_previews_row_count", DEFAULT_PREVIEW_ROWS)
 
     val useNewSourceNavigation: Preference<Boolean> = preferenceStore.getBoolean("use_new_source_navigation", true)
 

@@ -1,11 +1,16 @@
 package exh.util
 
+import exh.source.LEWD_SOURCE_SERIES
 import exh.source.isEhBasedManga
 import exh.source.nHentaiSourceIds
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+
+// The built-in adult sources took LEWD_SOURCE_SERIES + 5 .. + 13.
+private const val FIRST_LEWD_OFFSET = 5L
+private const val LAST_LEWD_OFFSET = 13L
 
 internal fun Manga.isLewd(): Boolean {
     val sourceName = Injekt.get<SourceManager>().get(source)?.name
@@ -14,7 +19,7 @@ internal fun Manga.isLewd(): Boolean {
         return genre.orEmpty().none { tag -> isNonHentaiTag(tag) }
     }
 
-    return source in 6905L..6913L ||
+    return source in LEWD_SOURCE_SERIES + FIRST_LEWD_OFFSET..LEWD_SOURCE_SERIES + LAST_LEWD_OFFSET ||
         (sourceName != null && isHentaiSource(sourceName)) ||
         genre.orEmpty().any { tag -> isHentaiTag(tag) }
 }

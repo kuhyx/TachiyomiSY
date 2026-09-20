@@ -9,6 +9,9 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
 
+// Latest and Browse have no saved search behind them; they take reserved negative ids.
+private const val BROWSE_FEED_ID = -2L
+
 internal sealed class SourceFeedUI {
     abstract val id: Long
 
@@ -31,7 +34,7 @@ internal sealed class SourceFeedUI {
         override fun withResults(results: List<Manga>?): SourceFeedUI = copy(results = results)
     }
     data class Browse(override val results: List<Manga>?) : SourceFeedUI() {
-        override val id: Long = -2
+        override val id: Long = BROWSE_FEED_ID
         override val title: String
             @Composable
             @ReadOnlyComposable

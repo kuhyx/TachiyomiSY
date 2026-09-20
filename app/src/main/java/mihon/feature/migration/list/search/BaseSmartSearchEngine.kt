@@ -6,6 +6,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 import java.util.Locale
 
+private const val SUSPICIOUSLY_SHORT_TITLE = 5
+
 internal typealias SearchAction<T> = suspend (String) -> List<T>
 
 internal abstract class BaseSmartSearchEngine<T>(
@@ -71,7 +73,7 @@ internal abstract class BaseSmartSearchEngine<T>(
 
         // Remove text in brackets
         var cleanedTitle = removeTextInBrackets(preTitle, true)
-        if (cleanedTitle.length <= 5) { // Title is suspiciously short, try parsing it backwards
+        if (cleanedTitle.length <= SUSPICIOUSLY_SHORT_TITLE) { // Try parsing it backwards
             cleanedTitle = removeTextInBrackets(preTitle, false)
         }
 
@@ -82,7 +84,7 @@ internal abstract class BaseSmartSearchEngine<T>(
         val cleanedTitleEng = cleanedTitle.replace(titleRegex, " ")
 
         // Do not strip foreign language letters if cleanedTitle is too short
-        cleanedTitle = if (cleanedTitleEng.length <= 5) {
+        cleanedTitle = if (cleanedTitleEng.length <= SUSPICIOUSLY_SHORT_TITLE) {
             cleanedTitle.replace(titleCyrillicRegex, " ")
         } else {
             cleanedTitleEng

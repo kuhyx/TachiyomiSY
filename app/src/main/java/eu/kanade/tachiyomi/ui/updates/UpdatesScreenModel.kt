@@ -54,6 +54,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.time.ZonedDateTime
 
+private const val UPDATES_HISTORY_MONTHS = 3L
+
 internal class UpdatesScreenModel(
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
@@ -87,7 +89,7 @@ internal class UpdatesScreenModel(
     init {
         screenModelScope.launchIO {
             // Set date limit for recent chapters
-            val limit = ZonedDateTime.now().minusMonths(3).toInstant()
+            val limit = ZonedDateTime.now().minusMonths(UPDATES_HISTORY_MONTHS).toInstant()
 
             combine(
                 // needed for SQL filters (unread, started, bookmarked, etc)

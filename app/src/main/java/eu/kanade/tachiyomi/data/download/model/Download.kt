@@ -65,11 +65,11 @@ internal data class Download(
         }
 
     enum class State(val value: Int) {
-        NOT_DOWNLOADED(0),
-        QUEUE(1),
-        DOWNLOADING(2),
-        DOWNLOADED(3),
-        ERROR(4),
+        NOT_DOWNLOADED(value = 0),
+        QUEUE(value = 1),
+        DOWNLOADING(value = 2),
+        DOWNLOADED(value = 3),
+        ERROR(value = 4),
     }
 
     companion object {

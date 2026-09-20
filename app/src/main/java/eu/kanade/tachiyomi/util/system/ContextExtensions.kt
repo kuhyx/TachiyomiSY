@@ -35,6 +35,9 @@ import java.io.File
  * @param label Label to show to the user describing the content
  * @param content the actual text to copy to the board
  */
+private const val CLIPBOARD_TOAST_CHARS = 50
+private const val THEME_AUTOMATIC = 3
+
 internal fun Context.copyToClipboard(label: String, content: String) {
     if (content.isBlank()) return
 
@@ -45,7 +48,7 @@ internal fun Context.copyToClipboard(label: String, content: String) {
         // Android 13 and higher shows a visual confirmation of copied contents
         // https://developer.android.com/about/versions/13/features/copy-paste
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-            toast(stringResource(MR.strings.copied_to_clipboard, content.truncateCenter(50)))
+            toast(stringResource(MR.strings.copied_to_clipboard, content.truncateCenter(CLIPBOARD_TOAST_CHARS)))
         }
     } catch (e: Throwable) {
         logcat(LogPriority.ERROR, e)
@@ -111,7 +114,7 @@ internal fun Context.createReaderThemeContext(): Context {
     val themeMode = preferences.themeMode.get()
     val isDarkBackground = when (readerPreferences.readerTheme.get()) {
         1, 2 -> true // Black, Gray
-        3 -> when (themeMode) { // Automatic bg uses activity background by default
+        THEME_AUTOMATIC -> when (themeMode) { // Automatic bg uses activity background by default
             ThemeMode.SYSTEM -> applicationContext.isNightMode()
             else -> themeMode == ThemeMode.DARK
         }

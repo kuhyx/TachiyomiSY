@@ -12,8 +12,10 @@ import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.preference.getAndSet
 import tachiyomi.core.common.util.lang.withIOContext
 
+private const val VERSION = 60f
+
 internal class MoveExtensionRepoSettingsMigration : Migration {
-    override val version: Float = 60f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val context = migrationContext.get<Application>() ?: return@withIOContext false

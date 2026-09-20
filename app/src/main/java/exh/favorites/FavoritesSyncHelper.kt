@@ -49,6 +49,8 @@ import uy.kohesive.injekt.injectLazy
 import kotlin.time.Duration.Companion.seconds
 
 // Follow-up: only apply database changes after sync (https://github.com/kuhyx/TachiyomiSY/issues/24)
+private const val EXH_REQUEST_RETRIES = 10
+
 internal class FavoritesSyncHelper(val context: Context) {
     private val getLibraryManga: GetLibraryManga by injectLazy()
     private val getCategories: GetCategories by injectLazy()
@@ -233,7 +235,7 @@ internal class FavoritesSyncHelper(val context: Context) {
                 .build(),
         )
 
-        if (!explicitlyRetryExhRequest(10, request)) {
+        if (!explicitlyRetryExhRequest(EXH_REQUEST_RETRIES, request)) {
             val error = FavoritesSyncStatus.SyncError.GallerySyncError.UnableToAddGalleryToRemote(
                 gallery.title,
                 gallery.gid,
@@ -289,7 +291,7 @@ internal class FavoritesSyncHelper(val context: Context) {
                 body = formBody.build(),
             )
 
-            if (!explicitlyRetryExhRequest(10, request)) {
+            if (!explicitlyRetryExhRequest(EXH_REQUEST_RETRIES, request)) {
                 if (exhPreferences.exhLenientSync.get()) {
                     errorList += FavoritesSyncStatus.SyncError.GallerySyncError.UnableToDeleteFromRemote
                 } else {

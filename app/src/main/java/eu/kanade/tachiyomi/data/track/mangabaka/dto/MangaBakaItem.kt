@@ -3,6 +3,9 @@ package eu.kanade.tachiyomi.data.track.mangabaka.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// Title preference: primary, then official, native, then everything else.
+private const val OTHER_TITLE_RANK = 3
+
 private val TITLE_PRIORITIES = listOf("en", "ja-Latn", "ja", "ko-Latn", "ko", "zh-Latn", "zh")
 
 @Serializable
@@ -38,7 +41,7 @@ internal data class MangaBakaItem(
                         it.isPrimary -> 0
                         "official" in it.traits -> 1
                         "native" in it.traits -> 2
-                        else -> 3
+                        else -> OTHER_TITLE_RANK
                     }
                 }
         }

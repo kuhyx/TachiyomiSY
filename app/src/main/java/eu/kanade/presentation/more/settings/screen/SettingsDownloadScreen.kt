@@ -22,6 +22,17 @@ import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+// "Remove after read": how many chapters back from the last read one to keep.
+private const val FOURTH_TO_LAST = 3
+private const val FIFTH_TO_LAST = 4
+
+// How many unread chapters to download ahead while reading; 0 disables.
+private const val TWO_CHAPTERS = 2
+private const val THREE_CHAPTERS = 3
+private const val FIVE_CHAPTERS = 5
+private const val TEN_CHAPTERS = 10
+private val DOWNLOAD_AHEAD_CHOICES = listOf(0, TWO_CHAPTERS, THREE_CHAPTERS, FIVE_CHAPTERS, TEN_CHAPTERS)
+
 internal object SettingsDownloadScreen : SearchableSettings {
 
     @ReadOnlyComposable
@@ -94,8 +105,8 @@ internal object SettingsDownloadScreen : SearchableSettings {
                         0 to stringResource(MR.strings.last_read_chapter),
                         1 to stringResource(MR.strings.second_to_last),
                         2 to stringResource(MR.strings.third_to_last),
-                        3 to stringResource(MR.strings.fourth_to_last),
-                        4 to stringResource(MR.strings.fifth_to_last),
+                        FOURTH_TO_LAST to stringResource(MR.strings.fourth_to_last),
+                        FIFTH_TO_LAST to stringResource(MR.strings.fifth_to_last),
                     ),
                     title = stringResource(MR.strings.pref_remove_after_read),
                 ),
@@ -191,7 +202,7 @@ internal object SettingsDownloadScreen : SearchableSettings {
             preferenceItems = listOf(
                 Preference.PreferenceItem.ListPreference(
                     preference = downloadPreferences.autoDownloadWhileReading,
-                    entries = listOf(0, 2, 3, 5, 10)
+                    entries = DOWNLOAD_AHEAD_CHOICES
                         .associateWith {
                             if (it == 0) {
                                 stringResource(MR.strings.disabled)

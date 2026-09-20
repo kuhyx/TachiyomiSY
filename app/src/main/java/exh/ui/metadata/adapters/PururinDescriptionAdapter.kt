@@ -19,6 +19,9 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import kotlin.math.round
 
+// Ratings are shown to two decimals.
+private const val HUNDREDTHS = 100.0
+
 @Composable
 internal fun PururinDescription(state: State.Success, openMetadataViewer: () -> Unit) {
     val context = LocalContext.current
@@ -52,7 +55,7 @@ internal fun PururinDescription(state: State.Success, openMetadataViewer: () -> 
             binding.ratingBar.rating = ratingFloat ?: 0F
             @SuppressLint("SetTextI18n")
             binding.rating.text =
-                (round((ratingFloat ?: 0F) * 100.0) / 100.0).toString() + " - " +
+                (round((ratingFloat ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " +
                 MetadataUIUtil.getRatingString(context, ratingFloat?.times(2))
 
             binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)

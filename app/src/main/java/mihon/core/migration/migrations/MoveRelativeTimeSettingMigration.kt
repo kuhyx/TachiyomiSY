@@ -6,13 +6,17 @@ import mihon.core.migration.MigrationContext
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.util.lang.withIOContext
 
+private const val VERSION = 57f
+
+private const val DEFAULT_RELATIVE_TIME_DAYS = 7
+
 internal class MoveRelativeTimeSettingMigration : Migration {
-    override val version: Float = 57f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val preferenceStore = migrationContext.get<PreferenceStore>() ?: return@withIOContext false
         val uiPreferences = migrationContext.get<UiPreferences>() ?: return@withIOContext false
-        val pref = preferenceStore.getInt("relative_time", 7)
+        val pref = preferenceStore.getInt("relative_time", DEFAULT_RELATIVE_TIME_DAYS)
         if (pref.get() == 0) {
             uiPreferences.relativeTime.set(false)
         }

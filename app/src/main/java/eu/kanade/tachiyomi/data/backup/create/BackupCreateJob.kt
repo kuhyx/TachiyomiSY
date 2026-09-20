@@ -31,6 +31,9 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 
+private const val FLEX_MINUTES = 10L
+private const val BACKOFF_MINUTES = 10L
+
 internal class BackupCreateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
@@ -96,10 +99,10 @@ internal class BackupCreateJob(private val context: Context, workerParams: Worke
                 val request = PeriodicWorkRequestBuilder<BackupCreateJob>(
                     interval.toLong(),
                     TimeUnit.HOURS,
-                    10,
+                    FLEX_MINUTES,
                     TimeUnit.MINUTES,
                 )
-                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.MINUTES)
+                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, BACKOFF_MINUTES, TimeUnit.MINUTES)
                     .addTag(TAG_AUTO)
                     .setConstraints(constraints)
                     .setInputData(workDataOf(IS_AUTO_BACKUP_KEY to true))

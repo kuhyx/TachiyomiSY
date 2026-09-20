@@ -39,8 +39,10 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import tachiyomi.presentation.core.components.material.padding
 
-private val readerBarsSlideAnimationSpec = tween<IntOffset>(200)
-private val readerBarsFadeAnimationSpec = tween<Float>(150)
+private const val SLIDE_MS = 200
+private const val FADE_MS = 150
+private val readerBarsSlideAnimationSpec = tween<IntOffset>(SLIDE_MS)
+private val readerBarsFadeAnimationSpec = tween<Float>(FADE_MS)
 
 @Composable
 internal fun ReaderAppBars(

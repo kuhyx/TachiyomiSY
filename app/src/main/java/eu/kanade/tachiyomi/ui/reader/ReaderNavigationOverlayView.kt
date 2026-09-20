@@ -16,6 +16,9 @@ import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
 import tachiyomi.core.common.i18n.stringResource
 import kotlin.math.abs
 
+private const val LABEL_TEXT_SIZE = 64f
+private const val LABEL_STROKE_WIDTH = 8f
+
 internal class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
     private var viewPropertyAnimator: ViewPropertyAnimator? = null
@@ -48,15 +51,15 @@ internal class ReaderNavigationOverlayView(context: Context, attributeSet: Attri
     private val textPaint = Paint().apply {
         textAlign = Paint.Align.CENTER
         color = Color.WHITE
-        textSize = 64f
+        textSize = LABEL_TEXT_SIZE
     }
 
     private val textBorderPaint = Paint().apply {
         textAlign = Paint.Align.CENTER
         color = Color.BLACK
-        textSize = 64f
+        textSize = LABEL_TEXT_SIZE
         style = Paint.Style.STROKE
-        strokeWidth = 8f
+        strokeWidth = LABEL_STROKE_WIDTH
     }
 
     override fun onDraw(canvas: Canvas) {

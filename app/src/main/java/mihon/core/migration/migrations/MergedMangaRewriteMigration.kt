@@ -23,8 +23,10 @@ import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.domain.manga.model.MergedMangaReference
 import tachiyomi.domain.source.service.SourceManager
 
+private const val VERSION = 7f
+
 internal class MergedMangaRewriteMigration : Migration {
-    override val version: Float = 7f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val database = migrationContext.get<Database>() ?: return@withIOContext false

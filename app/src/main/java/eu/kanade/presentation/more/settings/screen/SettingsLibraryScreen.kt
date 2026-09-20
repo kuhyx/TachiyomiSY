@@ -44,6 +44,13 @@ import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+// Library update interval choices, in hours.
+private const val TWELVE_HOURS = 12
+private const val ONE_DAY_HOURS = 24
+private const val TWO_DAYS_HOURS = 48
+private const val THREE_DAYS_HOURS = 72
+private const val ONE_WEEK_HOURS = 168
+
 internal object SettingsLibraryScreen : SearchableSettings {
 
     @Composable
@@ -154,11 +161,11 @@ internal object SettingsLibraryScreen : SearchableSettings {
                     preference = autoUpdateIntervalPref,
                     entries = mapOf(
                         0 to stringResource(MR.strings.update_never),
-                        12 to stringResource(MR.strings.update_12hour),
-                        24 to stringResource(MR.strings.update_24hour),
-                        48 to stringResource(MR.strings.update_48hour),
-                        72 to stringResource(MR.strings.update_72hour),
-                        168 to stringResource(MR.strings.update_weekly),
+                        TWELVE_HOURS to stringResource(MR.strings.update_12hour),
+                        ONE_DAY_HOURS to stringResource(MR.strings.update_24hour),
+                        TWO_DAYS_HOURS to stringResource(MR.strings.update_48hour),
+                        THREE_DAYS_HOURS to stringResource(MR.strings.update_72hour),
+                        ONE_WEEK_HOURS to stringResource(MR.strings.update_weekly),
                     ),
                     title = stringResource(MR.strings.pref_library_update_interval),
                     onValueChanged = {

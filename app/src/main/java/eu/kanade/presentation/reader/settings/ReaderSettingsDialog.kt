@@ -18,6 +18,8 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsScreenModel
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
+private const val DIM_AMOUNT = 0.5f
+
 @Composable
 internal fun ReaderSettingsDialog(
     onDismissRequest: () -> Unit,
@@ -49,7 +51,7 @@ internal fun ReaderSettingsDialog(
                     window?.setDimAmount(0f)
                     onHideMenus()
                 } else {
-                    window?.setDimAmount(0.5f)
+                    window?.setDimAmount(DIM_AMOUNT)
                     onShowMenus()
                 }
             }

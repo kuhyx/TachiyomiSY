@@ -35,6 +35,9 @@ import java.time.ZonedDateTime
 import kotlin.time.Duration.Companion.minutes
 import tachiyomi.domain.track.model.Track as DomainTrack
 
+// AniList tokens live a year.
+private const val YEAR_MILLIS = 365L * 24L * 60L * 60L * 1000L
+
 internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
     private val json: Json by injectLazy()
@@ -290,7 +293,7 @@ internal class AnilistApi(val client: OkHttpClient, interceptor: AnilistIntercep
         findLibManga(track, userId) ?: throw Exception("Could not find manga")
 
     fun createOAuth(token: String): ALOAuth =
-        ALOAuth(token, "Bearer", System.currentTimeMillis() + 31_536_000_000, 31_536_000_000)
+        ALOAuth(token, "Bearer", System.currentTimeMillis() + YEAR_MILLIS, YEAR_MILLIS)
 
     suspend fun getCurrentUser(): ALUserViewerData {
         return withIOContext {

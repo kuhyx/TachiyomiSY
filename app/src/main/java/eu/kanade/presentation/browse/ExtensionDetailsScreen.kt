@@ -64,6 +64,9 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 
+// The NSFW badge shares its row with the version; the badge gets the wider column.
+private const val NSFW_LABEL_WEIGHT = 1.5f
+
 @Composable
 internal fun ExtensionDetailsScreen(
     navigateUp: () -> Unit,
@@ -307,7 +310,7 @@ private fun DetailsHeader(
             InfoDivider()
 
             InfoText(
-                modifier = Modifier.weight(if (extension.isNsfw) 1.5f else 1f),
+                modifier = Modifier.weight(if (extension.isNsfw) NSFW_LABEL_WEIGHT else 1f),
                 primaryText = LocaleHelper.getSourceDisplayName(extension.lang, context),
                 secondaryText = stringResource(MR.strings.ext_info_language),
             )

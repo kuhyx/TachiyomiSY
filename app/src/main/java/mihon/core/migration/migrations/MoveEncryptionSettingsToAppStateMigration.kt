@@ -12,8 +12,10 @@ import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.lang.withUIContext
 
+private const val VERSION = 66f
+
 internal class MoveEncryptionSettingsToAppStateMigration : Migration {
-    override val version: Float = 66f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val context = migrationContext.get<Application>() ?: return@withIOContext false

@@ -8,8 +8,10 @@ import mihon.domain.extension.repository.ExtensionStoreRepository
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.system.logcat
 
+private const val VERSION = 67f
+
 internal class TrustExtensionRepositoryMigration : Migration {
-    override val version: Float = 67f
+    override val version: Float = VERSION
 
     override suspend fun invoke(migrationContext: MigrationContext): Boolean = withIOContext {
         val sourcePreferences = migrationContext.get<SourcePreferences>() ?: return@withIOContext false

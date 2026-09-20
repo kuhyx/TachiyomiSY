@@ -14,6 +14,8 @@ import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+private const val DISABLED_ALPHA = 0.5F
+
 internal class EditMergedMangaHolder(view: View, val adapter: EditMergedMangaAdapter) : FlexibleViewHolder(view, adapter) {
 
     lateinit var reference: MergedMangaReference
@@ -55,7 +57,7 @@ internal class EditMergedMangaHolder(view: View, val adapter: EditMergedMangaAda
     fun setHandelAlpha(isPriorityOrder: Boolean) {
         binding.reorder.alpha = when (isPriorityOrder) {
             true -> 1F
-            false -> 0.5F
+            false -> DISABLED_ALPHA
         }
     }
 

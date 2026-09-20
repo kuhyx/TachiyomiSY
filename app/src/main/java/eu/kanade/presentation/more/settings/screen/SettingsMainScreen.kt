@@ -51,6 +51,11 @@ import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import cafe.adriel.voyager.core.screen.Screen as VoyagerScreen
 
+// The icon tint nudges the HSV value slightly off the surface colour.
+private const val HSV_COMPONENTS = 3
+private const val DARK_VALUE_SHIFT = 0.05f
+private const val LIGHT_VALUE_SHIFT = 0.02f
+
 internal object SettingsMainScreen : Screen() {
 
     @Composable
@@ -63,12 +68,12 @@ internal object SettingsMainScreen : Screen() {
         val surface = MaterialTheme.colorScheme.surface
         val dark = isSystemInDarkTheme()
         return remember(surface, dark) {
-            val arr = FloatArray(3)
+            val arr = FloatArray(HSV_COMPONENTS)
             ColorUtils.colorToHSL(surface.toArgb(), arr)
             arr[2] = if (dark) {
-                arr[2] - 0.05f
+                arr[2] - DARK_VALUE_SHIFT
             } else {
-                arr[2] + 0.02f
+                arr[2] + LIGHT_VALUE_SHIFT
             }.coerceIn(0f, 1f)
             Color.hsl(arr[0], arr[1], arr[2])
         }

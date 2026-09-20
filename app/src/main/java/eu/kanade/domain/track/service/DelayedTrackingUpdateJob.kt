@@ -19,11 +19,14 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 
+private const val MAX_ATTEMPTS = 3
+private const val BACKOFF_MINUTES = 5L
+
 internal class DelayedTrackingUpdateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        if (runAttemptCount > 3) {
+        if (runAttemptCount > MAX_ATTEMPTS) {
             return Result.failure()
         }
 
@@ -62,7 +65,7 @@ internal class DelayedTrackingUpdateJob(private val context: Context, workerPara
 
             val request = OneTimeWorkRequestBuilder<DelayedTrackingUpdateJob>()
                 .setConstraints(constraints)
-                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 5, TimeUnit.MINUTES)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, BACKOFF_MINUTES, TimeUnit.MINUTES)
                 .addTag(TAG)
                 .build()
 

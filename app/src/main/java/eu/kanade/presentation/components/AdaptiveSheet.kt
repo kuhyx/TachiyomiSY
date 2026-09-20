@@ -16,6 +16,10 @@ import eu.kanade.presentation.util.ScreenTransition
 import eu.kanade.presentation.util.isTabletUi
 import tachiyomi.presentation.core.components.AdaptiveSheet as AdaptiveSheetImpl
 
+// Material's shared-axis fade-through timing.
+private const val FADE_IN_MS = 220
+private const val FADE_OUT_MS = 90
+
 @OptIn(InternalVoyagerApi::class)
 @Composable
 internal fun NavigatorAdaptiveSheet(
@@ -33,8 +37,8 @@ internal fun NavigatorAdaptiveSheet(
                 ScreenTransition(
                     navigator = sheetNavigator,
                     transition = {
-                        fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith
-                            fadeOut(animationSpec = tween(90))
+                        fadeIn(animationSpec = tween(FADE_IN_MS, delayMillis = FADE_OUT_MS)) togetherWith
+                            fadeOut(animationSpec = tween(FADE_OUT_MS))
                     },
                 )
             }

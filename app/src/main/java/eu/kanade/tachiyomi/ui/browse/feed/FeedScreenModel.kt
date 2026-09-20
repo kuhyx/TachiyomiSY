@@ -51,6 +51,8 @@ import tachiyomi.domain.manga.model.Manga as DomainManga
 /**
  * Presenter of [feedTab].
  */
+private const val MAX_FEEDS = 10
+
 internal open class FeedScreenModel(
     val sourceManager: SourceManager = Injekt.get(),
     val sourcePreferences: SourcePreferences = Injekt.get(),
@@ -146,7 +148,7 @@ internal open class FeedScreenModel(
         }
     }
 
-    private suspend fun hasTooManyFeeds(): Boolean = countFeedSavedSearchGlobal.await() > 10
+    private suspend fun hasTooManyFeeds(): Boolean = countFeedSavedSearchGlobal.await() > MAX_FEEDS
 
     fun getEnabledSources(): List<Source> {
         val languages = sourcePreferences.enabledLanguages.get()
