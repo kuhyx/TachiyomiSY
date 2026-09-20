@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from explicit_api import apply_fixes, parse_log
+from explicit_api import apply_fixes, main, parse_log
 
 LOG = """
 > Task :compileKotlin
@@ -29,3 +29,21 @@ def test_apply_fixes_inserts_public_once(tmp_path: Path) -> None:
         "    public fun g(): Int = 3\n}\n"
     )
     assert apply_fixes(source, {(3, 1)}) == 0
+
+
+def test_apply_fixes_can_insert_internal(tmp_path: Path) -> None:
+    source = tmp_path / "A.kt"
+    source.write_text("class A\ninternal class B\n")
+    assert apply_fixes(source, {(1, 1), (2, 1)}, "internal") == 1
+    assert source.read_text() == "internal class A\ninternal class B\n"
+
+
+def test_main_visibility_flag(tmp_path: Path, capsys: object) -> None:
+    source = tmp_path / "A.kt"
+    source.write_text("class A\n")
+    log = tmp_path / "gradle.log"
+    log.write_text(f"e: file://{source}:1:1 Visibility must be specified in explicit API mode.\n")
+    assert main(["explicit_api.py", "--visibility", "internal", str(log)]) == 0
+    assert source.read_text() == "internal class A\n"
+    assert main(["explicit_api.py", "--visibility", "protected", str(log)]) == 2
+    assert main(["explicit_api.py"]) == 2

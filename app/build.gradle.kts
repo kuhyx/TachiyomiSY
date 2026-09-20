@@ -336,3 +336,10 @@ androidComponents {
         it.packaging.resources.excludes.add("META-INF/*.version")
     }
 }
+
+// SY fork (kuhy): the full lint stack (build-logic PluginLint) goes on unconditionally in the
+// commit that makes this module clean; until then `-PsyAppLint` measures what is left without
+// turning every push red. Applied after `android {}` so its strict lint settings win.
+if (hasProperty("syAppLint")) {
+    pluginManager.apply(mihonx.plugins.lint.get().pluginId)
+}

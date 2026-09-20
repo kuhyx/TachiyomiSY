@@ -14,11 +14,18 @@ import java.io.File
 
 private const val JVM_TARGET: String = "17"
 
+private const val EH_TAG_TABLES: String = "**/exh/eh/tags/**"
+
 /**
  * Every detekt rule on, no baseline, one config directory for the whole tree
  * (one file per rule set so each stays under the 250-line cap). [configDir]
  * is passed in because the included build-logic build has a different root
  * than the modules it configures.
+ *
+ * The one path carve-out is [EH_TAG_TABLES], the e-hentai tag tables: 6000-line string arrays
+ * regenerated upstream, data not code. They are exempt from the 250-line cap for the same
+ * reason (`.file-length-exempt`) and would otherwise be one `LargeClass`/`LongMethod`/
+ * `MaxLineLength` finding per table (decided 2026-09-20).
  */
 public fun Project.configureDetekt(configDir: File) {
     extensions.configure<DetektExtension> {
@@ -31,6 +38,7 @@ public fun Project.configureDetekt(configDir: File) {
     tasks.withType(Detekt::class.java).configureEach {
         jvmTarget = JVM_TARGET
         exclude("**/build/**")
+        exclude(EH_TAG_TABLES)
         reports {
             html.required.set(false)
             xml.required.set(false)

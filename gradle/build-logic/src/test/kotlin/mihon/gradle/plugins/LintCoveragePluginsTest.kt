@@ -4,6 +4,7 @@ import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.android.build.api.dsl.LibraryExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import mihon.gradle.catalogProject
@@ -26,7 +27,10 @@ internal class LintCoveragePluginsTest {
         val detekt = project.extensions.getByType(DetektExtension::class.java)
         detekt.allRules shouldBe true
         detekt.buildUponDefaultConfig shouldBe false
-        project.tasks.withType(Detekt::class.java).forEach { it.jvmTarget shouldBe "17" }
+        project.tasks.withType(Detekt::class.java).forEach {
+            it.jvmTarget shouldBe "17"
+            it.excludes shouldContain "**/exh/eh/tags/**"
+        }
         val lint = project.extensions.getByType(LibraryExtension::class.java).lint
         lint.warningsAsErrors shouldBe true
         lint.abortOnError shouldBe true
