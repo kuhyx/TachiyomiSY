@@ -13,7 +13,6 @@ import androidx.paging.filter
 import androidx.paging.map
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import dev.icerock.moko.resources.StringResource
 import eu.kanade.core.preference.asState
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.source.interactor.GetExhSavedSearch
@@ -25,8 +24,6 @@ import eu.kanade.presentation.util.ioCoroutineScope
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.MetadataSource
-import eu.kanade.tachiyomi.source.online.all.MangaDex
-import eu.kanade.tachiyomi.util.removeCovers
 import exh.metadata.metadata.RaisedSearchMetadata
 import exh.metadata.metadata.base.raise
 import exh.source.ExhPreferences
@@ -36,7 +33,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -44,15 +40,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import tachiyomi.core.common.preference.CheckboxState
-import tachiyomi.core.common.preference.mapAsCheckboxState
-import tachiyomi.core.common.util.lang.launchIO
-import tachiyomi.core.common.util.lang.launchNonCancellable
-import tachiyomi.core.common.util.lang.withUIContext
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.interactor.SetMangaCategories
 import tachiyomi.domain.category.model.Category
@@ -63,20 +54,15 @@ import tachiyomi.domain.manga.interactor.GetFlatMetadataById
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaWithChapterCount
-import tachiyomi.domain.manga.model.toMangaUpdate
 import tachiyomi.domain.source.interactor.DeleteSavedSearchById
 import tachiyomi.domain.source.interactor.GetRemoteManga
 import tachiyomi.domain.source.interactor.InsertSavedSearch
 import tachiyomi.domain.source.model.EXHSavedSearch
-import tachiyomi.domain.source.model.SavedSearch
 import tachiyomi.domain.source.repository.SourcePagingSource
 import tachiyomi.domain.source.service.SourceManager
-import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import xyz.nulldev.ts.api.http.serializer.FilterSerializer
-import java.time.Instant
-import eu.kanade.tachiyomi.source.model.Filter as SourceModelFilter
 
 internal open class BrowseSourceScreenModel(
     private val sourceId: Long,
@@ -87,24 +73,24 @@ internal open class BrowseSourceScreenModel(
     // SY <--
     private val sourceManager: SourceManager = Injekt.get(),
     sourcePreferences: SourcePreferences = Injekt.get(),
-    private val libraryPreferences: LibraryPreferences = Injekt.get(),
-    private val coverCache: CoverCache = Injekt.get(),
+    internal val libraryPreferences: LibraryPreferences = Injekt.get(),
+    internal val coverCache: CoverCache = Injekt.get(),
     private val getRemoteManga: GetRemoteManga = Injekt.get(),
-    private val getDuplicateLibraryManga: GetDuplicateLibraryManga = Injekt.get(),
-    private val getCategories: GetCategories = Injekt.get(),
-    private val setMangaCategories: SetMangaCategories = Injekt.get(),
-    private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags = Injekt.get(),
+    internal val getDuplicateLibraryManga: GetDuplicateLibraryManga = Injekt.get(),
+    internal val getCategories: GetCategories = Injekt.get(),
+    internal val setMangaCategories: SetMangaCategories = Injekt.get(),
+    internal val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
-    private val updateManga: UpdateManga = Injekt.get(),
-    private val addTracks: AddTracks = Injekt.get(),
+    internal val updateManga: UpdateManga = Injekt.get(),
+    internal val addTracks: AddTracks = Injekt.get(),
     getIncognitoState: GetIncognitoState = Injekt.get(),
 
     // SY -->
     exhPreferences: ExhPreferences = Injekt.get(),
     uiPreferences: UiPreferences = Injekt.get(),
     private val getFlatMetadataById: GetFlatMetadataById = Injekt.get(),
-    private val deleteSavedSearchById: DeleteSavedSearchById = Injekt.get(),
-    private val insertSavedSearch: InsertSavedSearch = Injekt.get(),
+    internal val deleteSavedSearchById: DeleteSavedSearchById = Injekt.get(),
+    internal val insertSavedSearch: InsertSavedSearch = Injekt.get(),
     private val getExhSavedSearch: GetExhSavedSearch = Injekt.get(),
     // SY <--
 ) : StateScreenModel<BrowseSourceScreenModel.State>(State(Listing.valueOf(listingQuery))) {
@@ -118,7 +104,7 @@ internal open class BrowseSourceScreenModel(
 
     val startExpanded by uiPreferences.expandFilters.asState(screenModelScope)
 
-    private val filterSerializer = FilterSerializer()
+    internal val filterSerializer = FilterSerializer()
 
     val sourceIsMangaDex = sourceId in mangaDexSourceIds
     // SY <--
@@ -220,177 +206,14 @@ internal open class BrowseSourceScreenModel(
     }
     // SY <--
 
-    fun resetFilters() {
-        mutableState.update { it.copy(filters = source.getFilterList()) }
-    }
-
-    fun setListing(listing: Listing) {
-        mutableState.update { it.copy(listing = listing, toolbarQuery = null) }
-    }
-
-    fun setFilters(filters: FilterList) {
-        mutableState.update {
-            it.copy(
-                filters = filters,
-            )
-        }
-    }
-
-    fun search(query: String? = null, filters: FilterList? = null) {
-        // SY -->
-        if (filters != null && filters !== state.value.filters) {
-            mutableState.update { state -> state.copy(filters = filters) }
-        }
-        // SY <--
-        val input = state.value.listing as? Listing.Search
-            ?: Listing.Search(query = null, filters = source.getFilterList())
-
-        mutableState.update {
-            it.copy(
-                listing = input.copy(
-                    query = query ?: input.query,
-                    filters = filters ?: input.filters,
-                ),
-                toolbarQuery = query ?: input.query,
-            )
-        }
-    }
-
-    fun searchGenre(genreName: String) {
-        val defaultFilters = source.getFilterList()
-        var genreExists = false
-
-        filter@ for (sourceFilter in defaultFilters) {
-            if (sourceFilter is SourceModelFilter.Group<*>) {
-                for (filter in sourceFilter.state) {
-                    if (filter is SourceModelFilter<*> && filter.name.equals(genreName, true)) {
-                        when (filter) {
-                            is SourceModelFilter.TriState -> filter.state = 1
-                            is SourceModelFilter.CheckBox -> filter.state = true
-                            else -> {}
-                        }
-                        genreExists = true
-                        break@filter
-                    }
-                }
-            } else if (sourceFilter is SourceModelFilter.Select<*>) {
-                val index = sourceFilter.values.filterIsInstance<String>()
-                    .indexOfFirst { it.equals(genreName, true) }
-
-                if (index != -1) {
-                    sourceFilter.state = index
-                    genreExists = true
-                    break
-                }
-            }
-        }
-
-        mutableState.update {
-            val listing = if (genreExists) {
-                Listing.Search(query = null, filters = defaultFilters)
-            } else {
-                Listing.Search(query = genreName, filters = defaultFilters)
-            }
-            it.copy(
-                filters = defaultFilters,
-                listing = listing,
-                toolbarQuery = listing.query,
-            )
-        }
-    }
-
-    /**
-     * Adds or removes a manga from the library.
-     *
-     * @param manga the manga to update.
-     */
-    fun changeMangaFavorite(manga: Manga) {
-        screenModelScope.launch {
-            var new = manga.copy(
-                favorite = !manga.favorite,
-                dateAdded = when (manga.favorite) {
-                    true -> 0
-                    false -> Instant.now().toEpochMilli()
-                },
-            )
-
-            if (!new.favorite) {
-                new = new.removeCovers(coverCache)
-            } else {
-                setMangaDefaultChapterFlags.await(manga)
-                addTracks.bindEnhancedTrackers(manga, source)
-            }
-
-            updateManga.await(new.toMangaUpdate())
-        }
-    }
-
-    fun addFavorite(manga: Manga) {
-        screenModelScope.launch {
-            val categories = getCategories()
-            val defaultCategoryId = libraryPreferences.defaultCategory.get()
-            val defaultCategory = categories.find { it.id == defaultCategoryId.toLong() }
-
-            when {
-                // Default category set
-                defaultCategory != null -> {
-                    moveMangaToCategories(manga, defaultCategory)
-
-                    changeMangaFavorite(manga)
-                }
-
-                // Automatic 'Default' or no categories
-                defaultCategoryId == 0 || categories.isEmpty() -> {
-                    moveMangaToCategories(manga)
-
-                    changeMangaFavorite(manga)
-                }
-
-                // Choose a category
-                else -> {
-                    val preselectedIds = getCategories.await(manga.id).map { it.id }
-                    setDialog(
-                        Dialog.ChangeMangaCategory(
-                            manga,
-                            categories.mapAsCheckboxState { it.id in preselectedIds },
-                        ),
-                    )
-                }
-            }
-        }
-    }
-
     // SY -->
     open fun createSourcePagingSource(query: String, filters: FilterList): SourcePagingSource =
         getRemoteManga(sourceId, query, filters)
     // SY <--
 
-    /**
-     * Get user categories.
-     *
-     * @return List of categories, not including the default category
-     */
-    suspend fun getCategories(): List<Category> {
-        return getCategories.subscribe()
-            .firstOrNull()
-            ?.filterNot { it.isSystemCategory }
-            .orEmpty()
-    }
-
-    suspend fun getDuplicateLibraryManga(manga: Manga): List<MangaWithChapterCount> =
-        getDuplicateLibraryManga.invoke(manga)
-
-    private fun moveMangaToCategories(manga: Manga, vararg categories: Category) {
-        moveMangaToCategories(manga, categories.filter { it.id != 0L }.map { it.id })
-    }
-
-    fun moveMangaToCategories(manga: Manga, categoryIds: List<Long>) {
-        screenModelScope.launchIO {
-            setMangaCategories.await(
-                mangaId = manga.id,
-                categoryIds = categoryIds.toList(),
-            )
-        }
+    /** Applies [func] to the state; the extension files reach the protected flow through it. */
+    internal fun updateState(func: (State) -> State) {
+        mutableState.update(func)
     }
 
     fun openFilterSheet() {
@@ -454,84 +277,5 @@ internal open class BrowseSourceScreenModel(
         val isUserQuery get() = listing is Listing.Search && !listing.query.isNullOrEmpty()
     }
 
-    // EXH -->
-    fun onSaveSearch() {
-        screenModelScope.launchIO {
-            val names = state.value.savedSearches.map { it.name }
-            mutableState.update { it.copy(dialog = Dialog.CreateSavedSearch(names)) }
-        }
-    }
-
-    fun onSavedSearch(
-        search: EXHSavedSearch,
-        onToast: (StringResource) -> Unit,
-    ) {
-        screenModelScope.launchIO {
-            if (search.filterList == null && state.value.filters.isNotEmpty()) {
-                withUIContext {
-                    onToast(SYMR.strings.save_search_invalid)
-                }
-                return@launchIO
-            }
-
-            val allDefault = search.filterList != null && search.filterList == source.getFilterList()
-            setDialog(null)
-
-            val filters = search.filterList
-                ?.takeUnless { allDefault }
-                ?: source.getFilterList()
-
-            mutableState.update {
-                it.copy(
-                    listing = Listing.Search(
-                        query = search.query,
-                        filters = filters,
-                    ),
-                    filters = filters,
-                    toolbarQuery = search.query,
-                )
-            }
-        }
-    }
-
-    fun onSavedSearchPress(search: EXHSavedSearch) {
-        mutableState.update { it.copy(dialog = Dialog.DeleteSavedSearch(search.id, search.name)) }
-    }
-
-    fun saveSearch(
-        name: String,
-    ) {
-        screenModelScope.launchNonCancellable {
-            val query = state.value.toolbarQuery?.takeUnless {
-                it.isBlank() || it == GetRemoteManga.QUERY_POPULAR || it == GetRemoteManga.QUERY_LATEST
-            }?.trim()
-            val filterList = state.value.filters.ifEmpty { source.getFilterList() }
-            insertSavedSearch.await(
-                SavedSearch(
-                    id = -1,
-                    source = source.id,
-                    name = name.trim(),
-                    query = query,
-                    filtersJson = runCatching {
-                        filterSerializer.serialize(filterList).ifEmpty { null }?.let { Json.encodeToString(it) }
-                    }.getOrNull(),
-                ),
-            )
-        }
-    }
-
-    fun deleteSearch(savedSearchId: Long) {
-        screenModelScope.launchNonCancellable {
-            deleteSavedSearchById.await(savedSearchId)
-        }
-    }
-
-    fun onMangaDexRandom(onRandomFound: (String) -> Unit) {
-        screenModelScope.launchIO {
-            val random = source.getMainSource<MangaDex>()?.fetchRandomMangaUrl()
-                ?: return@launchIO
-            onRandomFound(random)
-        }
-    }
     // EXH <--
 }
