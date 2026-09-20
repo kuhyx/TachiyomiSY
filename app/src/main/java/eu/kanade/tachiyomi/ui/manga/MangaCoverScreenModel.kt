@@ -99,10 +99,7 @@ internal class MangaCoverScreenModel(
             val result = context.imageLoader.execute(req).image?.asDrawable(context.resources)
 
             // Follow-up: Handle animated cover (https://github.com/kuhyx/TachiyomiSY/issues/22)
-            val bitmap = result?.getBitmapOrNull()
-            if (bitmap == null) {
-                null
-            } else {
+            result?.getBitmapOrNull()?.let { bitmap ->
                 imageSaver.save(
                     Image.Cover(
                         bitmap = bitmap,

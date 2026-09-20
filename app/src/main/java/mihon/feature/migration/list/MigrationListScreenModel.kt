@@ -73,10 +73,7 @@ internal class MigrationListScreenModel(
             val manga = mangaIds
                 .map {
                     async {
-                        val manga = getManga.await(it)
-                        if (manga == null) {
-                            null
-                        } else {
+                        getManga.await(it)?.let { manga ->
                             val chapterInfo = getChapterInfo(it)
                             MigratingManga(
                                 manga = manga,
@@ -237,10 +234,7 @@ internal class MigrationListScreenModel(
         migratingManga.searchResult.value = SearchResult.Searching
         screenModelScope.launchIO {
             val result = migratingManga.migrationScope.async {
-                val manga = getManga.await(target)
-                if (manga == null) {
-                    null
-                } else {
+                getManga.await(target)?.let { manga ->
                     try {
                         val source = sourceManager.get(manga.source)!!
                         updateMangaFromRemote(

@@ -83,10 +83,7 @@ internal fun MigrationItemResult(
                     result,
                 ) {
                     value = withIOContext {
-                        val manga = getManga(result)
-                        if (manga == null) {
-                            null
-                        } else {
+                        getManga(result)?.let { manga ->
                             Triple(
                                 manga,
                                 getChapterInfo(result),
