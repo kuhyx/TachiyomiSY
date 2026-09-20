@@ -462,20 +462,6 @@ internal class UpdatesScreenModel(
     ) {
         val selected = items.filter { it.selected }
         val selectionMode = selected.isNotEmpty()
-
-        fun getUiModel(): List<UpdatesUiModel> {
-            return items
-                .map { UpdatesUiModel.Item(it) }
-                .insertSeparators { before, after ->
-                    val beforeDate = before?.item?.update?.dateFetch?.toLocalDate()
-                    val afterDate = after?.item?.update?.dateFetch?.toLocalDate()
-                    if (beforeDate != afterDate && afterDate != null) {
-                        UpdatesUiModel.Header(afterDate)
-                    } else {
-                        null
-                    }
-                }
-        }
     }
 
     sealed interface Dialog {
@@ -505,6 +491,22 @@ internal data class UpdatesItem(
     val selected: Boolean = false,
 ) {
     // SY -->
-    fun isEhBasedUpdate(): Boolean = update.sourceId == EH_SOURCE_ID || update.sourceId == EXH_SOURCE_ID
     // SY <--
+}
+
+internal fun UpdatesItem.isEhBasedUpdate(): Boolean =
+    update.sourceId == EH_SOURCE_ID || update.sourceId == EXH_SOURCE_ID
+
+internal fun UpdatesScreenModel.State.getUiModel(): List<UpdatesUiModel> {
+    return items
+        .map { UpdatesUiModel.Item(it) }
+        .insertSeparators { before, after ->
+            val beforeDate = before?.item?.update?.dateFetch?.toLocalDate()
+            val afterDate = after?.item?.update?.dateFetch?.toLocalDate()
+            if (beforeDate != afterDate && afterDate != null) {
+                UpdatesUiModel.Header(afterDate)
+            } else {
+                null
+            }
+        }
 }

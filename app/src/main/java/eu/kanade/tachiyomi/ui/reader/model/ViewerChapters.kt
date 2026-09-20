@@ -4,17 +4,16 @@ internal data class ViewerChapters(
     val currChapter: ReaderChapter,
     val prevChapter: ReaderChapter?,
     val nextChapter: ReaderChapter?,
-) {
+)
 
-    fun ref() {
-        currChapter.ref()
-        prevChapter?.ref()
-        nextChapter?.ref()
-    }
+internal fun ViewerChapters.ref() {
+    currChapter.ref()
+    prevChapter?.ref()
+    nextChapter?.ref()
+}
 
-    fun unref() {
-        currChapter.unref()
-        prevChapter?.unref()
-        nextChapter?.unref()
-    }
+internal fun ViewerChapters.unref() {
+    currChapter.unref()
+    prevChapter?.unref()
+    nextChapter?.unref()
 }

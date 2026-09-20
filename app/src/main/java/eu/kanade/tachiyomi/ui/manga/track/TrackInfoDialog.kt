@@ -205,19 +205,6 @@ internal data class TrackInfoDialogHomeScreen(
     }
 
     // Opens registered tracker url in browser.
-    private fun openTrackerInBrowser(context: Context, trackItem: TrackItem) {
-        val url = trackItem.track?.remoteUrl ?: return
-        if (url.isNotBlank()) {
-            context.openInBrowser(url)
-        }
-    }
-
-    private fun Context.copyTrackerLink(trackItem: TrackItem) {
-        val url = trackItem.track?.remoteUrl ?: return
-        if (url.isNotBlank()) {
-            copyToClipboard(url, url)
-        }
-    }
 
     private class Model(
         private val mangaId: Long,
@@ -379,6 +366,20 @@ internal data class TrackInfoDialogHomeScreen(
             val isLoading: Boolean = false,
             // SY <--
         )
+    }
+}
+
+private fun TrackInfoDialogHomeScreen.openTrackerInBrowser(context: Context, trackItem: TrackItem) {
+    val url = trackItem.track?.remoteUrl ?: return
+    if (url.isNotBlank()) {
+        context.openInBrowser(url)
+    }
+}
+
+private fun Context.copyTrackerLink(trackItem: TrackItem) {
+    val url = trackItem.track?.remoteUrl ?: return
+    if (url.isNotBlank()) {
+        copyToClipboard(url, url)
     }
 }
 

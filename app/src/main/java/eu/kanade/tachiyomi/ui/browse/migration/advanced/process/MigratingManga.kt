@@ -34,19 +34,19 @@ internal class MigratingManga(
     data class ChapterInfo(
         val latestChapter: Double?,
         val chapterCount: Int,
-    ) {
-        fun getFormattedLatestChapter(context: Context): String {
-            return if (latestChapter != null && latestChapter > 0.0) {
-                context.stringResource(
-                    SYMR.strings.latest_,
-                    DecimalFormat("#.#").format(latestChapter),
-                )
-            } else {
-                context.stringResource(
-                    SYMR.strings.latest_,
-                    context.stringResource(MR.strings.unknown),
-                )
-            }
-        }
+    )
+}
+
+internal fun MigratingManga.ChapterInfo.getFormattedLatestChapter(context: Context): String {
+    return if (latestChapter != null && latestChapter > 0.0) {
+        context.stringResource(
+            SYMR.strings.latest_,
+            DecimalFormat("#.#").format(latestChapter),
+        )
+    } else {
+        context.stringResource(
+            SYMR.strings.latest_,
+            context.stringResource(MR.strings.unknown),
+        )
     }
 }

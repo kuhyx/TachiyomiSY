@@ -37,14 +37,7 @@ internal abstract class ViewerNavigation {
     data class Region(
         val rectF: RectF,
         val type: NavigationRegion,
-    ) {
-        fun invert(invertMode: ReaderPreferences.TappingInvertMode): Region {
-            if (invertMode == ReaderPreferences.TappingInvertMode.NONE) return this
-            return this.copy(
-                rectF = this.rectF.invert(invertMode),
-            )
-        }
-    }
+    )
 
     private var constantMenuRegion: RectF = RectF(0f, 0f, 1f, MENU_REGION_HEIGHT)
 
@@ -65,4 +58,11 @@ internal abstract class ViewerNavigation {
             else -> NavigationRegion.MENU
         }
     }
+}
+
+internal fun ViewerNavigation.Region.invert(invertMode: ReaderPreferences.TappingInvertMode): ViewerNavigation.Region {
+    if (invertMode == ReaderPreferences.TappingInvertMode.NONE) return this
+    return this.copy(
+        rectF = this.rectF.invert(invertMode),
+    )
 }

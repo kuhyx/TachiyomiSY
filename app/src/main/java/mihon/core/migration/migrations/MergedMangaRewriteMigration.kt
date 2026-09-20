@@ -196,12 +196,12 @@ internal class MergedMangaRewriteMigration : Migration {
         val source: Long,
         @SerialName("u")
         val url: String,
-    ) {
-        suspend fun load(getManga: GetManga, sourceManager: SourceManager): LoadedMangaSource? {
-            val manga = getManga.await(url, source) ?: return null
-            val source = sourceManager.getOrStub(source)
-            return LoadedMangaSource(source, manga)
-        }
+    )
+
+    private suspend fun MangaSource.load(getManga: GetManga, sourceManager: SourceManager): LoadedMangaSource? {
+        val manga = getManga.await(url, source) ?: return null
+        val source = sourceManager.getOrStub(source)
+        return LoadedMangaSource(source, manga)
     }
 
     private fun readUrlConfig(url: String): UrlConfig? {

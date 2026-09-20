@@ -386,11 +386,8 @@ internal data class BrowseSourceScreen(
         }
     }
 
-    suspend fun search(query: String) = queryEvent.send(SearchType.Text(query))
-    suspend fun searchGenre(name: String) = queryEvent.send(SearchType.Genre(name))
-
     companion object {
-        private val queryEvent = Channel<SearchType>()
+        internal val queryEvent = Channel<SearchType>()
     }
 
     sealed class SearchType(val txt: String) {
@@ -398,3 +395,9 @@ internal data class BrowseSourceScreen(
         class Genre(txt: String) : SearchType(txt)
     }
 }
+
+internal suspend fun BrowseSourceScreen.search(query: String) =
+    BrowseSourceScreen.queryEvent.send(BrowseSourceScreen.SearchType.Text(query))
+
+internal suspend fun BrowseSourceScreen.searchGenre(name: String) =
+    BrowseSourceScreen.queryEvent.send(BrowseSourceScreen.SearchType.Genre(name))

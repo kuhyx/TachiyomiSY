@@ -122,43 +122,43 @@ internal data class MigrateMangaScreen(
             }
         }
     }
+}
 
-    @Composable
-    private fun MigrateMangaContent(
-        lazyListState: LazyListState,
-        contentPadding: PaddingValues,
-        state: MigrateMangaScreenModel.State,
-        onClickItem: (Manga) -> Unit,
-        onClickCover: (Manga) -> Unit,
+@Composable
+private fun MigrateMangaScreen.MigrateMangaContent(
+    lazyListState: LazyListState,
+    contentPadding: PaddingValues,
+    state: MigrateMangaScreenModel.State,
+    onClickItem: (Manga) -> Unit,
+    onClickCover: (Manga) -> Unit,
+) {
+    FastScrollLazyColumn(
+        state = lazyListState,
+        contentPadding = contentPadding,
     ) {
-        FastScrollLazyColumn(
-            state = lazyListState,
-            contentPadding = contentPadding,
-        ) {
-            items(state.titles) { manga ->
-                MigrateMangaItem(
-                    manga = manga,
-                    isSelected = manga.id in state.selection,
-                    onClickItem = onClickItem,
-                    onClickCover = onClickCover,
-                )
-            }
+        items(state.titles) { manga ->
+            MigrateMangaItem(
+                manga = manga,
+                isSelected = manga.id in state.selection,
+                onClickItem = onClickItem,
+                onClickCover = onClickCover,
+            )
         }
     }
+}
 
-    @Composable
-    private fun MigrateMangaItem(
-        manga: Manga,
-        isSelected: Boolean,
-        onClickItem: (Manga) -> Unit,
-        onClickCover: (Manga) -> Unit,
-        modifier: Modifier = Modifier,
-    ) {
-        BaseMangaListItem(
-            modifier = modifier.selectedBackground(isSelected),
-            manga = manga,
-            onClickItem = { onClickItem(manga) },
-            onClickCover = { onClickCover(manga) },
-        )
-    }
+@Composable
+private fun MigrateMangaScreen.MigrateMangaItem(
+    manga: Manga,
+    isSelected: Boolean,
+    onClickItem: (Manga) -> Unit,
+    onClickCover: (Manga) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BaseMangaListItem(
+        modifier = modifier.selectedBackground(isSelected),
+        manga = manga,
+        onClickItem = { onClickItem(manga) },
+        onClickCover = { onClickCover(manga) },
+    )
 }

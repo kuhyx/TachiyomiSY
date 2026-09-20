@@ -22,30 +22,31 @@ internal data class ReaderChapter(val chapter: Chapter) {
 
     var requestedPage: Int = 0
 
-    private var references = 0
+    // How many viewers hold the chapter; recycled when the last one lets go.
+    internal var references = 0
 
     constructor(chapter: tachiyomi.domain.chapter.model.Chapter) : this(chapter.toDbChapter())
-
-    fun ref() {
-        references++
-    }
-
-    fun unref() {
-        references--
-        if (references == 0) {
-            if (pageLoader != null) {
-                logcat { "Recycling chapter ${chapter.name}" }
-            }
-            pageLoader?.recycle()
-            pageLoader = null
-            state = State.Wait
-        }
-    }
 
     sealed interface State {
         data object Wait : State
         data object Loading : State
         data class Error(val error: Throwable) : State
         data class Loaded(val pages: List<ReaderPage>) : State
+    }
+}
+
+internal fun ReaderChapter.ref() {
+    references++
+}
+
+internal fun ReaderChapter.unref() {
+    references--
+    if (references == 0) {
+        if (pageLoader != null) {
+            logcat { "Recycling chapter ${chapter.name}" }
+        }
+        pageLoader?.recycle()
+        pageLoader = null
+        state = ReaderChapter.State.Wait
     }
 }

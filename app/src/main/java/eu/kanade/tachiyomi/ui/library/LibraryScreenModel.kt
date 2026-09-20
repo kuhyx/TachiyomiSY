@@ -795,7 +795,7 @@ internal class LibraryScreenModel(
         val dialog: Dialog? = null,
         val libraryData: LibraryData = LibraryData(),
         private val activeCategoryIndex: Int = 0,
-        private val groupedFavorites: Map<Category, List</* LibraryItem */ Long>> = emptyMap(),
+        internal val groupedFavorites: Map<Category, List</* LibraryItem */ Long>> = emptyMap(),
         // SY -->
         val showSyncExh: Boolean = false,
         val isSyncEnabled: Boolean = false,
@@ -841,36 +841,36 @@ internal class LibraryScreenModel(
             }
         }
         // SY <--
-
-        fun getItemsForCategoryId(categoryId: Long?): List<LibraryItem> {
-            if (categoryId == null) return emptyList()
-            val category = displayedCategories.find { it.id == categoryId } ?: return emptyList()
-            return getItemsForCategory(category)
-        }
-
-        fun getItemsForCategory(category: Category): List<LibraryItem> =
-            groupedFavorites[category].orEmpty().mapNotNull { libraryData.favoritesById[it] }
-
-        fun getItemCountForCategory(category: Category): Int? =
-            if (showMangaCount || !searchQuery.isNullOrEmpty()) groupedFavorites[category]?.size else null
-
-        fun getToolbarTitle(
-            defaultTitle: String,
-            defaultCategoryTitle: String,
-            page: Int,
-        ): LibraryToolbarTitle {
-            val category = displayedCategories.getOrNull(page) ?: return LibraryToolbarTitle(defaultTitle)
-            val categoryName = category.let {
-                if (it.isSystemCategory) defaultCategoryTitle else it.name
-            }
-            val title = if (showCategoryTabs) defaultTitle else categoryName
-            val count = when {
-                !showMangaCount -> null
-                !showCategoryTabs -> getItemCountForCategory(category)
-                // Whole library count
-                else -> libraryData.favorites.size
-            }
-            return LibraryToolbarTitle(title, count)
-        }
     }
+}
+
+internal fun LibraryScreenModel.State.getItemsForCategoryId(categoryId: Long?): List<LibraryItem> {
+    if (categoryId == null) return emptyList()
+    val category = displayedCategories.find { it.id == categoryId } ?: return emptyList()
+    return getItemsForCategory(category)
+}
+
+internal fun LibraryScreenModel.State.getItemsForCategory(category: Category): List<LibraryItem> =
+    groupedFavorites[category].orEmpty().mapNotNull { libraryData.favoritesById[it] }
+
+internal fun LibraryScreenModel.State.getItemCountForCategory(category: Category): Int? =
+    if (showMangaCount || !searchQuery.isNullOrEmpty()) groupedFavorites[category]?.size else null
+
+internal fun LibraryScreenModel.State.getToolbarTitle(
+    defaultTitle: String,
+    defaultCategoryTitle: String,
+    page: Int,
+): LibraryToolbarTitle {
+    val category = displayedCategories.getOrNull(page) ?: return LibraryToolbarTitle(defaultTitle)
+    val categoryName = category.let {
+        if (it.isSystemCategory) defaultCategoryTitle else it.name
+    }
+    val title = if (showCategoryTabs) defaultTitle else categoryName
+    val count = when {
+        !showMangaCount -> null
+        !showCategoryTabs -> getItemCountForCategory(category)
+        // Whole library count
+        else -> libraryData.favorites.size
+    }
+    return LibraryToolbarTitle(title, count)
 }
