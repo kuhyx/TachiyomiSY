@@ -34,7 +34,8 @@ internal class AzukiHandler(currentClient: OkHttpClient, userAgent: String) {
             .jsonObject["pages"]!!
             .jsonArray
             .mapIndexed { index, element ->
-                val url = element.jsonObject["image_wm"]!!.jsonObject["webp"]!!.jsonArray[1].jsonObject["url"]!!.jsonPrimitive.content
+                val webp = element.jsonObject["image_wm"]!!.jsonObject["webp"]!!.jsonArray
+                val url = webp[1].jsonObject["url"]!!.jsonPrimitive.content
                 Page(index, url, url)
             }
     }

@@ -19,12 +19,9 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.IOException
 
-/**
- * This class is used to provide the directories where the downloads should be saved.
- * It uses the following path scheme: /<root downloads dir>/<source name>/<manga>/<chapter>
- *
- * @param context the application context.
- */
+// This class is used to provide the directories where the downloads should be saved.
+// It uses the following path scheme: /<root downloads dir>/<source name>/<manga>/<chapter>
+// @param context the application context.
 // The name leaves room for "_" + a 6-character URL hash and the ".cbz" extension.
 private const val URL_HASH_CHARS = 6
 private const val RESERVED_NAME_BYTES = 1 + URL_HASH_CHARS + 4
@@ -200,7 +197,12 @@ internal class DownloadProvider(
         if (!chapterScanlator.isNullOrBlank()) {
             dirName = chapterScanlator + "_" + dirName
         }
-        dirName = DiskUtil.buildValidFilename(dirName, DiskUtil.MAX_FILE_NAME_BYTES - RESERVED_NAME_BYTES, disallowNonAsciiFilenames)
+        dirName =
+            DiskUtil.buildValidFilename(
+                dirName,
+                DiskUtil.MAX_FILE_NAME_BYTES - RESERVED_NAME_BYTES,
+                disallowNonAsciiFilenames,
+            )
         if (includeChapterUrlHash) dirName += "_" + md5(chapterUrl).take(URL_HASH_CHARS)
         return dirName
     }

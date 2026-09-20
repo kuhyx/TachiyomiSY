@@ -38,7 +38,8 @@ internal fun MangaDexDescription(state: State.Success, openMetadataViewer: () ->
             binding.ratingBar.rating = ratingFloat?.div(2F) ?: 0F
             @SuppressLint("SetTextI18n")
             binding.rating.text =
-                (round((ratingFloat ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " + getRatingString(context, ratingFloat)
+                (round((ratingFloat ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " +
+                getRatingString(context, ratingFloat)
             binding.rating.isVisible = ratingFloat != null
             binding.ratingBar.isVisible = ratingFloat != null
 

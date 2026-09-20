@@ -16,7 +16,13 @@ import uy.kohesive.injekt.api.get
 
 private const val DISABLED_ALPHA = 0.5F
 
-internal class EditMergedMangaHolder(view: View, val adapter: EditMergedMangaAdapter) : FlexibleViewHolder(view, adapter) {
+internal class EditMergedMangaHolder(
+    view: View,
+    val adapter: EditMergedMangaAdapter,
+) : FlexibleViewHolder(
+    view,
+    adapter,
+) {
 
     lateinit var reference: MergedMangaReference
     var binding = EditMergedSettingsItemBinding.bind(view)

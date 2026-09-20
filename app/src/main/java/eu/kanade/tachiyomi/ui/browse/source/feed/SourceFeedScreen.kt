@@ -155,7 +155,13 @@ internal class SourceFeedScreen(val sourceId: Long) : Screen() {
         navigator.push(MangaScreen(manga.id, true))
     }
 
-    fun onBrowseClick(navigator: Navigator, sourceId: Long, search: String? = null, savedSearch: Long? = null, filters: String? = null) {
+    fun onBrowseClick(
+        navigator: Navigator,
+        sourceId: Long,
+        search: String? = null,
+        savedSearch: Long? = null,
+        filters: String? = null,
+    ) {
         navigator.replace(BrowseSourceScreen(sourceId, search, savedSearch = savedSearch, filtersJson = filters))
     }
 

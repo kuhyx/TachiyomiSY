@@ -113,7 +113,7 @@ internal class EHConfigurator(val context: Context) {
 
         // No profile slots left :(
         if (availableProfiles.isEmpty()) {
-            throw IllegalStateException(context.stringResource(SYMR.strings.eh_settings_out_of_slots_error, source.name))
+            error(context.stringResource(SYMR.strings.eh_settings_out_of_slots_error, source.name))
         }
         // Create profile in available slot
 

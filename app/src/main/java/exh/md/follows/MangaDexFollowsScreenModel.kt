@@ -16,7 +16,9 @@ internal class MangaDexFollowsScreenModel(sourceId: Long) : BrowseSourceScreenMo
     override fun createSourcePagingSource(query: String, filters: FilterList): BaseSourcePagingSource =
         MangaDexFollowsPagingSource(source.getMainSource() as MangaDex)
 
-    override fun Flow<Manga>.combineMetadata(metadata: RaisedSearchMetadata?): Flow<Pair<Manga, RaisedSearchMetadata?>> =
+    override fun Flow<Manga>.combineMetadata(
+        metadata: RaisedSearchMetadata?,
+    ): Flow<Pair<Manga, RaisedSearchMetadata?>> =
         map { it to metadata }
 
     init {

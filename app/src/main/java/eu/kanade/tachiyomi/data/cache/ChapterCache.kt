@@ -23,14 +23,11 @@ import tachiyomi.domain.chapter.model.Chapter
 import java.io.File
 import java.io.IOException
 
-/**
- * Class used to create chapter cache
- * For each image in a chapter a file is created
- * For each chapter a Json list is created and converted to a file.
- * The files are in format *md5key*.0
- *
- * @param context the application context.
- */
+// Class used to create chapter cache
+// For each image in a chapter a file is created
+// For each chapter a Json list is created and converted to a file.
+// The files are in format *md5key*.0
+// @param context the application context.
 private const val BYTES_PER_MEBIBYTE = 1024L * 1024L
 
 internal class ChapterCache(

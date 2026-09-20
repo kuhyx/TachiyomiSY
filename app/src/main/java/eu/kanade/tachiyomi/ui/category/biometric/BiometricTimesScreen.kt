@@ -86,7 +86,8 @@ internal class BiometricTimesScreen : Screen() {
                     onDismissRequest = screenModel::dismissDialog,
                     onDelete = { screenModel.deleteTimeRanges(dialog.timeRange) },
                     title = stringResource(SYMR.strings.delete_time_range),
-                    text = stringResource(SYMR.strings.delete_time_range_confirmation, dialog.timeRange.formattedString),
+                    text =
+                    stringResource(SYMR.strings.delete_time_range_confirmation, dialog.timeRange.formattedString),
                 )
             }
         }

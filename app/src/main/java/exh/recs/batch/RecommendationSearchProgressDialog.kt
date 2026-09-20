@@ -61,7 +61,11 @@ internal fun RecommendationSearchProgressDialog(
             is SearchStatus.Processing -> {
                 RecommendationSearchProgressProperties(
                     title = context.stringResource(SYMR.strings.rec_collecting),
-                    text = context.stringResource(SYMR.strings.rec_processing_state, status.current, status.total) + "\n\n" + status.manga.title,
+                    text = context.stringResource(
+                        SYMR.strings.rec_processing_state,
+                        status.current,
+                        status.total,
+                    ) + "\n\n" + status.manga.title,
                     negativeButtonText = context.stringResource(MR.strings.action_cancel),
                     negativeButton = setStatusCancelling,
                 )

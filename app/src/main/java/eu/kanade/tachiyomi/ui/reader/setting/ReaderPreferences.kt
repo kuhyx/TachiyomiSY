@@ -24,9 +24,11 @@ internal class ReaderPreferences(
     // region General
 
     // SY -->
-    val pageTransitionsPager: Preference<Boolean> = preferenceStore.getBoolean("pref_enable_transitions_pager_key", true)
+    val pageTransitionsPager: Preference<Boolean> =
+        preferenceStore.getBoolean("pref_enable_transitions_pager_key", true)
 
-    val pageTransitionsWebtoon: Preference<Boolean> = preferenceStore.getBoolean("pref_enable_transitions_webtoon_key", true)
+    val pageTransitionsWebtoon: Preference<Boolean> =
+        preferenceStore.getBoolean("pref_enable_transitions_webtoon_key", true)
     // SY <--
 
     val flashOnPageChange: Preference<Boolean> = preferenceStore.getBoolean("pref_reader_flash", false)
@@ -37,7 +39,8 @@ internal class ReaderPreferences(
 
     val flashColor: Preference<FlashColor> = preferenceStore.getEnum("pref_reader_flash_mode", FlashColor.BLACK)
 
-    val doubleTapAnimSpeed: Preference<Int> = preferenceStore.getInt("pref_double_tap_anim_speed", DEFAULT_DOUBLE_TAP_ANIM_MS)
+    val doubleTapAnimSpeed: Preference<Int> =
+        preferenceStore.getInt("pref_double_tap_anim_speed", DEFAULT_DOUBLE_TAP_ANIM_MS)
 
     val showPageNumber: Preference<Boolean> = preferenceStore.getBoolean("pref_show_page_number_key", true)
 
@@ -211,7 +214,8 @@ internal class ReaderPreferences(
 
     val cacheSize: Preference<String> = preferenceStore.getString("eh_cache_size", "75")
 
-    val autoscrollInterval: Preference<Float> = preferenceStore.getFloat("eh_util_autoscroll_interval", DEFAULT_AUTOSCROLL_SECONDS)
+    val autoscrollInterval: Preference<Float> =
+        preferenceStore.getFloat("eh_util_autoscroll_interval", DEFAULT_AUTOSCROLL_SECONDS)
 
     val smoothAutoScroll: Preference<Boolean> = preferenceStore.getBoolean("smooth_auto_scroll", true)
 
@@ -221,19 +225,24 @@ internal class ReaderPreferences(
 
     val useAutoWebtoon: Preference<Boolean> = preferenceStore.getBoolean("eh_use_auto_webtoon", true)
 
-    val continuousVerticalTappingByPage: Preference<Boolean> = preferenceStore.getBoolean("continuous_vertical_tapping_by_page", false)
+    val continuousVerticalTappingByPage: Preference<Boolean> =
+        preferenceStore.getBoolean("continuous_vertical_tapping_by_page", false)
 
-    val cropBordersContinuousVertical: Preference<Boolean> = preferenceStore.getBoolean("crop_borders_continues_vertical", false)
+    val cropBordersContinuousVertical: Preference<Boolean> =
+        preferenceStore.getBoolean("crop_borders_continues_vertical", false)
 
-    val readerBottomButtons: Preference<Set<String>> = preferenceStore.getStringSet("reader_bottom_buttons", ReaderBottomButton.BUTTONS_DEFAULTS)
+    val readerBottomButtons: Preference<Set<String>> =
+        preferenceStore.getStringSet("reader_bottom_buttons", ReaderBottomButton.BUTTONS_DEFAULTS)
 
     val pageLayout: Preference<Int> = preferenceStore.getInt("page_layout", PagerConfig.PageLayout.AUTOMATIC)
 
     val invertDoublePages: Preference<Boolean> = preferenceStore.getBoolean("invert_double_pages", false)
 
-    val centerMarginType: Preference<Int> = preferenceStore.getInt("center_margin_type", PagerConfig.CenterMarginType.NONE)
+    val centerMarginType: Preference<Int> =
+        preferenceStore.getInt("center_margin_type", PagerConfig.CenterMarginType.NONE)
 
-    val archiveReaderMode: Preference<Int> = preferenceStore.getInt("archive_reader_mode", ArchiveReaderMode.LOAD_FROM_FILE)
+    val archiveReaderMode: Preference<Int> =
+        preferenceStore.getInt("archive_reader_mode", ArchiveReaderMode.LOAD_FROM_FILE)
     // SY <--
 
     enum class FlashColor {

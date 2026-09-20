@@ -26,14 +26,10 @@ import java.io.FileNotFoundException
 import java.nio.ByteBuffer
 import kotlin.concurrent.thread
 
-/**
- * In memory Int -> Obj lookup table implementation that
- * automatically persists itself to disk atomically and asynchronously.
- *
- * Thread safe
- *
- * @author nulldev
- */
+// In memory Int -> Obj lookup table implementation that
+// automatically persists itself to disk atomically and asynchronously.
+// Thread safe
+// @author nulldev
 // Each entry starts with two ints: the key, then the payload size.
 private const val ENTRY_HEADER_BYTES = 8
 private const val SIZE_OFFSET = 4
@@ -44,8 +40,10 @@ internal class MemAutoFlushingLookupTable<T>(
     private val debounceTimeMs: Long = 3000,
 ) : CoroutineScope by CoroutineScope(Dispatchers.IO + SupervisorJob()), Closeable {
     // The context of this scope.
-    // Context is encapsulated by the scope and used for implementation of coroutine builders that are extensions on the scope.
-    // Accessing this property in general code is not recommended for any purposes except accessing [Job] instance for advanced usages.
+    // Context is encapsulated by the scope and used for implementation of coroutine builders that are extensions on the
+    // scope.
+    // Accessing this property in general code is not recommended for any purposes except accessing [Job] instance for
+    // advanced usages.
     // By convention, should contain an instance of a [job][Job] to enforce structured concurrency.
 
     private val table = SparseArray<T>(INITIAL_SIZE)
@@ -169,7 +167,8 @@ internal class MemAutoFlushingLookupTable<T>(
      *  Cases where the close operation may fail require careful
      * attention by implementers. It is strongly advised to relinquish
      * the underlying resources and to internally *mark* the
-     * resource as closed, prior to throwing the exception. The `close` method is unlikely to be invoked more than once and so
+     * resource as closed, prior to throwing the exception. The `close` method is unlikely to be invoked more than once
+     * and so
      * this ensures that the resources are released in a timely manner.
      * Furthermore it reduces problems that could arise when the resource
      * wraps, or is wrapped, by another resource.
@@ -179,7 +178,8 @@ internal class MemAutoFlushingLookupTable<T>(
      * to not have the `close` method throw [ ].*
      *
      * This exception interacts with a thread's interrupted status,
-     * and runtime misbehavior is likely to occur if an `InterruptedException` is [ suppressed][Throwable.addSuppressed].
+     * and runtime misbehavior is likely to occur if an `InterruptedException` is [
+     * suppressed][Throwable.addSuppressed].
      *
      * More generally, if it would cause problems for an
      * exception to be suppressed, the `AutoCloseable.close`

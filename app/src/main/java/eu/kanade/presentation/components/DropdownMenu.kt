@@ -25,10 +25,8 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import androidx.compose.material3.DropdownMenu as ComposeDropdownMenu
 
-/**
- * DropdownMenu but overlaps anchor and has width constraints to better
- * match non-Compose implementation.
- */
+// DropdownMenu but overlaps anchor and has width constraints to better
+// match non-Compose implementation.
 // Lift the dropdown over the icon button that opened it.
 private const val MENU_ANCHOR_HEIGHT = 56
 

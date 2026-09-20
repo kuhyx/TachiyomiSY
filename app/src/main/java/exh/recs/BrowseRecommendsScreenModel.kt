@@ -38,7 +38,9 @@ internal class BrowseRecommendsScreenModel(
 
     override fun createSourcePagingSource(query: String, filters: FilterList) = recommendationSource
 
-    override fun Flow<Manga>.combineMetadata(metadata: RaisedSearchMetadata?): Flow<Pair<Manga, RaisedSearchMetadata?>> {
+    override fun Flow<Manga>.combineMetadata(
+        metadata: RaisedSearchMetadata?,
+    ): Flow<Pair<Manga, RaisedSearchMetadata?>> {
         // Overridden to prevent our custom metadata from being replaced from a cache
         return flatMapLatest { manga -> flowOf(manga to metadata) }
     }

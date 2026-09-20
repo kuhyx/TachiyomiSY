@@ -82,7 +82,12 @@ internal class AppModule(val app: Application) : InjektModule {
                         schema = Database.Schema.synchronous(),
                         context = app,
                         name = CbzCrypto.DATABASE_NAME,
-                        factory = SupportOpenHelperFactory(CbzCrypto.getDecryptedPasswordSql(), null, false, SQLCIPHER_MIN_PASSWORD_LENGTH),
+                        factory = SupportOpenHelperFactory(
+                            CbzCrypto.getDecryptedPasswordSql(),
+                            null,
+                            false,
+                            SQLCIPHER_MIN_PASSWORD_LENGTH,
+                        ),
                         callback = object : AndroidSqliteDriver.Callback(Database.Schema.synchronous()) {
                             override fun onOpen(db: SupportSQLiteDatabase) {
                                 super.onOpen(db)

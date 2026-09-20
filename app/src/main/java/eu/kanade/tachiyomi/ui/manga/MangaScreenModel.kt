@@ -276,7 +276,8 @@ internal class MangaScreenModel(
                         // Find chapters sharing same root
                         launchIO {
                             try {
-                                val (acceptedChain) = updateHelper.findAcceptedRootAndDiscardOthers(manga.source, chapters)
+                                val (acceptedChain) =
+                                    updateHelper.findAcceptedRootAndDiscardOthers(manga.source, chapters)
                                 // Redirect if we are not the accepted root
                                 if (manga.id != acceptedChain.manga.id && acceptedChain.manga.favorite) {
                                     // Update if any of our chapters are not in accepted manga's chapters

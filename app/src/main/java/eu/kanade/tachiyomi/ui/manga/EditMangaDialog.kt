@@ -60,7 +60,7 @@ import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/** Spinner positions of the status picker; the first entry is "default" (keep the source's status). */
+// Spinner positions of the status picker; the first entry is "default" (keep the source's status).
 private val STATUS_OPTIONS = listOf(
     null,
     SManga.ONGOING,
@@ -140,7 +140,16 @@ internal fun EditMangaDialog(
                         EditMangaDialogBinding.inflate(LayoutInflater.from(factoryContext))
                             .also { binding = it }
                             .apply {
-                                onViewCreated(manga, factoryContext, this, scope, getTracks, trackerManager, tracks, showTrackerSelectionDialogue)
+                                onViewCreated(
+                                    manga,
+                                    factoryContext,
+                                    this,
+                                    scope,
+                                    getTracks,
+                                    trackerManager,
+                                    tracks,
+                                    showTrackerSelectionDialogue,
+                                )
                             }
                             .root
                     },
@@ -203,7 +212,16 @@ private fun TrackerSelectDialog(
     )
 }
 
-private fun onViewCreated(manga: Manga, context: Context, binding: EditMangaDialogBinding, scope: CoroutineScope, getTracks: GetTracks, trackerManager: TrackerManager, tracks: MutableState<List<Pair<Track, Tracker>>>, showTrackerSelectionDialogue: MutableState<Boolean>) {
+private fun onViewCreated(
+    manga: Manga,
+    context: Context,
+    binding: EditMangaDialogBinding,
+    scope: CoroutineScope,
+    getTracks: GetTracks,
+    trackerManager: TrackerManager,
+    tracks: MutableState<List<Pair<Track, Tracker>>>,
+    showTrackerSelectionDialogue: MutableState<Boolean>,
+) {
     loadCover(manga, binding)
 
     val statusAdapter: ArrayAdapter<String> = ArrayAdapter(
@@ -267,7 +285,11 @@ private fun onViewCreated(manga: Manga, context: Context, binding: EditMangaDial
         binding.mangaDescription.hint =
             context.stringResource(
                 SYMR.strings.description_hint,
-                manga.ogDescription?.takeIf { it.isNotBlank() }?.replace("\n", " ")?.chop(DESCRIPTION_HINT_LENGTH) ?: "",
+                manga.ogDescription
+                    ?.takeIf { it.isNotBlank() }
+                    ?.replace("\n", " ")
+                    ?.chop(DESCRIPTION_HINT_LENGTH)
+                    ?: "",
             )
         binding.thumbnailUrl.hint =
             context.stringResource(
@@ -293,7 +315,15 @@ private fun onViewCreated(manga: Manga, context: Context, binding: EditMangaDial
     }
 }
 
-private suspend fun getTrackers(manga: Manga, binding: EditMangaDialogBinding, context: Context, getTracks: GetTracks, trackerManager: TrackerManager, tracks: MutableState<List<Pair<Track, Tracker>>>, showTrackerSelectionDialogue: MutableState<Boolean>) {
+private suspend fun getTrackers(
+    manga: Manga,
+    binding: EditMangaDialogBinding,
+    context: Context,
+    getTracks: GetTracks,
+    trackerManager: TrackerManager,
+    tracks: MutableState<List<Pair<Track, Tracker>>>,
+    showTrackerSelectionDialogue: MutableState<Boolean>,
+) {
     tracks.value = getTracks.await(manga.id).mapNotNull { track ->
         track to (trackerManager.get(track.trackerId) ?: return@mapNotNull null)
     }

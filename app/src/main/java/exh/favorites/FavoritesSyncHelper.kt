@@ -110,7 +110,9 @@ internal class FavoritesSyncHelper(val context: Context) {
                 status.value = FavoritesSyncStatus.BadLibraryState
                     .MangaInMultipleCategories(manga.id, manga.title, inCategories.map { it.name })
 
-                logger.w(context.stringResource(SYMR.strings.favorites_sync_gallery_multiple_categories_error, manga.id))
+                logger.w(
+                    context.stringResource(SYMR.strings.favorites_sync_gallery_multiple_categories_error, manga.id),
+                )
                 return
             } else {
                 seenManga += manga.id
@@ -222,7 +224,10 @@ internal class FavoritesSyncHelper(val context: Context) {
         }
     }
 
-    private suspend fun addGalleryRemote(errorList: MutableList<FavoritesSyncStatus.SyncError.GallerySyncError>, gallery: FavoriteEntry) {
+    private suspend fun addGalleryRemote(
+        errorList: MutableList<FavoritesSyncStatus.SyncError.GallerySyncError>,
+        gallery: FavoriteEntry,
+    ) {
         val url = "${exh.baseUrl}/gallerypopups.php?gid=${gallery.gid}&t=${gallery.token}&act=addfav"
 
         val request = POST(
@@ -387,12 +392,14 @@ internal class FavoritesSyncHelper(val context: Context) {
                     is GalleryAddEvent.Fail.Error -> FavoritesSyncStatus.SyncError.GallerySyncError.GalleryAddFail(
                         gallery.title, result.logMessage,
                     )
-                    is GalleryAddEvent.Fail.UnknownType -> FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail(
-                        gallery.title, result.galleryUrl,
-                    )
-                    is GalleryAddEvent.Fail.UnknownSource -> FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail(
-                        gallery.title, result.galleryUrl,
-                    )
+                    is GalleryAddEvent.Fail.UnknownType ->
+                        FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail(
+                            gallery.title, result.galleryUrl,
+                        )
+                    is GalleryAddEvent.Fail.UnknownSource ->
+                        FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail(
+                            gallery.title, result.galleryUrl,
+                        )
                 }
 
                 if (exhPreferences.exhLenientSync.get()) {
@@ -415,7 +422,9 @@ internal class FavoritesSyncHelper(val context: Context) {
     private fun needWarnThrottle() =
         throttleManager.throttleTime >= THROTTLE_WARN
 
-    class IgnoredException(message: FavoritesSyncStatus.SyncError.GallerySyncError) : RuntimeException(message.toString())
+    class IgnoredException(
+        message: FavoritesSyncStatus.SyncError.GallerySyncError,
+    ) : RuntimeException(message.toString())
 
     companion object {
         private val THROTTLE_WARN = 1.seconds

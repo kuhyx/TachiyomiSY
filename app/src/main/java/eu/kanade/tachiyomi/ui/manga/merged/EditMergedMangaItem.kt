@@ -10,7 +10,10 @@ import eu.kanade.tachiyomi.databinding.EditMergedSettingsItemBinding
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MergedMangaReference
 
-internal class EditMergedMangaItem(val mergedManga: Manga?, val mergedMangaReference: MergedMangaReference) : AbstractFlexibleItem<EditMergedMangaHolder>() {
+internal class EditMergedMangaItem(
+    val mergedManga: Manga?,
+    val mergedMangaReference: MergedMangaReference,
+) : AbstractFlexibleItem<EditMergedMangaHolder>() {
 
     override fun getLayoutRes(): Int = R.layout.edit_merged_settings_item
 
@@ -18,7 +21,10 @@ internal class EditMergedMangaItem(val mergedManga: Manga?, val mergedMangaRefer
 
     lateinit var binding: EditMergedSettingsItemBinding
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): EditMergedMangaHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+    ): EditMergedMangaHolder {
         binding = EditMergedSettingsItemBinding.bind(view)
         return EditMergedMangaHolder(binding.root, adapter as EditMergedMangaAdapter)
     }

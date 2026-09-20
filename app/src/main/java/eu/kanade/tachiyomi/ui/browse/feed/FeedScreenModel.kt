@@ -48,9 +48,7 @@ import xyz.nulldev.ts.api.http.serializer.FilterSerializer
 import java.util.concurrent.Executors
 import tachiyomi.domain.manga.model.Manga as DomainManga
 
-/**
- * Presenter of [feedTab].
- */
+// Presenter of [feedTab].
 private const val MAX_FEEDS = 10
 
 internal open class FeedScreenModel(
@@ -185,7 +183,9 @@ internal open class FeedScreenModel(
         }
     }
 
-    private suspend fun getSourcesToGetFeed(feedSavedSearch: List<FeedSavedSearch>): List<Pair<FeedSavedSearch, SavedSearch?>> {
+    private suspend fun getSourcesToGetFeed(
+        feedSavedSearch: List<FeedSavedSearch>,
+    ): List<Pair<FeedSavedSearch, SavedSearch?>> {
         val savedSearches = getSavedSearchGlobalFeed.await()
             .associateBy { it.id }
         return feedSavedSearch

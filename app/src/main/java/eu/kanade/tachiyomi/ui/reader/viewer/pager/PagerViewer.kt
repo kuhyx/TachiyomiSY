@@ -26,9 +26,7 @@ import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.min
 
-/**
- * Implementation of a [Viewer] to display pages with a [ViewPager].
- */
+// Implementation of a [Viewer] to display pages with a [ViewPager].
 private const val PRELOAD_PAGES_BEFORE_END = 5
 
 @Suppress("LeakingThis")

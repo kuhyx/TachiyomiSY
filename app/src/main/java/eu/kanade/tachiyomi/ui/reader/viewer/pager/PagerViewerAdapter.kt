@@ -15,9 +15,7 @@ import kotlinx.coroutines.delay
 import tachiyomi.core.common.util.lang.launchUI
 import tachiyomi.core.common.util.system.logcat
 
-/**
- * Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.
- */
+// Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.
 private const val SPLIT_DELAY_MS = 100L
 
 internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {

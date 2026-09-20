@@ -85,7 +85,8 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
                     "Local device ID: $localDeviceId, Last sync device ID: $lastSyncDeviceId"
                 }
 
-                // check if the last sync was done by the same device if so overwrite the remote data with the local data
+                // check if the last sync was done by the same device if so overwrite the remote data with the local
+                // data
                 return if (lastSyncDeviceId == localDeviceId) {
                     pushSyncData(syncData)
                     syncData.backup

@@ -156,7 +156,13 @@ internal class ExtensionManager(
         return filterNot { (_, extension) ->
             extension.isBlacklisted(blacklistEnabled)
                 .also {
-                    if (it) this@ExtensionManager.xLogD("Removing blacklisted extension: (name: %s, pkgName: %s)!", extension.name, extension.pkgName)
+                    if (it) {
+                        this@ExtensionManager.xLogD(
+                            "Removing blacklisted extension: (name: %s, pkgName: %s)!",
+                            extension.name,
+                            extension.pkgName,
+                        )
+                    }
                 }
         }
     }

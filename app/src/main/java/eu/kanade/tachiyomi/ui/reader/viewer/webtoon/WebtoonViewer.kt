@@ -31,9 +31,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Duration
 
-/**
- * Implementation of a [Viewer] to display pages with a [RecyclerView].
- */
+// Implementation of a [Viewer] to display pages with a [RecyclerView].
 // A side tap scrolls three quarters of the screen; the next chapter preloads five pages before the end.
 private const val SCROLL_DISTANCE_NUMERATOR = 3
 private const val SCROLL_DISTANCE_DENOMINATOR = 4

@@ -390,5 +390,5 @@ internal object SettingsSecurityScreen : SearchableSettings {
 private const val FIVE_MINUTES = 5
 private const val TEN_MINUTES = 10
 
-/** Minutes before the app locks again: 0 is always, -1 never. */
+// Minutes before the app locks again: 0 is always, -1 never.
 private val LockAfterValues = listOf(0, 1, 2, FIVE_MINUTES, TEN_MINUTES, -1)

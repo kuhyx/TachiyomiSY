@@ -216,7 +216,10 @@ internal class ApiMangaParser(
 
     /*private fun isOneShot(chapter: ChapterSerializer, finalChapterNumber: String): Boolean {
         return chapter.title.equals("oneshot", true) ||
-            ((chapter.chapter.isNullOrEmpty() || chapter.chapter == "0") && MdUtil.validOneShotFinalChapters.contains(finalChapterNumber))
+            (
+                (chapter.chapter.isNullOrEmpty() || chapter.chapter == "0") &&
+                    MdUtil.validOneShotFinalChapters.contains(finalChapterNumber)
+                )
     }*/
 
     private fun parseStatus(status: String?) = when (status) {

@@ -63,7 +63,8 @@ internal fun PagePreviewScreen(
                 title = stringResource(SYMR.strings.page_previews),
                 onOpenPageDialog = onOpenPageDialog,
                 showOpenPageDialog = state is PagePreviewState.Success &&
-                    state.pageCount != null && state.pageCount > 1 /* TODO support unknown pageCount || state.hasNextPage*/,
+                    // Unknown page counts (state.hasNextPage) are not paged yet.
+                    state.pageCount != null && state.pageCount > 1,
                 scrollBehavior = scrollBehavior,
             )
         },

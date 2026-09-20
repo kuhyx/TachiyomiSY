@@ -17,15 +17,12 @@ import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.io.IOException
 
-/**
- * Class used to create page preview cache
- * For each page in a page preview list a file is created
- * For each page preview page a Json list is created and converted to a file.
- * The files are in format *md5key*.0
- *
- * @param context the application context.
- * @constructor creates an instance of the page preview cache.
- */
+// Class used to create page preview cache
+// For each page in a page preview list a file is created
+// For each page preview page a Json list is created and converted to a file.
+// The files are in format *md5key*.0
+// @param context the application context.
+// @constructor creates an instance of the page preview cache.
 private const val DEFAULT_CACHE_SIZE_MIB = 75L
 private const val BYTES_PER_MEBIBYTE = 1024L * 1024L
 

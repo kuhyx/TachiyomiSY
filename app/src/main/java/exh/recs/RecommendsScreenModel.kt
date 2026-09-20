@@ -82,7 +82,8 @@ internal open class RecommendsScreenModel(
                                 // If the recommendation is associated with a source, resolve it
                                 networkToLocalManga(it.toDomainManga(recSourceId))
                             } else {
-                                // Otherwise, skip this step. The user will be prompted to choose a source via SmartSearch
+                                // Otherwise, skip this step. The user will be prompted to choose a source via
+                                // SmartSearch
                                 it.toDomainManga(-1)
                             }
                         }

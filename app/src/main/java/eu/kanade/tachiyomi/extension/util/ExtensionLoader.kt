@@ -23,20 +23,15 @@ import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 
-/**
- * Class that handles the loading of the extensions. Supports two kinds of extensions:
- *
- * 1. Shared extension: This extension is installed to the system with package
- * installer, so other variants of Tachiyomi and its forks can also use this extension.
- *
- * 2. Private extension: This extension is put inside private data directory of the
- * running app, so this extension can only be used by the running app and not shared
- * with other apps.
- *
- * When both kinds of extensions are installed with a same package name, shared
- * extension will be used unless the version codes are different. In that case the
- * one with higher version code will be used.
- */
+// Class that handles the loading of the extensions. Supports two kinds of extensions:
+// 1. Shared extension: This extension is installed to the system with package
+// installer, so other variants of Tachiyomi and its forks can also use this extension.
+// 2. Private extension: This extension is put inside private data directory of the
+// running app, so this extension can only be used by the running app and not shared
+// with other apps.
+// When both kinds of extensions are installed with a same package name, shared
+// extension will be used unless the version codes are different. In that case the
+// one with higher version code will be used.
 private const val LIB_VERSION_1_4 = 1.4
 private const val LIB_VERSION_1_6 = 1.6
 
@@ -250,7 +245,8 @@ internal object ExtensionLoader {
             ?: versionName.substringBeforeLast('.').toDoubleOrNull()
         if (libVersion == null || libVersion !in SUPPORTED_LIB_VERSIONS) {
             logcat(LogPriority.WARN) {
-                "Lib version is $libVersion, while only version(s) ${SUPPORTED_LIB_VERSIONS.joinToString()} are supported"
+                "Lib version is $libVersion, while only version(s) " +
+                    "${SUPPORTED_LIB_VERSIONS.joinToString()} are supported"
             }
             return LoadResult.Error
         }

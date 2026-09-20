@@ -29,12 +29,9 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
 
-/**
- * Copies a string to clipboard.
- *
- * @param label Label to show to the user describing the content
- * @param content the actual text to copy to the board
- */
+// Copies a string to clipboard.
+// @param label Label to show to the user describing the content
+// @param content the actual text to copy to the board
 private const val CLIPBOARD_TOAST_CHARS = 50
 private const val THEME_AUTOMATIC = 3
 

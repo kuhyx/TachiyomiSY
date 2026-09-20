@@ -414,7 +414,8 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                                             is NoChaptersException -> context.stringResource(
                                                 MR.strings.no_chapters_error,
                                             )
-                                            // failedUpdates will already have the source, don't need to copy it into the message
+                                            // failedUpdates will already have the source, don't need to copy it into
+                                            // the message
                                             is SourceNotInstalledException -> context.stringResource(
                                                 MR.strings.loader_not_implemented_error,
                                             )

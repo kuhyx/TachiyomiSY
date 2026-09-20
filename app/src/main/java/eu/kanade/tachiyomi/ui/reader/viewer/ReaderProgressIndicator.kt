@@ -17,11 +17,8 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import eu.kanade.presentation.theme.TachiyomiTheme
 import tachiyomi.presentation.core.components.RotatingProgressIndicator
 
-/**
- * A wrapper for [CircularProgressIndicator] that always rotates.
- *
- * By always rotating we give the feedback to the user that the application isn't 'stuck'.
- */
+// A wrapper for [CircularProgressIndicator] that always rotates.
+// By always rotating we give the feedback to the user that the application isn't 'stuck'.
 private const val PERCENT = 100f
 
 internal class ReaderProgressIndicator @JvmOverloads constructor(

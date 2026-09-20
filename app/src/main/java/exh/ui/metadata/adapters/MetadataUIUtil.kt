@@ -25,7 +25,7 @@ internal object MetadataUIUtil {
         @FloatRange(from = 0.0, to = 10.0) rating: Float? = null,
     ) = context.stringResource(RATING_LABELS.getOrNull(rating?.roundToInt() ?: -1) ?: SYMR.strings.no_rating)
 
-    /** One label per whole star, 0 to 10. */
+    // One label per whole star, 0 to 10.
     private val RATING_LABELS = listOf(
         SYMR.strings.rating0,
         SYMR.strings.rating1,

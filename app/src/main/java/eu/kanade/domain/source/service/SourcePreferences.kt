@@ -69,11 +69,14 @@ internal class SourcePreferences(
     // SY -->
     val enableSourceBlacklist: Preference<Boolean> = preferenceStore.getBoolean("eh_enable_source_blacklist", true)
 
-    val sourcesTabCategories: Preference<Set<String>> = preferenceStore.getStringSet("sources_tab_categories", mutableSetOf())
+    val sourcesTabCategories: Preference<Set<String>> =
+        preferenceStore.getStringSet("sources_tab_categories", mutableSetOf())
 
-    val sourcesTabCategoriesFilter: Preference<Boolean> = preferenceStore.getBoolean("sources_tab_categories_filter", false)
+    val sourcesTabCategoriesFilter: Preference<Boolean> =
+        preferenceStore.getBoolean("sources_tab_categories_filter", false)
 
-    val sourcesTabSourcesInCategories: Preference<Set<String>> = preferenceStore.getStringSet("sources_tab_source_categories", mutableSetOf())
+    val sourcesTabSourcesInCategories: Preference<Set<String>> =
+        preferenceStore.getStringSet("sources_tab_source_categories", mutableSetOf())
 
     val dataSaver: Preference<DataSaver> = preferenceStore.getEnum("data_saver", DataSaver.NONE)
 
@@ -81,15 +84,18 @@ internal class SourcePreferences(
 
     val dataSaverIgnoreGif: Preference<Boolean> = preferenceStore.getBoolean("ignore_gif", true)
 
-    val dataSaverImageQuality: Preference<Int> = preferenceStore.getInt("data_saver_image_quality", DEFAULT_DATA_SAVER_QUALITY)
+    val dataSaverImageQuality: Preference<Int> =
+        preferenceStore.getInt("data_saver_image_quality", DEFAULT_DATA_SAVER_QUALITY)
 
-    val dataSaverImageFormatJpeg: Preference<Boolean> = preferenceStore.getBoolean("data_saver_image_format_jpeg", false)
+    val dataSaverImageFormatJpeg: Preference<Boolean> =
+        preferenceStore.getBoolean("data_saver_image_format_jpeg", false)
 
     val dataSaverServer: Preference<String> = preferenceStore.getString("data_saver_server", "")
 
     val dataSaverColorBW: Preference<Boolean> = preferenceStore.getBoolean("data_saver_color_bw", false)
 
-    val dataSaverExcludedSources: Preference<Set<String>> = preferenceStore.getStringSet("data_saver_excluded", emptySet())
+    val dataSaverExcludedSources: Preference<Set<String>> =
+        preferenceStore.getStringSet("data_saver_excluded", emptySet())
 
     val dataSaverDownloader: Preference<Boolean> = preferenceStore.getBoolean("data_saver_downloader", true)
 
@@ -99,7 +105,8 @@ internal class SourcePreferences(
         WSRV_NL,
     }
 
-    val allowLocalSourceHiddenFolders: Preference<Boolean> = preferenceStore.getBoolean("allow_local_source_hidden_folders", false)
+    val allowLocalSourceHiddenFolders: Preference<Boolean> =
+        preferenceStore.getBoolean("allow_local_source_hidden_folders", false)
 
     val preferredMangaDexId: Preference<String> = preferenceStore.getString("preferred_mangaDex_id", "0")
 

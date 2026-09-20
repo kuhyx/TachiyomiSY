@@ -33,9 +33,7 @@ import tachiyomi.decoder.ImageDecoder
 import tachiyomi.i18n.MR
 import kotlin.math.max
 
-/**
- * View of the ViewPager that contains a page of a chapter.
- */
+// View of the ViewPager that contains a page of a chapter.
 // Progress-bar milestones while a page is prepared, and the double-page layout metrics.
 private const val PROGRESS_DECODING = 95
 private const val PROGRESS_SPLITTING = 96

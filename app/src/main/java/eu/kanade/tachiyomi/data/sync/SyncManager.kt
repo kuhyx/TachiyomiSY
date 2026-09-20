@@ -33,12 +33,9 @@ import java.io.IOException
 import java.util.Date
 import kotlin.system.measureTimeMillis
 
-/**
- * A manager to handle synchronization tasks in the app, such as updating
- * sync preferences and performing synchronization with a remote server.
- *
- * @property context The application context.
- */
+// A manager to handle synchronization tasks in the app, such as updating
+// sync preferences and performing synchronization with a remote server.
+// @property context The application context.
 private const val MILLIS_PER_SECOND = 1000L
 private const val MILLIS_PER_MINUTE = 60L * MILLIS_PER_SECOND
 
@@ -162,7 +159,10 @@ internal class SyncManager(
         }
 
         // Stop the sync early if the remote backup is null or empty
-        if (remoteBackup.backupManga.isEmpty() && remoteBackup.backupCategories.isEmpty() && remoteBackup.backupSources.isEmpty()) {
+        val remoteIsEmpty = remoteBackup.backupManga.isEmpty() &&
+            remoteBackup.backupCategories.isEmpty() &&
+            remoteBackup.backupSources.isEmpty()
+        if (remoteIsEmpty) {
             notifier.showSyncError("No data found on remote server.")
             return
         }

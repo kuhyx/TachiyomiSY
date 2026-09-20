@@ -121,7 +121,8 @@ internal class UpdateMangaFromRemote(
             ""
         }
 
-        // if the manga isn't a favorite (or 'update titles' preference is enabled), set its title from source and update in db
+        // if the manga isn't a favorite (or 'update titles' preference is enabled), set its title from source and
+        // update in db
         val title =
             if (remoteTitle.isNotEmpty() && (!localManga.favorite || libraryPreferences.updateMangaTitles.get())) {
                 remoteTitle

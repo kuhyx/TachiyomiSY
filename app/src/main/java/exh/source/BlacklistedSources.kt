@@ -3,7 +3,7 @@ package exh.source
 import eu.kanade.tachiyomi.source.online.sourceIdOf
 
 internal object BlacklistedSources {
-    /** The languages the E-Hentai extension ships a source for; SY replaces every one of them. */
+    // The languages the E-Hentai extension ships a source for; SY replaces every one of them.
     private val EHENTAI_EXT_LANGUAGES = listOf(
         "en", "ja", "zh", "nl", "fr", "de", "hu", "it", "ko", "pl", "pt", "ru", "es", "th", "vi", "other", "none",
     )

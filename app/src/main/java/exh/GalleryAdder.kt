@@ -63,7 +63,14 @@ internal class GalleryAdder(
         throttleFunc: suspend () -> Unit = {},
         retry: Int = 1,
     ): GalleryAddEvent {
-        logger.d(context.stringResource(SYMR.strings.gallery_adder_importing_gallery, url, fav.toString(), forceSource?.toString().orEmpty()))
+        logger.d(
+            context.stringResource(
+                SYMR.strings.gallery_adder_importing_gallery,
+                url,
+                fav.toString(),
+                forceSource?.toString().orEmpty(),
+            ),
+        )
         try {
             val uri = url.toUri()
 
@@ -164,7 +171,10 @@ internal class GalleryAdder(
                 if (chapter != null) {
                     GalleryAddEvent.Success(url, manga, context, chapter)
                 } else {
-                    GalleryAddEvent.Fail.Error(url, context.stringResource(SYMR.strings.gallery_adder_could_not_identify_chapter, url))
+                    GalleryAddEvent.Fail.Error(
+                        url,
+                        context.stringResource(SYMR.strings.gallery_adder_could_not_identify_chapter, url),
+                    )
                 }
             } else {
                 GalleryAddEvent.Success(url, manga, context)
@@ -224,7 +234,8 @@ internal sealed class GalleryAddEvent {
 
     sealed class Fail : GalleryAddEvent() {
         class UnknownType(override val galleryUrl: String, val context: Context) : Fail() {
-            override val logMessage = context.stringResource(SYMR.strings.batch_add_unknown_type_log_message, galleryUrl)
+            override val logMessage =
+                context.stringResource(SYMR.strings.batch_add_unknown_type_log_message, galleryUrl)
         }
 
         open class Error(
@@ -236,7 +247,8 @@ internal sealed class GalleryAddEvent {
             Error(galleryUrl, context.stringResource(SYMR.strings.batch_add_not_exist_log_message, galleryUrl))
 
         class UnknownSource(override val galleryUrl: String, val context: Context) : Fail() {
-            override val logMessage = context.stringResource(SYMR.strings.batch_add_unknown_source_log_message, galleryUrl)
+            override val logMessage =
+                context.stringResource(SYMR.strings.batch_add_unknown_source_log_message, galleryUrl)
         }
     }
 }

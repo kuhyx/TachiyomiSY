@@ -19,11 +19,8 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import java.util.regex.Pattern
 
-/**
- * DownloadNotifier is used to show notifications when downloading one or multiple chapters.
- *
- * @param context context of application
- */
+// DownloadNotifier is used to show notifications when downloading one or multiple chapters.
+// @param context context of application
 private const val TITLE_CHARS = 15
 private const val CONTENT_TITLE_CHARS = 30
 

@@ -29,7 +29,11 @@ internal fun File.getUriCompat(context: Context): Uri {
  *
  * @see File.copyTo
  */
-internal fun File.copyAndSetReadOnlyTo(target: File, overwrite: Boolean = false, bufferSize: Int = DEFAULT_BUFFER_SIZE): File {
+internal fun File.copyAndSetReadOnlyTo(
+    target: File,
+    overwrite: Boolean = false,
+    bufferSize: Int = DEFAULT_BUFFER_SIZE,
+): File {
     if (!this.exists()) {
         throw NoSuchFileException(file = this, reason = "The source file doesn't exist.")
     }

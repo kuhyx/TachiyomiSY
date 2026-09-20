@@ -10,7 +10,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 
 private const val VERSION = 17f
 
-/** The old rotation-type preference indexed these orientations, 1-based (0 was unused). */
+// The old rotation-type preference indexed these orientations, 1-based (0 was unused).
 private val LEGACY_ROTATION_TYPES = listOf(
     ReaderOrientation.FREE,
     ReaderOrientation.FREE,

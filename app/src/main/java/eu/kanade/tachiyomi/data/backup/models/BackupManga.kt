@@ -89,7 +89,8 @@ internal class BackupManga(
     @ProtoNumber(BACKUP_MANGA_MEMO) var memo: ByteArray = JsonObjectEmptyBytes,
 
     // SY specific values
-    @ProtoNumber(BACKUP_MANGA_MERGED_MANGA_REFERENCES) var mergedMangaReferences: List<BackupMergedMangaReference> = emptyList(),
+    @ProtoNumber(BACKUP_MANGA_MERGED_MANGA_REFERENCES) var mergedMangaReferences: List<BackupMergedMangaReference> =
+        emptyList(),
     @ProtoNumber(BACKUP_MANGA_FLAT_METADATA) var flatMetadata: BackupFlatMetadata? = null,
     @ProtoNumber(BACKUP_MANGA_CUSTOM_STATUS) var customStatus: Int = 0,
     @ProtoNumber(BACKUP_MANGA_CUSTOM_THUMBNAIL_URL) var customThumbnailUrl: String? = null,

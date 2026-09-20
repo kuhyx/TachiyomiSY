@@ -147,7 +147,8 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
                 }
 
                 logger.d(
-                    "Updating gallery (index: %s, manga.id: %s, meta.gId: %s, meta.gToken: %s, failures-so-far: %s, modifiedThisIteration.size: %s)...",
+                    "Updating gallery (index: %s, manga.id: %s, meta.gId: %s, meta.gToken: %s, " +
+                        "failures-so-far: %s, modifiedThisIteration.size: %s)...",
                     index,
                     manga.id,
                     meta.gId,
@@ -189,7 +190,8 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
 
                 if (chapters.isEmpty()) {
                     logger.e(
-                        "No chapters found for gallery (manga.id: %s, meta.gId: %s, meta.gToken: %s, failures-so-far: %s)!",
+                        "No chapters found for gallery (manga.id: %s, meta.gId: %s, meta.gToken: %s, " +
+                            "failures-so-far: %s)!",
                         manga.id,
                         meta.gId,
                         meta.gToken,
@@ -236,7 +238,10 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
     // New, current
     private suspend fun updateEntryAndGetChapters(manga: Manga): Pair<List<Chapter>, List<Chapter>> {
         val source = sourceManager.get(manga.source) as? EHentai
-            ?: throw GalleryNotUpdatedException(false, IllegalStateException("Missing EH-based source (${manga.source})!"))
+            ?: throw GalleryNotUpdatedException(
+                false,
+                IllegalStateException("Missing EH-based source (${manga.source})!"),
+            )
 
         try {
             val result = updateMangaFromRemote(

@@ -67,7 +67,10 @@ internal class BatchAddScreen : Screen() {
                             .verticalScroll(rememberScrollState())
                             .padding(MaterialTheme.padding.medium),
                     ) {
-                        Text(text = stringResource(SYMR.strings.eh_batch_add_title), style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            text = stringResource(SYMR.strings.eh_batch_add_title),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
                         Spacer(Modifier.height(8.dp))
                         TextField(
                             value = state.galleries,
@@ -97,7 +100,10 @@ internal class BatchAddScreen : Screen() {
                     ) {
                         item(key = "top") {
                             Column {
-                                Text(text = stringResource(SYMR.strings.eh_batch_add_adding_galleries), style = MaterialTheme.typography.titleLarge)
+                                Text(
+                                    text = stringResource(SYMR.strings.eh_batch_add_adding_galleries),
+                                    style = MaterialTheme.typography.titleLarge,
+                                )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Row(
                                     Modifier.fillMaxWidth(),

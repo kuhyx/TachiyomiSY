@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import tachiyomi.core.common.preference.Preference
 
-/**
- * Common configuration for all viewers.
- */
+// Common configuration for all viewers.
 // Values of the pager/webtoon navigation-mode preferences (0 is the viewer's default layout).
 private const val NAVIGATION_L = 1
 private const val NAVIGATION_KINDLISH = 2

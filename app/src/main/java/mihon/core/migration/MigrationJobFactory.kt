@@ -25,7 +25,8 @@ internal class MigrationJobFactory(
                     }
                 } else {
                     logcat {
-                        "(Dry-run) Running migration: { name = ${migration::class.simpleName}, version = ${migration.version} }"
+                        "(Dry-run) Running migration: " +
+                            "{ name = ${migration::class.simpleName}, version = ${migration.version} }"
                     }
                     CompletableDeferred(true)
                 }

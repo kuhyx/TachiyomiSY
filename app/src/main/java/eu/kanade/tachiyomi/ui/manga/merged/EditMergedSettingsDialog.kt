@@ -54,7 +54,12 @@ internal fun EditMergedSettingsDialog(
                 AndroidView(
                     factory = { factoryContext ->
                         val binding = EditMergedSettingsDialogBinding.inflate(LayoutInflater.from(factoryContext))
-                        state.onViewCreated(factoryContext, binding, mergedData.manga.values.toList(), mergedData.references)
+                        state.onViewCreated(
+                            factoryContext,
+                            binding,
+                            mergedData.manga.values.toList(),
+                            mergedData.references,
+                        )
                         binding.root
                     },
                     modifier = Modifier.fillMaxWidth(),

@@ -34,13 +34,10 @@ import tachiyomi.core.common.util.system.ImageUtil
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.i18n.MR
 
-/**
- * Holder of the webtoon reader for a single page of a chapter.
- *
- * @param frame the root view for this holder.
- * @param viewer the webtoon viewer.
- * @constructor creates a new webtoon holder.
- */
+// Holder of the webtoon reader for a single page of a chapter.
+// @param frame the root view for this holder.
+// @param viewer the webtoon viewer.
+// @constructor creates a new webtoon holder.
 private const val PERCENT = 100f
 private const val QUARTER_TURN_DEGREES = 90f
 private const val ERROR_LAYOUT_HEIGHT = 0.8
@@ -262,7 +259,8 @@ internal class WebtoonPageHolder(
     private fun initErrorLayout(error: Throwable?): ReaderErrorBinding {
         if (errorLayout == null) {
             errorLayout = ReaderErrorBinding.inflate(LayoutInflater.from(context), frame, true)
-            errorLayout?.root?.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, (parentHeight * ERROR_LAYOUT_HEIGHT).toInt())
+            errorLayout?.root?.layoutParams =
+                FrameLayout.LayoutParams(MATCH_PARENT, (parentHeight * ERROR_LAYOUT_HEIGHT).toInt())
             errorLayout?.actionRetry?.setOnClickListener {
                 page?.let { it.chapter.pageLoader?.retryPage(it) }
             }

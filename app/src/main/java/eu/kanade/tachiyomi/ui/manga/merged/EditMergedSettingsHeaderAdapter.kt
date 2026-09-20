@@ -14,7 +14,7 @@ import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.injectLazy
 
-/** The dedupe spinner's rows, in order. */
+// The dedupe spinner's rows, in order.
 private val DEDUPE_MODES = listOf(
     MergedMangaReference.CHAPTER_SORT_NO_DEDUPE,
     MergedMangaReference.CHAPTER_SORT_PRIORITY,
@@ -24,7 +24,10 @@ private val DEDUPE_MODES = listOf(
 
 private const val DISABLED_ALPHA = 0.5F
 
-internal class EditMergedSettingsHeaderAdapter(private val state: EditMergedSettingsState, adapter: EditMergedMangaAdapter) : RecyclerView.Adapter<EditMergedSettingsHeaderAdapter.HeaderViewHolder>() {
+internal class EditMergedSettingsHeaderAdapter(
+    private val state: EditMergedSettingsState,
+    adapter: EditMergedMangaAdapter,
+) : RecyclerView.Adapter<EditMergedSettingsHeaderAdapter.HeaderViewHolder>() {
 
     private val sourceManager: SourceManager by injectLazy()
 
@@ -72,7 +75,8 @@ internal class EditMergedSettingsHeaderAdapter(private val state: EditMergedSett
                     id: Long,
                 ) {
                     state.mergeReference = state.mergeReference?.copy(
-                        chapterSortMode = DEDUPE_MODES.getOrElse(position) { MergedMangaReference.CHAPTER_SORT_NO_DEDUPE },
+                        chapterSortMode =
+                        DEDUPE_MODES.getOrElse(position) { MergedMangaReference.CHAPTER_SORT_NO_DEDUPE },
                     )
                     xLogD(state.mergeReference?.chapterSortMode)
                     editMergedMangaItemSortingListener.onSetPrioritySort(canMove())

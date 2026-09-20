@@ -180,7 +180,14 @@ internal class LibraryScreenModel(
                 ),
                 // SY <--
                 getLibraryItemPreferencesFlow(),
-            ) { (searchQuery, categories, favorites), (tracksMap, trackingFilters), /* SY --> */ (groupType, sortingMode)/* <-- SY */, itemPreferences ->
+            ) {
+                    (searchQuery, categories, favorites),
+                    (tracksMap, trackingFilters),
+                    // SY -->
+                    (groupType, sortingMode),
+                    // SY <--
+                    itemPreferences,
+                ->
                 val showSystemCategory = favorites.any { it.libraryManga.categories.contains(0) }
                 val filteredFavorites = favorites
                     .applyFilters(tracksMap, trackingFilters, itemPreferences)
@@ -1389,7 +1396,8 @@ internal class LibraryScreenModel(
                             SManga.LICENSED.toLong() -> context.stringResource(MR.strings.licensed)
                             SManga.CANCELLED.toLong() -> context.stringResource(MR.strings.cancelled)
                             SManga.ON_HIATUS.toLong() -> context.stringResource(MR.strings.on_hiatus)
-                            SManga.PUBLISHING_FINISHED.toLong() -> context.stringResource(MR.strings.publishing_finished)
+                            SManga.PUBLISHING_FINISHED.toLong() ->
+                                context.stringResource(MR.strings.publishing_finished)
                             SManga.COMPLETED.toLong() -> context.stringResource(MR.strings.completed)
                             else -> context.stringResource(MR.strings.unknown)
                         },

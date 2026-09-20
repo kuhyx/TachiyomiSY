@@ -83,7 +83,12 @@ internal class SourcesScreenModel(
         // SY <--
     }
 
-    private fun collectLatestSources(sources: List<Source>, categories: List<String>, showLatest: Boolean, showPin: Boolean) {
+    private fun collectLatestSources(
+        sources: List<Source>,
+        categories: List<String>,
+        showLatest: Boolean,
+        showPin: Boolean,
+    ) {
         mutableState.update { state ->
             val map = TreeMap<String, MutableList<Source>> { d1, d2 ->
                 // Sources without a lang defined will be placed at the end

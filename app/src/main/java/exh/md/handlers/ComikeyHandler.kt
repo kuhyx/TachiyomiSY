@@ -24,7 +24,9 @@ internal class ComikeyHandler(cloudflareClient: OkHttpClient, userAgent: String)
 
     val client: OkHttpClient = cloudflareClient
 
-    private val urlForbidden = "https://fakeimg.pl/1800x2252/FFFFFF/000000/?font_size=120&text=This%20chapter%20is%20not%20available%20for%20free.%0A%0AIf%20you%20have%20purchased%20this%20chapter%2C%20please%20%0Aopen%20the%20website%20in%20web%20view%20and%20log%20in."
+    private val urlForbidden = "https://fakeimg.pl/1800x2252/FFFFFF/000000/?font_size=120&text=" +
+        "This%20chapter%20is%20not%20available%20for%20free.%0A%0AIf%20you%20have%20purchased%20this%20chapter%2C" +
+        "%20please%20%0Aopen%20the%20website%20in%20web%20view%20and%20log%20in."
 
     suspend fun fetchPageList(externalUrl: String): List<Page> {
         val httpUrl = externalUrl.toHttpUrl()

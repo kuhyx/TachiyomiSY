@@ -172,8 +172,8 @@ internal class HikkaApi(
                 put("rereads", rereads)
                 put("score", track.score.toInt())
                 put("status", track.toApiStatus())
-                put("start_date", if (track.startedReadingDate > 0L) track.startedReadingDate / MILLIS_PER_SECOND else null)
-                put("end_date", if (track.finishedReadingDate > 0L) track.finishedReadingDate / MILLIS_PER_SECOND else null)
+                put("start_date", track.startedReadingDate.toApiSeconds())
+                put("end_date", track.finishedReadingDate.toApiSeconds())
             }
 
             with(json) {
@@ -229,3 +229,6 @@ internal class HikkaApi(
         }
     }
 }
+
+// Hikka takes epoch seconds and null for "unset"; the app stores 0 for unset.
+private fun Long.toApiSeconds(): Long? = if (this > 0L) this / MILLIS_PER_SECOND else null

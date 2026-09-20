@@ -14,7 +14,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.IOException
 
-/** The two magic bytes every gzip stream starts with. */
+// The two magic bytes every gzip stream starts with.
 private const val MAGIC_GZIP = 0x1f8b
 
 internal class BackupDecoder(

@@ -19,9 +19,7 @@ import eu.kanade.tachiyomi.util.system.notify
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
 
-/**
- * Class used to show BigPictureStyle notifications.
- */
+// Class used to show BigPictureStyle notifications.
 private const val PREVIEW_WIDTH = 720
 private const val PREVIEW_HEIGHT = 1280
 

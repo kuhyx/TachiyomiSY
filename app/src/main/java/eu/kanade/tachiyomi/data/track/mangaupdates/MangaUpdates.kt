@@ -138,7 +138,8 @@ internal class MangaUpdates(id: Long) : BaseTracker(id, "MangaUpdates"), Deletab
          * database scraping. Unfortunately, sites like MD sometimes still provides links with the old IDs,
          * so we need to convert them.
          * Because the API only accepts the newer IDs, we are forced to access the legacy non-API website
-         * (ex. https://www.mangaupdates.com/series.html?id=15), which is a permanent redirect (HTTP 308) to the new one.
+         * (ex. https://www.mangaupdates.com/series.html?id=15), which is a permanent redirect (HTTP 308) to the new
+         * one.
          */
 
         val base36Id = if (id.matches(Regex("""^\d+$"""))) {

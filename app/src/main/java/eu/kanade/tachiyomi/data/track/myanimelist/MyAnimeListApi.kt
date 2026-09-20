@@ -304,7 +304,8 @@ internal class MyAnimeListApi(
         private const val BASE_API_URL = "https://api.myanimelist.net/v2"
 
         private const val SEARCH_FIELDS =
-            "id,title,synopsis,num_chapters,mean,main_picture,status,media_type,start_date,authors{first_name,last_name}"
+            "id,title,synopsis,num_chapters,mean,main_picture,status,media_type,start_date," +
+                "authors{first_name,last_name}"
 
         private const val LIST_PAGINATION_AMOUNT = 250
 

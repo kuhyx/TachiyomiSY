@@ -33,16 +33,8 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
 
     override fun getStatusList(): List<Long> = FollowStatus.entries.map { it.long }
 
-    override fun getStatus(status: Long): StringResource? = when (FollowStatus.entries.firstOrNull { it.long == status }) {
-        FollowStatus.UNFOLLOWED -> SYMR.strings.md_follows_unfollowed
-        FollowStatus.READING -> MR.strings.reading
-        FollowStatus.COMPLETED -> MR.strings.completed
-        FollowStatus.ON_HOLD -> MR.strings.on_hold
-        FollowStatus.PLAN_TO_READ -> MR.strings.plan_to_read
-        FollowStatus.DROPPED -> MR.strings.dropped
-        FollowStatus.RE_READING -> MR.strings.repeating
-        null -> null
-    }
+    override fun getStatus(status: Long): StringResource? =
+        STATUS_LABELS[FollowStatus.entries.firstOrNull { it.long == status }]
 
     override fun getScoreList() = SCORE_LIST
 
@@ -150,7 +142,8 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
         summary = mangaInfo.description.orEmpty()
     }
 
-    override suspend fun login(username: String, password: String) = throw UnsupportedOperationException("MDList signs in through the MangaDex source")
+    override suspend fun login(username: String, password: String) =
+        throw UnsupportedOperationException("MDList signs in through the MangaDex source")
 
     override fun logout() {
         super.logout()
@@ -177,3 +170,13 @@ internal class MdList(id: Long) : BaseTracker(id, "MDList") {
 
     class MangaDexNotFoundException : Exception("Mangadex not enabled")
 }
+
+private val STATUS_LABELS = mapOf(
+    FollowStatus.UNFOLLOWED to SYMR.strings.md_follows_unfollowed,
+    FollowStatus.READING to MR.strings.reading,
+    FollowStatus.COMPLETED to MR.strings.completed,
+    FollowStatus.ON_HOLD to MR.strings.on_hold,
+    FollowStatus.PLAN_TO_READ to MR.strings.plan_to_read,
+    FollowStatus.DROPPED to MR.strings.dropped,
+    FollowStatus.RE_READING to MR.strings.repeating,
+)

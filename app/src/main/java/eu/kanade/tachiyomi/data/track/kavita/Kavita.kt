@@ -16,7 +16,7 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-/** The Kavita extension ships three sources, kavita_1 to kavita_3. */
+// The Kavita extension ships three sources, kavita_1 to kavita_3.
 private const val KAVITA_SOURCES = 3
 
 internal class Kavita(id: Long) : BaseTracker(id, "Kavita"), EnhancedTracker {

@@ -44,14 +44,10 @@ import tachiyomi.core.common.util.system.ImageUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/**
- * A wrapper view for showing page image.
- *
- * Animated image will be drawn by [PhotoView] while [SubsamplingScaleImageView] will take non-animated image.
- *
- * @param isWebtoon if true, [WebtoonSubsamplingImageView] will be used instead of [SubsamplingScaleImageView]
- * and [AppCompatImageView] will be used instead of [PhotoView]
- */
+// A wrapper view for showing page image.
+// Animated image will be drawn by [PhotoView] while [SubsamplingScaleImageView] will take non-animated image.
+// @param isWebtoon if true, [WebtoonSubsamplingImageView] will be used instead of [SubsamplingScaleImageView]
+// and [AppCompatImageView] will be used instead of [PhotoView]
 private const val ZOOM_ANIMATION_MS = 500L
 private const val DOUBLE_TAP_ANIMATION_MS = 250L
 private const val MIN_TILE_DPI = 180

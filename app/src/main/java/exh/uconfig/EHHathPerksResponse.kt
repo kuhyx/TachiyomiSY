@@ -10,5 +10,7 @@ internal class EHHathPerksResponse {
     var pagingEnlargementIII = false
 
     override fun toString() =
-        "EHHathPerksResponse(moreThumbs=$moreThumbs, thumbsUp=$thumbsUp, allThumbs=$allThumbs, pagingEnlargementI=$pagingEnlargementI, pagingEnlargementII=$pagingEnlargementII, pagingEnlargementIII=$pagingEnlargementIII)"
+        "EHHathPerksResponse(moreThumbs=$moreThumbs, thumbsUp=$thumbsUp, allThumbs=$allThumbs, " +
+            "pagingEnlargementI=$pagingEnlargementI, pagingEnlargementII=$pagingEnlargementII, " +
+            "pagingEnlargementIII=$pagingEnlargementIII)"
 }

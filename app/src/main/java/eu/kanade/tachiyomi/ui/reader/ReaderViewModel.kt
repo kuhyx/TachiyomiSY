@@ -111,9 +111,7 @@ import uy.kohesive.injekt.api.get
 import java.time.Instant
 import java.util.Date
 
-/**
- * Presenter used by the activity to perform background operations.
- */
+// Presenter used by the activity to perform background operations.
 private const val MAX_PAGE_INPUT = 9999
 
 // Download-ahead starts once a quarter of the chapter has been read.
@@ -1233,7 +1231,8 @@ internal class ReaderViewModel @JvmOverloads constructor(
                     location = Location.Cache,
                     manga = manga,
                 )
-                eventChannel.send(if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, firstPage, secondPage))
+                val event = if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, firstPage, secondPage)
+                eventChannel.send(event)
             }
         } catch (e: Throwable) {
             logcat(LogPriority.ERROR, e)

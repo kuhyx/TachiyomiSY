@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.util.lang.invert
 import tachiyomi.i18n.MR
 
-/** The strip along the top that always opens the menu, as a fraction of the screen height. */
+// The strip along the top that always opens the menu, as a fraction of the screen height.
 private const val MENU_REGION_HEIGHT = 0.05f
 
 /** The tap layouts split the screen into thirds; these are the cut points as screen fractions. */

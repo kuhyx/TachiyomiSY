@@ -8,13 +8,10 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadItemBinding
 import eu.kanade.tachiyomi.util.view.popupMenu
 
-/**
- * Class used to hold the data of a download.
- * All the elements from the layout file "download_item" are available in this class.
- *
- * @param view the inflated view for this holder.
- * @constructor creates a new download holder.
- */
+// Class used to hold the data of a download.
+// All the elements from the layout file "download_item" are available in this class.
+// @param view the inflated view for this holder.
+// @constructor creates a new download holder.
 private const val PERCENT = 100
 
 internal class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :

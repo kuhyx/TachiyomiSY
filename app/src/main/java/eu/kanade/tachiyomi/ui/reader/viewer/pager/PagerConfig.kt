@@ -15,9 +15,7 @@ import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/**
- * Configuration used by pager viewers.
- */
+// Configuration used by pager viewers.
 // Reader theme and zoom-start preference values.
 private const val THEME_BLACK = 1
 private const val THEME_GRAY = 2

@@ -57,15 +57,23 @@ internal fun SyncFavoritesProgressDialog(
                                 is FavoritesSyncStatus.SyncError.GallerySyncError.GalleryAddFail ->
                                     context.stringResource(SYMR.strings.favorites_sync_failed_to_add_to_local) +
                                         context.stringResource(
-                                            SYMR.strings.favorites_sync_failed_to_add_to_local_error, it.title, it.reason,
+                                            SYMR.strings.favorites_sync_failed_to_add_to_local_error,
+                                            it.title,
+                                            it.reason,
                                         )
                                 is FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail ->
                                     context.stringResource(SYMR.strings.favorites_sync_failed_to_add_to_local) +
                                         context.stringResource(
-                                            SYMR.strings.favorites_sync_failed_to_add_to_local_unknown_type, it.title, it.url,
+                                            SYMR.strings.favorites_sync_failed_to_add_to_local_unknown_type,
+                                            it.title,
+                                            it.url,
                                         )
                                 is FavoritesSyncStatus.SyncError.GallerySyncError.UnableToAddGalleryToRemote ->
-                                    context.stringResource(SYMR.strings.favorites_sync_unable_to_add_to_remote, it.title, it.gid)
+                                    context.stringResource(
+                                        SYMR.strings.favorites_sync_unable_to_add_to_remote,
+                                        it.title,
+                                        it.gid,
+                                    )
                                 FavoritesSyncStatus.SyncError.GallerySyncError.UnableToDeleteFromRemote ->
                                     context.stringResource(SYMR.strings.favorites_sync_unable_to_delete)
                             }
@@ -91,7 +99,8 @@ internal fun SyncFavoritesProgressDialog(
                     text = context.stringResource(
                         SYMR.strings.favorites_sync_error_string,
                         when (status) {
-                            FavoritesSyncStatus.SyncError.NotLoggedInSyncError -> context.stringResource(SYMR.strings.please_login)
+                            FavoritesSyncStatus.SyncError.NotLoggedInSyncError ->
+                                context.stringResource(SYMR.strings.please_login)
                             FavoritesSyncStatus.SyncError.FailedToFetchFavorites ->
                                 context.stringResource(SYMR.strings.favorites_sync_failed_to_featch)
                             is FavoritesSyncStatus.SyncError.UnknownSyncError ->
@@ -99,15 +108,23 @@ internal fun SyncFavoritesProgressDialog(
                             is FavoritesSyncStatus.SyncError.GallerySyncError.GalleryAddFail ->
                                 context.stringResource(SYMR.strings.favorites_sync_failed_to_add_to_local) +
                                     context.stringResource(
-                                        SYMR.strings.favorites_sync_failed_to_add_to_local_error, status.title, status.reason,
+                                        SYMR.strings.favorites_sync_failed_to_add_to_local_error,
+                                        status.title,
+                                        status.reason,
                                     )
                             is FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail ->
                                 context.stringResource(SYMR.strings.favorites_sync_failed_to_add_to_local) +
                                     context.stringResource(
-                                        SYMR.strings.favorites_sync_failed_to_add_to_local_unknown_type, status.title, status.url,
+                                        SYMR.strings.favorites_sync_failed_to_add_to_local_unknown_type,
+                                        status.title,
+                                        status.url,
                                     )
                             is FavoritesSyncStatus.SyncError.GallerySyncError.UnableToAddGalleryToRemote ->
-                                context.stringResource(SYMR.strings.favorites_sync_unable_to_add_to_remote, status.title, status.gid)
+                                context.stringResource(
+                                    SYMR.strings.favorites_sync_unable_to_add_to_remote,
+                                    status.title,
+                                    status.gid,
+                                )
                             FavoritesSyncStatus.SyncError.GallerySyncError.UnableToDeleteFromRemote ->
                                 context.stringResource(SYMR.strings.favorites_sync_unable_to_delete)
                         },
@@ -136,21 +153,41 @@ internal fun SyncFavoritesProgressDialog(
                             if (status.isThrottling) {
                                 context.stringResource(
                                     SYMR.strings.favorites_sync_processing_throttle,
-                                    context.stringResource(SYMR.strings.favorites_sync_adding_to_remote, status.index, status.total),
+                                    context.stringResource(
+                                        SYMR.strings.favorites_sync_adding_to_remote,
+                                        status.index,
+                                        status.total,
+                                    ),
                                 )
                             } else {
-                                context.stringResource(SYMR.strings.favorites_sync_adding_to_remote, status.index, status.total)
+                                context.stringResource(
+                                    SYMR.strings.favorites_sync_adding_to_remote,
+                                    status.index,
+                                    status.total,
+                                )
                             }
                         is FavoritesSyncStatus.Processing.RemovingGalleryFromLocal ->
-                            context.stringResource(SYMR.strings.favorites_sync_remove_from_local, status.index, status.total)
+                            context.stringResource(
+                                SYMR.strings.favorites_sync_remove_from_local,
+                                status.index,
+                                status.total,
+                            )
                         is FavoritesSyncStatus.Processing.AddingGalleryToLocal ->
                             if (status.isThrottling) {
                                 context.stringResource(
                                     SYMR.strings.favorites_sync_processing_throttle,
-                                    context.stringResource(SYMR.strings.favorites_sync_add_to_local, status.index, status.total),
+                                    context.stringResource(
+                                        SYMR.strings.favorites_sync_add_to_local,
+                                        status.index,
+                                        status.total,
+                                    ),
                                 )
                             } else {
-                                context.stringResource(SYMR.strings.favorites_sync_add_to_local, status.index, status.total)
+                                context.stringResource(
+                                    SYMR.strings.favorites_sync_add_to_local,
+                                    status.index,
+                                    status.total,
+                                )
                             }
 
                         FavoritesSyncStatus.Processing.CleaningUp ->

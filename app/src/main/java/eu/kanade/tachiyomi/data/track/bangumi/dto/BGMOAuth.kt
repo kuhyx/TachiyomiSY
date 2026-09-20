@@ -27,4 +27,5 @@ internal data class BGMOAuth(
 )
 
 // Access token refresh before expired
-internal fun BGMOAuth.isExpired() = System.currentTimeMillis() / MILLIS_PER_SECOND > createdAt + expiresIn - EXPIRY_MARGIN_SECONDS
+internal fun BGMOAuth.isExpired() =
+    System.currentTimeMillis() / MILLIS_PER_SECOND > createdAt + expiresIn - EXPIRY_MARGIN_SECONDS

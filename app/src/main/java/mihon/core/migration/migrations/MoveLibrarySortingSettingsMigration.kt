@@ -11,7 +11,7 @@ import tachiyomi.domain.library.service.LibraryPreferences
 
 private const val VERSION = 20f
 
-/** The integer sorting-mode preference indexed these names; 5 was unused and falls back to alphabetical. */
+// The integer sorting-mode preference indexed these names; 5 was unused and falls back to alphabetical.
 private val LEGACY_SORTING_MODES = listOf(
     "ALPHABETICAL",
     "LAST_READ",

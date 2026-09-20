@@ -314,7 +314,9 @@ internal class MainActivity : BaseActivity() {
             }
             // SY <--
 
-            var showChangelog by remember { mutableStateOf(didMigration && !BuildConfig.DEBUG && !isBenchmarkBuildType) }
+            var showChangelog by remember {
+                mutableStateOf(didMigration && !BuildConfig.DEBUG && !isBenchmarkBuildType)
+            }
             if (showChangelog) {
                 // SY -->
                 WhatsNewDialog(onDismissRequest = { showChangelog = false })
@@ -498,7 +500,8 @@ internal class MainActivity : BaseActivity() {
             }
             Intent.ACTION_SEARCH, Intent.ACTION_SEND, "com.google.android.gms.actions.SEARCH_ACTION" -> {
                 // If the intent match the "standard" Android search intent
-                // or the Google-specific search intent (triggered by saying or typing "search *query* on *Tachiyomi*" in Google Search/Google Assistant)
+                // or the Google-specific search intent (triggered by saying or typing "search *query* on *Tachiyomi*"
+                // in Google Search/Google Assistant)
 
                 // Get the search query provided in extras, and if not null, perform a global search with it.
                 val query = intent.getStringExtra(SearchManager.QUERY) ?: intent.getStringExtra(Intent.EXTRA_TEXT)
