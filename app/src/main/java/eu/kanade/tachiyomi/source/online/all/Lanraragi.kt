@@ -200,27 +200,27 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
     }
 
     override suspend fun fetchPreviewImage(page: PagePreviewInfo, cacheControl: CacheControl?): Response {
-        return requestPreviewImage(page, cacheControl).let {
-            if (it.code == HttpURLConnection.HTTP_ACCEPTED) {
-                val task = with(jsonParser) {
-                    it.parseAs<ThumbnailTask>()
-                }
-                var tries = 0
-                do {
-                    if (tries > 1) {
-                        delay(200.milliseconds)
-                    }
-                    val jobDone = minionJobDone(task.job)
-                } while (!jobDone && tries++ < THUMBNAIL_JOB_POLLS)
-                requestPreviewImage(page, cacheControl).apply {
-                    if (code == HttpURLConnection.HTTP_ACCEPTED) {
-                        throw IOException("Thumbnail not ready")
-                    }
-                }
-            } else {
-                it
+        val response = requestPreviewImage(page, cacheControl)
+        if (response.code != HttpURLConnection.HTTP_ACCEPTED) return response
+
+        // 202 means the server is still rendering the thumbnail: wait for its job, then ask once more.
+        val task = with(jsonParser) { response.parseAs<ThumbnailTask>() }
+        awaitMinionJob(task.job)
+        return requestPreviewImage(page, cacheControl).apply {
+            if (code == HttpURLConnection.HTTP_ACCEPTED) {
+                throw IOException("Thumbnail not ready")
             }
         }
+    }
+
+    private suspend fun awaitMinionJob(job: Int) {
+        var tries = 0
+        do {
+            if (tries > 1) {
+                delay(200.milliseconds)
+            }
+            val jobDone = minionJobDone(job)
+        } while (!jobDone && tries++ < THUMBNAIL_JOB_POLLS)
     }
 
     companion object {

@@ -58,6 +58,27 @@ private const val COOKIE = "Cookie"
 private const val FIRST_GALLERY_YEAR = 2007
 private const val LAST_SEEK_YEAR = 2099
 
+private val MATCH_YEAR_REGEX = "^\\d{4}\$".toRegex()
+private val MATCH_SEEK_REGEX = """^\d{2,4}-\d{1,2}(-\d{1,2})?""".toRegex()
+private val MATCH_JUMP_REGEX = "^\\d+(\$|d\$|w\$|m\$|y\$|-\$)".toRegex()
+
+// The site "seek"s to a date (or a whole year) and "jump"s by a count of days/weeks/months/years.
+private fun Uri.Builder.appendJumpOrSeek(value: String) {
+    when {
+        MATCH_SEEK_REGEX.matches(value) || value.isSeekYear() -> appendQueryParameter("seek", value)
+        MATCH_JUMP_REGEX.matches(value) -> appendQueryParameter("jump", value)
+    }
+}
+
+private fun String.isSeekYear(): Boolean =
+    MATCH_YEAR_REGEX.matches(this) && toIntOrNull()?.let { it in FIRST_GALLERY_YEAR..LAST_SEEK_YEAR } == true
+
+private fun toplistUrl(toplist: ToplistOption, page: Int): String = "https://e-hentai.org".toUri().buildUpon()
+    .appendPath("toplist.php")
+    .appendQueryParameter("tl", toplist.index.toString())
+    .appendQueryParameter("p", (page - 1).toString())
+    .toString()
+
 internal class EHentai(
     override val id: Long,
     val exh: Boolean,
@@ -209,14 +230,7 @@ internal class EHentai(
     @Deprecated(HELPER_DEPRECATION)
     override fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request {
         val toplist = ToplistOption.entries[filters.firstNotNullOfOrNull { (it as? ToplistOptions)?.state } ?: 0]
-        if (toplist != ToplistOption.NONE) {
-            val uri = "https://e-hentai.org".toUri().buildUpon()
-            uri.appendPath("toplist.php")
-            uri.appendQueryParameter("tl", toplist.index.toString())
-            uri.appendQueryParameter("p", (page - 1).toString())
-
-            return exGet(url = uri.toString())
-        }
+        if (toplist != ToplistOption.NONE) return exGet(url = toplistUrl(toplist, page))
 
         val uri = baseUrl.toUri().buildUpon()
         val isReverseFilterEnabled = filters.any { it is ReverseFilter && it.state }
@@ -232,19 +246,7 @@ internal class EHentai(
             uri.appendQueryParameter(REVERSE_PARAM, "on")
         }
         if (jumpSeekValue != null && page == 1) {
-            if (
-                MATCH_SEEK_REGEX.matches(jumpSeekValue) ||
-                (
-                    MATCH_YEAR_REGEX.matches(jumpSeekValue) &&
-                        jumpSeekValue.toIntOrNull()?.let {
-                            it in FIRST_GALLERY_YEAR..LAST_SEEK_YEAR
-                        } == true
-                    )
-            ) {
-                uri.appendQueryParameter("seek", jumpSeekValue)
-            } else if (MATCH_JUMP_REGEX.matches(jumpSeekValue)) {
-                uri.appendQueryParameter("jump", jumpSeekValue)
-            }
+            uri.appendJumpOrSeek(jumpSeekValue)
         }
 
         return exGet(
@@ -468,10 +470,6 @@ internal class EHentai(
     }
 
     companion object {
-
-        private val MATCH_YEAR_REGEX = "^\\d{4}\$".toRegex()
-        private val MATCH_SEEK_REGEX = """^\d{2,4}-\d{1,2}(-\d{1,2})?""".toRegex()
-        private val MATCH_JUMP_REGEX = "^\\d+(\$|d\$|w\$|m\$|y\$|-\$)".toRegex()
 
         internal const val EH_API_BASE = "https://api.e-hentai.org/api.php"
         internal val JSON = "application/json; charset=utf-8".toMediaTypeOrNull()!!

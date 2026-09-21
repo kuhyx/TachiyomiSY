@@ -63,12 +63,10 @@ internal fun Context.openInBrowser(url: String, forceDefaultBrowser: Boolean = f
 
 internal fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {
     try {
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-            // Force default browser so that verified extensions don't re-open Tachiyomi
-            if (forceDefaultBrowser) {
-                defaultBrowserPackageName()?.let { setPackage(it) }
-            }
-        }
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        // Force default browser so that verified extensions don't re-open Tachiyomi
+        val browser = if (forceDefaultBrowser) defaultBrowserPackageName() else null
+        browser?.let(intent::setPackage)
         startActivity(intent)
     } catch (expected: Exception) {
         // Any failure ends here and the fallback below applies.

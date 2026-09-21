@@ -138,27 +138,33 @@ internal class MigrationListScreenModel(
         }
 
         if (result != null && result.first.thumbnailUrl == null) {
-            try {
-                updateMangaFromRemote(result.first, fetchDetails = true, manualFetch = true).getOrThrow().manga
-            } catch (e: CancellationException) {
-                throw e
-            } catch (_: Exception) {
-            }
+            fetchCoverQuietly(result.first)
         }
 
         manga.searchResult.value = result?.first?.toSuccessSearchResult() ?: SearchResult.NotFound
 
-        if (result == null && hideUnmatched) {
-            removeManga(manga)
-        }
-        if (result != null &&
-            hideWithoutUpdates &&
-            (result.second.latestChapter ?: 0.0) <= (manga.latestChapter ?: 0.0)
-        ) {
+        if (shouldHide(manga, result)) {
             removeManga(manga)
         }
 
         updateMigrationProgress()
+    }
+
+    // A match without a cover gets its details fetched; a failure there is not worth reporting.
+    private suspend fun fetchCoverQuietly(match: Manga) {
+        try {
+            updateMangaFromRemote(match, fetchDetails = true, manualFetch = true).getOrThrow().manga
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+        }
+    }
+
+    // Per the options: an entry with no match, or one whose match brings no newer chapter.
+    private fun shouldHide(manga: MigratingManga, result: Pair<Manga, ChapterInfo>?): Boolean = when {
+        result == null -> hideUnmatched
+        hideWithoutUpdates -> (result.second.latestChapter ?: 0.0) <= (manga.latestChapter ?: 0.0)
+        else -> false
     }
 
     internal suspend fun updateMigrationProgress() {

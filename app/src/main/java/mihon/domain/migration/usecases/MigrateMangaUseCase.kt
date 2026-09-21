@@ -130,25 +130,25 @@ internal class MigrateMangaUseCase(collaborators: Collaborators) {
 
         targetChapters.forEach { mangaChapter ->
             var updatedChapter = mangaChapter
-            if (updatedChapter.isRecognizedNumber) {
-                val prevChapter = currentChapters
-                    .find { it.isRecognizedNumber && it.chapterNumber == updatedChapter.chapterNumber }
-                if (prevChapter != null) {
-                    updatedChapter = updatedChapter.copy(
-                        dateFetch = prevChapter.dateFetch,
-                        bookmark = prevChapter.bookmark,
-                        lastPageRead = prevChapter.lastPageRead,
-                    )
-                    val updatedHistory = currentHistory.find { it.chapterId == prevChapter.id }
-                    val chapterHasHistory =
-                        mangaChapter.read && targetHistory.find { it.chapterId == mangaChapter.id } != null
-                    if (updatedHistory != null && !chapterHasHistory) {
-                        historyUpdates.add(updatedHistory.copy(chapterId = updatedChapter.id).toHistoryUpdate())
-                    }
+            val prevChapter = mangaChapter.takeIf { it.isRecognizedNumber }?.let { chapter ->
+                currentChapters.find { it.isRecognizedNumber && it.chapterNumber == chapter.chapterNumber }
+            }
+            if (prevChapter != null) {
+                updatedChapter = updatedChapter.copy(
+                    dateFetch = prevChapter.dateFetch,
+                    bookmark = prevChapter.bookmark,
+                    lastPageRead = prevChapter.lastPageRead,
+                )
+                // History moves over unless the target chapter is already read with history of its own.
+                val updatedHistory = currentHistory.find { it.chapterId == prevChapter.id }
+                val chapterHasHistory = mangaChapter.read && targetHistory.any { it.chapterId == mangaChapter.id }
+                if (updatedHistory != null && !chapterHasHistory) {
+                    historyUpdates.add(updatedHistory.copy(chapterId = updatedChapter.id).toHistoryUpdate())
                 }
-                if (maxChapterRead != null && updatedChapter.chapterNumber <= maxChapterRead) {
-                    updatedChapter = updatedChapter.copy(read = true)
-                }
+            }
+            val readBefore = maxChapterRead != null && mangaChapter.chapterNumber <= maxChapterRead
+            if (mangaChapter.isRecognizedNumber && readBefore) {
+                updatedChapter = updatedChapter.copy(read = true)
             }
             chapterUpdates.add(updatedChapter.toChapterUpdate())
         }

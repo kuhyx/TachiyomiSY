@@ -3,6 +3,7 @@ package exh.ui.login
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.webkit.CookieManager
@@ -24,8 +25,6 @@ import exh.log.xLogD
 import exh.source.ExhPreferences
 import tachiyomi.i18n.MR
 import uy.kohesive.injekt.injectLazy
-import java.net.HttpCookie
-import java.util.Locale
 
 /**
  * LoginController.
@@ -97,34 +96,12 @@ internal class EhLoginActivity : BaseActivity() {
     private fun onPageFinished(view: WebView, url: String, customIgneous: String?) {
         xLogD(url)
         val parsedUrl = url.toUri()
-        if (parsedUrl.host.equals("forums.e-hentai.org", ignoreCase = true)) {
-            view.evaluateJavascript(
-                """
-                    (function() {
-                        let html = document.documentElement.innerHTML;
-                        return html.includes("/cdn-cgi/");
-                    })();
-                """.trimIndent(),
-            ) { result ->
-                val isCloudflareBlock = result == "true"
-
-                if (isCloudflareBlock) {
-                    xLogD("Cloudflare block detected — skipping logic")
-                } else {
-                    // Hide distracting content
-                    if (!parsedUrl.queryParameterNames.contains(PARAM_SKIP_INJECT)) {
-                        view.evaluateJavascript(HIDE_JS, null)
-                    }
-                    // Check login result
-
-                    if (parsedUrl.getQueryParameter("code")?.toInt() != 0 && checkLoginCookies(url)) {
-                        view.loadUrl("https://exhentai.org/")
-                    }
-                }
+        when {
+            parsedUrl.host.equals("forums.e-hentai.org", ignoreCase = true) -> {
+                onForumsPageFinished(view, url, parsedUrl)
             }
-        } else if (parsedUrl.host.equals("exhentai.org", ignoreCase = true)) {
             // At ExHentai, check that everything worked out...
-            if (applyExHentaiCookies(url, customIgneous)) {
+            parsedUrl.host.equals("exhentai.org", ignoreCase = true) && applyExHentaiCookies(url, customIgneous) -> {
                 exhPreferences.enableExhentai.set(true)
                 setResult(RESULT_OK)
                 finish()
@@ -132,59 +109,46 @@ internal class EhLoginActivity : BaseActivity() {
         }
     }
 
-    // Check if we are logged in.
-    private fun checkLoginCookies(url: String): Boolean {
-        getCookies(url)?.let { parsed ->
-            return parsed.count {
-                (
-                    it.name.equals(MEMBER_ID_COOKIE, ignoreCase = true) ||
-                        it.name.equals(PASS_HASH_COOKIE, ignoreCase = true)
-                    ) &&
-                    it.value.isNotBlank()
-            } >= 2
+    private fun onForumsPageFinished(view: WebView, url: String, parsedUrl: Uri) {
+        view.evaluateJavascript(
+            """
+                (function() {
+                    let html = document.documentElement.innerHTML;
+                    return html.includes("/cdn-cgi/");
+                })();
+            """.trimIndent(),
+        ) { result ->
+            if (result == "true") {
+                xLogD("Cloudflare block detected — skipping logic")
+            } else {
+                // Hide distracting content
+                if (!parsedUrl.queryParameterNames.contains(PARAM_SKIP_INJECT)) {
+                    view.evaluateJavascript(HIDE_JS, null)
+                }
+                // Check login result
+                if (parsedUrl.getQueryParameter("code")?.toInt() != 0 && cookiesFor(url)?.hasForumLogin() == true) {
+                    view.loadUrl("https://exhentai.org/")
+                }
+            }
         }
-        return false
     }
 
     // Parse cookies at ExHentai.
     private fun applyExHentaiCookies(url: String, customIgneous: String?): Boolean {
-        getCookies(url)?.let { parsed ->
-
-            var memberId: String? = null
-            var passHash: String? = null
-            var igneous: String? = customIgneous
-
-            if (customIgneous != null) {
-                CookieManager.getInstance().setCookie(url, "$IGNEOUS_COOKIE=$customIgneous")
-            }
-
-            parsed.forEach {
-                when (it.name.lowercase(Locale.getDefault())) {
-                    MEMBER_ID_COOKIE -> memberId = it.value
-                    PASS_HASH_COOKIE -> passHash = it.value
-                    IGNEOUS_COOKIE -> igneous = customIgneous ?: it.value
-                }
-            }
-
-            // Missing a cookie
-            if (memberId == null || passHash == null || igneous == null) return false
-
-            // Update prefs
-            exhPreferences.memberIdVal.set(memberId)
-            exhPreferences.passHashVal.set(passHash)
-            exhPreferences.igneousVal.set(igneous)
-
-            return true
+        val parsed = cookiesFor(url) ?: return false
+        if (customIgneous != null) {
+            CookieManager.getInstance().setCookie(url, "$IGNEOUS_COOKIE=$customIgneous")
         }
-        return false
+        val login = parsed.toExhLogin(customIgneous)
+        // Missing a cookie
+        if (login == null) return false
+
+        // Update prefs
+        exhPreferences.memberIdVal.set(login.memberId)
+        exhPreferences.passHashVal.set(login.passHash)
+        exhPreferences.igneousVal.set(login.igneous)
+        return true
     }
-
-    private fun getCookies(url: String): List<HttpCookie>? =
-        CookieManager.getInstance().getCookie(url)?.let { cookie ->
-            cookie.split("; ").flatMap {
-                HttpCookie.parse(it)
-            }
-        }
 
     override fun finish() {
         super.finish()

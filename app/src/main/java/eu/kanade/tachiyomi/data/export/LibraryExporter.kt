@@ -40,28 +40,20 @@ internal object LibraryExporter {
         )
             .count { it }
 
-        val rows = buildList(favorites.size) {
-            favorites.forEach { manga ->
-                buildList(columnSize) {
-                    if (options.includeTitle) add(manga.title)
-                    if (options.includeAuthor) add(manga.author)
-                    if (options.includeArtist) add(manga.artist)
-                }
-                    .let(::add)
+        val rows = favorites.map { manga ->
+            buildList(columnSize) {
+                if (options.includeTitle) add(manga.title)
+                if (options.includeAuthor) add(manga.author)
+                if (options.includeArtist) add(manga.artist)
             }
         }
-        return rows.joinToString("\r\n") { columns ->
-            columns.joinToString(",") { column ->
-                if (column.isNullOrBlank()) {
-                    ""
-                } else {
-                    if (escapeRequired.any { column.contains(it) }) {
-                        column.replace("\"", "\"\"").let { "\"$it\"" }
-                    } else {
-                        column
-                    }
-                }
-            }
-        }
+        return rows.joinToString("\r\n") { columns -> columns.joinToString(",", transform = ::csvCell) }
+    }
+
+    // A blank value is an empty cell; one holding a delimiter, quote or newline is quoted with quotes doubled.
+    private fun csvCell(column: String?): String = when {
+        column.isNullOrBlank() -> ""
+        escapeRequired.any { column.contains(it) } -> "\"" + column.replace("\"", "\"\"") + "\""
+        else -> column
     }
 }

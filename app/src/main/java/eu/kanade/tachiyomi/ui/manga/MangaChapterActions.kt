@@ -107,37 +107,41 @@ internal class MangaChapterActions(
             )
 
             val autoTrack = model.autoTrackState
-            if (!(!read || model.successState?.hasLoggedInTrackers == false || autoTrack == AutoTrackState.NEVER)) {
+            val trackable = read &&
+                model.successState?.hasLoggedInTrackers != false &&
+                autoTrack != AutoTrackState.NEVER
+            if (trackable) {
                 refreshTrackers()
+                pushProgressToTrackers(chapters.maxOf { it.chapterNumber }, autoTrack)
+            }
+        }
+    }
 
-                val tracks = getTracks.await(mangaId)
-                val maxChapterNumber = chapters.maxOf { it.chapterNumber }
-                val shouldPromptTrackingUpdate = tracks.any { track -> maxChapterNumber > track.lastChapterRead }
+    // Trackers behind the newly read chapter are updated outright or after the snackbar's OK, per the preference.
+    private suspend fun pushProgressToTrackers(maxChapterNumber: Double, autoTrack: AutoTrackState) {
+        val tracks = getTracks.await(mangaId)
+        val shouldPromptTrackingUpdate = tracks.any { track -> maxChapterNumber > track.lastChapterRead }
+        if (!shouldPromptTrackingUpdate) return
 
-                if (shouldPromptTrackingUpdate) {
-                    if (autoTrack == AutoTrackState.ALWAYS) {
-                        trackChapter.await(context, mangaId, maxChapterNumber)
-                        withUIContext {
-                            context.toast(
-                                context.stringResource(MR.strings.trackers_updated_summary, maxChapterNumber.toInt()),
-                            )
-                        }
-                    } else {
-                        val result = model.snackbarHostState.showSnackbar(
-                            message = context.stringResource(
-                                MR.strings.confirm_tracker_update,
-                                maxChapterNumber.toInt(),
-                            ),
-                            actionLabel = context.stringResource(MR.strings.action_ok),
-                            duration = SnackbarDuration.Short,
-                            withDismissAction = true,
-                        )
-
-                        if (result == SnackbarResult.ActionPerformed) {
-                            trackChapter.await(context, mangaId, maxChapterNumber)
-                        }
-                    }
-                }
+        if (autoTrack == AutoTrackState.ALWAYS) {
+            trackChapter.await(context, mangaId, maxChapterNumber)
+            withUIContext {
+                context.toast(
+                    context.stringResource(MR.strings.trackers_updated_summary, maxChapterNumber.toInt()),
+                )
+            }
+        } else {
+            val result = model.snackbarHostState.showSnackbar(
+                message = context.stringResource(
+                    MR.strings.confirm_tracker_update,
+                    maxChapterNumber.toInt(),
+                ),
+                actionLabel = context.stringResource(MR.strings.action_ok),
+                duration = SnackbarDuration.Short,
+                withDismissAction = true,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                trackChapter.await(context, mangaId, maxChapterNumber)
             }
         }
     }

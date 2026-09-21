@@ -23,16 +23,11 @@ internal data class TimeRange(val startTime: Duration, val endTime: Duration) {
     operator fun contains(other: Duration): Boolean = other in startTime..endTime
 
     companion object {
+        /** Parses `"<start minutes>,<end minutes>"`; null when either half is missing or not a number. */
         fun fromPreferenceString(timeRange: String): TimeRange? {
-            val index = timeRange.indexOf(',')
-            return if (index != -1) {
-                TimeRange(
-                    timeRange.substring(0, index).toDoubleOrNull()?.minutes ?: return null,
-                    timeRange.substring(index + 1).toDoubleOrNull()?.minutes ?: return null,
-                )
-            } else {
-                return null
-            }
+            val start = timeRange.substringBefore(',', missingDelimiterValue = "").toDoubleOrNull() ?: return null
+            val end = timeRange.substringAfter(',').toDoubleOrNull() ?: return null
+            return TimeRange(start.minutes, end.minutes)
         }
     }
 }

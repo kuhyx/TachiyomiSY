@@ -111,19 +111,7 @@ internal class MetadataUpdateJob(private val context: Context, workerParams: Wor
                                     progressCount,
                                     manga,
                                 ) {
-                                    val source = sourceManager.get(manga.source)
-                                    if (source != null) {
-                                        try {
-                                            updateMangaFromRemote(
-                                                source = source,
-                                                manga = manga,
-                                                fetchDetails = true,
-                                            ).getOrThrow()
-                                        } catch (expected: Throwable) {
-                                            // Ignore errors and continue
-                                            logcat(LogPriority.ERROR, expected)
-                                        }
-                                    }
+                                    refreshDetails(manga)
                                 }
                             }
                         }
@@ -133,6 +121,17 @@ internal class MetadataUpdateJob(private val context: Context, workerParams: Wor
         }
 
         notifier.cancelProgressNotification()
+    }
+
+    // A failure is logged and the pass carries on with the next entry.
+    private suspend fun refreshDetails(manga: Manga) {
+        val source = sourceManager.get(manga.source) ?: return
+        try {
+            updateMangaFromRemote(source = source, manga = manga, fetchDetails = true).getOrThrow()
+        } catch (expected: Throwable) {
+            // Ignore errors and continue
+            logcat(LogPriority.ERROR, expected)
+        }
     }
 
     private suspend fun withUpdateNotification(

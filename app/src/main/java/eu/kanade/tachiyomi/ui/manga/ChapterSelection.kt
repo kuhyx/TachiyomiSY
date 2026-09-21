@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import eu.kanade.core.util.addOrRemove
+import eu.kanade.core.util.toggleRow
 
 /**
  * The chapter multi-select of the manga screen: which ids are selected and the first/last
@@ -16,60 +17,16 @@ internal class ChapterSelection {
         item: ChapterList.Item,
         selected: Boolean,
         fromLongPress: Boolean,
-    ): List<ChapterList.Item> {
-        return chapters.toMutableList().apply {
-            val selectedIndex = chapters.indexOfFirst { it.id == item.chapter.id }
-            if (!(selectedIndex < 0)) {
-                val selectedItem = get(selectedIndex)
-                if (selectedItem.selected != selected) {
-                    val firstSelection = none { it.selected }
-                    set(selectedIndex, selectedItem.copy(selected = selected))
-                    selectedChapterIds.addOrRemove(item.id, selected)
-
-                    if (selected && fromLongPress) {
-                        if (firstSelection) {
-                            selectedPositions[0] = selectedIndex
-                            selectedPositions[1] = selectedIndex
-                        } else {
-                            // Try to select the items in-between when possible
-                            val range: IntRange
-                            if (selectedIndex < selectedPositions[0]) {
-                                range = selectedIndex + 1..<selectedPositions[0]
-                                selectedPositions[0] = selectedIndex
-                            } else if (selectedIndex > selectedPositions[1]) {
-                                range = (selectedPositions[1] + 1)..<selectedIndex
-                                selectedPositions[1] = selectedIndex
-                            } else {
-                                // Just select itself
-                                range = IntRange.EMPTY
-                            }
-
-                            range.forEach {
-                                val inbetweenItem = get(it)
-                                if (!inbetweenItem.selected) {
-                                    selectedChapterIds.add(inbetweenItem.id)
-                                    set(it, inbetweenItem.copy(selected = true))
-                                }
-                            }
-                        }
-                    } else if (!fromLongPress) {
-                        if (!selected) {
-                            if (selectedIndex == selectedPositions[0]) {
-                                selectedPositions[0] = indexOfFirst { it.selected }
-                            } else if (selectedIndex == selectedPositions[1]) {
-                                selectedPositions[1] = indexOfLast { it.selected }
-                            }
-                        } else {
-                            if (selectedIndex < selectedPositions[0]) {
-                                selectedPositions[0] = selectedIndex
-                            } else if (selectedIndex > selectedPositions[1]) {
-                                selectedPositions[1] = selectedIndex
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    ): List<ChapterList.Item> = chapters.toMutableList().apply {
+        toggleRow(
+            selectedIndex = indexOfFirst { it.id == item.chapter.id },
+            selected = selected,
+            fromLongPress = fromLongPress,
+            positions = selectedPositions,
+            isSelected = { it.selected },
+            withSelected = { chapter, value -> chapter.copy(selected = value) },
+            track = { chapter, value -> selectedChapterIds.addOrRemove(chapter.id, value) },
+        )
     }
 
     fun setAll(chapters: List<ChapterList.Item>, selected: Boolean): List<ChapterList.Item> {

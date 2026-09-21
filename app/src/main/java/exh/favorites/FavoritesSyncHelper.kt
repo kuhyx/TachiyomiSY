@@ -96,26 +96,29 @@ internal class FavoritesSyncHelper(val context: Context) {
         }
         // Validate library state
         status.value = FavoritesSyncStatus.Processing.VerifyingLibrary
-        if (!libraryStateIsSyncable()) return
-
-        // Download remote favorites
-        val favorites = try {
-            status.value = FavoritesSyncStatus.Processing.DownloadingFavorites
-            exh.fetchFavorites()
-        } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
-            status.value = FavoritesSyncStatus.SyncError.FailedToFetchFavorites
-            logger.e(context.stringResource(SYMR.strings.favorites_sync_could_not_fetch), expected)
-            return
-        }
+        val favorites = if (libraryStateIsSyncable()) downloadFavorites() else null
 
         val errorList = mutableListOf<FavoritesSyncStatus.SyncError.GallerySyncError>()
-        val completed = syncUnderLocks(favorites, errorList)
-        status.value = when {
-            !completed -> return
-            errorList.isEmpty() -> FavoritesSyncStatus.Idle
-            else -> FavoritesSyncStatus.CompleteWithErrors(errorList)
+        // A failed step has already set the error status.
+        val completed = favorites != null && syncUnderLocks(favorites, errorList)
+        if (completed) {
+            status.value = if (errorList.isEmpty()) {
+                FavoritesSyncStatus.Idle
+            } else {
+                FavoritesSyncStatus.CompleteWithErrors(errorList)
+            }
         }
+    }
+
+    // The remote favorites, or null (with [status] set to the error) when they could not be fetched.
+    private suspend fun downloadFavorites(): Pair<List<EHentai.ParsedManga>, List<String>>? = try {
+        status.value = FavoritesSyncStatus.Processing.DownloadingFavorites
+        exh.fetchFavorites()
+    } catch (expected: Exception) {
+        // Logged whatever the cause; the caller carries on.
+        status.value = FavoritesSyncStatus.SyncError.FailedToFetchFavorites
+        logger.e(context.stringResource(SYMR.strings.favorites_sync_could_not_fetch), expected)
+        null
     }
 
     // An EH gallery in more than one category cannot be mirrored to a single remote favourite slot.
@@ -144,7 +147,7 @@ internal class FavoritesSyncHelper(val context: Context) {
         favorites: Pair<List<EHentai.ParsedManga>, List<String>>,
         errorList: MutableList<FavoritesSyncStatus.SyncError.GallerySyncError>,
     ): Boolean {
-        try {
+        return try {
             // Take wake + wifi locks
             ignore { wakeLock?.release() }
             wakeLock = ignore { context.createPartialWakeLock("teh:ExhFavoritesSyncWakelock") }
@@ -179,15 +182,16 @@ internal class FavoritesSyncHelper(val context: Context) {
             withUIContext {
                 context.toast(SYMR.strings.favorites_sync_complete)
             }
+            true
         } catch (e: IgnoredException) {
             // Do not display error as this error has already been reported
             logger.w(context.stringResource(SYMR.strings.favorites_sync_ignoring_exception), e)
-            return false
+            false
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.
             status.value = FavoritesSyncStatus.SyncError.UnknownSyncError(expected.message.orEmpty())
             logger.e(context.stringResource(SYMR.strings.favorites_sync_sync_error), expected)
-            return false
+            false
         } finally {
             // Release wake + wifi locks
             ignore {
@@ -201,7 +205,6 @@ internal class FavoritesSyncHelper(val context: Context) {
             // Update galleries again!
             EHentaiUpdateWorker.scheduleBackground(context)
         }
-        return true
     }
 
     private suspend fun applyRemoteCategories(categories: List<String>) {

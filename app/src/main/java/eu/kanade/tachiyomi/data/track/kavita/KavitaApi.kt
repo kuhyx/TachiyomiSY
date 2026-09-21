@@ -121,17 +121,8 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
     private fun getLatestChapterRead(url: String): Double {
         val seriesId = getIdFromUrl(url)
         val requestUrl = "${getApiFromUrl(url)}/Tachiyomi/latest-chapter?seriesId=$seriesId"
-        try {
-            with(json) {
-                authClient.newCall(GET(requestUrl)).execute().use {
-                    if (it.code == HttpURLConnection.HTTP_OK) {
-                        return it.parseAs<ChapterDto>().number!!.replace(",", ".").toDouble()
-                    }
-                    if (it.code == HttpURLConnection.HTTP_NO_CONTENT) {
-                        return 0.0
-                    }
-                }
-            }
+        return try {
+            authClient.newCall(GET(requestUrl)).execute().use { it.latestChapterNumber() }
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.
             logcat(
@@ -140,7 +131,13 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
             ) { "Exception getting latest chapter read. Could not get itemRequest: $requestUrl" }
             throw expected
         }
-        return 0.0
+    }
+
+    // 200 carries the chapter; 204 means nothing read yet, and anything else counts the same.
+    private fun Response.latestChapterNumber(): Double = if (code == HttpURLConnection.HTTP_OK) {
+        with(json) { parseAs<ChapterDto>().number!!.replace(",", ".").toDouble() }
+    } else {
+        0.0
     }
 
     suspend fun getTrackSearch(url: String): TrackSearch = withIOContext {

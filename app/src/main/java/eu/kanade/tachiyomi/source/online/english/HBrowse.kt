@@ -71,12 +71,8 @@ internal class HBrowse(delegate: HttpSource, val context: Context) :
                         length = v.text().substringBefore(" ").toInt()
                     }
                     else -> {
-                        v.getElementsByTag("a").forEach {
-                            tags += RaisedTag(
-                                lowercaseNs,
-                                it.text(),
-                                HBrowseSearchMetadata.TAG_TYPE_DEFAULT,
-                            )
+                        tags += v.getElementsByTag("a").map {
+                            RaisedTag(lowercaseNs, it.text(), HBrowseSearchMetadata.TAG_TYPE_DEFAULT)
                         }
                     }
                 }

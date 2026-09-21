@@ -27,27 +27,26 @@ internal fun Manga.mangaType(context: Context): String {
  */
 internal fun Manga.mangaType(sourceName: String? = Injekt.get<SourceManager>().get(source)?.name): MangaType {
     val currentTags = genre.orEmpty()
-    return when {
-        currentTags.any { tag -> isMangaTag(tag) } -> {
-            MangaType.TYPE_MANGA
-        }
-        currentTags.any { tag -> isWebtoonTag(tag) } || sourceName?.let { isWebtoonSource(it) } == true -> {
-            MangaType.TYPE_WEBTOON
-        }
-        currentTags.any { tag -> isComicTag(tag) } || sourceName?.let { isComicSource(it) } == true -> {
-            MangaType.TYPE_COMIC
-        }
-        currentTags.any { tag -> isManhuaTag(tag) } || sourceName?.let { isManhuaSource(it) } == true -> {
-            MangaType.TYPE_MANHUA
-        }
-        currentTags.any { tag -> isManhwaTag(tag) } || sourceName?.let { isManhwaSource(it) } == true -> {
-            MangaType.TYPE_MANHWA
-        }
-        else -> {
-            MangaType.TYPE_MANGA
-        }
+    if (currentTags.any { tag -> isMangaTag(tag) }) return MangaType.TYPE_MANGA
+    val match = TYPE_DETECTORS.firstOrNull { (_, isTag, isSource) ->
+        currentTags.any(isTag) || sourceName?.let(isSource) == true
     }
+    return match?.type ?: MangaType.TYPE_MANGA
 }
+
+private data class TypeDetector(
+    val type: MangaType,
+    val isTag: (String) -> Boolean,
+    val isSource: (String) -> Boolean,
+)
+
+// Checked in order; an explicit "manga" tag wins over all of these.
+private val TYPE_DETECTORS = listOf(
+    TypeDetector(MangaType.TYPE_WEBTOON, ::isWebtoonTag, ::isWebtoonSource),
+    TypeDetector(MangaType.TYPE_COMIC, ::isComicTag, ::isComicSource),
+    TypeDetector(MangaType.TYPE_MANHUA, ::isManhuaTag, ::isManhuaSource),
+    TypeDetector(MangaType.TYPE_MANHWA, ::isManhwaTag, ::isManhwaSource),
+)
 
 /**
  * The type the reader should use. Different from manga type as certain manga has different
@@ -65,72 +64,37 @@ internal fun Manga.defaultReaderType(type: MangaType = mangaType()): Int? {
     return
 }*/
 
-private fun isManhwaSource(sourceName: String): Boolean {
-    return sourceName.contains("hiperdex", true) ||
-        sourceName.contains("hmanhwa", true) ||
-        sourceName.contains("instamanhwa", true) ||
-        sourceName.contains("manhwa18", true) ||
-        sourceName.contains("manhwa68", true) ||
-        sourceName.contains("manhwa365", true) ||
-        sourceName.contains("manhwahentaime", true) ||
-        sourceName.contains("manhwamanga", true) ||
-        sourceName.contains("manhwatop", true) ||
-        sourceName.contains("manhwa club", true) ||
-        sourceName.contains("manytoon", true) ||
-        sourceName.contains("manwha", true) ||
-        sourceName.contains("readmanhwa", true) ||
-        sourceName.contains("skymanga", true) ||
-        sourceName.contains("toonily", true) ||
-        sourceName.contains("webtoonxyz", true)
-}
+// Case-insensitive substrings of source names, one list per comic type.
+private val MANHWA_SOURCES = listOf(
+    "hiperdex", "hmanhwa", "instamanhwa", "manhwa18", "manhwa68", "manhwa365", "manhwahentaime",
+    "manhwamanga", "manhwatop", "manhwa club", "manytoon", "manwha", "readmanhwa", "skymanga",
+    "toonily", "webtoonxyz",
+)
 
-private fun isWebtoonSource(sourceName: String): Boolean {
-    return sourceName.contains("mangatoon", true) ||
-        sourceName.contains("manmanga", true) ||
-        // sourceName.contains("tapas", true) ||
-        sourceName.contains("toomics", true) ||
-        sourceName.contains("webcomics", true) ||
-        sourceName.contains("webtoons", true) ||
-        sourceName.contains("webtoon", true)
-}
+// "tapas" deliberately left out: it hosts more than webtoons.
+private val WEBTOON_SOURCES = listOf("mangatoon", "manmanga", "toomics", "webcomics", "webtoons", "webtoon")
 
-private fun isComicSource(sourceName: String): Boolean {
-    return sourceName.contains("8muses", true) ||
-        sourceName.contains("allporncomic", true) ||
-        sourceName.contains("ciayo comics", true) ||
-        sourceName.contains("comicextra", true) ||
-        sourceName.contains("comicpunch", true) ||
-        sourceName.contains("cyanide", true) ||
-        sourceName.contains("dilbert", true) ||
-        sourceName.contains("eggporncomics", true) ||
-        sourceName.contains("existential comics", true) ||
-        sourceName.contains("hiveworks comics", true) ||
-        sourceName.contains("milftoon", true) ||
-        sourceName.contains("myhentaicomics", true) ||
-        sourceName.contains("myhentaigallery", true) ||
-        sourceName.contains("gunnerkrigg", true) ||
-        sourceName.contains("oglaf", true) ||
-        sourceName.contains("patch friday", true) ||
-        sourceName.contains("porncomix", true) ||
-        sourceName.contains("questionable content", true) ||
-        sourceName.contains("readcomiconline", true) ||
-        sourceName.contains("read comics online", true) ||
-        sourceName.contains("swords comic", true) ||
-        sourceName.contains("teabeer comics", true) ||
-        sourceName.contains("xkcd", true)
-}
+private val COMIC_SOURCES = listOf(
+    "8muses", "allporncomic", "ciayo comics", "comicextra", "comicpunch", "cyanide", "dilbert",
+    "eggporncomics", "existential comics", "hiveworks comics", "milftoon", "myhentaicomics",
+    "myhentaigallery", "gunnerkrigg", "oglaf", "patch friday", "porncomix", "questionable content",
+    "readcomiconline", "read comics online", "swords comic", "teabeer comics", "xkcd",
+)
 
-private fun isManhuaSource(sourceName: String): Boolean {
-    return sourceName.contains("1st kiss manhua", true) ||
-        sourceName.contains("hero manhua", true) ||
-        sourceName.contains("manhuabox", true) ||
-        sourceName.contains("manhuaus", true) ||
-        sourceName.contains("manhuas world", true) ||
-        sourceName.contains("manhuas.net", true) ||
-        sourceName.contains("readmanhua", true) ||
-        sourceName.contains("wuxiaworld", true) ||
-        sourceName.contains("manhua", true)
-}
+private val MANHUA_SOURCES = listOf(
+    "1st kiss manhua", "hero manhua", "manhuabox", "manhuaus", "manhuas world", "manhuas.net",
+    "readmanhua", "wuxiaworld", "manhua",
+)
+
+private fun String.matchesAny(needles: List<String>): Boolean = needles.any { contains(it, ignoreCase = true) }
+
+private fun isManhwaSource(sourceName: String): Boolean = sourceName.matchesAny(MANHWA_SOURCES)
+
+private fun isWebtoonSource(sourceName: String): Boolean = sourceName.matchesAny(WEBTOON_SOURCES)
+
+private fun isComicSource(sourceName: String): Boolean = sourceName.matchesAny(COMIC_SOURCES)
+
+private fun isManhuaSource(sourceName: String): Boolean = sourceName.matchesAny(MANHUA_SOURCES)
 
 internal enum class MangaType {
     TYPE_MANGA,

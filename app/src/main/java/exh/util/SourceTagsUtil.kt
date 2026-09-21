@@ -15,6 +15,7 @@ internal object SourceTagsUtil {
     private const val TAG_TYPE_EXCLUDE = 69 // why not
     private const val TAG_TYPE_DEFAULT = 1
     private val spaceRegex = "\\s".toRegex()
+    private val FIXED_TAG_SOURCE_IDS = setOf(EXH_SOURCE_ID, EH_SOURCE_ID, PURURIN_SOURCE_ID, TSUMINO_SOURCE_ID)
 
     fun getWrappedTag(
         sourceId: Long?,
@@ -22,19 +23,8 @@ internal object SourceTagsUtil {
         tag: String? = null,
         fullTag: String? = null,
     ): String? {
-        val supported = sourceId == EXH_SOURCE_ID ||
-            sourceId == EH_SOURCE_ID ||
-            sourceId in nHentaiSourceIds ||
-            sourceId in mangaDexSourceIds ||
-            sourceId == PURURIN_SOURCE_ID ||
-            sourceId == TSUMINO_SOURCE_ID ||
-            sourceId in lanraragiSourceIds
-        if (!supported) return null
-        val parsed = when {
-            fullTag != null -> parseTag(fullTag)
-            namespace != null && tag != null -> RaisedTag(namespace, tag, TAG_TYPE_DEFAULT)
-            else -> null
-        } ?: return null
+        if (!supportsWrappedTags(sourceId)) return null
+        val parsed = toRaisedTag(namespace, tag, fullTag) ?: return null
         val parsedNamespace = parsed.namespace ?: return null
         val name = parsed.name.substringBefore('|').trim()
         return when (sourceId) {
@@ -44,6 +34,19 @@ internal object SourceTagsUtil {
             TSUMINO_SOURCE_ID -> wrapTagTsumino(parsedNamespace, name)
             else -> wrapTag(parsedNamespace, name)
         }
+    }
+
+    // The delegated-source id lists are filled at runtime, so this cannot be a constant set.
+    private fun supportsWrappedTags(sourceId: Long?): Boolean =
+        sourceId in FIXED_TAG_SOURCE_IDS ||
+            sourceId in nHentaiSourceIds ||
+            sourceId in mangaDexSourceIds ||
+            sourceId in lanraragiSourceIds
+
+    private fun toRaisedTag(namespace: String?, tag: String?, fullTag: String?): RaisedTag? = when {
+        fullTag != null -> parseTag(fullTag)
+        namespace != null && tag != null -> RaisedTag(namespace, tag, TAG_TYPE_DEFAULT)
+        else -> null
     }
 
     private fun wrapTag(namespace: String, tag: String) = if (tag.contains(spaceRegex)) {
@@ -102,21 +105,24 @@ internal object SourceTagsUtil {
         constructor(color: String) : this(color.toColorInt())
     }
 
-    fun getLocaleSourceUtil(language: String?) = when (language) {
-        "english", "eng" -> Locale.forLanguageTag("en")
-        "chinese" -> Locale.forLanguageTag("zh")
-        "spanish" -> Locale.forLanguageTag("es")
-        "korean" -> Locale.forLanguageTag("ko")
-        "russian" -> Locale.forLanguageTag("ru")
-        "french" -> Locale.forLanguageTag("fr")
-        "portuguese" -> Locale.forLanguageTag("pt")
-        "thai" -> Locale.forLanguageTag("th")
-        "german" -> Locale.forLanguageTag("de")
-        "italian" -> Locale.forLanguageTag("it")
-        "vietnamese" -> Locale.forLanguageTag("vi")
-        "polish" -> Locale.forLanguageTag("pl")
-        "hungarian" -> Locale.forLanguageTag("hu")
-        "dutch" -> Locale.forLanguageTag("nl")
-        else -> null
-    }
+    fun getLocaleSourceUtil(language: String?): Locale? = LANGUAGE_TAGS[language]?.let(Locale::forLanguageTag)
 }
+
+// Source language names (as the galleries spell them) to BCP 47 tags.
+private val LANGUAGE_TAGS = mapOf(
+    "english" to "en",
+    "eng" to "en",
+    "chinese" to "zh",
+    "spanish" to "es",
+    "korean" to "ko",
+    "russian" to "ru",
+    "french" to "fr",
+    "portuguese" to "pt",
+    "thai" to "th",
+    "german" to "de",
+    "italian" to "it",
+    "vietnamese" to "vi",
+    "polish" to "pl",
+    "hungarian" to "hu",
+    "dutch" to "nl",
+)

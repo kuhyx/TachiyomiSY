@@ -14,6 +14,8 @@ import exh.md.utils.MdApi
 import exh.md.utils.MdUtil
 import okhttp3.Call
 import tachiyomi.core.common.util.lang.withIOContext
+import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.isAccessible
 
@@ -88,18 +90,13 @@ internal class PageHandler(
         }
     }
 
+    // Tells the extension's own token tracker about the at-home url so it does not re-request it.
     @Suppress("UNCHECKED_CAST")
     private fun updateExtensionVariable(mangadex: Source, atHomeRequestUrl: String) {
-        val mangadexSuperclass = mangadex::class.superclasses.first()
-
-        val helperCallable = mangadexSuperclass.members.find { it.name == "helper" } ?: return
-        helperCallable.isAccessible = true
-        val helper = helperCallable.call(mangadex) ?: return
-
-        val tokenTrackerCallable = helper::class.members.find { it.name == "tokenTracker" } ?: return
-        tokenTrackerCallable.isAccessible = true
-        val tokenTracker = tokenTrackerCallable.call(helper) as? HashMap<String, Long> ?: return
-        tokenTracker[atHomeRequestUrl] = System.currentTimeMillis()
+        val helper = mangadex::class.superclasses.first().accessibleMember("helper")?.call(mangadex)
+        val tokenTracker = helper?.let { it::class.accessibleMember("tokenTracker")?.call(it) }
+            as? HashMap<String, Long>
+        tokenTracker?.set(atHomeRequestUrl, System.currentTimeMillis())
     }
 
     private fun pageListParse(
@@ -175,3 +172,7 @@ internal class PageHandler(
         }
     }
 }
+
+// A member by name, made callable regardless of its visibility; null when the class has none.
+private fun KClass<*>.accessibleMember(name: String): KCallable<*>? =
+    members.find { it.name == name }?.also { it.isAccessible = true }

@@ -32,17 +32,11 @@ internal class ExtensionInstallerPreference(
         ExtensionInstaller.PACKAGEINSTALLER
     }
 
-    private fun check(value: ExtensionInstaller): ExtensionInstaller {
-        when (value) {
-            ExtensionInstaller.PACKAGEINSTALLER -> {
-                if (context.hasMiuiPackageInstaller) return ExtensionInstaller.LEGACY
-            }
-            ExtensionInstaller.SHIZUKU -> {
-                if (!context.isShizukuInstalled) return defaultValue()
-            }
-            else -> {}
-        }
-        return value
+    // Falls back when the chosen installer cannot work on this device.
+    private fun check(value: ExtensionInstaller): ExtensionInstaller = when {
+        value == ExtensionInstaller.PACKAGEINSTALLER && context.hasMiuiPackageInstaller -> ExtensionInstaller.LEGACY
+        value == ExtensionInstaller.SHIZUKU && !context.isShizukuInstalled -> defaultValue()
+        else -> value
     }
 
     override fun get(): ExtensionInstaller {

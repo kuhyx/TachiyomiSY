@@ -38,10 +38,9 @@ internal class BackupCreateJob(private val context: Context, workerParams: Worke
     CoroutineWorker(context, workerParams) {
 
     private val notifier = BackupNotifier(context)
+    private val isAutoBackup by lazy { inputData.getBoolean(IS_AUTO_BACKUP_KEY, true) }
 
     override suspend fun doWork(): Result {
-        val isAutoBackup = inputData.getBoolean(IS_AUTO_BACKUP_KEY, true)
-
         if (isAutoBackup && BackupRestoreJob.isRunning(context)) return Result.retry()
 
         val uri = inputData.getString(LOCATION_URI_KEY)?.toUri()

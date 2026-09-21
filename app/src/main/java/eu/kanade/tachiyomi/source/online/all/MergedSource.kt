@@ -124,38 +124,7 @@ internal class MergedSource : UnsupportedHelpersHttpSource() {
                 .map { (_, values) ->
                     async {
                         semaphore.withPermit {
-                            values.flatMap {
-                                try {
-                                    val (source, loadedManga, reference) = it.load()
-                                    if (loadedManga != null && reference.getChapterUpdates) {
-                                        val results = updateMangaFromRemote(
-                                            source,
-                                            loadedManga,
-                                            fetchDetails = false,
-                                            fetchChapters = true,
-                                        ).getOrThrow().newChapters
-
-                                        if (downloadChapters && reference.downloadChapters) {
-                                            val chaptersToDownload = filterChaptersForDownload.await(manga, results)
-                                            if (chaptersToDownload.isNotEmpty()) {
-                                                downloadManager.downloadChapters(
-                                                    loadedManga,
-                                                    chaptersToDownload,
-                                                )
-                                            }
-                                        }
-                                        results
-                                    } else {
-                                        emptyList()
-                                    }
-                                } catch (cancelled: CancellationException) {
-                                    throw cancelled
-                                } catch (expected: Exception) {
-                                    // Rethrown (or wrapped) whatever the cause.
-                                    exception = expected
-                                    emptyList()
-                                }
-                            }
+                            fetchParts(manga, values, downloadChapters) { exception = it }
                         }
                     }
                 }
@@ -164,6 +133,49 @@ internal class MergedSource : UnsupportedHelpersHttpSource() {
         }.also {
             exception?.let { throw it }
         }
+    }
+
+    // A failing part reports its error and contributes nothing; the others still load.
+    private suspend fun fetchParts(
+        manga: Manga,
+        references: List<MergedMangaReference>,
+        downloadChapters: Boolean,
+        onError: (Exception) -> Unit,
+    ): List<Chapter> = references.flatMap { reference ->
+        try {
+            fetchPartChapters(manga, reference, downloadChapters)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (expected: Exception) {
+            // Rethrown (or wrapped) whatever the cause.
+            onError(expected)
+            emptyList()
+        }
+    }
+
+    // One part's new chapters, queued for download when its reference asks; none when it is not followed.
+    private suspend fun fetchPartChapters(
+        manga: Manga,
+        reference: MergedMangaReference,
+        downloadChapters: Boolean,
+    ): List<Chapter> {
+        val (source, loadedManga, loaded) = reference.load()
+        if (loadedManga == null || !loaded.getChapterUpdates) return emptyList()
+
+        val results = updateMangaFromRemote(
+            source,
+            loadedManga,
+            fetchDetails = false,
+            fetchChapters = true,
+        ).getOrThrow().newChapters
+
+        if (downloadChapters && loaded.downloadChapters) {
+            val chaptersToDownload = filterChaptersForDownload.await(manga, results)
+            if (chaptersToDownload.isNotEmpty()) {
+                downloadManager.downloadChapters(loadedManga, chaptersToDownload)
+            }
+        }
+        return results
     }
 
     suspend fun MergedMangaReference.load(): LoadedMangaSource {

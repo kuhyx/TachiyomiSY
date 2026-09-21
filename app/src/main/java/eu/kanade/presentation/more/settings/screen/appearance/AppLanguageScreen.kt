@@ -93,21 +93,11 @@ internal class AppLanguageScreen : Screen() {
     }
 
     private fun getLangs(context: Context): List<Language> = buildList {
-        val parser = context.resources.getXml(R.xml.locales_config)
-        var eventType = parser.eventType
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            if (eventType == XmlPullParser.START_TAG && parser.name == "locale") {
-                for (i in 0..<parser.attributeCount) {
-                    if (parser.getAttributeName(i) == "name") {
-                        val langTag = parser.getAttributeValue(i)
-                        val displayName = LocaleHelper.getLocalizedDisplayName(langTag)
-                        if (displayName.isNotEmpty()) {
-                            add(Language(langTag, displayName, LocaleHelper.getDisplayName(langTag)))
-                        }
-                    }
-                }
+        for (langTag in context.resources.getXml(R.xml.locales_config).localeTags()) {
+            val displayName = LocaleHelper.getLocalizedDisplayName(langTag)
+            if (displayName.isNotEmpty()) {
+                add(Language(langTag, displayName, LocaleHelper.getDisplayName(langTag)))
             }
-            eventType = parser.next()
         }
 
         sortBy { it.displayName }
@@ -120,3 +110,19 @@ internal class AppLanguageScreen : Screen() {
         val localizedDisplayName: String?,
     )
 }
+
+// The `name` attribute of every `<locale>` element, in document order.
+private fun XmlPullParser.localeTags(): List<String> {
+    val tags = mutableListOf<String>()
+    var event = eventType
+    while (event != XmlPullParser.END_DOCUMENT) {
+        if (event == XmlPullParser.START_TAG && name == "locale") {
+            tags += attributeValues("name")
+        }
+        event = next()
+    }
+    return tags
+}
+
+private fun XmlPullParser.attributeValues(attribute: String): List<String> =
+    (0..<attributeCount).filter { getAttributeName(it) == attribute }.map { getAttributeValue(it) }

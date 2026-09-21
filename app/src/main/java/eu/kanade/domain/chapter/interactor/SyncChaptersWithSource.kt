@@ -134,21 +134,23 @@ internal class SyncChaptersWithSource(collaborators: Collaborators) {
         for (sourceChapter in sourceChapters) {
             val chapter = prepare(sourceChapter, manga, source)
             val dbChapter = dbChapters.find { it.url == chapter.url }
-            if (dbChapter == null) {
-                val toAddChapter = if (chapter.dateUpload == 0L) {
-                    val altDateUpload = if (maxSeenUploadDate == 0L) nowMillis else maxSeenUploadDate
-                    chapter.copy(dateUpload = altDateUpload)
-                } else {
+            when {
+                dbChapter == null -> {
+                    // A missing upload date borrows the newest one seen so far, or "now" for the first.
+                    val fallbackDate = if (maxSeenUploadDate == 0L) nowMillis else maxSeenUploadDate
+                    diff.new.add(chapter.withUploadDate(fallbackDate))
                     maxSeenUploadDate = max(maxSeenUploadDate, sourceChapter.dateUpload)
-                    chapter
                 }
-                diff.new.add(toAddChapter)
-            } else if (shouldUpdateDbChapter.await(dbChapter, chapter)) {
-                diff.updated.add(updatedDbChapter(dbChapter, chapter, manga, source))
+                shouldUpdateDbChapter.await(dbChapter, chapter) -> {
+                    diff.updated.add(updatedDbChapter(dbChapter, chapter, manga, source))
+                }
             }
         }
         return diff
     }
+
+    private fun Chapter.withUploadDate(fallback: Long): Chapter =
+        if (dateUpload == 0L) copy(dateUpload = fallback) else this
 
     // Applies the source's per-chapter hook and recognises the chapter number.
     private fun prepare(sourceChapter: Chapter, manga: Manga, source: Source): Chapter {
@@ -246,11 +248,9 @@ internal class SyncChaptersWithSource(collaborators: Collaborators) {
         toAdd: List<Chapter>,
         changedOrDuplicateReadUrls: Set<String>,
     ): List<Chapter> {
-        if (!manga.isEhBasedManga()) return toAdd
-        val finalAdded = toAdd.filterNot { it.url in changedOrDuplicateReadUrls }
-        if (finalAdded.isEmpty()) return toAdd
-        val max = dbChapters.maxOfOrNull { it.lastPageRead }
-        if (max == null || max <= 0) return toAdd
+        val max = dbChapters.maxOfOrNull { it.lastPageRead } ?: 0
+        val applies = manga.isEhBasedManga() && max > 0 && toAdd.any { it.url !in changedOrDuplicateReadUrls }
+        if (!applies) return toAdd
         return toAdd.map { if (it.url !in changedOrDuplicateReadUrls) it.copy(lastPageRead = max) else it }
     }
 

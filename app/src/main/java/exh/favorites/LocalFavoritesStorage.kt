@@ -85,18 +85,6 @@ internal class LocalFavoritesStorage(
         return ChangeSet(added, removed)
     }
 
-    private fun FavoriteEntry.urlEquals(other: FavoriteEntry) = (gid == other.gid && token == other.token) ||
-        (otherGid != null && otherToken != null && otherGid == other.gid && otherToken == other.token) ||
-        (other.otherGid != null && other.otherToken != null && gid == other.otherGid && token == other.otherToken) ||
-        (
-            otherGid != null &&
-                otherToken != null &&
-                other.otherGid != null &&
-                other.otherToken != null &&
-                otherGid == other.otherGid &&
-                otherToken == other.otherToken
-            )
-
     private fun queryListForEntry(list: List<FavoriteEntry>, entry: FavoriteEntry) =
         list.find { it.urlEquals(entry) && it.category == entry.category }
 
@@ -133,3 +121,14 @@ internal data class ChangeSet(
     val added: List<FavoriteEntry>,
     val removed: List<FavoriteEntry>,
 )
+
+// An entry is known by its gallery id/token pair and, once E-Hentai has moved it, by a second pair.
+private fun FavoriteEntry.identities(): List<Pair<String, String>> = listOfNotNull(
+    gid to token,
+    otherGid?.let { g -> otherToken?.let { t -> g to t } },
+)
+
+private fun FavoriteEntry.urlEquals(other: FavoriteEntry): Boolean {
+    val theirs = other.identities()
+    return identities().any { it in theirs }
+}

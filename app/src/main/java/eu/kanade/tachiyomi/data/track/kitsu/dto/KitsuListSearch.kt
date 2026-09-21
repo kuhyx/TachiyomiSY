@@ -34,19 +34,20 @@ internal fun KitsuListSearchResult.firstToTrack(): TrackSearch {
         startDate = userDataAttrs.startedAt ?: ""
         startedReadingDate = KitsuDateHelper.parse(userDataAttrs.startedAt)
         finishedReadingDate = KitsuDateHelper.parse(userDataAttrs.finishedAt)
-        status = when (userDataAttrs.status) {
-            "current" -> Kitsu.READING
-            "completed" -> Kitsu.COMPLETED
-            "on_hold" -> Kitsu.ON_HOLD
-            "dropped" -> Kitsu.DROPPED
-            "planned" -> Kitsu.PLAN_TO_READ
-            else -> error("Unknown status")
-        }
+        status = KITSU_STATUSES[userDataAttrs.status] ?: error("Unknown status")
         score = userDataAttrs.ratingTwenty?.let { it / 2.0 } ?: 0.0
         lastChapterRead = userDataAttrs.progress.toDouble()
         private = userDataAttrs.private
     }
 }
+
+private val KITSU_STATUSES = mapOf(
+    "current" to Kitsu.READING,
+    "completed" to Kitsu.COMPLETED,
+    "on_hold" to Kitsu.ON_HOLD,
+    "dropped" to Kitsu.DROPPED,
+    "planned" to Kitsu.PLAN_TO_READ,
+)
 
 @Serializable
 internal data class KitsuListSearchItemData(

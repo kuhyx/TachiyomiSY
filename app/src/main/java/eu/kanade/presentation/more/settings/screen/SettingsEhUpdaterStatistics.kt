@@ -121,19 +121,18 @@ private class PeriodRemainder(private var period: Duration) {
 }
 
 private fun getRelativeTimeString(relativeTime: RelativeTime, context: Context): String {
-    return relativeTime.years?.let { context.pluralStringResource(SYMR.plurals.humanize_year, it.toInt(), it) }
-        ?: relativeTime.months?.let {
-            context.pluralStringResource(SYMR.plurals.humanize_month, it.toInt(), it)
-        }
-        ?: relativeTime.weeks?.let { context.pluralStringResource(SYMR.plurals.humanize_week, it.toInt(), it) }
-        ?: relativeTime.days?.let { context.pluralStringResource(SYMR.plurals.humanize_day, it.toInt(), it) }
-        ?: relativeTime.hours?.let { context.pluralStringResource(SYMR.plurals.humanize_hour, it.toInt(), it) }
-        ?: relativeTime.minutes?.let {
-            context.pluralStringResource(SYMR.plurals.humanize_minute, it.toInt(), it)
-        }
-        ?: relativeTime.seconds?.let {
-            context.pluralStringResource(SYMR.plurals.humanize_second, it.toInt(), it)
-        }
+    // Largest unit first; milliseconds never get a label.
+    val units = listOf(
+        relativeTime.years to SYMR.plurals.humanize_year,
+        relativeTime.months to SYMR.plurals.humanize_month,
+        relativeTime.weeks to SYMR.plurals.humanize_week,
+        relativeTime.days to SYMR.plurals.humanize_day,
+        relativeTime.hours to SYMR.plurals.humanize_hour,
+        relativeTime.minutes to SYMR.plurals.humanize_minute,
+        relativeTime.seconds to SYMR.plurals.humanize_second,
+    )
+    val largest = units.firstNotNullOfOrNull { (count, plural) -> count?.let { it to plural } }
+    return largest?.let { (count, plural) -> context.pluralStringResource(plural, count.toInt(), count) }
         ?: context.stringResource(SYMR.strings.humanize_fallback)
 }
 

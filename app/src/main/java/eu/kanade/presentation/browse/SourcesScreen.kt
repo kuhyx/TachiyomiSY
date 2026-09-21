@@ -214,52 +214,57 @@ internal fun SourceOptionsDialog(
             Text(text = source.visualName)
         },
         text = {
-            Column {
-                val textId = if (Pin.Pinned in source.pin) MR.strings.action_unpin else MR.strings.action_pin
-                Text(
-                    text = stringResource(textId),
-                    modifier = Modifier
-                        .clickable(onClick = onClickPin)
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                )
-                if (!source.isLocal()) {
-                    Text(
-                        text = stringResource(MR.strings.action_disable),
-                        modifier = Modifier
-                            .clickable(onClick = onClickDisable)
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                    )
-                }
-                // SY -->
-                if (onClickSetCategories != null) {
-                    Text(
-                        text = stringResource(MR.strings.categories),
-                        modifier = Modifier
-                            .clickable(onClick = onClickSetCategories)
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                    )
-                }
-                if (onClickToggleDataSaver != null) {
-                    Text(
-                        text = if (source.isExcludedFromDataSaver) {
-                            stringResource(SYMR.strings.data_saver_stop_exclude)
-                        } else {
-                            stringResource(SYMR.strings.data_saver_exclude)
-                        },
-                        modifier = Modifier
-                            .clickable(onClick = onClickToggleDataSaver)
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                    )
-                }
-                // SY <--
-            }
+            SourceOptions(
+                source = source,
+                onClickPin = onClickPin,
+                onClickDisable = onClickDisable,
+                onClickSetCategories = onClickSetCategories,
+                onClickToggleDataSaver = onClickToggleDataSaver,
+            )
         },
         onDismissRequest = onDismiss,
         confirmButton = {},
+    )
+}
+
+@Composable
+private fun SourceOptions(
+    source: Source,
+    onClickPin: () -> Unit,
+    onClickDisable: () -> Unit,
+    onClickSetCategories: (() -> Unit)?,
+    onClickToggleDataSaver: (() -> Unit)?,
+) {
+    Column {
+        val textId = if (Pin.Pinned in source.pin) MR.strings.action_unpin else MR.strings.action_pin
+        SourceOption(text = stringResource(textId), onClick = onClickPin)
+        if (!source.isLocal()) {
+            SourceOption(text = stringResource(MR.strings.action_disable), onClick = onClickDisable)
+        }
+        // SY -->
+        if (onClickSetCategories != null) {
+            SourceOption(text = stringResource(MR.strings.categories), onClick = onClickSetCategories)
+        }
+        if (onClickToggleDataSaver != null) {
+            val dataSaverId = if (source.isExcludedFromDataSaver) {
+                SYMR.strings.data_saver_stop_exclude
+            } else {
+                SYMR.strings.data_saver_exclude
+            }
+            SourceOption(text = stringResource(dataSaverId), onClick = onClickToggleDataSaver)
+        }
+        // SY <--
+    }
+}
+
+@Composable
+private fun SourceOption(text: String, onClick: () -> Unit) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
     )
 }
 

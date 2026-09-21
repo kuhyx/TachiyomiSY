@@ -37,25 +37,11 @@ internal class SetReadStatus(
 
     // Writes the read flag, then drops the downloads of everything just marked read (when configured).
     private suspend fun markRead(read: Boolean, chapters: List<Chapter>): Result {
-        val chaptersToUpdate = chapters.filter {
-            when (read) {
-                true -> !it.read
-                false -> it.read || it.lastPageRead > 0
-            }
-        }
-        if (chaptersToUpdate.isEmpty()) {
-            return Result.NoChapters
-        }
+        val chaptersToUpdate = chapters.filter { it.changesWhenMarked(read) }.ifEmpty { null }
+            ?: return Result.NoChapters
 
-        try {
-            chapterRepository.updateAll(
-                chaptersToUpdate.map { mapper(it, read) },
-            )
-        } catch (expected: Exception) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected)
-            return Result.InternalError(expected)
-        }
+        val failure = tryUpdate(chaptersToUpdate, read)
+        if (failure != null) return Result.InternalError(failure)
 
         if (read && downloadPreferences.removeAfterMarkedAsRead.get()) {
             chaptersToUpdate
@@ -69,6 +55,18 @@ internal class SetReadStatus(
         }
 
         return Result.Success
+    }
+
+    private fun Chapter.changesWhenMarked(read: Boolean): Boolean =
+        if (read) !this.read else this.read || lastPageRead > 0
+
+    // Null on success, otherwise the logged cause; the caller carries on.
+    private suspend fun tryUpdate(chapters: List<Chapter>, read: Boolean): Exception? = try {
+        chapterRepository.updateAll(chapters.map { mapper(it, read) })
+        null
+    } catch (expected: Exception) {
+        logcat(LogPriority.ERROR, expected)
+        expected
     }
 
     suspend fun await(mangaId: Long, read: Boolean): Result = withNonCancellableContext {

@@ -68,57 +68,62 @@ internal class PagePreviewFetcher(
         if (isInCache() && options.diskCachePolicy.readEnabled) {
             return fileLoader(pagePreviewFile())
         }
-        var snapshot = readFromDiskCache()
-        try {
-            // Fetch from disk cache
-            if (snapshot != null) {
-                val snapshotPagePreviewCache = moveSnapshotToPagePreviewCache(snapshot)
-                if (snapshotPagePreviewCache != null) {
-                    // Read from page preview cache
-                    return fileLoader(snapshotPagePreviewCache)
-                }
+        val snapshot = readFromDiskCache()
+        return try {
+            if (snapshot != null) fromSnapshot(snapshot) else fromNetwork()
+        } catch (expected: Exception) {
+            // Rethrown (or wrapped) whatever the cause.
+            snapshot?.close()
+            throw expected
+        }
+    }
 
-                // Read from snapshot
-                return SourceFetchResult(
-                    source = snapshot.toImageSource(),
-                    mimeType = IMAGE,
-                    dataSource = DataSource.DISK,
-                )
+    // Fetch from disk cache
+    private fun fromSnapshot(snapshot: DiskCache.Snapshot): FetchResult {
+        val snapshotPagePreviewCache = moveSnapshotToPagePreviewCache(snapshot)
+        if (snapshotPagePreviewCache != null) {
+            // Read from page preview cache
+            return fileLoader(snapshotPagePreviewCache)
+        }
+
+        // Read from snapshot
+        return SourceFetchResult(
+            source = snapshot.toImageSource(),
+            mimeType = IMAGE,
+            dataSource = DataSource.DISK,
+        )
+    }
+
+    // Fetch from network; whatever was opened is closed again on failure.
+    private suspend fun fromNetwork(): FetchResult {
+        val response = executeNetworkRequest()
+        val responseBody = checkNotNull(response.body) { "Null response source" }
+        var snapshot: DiskCache.Snapshot? = null
+        try {
+            // Read from page preview cache after page preview updated
+            val responsePagePreviewCache = writeResponseToPreviewCache(response)
+            if (responsePagePreviewCache != null) {
+                return fileLoader(responsePagePreviewCache)
             }
 
-            // Fetch from network
-            val response = executeNetworkRequest()
-            val responseBody = checkNotNull(response.body) { "Null response source" }
-            try {
-                // Read from page preview cache after page preview updated
-                val responsePagePreviewCache = writeResponseToPreviewCache(response)
-                if (responsePagePreviewCache != null) {
-                    return fileLoader(responsePagePreviewCache)
-                }
-
-                // Read from disk cache
-                snapshot = writeToDiskCache(response)
-                if (snapshot != null) {
-                    return SourceFetchResult(
-                        source = snapshot.toImageSource(),
-                        mimeType = IMAGE,
-                        dataSource = DataSource.NETWORK,
-                    )
-                }
-
-                // Read from response if cache is unused or unusable
-                return SourceFetchResult(
+            // Read from disk cache, else from the response if cache is unused or unusable
+            snapshot = writeToDiskCache(response)
+            return if (snapshot != null) {
+                SourceFetchResult(
+                    source = snapshot.toImageSource(),
+                    mimeType = IMAGE,
+                    dataSource = DataSource.NETWORK,
+                )
+            } else {
+                SourceFetchResult(
                     source = ImageSource(source = responseBody.source(), fileSystem = FileSystem.SYSTEM),
                     mimeType = IMAGE,
                     dataSource = if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK,
                 )
-            } catch (expected: Exception) {
-                // Rethrown (or wrapped) whatever the cause.
-                responseBody.close()
-                throw expected
             }
         } catch (expected: Exception) {
             // Rethrown (or wrapped) whatever the cause.
+            responseBody.close()
             snapshot?.close()
             throw expected
         }

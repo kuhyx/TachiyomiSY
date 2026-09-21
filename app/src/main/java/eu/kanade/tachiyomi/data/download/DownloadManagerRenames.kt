@@ -51,16 +51,11 @@ internal suspend fun DownloadManager.renameManga(manga: Manga, newTitle: String)
     // just to be safe, don't allow downloads for this manga while renaming it
     downloader.removeFromQueue(manga)
 
+    // A case-only change goes through a temporary name: the filesystem may treat both names as one folder.
     val capitalizationChanged = oldFolder.name.equals(newName, ignoreCase = true)
-    if (capitalizationChanged) {
-        val tempName = newName + Downloader.TMP_DIR_SUFFIX
-        if (!oldFolder.renameTo(tempName)) {
-            logcat(LogPriority.ERROR) { "Failed to rename manga download folder: ${oldFolder.name}" }
-            return
-        }
-    }
-
-    if (oldFolder.renameTo(newName)) {
+    val renamed = (!capitalizationChanged || oldFolder.renameTo(newName + Downloader.TMP_DIR_SUFFIX)) &&
+        oldFolder.renameTo(newName)
+    if (renamed) {
         cache.renameManga(manga, oldFolder, newTitle)
     } else {
         logcat(LogPriority.ERROR) { "Failed to rename manga download folder: ${oldFolder.name}" }
@@ -81,11 +76,13 @@ internal suspend fun DownloadManager.renameChapter(
     oldChapter: Chapter,
     newChapter: Chapter,
 ) {
+    val mangaDir = provider.getMangaDir(/* SY --> */ manga.ogTitle /* SY <-- */, source)
+        .onFailure { e ->
+            logcat(LogPriority.ERROR, e) { "Manga download folder doesn't exist. Skipping renaming after source sync" }
+        }
+        .getOrNull()
+        ?: return
     val oldNames = provider.getValidChapterDirNames(oldChapter.name, oldChapter.scanlator, oldChapter.url)
-    val mangaDir = provider.getMangaDir(/* SY --> */ manga.ogTitle /* SY <-- */, source).getOrElse { e ->
-        logcat(LogPriority.ERROR, e) { "Manga download folder doesn't exist. Skipping renaming after source sync" }
-        return
-    }
 
     // Assume there's only 1 version of the chapter name formats present
     val oldDownload = oldNames.asSequence()

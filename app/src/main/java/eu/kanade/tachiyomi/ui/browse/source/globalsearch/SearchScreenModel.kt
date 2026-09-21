@@ -9,6 +9,7 @@ import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.presentation.util.ioCoroutineScope
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.Source
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
@@ -129,46 +130,34 @@ internal abstract class SearchScreenModel(
         val sources = getSelectedSources()
 
         // Reuse previous results if possible
-        if (sameQuery) {
-            val existingResults = state.value.items
-            updateItems(
-                sources
-                    .associateWith { existingResults[it] ?: SearchItemResult.Loading },
-            )
-        } else {
-            updateItems(
-                sources
-                    .associateWith { SearchItemResult.Loading },
-            )
-        }
+        val existingResults = if (sameQuery) state.value.items else emptyMap()
+        updateItems(sources.associateWith { existingResults[it] ?: SearchItemResult.Loading })
 
         searchJob = ioCoroutineScope.launch {
-            sources.map { source ->
-                async {
-                    if (!(state.value.items[source] !is SearchItemResult.Loading)) {
-                        try {
-                            val page = withContext(coroutineDispatcher) {
-                                source.getSearchManga(1, query, source.getFilterList())
-                            }
-
-                            val titles = page.mangas
-                                .map { it.toDomainManga(source.id) }
-                                .distinctBy { it.url }
-                                .let { networkToLocalManga(it) }
-
-                            if (isActive) {
-                                updateItem(source, SearchItemResult.Success(titles))
-                            }
-                        } catch (expected: Exception) {
-                            // Any failure ends here and the fallback below applies.
-                            if (isActive) {
-                                updateItem(source, SearchItemResult.Error(expected))
-                            }
-                        }
-                    }
-                }
-            }
+            sources
+                .filter { state.value.items[it] is SearchItemResult.Loading }
+                .map { source -> async { searchSource(source, query) } }
                 .awaitAll()
+        }
+    }
+
+    // The result lands only while this search is still the current one.
+    private suspend fun CoroutineScope.searchSource(source: Source, query: String) {
+        val result = try {
+            val page = withContext(coroutineDispatcher) {
+                source.getSearchManga(1, query, source.getFilterList())
+            }
+            val titles = page.mangas
+                .map { it.toDomainManga(source.id) }
+                .distinctBy { it.url }
+                .let { networkToLocalManga(it) }
+            SearchItemResult.Success(titles)
+        } catch (expected: Exception) {
+            // Any failure ends here and the fallback below applies.
+            SearchItemResult.Error(expected)
+        }
+        if (isActive) {
+            updateItem(source, result)
         }
     }
 

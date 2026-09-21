@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import cafe.adriel.voyager.core.model.screenModelScope
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.track.interactor.AddTracks
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.manga.MangaScreenModel.Dialog
 import eu.kanade.tachiyomi.util.removeCovers
 import kotlinx.coroutines.launch
@@ -42,67 +43,70 @@ internal class MangaLibrary(
         checkDuplicate: Boolean = true,
     ) {
         val state = model.successState ?: return
-        suspend fun work() {
-            val manga = state.manga
-
+        model.screenModelScope.launchIO {
             if (model.isFavorited) {
-                // Remove from library
-                if (updateManga.awaitUpdateFavorite(manga.id, false)) {
-                    // Remove covers and update last modified in db
-                    if (manga.removeCovers() != manga) {
-                        updateManga.awaitUpdateCoverLastModified(manga.id)
-                    }
-                    withUIContext { onRemoved() }
-                }
+                removeFromLibrary(state.manga, onRemoved)
             } else {
-                // Add to library
-                // First, check if duplicate exists if callback is provided
-                if (checkDuplicate) {
-                    val duplicates = getDuplicateLibraryManga(manga)
-
-                    if (duplicates.isNotEmpty()) {
-                        model.updateSuccessState { it.copy(dialog = Dialog.DuplicateManga(manga, duplicates)) }
-                        return
-                    }
-                }
-
-                // Now check if user previously set categories, when available
-                val categories = getCategories()
-                val defaultCategoryId = libraryPreferences.defaultCategory.get().toLong()
-                val defaultCategory = categories.find { it.id == defaultCategoryId }
-                when {
-                    // Default category set
-                    defaultCategory != null -> {
-                        val result = updateManga.awaitUpdateFavorite(manga.id, true)
-                        if (!result) return
-                        moveMangaToCategory(defaultCategory)
-                    }
-
-                    // Automatic 'Default' or no categories
-                    defaultCategoryId == 0L || categories.isEmpty() -> {
-                        val result = updateManga.awaitUpdateFavorite(manga.id, true)
-                        if (!result) return
-                        moveMangaToCategory(null)
-                    }
-
-                    // Choose a category
-                    else -> {
-                        showChangeCategoryDialog()
-                    }
-                }
-
-                // Finally match with enhanced tracking when available
-                addTracks.bindEnhancedTrackers(manga, state.source)
+                addToLibrary(state.manga, state.source, checkDuplicate)
             }
         }
-        model.screenModelScope.launchIO { work() }
+    }
+
+    private suspend fun removeFromLibrary(manga: Manga, onRemoved: () -> Unit) {
+        if (!updateManga.awaitUpdateFavorite(manga.id, false)) return
+        // Remove covers and update last modified in db
+        if (manga.removeCovers() != manga) {
+            updateManga.awaitUpdateCoverLastModified(manga.id)
+        }
+        withUIContext { onRemoved() }
+    }
+
+    // A duplicate (when checked) or a missing default category stops at a dialog; otherwise the entry is
+    // favourited, filed, and matched with enhanced trackers.
+    private suspend fun addToLibrary(manga: Manga, source: Source, checkDuplicate: Boolean) {
+        val duplicates = if (checkDuplicate) getDuplicateLibraryManga(manga) else emptyList()
+        if (duplicates.isNotEmpty()) {
+            model.updateSuccessState { it.copy(dialog = Dialog.DuplicateManga(manga, duplicates)) }
+            return
+        }
+
+        // Now check if user previously set categories, when available
+        val categories = getCategories()
+        val defaultCategoryId = libraryPreferences.defaultCategory.get().toLong()
+        val defaultCategory = categories.find { it.id == defaultCategoryId }
+        val filed = when {
+            // Default category set
+            defaultCategory != null -> {
+                favouriteInto(manga, defaultCategory)
+            }
+            // Automatic 'Default' or no categories
+            defaultCategoryId == 0L || categories.isEmpty() -> {
+                favouriteInto(manga, null)
+            }
+            // Choose a category
+            else -> {
+                showChangeCategoryDialog()
+                true
+            }
+        }
+        if (!filed) return
+
+        // Finally match with enhanced tracking when available
+        addTracks.bindEnhancedTrackers(manga, source)
+    }
+
+    // False when the favourite flag could not be written, in which case nothing else happens.
+    private suspend fun favouriteInto(manga: Manga, category: Category?): Boolean {
+        val result = updateManga.awaitUpdateFavorite(manga.id, true)
+        if (result) moveMangaToCategory(listOfNotNull(category).map { it.id })
+        return result
     }
 
     fun showChangeCategoryDialog() {
         val manga = model.successState?.manga ?: return
         model.screenModelScope.launch {
             val categories = getCategories()
-            val selection = getMangaCategoryIds(manga)
+            val selection = getCategories.await(manga.id).map { it.id }
             model.updateSuccessState { successState ->
                 successState.copy(
                     dialog = Dialog.ChangeCategory(
@@ -142,14 +146,6 @@ internal class MangaLibrary(
      */
     suspend fun getCategories(): List<Category> = getCategories.await().filterNot { it.isSystemCategory }
 
-    // Gets the category id's the manga is in, if the manga is not in a category, returns the default id.
-    // @param manga the manga to get categories from.
-    // @return Array of category ids the manga is in, if none returns default id
-    private suspend fun getMangaCategoryIds(manga: Manga): List<Long> {
-        return getCategories.await(manga.id)
-            .map { it.id }
-    }
-
     fun addToLibraryInCategories(manga: Manga, categories: List<Long>) {
         moveMangaToCategory(categories)
         if (manga.favorite) return
@@ -159,22 +155,9 @@ internal class MangaLibrary(
         }
     }
 
-    // Move the given manga to categories.
-    // @param categories the selected categories.
-    private fun moveMangaToCategories(categories: List<Category>) {
-        val categoryIds = categories.map { it.id }
-        moveMangaToCategory(categoryIds)
-    }
-
     private fun moveMangaToCategory(categoryIds: List<Long>) {
         model.screenModelScope.launchIO {
             setMangaCategories.await(mangaId, categoryIds)
         }
-    }
-
-    // Move the given manga to the category.
-    // @param category the selected category, or null for default category.
-    private fun moveMangaToCategory(category: Category?) {
-        moveMangaToCategories(listOfNotNull(category))
     }
 }

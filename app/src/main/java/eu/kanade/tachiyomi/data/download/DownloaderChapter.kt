@@ -22,23 +22,20 @@ private const val MIN_DISK_SPACE = 200L * 1024 * 1024
 /** The manga's download directory, or null (with the download already failed) when it is unavailable or full. */
 internal fun Downloader.mangaDirWithSpace(download: Download): UniFile? {
     val mangaDir = provider.getMangaDir(/* SY --> */ download.manga.ogTitle /* SY <-- */, download.source)
-        .getOrElse { e ->
-            download.transition(Download.State.ERROR)
-            notifier.onError(e.message, download.chapter.name, download.manga.title, download.manga.id)
-            return null
-        }
+        .onFailure { e -> fail(download, e.message) }
+        .getOrNull()
+        ?: return null
     val availSpace = DiskUtil.getAvailableStorageSpace(mangaDir)
     if (availSpace != -1L && availSpace < MIN_DISK_SPACE) {
-        download.transition(Download.State.ERROR)
-        notifier.onError(
-            context.stringResource(MR.strings.download_insufficient_space),
-            download.chapter.name,
-            download.manga.title,
-            download.manga.id,
-        )
+        fail(download, context.stringResource(MR.strings.download_insufficient_space))
         return null
     }
     return mangaDir
+}
+
+private fun Downloader.fail(download: Download, message: String?) {
+    download.transition(Download.State.ERROR)
+    notifier.onError(message, download.chapter.name, download.manga.title, download.manga.id)
 }
 
 /** Pulls the page list from the source and stores it on the download. */

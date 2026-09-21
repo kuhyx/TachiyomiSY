@@ -33,15 +33,7 @@ internal class SyncDataJob(private val context: Context, workerParams: WorkerPar
     private val notifier = SyncNotifier(context)
 
     override suspend fun doWork(): Result {
-        if (tags.contains(TAG_AUTO)) {
-            if (!context.isOnline()) {
-                return Result.retry()
-            }
-            // Find a running manual worker. If exists, try again later
-            if (context.workManager.isRunning(TAG_MANUAL)) {
-                return Result.retry()
-            }
-        }
+        if (tags.contains(TAG_AUTO) && !canRunAutoNow()) return Result.retry()
 
         setForegroundSafely()
 
@@ -57,6 +49,9 @@ internal class SyncDataJob(private val context: Context, workerParams: WorkerPar
             context.cancelNotification(Notifications.ID_RESTORE_PROGRESS)
         }
     }
+
+    // An automatic run waits for connectivity and for any manual sync to finish.
+    private fun canRunAutoNow(): Boolean = context.isOnline() && !context.workManager.isRunning(TAG_MANUAL)
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         return ForegroundInfo(

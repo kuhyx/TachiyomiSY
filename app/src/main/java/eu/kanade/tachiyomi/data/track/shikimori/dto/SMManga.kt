@@ -40,15 +40,15 @@ internal data class SMManga(
             publishingStatus = this@SMManga.status.orEmpty()
             publishingType = kind?.replace("one_shot", "oneshot").orEmpty()
             startDate = airedOn?.date.orEmpty()
-            personRoles?.forEach { personRole ->
-                personRole.roles.forEach { role ->
-                    if ("Story" in role) authors += personRole.person.name
-                    if ("Art" in role) artists += personRole.person.name
-                }
-            }
+            authors += personRoles.creditedFor("Story")
+            artists += personRoles.creditedFor("Art")
         }
     }
 }
+
+// The names credited with a role containing [word], once per matching role like the site lists them.
+private fun List<SMPersonRole>?.creditedFor(word: String): List<String> =
+    orEmpty().flatMap { personRole -> personRole.roles.filter { word in it }.map { personRole.person.name } }
 
 @Serializable
 internal data class SMPoster(

@@ -26,40 +26,18 @@ internal fun Manga.isLewd(): Boolean {
 
 private fun isNonHentaiTag(tag: String): Boolean = tag.contains("non-h", true)
 
-private fun isHentaiTag(tag: String): Boolean {
-    return tag.contains("hentai", true) ||
-        tag.contains("adult", true) ||
-        tag.contains("smut", true) ||
-        tag.contains("lewd", true) ||
-        tag.contains("nsfw", true) ||
-        tag.contains("erotica", true) ||
-        tag.contains("pornographic", true) ||
-        tag.contains("mature", true) ||
-        tag.contains("18+", true)
-}
+// Case-insensitive substrings that mark a genre tag / source name as adult.
+private val HENTAI_TAGS = listOf(
+    "hentai", "adult", "smut", "lewd", "nsfw", "erotica", "pornographic", "mature", "18+",
+)
 
-private fun isHentaiSource(source: String): Boolean {
-    return source.contains("allporncomic", true) ||
-        source.contains("hentai cafe", true) ||
-        source.contains("hentai2read", true) ||
-        source.contains("hentaifox", true) ||
-        source.contains("hentainexus", true) ||
-        source.contains("manhwahentai.me", true) ||
-        source.contains("milftoon", true) ||
-        source.contains("myhentaicomics", true) ||
-        source.contains("myhentaigallery", true) ||
-        source.contains("ninehentai", true) ||
-        source.contains("pururin", true) ||
-        source.contains("simply hentai", true) ||
-        source.contains("tsumino", true) ||
-        source.contains("8muses", true) ||
-        source.contains("hbrowse", true) ||
-        source.contains("nhentai", true) ||
-        source.contains("erofus", true) ||
-        source.contains("luscious", true) ||
-        source.contains("doujins", true) ||
-        source.contains("multporn", true) ||
-        source.contains("vcp", true) ||
-        source.contains("vmp", true) ||
-        source.contains("hentai", true)
-}
+private val HENTAI_SOURCES = listOf(
+    "allporncomic", "hentai cafe", "hentai2read", "hentaifox", "hentainexus", "manhwahentai.me",
+    "milftoon", "myhentaicomics", "myhentaigallery", "ninehentai", "pururin", "simply hentai",
+    "tsumino", "8muses", "hbrowse", "nhentai", "erofus", "luscious", "doujins", "multporn",
+    "vcp", "vmp", "hentai",
+)
+
+private fun isHentaiTag(tag: String): Boolean = HENTAI_TAGS.any { tag.contains(it, ignoreCase = true) }
+
+private fun isHentaiSource(source: String): Boolean = HENTAI_SOURCES.any { source.contains(it, ignoreCase = true) }

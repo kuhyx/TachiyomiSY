@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.updates
 
 import androidx.compose.runtime.getValue
 import eu.kanade.core.util.addOrRemove
+import eu.kanade.core.util.toggleRow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import uy.kohesive.injekt.api.get
@@ -13,57 +14,15 @@ internal fun UpdatesScreenModel.toggleSelection(
 ) {
     updateState { state ->
         val newItems = state.items.toMutableList().apply {
-            val selectedIndex = indexOfFirst { it.update.chapterId == item.update.chapterId }
-            if (!(selectedIndex < 0)) {
-                val selectedItem = get(selectedIndex)
-                if (selectedItem.selected != selected) {
-                    val firstSelection = none { it.selected }
-                    set(selectedIndex, selectedItem.copy(selected = selected))
-                    selectedChapterIds.addOrRemove(item.update.chapterId, selected)
-
-                    if (selected && fromLongPress) {
-                        if (firstSelection) {
-                            selectedPositions[0] = selectedIndex
-                            selectedPositions[1] = selectedIndex
-                        } else {
-                            // Try to select the items in-between when possible
-                            val range: IntRange
-                            if (selectedIndex < selectedPositions[0]) {
-                                range = selectedIndex + 1..<selectedPositions[0]
-                                selectedPositions[0] = selectedIndex
-                            } else if (selectedIndex > selectedPositions[1]) {
-                                range = (selectedPositions[1] + 1)..<selectedIndex
-                                selectedPositions[1] = selectedIndex
-                            } else {
-                                // Just select itself
-                                range = IntRange.EMPTY
-                            }
-
-                            range.forEach {
-                                val inbetweenItem = get(it)
-                                if (!inbetweenItem.selected) {
-                                    selectedChapterIds.add(inbetweenItem.update.chapterId)
-                                    set(it, inbetweenItem.copy(selected = true))
-                                }
-                            }
-                        }
-                    } else if (!fromLongPress) {
-                        if (!selected) {
-                            if (selectedIndex == selectedPositions[0]) {
-                                selectedPositions[0] = indexOfFirst { it.selected }
-                            } else if (selectedIndex == selectedPositions[1]) {
-                                selectedPositions[1] = indexOfLast { it.selected }
-                            }
-                        } else {
-                            if (selectedIndex < selectedPositions[0]) {
-                                selectedPositions[0] = selectedIndex
-                            } else if (selectedIndex > selectedPositions[1]) {
-                                selectedPositions[1] = selectedIndex
-                            }
-                        }
-                    }
-                }
-            }
+            toggleRow(
+                selectedIndex = indexOfFirst { it.update.chapterId == item.update.chapterId },
+                selected = selected,
+                fromLongPress = fromLongPress,
+                positions = selectedPositions,
+                isSelected = { it.selected },
+                withSelected = { row, value -> row.copy(selected = value) },
+                track = { row, value -> selectedChapterIds.addOrRemove(row.update.chapterId, value) },
+            )
         }
         state.copy(items = newItems)
     }

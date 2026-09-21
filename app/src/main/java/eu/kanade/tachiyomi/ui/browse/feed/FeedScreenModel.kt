@@ -10,6 +10,7 @@ import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.presentation.browse.FeedItemUI
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
@@ -154,26 +155,7 @@ internal open class FeedScreenModel(
         screenModelScope.launch {
             feedSavedSearch.map { itemUI ->
                 async {
-                    val page = try {
-                        if (itemUI.source != null) {
-                            withContext(coroutineDispatcher) {
-                                if (itemUI.savedSearch == null) {
-                                    itemUI.source.getLatestUpdates(1)
-                                } else {
-                                    itemUI.source.getSearchManga(
-                                        1,
-                                        itemUI.savedSearch.query.orEmpty(),
-                                        getFilterList(itemUI.savedSearch, itemUI.source),
-                                    )
-                                }
-                            }.mangas
-                        } else {
-                            emptyList()
-                        }
-                    } catch (_: Exception) {
-                        // Any failure ends here and the fallback below applies.
-                        emptyList()
-                    }
+                    val page = withContext(coroutineDispatcher) { itemUI.fetchFirstPage(::getFilterList) }
 
                     val result = withIOContext {
                         itemUI.copy(
@@ -243,4 +225,20 @@ internal data class FeedScreenState(
 
     val isLoadingItems
         get() = items?.fastAny { it.results == null } != false
+}
+
+// The feed's first page: latest updates, or the saved search; nothing when the source is gone or the request fails.
+private suspend fun FeedItemUI.fetchFirstPage(filterList: (SavedSearch, Source) -> FilterList): List<SManga> {
+    val source = source ?: return emptyList()
+    return try {
+        val page = if (savedSearch == null) {
+            source.getLatestUpdates(1)
+        } else {
+            source.getSearchManga(1, savedSearch.query.orEmpty(), filterList(savedSearch, source))
+        }
+        page.mangas
+    } catch (_: Exception) {
+        // Any failure ends here and the fallback below applies.
+        emptyList()
+    }
 }

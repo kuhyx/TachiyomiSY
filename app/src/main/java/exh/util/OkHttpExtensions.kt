@@ -4,6 +4,7 @@ import okhttp3.Call
 import okhttp3.Response
 import rx.Observable
 import rx.Producer
+import rx.Subscriber
 import rx.Subscription
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -14,40 +15,45 @@ internal fun Call.asObservableWithStacktrace(): Observable<Pair<Exception, Respo
 
     return Observable.unsafeCreate { subscriber ->
         // Since Call is a one-shot type, clone it for each new subscriber.
-        val call = clone()
-
-        // Wrap the call in a helper which handles both unsubscription and backpressure.
-        val requestArbiter = object : AtomicBoolean(), Producer, Subscription {
-            val executed = AtomicBoolean(false)
-
-            override fun request(n: Long) {
-                if (n == 0L || !compareAndSet(false, true)) return
-
-                try {
-                    val response = call.execute()
-                    executed.set(true)
-                    if (!subscriber.isUnsubscribed) {
-                        subscriber.onNext(asyncStackTrace to response)
-                        subscriber.onCompleted()
-                    }
-                } catch (expected: Throwable) {
-                    // Any failure ends here and the fallback below applies.
-                    if (!subscriber.isUnsubscribed) {
-                        subscriber.onError(expected.withRootCause(asyncStackTrace))
-                    }
-                }
-            }
-
-            override fun unsubscribe() {
-                if (!executed.get()) {
-                    call.cancel()
-                }
-            }
-
-            override fun isUnsubscribed(): Boolean = call.isCanceled()
-        }
-
+        val requestArbiter = RequestArbiter(clone(), subscriber, asyncStackTrace)
         subscriber.add(requestArbiter)
         subscriber.setProducer(requestArbiter)
     }
+}
+
+// Wraps the call in a helper which handles both unsubscription and backpressure.
+private class RequestArbiter(
+    private val call: Call,
+    private val subscriber: Subscriber<in Pair<Exception, Response>>,
+    private val asyncStackTrace: Exception,
+) : AtomicBoolean(),
+    Producer,
+    Subscription {
+    private val executed = AtomicBoolean(false)
+
+    override fun request(n: Long) {
+        if (n == 0L || !compareAndSet(false, true)) return
+
+        try {
+            val response = call.execute()
+            executed.set(true)
+            if (!subscriber.isUnsubscribed) {
+                subscriber.onNext(asyncStackTrace to response)
+                subscriber.onCompleted()
+            }
+        } catch (expected: Throwable) {
+            // Any failure ends here and the fallback below applies.
+            if (!subscriber.isUnsubscribed) {
+                subscriber.onError(expected.withRootCause(asyncStackTrace))
+            }
+        }
+    }
+
+    override fun unsubscribe() {
+        if (!executed.get()) {
+            call.cancel()
+        }
+    }
+
+    override fun isUnsubscribed(): Boolean = call.isCanceled()
 }

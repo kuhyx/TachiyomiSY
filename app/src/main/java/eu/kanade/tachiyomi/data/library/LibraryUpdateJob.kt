@@ -24,7 +24,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.sync.SyncDataJob
 import eu.kanade.tachiyomi.data.track.TrackerManager
-import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import eu.kanade.tachiyomi.util.system.isRunning
 import eu.kanade.tachiyomi.util.system.setForegroundSafely
@@ -44,7 +43,6 @@ import kotlinx.coroutines.sync.withPermit
 import logcat.LogPriority
 import mihon.domain.chapter.interactor.FilterChaptersForDownload
 import mihon.domain.source.interactor.UpdateMangaFromRemote
-import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.category.model.Category
@@ -66,10 +64,8 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.interactor.InsertTrack
-import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.File
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.util.concurrent.CopyOnWriteArrayList
@@ -113,20 +109,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
     private var mangaToUpdate: List<LibraryManga> = mutableListOf()
 
     override suspend fun doWork(): Result {
-        if (tags.contains(WORK_NAME_AUTO)) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-                val preferences = Injekt.get<LibraryPreferences>()
-                val restrictions = preferences.autoUpdateDeviceRestrictions.get()
-                if (DEVICE_ONLY_ON_WIFI in restrictions && !context.isConnectedToWifi()) {
-                    return Result.retry()
-                }
-            }
-
-            // Find a running manual worker. If exists, try again later
-            if (context.workManager.isRunning(WORK_NAME_MANUAL)) {
-                return Result.retry()
-            }
-        }
+        if (tags.contains(WORK_NAME_AUTO) && !canRunAutoNow()) return Result.retry()
 
         setForegroundSafely()
 
@@ -145,28 +128,37 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
         // SY <--
         addMangaToQueue(categoryId, group, groupExtra)
 
-        return withIOContext {
-            try {
-                when (target) {
-                    Target.CHAPTERS -> updateChapterList()
-                    Target.COVERS -> updateCovers()
-                    // SY -->
-                    Target.SYNC_FOLLOWS -> syncFollows()
-                    Target.PUSH_FAVORITES -> pushFavorites()
-                    // SY <--
-                }
-                Result.success()
-            } catch (_: CancellationException) {
-                // Assume success although cancelled
-                Result.success()
-            } catch (expected: Exception) {
-                // Logged whatever the cause; the caller carries on.
-                logcat(LogPriority.ERROR, expected)
-                Result.failure()
-            } finally {
-                notifier.cancelProgressNotification()
-            }
+        return withIOContext { run(target) }
+    }
+
+    // An automatic run honours the wifi-only restriction (pre-P, where WorkManager cannot) and yields to a manual one.
+    private fun canRunAutoNow(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            val restrictions = Injekt.get<LibraryPreferences>().autoUpdateDeviceRestrictions.get()
+            if (DEVICE_ONLY_ON_WIFI in restrictions && !context.isConnectedToWifi()) return false
         }
+        return !context.workManager.isRunning(WORK_NAME_MANUAL)
+    }
+
+    private suspend fun run(target: Target): Result = try {
+        when (target) {
+            Target.CHAPTERS -> updateChapterList()
+            Target.COVERS -> updateCovers()
+            // SY -->
+            Target.SYNC_FOLLOWS -> syncFollows()
+            Target.PUSH_FAVORITES -> pushFavorites()
+            // SY <--
+        }
+        Result.success()
+    } catch (_: CancellationException) {
+        // Assume success although cancelled
+        Result.success()
+    } catch (expected: Exception) {
+        // Logged whatever the cause; the caller carries on.
+        logcat(LogPriority.ERROR, expected)
+        Result.failure()
+    } finally {
+        notifier.cancelProgressNotification()
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
@@ -297,21 +289,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                                     progressCount,
                                     manga,
                                 ) {
-                                    val source = sourceManager.get(manga.source)
-                                    if (source != null) {
-                                        try {
-                                            updateMangaFromRemote(
-                                                source,
-                                                manga,
-                                                fetchDetails = true,
-                                                fetchChapters = false,
-                                                manualFetch = true,
-                                            ).getOrThrow()
-                                        } catch (expected: Throwable) {
-                                            // Ignore errors and continue
-                                            logcat(LogPriority.ERROR, expected)
-                                        }
-                                    }
+                                    refreshCover(manga)
                                 }
                             }
                         }
@@ -355,34 +333,6 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
         )
     }
 
-    // Writes basic file of update errors to cache dir.
-    internal fun writeErrorFile(errors: List<Pair<Manga, String?>>): File {
-        try {
-            if (errors.isNotEmpty()) {
-                val file = context.createFileInCacheDir("mihon_update_errors.txt")
-                file.bufferedWriter().use { out ->
-                    out.write(context.stringResource(MR.strings.library_errors_help, ERROR_LOG_HELP_URL) + "\n\n")
-                    // Error file format:
-                    // ! Error
-                    //   # Source
-                    //     - Manga
-                    errors.groupBy({ it.second }, { it.first }).forEach { (error, mangas) ->
-                        out.write("\n! ${error}\n")
-                        mangas.groupBy { it.source }.forEach { (srcId, mangas) ->
-                            val source = sourceManager.getOrStub(srcId)
-                            out.write("  # $source\n")
-                            mangas.forEach {
-                                out.write("    - ${it.title}\n")
-                            }
-                        }
-                    }
-                }
-                return file
-            }
-        } catch (_: Exception) {}
-        return File("")
-    }
-
     /**
      * Defines what should be updated within a service execution.
      */
@@ -402,7 +352,7 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
         private const val WORK_NAME_AUTO = "LibraryUpdate-auto"
         private const val WORK_NAME_MANUAL = "LibraryUpdate-manual"
 
-        private const val ERROR_LOG_HELP_URL = "https://mihon.app/docs/guides/troubleshooting/"
+        const val ERROR_LOG_HELP_URL = "https://mihon.app/docs/guides/troubleshooting/"
 
         // Key for category to update.
         private const val KEY_CATEGORY = "category"
@@ -480,12 +430,12 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
             groupExtra: String? = null,
             // SY <--
         ): Boolean {
-            val wm = context.workManager
-            // Check if the LibraryUpdateJob is already running
-            if (wm.isRunning(TAG)) {
-                // Already running either as a scheduled or manual job
-                return false
-            }
+            // Already running either as a scheduled or manual job
+            if (context.workManager.isRunning(TAG)) return false
+
+            // Always sync the data before library update if syncing is enabled; a sync already running wins.
+            val syncFirst = Injekt.get<SyncPreferences>().isSyncEnabled()
+            if (syncFirst && SyncDataJob.isRunning(context)) return false
 
             val inputData = workDataOf(
                 KEY_CATEGORY to category?.id,
@@ -495,40 +445,23 @@ internal class LibraryUpdateJob(private val context: Context, workerParams: Work
                 KEY_GROUP_EXTRA to groupExtra,
                 // SY <--
             )
+            val libraryUpdateJob = OneTimeWorkRequestBuilder<LibraryUpdateJob>()
+                .addTag(TAG)
+                .addTag(WORK_NAME_MANUAL)
+                .setInputData(inputData)
+                .build()
 
-            val syncPreferences: SyncPreferences = Injekt.get()
-
-            // Always sync the data before library update if syncing is enabled.
-            if (syncPreferences.isSyncEnabled()) {
-                // Check if SyncDataJob is already running
-                if (SyncDataJob.isRunning(context)) {
-                    // SyncDataJob is already running
-                    return false
-                }
-
-                // Define the SyncDataJob
+            val wm = context.workManager
+            if (syncFirst) {
+                // Chain SyncDataJob to run before LibraryUpdateJob
                 val syncDataJob = OneTimeWorkRequestBuilder<SyncDataJob>()
                     .addTag(SyncDataJob.TAG_MANUAL)
                     .build()
-
-                // Chain SyncDataJob to run before LibraryUpdateJob
-                val libraryUpdateJob = OneTimeWorkRequestBuilder<LibraryUpdateJob>()
-                    .addTag(TAG)
-                    .addTag(WORK_NAME_MANUAL)
-                    .setInputData(inputData)
-                    .build()
-
                 wm.beginUniqueWork(WORK_NAME_MANUAL, ExistingWorkPolicy.KEEP, syncDataJob)
                     .then(libraryUpdateJob)
                     .enqueue()
             } else {
-                val request = OneTimeWorkRequestBuilder<LibraryUpdateJob>()
-                    .addTag(TAG)
-                    .addTag(WORK_NAME_MANUAL)
-                    .setInputData(inputData)
-                    .build()
-
-                wm.enqueueUniqueWork(WORK_NAME_MANUAL, ExistingWorkPolicy.KEEP, request)
+                wm.enqueueUniqueWork(WORK_NAME_MANUAL, ExistingWorkPolicy.KEEP, libraryUpdateJob)
             }
 
             return true

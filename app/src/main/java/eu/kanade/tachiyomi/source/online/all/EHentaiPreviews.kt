@@ -90,32 +90,32 @@ internal data class EHentaiThumbnailPreview(
 internal class ThumbnailPreviewInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-
-        if (request.url.host == THUMB_DOMAIN && request.url.pathSegments.contains(BLANK_THUMB)) {
-            val thumbnailPreview = EHentaiThumbnailPreview.parseFromUrl(request.url)
-            val response = chain.proceed(request.newBuilder().url(thumbnailPreview.imageUrl).build())
-            if (response.isSuccessful) {
-                val body = ByteArrayOutputStream()
-                    .use {
-                        val bitmap = BitmapFactory.decodeStream(response.body.byteStream())
-                            ?: throw IOException("Null bitmap($thumbnailPreview)")
-                        Bitmap.createBitmap(
-                            bitmap,
-                            thumbnailPreview.widthOffset,
-                            0,
-                            thumbnailPreview.width.coerceAtMost(bitmap.width - thumbnailPreview.widthOffset),
-                            thumbnailPreview.height.coerceAtMost(bitmap.height),
-                        ).compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY_LOSSLESS, it)
-                        it.toByteArray()
-                    }
-                    .toResponseBody("image/jpeg".toMediaType())
-
-                return response.newBuilder().body(body).build()
-            } else {
-                return response
-            }
+        if (request.url.host != THUMB_DOMAIN || !request.url.pathSegments.contains(BLANK_THUMB)) {
+            return chain.proceed(request)
         }
 
-        return chain.proceed(request)
+        val thumbnailPreview = EHentaiThumbnailPreview.parseFromUrl(request.url)
+        val response = chain.proceed(request.newBuilder().url(thumbnailPreview.imageUrl).build())
+        return if (response.isSuccessful) response.croppedTo(thumbnailPreview) else response
     }
+}
+
+// The site serves one sprite per gallery page; the preview is its slice at the given offset.
+private fun Response.croppedTo(thumbnailPreview: EHentaiThumbnailPreview): Response {
+    val body = ByteArrayOutputStream()
+        .use {
+            val bitmap = BitmapFactory.decodeStream(body.byteStream())
+                ?: throw IOException("Null bitmap($thumbnailPreview)")
+            Bitmap.createBitmap(
+                bitmap,
+                thumbnailPreview.widthOffset,
+                0,
+                thumbnailPreview.width.coerceAtMost(bitmap.width - thumbnailPreview.widthOffset),
+                thumbnailPreview.height.coerceAtMost(bitmap.height),
+            ).compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY_LOSSLESS, it)
+            it.toByteArray()
+        }
+        .toResponseBody("image/jpeg".toMediaType())
+
+    return newBuilder().body(body).build()
 }

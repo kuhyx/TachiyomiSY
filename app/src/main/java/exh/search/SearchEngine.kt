@@ -1,7 +1,5 @@
 package exh.search
 
-import java.util.Locale
-
 internal class SearchEngine {
     private val queryCache = mutableMapOf<String, List<QueryComponent>>()
 
@@ -70,28 +68,12 @@ internal class SearchEngine {
         val exclude = mutableListOf<Pair<String, List<String>>>()
 
         q.forEach { component ->
-            val query = if (component is Text) {
-                textToSubQueries(null, component)
-            } else if (component is Namespace) {
-                if (component.namespace == "uploader") {
-                    wheres += "meta.uploader LIKE ?"
-                    whereParams += component.tag!!.rawTextEscapedForLike()
-                    null
-                } else {
-                    if (component.tag!!.components.size > 0) {
-                        // Match namespace + tags
-                        textToSubQueries(component.namespace, component.tag)
-                    } else {
-                        // Perform namespace search
-                        textToSubQueries(component.namespace, null)
-                    }
-                }
+            if (component is Namespace && component.namespace == "uploader") {
+                wheres += "meta.uploader LIKE ?"
+                whereParams += component.tag!!.rawTextEscapedForLike()
             } else {
-                error("Unknown query component!")
-            }
-
-            if (query != null) {
-                (if (component.excluded) exclude else include) += query
+                val bucket = if (component.excluded) exclude else include
+                subQueryFor(component)?.let(bucket::add)
             }
         }
 
@@ -127,84 +109,15 @@ internal class SearchEngine {
         return baseQuery to completeParams
     }
 
-    fun parseQuery(query: String, enableWildcard: Boolean = true) = queryCache.getOrPut(query) {
-        val res = mutableListOf<QueryComponent>()
-
-        var inQuotes = false
-        val queuedRawText = StringBuilder()
-        val queuedText = mutableListOf<TextComponent>()
-        var namespace: Namespace? = null
-
-        var nextIsExcluded = false
-        var nextIsExact = false
-
-        fun flushText() {
-            if (queuedRawText.isNotEmpty()) {
-                queuedText += StringTextComponent(queuedRawText.toString())
-                queuedRawText.setLength(0)
-            }
-        }
-
-        fun flushToText() = Text().apply {
-            components += queuedText
-            queuedText.clear()
-        }
-
-        fun flushAll() {
-            flushText()
-            if (queuedText.isNotEmpty() || namespace != null) {
-                val component = namespace?.apply {
-                    tag = flushToText()
-                    namespace = null
-                } ?: flushToText()
-                component.excluded = nextIsExcluded
-                component.exact = nextIsExact
-                res += component
-            }
-        }
-
-        query.lowercase(Locale.getDefault()).forEach { char ->
-            if (char == '"') {
-                inQuotes = !inQuotes
-            } else if (enableWildcard && (char == '?' || char == '_')) {
-                flushText()
-                queuedText.add(SingleWildcard(char.toString()))
-            } else if (enableWildcard && (char == '*' || char == '%')) {
-                flushText()
-                queuedText.add(MultiWildcard(char.toString()))
-            } else if (char == '-' && !inQuotes && queuedRawText.atWordStart()) {
-                nextIsExcluded = true
-            } else if (char == '$') {
-                nextIsExact = true
-            } else if (char == ':') {
-                flushText()
-                var flushed = flushToText().rawTextOnly()
-                // Map tag aliases
-                flushed = when (flushed) {
-                    "a" -> "artist"
-                    "c", "char" -> "character"
-                    "f" -> "female"
-                    "g", "creator", "circle" -> "group"
-                    "l", "lang" -> "language"
-                    "m" -> "male"
-                    "p", "series" -> "parody"
-                    "r" -> "reclass"
-                    else -> flushed
-                }
-                namespace = Namespace(flushed, null)
-            } else if (char == ' ' && !inQuotes) {
-                flushAll()
-            } else {
-                queuedRawText.append(char)
-            }
-        }
-        flushAll()
-
-        res
+    private fun subQueryFor(component: QueryComponent): Pair<String, List<String>>? = when (component) {
+        is Text -> textToSubQueries(null, component)
+        // A namespace with no tag text matches every entry that has the namespace at all.
+        is Namespace -> textToSubQueries(component.namespace, component.tag?.takeIf { it.components.isNotEmpty() })
+        else -> error("Unknown query component!")
     }
 
-    // A leading '-' only excludes when it starts a word.
-    private fun StringBuilder.atWordStart(): Boolean = isBlank() || last() == ' '
+    fun parseQuery(query: String, enableWildcard: Boolean = true): List<QueryComponent> =
+        queryCache.getOrPut(query) { QueryParser(enableWildcard).parse(query) }
 
     companion object {
         private const val COL_MANGA_ID = "cmid"

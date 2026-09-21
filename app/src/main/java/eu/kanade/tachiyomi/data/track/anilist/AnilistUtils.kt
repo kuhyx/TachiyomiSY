@@ -32,22 +32,26 @@ internal fun DomainTrack.toApiScore(): String = when (preferences.anilistScoreTy
     // 100 point
     "POINT_100" -> score.toInt().toString()
     // 5 stars
-    "POINT_5" -> when {
-        score == 0.0 -> "0"
-        score < ONE_STAR_MAX -> "1"
-        score < TWO_STARS_MAX -> "2"
-        score < THREE_STARS_MAX -> "3"
-        score < FOUR_STARS_MAX -> "4"
-        else -> "5"
-    }
+    "POINT_5" -> score.toStars()
     // Smiley
-    "POINT_3" -> when {
-        score == 0.0 -> "0"
-        score <= SAD_SMILEY_MAX -> ":("
-        score <= NEUTRAL_SMILEY_MAX -> ":|"
-        else -> ":)"
-    }
+    "POINT_3" -> score.toSmiley()
     // 10 point decimal
     "POINT_10_DECIMAL" -> (score / POINTS_PER_TEN_POINT_STEP).toString()
     else -> throw IllegalArgumentException("Unknown score type")
+}
+
+private fun Double.toStars(): String = when {
+    this == 0.0 -> "0"
+    this < ONE_STAR_MAX -> "1"
+    this < TWO_STARS_MAX -> "2"
+    this < THREE_STARS_MAX -> "3"
+    this < FOUR_STARS_MAX -> "4"
+    else -> "5"
+}
+
+private fun Double.toSmiley(): String = when {
+    this == 0.0 -> "0"
+    this <= SAD_SMILEY_MAX -> ":("
+    this <= NEUTRAL_SMILEY_MAX -> ":|"
+    else -> ":)"
 }

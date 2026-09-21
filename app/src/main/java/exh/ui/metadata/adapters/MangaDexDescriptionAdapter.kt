@@ -1,6 +1,5 @@
 package exh.ui.metadata.adapters
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -11,14 +10,8 @@ import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.DescriptionAdapterMdBinding
 import eu.kanade.tachiyomi.ui.manga.MangaScreenModel.State
-import eu.kanade.tachiyomi.util.system.copyToClipboard
 import exh.metadata.metadata.MangaDexSearchMetadata
 import exh.ui.metadata.adapters.MetadataUIUtil.bindDrawable
-import exh.ui.metadata.adapters.MetadataUIUtil.getRatingString
-import kotlin.math.round
-
-// Ratings are shown to two decimals.
-private const val HUNDREDTHS = 100.0
 
 @Composable
 internal fun MangaDexDescription(state: State.Success, openMetadataViewer: () -> Unit) {
@@ -36,22 +29,13 @@ internal fun MangaDexDescription(state: State.Success, openMetadataViewer: () ->
                 // todo
                 val ratingFloat = meta.rating
                 binding.ratingBar.rating = ratingFloat?.div(2F) ?: 0F
-                @SuppressLint("SetTextI18n")
-                binding.rating.text =
-                    (round((ratingFloat ?: 0F) * HUNDREDTHS) / HUNDREDTHS).toString() + " - " +
-                    getRatingString(context, ratingFloat)
+                binding.rating.text = ratingText(context, ratingFloat, outOfTen = ratingFloat)
                 binding.rating.isVisible = ratingFloat != null
                 binding.ratingBar.isVisible = ratingFloat != null
 
                 binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
 
-                binding.rating.setOnLongClickListener {
-                    context.copyToClipboard(
-                        binding.rating.text.toString(),
-                        binding.rating.text.toString(),
-                    )
-                    true
-                }
+                copyTextOnLongClick(context, binding.rating)
 
                 binding.moreInfo.setOnClickListener {
                     openMetadataViewer()

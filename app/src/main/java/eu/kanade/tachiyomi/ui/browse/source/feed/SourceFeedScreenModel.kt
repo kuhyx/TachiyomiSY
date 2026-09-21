@@ -13,6 +13,7 @@ import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.browse.SourceFeedUI
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
+import eu.kanade.tachiyomi.source.model.SManga
 import exh.source.mangaDexSourceIds
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
@@ -139,21 +140,7 @@ internal open class SourceFeedScreenModel(
         screenModelScope.launch {
             feedSavedSearch.map { sourceFeed ->
                 async {
-                    val page = try {
-                        withContext(coroutineDispatcher) {
-                            when (sourceFeed) {
-                                is SourceFeedUI.Browse -> source.getPopularManga(1)
-                                is SourceFeedUI.Latest -> source.getLatestUpdates(1)
-                                is SourceFeedUI.SourceSavedSearch -> source.getSearchManga(
-                                    page = 1,
-                                    query = sourceFeed.savedSearch.query.orEmpty(),
-                                    filters = getFilterList(sourceFeed.savedSearch, source),
-                                )
-                            }
-                        }.mangas
-                    } catch (_: Exception) {
-                        emptyList()
-                    }
+                    val page = withContext(coroutineDispatcher) { sourceFeed.fetchFirstPage(source, ::getFilterList) }
 
                     val titles = withIOContext {
                         networkToLocalManga(page.map { it.toDomainManga(source.id) })
@@ -220,4 +207,24 @@ internal data class SourceFeedState(
 ) {
     val isLoading
         get() = items.isEmpty()
+}
+
+// The feed's first page from [source]; nothing when the request fails.
+private suspend fun SourceFeedUI.fetchFirstPage(
+    source: Source,
+    filterList: (SavedSearch, Source) -> FilterList,
+): List<SManga> = try {
+    val page = when (this) {
+        is SourceFeedUI.Browse -> source.getPopularManga(1)
+        is SourceFeedUI.Latest -> source.getLatestUpdates(1)
+        is SourceFeedUI.SourceSavedSearch -> source.getSearchManga(
+            page = 1,
+            query = savedSearch.query.orEmpty(),
+            filters = filterList(savedSearch, source),
+        )
+    }
+    page.mangas
+} catch (_: Exception) {
+    // Any failure ends here and the fallback below applies.
+    emptyList()
 }

@@ -10,18 +10,17 @@ internal class ReorderSortTag(
     fun await(tag: String, newPosition: Int): Result {
         val tags = getSortTag.await()
         val currentIndex = tags.indexOfFirst { it == tag }
-
-        if (currentIndex == -1) {
-            return Result.InternalError
+        return when {
+            currentIndex == -1 -> Result.InternalError
+            currentIndex == newPosition -> Result.Unchanged
+            else -> move(tags, from = currentIndex, to = newPosition)
         }
+    }
 
-        if (currentIndex == newPosition) {
-            return Result.Unchanged
-        }
-
+    private fun move(tags: List<String>, from: Int, to: Int): Result {
         val reorderedTags = tags.toMutableList()
-        val reorderedTag = reorderedTags.removeAt(currentIndex)
-        reorderedTags.add(newPosition, reorderedTag)
+        val reorderedTag = reorderedTags.removeAt(from)
+        reorderedTags.add(to, reorderedTag)
 
         preferences.sortTagsForLibrary.set(
             reorderedTags.mapIndexed { index, s ->

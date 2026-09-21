@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +25,7 @@ import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.WarningBanner
 import eu.kanade.presentation.util.Screen
@@ -108,60 +110,48 @@ internal class RestoreBackupScreen(
                     modifier = Modifier.padding(horizontal = MaterialTheme.padding.medium),
                     verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
                 ) {
-                    val msg = buildAnnotatedString {
-                        when (error) {
-                            is MissingRestoreComponents -> {
-                                appendLine(stringResource(MR.strings.backup_restore_content_full))
-                                if (error.sources.isNotEmpty()) {
-                                    appendLine()
-                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                        appendLine(stringResource(MR.strings.backup_restore_missing_sources))
-                                    }
-                                    error.sources.joinTo(
-                                        this,
-                                        separator = "\n- ",
-                                        prefix = "- ",
-                                    )
-                                }
-                                if (error.trackers.isNotEmpty()) {
-                                    appendLine()
-                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                        appendLine(stringResource(MR.strings.backup_restore_missing_trackers))
-                                    }
-                                    error.trackers.joinTo(
-                                        this,
-                                        separator = "\n- ",
-                                        prefix = "- ",
-                                    )
-                                }
-                            }
-
-                            is InvalidRestore -> {
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    appendLine(stringResource(MR.strings.invalid_backup_file))
-                                }
-                                appendLine(error.uri.toString())
-
-                                appendLine()
-
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    appendLine(stringResource(MR.strings.invalid_backup_file_error))
-                                }
-                                appendLine(error.message)
-                            }
-
-                            else -> {
-                                appendLine(error.toString())
-                            }
-                        }
-                    }
-
                     SelectionContainer {
-                        Text(text = msg)
+                        Text(text = restoreErrorMessage(error))
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun restoreErrorMessage(error: Any?): AnnotatedString = buildAnnotatedString {
+    when (error) {
+        is MissingRestoreComponents -> {
+            appendLine(stringResource(MR.strings.backup_restore_content_full))
+            appendMissing(MR.strings.backup_restore_missing_sources, error.sources)
+            appendMissing(MR.strings.backup_restore_missing_trackers, error.trackers)
+        }
+        is InvalidRestore -> {
+            appendBoldLine(MR.strings.invalid_backup_file)
+            appendLine(error.uri.toString())
+            appendLine()
+            appendBoldLine(MR.strings.invalid_backup_file_error)
+            appendLine(error.message)
+        }
+        else -> {
+            appendLine(error.toString())
+        }
+    }
+}
+
+@Composable
+private fun AnnotatedString.Builder.appendMissing(title: StringResource, names: List<String>) {
+    if (names.isEmpty()) return
+    appendLine()
+    appendBoldLine(title)
+    names.joinTo(this, separator = "\n- ", prefix = "- ")
+}
+
+@Composable
+private fun AnnotatedString.Builder.appendBoldLine(text: StringResource) {
+    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+        appendLine(stringResource(text))
     }
 }
 

@@ -90,22 +90,7 @@ internal class SourcesScreenModel(
         showPin: Boolean,
     ) {
         mutableState.update { state ->
-            val map = TreeMap<String, MutableList<Source>> { d1, d2 ->
-                // Sources without a lang defined will be placed at the end
-                when {
-                    d1 == LAST_USED_KEY && d2 != LAST_USED_KEY -> -1
-                    d2 == LAST_USED_KEY && d1 != LAST_USED_KEY -> 1
-                    d1 == PINNED_KEY && d2 != PINNED_KEY -> -1
-                    d2 == PINNED_KEY && d1 != PINNED_KEY -> 1
-                    // SY -->
-                    d1.startsWith(CATEGORY_KEY_PREFIX) && !d2.startsWith(CATEGORY_KEY_PREFIX) -> -1
-                    d2.startsWith(CATEGORY_KEY_PREFIX) && !d1.startsWith(CATEGORY_KEY_PREFIX) -> 1
-                    // SY <--
-                    d1 == "" && d2 != "" -> 1
-                    d2 == "" && d1 != "" -> -1
-                    else -> d1.compareTo(d2)
-                }
-            }
+            val map = TreeMap<String, MutableList<Source>>(SECTION_ORDER)
             val byLang = sources.groupByTo(map) {
                 when {
                     // SY -->
@@ -200,3 +185,24 @@ internal class SourcesScreenModel(
         // SY <--
     }
 }
+
+// Section order: last used, pinned, categories, then languages alphabetically with the unnamed one last.
+private enum class Section {
+    LAST_USED,
+    PINNED,
+    CATEGORY,
+    LANGUAGE,
+    NO_LANGUAGE,
+}
+
+private fun sectionOf(key: String): Section = when {
+    key == SourcesScreenModel.LAST_USED_KEY -> Section.LAST_USED
+    key == SourcesScreenModel.PINNED_KEY -> Section.PINNED
+    // SY -->
+    key.startsWith(SourcesScreenModel.CATEGORY_KEY_PREFIX) -> Section.CATEGORY
+    // SY <--
+    key == "" -> Section.NO_LANGUAGE
+    else -> Section.LANGUAGE
+}
+
+private val SECTION_ORDER: Comparator<String> = compareBy<String>(::sectionOf).thenBy { it }

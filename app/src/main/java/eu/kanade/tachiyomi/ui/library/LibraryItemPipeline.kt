@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.preference.TriState
-import tachiyomi.core.common.util.lang.compareToWithCollator
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryGroup
 import tachiyomi.domain.library.model.LibrarySort
@@ -96,7 +95,7 @@ internal class LibraryItemPipeline(
         // <-- SY
     ): Map<Category, List</* LibraryItem */ Long>> {
         // SY -->
-        when (groupType) {
+        return when (groupType) {
             LibraryGroup.BY_DEFAULT -> {
                 // SY <--
                 val groupCache = mutableMapOf</* Category.id */ Long, MutableList</* LibraryItem */ Long>>()
@@ -106,12 +105,12 @@ internal class LibraryItemPipeline(
                     }
                 }
 
-                return categories.filter { showSystemCategory || !it.isSystemCategory }
+                categories.filter { showSystemCategory || !it.isSystemCategory }
                     .associateWith { groupCache[it.id]?.toList().orEmpty() }
             }
             // SY -->
             LibraryGroup.UNGROUPED -> {
-                return mapOf(
+                mapOf(
                     Category(
                         0,
                         preferences.context.stringResource(SYMR.strings.ungrouped),
@@ -123,7 +122,7 @@ internal class LibraryItemPipeline(
             }
 
             else -> {
-                return getGroupedMangaItems(
+                getGroupedMangaItems(
                     groupType = groupType,
                 )
             }
@@ -140,106 +139,9 @@ internal class LibraryItemPipeline(
         // SY <--
     ): Map<Category, List</* LibraryItem */ Long>> {
         // SY -->
-        val listOfTags by lazy {
-            libraryPreferences.sortTagsForLibrary.get()
-                .asSequence()
-                .mapNotNull {
-                    val list = it.split("|")
-                    val order = list.getOrNull(0)?.toIntOrNull()
-                    val tag = list.getOrNull(1)
-                    if (order != null && tag != null) order to tag else null
-                }
-                .sortedBy { it.first }
-                .map { it.second }
-                .toList()
-        }
+        val listOfTags = lazy { libraryPreferences.sortTagList() }
         // SY <--
-
-        val sortAlphabetically: (LibraryItem, LibraryItem) -> Int = { manga1, manga2 ->
-            val title1 = manga1.libraryManga.manga.title.lowercase()
-            val title2 = manga2.libraryManga.manga.title.lowercase()
-            title1.compareToWithCollator(title2)
-        }
-
-        val defaultTrackerScoreSortValue = -1.0
-        val trackerScores by lazy {
-            val trackerMap = trackerManager.getAll(loggedInTrackerIds).associateBy { e -> e.id }
-            trackMap.mapValues { entry ->
-                if (entry.value.isEmpty()) {
-                    null
-                } else {
-                    entry.value
-                        .mapNotNull { trackerMap[it.trackerId]?.get10PointScore(it) }
-                        .average()
-                }
-            }
-        }
-
-        fun LibrarySort.comparator(): Comparator<LibraryItem> = Comparator { manga1, manga2 ->
-            // SY -->
-            val sort = groupSort ?: this
-            // SY <--
-            when (sort.type) {
-                LibrarySort.Type.Alphabetical -> {
-                    sortAlphabetically(manga1, manga2)
-                }
-
-                LibrarySort.Type.LastRead -> {
-                    manga1.libraryManga.lastRead.compareTo(manga2.libraryManga.lastRead)
-                }
-
-                LibrarySort.Type.LastUpdate -> {
-                    manga1.libraryManga.manga.lastUpdate.compareTo(manga2.libraryManga.manga.lastUpdate)
-                }
-
-                LibrarySort.Type.UnreadCount -> {
-                    when {
-                        // Ensure unread content comes first
-                        manga1.libraryManga.unreadCount == manga2.libraryManga.unreadCount -> 0
-                        manga1.libraryManga.unreadCount == 0L -> if (sort.isAscending) 1 else -1
-                        manga2.libraryManga.unreadCount == 0L -> if (sort.isAscending) -1 else 1
-                        else -> manga1.libraryManga.unreadCount.compareTo(manga2.libraryManga.unreadCount)
-                    }
-                }
-
-                LibrarySort.Type.TotalChapters -> {
-                    manga1.libraryManga.totalChapters.compareTo(manga2.libraryManga.totalChapters)
-                }
-
-                LibrarySort.Type.LatestChapter -> {
-                    manga1.libraryManga.latestUpload.compareTo(manga2.libraryManga.latestUpload)
-                }
-
-                LibrarySort.Type.ChapterFetchDate -> {
-                    manga1.libraryManga.chapterFetchedAt.compareTo(manga2.libraryManga.chapterFetchedAt)
-                }
-
-                LibrarySort.Type.DateAdded -> {
-                    manga1.libraryManga.manga.dateAdded.compareTo(manga2.libraryManga.manga.dateAdded)
-                }
-
-                LibrarySort.Type.TrackerMean -> {
-                    val item1Score = trackerScores[manga1.id] ?: defaultTrackerScoreSortValue
-                    val item2Score = trackerScores[manga2.id] ?: defaultTrackerScoreSortValue
-                    item1Score.compareTo(item2Score)
-                }
-
-                LibrarySort.Type.Random -> {
-                    error("Why Are We Still Here? Just To Suffer?")
-                }
-                // SY -->
-                LibrarySort.Type.TagList -> {
-                    val manga1IndexOfTag = listOfTags.indexOfFirst {
-                        manga1.libraryManga.manga.genre?.contains(it) ?: false
-                    }
-                    val manga2IndexOfTag = listOfTags.indexOfFirst {
-                        manga2.libraryManga.manga.genre?.contains(it) ?: false
-                    }
-                    manga1IndexOfTag.compareTo(manga2IndexOfTag)
-                }
-                // SY <--
-            }
-        }
+        val trackerScores = lazy { trackerManager.meanScores(trackMap, loggedInTrackerIds) }
 
         return mapValues { (key, value) ->
             // SY -->
@@ -250,11 +152,9 @@ internal class LibraryItemPipeline(
             } else {
                 val manga = value.mapNotNull { favoritesById[it] }
 
-                // SY -->
-                val comparator = sort.comparator()
-                    // SY <--
+                val comparator = sort.type.comparator(sort.isAscending, trackerScores, listOfTags)
                     .let { if (/* SY --> */ sort.isAscending /* SY <-- */) it else it.reversed() }
-                    .thenComparator(sortAlphabetically)
+                    .then(ALPHABETICALLY)
 
                 manga.sortedWith(comparator).map { it.id }
             }

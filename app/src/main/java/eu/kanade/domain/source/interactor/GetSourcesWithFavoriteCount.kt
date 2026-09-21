@@ -7,7 +7,6 @@ import tachiyomi.core.common.util.lang.compareToWithCollator
 import tachiyomi.domain.source.model.Source
 import tachiyomi.domain.source.repository.SourceRepository
 import tachiyomi.source.local.isLocal
-import java.util.Collections
 
 internal class GetSourcesWithFavoriteCount(
     private val repository: SourceRepository,
@@ -29,29 +28,18 @@ internal class GetSourcesWithFavoriteCount(
     private fun sortFn(
         direction: SetMigrateSorting.Direction,
         sorting: SetMigrateSorting.Mode,
-    ): java.util.Comparator<Pair<Source, Long>> {
-        val sortFn: (Pair<Source, Long>, Pair<Source, Long>) -> Int = { a, b ->
-            when (sorting) {
-                SetMigrateSorting.Mode.ALPHABETICAL -> {
-                    when {
-                        a.first.isStub && !b.first.isStub -> -1
-                        b.first.isStub && !a.first.isStub -> 1
-                        else -> a.first.name.lowercase().compareToWithCollator(b.first.name.lowercase())
-                    }
-                }
-                SetMigrateSorting.Mode.TOTAL -> {
-                    when {
-                        a.first.isStub && !b.first.isStub -> -1
-                        b.first.isStub && !a.first.isStub -> 1
-                        else -> a.second.compareTo(b.second)
-                    }
-                }
+    ): Comparator<Pair<Source, Long>> {
+        val byMode: Comparator<Pair<Source, Long>> = when (sorting) {
+            SetMigrateSorting.Mode.ALPHABETICAL -> Comparator { a, b ->
+                a.first.name.lowercase().compareToWithCollator(b.first.name.lowercase())
             }
+            SetMigrateSorting.Mode.TOTAL -> compareBy { it.second }
         }
-
+        // Stubs (uninstalled sources) sort first ascending, so last descending.
+        val stubsFirst = compareByDescending<Pair<Source, Long>> { it.first.isStub }.then(byMode)
         return when (direction) {
-            SetMigrateSorting.Direction.ASCENDING -> Comparator(sortFn)
-            SetMigrateSorting.Direction.DESCENDING -> Collections.reverseOrder(sortFn)
+            SetMigrateSorting.Direction.ASCENDING -> stubsFirst
+            SetMigrateSorting.Direction.DESCENDING -> stubsFirst.reversed()
         }
     }
 }

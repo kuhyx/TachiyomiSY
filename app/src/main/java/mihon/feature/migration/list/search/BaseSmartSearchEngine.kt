@@ -99,20 +99,20 @@ internal abstract class BaseSmartSearchEngine<T>(
     private fun removeTextInBrackets(text: String, readForward: Boolean): String {
         val openingChars = if (readForward) "([<{" else ")]}>"
         val closingChars = if (readForward) ")]}>" else "([<{"
+        val chars = if (readForward) text else text.reversed()
         var depth = 0
 
-        return buildString {
-            for (char in if (readForward) text else text.reversed()) {
-                when (char) {
-                    in openingChars -> depth++
-                    in closingChars -> if (depth > 0) depth-- // Avoid depth going negative on mismatched closing
-                    else -> if (depth == 0) {
-                        // If reading backward, the result is reversed, so prepend
-                        if (readForward) append(char) else insert(0, char)
-                    }
-                }
+        val kept = StringBuilder()
+        for (char in chars) {
+            when {
+                char in openingChars -> depth++
+                // A mismatched closing bracket never takes the depth negative.
+                char in closingChars -> depth = maxOf(0, depth - 1)
+                depth == 0 -> kept.append(char)
             }
         }
+        // Reading backward collected the survivors reversed.
+        return if (readForward) kept.toString() else kept.reverse().toString()
     }
 
     private fun getDeepSearchQueries(cleanedTitle: String): List<String> {

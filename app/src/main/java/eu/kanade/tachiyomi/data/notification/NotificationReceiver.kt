@@ -39,10 +39,22 @@ internal class NotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
-            ACTION_DISMISS_NOTIFICATION -> dismissNotification(context, intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1))
             ACTION_RESUME_DOWNLOADS -> downloadManager.startDownloads()
             ACTION_PAUSE_DOWNLOADS -> downloadManager.pauseDownloads()
             ACTION_CLEAR_DOWNLOADS -> downloadManager.clearQueue()
+            ACTION_CANCEL_RESTORE -> cancelRestore(context)
+            ACTION_CANCEL_SYNC -> cancelSync(context)
+            // Cancel library update and dismiss notification
+            ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
+            ACTION_CANCEL_APP_UPDATE_DOWNLOAD -> cancelDownloadAppUpdate(context)
+            else -> onReceiveWithExtras(context, intent)
+        }
+    }
+
+    // The actions whose target rides in the intent's extras.
+    private fun onReceiveWithExtras(context: Context, intent: Intent) {
+        when (intent.action) {
+            ACTION_DISMISS_NOTIFICATION -> dismissNotification(context, intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1))
             // Launch share activity and dismiss notification
             ACTION_SHARE_IMAGE -> shareImage(context, intent.getStringExtra(EXTRA_URI)!!.toUri())
             ACTION_SHARE_BACKUP -> shareFile(
@@ -50,12 +62,7 @@ internal class NotificationReceiver : BroadcastReceiver() {
                 intent.getParcelableExtraCompat(EXTRA_URI)!!,
                 "application/x-protobuf+gzip",
             )
-            ACTION_CANCEL_RESTORE -> cancelRestore(context)
-            ACTION_CANCEL_SYNC -> cancelSync(context)
-            // Cancel library update and dismiss notification
-            ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
             ACTION_START_APP_UPDATE -> startDownloadAppUpdate(context, intent)
-            ACTION_CANCEL_APP_UPDATE_DOWNLOAD -> cancelDownloadAppUpdate(context)
             ACTION_OPEN_CHAPTER -> openChapter(
                 context,
                 intent.getLongExtra(EXTRA_MANGA_ID, -1),

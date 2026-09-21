@@ -160,26 +160,11 @@ internal class MangaBakaApi(
             val body = buildJsonObject {
                 put(STATE, track.toApiStatus())
                 put("is_private", track.private)
-                if (track.lastChapterRead > 0.0) {
-                    put(PROGRESS_CHAPTER, track.lastChapterRead)
-                } else {
-                    put(PROGRESS_CHAPTER, null)
-                }
-                if (track.score > 0) {
-                    put(RATING, track.score.toInt().coerceIn(0, MAX_RATING))
-                } else {
-                    put(RATING, null)
-                }
-                if (track.startedReadingDate > 0) {
-                    put(START_DATE, track.startedReadingDate.toLocalDate().toString())
-                } else {
-                    put(START_DATE, null)
-                }
-                if (track.finishedReadingDate > 0) {
-                    put(FINISH_DATE, track.finishedReadingDate.toLocalDate().toString())
-                } else {
-                    put(FINISH_DATE, null)
-                }
+                // Unset values go over as JSON null.
+                put(PROGRESS_CHAPTER, track.lastChapterRead.takeIf { it > 0.0 })
+                put(RATING, track.score.takeIf { it > 0 }?.toInt()?.coerceIn(0, MAX_RATING))
+                put(START_DATE, track.startedReadingDate.takeIf { it > 0 }?.toLocalDate()?.toString())
+                put(FINISH_DATE, track.finishedReadingDate.takeIf { it > 0 }?.toLocalDate()?.toString())
             }
                 .toString()
                 .toRequestBody()

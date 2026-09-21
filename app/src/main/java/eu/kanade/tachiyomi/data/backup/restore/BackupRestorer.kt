@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import eu.kanade.tachiyomi.data.backup.BackupDecoder
 import eu.kanade.tachiyomi.data.backup.BackupNotifier
+import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupExtensionStore
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
@@ -98,26 +99,7 @@ internal class BackupRestorer(
         val backupMaps = backup.backupSources
         sourceMapping = backupMaps.associate { it.sourceId to it.name }
 
-        if (options.libraryEntries) {
-            restoreAmount += backup.backupManga.size
-        }
-        if (options.categories) {
-            restoreAmount += 1
-        }
-        // SY -->
-        if (options.savedSearches) {
-            restoreAmount += 1
-        }
-        // SY <--
-        if (options.appSettings) {
-            restoreAmount += 1
-        }
-        if (options.extensionStores) {
-            restoreAmount += backup.backupExtensionStores.size
-        }
-        if (options.sourceSettings) {
-            restoreAmount += 1
-        }
+        restoreAmount += options.stepCount(backup)
 
         // Each restorer opens its own write transaction on the same database. Upstream
         // `launch`es all six into one coroutineScope, so they contend for SQLite's
@@ -127,6 +109,7 @@ internal class BackupRestorer(
         // and removes the contention entirely. It also removes a second race: with
         // appSettings and categories both enabled, restoreAppPreferences writes the
         // category tables at the same time restoreCategories and restoreManga do.
+        val restoredCategories = backup.backupCategories.takeIf { options.categories }
         coroutineScope {
             if (options.categories) {
                 restoreCategories(backup.backupCategories)
@@ -137,13 +120,13 @@ internal class BackupRestorer(
             }
             // SY <--
             if (options.appSettings) {
-                restoreAppPreferences(backup.backupPreferences, backup.backupCategories.takeIf { options.categories })
+                restoreAppPreferences(backup.backupPreferences, restoredCategories)
             }
             if (options.sourceSettings) {
                 restoreSourcePreferences(backup.backupSourcePreferences)
             }
             if (options.libraryEntries) {
-                restoreManga(backup.backupManga, if (options.categories) backup.backupCategories else emptyList())
+                restoreManga(backup.backupManga, restoredCategories.orEmpty())
             }
             if (options.extensionStores) {
                 restoreExtensionStores(backup.backupExtensionStores)
@@ -270,22 +253,32 @@ internal class BackupRestorer(
             }
     }
 
+    // An unwritable cache yields an empty path, like no errors at all.
     private fun writeErrorLog(): File {
-        try {
-            if (errors.isNotEmpty()) {
-                val file = context.createFileInCacheDir("mihon_restore_error.txt")
-                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
-
-                file.bufferedWriter().use { out ->
-                    errors.forEach { (date, message) ->
-                        out.write("[${sdf.format(date)}] $message\n")
-                    }
+        if (errors.isEmpty()) return File("")
+        return try {
+            val file = context.createFileInCacheDir("mihon_restore_error.txt")
+            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+            file.bufferedWriter().use { out ->
+                errors.forEach { (date, message) ->
+                    out.write("[${sdf.format(date)}] $message\n")
                 }
-                return file
             }
+            file
         } catch (_: Exception) {
-            // Empty
+            File("")
         }
-        return File("")
     }
 }
+
+// One progress step per manga and per extension store, one per enabled settings group.
+private fun RestoreOptions.stepCount(backup: Backup): Int = listOf(
+    backup.backupManga.size.takeIf { libraryEntries },
+    1.takeIf { categories },
+    // SY -->
+    1.takeIf { savedSearches },
+    // SY <--
+    1.takeIf { appSettings },
+    backup.backupExtensionStores.size.takeIf { extensionStores },
+    1.takeIf { sourceSettings },
+).sumOf { it ?: 0 }

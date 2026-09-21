@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.extension.util
 
 import android.content.Context
+import android.content.pm.PackageInfo
 import androidx.core.content.pm.PackageInfoCompat
 import eu.kanade.tachiyomi.util.storage.copyAndSetReadOnlyTo
 import logcat.LogPriority
@@ -15,24 +16,10 @@ internal fun ExtensionLoader.installPrivateExtensionFile(context: Context, file:
         ?: return false
     val currentExtension = getExtensionPackageInfo(context, extension.packageName)
 
-    if (currentExtension != null) {
-        if (PackageInfoCompat.getLongVersionCode(extension) <
-            PackageInfoCompat.getLongVersionCode(currentExtension)
-        ) {
-            logcat(LogPriority.ERROR) { "Installed extension version is higher. Downgrading is not allowed." }
-            return false
-        }
-
-        val extensionSignatures = getSignatures(extension)
-        if (extensionSignatures.isNullOrEmpty()) {
-            logcat(LogPriority.ERROR) { "Extension to be installed is not signed." }
-            return false
-        }
-
-        if (!extensionSignatures.containsAll(getSignatures(currentExtension)!!)) {
-            logcat(LogPriority.ERROR) { "Installed extension signature is not matched." }
-            return false
-        }
+    val rejection = currentExtension?.let { replacementRejection(it, extension) }
+    if (rejection != null) {
+        logcat(LogPriority.ERROR) { rejection }
+        return false
     }
 
     val target = File(getPrivateExtensionDir(context), "${extension.packageName}.$PRIVATE_EXTENSION_EXTENSION")
@@ -50,6 +37,25 @@ internal fun ExtensionLoader.installPrivateExtensionFile(context: Context, file:
         logcat(LogPriority.ERROR, expected) { "Failed to copy extension file." }
         target.delete()
         false
+    }
+}
+
+// Why [extension] may not replace [current]: only a same-or-newer build signed by the same keys may. Null when it may.
+private fun ExtensionLoader.replacementRejection(current: PackageInfo, extension: PackageInfo): String? {
+    val extensionSignatures = getSignatures(extension).orEmpty()
+    return when {
+        PackageInfoCompat.getLongVersionCode(extension) < PackageInfoCompat.getLongVersionCode(current) -> {
+            "Installed extension version is higher. Downgrading is not allowed."
+        }
+        extensionSignatures.isEmpty() -> {
+            "Extension to be installed is not signed."
+        }
+        !extensionSignatures.containsAll(getSignatures(current)!!) -> {
+            "Installed extension signature is not matched."
+        }
+        else -> {
+            null
+        }
     }
 }
 

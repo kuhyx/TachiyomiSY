@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.backup.models.BooleanPreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.FloatPreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.IntPreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.LongPreferenceValue
+import eu.kanade.tachiyomi.data.backup.models.PreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.StringPreferenceValue
 import eu.kanade.tachiyomi.data.backup.models.StringSetPreferenceValue
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
@@ -56,57 +57,14 @@ internal class PreferenceRestorer(
         backupCategories: List<BackupCategory>? = null,
     ) {
         val allCategories = if (backupCategories != null) getCategories.await() else emptyList()
-        val categoriesByName = allCategories.associateBy { it.name }
-        val backupCategoriesById = backupCategories?.associateBy { it.id.toString() }.orEmpty()
+        val mapping = CategoryMapping(
+            backupCategoriesById = backupCategories?.associateBy { it.id.toString() }.orEmpty(),
+            categoriesByName = allCategories.associateBy { it.name },
+        )
         val prefs = preferenceStore.getAll()
         toRestore.forEach { (key, value) ->
             try {
-                when (value) {
-                    is IntPreferenceValue -> {
-                        if (prefs[key] is Int?) {
-                            val newValue = if (key == LibraryPreferences.DEFAULT_CATEGORY_PREF_KEY) {
-                                backupCategoriesById[value.value.toString()]
-                                    ?.let { categoriesByName[it.name]?.id?.toInt() }
-                            } else {
-                                value.value
-                            }
-
-                            newValue?.let { preferenceStore.getInt(key).set(it) }
-                        }
-                    }
-                    is LongPreferenceValue -> {
-                        if (prefs[key] is Long?) {
-                            preferenceStore.getLong(key).set(value.value)
-                        }
-                    }
-                    is FloatPreferenceValue -> {
-                        if (prefs[key] is Float?) {
-                            preferenceStore.getFloat(key).set(value.value)
-                        }
-                    }
-                    is StringPreferenceValue -> {
-                        if (prefs[key] is String?) {
-                            preferenceStore.getString(key).set(value.value)
-                        }
-                    }
-                    is BooleanPreferenceValue -> {
-                        if (prefs[key] is Boolean?) {
-                            preferenceStore.getBoolean(key).set(value.value)
-                        }
-                    }
-                    is StringSetPreferenceValue -> {
-                        if (prefs[key] is Set<*>?) {
-                            val restored = restoreCategoriesPreference(
-                                key,
-                                value.value,
-                                preferenceStore,
-                                backupCategoriesById,
-                                categoriesByName,
-                            )
-                            if (!restored) preferenceStore.getStringSet(key).set(value.value)
-                        }
-                    }
-                }
+                restoreOne(key, value, current = prefs[key], preferenceStore, mapping)
             } catch (expected: Exception) {
                 // Logged whatever the cause; the caller carries on.
                 Log.e("PreferenceRestorer", "Failed to restore preference <$key>", expected)
@@ -114,25 +72,68 @@ internal class PreferenceRestorer(
         }
     }
 
+    // A value is only written over a stored value of the same type (or none at all).
+    private fun restoreOne(
+        key: String,
+        value: PreferenceValue,
+        current: Any?,
+        preferenceStore: PreferenceStore,
+        mapping: CategoryMapping,
+    ) {
+        when (value) {
+            is IntPreferenceValue -> if (current is Int?) restoreInt(key, value.value, preferenceStore, mapping)
+            is LongPreferenceValue -> if (current is Long?) preferenceStore.getLong(key).set(value.value)
+            is FloatPreferenceValue -> if (current is Float?) preferenceStore.getFloat(key).set(value.value)
+            is StringPreferenceValue -> if (current is String?) preferenceStore.getString(key).set(value.value)
+            is BooleanPreferenceValue -> if (current is Boolean?) preferenceStore.getBoolean(key).set(value.value)
+            is StringSetPreferenceValue -> if (current is Set<*>?) {
+                restoreStringSet(key, value.value, preferenceStore, mapping)
+            }
+        }
+    }
+
+    // The default category is stored by id, which the backup's ids must be mapped onto.
+    private fun restoreInt(key: String, value: Int, preferenceStore: PreferenceStore, mapping: CategoryMapping) {
+        val newValue = if (key == LibraryPreferences.DEFAULT_CATEGORY_PREF_KEY) {
+            mapping.localCategoryId(value.toString())?.toInt()
+        } else {
+            value
+        }
+        newValue?.let { preferenceStore.getInt(key).set(it) }
+    }
+
+    private fun restoreStringSet(
+        key: String,
+        value: Set<String>,
+        preferenceStore: PreferenceStore,
+        mapping: CategoryMapping,
+    ) {
+        val restored = restoreCategoriesPreference(key, value, preferenceStore, mapping)
+        if (!restored) preferenceStore.getStringSet(key).set(value)
+    }
+
     private fun restoreCategoriesPreference(
         key: String,
         value: Set<String>,
         preferenceStore: PreferenceStore,
-        backupCategoriesById: Map<String, BackupCategory>,
-        categoriesByName: Map<String, Category>,
+        mapping: CategoryMapping,
     ): Boolean {
         val categoryPreferences = LibraryPreferences.categoryPreferenceKeys + DownloadPreferences.categoryPreferenceKeys
         if (key !in categoryPreferences) return false
 
-        val ids = value.mapNotNull {
-            backupCategoriesById[it]?.name?.let { name ->
-                categoriesByName[name]?.id?.toString()
-            }
-        }
+        val ids = value.mapNotNull { mapping.localCategoryId(it)?.toString() }
 
         if (ids.isNotEmpty()) {
             preferenceStore.getStringSet(key) += ids
         }
         return true
     }
+}
+
+// A backup's category ids map onto the local category of the same name.
+private class CategoryMapping(
+    private val backupCategoriesById: Map<String, BackupCategory>,
+    private val categoriesByName: Map<String, Category>,
+) {
+    fun localCategoryId(backupId: String): Long? = backupCategoriesById[backupId]?.let { categoriesByName[it.name]?.id }
 }

@@ -79,32 +79,9 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
 
         try {
             val remoteSData = pullSyncData()
-
-            if (remoteSData != null) {
-                // Get local unique device ID
-                val localDeviceId = syncPreferences.uniqueDeviceID()
-                val lastSyncDeviceId = remoteSData.deviceId
-
-                // Log the device IDs
-                logcat(LogPriority.DEBUG, "SyncService") {
-                    "Local device ID: $localDeviceId, Last sync device ID: $lastSyncDeviceId"
-                }
-
-                // check if the last sync was done by the same device if so overwrite the remote data with the local
-                // data
-                return if (lastSyncDeviceId == localDeviceId) {
-                    pushSyncData(syncData)
-                    syncData.backup
-                } else {
-                    // Merge the local and remote sync data
-                    val mergedSyncData = mergeSyncData(syncData, remoteSData)
-                    pushSyncData(mergedSyncData)
-                    mergedSyncData.backup
-                }
-            }
-
-            pushSyncData(syncData)
-            return syncData.backup
+            val toPush = if (remoteSData == null) syncData else reconcile(syncData, remoteSData)
+            pushSyncData(toPush)
+            return toPush.backup
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.
             logcat(LogPriority.ERROR, "SyncService") { "Error syncing: ${expected.message}" }
@@ -114,6 +91,16 @@ internal class GoogleDriveSyncService(context: Context, json: Json, syncPreferen
 
     private suspend fun beforeSync() {
         googleDriveService.refreshToken()
+    }
+
+    // The last device to sync overwrites the remote copy; any other device merges into it.
+    private fun reconcile(syncData: SyncData, remoteSData: SyncData): SyncData {
+        val localDeviceId = syncPreferences.uniqueDeviceID()
+        val lastSyncDeviceId = remoteSData.deviceId
+        logcat(LogPriority.DEBUG, "SyncService") {
+            "Local device ID: $localDeviceId, Last sync device ID: $lastSyncDeviceId"
+        }
+        return if (lastSyncDeviceId == localDeviceId) syncData else mergeSyncData(syncData, remoteSData)
     }
 
     private fun pullSyncData(): SyncData? {

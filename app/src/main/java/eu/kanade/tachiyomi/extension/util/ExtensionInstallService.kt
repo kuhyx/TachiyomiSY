@@ -38,31 +38,33 @@ internal class ExtensionInstallService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val uri = intent?.data
-        val id = intent?.getLongExtra(EXTRA_DOWNLOAD_ID, -1)?.takeIf { it != -1L }
-        val installerUsed = intent?.getSerializableExtraCompat<BasePreferences.ExtensionInstaller>(EXTRA_INSTALLER)
-        if (uri == null || id == null || installerUsed == null) {
-            stopSelf()
-            return START_NOT_STICKY
-        }
-
-        if (installer == null) {
-            installer = when (installerUsed) {
-                BasePreferences.ExtensionInstaller.PACKAGEINSTALLER -> {
-                    PackageInstallerInstaller(this)
-                }
-                BasePreferences.ExtensionInstaller.SHIZUKU -> {
-                    ShizukuInstaller(this)
-                }
-                else -> {
-                    logcat(LogPriority.ERROR) { "Not implemented for installer $installerUsed" }
-                    stopSelf()
-                    return START_NOT_STICKY
-                }
-            }
-        }
-        installer!!.addToQueue(id, uri)
+        if (!enqueue(intent)) stopSelf()
         return START_NOT_STICKY
+    }
+
+    // False when the intent is incomplete or names an installer this service cannot drive.
+    private fun enqueue(intent: Intent?): Boolean {
+        val uri = intent?.data ?: return false
+        val id = intent.getLongExtra(EXTRA_DOWNLOAD_ID, -1).takeIf { it != -1L } ?: return false
+        val installerUsed = intent.getSerializableExtraCompat<BasePreferences.ExtensionInstaller>(EXTRA_INSTALLER)
+            ?: return false
+        val installer = installer ?: createInstaller(installerUsed) ?: return false
+        this.installer = installer
+        installer.addToQueue(id, uri)
+        return true
+    }
+
+    private fun createInstaller(installerUsed: BasePreferences.ExtensionInstaller): Installer? = when (installerUsed) {
+        BasePreferences.ExtensionInstaller.PACKAGEINSTALLER -> {
+            PackageInstallerInstaller(this)
+        }
+        BasePreferences.ExtensionInstaller.SHIZUKU -> {
+            ShizukuInstaller(this)
+        }
+        else -> {
+            logcat(LogPriority.ERROR) { "Not implemented for installer $installerUsed" }
+            null
+        }
     }
 
     override fun onDestroy() {

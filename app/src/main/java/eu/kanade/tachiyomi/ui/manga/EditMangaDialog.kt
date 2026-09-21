@@ -89,32 +89,15 @@ internal fun EditMangaDialog(
             }
         },
         text = {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                AndroidView(
-                    factory = { factoryContext ->
-                        EditMangaDialogBinding.inflate(LayoutInflater.from(factoryContext))
-                            .also { binding = it }
-                            .apply {
-                                onViewCreated(
-                                    manga,
-                                    factoryContext,
-                                    this,
-                                    scope,
-                                    getTracks,
-                                    trackerManager,
-                                    tracks,
-                                    showTrackerSelectionDialogue,
-                                )
-                            }
-                            .root
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            EditMangaForm(
+                manga = manga,
+                scope = scope,
+                getTracks = getTracks,
+                trackerManager = trackerManager,
+                tracks = tracks,
+                showTrackerSelectionDialogue = showTrackerSelectionDialogue,
+                onInflated = { binding = it },
+            )
         },
     )
 
@@ -127,6 +110,45 @@ internal fun EditMangaDialog(
                     autofillFromTracker(binding!!, track, tracker)
                 }
             },
+        )
+    }
+}
+
+// The View-based form; [onInflated] hands the binding back so the dialog buttons can read it.
+@Composable
+private fun EditMangaForm(
+    manga: Manga,
+    scope: CoroutineScope,
+    getTracks: GetTracks,
+    trackerManager: TrackerManager,
+    tracks: MutableState<List<Pair<Track, Tracker>>>,
+    showTrackerSelectionDialogue: MutableState<Boolean>,
+    onInflated: (EditMangaDialogBinding) -> Unit,
+) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        AndroidView(
+            factory = { factoryContext ->
+                EditMangaDialogBinding.inflate(LayoutInflater.from(factoryContext))
+                    .also(onInflated)
+                    .apply {
+                        onViewCreated(
+                            manga,
+                            factoryContext,
+                            this,
+                            scope,
+                            getTracks,
+                            trackerManager,
+                            tracks,
+                            showTrackerSelectionDialogue,
+                        )
+                    }
+                    .root
+            },
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

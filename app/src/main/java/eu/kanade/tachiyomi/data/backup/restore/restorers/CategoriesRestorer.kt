@@ -4,6 +4,7 @@ import app.cash.sqldelight.async.coroutines.awaitAsOne
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import tachiyomi.data.Database
 import tachiyomi.domain.category.interactor.GetCategories
+import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.service.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -28,27 +29,12 @@ internal class CategoriesRestorer(
                 .sortedBy { it.order }
                 // SY -->
                 .map { backupCategory ->
-                    var dbCategory = if (backupCategory.uid != 0L) {
-                        dbCategoriesByUid[backupCategory.uid]
-                    } else {
-                        null
-                    }
-
-                    if (dbCategory == null) {
-                        dbCategory = dbCategoriesByName[backupCategory.name]
-                    }
+                    // A synced backup carries uids; an older one is matched by name.
+                    val dbCategory = backupCategory.uid.takeIf { it != 0L }?.let(dbCategoriesByUid::get)
+                        ?: dbCategoriesByName[backupCategory.name]
 
                     if (dbCategory != null) {
-                        database.categoriesQueries.update(
-                            name = backupCategory.name,
-                            order = backupCategory.order,
-                            flags = backupCategory.flags,
-                            version = backupCategory.version,
-                            uid = if (backupCategory.uid != 0L) backupCategory.uid else dbCategory.uid,
-                            last_modified_at = backupCategory.lastModifiedAt,
-                            isSyncing = 1,
-                            categoryId = dbCategory.id,
-                        )
+                        update(dbCategory, backupCategory)
                         dbCategory
                     } else {
                         val order = nextOrder++
@@ -75,5 +61,18 @@ internal class CategoriesRestorer(
                     .size > 1,
             )
         }
+    }
+
+    private suspend fun update(dbCategory: Category, backupCategory: BackupCategory) {
+        database.categoriesQueries.update(
+            name = backupCategory.name,
+            order = backupCategory.order,
+            flags = backupCategory.flags,
+            version = backupCategory.version,
+            uid = if (backupCategory.uid != 0L) backupCategory.uid else dbCategory.uid,
+            last_modified_at = backupCategory.lastModifiedAt,
+            isSyncing = 1,
+            categoryId = dbCategory.id,
+        )
     }
 }

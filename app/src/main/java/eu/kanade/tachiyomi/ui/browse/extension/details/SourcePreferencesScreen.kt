@@ -24,6 +24,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.DialogPreference
 import androidx.preference.EditTextPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
 import androidx.preference.forEach
@@ -35,6 +36,7 @@ import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.SharedPreferencesDataStore
 import eu.kanade.tachiyomi.source.ConfigurableSource
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.sourcePreferences
 import eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText.Companion.setIncognito
 import exh.source.EnhancedHttpSource
@@ -132,19 +134,7 @@ internal class SourcePreferencesFragment : PreferenceFragmentCompat() {
     private fun populateScreen(): PreferenceScreen {
         val sourceId = requireArguments().getLong(SOURCE_ID)
         // SY -->
-        val source = Injekt.get<SourceManager>()
-            .getOrStub(sourceId)
-            .let { source ->
-                if (source is EnhancedHttpSource) {
-                    if (source.enhancedSource is ConfigurableSource) {
-                        source.source()
-                    } else {
-                        source.originalSource
-                    }
-                } else {
-                    source
-                }
-            }
+        val source = Injekt.get<SourceManager>().getOrStub(sourceId).configurableSide()
         // SY <--
         val sourceScreen = preferenceManager.createPreferenceScreen(requireContext())
 
@@ -153,25 +143,27 @@ internal class SourcePreferencesFragment : PreferenceFragmentCompat() {
             preferenceManager.preferenceDataStore = dataStore
 
             source.setupPreferenceScreen(sourceScreen)
-            sourceScreen.forEach { pref ->
-                pref.isIconSpaceReserved = false
-                pref.isSingleLineTitle = false
-                if (pref is DialogPreference && pref.dialogTitle.isNullOrEmpty()) {
-                    pref.dialogTitle = pref.title
-                }
-
-                // Apply incognito IME for EditTextPreference
-                if (pref is EditTextPreference) {
-                    val setListener = pref.getOnBindEditTextListener()
-                    pref.setOnBindEditTextListener {
-                        setListener?.onBindEditText(it)
-                        it.setIncognito(lifecycleScope)
-                    }
-                }
-            }
+            sourceScreen.forEach { pref -> pref.styleForScreen() }
         }
 
         return sourceScreen
+    }
+
+    private fun Preference.styleForScreen() {
+        isIconSpaceReserved = false
+        isSingleLineTitle = false
+        if (this is DialogPreference && dialogTitle.isNullOrEmpty()) {
+            dialogTitle = title
+        }
+
+        // Apply incognito IME for EditTextPreference
+        if (this is EditTextPreference) {
+            val setListener = getOnBindEditTextListener()
+            setOnBindEditTextListener {
+                setListener?.onBindEditText(it)
+                it.setIncognito(lifecycleScope)
+            }
+        }
     }
 
     companion object {
@@ -186,3 +178,11 @@ internal class SourcePreferencesFragment : PreferenceFragmentCompat() {
         }
     }
 }
+
+// SY --> An enhanced source is configured through its wrapper only when that wrapper has settings of its own.
+private fun Source.configurableSide(): Source = when {
+    this !is EnhancedHttpSource -> this
+    enhancedSource is ConfigurableSource -> source()
+    else -> originalSource
+}
+// SY <--

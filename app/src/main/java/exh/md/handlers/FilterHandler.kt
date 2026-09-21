@@ -99,23 +99,31 @@ internal class FilterHandler {
         // add filters
         filters.forEach { filter ->
             when (filter) {
-                is OriginalLanguageList -> queryMap.putList("originalLanguage[]", filter.selectedIsoCodes())
-                is ContentRatingList -> queryMap.putList("contentRating[]", filter.checkedNames())
-                is DemographicList -> queryMap.putList("publicationDemographic[]", filter.checkedNames())
-                is StatusList -> queryMap.putList("status[]", filter.checkedNames())
-                is SortFilter -> filter.state?.takeIf { it.index != 0 }?.let { selection ->
-                    val query = sortableList[selection.index].second
-                    queryMap["order[$query]"] = if (selection.ascending) "asc" else "desc"
+                is OriginalLanguageList -> {
+                    queryMap.putList("originalLanguage[]", filter.selectedIsoCodes())
                 }
-                is TagList -> filter.state.forEach { tag ->
-                    if (tag.isIncluded()) {
-                        includeTagList.add(tag.id)
-                    } else if (tag.isExcluded()) {
-                        excludeTagList.add(tag.id)
-                    }
+                is ContentRatingList -> {
+                    queryMap.putList("contentRating[]", filter.checkedNames())
                 }
-                is TagInclusionMode -> queryMap["includedTagsMode"] = filter.values[filter.state].uppercase(Locale.US)
-                is TagExclusionMode -> queryMap["excludedTagsMode"] = filter.values[filter.state].uppercase(Locale.US)
+                is DemographicList -> {
+                    queryMap.putList("publicationDemographic[]", filter.checkedNames())
+                }
+                is StatusList -> {
+                    queryMap.putList("status[]", filter.checkedNames())
+                }
+                is SortFilter -> {
+                    queryMap.putSort(filter)
+                }
+                is TagList -> {
+                    includeTagList += filter.state.filter { it.isIncluded() }.map { it.id }
+                    excludeTagList += filter.state.filter { it.isExcluded() }.map { it.id }
+                }
+                is TagInclusionMode -> {
+                    queryMap["includedTagsMode"] = filter.values[filter.state].uppercase(Locale.US)
+                }
+                is TagExclusionMode -> {
+                    queryMap["excludedTagsMode"] = filter.values[filter.state].uppercase(Locale.US)
+                }
                 else -> {
                     // Nothing to show.
                 }
@@ -124,6 +132,13 @@ internal class FilterHandler {
         queryMap.putList("includedTags[]", includeTagList)
         queryMap.putList("excludedTags[]", excludeTagList)
         return queryMap
+    }
+
+    // Index 0 is the site default, which needs no parameter.
+    private fun MutableMap<String, Any>.putSort(filter: SortFilter) {
+        val selection = filter.state?.takeIf { it.index != 0 } ?: return
+        val query = sortableList[selection.index].second
+        this["order[$query]"] = if (selection.ascending) "asc" else "desc"
     }
 }
 

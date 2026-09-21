@@ -19,17 +19,18 @@ internal inline fun <T : Closeable?> Array<T>.use(block: () -> Unit) {
         blockException = expected
         throw expected
     } finally {
-        if (blockException == null) {
-            forEach { it?.close() }
-        } else {
-            forEach {
-                try {
-                    it?.close()
-                } catch (expected: Throwable) {
-                    // Any failure ends here and the fallback below applies.
-                    blockException.addSuppressed(expected)
-                }
-            }
+        closeAll(blockException)
+    }
+}
+
+// Closes every element; once the block has failed, a failing close is attached to that failure instead of thrown.
+internal fun <T : Closeable?> Array<T>.closeAll(blockException: Throwable?) {
+    forEach {
+        try {
+            it?.close()
+        } catch (expected: Throwable) {
+            if (blockException == null) throw expected
+            blockException.addSuppressed(expected)
         }
     }
 }

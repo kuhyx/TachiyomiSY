@@ -41,35 +41,27 @@ internal class DownloadProvider(
      * @param source the source of the manga.
      */
     internal fun getMangaDir(mangaTitle: String, source: Source): Result<UniFile> {
-        val downloadsDir = downloadsDir
-        if (downloadsDir == null) {
-            logcat(LogPriority.ERROR) { "Failed to create download directory" }
-            return Result.failure(
-                IOException(context.stringResource(MR.strings.storage_failed_to_create_download_directory)),
-            )
-        }
-
-        val sourceDirName = getSourceDirName(source)
-        val sourceDir = downloadsDir.createDirectory(sourceDirName)
-        if (sourceDir == null) {
-            val displayablePath = downloadsDir.displayablePath + "/$sourceDirName"
-            logcat(LogPriority.ERROR) { "Failed to create source download directory: $displayablePath" }
-            return Result.failure(
-                IOException(context.stringResource(MR.strings.storage_failed_to_create_directory, displayablePath)),
-            )
-        }
-
-        val mangaDirName = getMangaDirName(mangaTitle)
-        val mangaDir = sourceDir.createDirectory(mangaDirName)
-        if (mangaDir == null) {
-            val displayablePath = sourceDir.displayablePath + "/$mangaDirName"
-            logcat(LogPriority.ERROR) { "Failed to create manga download directory: $displayablePath" }
-            return Result.failure(
-                IOException(context.stringResource(MR.strings.storage_failed_to_create_directory, displayablePath)),
-            )
-        }
-
+        val downloadsDir = downloadsDir ?: return noDownloadsDir()
+        val sourceDir = downloadsDir.createDirectory(getSourceDirName(source))
+            ?: return cannotCreate(downloadsDir, getSourceDirName(source), "source")
+        val mangaDir = sourceDir.createDirectory(getMangaDirName(mangaTitle))
+            ?: return cannotCreate(sourceDir, getMangaDirName(mangaTitle), "manga")
         return Result.success(mangaDir)
+    }
+
+    private fun noDownloadsDir(): Result<UniFile> {
+        logcat(LogPriority.ERROR) { "Failed to create download directory" }
+        return Result.failure(
+            IOException(context.stringResource(MR.strings.storage_failed_to_create_download_directory)),
+        )
+    }
+
+    private fun cannotCreate(parent: UniFile, name: String, kind: String): Result<UniFile> {
+        val displayablePath = parent.displayablePath + "/$name"
+        logcat(LogPriority.ERROR) { "Failed to create $kind download directory: $displayablePath" }
+        return Result.failure(
+            IOException(context.stringResource(MR.strings.storage_failed_to_create_directory, displayablePath)),
+        )
     }
 
     /**

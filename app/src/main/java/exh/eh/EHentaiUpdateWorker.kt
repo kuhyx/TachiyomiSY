@@ -183,17 +183,6 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
             }
 
             val (new, chapters) = fetchChapters(manga, meta) ?: return
-            if (chapters.isEmpty()) {
-                logger.e(
-                    "No chapters found for gallery (manga.id: %s, meta.gId: %s, meta.gToken: %s, " +
-                        "failures-so-far: %s)!",
-                    manga.id,
-                    meta.gId,
-                    meta.gToken,
-                    failures,
-                )
-                return
-            }
 
             // Find accepted root and discard others
             val (acceptedRoot, discardedRoots, exhNew) =
@@ -212,8 +201,28 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
             updated++
         }
 
-        // (new, current) chapters, or null when the gallery could not be updated; network failures count.
+        // (new, current) chapters, or null when the gallery could not be updated or came back empty.
         private suspend fun fetchChapters(
+            manga: Manga,
+            meta: EHentaiSearchMetadata,
+        ): Pair<List<Chapter>, List<Chapter>>? {
+            val fetched = fetchOrNull(manga, meta)
+            if (fetched != null && fetched.second.isEmpty()) {
+                logger.e(
+                    "No chapters found for gallery (manga.id: %s, meta.gId: %s, meta.gToken: %s, " +
+                        "failures-so-far: %s)!",
+                    manga.id,
+                    meta.gId,
+                    meta.gToken,
+                    failures,
+                )
+                return null
+            }
+            return fetched
+        }
+
+        // Network failures count towards the run's failure tally.
+        private suspend fun fetchOrNull(
             manga: Manga,
             meta: EHentaiSearchMetadata,
         ): Pair<List<Chapter>, List<Chapter>>? =

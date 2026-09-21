@@ -49,48 +49,47 @@ internal value class SearchMetadataChips(
 ) {
     companion object {
         operator fun invoke(meta: RaisedSearchMetadata?, sourceId: Long, tags: List<String>?): SearchMetadataChips? {
-            return if (meta != null) {
-                SearchMetadataChips(
+            return when {
+                meta != null -> SearchMetadataChips(
                     meta.tags
                         .filterNot { it.type == RaisedSearchMetadata.TAG_TYPE_VIRTUAL }
-                        .map {
-                            DisplayTag(
-                                namespace = it.namespace,
-                                text = it.name,
-                                search = if (!it.namespace.isNullOrEmpty()) {
-                                    SourceTagsUtil.getWrappedTag(sourceId, namespace = it.namespace, tag = it.name)
-                                } else {
-                                    SourceTagsUtil.getWrappedTag(sourceId, fullTag = it.name)
-                                } ?: it.name,
-                                border = if (sourceId == EXH_SOURCE_ID || sourceId == EH_SOURCE_ID) {
-                                    when (it.type) {
-                                        EHentaiSearchMetadata.TAG_TYPE_NORMAL -> 2
-                                        EHentaiSearchMetadata.TAG_TYPE_LIGHT -> 1
-                                        else -> null
-                                    }
-                                } else {
-                                    null
-                                },
-                            )
-                        }
+                        .map { it.toDisplayTag(sourceId) }
                         .groupBy { it.namespace.orEmpty() },
                 )
-            } else if (tags != null && tags.all { it.contains(':') }) {
-                SearchMetadataChips(
-                    tags
-                        .map { tag ->
-                            val index = tag.indexOf(':')
-                            DisplayTag(tag.substring(0, index).trim(), tag.substring(index + 1).trim(), tag, null)
-                        }
-                        .groupBy {
-                            it.namespace.orEmpty()
-                        },
+                tags != null && tags.all { it.contains(':') } -> SearchMetadataChips(
+                    tags.map(::parseNamespacedTag).groupBy { it.namespace.orEmpty() },
                 )
-            } else {
-                null
+                else -> null
             }
         }
     }
+}
+
+private fun RaisedTag.toDisplayTag(sourceId: Long): DisplayTag = DisplayTag(
+    namespace = namespace,
+    text = name,
+    search = if (namespace.isNullOrEmpty()) {
+        SourceTagsUtil.getWrappedTag(sourceId, fullTag = name)
+    } else {
+        SourceTagsUtil.getWrappedTag(sourceId, namespace = namespace, tag = name)
+    } ?: name,
+    border = ehBorder(sourceId, type),
+)
+
+// Only E-Hentai grades its tags; the border width shows the grade.
+private fun ehBorder(sourceId: Long, tagType: Int): Int? {
+    if (sourceId != EXH_SOURCE_ID && sourceId != EH_SOURCE_ID) return null
+    return when (tagType) {
+        EHentaiSearchMetadata.TAG_TYPE_NORMAL -> 2
+        EHentaiSearchMetadata.TAG_TYPE_LIGHT -> 1
+        else -> null
+    }
+}
+
+// A plain "namespace:name" genre string from a source without metadata.
+private fun parseNamespacedTag(tag: String): DisplayTag {
+    val index = tag.indexOf(':')
+    return DisplayTag(tag.substring(0, index).trim(), tag.substring(index + 1).trim(), tag, null)
 }
 
 @Composable

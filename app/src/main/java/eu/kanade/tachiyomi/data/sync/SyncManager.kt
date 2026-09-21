@@ -179,19 +179,9 @@ internal class SyncManager(
         val localChapters = database.chaptersQueries.getChaptersByMangaId(localManga.id, 0).awaitAsList()
         val localCategories = getCategories.await(localManga.id).map { it.order }
 
-        if (areChaptersDifferent(localChapters, remoteManga.chapters)) {
-            return true
-        }
-
-        if (localManga.version != remoteManga.version) {
-            return true
-        }
-
-        if (localCategories.toSet() != remoteManga.categories.toSet()) {
-            return true
-        }
-
-        return false
+        return areChaptersDifferent(localChapters, remoteManga.chapters) ||
+            localManga.version != remoteManga.version ||
+            localCategories.toSet() != remoteManga.categories.toSet()
     }
 
     // Filters the favorite and non-favorite manga from the backup and checks

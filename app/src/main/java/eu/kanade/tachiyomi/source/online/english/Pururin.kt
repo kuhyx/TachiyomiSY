@@ -20,6 +20,7 @@ import exh.util.dropBlank
 import exh.util.trimAll
 import exh.util.urlImportSearchManga
 import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import rx.Observable
 import tachiyomi.core.common.util.lang.runAsObservable
 
@@ -102,23 +103,26 @@ internal class Pururin(delegate: HttpSource, val context: Context) :
                         uploader = value.child(0).attr("href").toUri().lastPathSegment
                     }
                     else -> {
-                        value.select("a").forEach { link ->
-                            val searchUrl = link.attr("href").toUri()
-                            val namespace = searchUrl.pathSegments[searchUrl.pathSegments.lastIndex - 2]
-                            tags += RaisedTag(
-                                namespace,
-                                searchUrl.lastPathSegment!!.substringBefore("."),
-                                if (namespace != PururinSearchMetadata.TAG_NAMESPACE_CATEGORY) {
-                                    PururinSearchMetadata.TAG_TYPE_DEFAULT
-                                } else {
-                                    RaisedSearchMetadata.TAG_TYPE_VIRTUAL
-                                },
-                            )
-                        }
+                        tags += value.select("a").map { link -> link.toRaisedTag() }
                     }
                 }
             }
         }
+    }
+
+    // The tag's namespace and name are the last path segments of its search link.
+    private fun Element.toRaisedTag(): RaisedTag {
+        val searchUrl = attr("href").toUri()
+        val namespace = searchUrl.pathSegments[searchUrl.pathSegments.lastIndex - 2]
+        return RaisedTag(
+            namespace,
+            searchUrl.lastPathSegment!!.substringBefore("."),
+            if (namespace != PururinSearchMetadata.TAG_NAMESPACE_CATEGORY) {
+                PururinSearchMetadata.TAG_TYPE_DEFAULT
+            } else {
+                RaisedSearchMetadata.TAG_TYPE_VIRTUAL
+            },
+        )
     }
 
     override suspend fun mapUrlToMangaUrl(uri: Uri): String =

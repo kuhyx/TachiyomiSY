@@ -76,13 +76,10 @@ internal class GalleryAdder(
         )
         return try {
             val uri = url.toUri()
-            val source = when (val match = matchSource(uri, url, forceSource, context)) {
-                is SourceMatch.Found -> match.source
-                is SourceMatch.Failed -> return match.event
+            when (val match = matchSource(uri, url, forceSource, context)) {
+                is SourceMatch.Failed -> match.event
+                is SourceMatch.Found -> importFrom(match.source, uri, url, fav, throttleFunc, retry, context)
             }
-            val urls = resolveUrls(source, uri, context) ?: return GalleryAddEvent.Fail.UnknownType(url, context)
-            val manga = importManga(source, urls.mangaUrl, fav, throttleFunc, retry)
-            successEvent(url, manga, urls.chapterUrl, context)
         } catch (notFound: EHentai.GalleryNotFoundException) {
             logger.w(context.stringResource(SYMR.strings.gallery_adder_could_not_add_gallery, url), notFound)
             GalleryAddEvent.Fail.NotFound(url, context)
@@ -91,6 +88,20 @@ internal class GalleryAdder(
             logger.w(context.stringResource(SYMR.strings.gallery_adder_could_not_add_gallery, url), expected)
             GalleryAddEvent.Fail.Error(url, ((expected.message ?: "Unknown error!") + " (Gallery: $url)").trim())
         }
+    }
+
+    private suspend fun importFrom(
+        source: UrlImportableSource,
+        uri: Uri,
+        url: String,
+        fav: Boolean,
+        throttleFunc: suspend () -> Unit,
+        retry: Int,
+        context: Context,
+    ): GalleryAddEvent {
+        val urls = resolveUrls(source, uri, context) ?: return GalleryAddEvent.Fail.UnknownType(url, context)
+        val manga = importManga(source, urls.mangaUrl, fav, throttleFunc, retry)
+        return successEvent(url, manga, urls.chapterUrl, context)
     }
 
     private sealed interface SourceMatch {
@@ -143,12 +154,12 @@ internal class GalleryAdder(
         // Map URL to manga URL
         val realMangaUrl = logged(context, SYMR.strings.gallery_adder_uri_map_to_gallery_error) {
             chapterMangaUrl ?: source.mapUrlToMangaUrl(uri)
-        } ?: return null
+        }
         // Clean URL
-        val cleanedMangaUrl = logged(context, SYMR.strings.gallery_adder_uri_clean_error) {
-            source.cleanMangaUrl(realMangaUrl)
-        } ?: return null
-        return ResolvedUrls(cleanedMangaUrl, cleanedChapterUrl)
+        val cleanedMangaUrl = realMangaUrl?.let { mangaUrl ->
+            logged(context, SYMR.strings.gallery_adder_uri_clean_error) { source.cleanMangaUrl(mangaUrl) }
+        }
+        return cleanedMangaUrl?.let { ResolvedUrls(it, cleanedChapterUrl) }
     }
 
     // Runs [block], logging any failure under [message] and yielding null in its place.

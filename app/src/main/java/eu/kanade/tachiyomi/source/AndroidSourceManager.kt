@@ -220,16 +220,11 @@ internal class AndroidSourceManager(
         }
     }
 
-    private suspend fun createStubSource(id: Long): StubSource {
-        sourceRepository.getStubSource(id)?.let {
-            return it
-        }
-        extensionManager.getSourceData(id)?.let {
-            registerStubSource(it)
-            return it
-        }
-        return StubSource(id = id, lang = "", name = "")
-    }
+    // A stub already stored, else one built from the extension's data (and stored), else a nameless one.
+    private suspend fun createStubSource(id: Long): StubSource =
+        sourceRepository.getStubSource(id)
+            ?: extensionManager.getSourceData(id)?.also { registerStubSource(it) }
+            ?: StubSource(id = id, lang = "", name = "")
 
     // SY -->
     companion object {

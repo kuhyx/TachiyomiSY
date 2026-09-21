@@ -133,33 +133,46 @@ internal fun Changelog.toDisplayChangelog(): List<DisplayChangelog> {
             changelog = version.text.mapIndexed { index, changelogText ->
                 buildAnnotatedString {
                     append(prefix)
-                    var inBBCode = false
-                    var isEscape = false
-                    changelogText.value.forEachIndexed { charIndex, c ->
-                        if (!inBBCode && c == '[') {
-                            inBBCode = true
-                        } else if (inBBCode && c == ']') {
-                            inBBCode = false
-                            isEscape = false
-                        } else if (inBBCode && c == '/') {
-                            isEscape = true
-                        } else if (inBBCode && c == 'b') {
-                            if (isEscape) {
-                                try {
-                                    pop()
-                                } catch (e: IllegalStateException) {
-                                    val where = "${version.versionName}:$index:$charIndex"
-                                    throw IllegalStateException("Exception on $where", e)
-                                }
-                            } else {
-                                pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                            }
-                        } else {
-                            append(c)
-                        }
-                    }
+                    appendBBCode(changelogText.value) { charIndex -> "${version.versionName}:$index:$charIndex" }
                 }
             },
         )
+    }
+}
+
+// Appends text with [b]…[/b] rendered bold; `where` names a char index in the error for a stray [/b].
+private fun AnnotatedString.Builder.appendBBCode(text: String, where: (Int) -> String) {
+    var inBBCode = false
+    var isEscape = false
+    text.forEachIndexed { charIndex, c ->
+        when {
+            !inBBCode && c == '[' -> {
+                inBBCode = true
+            }
+            inBBCode && c == ']' -> {
+                inBBCode = false
+                isEscape = false
+            }
+            inBBCode && c == '/' -> {
+                isEscape = true
+            }
+            inBBCode && c == 'b' && isEscape -> {
+                popOrThrow(where(charIndex))
+            }
+            inBBCode && c == 'b' -> {
+                pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+            }
+            else -> {
+                append(c)
+            }
+        }
+    }
+}
+
+private fun AnnotatedString.Builder.popOrThrow(where: String) {
+    try {
+        pop()
+    } catch (e: IllegalStateException) {
+        throw IllegalStateException("Exception on $where", e)
     }
 }

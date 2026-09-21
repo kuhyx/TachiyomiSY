@@ -47,6 +47,7 @@ import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.chapter.interactor.GetMergedChaptersByMangaId
 import tachiyomi.domain.history.interactor.GetNextChapters
 import tachiyomi.domain.library.model.LibraryGroup
+import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.manga.interactor.GetLibraryManga
 import tachiyomi.domain.manga.interactor.GetMergedMangaById
@@ -338,48 +339,37 @@ internal class LibraryScreenModel(
             getLibraryItemPreferencesFlow(),
             downloadCache.changes,
         ) { libraryManga, preferences, _ ->
-            libraryManga.map { manga ->
-                // SY -->
-                val downloadCount = if (manga.manga.source == MERGED_SOURCE_ID) {
-                    getMergedMangaById.await(manga.manga.id).sumOf { downloadManager.getDownloadCount(it) }
-                } else {
-                    downloadManager.getDownloadCount(manga.manga)
-                }
-                // SY <--
-                LibraryItem(
-                    libraryManga = manga,
-                    // SY -->
-                    downloadCount = downloadCount,
-                    // SY <--
-                    unreadCount = manga.unreadCount,
-                    isLocal = manga.manga.isLocal(),
-                    badges = LibraryItem.Badges(
-                        downloadCount = if (preferences.downloadBadge) {
-                            // SY -->
-                            downloadCount
-                            // SY <--
-                        } else {
-                            0
-                        },
-                        unreadCount = if (preferences.unreadBadge) {
-                            manga.unreadCount
-                        } else {
-                            0
-                        },
-                        isLocal = if (preferences.localBadge) {
-                            manga.manga.isLocal()
-                        } else {
-                            false
-                        },
-                        sourceLanguage = if (preferences.languageBadge) {
-                            sourceManager.getOrStub(manga.manga.source).lang
-                        } else {
-                            ""
-                        },
-                    ),
-                )
-            }
+            libraryManga.map { manga -> toLibraryItem(manga, preferences) }
         }
+    }
+
+    private suspend fun toLibraryItem(manga: LibraryManga, preferences: ItemPreferences): LibraryItem {
+        // SY -->
+        val downloadCount = if (manga.manga.source == MERGED_SOURCE_ID) {
+            getMergedMangaById.await(manga.manga.id).sumOf { downloadManager.getDownloadCount(it) }
+        } else {
+            downloadManager.getDownloadCount(manga.manga)
+        }
+        // SY <--
+        return LibraryItem(
+            libraryManga = manga,
+            // SY -->
+            downloadCount = downloadCount,
+            // SY <--
+            unreadCount = manga.unreadCount,
+            isLocal = manga.manga.isLocal(),
+            badges = LibraryItem.Badges(
+                // Each badge shows its value only when the preference asks for it.
+                downloadCount = if (preferences.downloadBadge) /* SY --> */ downloadCount /* SY <-- */ else 0,
+                unreadCount = if (preferences.unreadBadge) manga.unreadCount else 0,
+                isLocal = preferences.localBadge && manga.manga.isLocal(),
+                sourceLanguage = if (preferences.languageBadge) {
+                    sourceManager.getOrStub(manga.manga.source).lang
+                } else {
+                    ""
+                },
+            ),
+        )
     }
 
     // Flow of tracking filter preferences.

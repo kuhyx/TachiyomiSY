@@ -10,18 +10,13 @@ import eu.kanade.tachiyomi.util.lang.Hash
 // @param shared extension installed to system
 // @param private extension installed to data directory
 internal fun ExtensionLoader.selectExtensionPackage(shared: ExtensionInfo?, private: ExtensionInfo?): ExtensionInfo? {
-    when {
-        private == null && shared != null -> return shared
-        shared == null && private != null -> return private
-        shared == null && private == null -> return null
-    }
-
-    return if (PackageInfoCompat.getLongVersionCode(shared!!.packageInfo) >=
-        PackageInfoCompat.getLongVersionCode(private!!.packageInfo)
-    ) {
-        shared
-    } else {
-        private
+    return when {
+        shared == null -> private
+        private == null -> shared
+        // Both installed: the newer one wins, the shared one on a tie.
+        PackageInfoCompat.getLongVersionCode(shared.packageInfo) >=
+            PackageInfoCompat.getLongVersionCode(private.packageInfo) -> shared
+        else -> private
     }
 }
 

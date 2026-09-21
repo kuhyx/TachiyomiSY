@@ -32,21 +32,19 @@ internal data class ALManga(
         publishingStatus = this@ALManga.publishingStatus
         publishingType = format
         if (startDateFuzzy != 0L) {
-            startDate = try {
-                val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-                outputDf.format(startDateFuzzy)
-            } catch (_: IllegalArgumentException) {
-                ""
-            }
+            startDate = formatStartDate(startDateFuzzy)
         }
-        staff.edges.forEach {
-            val name = it.node.name()
-            if (name != null) {
-                if ("Story" in it.role) authors += name
-                if ("Art" in it.role) artists += name
-            }
-        }
+        val credited = staff.edges.mapNotNull { edge -> edge.node.name()?.let { it to edge.role } }
+        authors += credited.filter { (_, role) -> "Story" in role }.map { it.first }
+        artists += credited.filter { (_, role) -> "Art" in role }.map { it.first }
     }
+}
+
+// An unformattable date is shown as none at all.
+private fun formatStartDate(startDateFuzzy: Long): String = try {
+    SimpleDateFormat("yyyy-MM-dd", Locale.US).format(startDateFuzzy)
+} catch (_: IllegalArgumentException) {
+    ""
 }
 
 internal data class ALUserManga(

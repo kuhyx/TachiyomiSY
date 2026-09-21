@@ -89,19 +89,12 @@ internal class MyAnimeList(id: Long) : BaseTracker(id, "MyAnimeList"), Deletable
     }
 
     override suspend fun search(query: String): List<TrackSearch> {
-        if (query.startsWith(SEARCH_ID_PREFIX)) {
-            query.substringAfter(SEARCH_ID_PREFIX).toIntOrNull()?.let { id ->
-                return listOf(api.getMangaDetails(id))
-            }
+        val id = query.takeIf { it.startsWith(SEARCH_ID_PREFIX) }?.substringAfter(SEARCH_ID_PREFIX)?.toIntOrNull()
+        return when {
+            id != null -> listOf(api.getMangaDetails(id))
+            query.startsWith(SEARCH_LIST_PREFIX) -> api.findListItems(query.substringAfter(SEARCH_LIST_PREFIX))
+            else -> api.search(query)
         }
-
-        if (query.startsWith(SEARCH_LIST_PREFIX)) {
-            query.substringAfter(SEARCH_LIST_PREFIX).let { title ->
-                return api.findListItems(title)
-            }
-        }
-
-        return api.search(query)
     }
 
     override suspend fun refresh(track: Track): Track = api.findListItem(track) ?: add(track)

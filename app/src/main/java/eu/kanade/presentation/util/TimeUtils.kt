@@ -11,21 +11,17 @@ import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
-// Days, hours, minutes, seconds.
-private const val MAX_PARTS = 4
-
 internal fun Duration.toDurationString(context: Context, fallback: String): String {
     return toComponents { days, hours, minutes, seconds, _ ->
-        buildList(MAX_PARTS) {
-            if (days != 0L) add(context.stringResource(MR.strings.day_short, days))
-            if (hours != 0) add(context.stringResource(MR.strings.hour_short, hours))
-            if (minutes != 0 && (days == 0L || hours == 0)) {
-                add(
-                    context.stringResource(MR.strings.minute_short, minutes),
-                )
-            }
-            if (seconds != 0 && days == 0L && hours == 0) add(context.stringResource(MR.strings.seconds_short, seconds))
-        }.joinToString(" ").ifBlank { fallback }
+        // Never more than two parts: minutes drop once both days and hours show, seconds once either does.
+        val showMinutes = minutes != 0 && (days == 0L || hours == 0)
+        val showSeconds = seconds != 0 && days == 0L && hours == 0
+        listOfNotNull(
+            context.stringResource(MR.strings.day_short, days).takeIf { days != 0L },
+            context.stringResource(MR.strings.hour_short, hours).takeIf { hours != 0 },
+            context.stringResource(MR.strings.minute_short, minutes).takeIf { showMinutes },
+            context.stringResource(MR.strings.seconds_short, seconds).takeIf { showSeconds },
+        ).joinToString(" ").ifBlank { fallback }
     }
 }
 
