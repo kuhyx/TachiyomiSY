@@ -11,10 +11,12 @@
 #   scripts/ci_gates.sh                # all gates
 #   scripts/ci_gates.sh --no-gradle    # only the shell gates (seconds, not minutes)
 #   scripts/ci_gates.sh --changed-only # gradle only if the push range touches
-#                                      # build inputs (the pre-push hook's mode:
-#                                      # a full check is ~2 min under the local
-#                                      # cap, and a docs-only push must not pay
-#                                      # for it)
+#                                      # build inputs, scoped to the touched
+#                                      # modules (the pre-push hook's mode, and
+#                                      # the per-commit gate to run detached:
+#                                      # ~65 s of check plus ~3 min of Android
+#                                      # Lint when app changed; a docs-only
+#                                      # push must not pay for it)
 #
 # Env:
 #   UTILS_ROOT     where github.com/kuhyx/utils is checked out
@@ -141,10 +143,14 @@ gradle_gate() {
         # The cap is whatever ceiling capped.sh currently allows, read from
         # the script so a raised ceiling speeds the gate up without a second
         # edit here and a lowered one cannot make it refuse to run.
-        # 2026-09-13: :app:lintAnalyzeDebug alone needs more than the cap
-        # leaves next to the daemon and the Kotlin daemon (SIGTERM 143 at
-        # 1.5, 2 and 2.5 GiB, in-process or as a worker), so Android Lint is
-        # CI's job: the local gate is compile, tests, detekt, ktlint, Kover.
+        # Android Lint runs here too since 2026-09-21: at the 8 GiB cap
+        # :app:lintAnalyzeDebug fits (2m46s, serial, not heap-bound -- the
+        # same at 4 and 6 GiB), and the first push after the app joined the
+        # lint stack went red on two debug-only findings the local gate had
+        # skipped with `-x lint`. Gradle's up-to-date check makes a repeat on
+        # the same tree cost seconds, so run this script `--changed-only`
+        # detached after every commit and the pre-push hook finds every task
+        # up to date; only the < 8 GiB branch still cannot hold lint.
         local mem_g cpu_pct workers
         mem_g="$(sed -n 's/^readonly HARD_MEM_G=\([0-9]*\)$/\1/p' "$capped")"
         cpu_pct="$(sed -n 's/^readonly HARD_CPU_PCT=\([0-9]*\)$/\1/p' "$capped")"
@@ -165,7 +171,7 @@ gradle_gate() {
             # 8 GiB; 2 GiB is what the < 8 GiB branch below already compiles
             # the app with.
             CAP_MEM="${mem_g}G" CAP_CPU_PCT="$cpu_pct" "$capped" \
-                "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint "${scope[@]}" \
+                "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" "${scope[@]}" \
                 --max-workers="$workers" \
                 -Dorg.gradle.parallel=true \
                 -Dorg.gradle.jvmargs="-Xmx$((mem_g / 4))g -Dfile.encoding=UTF-8" \

@@ -28,10 +28,13 @@ the sync job execute. Add a gate there, never in a workflow alone.
 - Hooks (once per clone): `scripts/install_hooks.sh`
 - All gates, as CI runs them: `scripts/ci_gates.sh` (`--no-gradle` for the
   shell gates only, seconds instead of minutes)
-- Build gate only: `~/.claude/scripts/capped.sh ./gradlew check` (local
-  builds run under the shared resource cap: a full `check` is well over ten
-  minutes, so the pre-push hook runs it only when the push touches build
-  inputs, and CI is the authority for the rest)
+- Per-commit gate, detached: `scripts/ci_gates.sh --changed-only > .logs/<name>.log 2>&1 &`
+  -- the pre-push hook runs the same command, so once the detached run is
+  green every Gradle task is up to date and the push costs seconds. Android
+  Lint is part of it since 2026-09-21 (`:app:lintAnalyzeDebug` is ~3 min,
+  serial, and re-runs whenever any app file changes; the first app-lint push
+  went red on findings a `-x lint` local gate had skipped). CI's `check`
+  lints the debug variant -- `lintFoss` is not what CI runs.
 - One module: `./gradlew :domain:check`; the convention plugins themselves:
   `./gradlew -p gradle/build-logic check` (root `check` depends on it)
 - Lint stack per module: apply `mihonx.plugins.lint` (detekt every rule from
