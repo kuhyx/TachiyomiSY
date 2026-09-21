@@ -4,65 +4,38 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.data.CreateBackupScreen
 import eu.kanade.presentation.more.settings.screen.data.RestoreBackupScreen
-import eu.kanade.presentation.more.settings.screen.data.StorageInfo
 import eu.kanade.presentation.more.settings.widget.BasePreferenceWidget
 import eu.kanade.presentation.more.settings.widget.PrefsHorizontalPadding
 import eu.kanade.presentation.util.relativeTimeSpanString
 import eu.kanade.tachiyomi.data.backup.create.BackupCreateJob
 import eu.kanade.tachiyomi.data.backup.restore.BackupRestoreJob
-import eu.kanade.tachiyomi.data.cache.ChapterCache
-import eu.kanade.tachiyomi.data.cache.PagePreviewCache
-import eu.kanade.tachiyomi.data.export.LibraryExporter
-import eu.kanade.tachiyomi.data.export.LibraryExporter.ExportOptions
 import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource
-import tachiyomi.core.common.util.lang.launchNonCancellable
-import tachiyomi.core.common.util.lang.withUIContext
-import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.backup.service.BackupPreferences
-import tachiyomi.domain.library.service.LibraryPreferences
-import tachiyomi.domain.manga.interactor.GetFavorites
-import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
-import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 private const val SIX_HOURS = 6
@@ -180,219 +153,4 @@ internal fun getBackupAndRestoreGroup(backupPreferences: BackupPreferences): Pre
             ),
         ),
     )
-}
-
-// A "clear this cache" row; [clear] returns how many files went, [onCleared] refreshes the shown size.
-@Composable
-private fun clearCachePreference(
-    title: String,
-    readableSize: String,
-    clear: () -> Int,
-    onCleared: () -> Unit,
-): Preference.PreferenceItem<out Any, out Any> {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    return Preference.PreferenceItem.TextPreference(
-        title = title,
-        subtitle = stringResource(MR.strings.used_cache, readableSize),
-        onClick = {
-            scope.launchNonCancellable {
-                try {
-                    val deletedFiles = clear()
-                    withUIContext {
-                        context.toast(context.stringResource(MR.strings.cache_deleted, deletedFiles))
-                        onCleared()
-                    }
-                } catch (expected: Throwable) {
-                    // Logged whatever the cause; the caller carries on.
-                    logcat(LogPriority.ERROR, expected)
-                    withUIContext { context.toast(MR.strings.cache_delete_error) }
-                }
-            }
-        },
-    )
-}
-
-@Composable
-internal fun getDataGroup(): Preference.PreferenceGroup {
-    val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
-
-    val chapterCache = remember { Injekt.get<ChapterCache>() }
-    var cacheReadableSizeSema by remember { mutableIntStateOf(0) }
-    val cacheReadableSize = remember(cacheReadableSizeSema) { chapterCache.readableSize }
-
-    // SY -->
-    val pagePreviewCache = remember { Injekt.get<PagePreviewCache>() }
-    var pagePreviewReadableSizeSema by remember { mutableIntStateOf(0) }
-    val pagePreviewReadableSize = remember(pagePreviewReadableSizeSema) { pagePreviewCache.readableSize }
-    // SY <--
-
-    return Preference.PreferenceGroup(
-        title = stringResource(MR.strings.pref_storage_usage),
-        preferenceItems = listOf(
-            Preference.PreferenceItem.CustomPreference(
-                title = stringResource(MR.strings.pref_storage_usage),
-            ) {
-                BasePreferenceWidget(
-                    subcomponent = {
-                        StorageInfo(
-                            modifier = Modifier.padding(horizontal = PrefsHorizontalPadding),
-                        )
-                    },
-                )
-            },
-
-            clearCachePreference(
-                title = stringResource(MR.strings.pref_clear_chapter_cache),
-                readableSize = cacheReadableSize,
-                clear = chapterCache::clear,
-                onCleared = { cacheReadableSizeSema++ },
-            ),
-            // SY -->
-            clearCachePreference(
-                title = stringResource(SYMR.strings.pref_clear_page_preview_cache),
-                readableSize = pagePreviewReadableSize,
-                clear = pagePreviewCache::clear,
-                onCleared = { pagePreviewReadableSizeSema++ },
-            ),
-            // SY <--
-            Preference.PreferenceItem.SwitchPreference(
-                preference = libraryPreferences.autoClearChapterCache,
-                title = stringResource(MR.strings.pref_auto_clear_chapter_cache),
-            ),
-        ),
-    )
-}
-
-@Composable
-internal fun getExportGroup(): Preference.PreferenceGroup {
-    var showDialog by remember { mutableStateOf(false) }
-    var exportOptions by remember {
-        mutableStateOf(
-            ExportOptions(
-                includeTitle = true,
-                includeAuthor = true,
-                includeArtist = true,
-            ),
-        )
-    }
-
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val getFavorites = remember { Injekt.get<GetFavorites>() }
-    var favorites by remember { mutableStateOf<List<Manga>>(emptyList()) }
-    LaunchedEffect(Unit) {
-        favorites = getFavorites.await()
-    }
-
-    val saveFileLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("text/csv"),
-    ) { uri ->
-        uri?.let {
-            scope.launch {
-                LibraryExporter.exportToCsv(
-                    context = context,
-                    uri = it,
-                    favorites = favorites,
-                    options = exportOptions,
-                    onExportComplete = {
-                        scope.launch(Dispatchers.Main) {
-                            context.toast(MR.strings.library_exported)
-                        }
-                    },
-                )
-            }
-        }
-    }
-
-    if (showDialog) {
-        ColumnSelectionDialog(
-            options = exportOptions,
-            onConfirm = { options ->
-                exportOptions = options
-                saveFileLauncher.launch("mihon_library.csv")
-            },
-            onDismissRequest = { showDialog = false },
-        )
-    }
-
-    return Preference.PreferenceGroup(
-        title = stringResource(MR.strings.export),
-        preferenceItems = listOf(
-            Preference.PreferenceItem.TextPreference(
-                title = stringResource(MR.strings.library_list),
-                onClick = { showDialog = true },
-            ),
-        ),
-    )
-}
-
-@Composable
-internal fun ColumnSelectionDialog(
-    options: ExportOptions,
-    onConfirm: (ExportOptions) -> Unit,
-    onDismissRequest: () -> Unit,
-) {
-    var titleSelected by remember { mutableStateOf(options.includeTitle) }
-    var authorSelected by remember { mutableStateOf(options.includeAuthor) }
-    var artistSelected by remember { mutableStateOf(options.includeArtist) }
-
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = {
-            Text(text = stringResource(MR.strings.migration_dialog_what_to_include))
-        },
-        text = {
-            Column {
-                // Author and artist only make sense next to a title.
-                LabeledCheckboxRow(MR.strings.title, titleSelected) { checked ->
-                    titleSelected = checked
-                    if (!checked) {
-                        authorSelected = false
-                        artistSelected = false
-                    }
-                }
-                LabeledCheckboxRow(MR.strings.author, authorSelected, enabled = titleSelected) { authorSelected = it }
-                LabeledCheckboxRow(MR.strings.artist, artistSelected, enabled = titleSelected) { artistSelected = it }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirm(
-                        ExportOptions(
-                            includeTitle = titleSelected,
-                            includeAuthor = authorSelected,
-                            includeArtist = artistSelected,
-                        ),
-                    )
-                    onDismissRequest()
-                },
-            ) {
-                Text(text = stringResource(MR.strings.action_save))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(text = stringResource(MR.strings.action_cancel))
-            }
-        },
-    )
-}
-
-@Composable
-private fun LabeledCheckboxRow(
-    label: StringResource,
-    checked: Boolean,
-    enabled: Boolean = true,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Checkbox(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            enabled = enabled,
-        )
-        Text(text = stringResource(label))
-    }
 }

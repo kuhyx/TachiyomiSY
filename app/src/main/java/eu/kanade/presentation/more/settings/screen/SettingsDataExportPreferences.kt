@@ -1,0 +1,166 @@
+package eu.kanade.presentation.more.settings.screen
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import dev.icerock.moko.resources.StringResource
+import eu.kanade.presentation.more.settings.Preference
+import eu.kanade.tachiyomi.data.export.LibraryExporter
+import eu.kanade.tachiyomi.data.export.LibraryExporter.ExportOptions
+import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.domain.manga.interactor.GetFavorites
+import tachiyomi.domain.manga.model.Manga
+import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.i18n.stringResource
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+
+@Composable
+internal fun getExportGroup(): Preference.PreferenceGroup {
+    var showDialog by remember { mutableStateOf(false) }
+    var exportOptions by remember {
+        mutableStateOf(
+            ExportOptions(
+                includeTitle = true,
+                includeAuthor = true,
+                includeArtist = true,
+            ),
+        )
+    }
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val getFavorites = remember { Injekt.get<GetFavorites>() }
+    var favorites by remember { mutableStateOf<List<Manga>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        favorites = getFavorites.await()
+    }
+
+    val saveFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv"),
+    ) { uri ->
+        uri?.let {
+            scope.launch {
+                LibraryExporter.exportToCsv(
+                    context = context,
+                    uri = it,
+                    favorites = favorites,
+                    options = exportOptions,
+                    onExportComplete = {
+                        scope.launch(Dispatchers.Main) {
+                            context.toast(MR.strings.library_exported)
+                        }
+                    },
+                )
+            }
+        }
+    }
+
+    if (showDialog) {
+        ColumnSelectionDialog(
+            options = exportOptions,
+            onConfirm = { options ->
+                exportOptions = options
+                saveFileLauncher.launch("mihon_library.csv")
+            },
+            onDismissRequest = { showDialog = false },
+        )
+    }
+
+    return Preference.PreferenceGroup(
+        title = stringResource(MR.strings.export),
+        preferenceItems = listOf(
+            Preference.PreferenceItem.TextPreference(
+                title = stringResource(MR.strings.library_list),
+                onClick = { showDialog = true },
+            ),
+        ),
+    )
+}
+
+@Composable
+internal fun ColumnSelectionDialog(
+    options: ExportOptions,
+    onConfirm: (ExportOptions) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    var titleSelected by remember { mutableStateOf(options.includeTitle) }
+    var authorSelected by remember { mutableStateOf(options.includeAuthor) }
+    var artistSelected by remember { mutableStateOf(options.includeArtist) }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(text = stringResource(MR.strings.migration_dialog_what_to_include))
+        },
+        text = {
+            Column {
+                // Author and artist only make sense next to a title.
+                LabeledCheckboxRow(MR.strings.title, titleSelected) { checked ->
+                    titleSelected = checked
+                    if (!checked) {
+                        authorSelected = false
+                        artistSelected = false
+                    }
+                }
+                LabeledCheckboxRow(MR.strings.author, authorSelected, enabled = titleSelected) { authorSelected = it }
+                LabeledCheckboxRow(MR.strings.artist, artistSelected, enabled = titleSelected) { artistSelected = it }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(
+                        ExportOptions(
+                            includeTitle = titleSelected,
+                            includeAuthor = authorSelected,
+                            includeArtist = artistSelected,
+                        ),
+                    )
+                    onDismissRequest()
+                },
+            ) {
+                Text(text = stringResource(MR.strings.action_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = stringResource(MR.strings.action_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+internal fun LabeledCheckboxRow(
+    label: StringResource,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled,
+        )
+        Text(text = stringResource(label))
+    }
+}
