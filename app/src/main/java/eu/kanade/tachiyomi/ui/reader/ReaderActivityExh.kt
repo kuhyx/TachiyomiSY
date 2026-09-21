@@ -9,6 +9,8 @@ import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.linearScroll
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.scrollDown
 import eu.kanade.tachiyomi.util.system.toast
 import exh.source.isEhBasedSource
 import kotlinx.coroutines.delay
