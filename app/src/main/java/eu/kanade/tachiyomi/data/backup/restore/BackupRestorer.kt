@@ -5,12 +5,6 @@ import android.net.Uri
 import eu.kanade.tachiyomi.data.backup.BackupDecoder
 import eu.kanade.tachiyomi.data.backup.BackupNotifier
 import eu.kanade.tachiyomi.data.backup.models.Backup
-import eu.kanade.tachiyomi.data.backup.models.BackupCategory
-import eu.kanade.tachiyomi.data.backup.models.BackupExtensionStore
-import eu.kanade.tachiyomi.data.backup.models.BackupManga
-import eu.kanade.tachiyomi.data.backup.models.BackupPreference
-import eu.kanade.tachiyomi.data.backup.models.BackupSavedSearch
-import eu.kanade.tachiyomi.data.backup.models.BackupSourcePreferences
 import eu.kanade.tachiyomi.data.backup.restore.restorers.CategoriesRestorer
 import eu.kanade.tachiyomi.data.backup.restore.restorers.ExtensionStoreRestorer
 import eu.kanade.tachiyomi.data.backup.restore.restorers.MangaRestorer
@@ -18,16 +12,10 @@ import eu.kanade.tachiyomi.data.backup.restore.restorers.PreferenceRestorer
 import eu.kanade.tachiyomi.data.backup.restore.restorers.SavedSearchRestorer
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
-import exh.source.MERGED_SOURCE_ID
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.ensureActive
 import logcat.LogPriority
-import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.data.Database
-import tachiyomi.i18n.MR
-import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -37,32 +25,31 @@ import java.util.Locale
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.incrementAndFetch
 
-private const val RESTORE_BATCH_SIZE = 100
+internal const val RESTORE_BATCH_SIZE = 100
 
 @OptIn(ExperimentalAtomicApi::class)
 internal class BackupRestorer(
-    private val context: Context,
-    private val notifier: BackupNotifier,
-    private val isSync: Boolean,
+    internal val context: Context,
+    internal val notifier: BackupNotifier,
+    internal val isSync: Boolean,
 
-    private val database: Database = Injekt.get(),
-    private val categoriesRestorer: CategoriesRestorer = CategoriesRestorer(),
-    private val preferenceRestorer: PreferenceRestorer = PreferenceRestorer(context),
-    private val extensionStoreRestorer: ExtensionStoreRestorer = ExtensionStoreRestorer(),
-    private val mangaRestorer: MangaRestorer = MangaRestorer(isSync),
+    internal val database: Database = Injekt.get(),
+    internal val categoriesRestorer: CategoriesRestorer = CategoriesRestorer(),
+    internal val preferenceRestorer: PreferenceRestorer = PreferenceRestorer(context),
+    internal val extensionStoreRestorer: ExtensionStoreRestorer = ExtensionStoreRestorer(),
+    internal val mangaRestorer: MangaRestorer = MangaRestorer(isSync),
     // SY -->
-    private val savedSearchRestorer: SavedSearchRestorer = SavedSearchRestorer(),
+    internal val savedSearchRestorer: SavedSearchRestorer = SavedSearchRestorer(),
     // SY <--
 ) {
 
-    private var restoreAmount = 0
-    private val restoreProgress = AtomicInt(0)
-    private val errors = CopyOnWriteArrayList<Pair<Date, String>>()
+    internal var restoreAmount = 0
+    internal val restoreProgress = AtomicInt(0)
+    internal val errors = CopyOnWriteArrayList<Pair<Date, String>>()
 
     // Mapping of source ID to source name from backup data.
-    private var sourceMapping: Map<Long, String> = emptyMap()
+    internal var sourceMapping: Map<Long, String> = emptyMap()
 
     suspend fun restore(uri: Uri, options: RestoreOptions) {
         val startTime = System.currentTimeMillis()
@@ -137,121 +124,7 @@ internal class BackupRestorer(
         }
     }
 
-    private suspend fun CoroutineScope.restoreCategories(backupCategories: List<BackupCategory>) {
-        ensureActive()
-        categoriesRestorer(backupCategories)
-
-        val progress = restoreProgress.incrementAndFetch()
-        notifier.showRestoreProgress(
-            context.stringResource(MR.strings.categories),
-            progress,
-            restoreAmount,
-            isSync,
-        )
-    }
-
-    // SY -->
-    private suspend fun CoroutineScope.restoreSavedSearches(backupSavedSearches: List<BackupSavedSearch>) {
-        ensureActive()
-        savedSearchRestorer.restoreSavedSearches(backupSavedSearches)
-
-        val progress = restoreProgress.incrementAndFetch()
-        notifier.showRestoreProgress(
-            context.stringResource(SYMR.strings.saved_searches),
-            progress,
-            restoreAmount,
-            isSync,
-        )
-    }
     // SY <--
-
-    private suspend fun CoroutineScope.restoreManga(
-        backupMangas: List<BackupManga>,
-        backupCategories: List<BackupCategory>,
-    ) {
-        mangaRestorer.sortByNew(backupMangas)
-            /* SY --> */.sortedBy { it.source == MERGED_SOURCE_ID } /* SY <-- */
-            .chunked(RESTORE_BATCH_SIZE)
-            .forEach { chunk ->
-                database.transaction {
-                    chunk.forEach {
-                        ensureActive()
-
-                        try {
-                            mangaRestorer.restore(it, backupCategories)
-                        } catch (expected: Exception) {
-                            // Any failure ends here and the fallback below applies.
-                            val sourceName = sourceMapping[it.source] ?: it.source.toString()
-                            errors.add(Date() to "${it.title} [$sourceName]: ${expected.message}")
-                        }
-
-                        restoreProgress.incrementAndFetch()
-                    }
-                }
-                notifier.showRestoreProgress(chunk.last().title, restoreProgress.load(), restoreAmount, isSync)
-            }
-    }
-
-    private suspend fun CoroutineScope.restoreAppPreferences(
-        preferences: List<BackupPreference>,
-        categories: List<BackupCategory>?,
-    ) {
-        ensureActive()
-        preferenceRestorer.restoreApp(
-            preferences,
-            categories,
-        )
-
-        val progress = restoreProgress.incrementAndFetch()
-        notifier.showRestoreProgress(
-            context.stringResource(MR.strings.app_settings),
-            progress,
-            restoreAmount,
-            isSync,
-        )
-    }
-
-    private suspend fun CoroutineScope.restoreSourcePreferences(preferences: List<BackupSourcePreferences>) {
-        ensureActive()
-        preferenceRestorer.restoreSource(preferences)
-
-        val progress = restoreProgress.incrementAndFetch()
-        notifier.showRestoreProgress(
-            context.stringResource(MR.strings.source_settings),
-            progress,
-            restoreAmount,
-            isSync,
-        )
-    }
-
-    private suspend fun CoroutineScope.restoreExtensionStores(
-        backupExtensionStores: List<BackupExtensionStore>,
-    ) {
-        backupExtensionStores
-            .chunked(RESTORE_BATCH_SIZE)
-            .forEach { chunk ->
-                database.transaction {
-                    chunk.forEach {
-                        ensureActive()
-
-                        try {
-                            extensionStoreRestorer(it)
-                        } catch (expected: Exception) {
-                            // Any failure ends here and the fallback below applies.
-                            errors.add(Date() to "Error Adding Repo: ${it.name} : ${expected.message}")
-                        }
-
-                        restoreProgress.incrementAndFetch()
-                    }
-                }
-                notifier.showRestoreProgress(
-                    context.stringResource(MR.strings.extensionStores),
-                    restoreProgress.load(),
-                    restoreAmount,
-                    isSync,
-                )
-            }
-    }
 
     // An unwritable cache yields an empty path, like no errors at all.
     private fun writeErrorLog(): File {
