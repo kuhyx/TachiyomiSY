@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences.ArchiveReaderMode
+import eu.kanade.tachiyomi.ui.reader.setting.archiveReaderMode
 import eu.kanade.tachiyomi.util.lang.compareNaturalIgnoreCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred

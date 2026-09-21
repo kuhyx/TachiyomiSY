@@ -1,6 +1,11 @@
 package eu.kanade.tachiyomi.ui.reader.viewer
 
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
+import eu.kanade.tachiyomi.ui.reader.setting.readWithLongTap
+import eu.kanade.tachiyomi.ui.reader.setting.readWithVolumeKeys
+import eu.kanade.tachiyomi.ui.reader.setting.readWithVolumeKeysInverted
+import eu.kanade.tachiyomi.ui.reader.setting.showNavigationOverlayNewUser
+import eu.kanade.tachiyomi.ui.reader.setting.showNavigationOverlayOnStart
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.EdgeNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.KindlishNavigation

@@ -8,6 +8,10 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
+import eu.kanade.tachiyomi.ui.reader.setting.aggressivePageLoading
+import eu.kanade.tachiyomi.ui.reader.setting.preloadSize
+import eu.kanade.tachiyomi.ui.reader.setting.readerInstantRetry
+import eu.kanade.tachiyomi.ui.reader.setting.readerThreads
 import exh.source.isEhBasedSource
 import exh.util.DataSaver
 import exh.util.DataSaver.Companion.getImage

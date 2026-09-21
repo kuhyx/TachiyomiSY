@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.MetadataSource
 import eu.kanade.tachiyomi.source.online.all.MergedSource
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
+import eu.kanade.tachiyomi.ui.reader.setting.autoscrollInterval
 import exh.metadata.metadata.base.raise
 import exh.source.getMainSource
 import kotlinx.coroutines.CancellationException

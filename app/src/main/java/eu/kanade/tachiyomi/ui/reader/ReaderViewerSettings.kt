@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.Event
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
+import eu.kanade.tachiyomi.ui.reader.setting.cropBordersContinuousVertical
+import eu.kanade.tachiyomi.ui.reader.setting.useAutoWebtoon
 import exh.util.defaultReaderType
 import exh.util.mangaType
 import kotlinx.coroutines.Dispatchers

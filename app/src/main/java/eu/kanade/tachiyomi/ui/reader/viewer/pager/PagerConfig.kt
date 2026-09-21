@@ -3,6 +3,15 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 import android.graphics.Color
 import androidx.annotation.ColorInt
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
+import eu.kanade.tachiyomi.ui.reader.setting.centerMarginType
+import eu.kanade.tachiyomi.ui.reader.setting.dualPageInvertPaged
+import eu.kanade.tachiyomi.ui.reader.setting.dualPageRotateToFit
+import eu.kanade.tachiyomi.ui.reader.setting.dualPageRotateToFitInvert
+import eu.kanade.tachiyomi.ui.reader.setting.dualPageSplitPaged
+import eu.kanade.tachiyomi.ui.reader.setting.invertDoublePages
+import eu.kanade.tachiyomi.ui.reader.setting.navigationModePager
+import eu.kanade.tachiyomi.ui.reader.setting.pageLayout
+import eu.kanade.tachiyomi.ui.reader.setting.pagerNavInverted
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation

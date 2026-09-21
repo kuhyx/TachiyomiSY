@@ -1,6 +1,13 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
+import eu.kanade.tachiyomi.ui.reader.setting.cropBordersContinuousVertical
+import eu.kanade.tachiyomi.ui.reader.setting.dualPageInvertWebtoon
+import eu.kanade.tachiyomi.ui.reader.setting.dualPageRotateToFitInvertWebtoon
+import eu.kanade.tachiyomi.ui.reader.setting.dualPageRotateToFitWebtoon
+import eu.kanade.tachiyomi.ui.reader.setting.dualPageSplitWebtoon
+import eu.kanade.tachiyomi.ui.reader.setting.navigationModeWebtoon
+import eu.kanade.tachiyomi.ui.reader.setting.webtoonNavInverted
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.LNavigation

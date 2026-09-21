@@ -28,6 +28,10 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsScreenModel
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
+import eu.kanade.tachiyomi.ui.reader.setting.cropBordersContinuousVertical
+import eu.kanade.tachiyomi.ui.reader.setting.dualPageSplitPaged
+import eu.kanade.tachiyomi.ui.reader.setting.pageLayout
+import eu.kanade.tachiyomi.ui.reader.setting.readerBottomButtons
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer

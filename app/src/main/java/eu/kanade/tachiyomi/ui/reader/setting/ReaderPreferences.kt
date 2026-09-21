@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.reader.setting
 import android.os.Build
 import androidx.compose.ui.graphics.BlendMode
 import dev.icerock.moko.resources.StringResource
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.core.common.preference.getEnum
@@ -14,12 +13,13 @@ import tachiyomi.i18n.sy.SYMR
 // Preference defaults.
 private const val DEFAULT_DOUBLE_TAP_ANIM_MS = 500
 private const val DEFAULT_VERTICAL_NAVIGATOR_HEIGHT = 65
-private const val DEFAULT_AUTOSCROLL_SECONDS = 3f
-private const val DEFAULT_PRELOAD_PAGES = 10
 
 internal class ReaderPreferences(
     preferenceStore: PreferenceStore,
 ) {
+
+    // The extension-property files (dual page, controls, SY) read preferences through this.
+    internal val preferenceStore: PreferenceStore = preferenceStore
 
     // region General
 
@@ -120,35 +120,6 @@ internal class ReaderPreferences(
 
     // endregion
 
-    // region Split two-page spread
-
-    val dualPageSplitPaged: Preference<Boolean> = preferenceStore.getBoolean("pref_dual_page_split", false)
-
-    val dualPageInvertPaged: Preference<Boolean> = preferenceStore.getBoolean("pref_dual_page_invert", false)
-
-    val dualPageSplitWebtoon: Preference<Boolean> = preferenceStore.getBoolean("pref_dual_page_split_webtoon", false)
-
-    val dualPageInvertWebtoon: Preference<Boolean> = preferenceStore.getBoolean("pref_dual_page_invert_webtoon", false)
-
-    val dualPageRotateToFit: Preference<Boolean> = preferenceStore.getBoolean("pref_dual_page_rotate", false)
-
-    val dualPageRotateToFitInvert: Preference<Boolean> = preferenceStore.getBoolean(
-        "pref_dual_page_rotate_invert",
-        false,
-    )
-
-    val dualPageRotateToFitWebtoon: Preference<Boolean> = preferenceStore.getBoolean(
-        "pref_dual_page_rotate_webtoon",
-        false,
-    )
-
-    val dualPageRotateToFitInvertWebtoon: Preference<Boolean> = preferenceStore.getBoolean(
-        "pref_dual_page_rotate_invert_webtoon",
-        false,
-    )
-
-    // endregion
-
     // region Color filter
 
     val customBrightness: Preference<Boolean> = preferenceStore.getBoolean("pref_custom_brightness_key", false)
@@ -166,84 +137,6 @@ internal class ReaderPreferences(
     val invertedColors: Preference<Boolean> = preferenceStore.getBoolean("pref_inverted_colors", false)
 
     // endregion
-
-    // region Controls
-
-    val readWithLongTap: Preference<Boolean> = preferenceStore.getBoolean("reader_long_tap", true)
-
-    val readWithVolumeKeys: Preference<Boolean> = preferenceStore.getBoolean("reader_volume_keys", false)
-
-    val readWithVolumeKeysInverted: Preference<Boolean> = preferenceStore.getBoolean(
-        "reader_volume_keys_inverted",
-        false,
-    )
-
-    val navigationModePager: Preference<Int> = preferenceStore.getInt("reader_navigation_mode_pager", 0)
-
-    val navigationModeWebtoon: Preference<Int> = preferenceStore.getInt("reader_navigation_mode_webtoon", 0)
-
-    val pagerNavInverted: Preference<TappingInvertMode> = preferenceStore.getEnum(
-        "reader_tapping_inverted",
-        TappingInvertMode.NONE,
-    )
-
-    val webtoonNavInverted: Preference<TappingInvertMode> = preferenceStore.getEnum(
-        "reader_tapping_inverted_webtoon",
-        TappingInvertMode.NONE,
-    )
-
-    val showNavigationOverlayNewUser: Preference<Boolean> = preferenceStore.getBoolean(
-        "reader_navigation_overlay_new_user",
-        true,
-    )
-
-    val showNavigationOverlayOnStart: Preference<Boolean> = preferenceStore.getBoolean(
-        "reader_navigation_overlay_on_start",
-        false,
-    )
-
-    // endregion
-
-    // SY -->
-
-    val readerThreads: Preference<Int> = preferenceStore.getInt("eh_reader_threads", 2)
-
-    val readerInstantRetry: Preference<Boolean> = preferenceStore.getBoolean("eh_reader_instant_retry", true)
-
-    val aggressivePageLoading: Preference<Boolean> = preferenceStore.getBoolean("eh_aggressive_page_loading", false)
-
-    val cacheSize: Preference<String> = preferenceStore.getString("eh_cache_size", "75")
-
-    val autoscrollInterval: Preference<Float> =
-        preferenceStore.getFloat("eh_util_autoscroll_interval", DEFAULT_AUTOSCROLL_SECONDS)
-
-    val smoothAutoScroll: Preference<Boolean> = preferenceStore.getBoolean("smooth_auto_scroll", true)
-
-    val preserveReadingPosition: Preference<Boolean> = preferenceStore.getBoolean("eh_preserve_reading_position", false)
-
-    val preloadSize: Preference<Int> = preferenceStore.getInt("eh_preload_size", DEFAULT_PRELOAD_PAGES)
-
-    val useAutoWebtoon: Preference<Boolean> = preferenceStore.getBoolean("eh_use_auto_webtoon", true)
-
-    val continuousVerticalTappingByPage: Preference<Boolean> =
-        preferenceStore.getBoolean("continuous_vertical_tapping_by_page", false)
-
-    val cropBordersContinuousVertical: Preference<Boolean> =
-        preferenceStore.getBoolean("crop_borders_continues_vertical", false)
-
-    val readerBottomButtons: Preference<Set<String>> =
-        preferenceStore.getStringSet("reader_bottom_buttons", ReaderBottomButton.BUTTONS_DEFAULTS)
-
-    val pageLayout: Preference<Int> = preferenceStore.getInt("page_layout", PagerConfig.PageLayout.AUTOMATIC)
-
-    val invertDoublePages: Preference<Boolean> = preferenceStore.getBoolean("invert_double_pages", false)
-
-    val centerMarginType: Preference<Int> =
-        preferenceStore.getInt("center_margin_type", PagerConfig.CenterMarginType.NONE)
-
-    val archiveReaderMode: Preference<Int> =
-        preferenceStore.getInt("archive_reader_mode", ArchiveReaderMode.LOAD_FROM_FILE)
-    // SY <--
 
     enum class FlashColor {
         BLACK,
