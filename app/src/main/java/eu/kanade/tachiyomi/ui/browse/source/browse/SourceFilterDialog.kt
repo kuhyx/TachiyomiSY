@@ -25,13 +25,8 @@ import eu.kanade.tachiyomi.source.model.FilterList
 import tachiyomi.core.common.preference.TriState
 import tachiyomi.domain.source.model.EXHSavedSearch
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.components.CheckboxItem
 import tachiyomi.presentation.core.components.CollapsibleBox
 import tachiyomi.presentation.core.components.HeadingItem
-import tachiyomi.presentation.core.components.SelectItem
-import tachiyomi.presentation.core.components.SortItem
-import tachiyomi.presentation.core.components.TextItem
-import tachiyomi.presentation.core.components.TriStateItem
 import tachiyomi.presentation.core.components.material.Button
 import tachiyomi.presentation.core.i18n.stringResource
 
@@ -173,95 +168,3 @@ private fun FilterItem(filter: Filter<*>, onUpdate: () -> Unit/* SY --> */, star
 }
 
 // Each leaf item writes the new value into the filter and reports the change upward.
-
-@Composable
-private fun CheckboxFilterItem(filter: Filter.CheckBox, onUpdate: () -> Unit) {
-    CheckboxItem(
-        label = filter.name,
-        checked = filter.state,
-    ) {
-        filter.state = !filter.state
-        onUpdate()
-    }
-}
-
-@Composable
-private fun TriStateFilterItem(filter: Filter.TriState, onUpdate: () -> Unit) {
-    TriStateItem(
-        label = filter.name,
-        state = filter.state.toTriStateFilter(),
-    ) {
-        filter.state = filter.state.toTriStateFilter().next().toTriStateInt()
-        onUpdate()
-    }
-}
-
-@Composable
-private fun TextFilterItem(filter: Filter.Text, onUpdate: () -> Unit) {
-    TextItem(
-        label = filter.name,
-        value = filter.state,
-    ) {
-        filter.state = it
-        onUpdate()
-    }
-}
-
-@Composable
-private fun SelectFilterItem(filter: Filter.Select<*>, onUpdate: () -> Unit) {
-    SelectItem(
-        label = filter.name,
-        options = filter.values,
-        selectedIndex = filter.state,
-    ) {
-        filter.state = it
-        onUpdate()
-    }
-}
-
-private fun Int.toTriStateFilter(): TriState {
-    return when (this) {
-        Filter.TriState.STATE_IGNORE -> TriState.DISABLED
-        Filter.TriState.STATE_INCLUDE -> TriState.ENABLED_IS
-        Filter.TriState.STATE_EXCLUDE -> TriState.ENABLED_NOT
-        else -> error("Unknown TriState state: $this")
-    }
-}
-
-private fun TriState.toTriStateInt(): Int {
-    return when (this) {
-        TriState.DISABLED -> Filter.TriState.STATE_IGNORE
-        TriState.ENABLED_IS -> Filter.TriState.STATE_INCLUDE
-        TriState.ENABLED_NOT -> Filter.TriState.STATE_EXCLUDE
-    }
-}
-
-@Composable
-private fun SortFilterItem(filter: Filter.Sort, onUpdate: () -> Unit, startExpanded: Boolean) {
-    CollapsibleBox(
-        heading = filter.name,
-        // SY -->
-        startExpanded = startExpanded,
-        // SY <--
-    ) {
-        Column {
-            filter.values.mapIndexed { index, item ->
-                val sortAscending = filter.state?.ascending
-                    ?.takeIf { index == filter.state?.index }
-                SortItem(
-                    label = item,
-                    sortDescending = sortAscending?.let { !it },
-                    onClick = {
-                        val ascending = if (index == filter.state?.index) {
-                            !filter.state!!.ascending
-                        } else {
-                            filter.state?.ascending ?: true
-                        }
-                        filter.state = Filter.Sort.Selection(index = index, ascending = ascending)
-                        onUpdate()
-                    },
-                )
-            }
-        }
-    }
-}
