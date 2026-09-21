@@ -6,6 +6,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
+import eu.kanade.tachiyomi.ui.reader.loader.boostPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.setting.autoscrollInterval
 import eu.kanade.tachiyomi.ui.reader.setting.smoothAutoScroll

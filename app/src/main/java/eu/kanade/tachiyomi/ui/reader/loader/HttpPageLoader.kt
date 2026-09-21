@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.ui.reader.setting.readerInstantRetry
 import eu.kanade.tachiyomi.ui.reader.setting.readerThreads
 import exh.source.isEhBasedSource
 import exh.util.DataSaver
-import exh.util.DataSaver.Companion.getImage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -30,10 +29,6 @@ import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.PriorityBlockingQueue
-import kotlin.concurrent.atomics.AtomicInt
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.incrementAndFetch
-import kotlin.math.min
 
 /**
  * Loader used to load chapters from an online source.
@@ -41,23 +36,23 @@ import kotlin.math.min
 @OptIn(DelicateCoroutinesApi::class)
 internal class HttpPageLoader(
     private val chapter: ReaderChapter,
-    private val source: HttpSource,
-    private val chapterCache: ChapterCache = Injekt.get(),
+    internal val source: HttpSource,
+    internal val chapterCache: ChapterCache = Injekt.get(),
     // SY -->
     private val readerPreferences: ReaderPreferences = Injekt.get(),
     sourcePreferences: SourcePreferences = Injekt.get(),
     // SY <--
 ) : PageLoader() {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // A queue used to manage requests one by one while allowing priorities.
-    private val queue = PriorityBlockingQueue<PriorityPage>()
+    internal val queue = PriorityBlockingQueue<PriorityPage>()
 
     private val preloadSize = /* SY --> */ readerPreferences.preloadSize.get() // SY <--
 
     // SY -->
-    private val dataSaver = DataSaver(source, sourcePreferences)
+    internal val dataSaver = DataSaver(source, sourcePreferences)
     // SY <--
 
     init {
@@ -189,84 +184,5 @@ internal class HttpPageLoader(
         }
     }
 
-    // Preloads the given [amount] of pages after the [currentPage] with a lower priority.
-    // @return a list of [PriorityPage] that were added to the [queue]
-    private fun preloadNextPages(currentPage: ReaderPage, amount: Int): List<PriorityPage> {
-        val pages = currentPage.chapter.pages ?: return emptyList()
-        val pageIndex = currentPage.index
-        if (pageIndex == pages.lastIndex) return emptyList()
-
-        return pages
-            .subList(pageIndex + 1, min(pageIndex + 1 + amount, pages.size))
-            .mapNotNull {
-                if (it.status == Page.State.Queue) {
-                    PriorityPage(it, PriorityPage.ADJACENT).apply { queue.offer(this) }
-                } else {
-                    null
-                }
-            }
-    }
-
-    // Loads the page, retrieving the image URL and downloading the image if necessary.
-    // Downloaded images are stored in the chapter cache.
-    // @param page the page whose source image has to be downloaded.
-    private suspend fun internalLoadPage(page: ReaderPage, force: Boolean) {
-        try {
-            if (page.imageUrl.isNullOrEmpty()) {
-                page.status = Page.State.LoadPage
-                page.imageUrl = source.getImageUrl(page)
-            }
-            val imageUrl = page.imageUrl!!
-
-            if (force || !chapterCache.isImageInCache(imageUrl)) {
-                page.status = Page.State.DownloadImage
-                val imageResponse = source.getImage(page, dataSaver = dataSaver)
-                chapterCache.putImageToCache(imageUrl, imageResponse)
-            }
-
-            page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
-            page.status = Page.State.Ready
-        } catch (cancelled: CancellationException) {
-            page.status = Page.State.Error(cancelled)
-            throw cancelled
-        } catch (expected: Throwable) {
-            // The page shows the error, whatever the cause.
-            page.status = Page.State.Error(expected)
-        }
-    }
-
-    // EXH -->
-    fun boostPage(page: ReaderPage) {
-        if (page.status == Page.State.Queue) {
-            scope.launchIO {
-                loadPage(page)
-            }
-        }
-    }
     // EXH <--
-}
-
-/**
- * Data class used to keep ordering of pages in order to maintain priority.
- */
-@OptIn(ExperimentalAtomicApi::class)
-private class PriorityPage(
-    val page: ReaderPage,
-    val priority: Int,
-) : Comparable<PriorityPage> {
-
-    private val identifier = idGenerator.incrementAndFetch()
-
-    override fun compareTo(other: PriorityPage): Int {
-        val p = other.priority.compareTo(priority)
-        return if (p != 0) p else identifier.compareTo(other.identifier)
-    }
-
-    companion object {
-        private val idGenerator = AtomicInt(0)
-
-        const val RETRY = 2
-        const val DEFAULT = 1
-        const val ADJACENT = 0
-    }
 }
