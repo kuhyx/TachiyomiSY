@@ -4,10 +4,6 @@ import android.content.Context
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.library.LibraryUpdateNotifier
-import eu.kanade.tachiyomi.data.notification.NotificationHandler
-import eu.kanade.tachiyomi.source.UnmeteredSource
-import eu.kanade.tachiyomi.source.online.HttpSource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -17,28 +13,17 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 import logcat.LogPriority
 import nl.adaptivity.xmlutil.serialization.XML
-import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.launchNow
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.category.interactor.GetCategories
-import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.download.service.DownloadPreferences
-import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracks
-import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -52,7 +37,7 @@ internal class Downloader(
     internal val context: Context,
     internal val provider: DownloadProvider,
     internal val cache: DownloadCache,
-    private val sourceManager: SourceManager = Injekt.get(),
+    internal val sourceManager: SourceManager = Injekt.get(),
     internal val chapterCache: ChapterCache = Injekt.get(),
     internal val downloadPreferences: DownloadPreferences = Injekt.get(),
     internal val xml: XML = Injekt.get(),
@@ -73,8 +58,8 @@ internal class Downloader(
     // Notifier for the downloader state and progress.
     internal val notifier by lazy { DownloadNotifier(context) }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private var downloaderJob: Job? = null
+    internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    internal var downloaderJob: Job? = null
 
     /**
      * Whether the downloader is running.
@@ -167,57 +152,7 @@ internal class Downloader(
         notifier.dismissProgress()
     }
 
-    // Prepares the subscriptions to start downloading.
-    private fun launchDownloaderJob() {
-        if (isRunning) return
-
-        downloaderJob = scope.launch {
-            val activeDownloadsFlow = combine(
-                queueState,
-                downloadPreferences.parallelSourceLimit.changes(),
-            ) { a, b -> a to b }.transformLatest { (queue, parallelCount) ->
-                while (true) {
-                    val activeDownloads = queue.asSequence()
-                        // Ignore completed downloads, leave them in the queue
-                        .filter { it.status.value <= Download.State.DOWNLOADING.value }
-                        .groupBy { it.source }
-                        .toList()
-                        .take(parallelCount)
-                        .map { (_, downloads) -> downloads.first() }
-                    emit(activeDownloads)
-
-                    if (activeDownloads.isEmpty()) break
-                    // Suspend until a download enters the ERROR state
-                    val activeDownloadsErroredFlow =
-                        combine(activeDownloads.map(Download::statusFlow)) { states ->
-                            states.contains(Download.State.ERROR)
-                        }.filter { it }
-                    activeDownloadsErroredFlow.first()
-                }
-            }
-                .distinctUntilChanged()
-
-            // Use supervisorScope to cancel child jobs when the downloader job is cancelled
-            supervisorScope {
-                val downloadJobs = mutableMapOf<Download, Job>()
-
-                activeDownloadsFlow.collectLatest { activeDownloads ->
-                    val downloadJobsToStop = downloadJobs.filter { it.key !in activeDownloads }
-                    downloadJobsToStop.forEach { (download, job) ->
-                        job.cancel()
-                        downloadJobs.remove(download)
-                    }
-
-                    val downloadsToStart = activeDownloads.filter { it !in downloadJobs }
-                    downloadsToStart.forEach { download ->
-                        downloadJobs[download] = launchDownloadJob(download)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun CoroutineScope.launchDownloadJob(download: Download) = launchIO {
+    internal fun CoroutineScope.launchDownloadJob(download: Download) = launchIO {
         try {
             downloadChapter(download)
 
@@ -244,105 +179,11 @@ internal class Downloader(
         downloaderJob = null
     }
 
-    /**
-     * Creates a download object for every chapter and adds them to the downloads queue.
-     *
-     * @param manga the manga of the chapters to download.
-     * @param chapters the list of chapters to download.
-     * @param autoStart whether to start the downloader after enqueing the chapters.
-     */
-    fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) {
-        if (chapters.isEmpty()) return
-
-        val source = sourceManager.get(manga.source) as? HttpSource ?: return
-        val wasEmpty = queueState.value.isEmpty()
-        val chaptersToQueue = chapters.asSequence()
-            // Filter out those already downloaded.
-            .filter {
-                provider.findChapterDir(
-                    it.name,
-                    it.scanlator,
-                    it.url,
-                    /* SY --> */ manga.ogTitle, /* SY <-- */
-                    source,
-                ) == null
-            }
-            // Add chapters to queue from the start.
-            .sortedByDescending { it.sourceOrder }
-            // Filter out those already enqueued.
-            .filter { chapter -> queueState.value.none { it.chapter.id == chapter.id } }
-            // Create a download for each one.
-            .map { Download(source, manga, it) }
-            .toList()
-
-        if (chaptersToQueue.isNotEmpty()) {
-            addAllToQueue(chaptersToQueue)
-
-            // Start downloader if needed
-            if (autoStart && wasEmpty) {
-                val queuedDownloads = queueState.value.count { it.source !is UnmeteredSource }
-                val maxDownloadsFromSource = queueState.value
-                    .groupBy { it.source }
-                    .filterKeys { it !is UnmeteredSource }
-                    .maxOfOrNull { it.value.size }
-                    ?: 0
-                if (
-                    queuedDownloads > DOWNLOADS_QUEUED_WARNING_THRESHOLD ||
-                    maxDownloadsFromSource > CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD
-                ) {
-                    notifier.onWarning(
-                        context.stringResource(
-                            MR.strings.download_queue_size_warning,
-                            context.stringResource(MR.strings.app_name),
-                        ),
-                        WARNING_NOTIF_TIMEOUT_MS,
-                        NotificationHandler.openUrl(context, LibraryUpdateNotifier.HELP_WARNING_URL),
-                    )
-                }
-                DownloadJob.start(context)
-            }
-        }
-    }
-
-    // Downloads a chapter.
-    // @param download the chapter to be downloaded.
-    private suspend fun downloadChapter(download: Download) {
-        val mangaDir = mangaDirWithSpace(download) ?: return
-        val chapterDirname = provider.getChapterDirName(
-            download.chapter.name,
-            download.chapter.scanlator,
-            download.chapter.url,
-        )
-        val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)!!
-
-        try {
-            // If the page list already exists, start from the file; otherwise pull it from the network.
-            val pageList = download.pages ?: fetchPageList(download)
-            download.transition(Download.State.DOWNLOADING)
-            // Start downloading images, consider we can have downloaded images already
-            downloadPages(download, pageList, tmpDir)
-            // Do after download completes
-            if (!isDownloadSuccessful(download, tmpDir)) {
-                download.transition(Download.State.ERROR)
-                return
-            }
-            finishChapter(download, mangaDir, chapterDirname, tmpDir)
-        } catch (cancelled: CancellationException) {
-            throw cancelled
-        } catch (expected: Throwable) {
-            // Logged whatever the cause; the caller carries on.
-            // If the page list threw, it will resume here
-            logcat(LogPriority.ERROR, expected)
-            download.transition(Download.State.ERROR)
-            notifier.onError(expected.message, download.chapter.name, download.manga.title, download.manga.id)
-        }
-    }
-
     companion object {
         const val TMP_DIR_SUFFIX = "_tmp"
         const val WARNING_NOTIF_TIMEOUT_MS = 30_000L
         const val CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 15
-        private const val DOWNLOADS_QUEUED_WARNING_THRESHOLD = 30
+        internal const val DOWNLOADS_QUEUED_WARNING_THRESHOLD = 30
     }
 }
 
