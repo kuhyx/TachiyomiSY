@@ -4,6 +4,7 @@ import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -77,41 +78,7 @@ internal fun PagePreviewScreen(
                 LoadingScreen()
             }
             is PagePreviewState.Success -> {
-                BoxWithConstraints(Modifier.fillMaxSize()) {
-                    val itemPerRowCount = remember(maxWidth) {
-                        (maxWidth / 120.dp).floor()
-                    }
-                    val items = remember(state.pagePreviews, itemPerRowCount) {
-                        state.pagePreviews.chunked(itemPerRowCount)
-                    }
-                    val lazyListState = key(state.page) {
-                        rememberLazyListState()
-                    }
-                    ScrollbarLazyColumn(
-                        state = lazyListState,
-                        modifier = Modifier,
-                        contentPadding = paddingValues + topSmallPaddingValues,
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(items) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            ) {
-                                it.forEach { page ->
-                                    PagePreview(
-                                        modifier = Modifier.weight(1F),
-                                        page = page,
-                                        onOpenPage = onOpenPage,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                PagePreviewGrid(state, onOpenPage, paddingValues)
             }
         }
     }
@@ -213,4 +180,48 @@ internal fun PagePreviewTopAppBar(
         navigateUp = navigateUp,
         scrollBehavior = scrollBehavior,
     )
+}
+
+// Previews laid out in rows of as many 120dp cells as the width allows.
+@Composable
+private fun PagePreviewGrid(
+    state: PagePreviewState.Success,
+    onOpenPage: (Int) -> Unit,
+    paddingValues: PaddingValues,
+) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val itemPerRowCount = remember(maxWidth) {
+            (maxWidth / 120.dp).floor()
+        }
+        val items = remember(state.pagePreviews, itemPerRowCount) {
+            state.pagePreviews.chunked(itemPerRowCount)
+        }
+        val lazyListState = key(state.page) {
+            rememberLazyListState()
+        }
+        ScrollbarLazyColumn(
+            state = lazyListState,
+            modifier = Modifier,
+            contentPadding = paddingValues + topSmallPaddingValues,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(items) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    it.forEach { page ->
+                        PagePreview(
+                            modifier = Modifier.weight(1F),
+                            page = page,
+                            onOpenPage = onOpenPage,
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

@@ -91,8 +91,38 @@ internal data object HistoryTab : Tab {
             onClickFavorite = screenModel::addFavorite,
         )
 
+        HistoryDialogs(screenModel, state.dialog)
+
+        LaunchedEffect(state.list) {
+            if (state.list != null) {
+                (context as? MainActivity)?.ready = true
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            screenModel.events.collectLatest { e ->
+                when (e) {
+                    HistoryScreenModel.Event.InternalError ->
+                        snackbarHostState.showSnackbar(context.stringResource(MR.strings.internal_error))
+                    HistoryScreenModel.Event.HistoryCleared ->
+                        snackbarHostState.showSnackbar(context.stringResource(MR.strings.clear_history_completed))
+                    is HistoryScreenModel.Event.OpenChapter -> openChapter(context, e.chapter)
+                }
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            resumeLastChapterReadEvent.receiveAsFlow().collectLatest {
+                openChapter(context, screenModel.getNextChapter())
+            }
+        }
+    }
+
+    @Composable
+    private fun HistoryDialogs(screenModel: HistoryScreenModel, dialog: HistoryScreenModel.Dialog?) {
+        val navigator = LocalNavigator.currentOrThrow
         val onDismissRequest = { screenModel.setDialog(null) }
-        when (val dialog = state.dialog) {
+        when (dialog) {
             is HistoryScreenModel.Dialog.Delete -> {
                 HistoryDeleteDialog(
                     onDismissRequest = onDismissRequest,
@@ -140,30 +170,6 @@ internal data object HistoryTab : Tab {
                 )
             }
             null -> {}
-        }
-
-        LaunchedEffect(state.list) {
-            if (state.list != null) {
-                (context as? MainActivity)?.ready = true
-            }
-        }
-
-        LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { e ->
-                when (e) {
-                    HistoryScreenModel.Event.InternalError ->
-                        snackbarHostState.showSnackbar(context.stringResource(MR.strings.internal_error))
-                    HistoryScreenModel.Event.HistoryCleared ->
-                        snackbarHostState.showSnackbar(context.stringResource(MR.strings.clear_history_completed))
-                    is HistoryScreenModel.Event.OpenChapter -> openChapter(context, e.chapter)
-                }
-            }
-        }
-
-        LaunchedEffect(Unit) {
-            resumeLastChapterReadEvent.receiveAsFlow().collectLatest {
-                openChapter(context, screenModel.getNextChapter())
-            }
         }
     }
 

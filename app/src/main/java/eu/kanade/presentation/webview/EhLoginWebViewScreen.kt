@@ -3,7 +3,6 @@ package eu.kanade.presentation.webview
 import android.content.pm.ApplicationInfo
 import android.webkit.CookieManager
 import android.webkit.WebView
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,8 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,9 +28,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.kevinnzou.web.AccompanistWebViewClient
-import com.kevinnzou.web.LoadingState
 import com.kevinnzou.web.WebContent
 import com.kevinnzou.web.WebView
+import com.kevinnzou.web.WebViewNavigator
+import com.kevinnzou.web.WebViewState
 import com.kevinnzou.web.rememberWebViewNavigator
 import com.kevinnzou.web.rememberWebViewState
 import eu.kanade.presentation.components.AppBar
@@ -75,29 +73,7 @@ internal fun EhLoginWebViewScreen(
                     navigateUp = onUp,
                     navigationIcon = Icons.Outlined.Close,
                 )
-                when (val loadingState = state.loadingState) {
-                    is LoadingState.Initializing -> {
-                        LinearProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                        )
-                    }
-                    is LoadingState.Loading -> {
-                        val animatedProgress by animateFloatAsState(
-                            loadingState.progress,
-                            animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-                            label = "webview_loading",
-                        )
-                        LinearProgressIndicator(
-                            progress = { animatedProgress },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                        )
-                    }
-                    else -> {}
-                }
+                WebViewLoadingIndicator(state.loadingState, animated = true)
             }
         },
     ) { contentPadding ->
@@ -116,92 +92,106 @@ internal fun EhLoginWebViewScreen(
             }
 
             Box(Modifier.padding(contentPadding)) {
-                Box {
-                    WebView(
-                        state = state,
-                        navigator = navigator,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = 48.dp),
-                        onCreated = { webView ->
-                            webView.setDefaultSettings()
-
-                            // Debug mode (chrome://inspect/#devices)
-                            if (BuildConfig.DEBUG &&
-                                0 != webView.context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
-                            ) {
-                                WebView.setWebContentsDebuggingEnabled(true)
-                            }
-                        },
-                        client = webClient,
-                    )
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .align(Alignment.BottomCenter),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Button(onClick = onUp, Modifier.weight(HALF)) {
-                            Text(text = stringResource(MR.strings.action_cancel))
-                        }
-                        Button(onClick = { showAdvancedOptions = true }, Modifier.weight(HALF)) {
-                            Text(text = stringResource(MR.strings.pref_category_advanced))
-                        }
-                    }
-                }
+                LoginWebView(
+                    state = state,
+                    navigator = navigator,
+                    client = webClient,
+                    onUp = onUp,
+                    onShowAdvancedOptions = { showAdvancedOptions = true },
+                )
                 if (showAdvancedOptions) {
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(Color(color = 0xb5000000)),
+                    AdvancedOptionsDialog(
+                        onDismiss = { showAdvancedOptions = false },
+                        loadUrl = { url -> state.content = WebContent.Url(url) },
+                        onClickRecheckLoginStatus = onClickRecheckLoginStatus,
+                        onClickAlternateLoginPage = onClickAlternateLoginPage,
+                        onClickSkipPageRestyling = onClickSkipPageRestyling,
+                        onClickCustomIgneousCookie = onClickCustomIgneousCookie,
+                    )
+                }
+            }
+        }
+    }
+}
+
+// The login page with Cancel / Advanced buttons docked under it.
+@Composable
+private fun LoginWebView(
+    state: WebViewState,
+    navigator: WebViewNavigator,
+    client: AccompanistWebViewClient,
+    onUp: () -> Unit,
+    onShowAdvancedOptions: () -> Unit,
+) {
+    Box {
+        WebView(
+            state = state,
+            navigator = navigator,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 48.dp),
+            onCreated = { webView ->
+                webView.setDefaultSettings()
+
+                // Debug mode (chrome://inspect/#devices)
+                if (BuildConfig.DEBUG &&
+                    0 != webView.context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
+                ) {
+                    WebView.setWebContentsDebuggingEnabled(true)
+                }
+            },
+            client = client,
+        )
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Button(onClick = onUp, Modifier.weight(HALF)) {
+                Text(text = stringResource(MR.strings.action_cancel))
+            }
+            Button(onClick = onShowAdvancedOptions, Modifier.weight(HALF)) {
+                Text(text = stringResource(MR.strings.pref_category_advanced))
+            }
+        }
+    }
+}
+
+// Every option closes the dialog; the first three hand the dialog's loadUrl to the caller.
+@Composable
+private fun AdvancedOptionsDialog(
+    onDismiss: () -> Unit,
+    loadUrl: (String) -> Unit,
+    onClickRecheckLoginStatus: (loadUrl: (String) -> Unit) -> Unit,
+    onClickAlternateLoginPage: (loadUrl: (String) -> Unit) -> Unit,
+    onClickSkipPageRestyling: (loadUrl: (String) -> Unit) -> Unit,
+    onClickCustomIgneousCookie: () -> Unit,
+) {
+    val options = listOf(
+        SYMR.strings.recheck_login_status to { onClickRecheckLoginStatus(loadUrl) },
+        SYMR.strings.alternative_login_page to { onClickAlternateLoginPage(loadUrl) },
+        SYMR.strings.skip_page_restyling to { onClickSkipPageRestyling(loadUrl) },
+        SYMR.strings.custom_igneous_cookie to onClickCustomIgneousCookie,
+        MR.strings.action_cancel to {},
+    )
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color(color = 0xb5000000)),
+    ) {
+        Dialog(onDismissRequest = onDismiss) {
+            Column(Modifier.fillMaxWidth(ADVANCED_OPTIONS_WIDTH)) {
+                options.forEach { (label, action) ->
+                    Button(
+                        onClick = {
+                            action()
+                            onDismiss()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Dialog(onDismissRequest = { showAdvancedOptions = false }) {
-                            fun loadUrl(url: String) {
-                                state.content = WebContent.Url(url)
-                            }
-                            Column(Modifier.fillMaxWidth(ADVANCED_OPTIONS_WIDTH)) {
-                                Button(
-                                    onClick = {
-                                        onClickRecheckLoginStatus(::loadUrl)
-                                        showAdvancedOptions = false
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    Text(text = stringResource(SYMR.strings.recheck_login_status))
-                                }
-                                Button(
-                                    onClick = {
-                                        onClickAlternateLoginPage(::loadUrl)
-                                        showAdvancedOptions = false
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    Text(text = stringResource(SYMR.strings.alternative_login_page))
-                                }
-                                Button(
-                                    onClick = {
-                                        onClickSkipPageRestyling(::loadUrl)
-                                        showAdvancedOptions = false
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    Text(text = stringResource(SYMR.strings.skip_page_restyling))
-                                }
-                                Button(
-                                    onClick = {
-                                        onClickCustomIgneousCookie()
-                                        showAdvancedOptions = false
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    Text(text = stringResource(SYMR.strings.custom_igneous_cookie))
-                                }
-                                Button(onClick = { showAdvancedOptions = false }, Modifier.fillMaxWidth()) {
-                                    Text(text = stringResource(MR.strings.action_cancel))
-                                }
-                            }
-                        }
+                        Text(text = stringResource(label))
                     }
                 }
             }

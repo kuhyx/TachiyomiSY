@@ -80,53 +80,11 @@ internal fun SetIntervalDialog(
         title = { Text(stringResource(MR.strings.pref_library_update_smart_update)) },
         text = {
             Column {
-                if (nextUpdateDays != null && nextUpdateDays >= 0 && interval >= 0) {
-                    Text(
-                        stringResource(
-                            MR.strings.manga_interval_expected_update,
-                            pluralStringResource(
-                                MR.plurals.day,
-                                count = nextUpdateDays,
-                                nextUpdateDays,
-                            ),
-                            pluralStringResource(
-                                MR.plurals.day,
-                                count = interval.absoluteValue,
-                                interval.absoluteValue,
-                            ),
-                        ),
-                    )
-                } else {
-                    Text(
-                        stringResource(MR.strings.manga_interval_expected_update_null),
-                    )
-                }
+                ExpectedUpdateText(nextUpdateDays, interval)
                 Spacer(Modifier.height(MaterialTheme.padding.small))
-
                 if (onValueChanged != null && (isDebugBuildType || isPreviewBuildType)) {
                     Text(stringResource(MR.strings.manga_interval_custom_amount))
-
-                    BoxWithConstraints(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        val size = DpSize(width = maxWidth / 2, height = 128.dp)
-                        val items = (0..FetchInterval.MAX_INTERVAL)
-                            .map {
-                                if (it == 0) {
-                                    stringResource(MR.strings.label_default)
-                                } else {
-                                    it.toString()
-                                }
-                            }
-
-                        WheelTextPicker(
-                            items = items,
-                            size = size,
-                            startIndex = selectedInterval,
-                            onSelectionChanged = { selectedInterval = it },
-                        )
-                    }
+                    IntervalPicker(selectedInterval) { selectedInterval = it }
                 }
             }
         },
@@ -144,4 +102,39 @@ internal fun SetIntervalDialog(
             }
         },
     )
+}
+
+@Composable
+private fun ExpectedUpdateText(nextUpdateDays: Int?, interval: Int) {
+    if (nextUpdateDays != null && nextUpdateDays >= 0 && interval >= 0) {
+        Text(
+            stringResource(
+                MR.strings.manga_interval_expected_update,
+                pluralStringResource(MR.plurals.day, count = nextUpdateDays, nextUpdateDays),
+                pluralStringResource(MR.plurals.day, count = interval.absoluteValue, interval.absoluteValue),
+            ),
+        )
+    } else {
+        Text(stringResource(MR.strings.manga_interval_expected_update_null))
+    }
+}
+
+// Debug/preview only: a wheel over 0 ("default") .. MAX_INTERVAL days.
+@Composable
+private fun IntervalPicker(selectedInterval: Int, onSelectionChanged: (Int) -> Unit) {
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        val size = DpSize(width = maxWidth / 2, height = 128.dp)
+        val items = (0..FetchInterval.MAX_INTERVAL).map {
+            if (it == 0) stringResource(MR.strings.label_default) else it.toString()
+        }
+        WheelTextPicker(
+            items = items,
+            size = size,
+            startIndex = selectedInterval,
+            onSelectionChanged = onSelectionChanged,
+        )
+    }
 }

@@ -1,6 +1,7 @@
 package eu.kanade.presentation.more
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.outlined.Label
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.vectorResource
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.tachiyomi.R
@@ -61,133 +63,115 @@ internal fun MoreScreen(
             item {
                 LogoHeader()
             }
-            item {
-                SwitchPreferenceWidget(
-                    title = stringResource(MR.strings.label_downloaded_only),
-                    subtitle = stringResource(MR.strings.downloaded_only_summary),
-                    icon = Icons.Outlined.CloudOff,
-                    checked = downloadedOnly,
-                    onCheckedChanged = onDownloadedOnlyChange,
-                )
-            }
-            item {
-                SwitchPreferenceWidget(
-                    title = stringResource(MR.strings.pref_incognito_mode),
-                    subtitle = stringResource(MR.strings.pref_incognito_mode_summary),
-                    icon = ImageVector.vectorResource(R.drawable.ic_glasses_24dp),
-                    checked = incognitoMode,
-                    onCheckedChanged = onIncognitoModeChange,
-                )
-            }
+            modeSwitches(
+                downloadedOnly = downloadedOnly,
+                onDownloadedOnlyChange = onDownloadedOnlyChange,
+                incognitoMode = incognitoMode,
+                onIncognitoModeChange = onIncognitoModeChange,
+            )
 
             item { HorizontalDivider() }
 
-            // SY -->
-            if (!showNavUpdates) {
-                item {
-                    TextPreferenceWidget(
-                        title = stringResource(MR.strings.label_recent_updates),
-                        icon = Icons.Outlined.NewReleases,
-                        onPreferenceClick = onClickUpdates,
-                    )
-                }
-            }
-            if (!showNavHistory) {
-                item {
-                    TextPreferenceWidget(
-                        title = stringResource(MR.strings.label_recent_manga),
-                        icon = Icons.Outlined.History,
-                        onPreferenceClick = onClickHistory,
-                    )
-                }
-            }
+            // SY --> Updates and history live here only when they are not bottom-nav tabs.
+            linkItems(
+                listOfNotNull(
+                    Triple(MR.strings.label_recent_updates, Icons.Outlined.NewReleases, onClickUpdates)
+                        .takeIf { !showNavUpdates },
+                    Triple(MR.strings.label_recent_manga, Icons.Outlined.History, onClickHistory)
+                        .takeIf { !showNavHistory },
+                ),
+            )
             // SY <--
 
             item {
-                val downloadQueueState = downloadQueueStateProvider()
                 TextPreferenceWidget(
                     title = stringResource(MR.strings.label_download_queue),
-                    subtitle = when (downloadQueueState) {
-                        DownloadQueueState.Stopped -> {
-                            null
-                        }
-                        is DownloadQueueState.Paused -> {
-                            val pending = downloadQueueState.pending
-                            if (pending == 0) {
-                                stringResource(MR.strings.paused)
-                            } else {
-                                "${stringResource(MR.strings.paused)} • ${
-                                    pluralStringResource(
-                                        MR.plurals.download_queue_summary,
-                                        count = pending,
-                                        pending,
-                                    )
-                                }"
-                            }
-                        }
-                        is DownloadQueueState.Downloading -> {
-                            val pending = downloadQueueState.pending
-                            pluralStringResource(MR.plurals.download_queue_summary, count = pending, pending)
-                        }
-                    },
+                    subtitle = downloadQueueSubtitle(downloadQueueStateProvider()),
                     icon = Icons.Outlined.GetApp,
                     onPreferenceClick = onClickDownloadQueue,
                 )
             }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.categories),
-                    icon = Icons.AutoMirrored.Outlined.Label,
-                    onPreferenceClick = onClickCategories,
-                )
-            }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_stats),
-                    icon = Icons.Outlined.QueryStats,
-                    onPreferenceClick = onClickStats,
-                )
-            }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_data_storage),
-                    icon = Icons.Outlined.Storage,
-                    onPreferenceClick = onClickDataAndStorage,
-                )
-            }
-            // SY -->
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(SYMR.strings.eh_batch_add),
-                    icon = Icons.AutoMirrored.Outlined.PlaylistAdd,
-                    onPreferenceClick = onClickBatchAdd,
-                )
-            }
-            // SY <--
+            linkItems(
+                listOf(
+                    Triple(MR.strings.categories, Icons.AutoMirrored.Outlined.Label, onClickCategories),
+                    Triple(MR.strings.label_stats, Icons.Outlined.QueryStats, onClickStats),
+                    Triple(MR.strings.label_data_storage, Icons.Outlined.Storage, onClickDataAndStorage),
+                    // SY -->
+                    Triple(SYMR.strings.eh_batch_add, Icons.AutoMirrored.Outlined.PlaylistAdd, onClickBatchAdd),
+                    // SY <--
+                ),
+            )
 
             item { HorizontalDivider() }
 
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_settings),
-                    icon = Icons.Outlined.Settings,
-                    onPreferenceClick = onClickSettings,
-                )
-            }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.pref_category_about),
-                    icon = Icons.Outlined.Info,
-                    onPreferenceClick = onClickAbout,
-                )
-            }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_help),
-                    icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                    onPreferenceClick = { uriHandler.openUri(Constants.URL_HELP) },
-                )
-            }
+            linkItems(
+                listOf(
+                    Triple(MR.strings.label_settings, Icons.Outlined.Settings, onClickSettings),
+                    Triple(MR.strings.pref_category_about, Icons.Outlined.Info, onClickAbout),
+                    Triple(MR.strings.label_help, Icons.AutoMirrored.Outlined.HelpOutline) {
+                        uriHandler.openUri(Constants.URL_HELP)
+                    },
+                ),
+            )
         }
+    }
+}
+
+private fun LazyListScope.modeSwitches(
+    downloadedOnly: Boolean,
+    onDownloadedOnlyChange: (Boolean) -> Unit,
+    incognitoMode: Boolean,
+    onIncognitoModeChange: (Boolean) -> Unit,
+) {
+    item {
+        SwitchPreferenceWidget(
+            title = stringResource(MR.strings.label_downloaded_only),
+            subtitle = stringResource(MR.strings.downloaded_only_summary),
+            icon = Icons.Outlined.CloudOff,
+            checked = downloadedOnly,
+            onCheckedChanged = onDownloadedOnlyChange,
+        )
+    }
+    item {
+        SwitchPreferenceWidget(
+            title = stringResource(MR.strings.pref_incognito_mode),
+            subtitle = stringResource(MR.strings.pref_incognito_mode_summary),
+            icon = ImageVector.vectorResource(R.drawable.ic_glasses_24dp),
+            checked = incognitoMode,
+            onCheckedChanged = onIncognitoModeChange,
+        )
+    }
+}
+
+private fun LazyListScope.linkItems(links: List<Triple<StringResource, ImageVector, () -> Unit>>) {
+    links.forEach { (title, icon, onClick) ->
+        item {
+            TextPreferenceWidget(
+                title = stringResource(title),
+                icon = icon,
+                onPreferenceClick = onClick,
+            )
+        }
+    }
+}
+
+@Composable
+private fun downloadQueueSubtitle(state: DownloadQueueState): String? = when (state) {
+    DownloadQueueState.Stopped -> {
+        null
+    }
+    is DownloadQueueState.Paused -> {
+        val pending = state.pending
+        if (pending == 0) {
+            stringResource(MR.strings.paused)
+        } else {
+            "${stringResource(MR.strings.paused)} • ${
+                pluralStringResource(MR.plurals.download_queue_summary, count = pending, pending)
+            }"
+        }
+    }
+    is DownloadQueueState.Downloading -> {
+        val pending = state.pending
+        pluralStringResource(MR.plurals.download_queue_summary, count = pending, pending)
     }
 }

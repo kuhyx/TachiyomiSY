@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.screen.data.CreateBackupScreen
 import eu.kanade.presentation.more.settings.screen.data.RestoreBackupScreen
@@ -75,13 +76,11 @@ private const val ONE_WEEK_HOURS = 168
  * Part of [SettingsDataScreen]; same package, so its getPreferences() calls them as before.
  */
 
+// Picks the backup file through the system chooser and opens the restore screen for it.
 @Composable
-internal fun getBackupAndRestoreGroup(backupPreferences: BackupPreferences): Preference.PreferenceGroup {
+private fun rememberRestoreAction(): () -> Unit {
     val context = LocalContext.current
     val navigator = LocalNavigator.currentOrThrow
-
-    val lastAutoBackup by backupPreferences.lastAutoBackupTimestamp.collectAsState()
-
     val chooseBackup = rememberLauncherForActivityResult(
         object : ActivityResultContracts.GetContent() {
             override fun createIntent(context: Context, input: String): Intent {
@@ -96,6 +95,55 @@ internal fun getBackupAndRestoreGroup(backupPreferences: BackupPreferences): Pre
             navigator.push(RestoreBackupScreen(it.toString()))
         }
     }
+    return {
+        if (!BackupRestoreJob.isRunning(context)) {
+            if (DeviceUtil.isMiui && DeviceUtil.isMiuiOptimizationDisabled()) {
+                context.toast(MR.strings.restore_miui_warning)
+            }
+            // no need to catch because it's wrapped with a chooser
+            chooseBackup.launch("*/*")
+        } else {
+            context.toast(MR.strings.restore_in_progress)
+        }
+    }
+}
+
+@Composable
+private fun CreateRestoreButtons(onRestoreClick: () -> Unit) {
+    val navigator = LocalNavigator.currentOrThrow
+    MultiChoiceSegmentedButtonRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(intrinsicSize = IntrinsicSize.Min)
+            .padding(horizontal = PrefsHorizontalPadding),
+    ) {
+        SegmentedButton(
+            modifier = Modifier.fillMaxHeight(),
+            checked = false,
+            onCheckedChange = { navigator.push(CreateBackupScreen()) },
+            shape = SegmentedButtonDefaults.itemShape(0, 2),
+        ) {
+            Text(stringResource(MR.strings.pref_create_backup))
+        }
+        SegmentedButton(
+            modifier = Modifier.fillMaxHeight(),
+            checked = false,
+            onCheckedChange = { onRestoreClick() },
+            shape = SegmentedButtonDefaults.itemShape(1, 2),
+        ) {
+            Text(stringResource(MR.strings.pref_restore_backup))
+        }
+    }
+}
+
+@Composable
+internal fun getBackupAndRestoreGroup(backupPreferences: BackupPreferences): Preference.PreferenceGroup {
+    val context = LocalContext.current
+    val navigator = LocalNavigator.currentOrThrow
+
+    val lastAutoBackup by backupPreferences.lastAutoBackupTimestamp.collectAsState()
+
+    val onRestoreClick = rememberRestoreAction()
 
     return Preference.PreferenceGroup(
         title = stringResource(MR.strings.label_backup),
@@ -105,42 +153,7 @@ internal fun getBackupAndRestoreGroup(backupPreferences: BackupPreferences): Pre
                 title = stringResource(SettingsDataScreen.restorePreferenceKeyString),
             ) {
                 BasePreferenceWidget(
-                    subcomponent = {
-                        MultiChoiceSegmentedButtonRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(intrinsicSize = IntrinsicSize.Min)
-                                .padding(horizontal = PrefsHorizontalPadding),
-                        ) {
-                            SegmentedButton(
-                                modifier = Modifier.fillMaxHeight(),
-                                checked = false,
-                                onCheckedChange = { navigator.push(CreateBackupScreen()) },
-                                shape = SegmentedButtonDefaults.itemShape(0, 2),
-                            ) {
-                                Text(stringResource(MR.strings.pref_create_backup))
-                            }
-                            SegmentedButton(
-                                modifier = Modifier.fillMaxHeight(),
-                                checked = false,
-                                onCheckedChange = {
-                                    if (!BackupRestoreJob.isRunning(context)) {
-                                        if (DeviceUtil.isMiui && DeviceUtil.isMiuiOptimizationDisabled()) {
-                                            context.toast(MR.strings.restore_miui_warning)
-                                        }
-
-                                        // no need to catch because it's wrapped with a chooser
-                                        chooseBackup.launch("*/*")
-                                    } else {
-                                        context.toast(MR.strings.restore_in_progress)
-                                    }
-                                },
-                                shape = SegmentedButtonDefaults.itemShape(1, 2),
-                            ) {
-                                Text(stringResource(MR.strings.pref_restore_backup))
-                            }
-                        }
-                    },
+                    subcomponent = { CreateRestoreButtons(onRestoreClick) },
                 )
             },
 
@@ -169,10 +182,39 @@ internal fun getBackupAndRestoreGroup(backupPreferences: BackupPreferences): Pre
     )
 }
 
+// A "clear this cache" row; [clear] returns how many files went, [onCleared] refreshes the shown size.
 @Composable
-internal fun getDataGroup(): Preference.PreferenceGroup {
+private fun clearCachePreference(
+    title: String,
+    readableSize: String,
+    clear: () -> Int,
+    onCleared: () -> Unit,
+): Preference.PreferenceItem<out Any, out Any> {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    return Preference.PreferenceItem.TextPreference(
+        title = title,
+        subtitle = stringResource(MR.strings.used_cache, readableSize),
+        onClick = {
+            scope.launchNonCancellable {
+                try {
+                    val deletedFiles = clear()
+                    withUIContext {
+                        context.toast(context.stringResource(MR.strings.cache_deleted, deletedFiles))
+                        onCleared()
+                    }
+                } catch (expected: Throwable) {
+                    // Logged whatever the cause; the caller carries on.
+                    logcat(LogPriority.ERROR, expected)
+                    withUIContext { context.toast(MR.strings.cache_delete_error) }
+                }
+            }
+        },
+    )
+}
+
+@Composable
+internal fun getDataGroup(): Preference.PreferenceGroup {
     val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
 
     val chapterCache = remember { Injekt.get<ChapterCache>() }
@@ -200,44 +242,18 @@ internal fun getDataGroup(): Preference.PreferenceGroup {
                 )
             },
 
-            Preference.PreferenceItem.TextPreference(
+            clearCachePreference(
                 title = stringResource(MR.strings.pref_clear_chapter_cache),
-                subtitle = stringResource(MR.strings.used_cache, cacheReadableSize),
-                onClick = {
-                    scope.launchNonCancellable {
-                        try {
-                            val deletedFiles = chapterCache.clear()
-                            withUIContext {
-                                context.toast(context.stringResource(MR.strings.cache_deleted, deletedFiles))
-                                cacheReadableSizeSema++
-                            }
-                        } catch (expected: Throwable) {
-                            // Logged whatever the cause; the caller carries on.
-                            logcat(LogPriority.ERROR, expected)
-                            withUIContext { context.toast(MR.strings.cache_delete_error) }
-                        }
-                    }
-                },
+                readableSize = cacheReadableSize,
+                clear = chapterCache::clear,
+                onCleared = { cacheReadableSizeSema++ },
             ),
             // SY -->
-            Preference.PreferenceItem.TextPreference(
+            clearCachePreference(
                 title = stringResource(SYMR.strings.pref_clear_page_preview_cache),
-                subtitle = stringResource(MR.strings.used_cache, pagePreviewReadableSize),
-                onClick = {
-                    scope.launchNonCancellable {
-                        try {
-                            val deletedFiles = pagePreviewCache.clear()
-                            withUIContext {
-                                context.toast(context.stringResource(MR.strings.cache_deleted, deletedFiles))
-                                pagePreviewReadableSizeSema++
-                            }
-                        } catch (expected: Throwable) {
-                            // Logged whatever the cause; the caller carries on.
-                            logcat(LogPriority.ERROR, expected)
-                            withUIContext { context.toast(MR.strings.cache_delete_error) }
-                        }
-                    }
-                },
+                readableSize = pagePreviewReadableSize,
+                clear = pagePreviewCache::clear,
+                onCleared = { pagePreviewReadableSizeSema++ },
             ),
             // SY <--
             Preference.PreferenceItem.SwitchPreference(
@@ -328,37 +344,16 @@ internal fun ColumnSelectionDialog(
         },
         text = {
             Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = titleSelected,
-                        onCheckedChange = { checked ->
-                            titleSelected = checked
-                            if (!checked) {
-                                authorSelected = false
-                                artistSelected = false
-                            }
-                        },
-                    )
-                    Text(text = stringResource(MR.strings.title))
+                // Author and artist only make sense next to a title.
+                LabeledCheckboxRow(MR.strings.title, titleSelected) { checked ->
+                    titleSelected = checked
+                    if (!checked) {
+                        authorSelected = false
+                        artistSelected = false
+                    }
                 }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = authorSelected,
-                        onCheckedChange = { authorSelected = it },
-                        enabled = titleSelected,
-                    )
-                    Text(text = stringResource(MR.strings.author))
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = artistSelected,
-                        onCheckedChange = { artistSelected = it },
-                        enabled = titleSelected,
-                    )
-                    Text(text = stringResource(MR.strings.artist))
-                }
+                LabeledCheckboxRow(MR.strings.author, authorSelected, enabled = titleSelected) { authorSelected = it }
+                LabeledCheckboxRow(MR.strings.artist, artistSelected, enabled = titleSelected) { artistSelected = it }
             }
         },
         confirmButton = {
@@ -383,4 +378,21 @@ internal fun ColumnSelectionDialog(
             }
         },
     )
+}
+
+@Composable
+private fun LabeledCheckboxRow(
+    label: StringResource,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled,
+        )
+        Text(text = stringResource(label))
+    }
 }

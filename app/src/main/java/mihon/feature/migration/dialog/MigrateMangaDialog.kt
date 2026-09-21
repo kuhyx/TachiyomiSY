@@ -84,43 +84,38 @@ internal fun Screen.MigrateMangaDialog(
             }
         },
         confirmButton = {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
-            ) {
-                TextButton(
-                    onClick = {
-                        onDismissRequest()
-                        onClickTitle()
-                    },
-                ) {
-                    Text(text = stringResource(MR.strings.action_show_manga))
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                TextButton(
-                    onClick = {
-                        scope.launchIO {
-                            screenModel.migrateManga(replace = false)
-                            withUIContext { onComplete() }
-                        }
-                    },
-                ) {
-                    Text(text = stringResource(MR.strings.copy))
-                }
-                TextButton(
-                    onClick = {
-                        scope.launchIO {
-                            screenModel.migrateManga(replace = true)
-                            withUIContext { onComplete() }
-                        }
-                    },
-                ) {
-                    Text(text = stringResource(MR.strings.migrate))
-                }
-            }
+            MigrateButtons(
+                onShowManga = {
+                    onDismissRequest()
+                    onClickTitle()
+                },
+                onMigrate = { replace ->
+                    scope.launchIO {
+                        screenModel.migrateManga(replace = replace)
+                        withUIContext { onComplete() }
+                    }
+                },
+            )
         },
     )
+}
+
+@Composable
+private fun MigrateButtons(onShowManga: () -> Unit, onMigrate: (replace: Boolean) -> Unit) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
+    ) {
+        TextButton(onClick = onShowManga) {
+            Text(text = stringResource(MR.strings.action_show_manga))
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        TextButton(onClick = { onMigrate(false) }) {
+            Text(text = stringResource(MR.strings.copy))
+        }
+        TextButton(onClick = { onMigrate(true) }) {
+            Text(text = stringResource(MR.strings.migrate))
+        }
+    }
 }
 
 private class MigrateDialogScreenModel(

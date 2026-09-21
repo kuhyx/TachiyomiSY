@@ -63,60 +63,83 @@ internal fun LibraryPager(
                 )
             } else {
                 val displayMode by getDisplayMode(page)
-                val columns by if (displayMode != LibraryDisplayMode.List) {
-                    val configuration = LocalConfiguration.current
-                    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-                    remember(isLandscape) { getColumnsForOrientation(isLandscape) }
-                } else {
-                    remember { mutableIntStateOf(0) }
-                }
-
-                val onClickManga: (LibraryManga) -> Unit = { onClickManga(category, it) }
-                val onLongClickManga: (LibraryManga) -> Unit = { onLongClickManga(category, it) }
-
-                when (displayMode) {
-                    LibraryDisplayMode.List -> {
-                        LibraryList(
-                            items = items,
-                            contentPadding = contentPadding,
-                            selection = selection,
-                            onClick = onClickManga,
-                            onLongClick = onLongClickManga,
-                            onClickContinueReading = onClickContinueReading,
-                            searchQuery = searchQuery,
-                            onGlobalSearchClicked = onGlobalSearchClicked,
-                        )
-                    }
-                    LibraryDisplayMode.CompactGrid, LibraryDisplayMode.CoverOnlyGrid -> {
-                        LibraryCompactGrid(
-                            items = items,
-                            showTitle = displayMode is LibraryDisplayMode.CompactGrid,
-                            columns = columns,
-                            contentPadding = contentPadding,
-                            selection = selection,
-                            onClick = onClickManga,
-                            onLongClick = onLongClickManga,
-                            onClickContinueReading = onClickContinueReading,
-                            searchQuery = searchQuery,
-                            onGlobalSearchClicked = onGlobalSearchClicked,
-                        )
-                    }
-                    LibraryDisplayMode.ComfortableGrid -> {
-                        LibraryComfortableGrid(
-                            items = items,
-                            columns = columns,
-                            contentPadding = contentPadding,
-                            selection = selection,
-                            onClick = onClickManga,
-                            onLongClick = onLongClickManga,
-                            onClickContinueReading = onClickContinueReading,
-                            searchQuery = searchQuery,
-                            onGlobalSearchClicked = onGlobalSearchClicked,
-                        )
-                    }
-                }
+                LibraryPage(
+                    displayMode = displayMode,
+                    items = items,
+                    contentPadding = contentPadding,
+                    selection = selection,
+                    searchQuery = searchQuery,
+                    getColumnsForOrientation = getColumnsForOrientation,
+                    onClick = { onClickManga(category, it) },
+                    onLongClick = { onLongClickManga(category, it) },
+                    onClickContinueReading = onClickContinueReading,
+                    onGlobalSearchClicked = onGlobalSearchClicked,
+                )
             }
+        }
+    }
+}
+
+// One category rendered in its display mode; grids read the column count for the current orientation.
+@Composable
+private fun LibraryPage(
+    displayMode: LibraryDisplayMode,
+    items: List<LibraryItem>,
+    contentPadding: PaddingValues,
+    selection: Set<Long>,
+    searchQuery: String?,
+    getColumnsForOrientation: (Boolean) -> PreferenceMutableState<Int>,
+    onClick: (LibraryManga) -> Unit,
+    onLongClick: (LibraryManga) -> Unit,
+    onClickContinueReading: ((LibraryManga) -> Unit)?,
+    onGlobalSearchClicked: () -> Unit,
+) {
+    val columns by if (displayMode != LibraryDisplayMode.List) {
+        val configuration = LocalConfiguration.current
+        val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        remember(isLandscape) { getColumnsForOrientation(isLandscape) }
+    } else {
+        remember { mutableIntStateOf(0) }
+    }
+    when (displayMode) {
+        LibraryDisplayMode.List -> {
+            LibraryList(
+                items = items,
+                contentPadding = contentPadding,
+                selection = selection,
+                onClick = onClick,
+                onLongClick = onLongClick,
+                onClickContinueReading = onClickContinueReading,
+                searchQuery = searchQuery,
+                onGlobalSearchClicked = onGlobalSearchClicked,
+            )
+        }
+        LibraryDisplayMode.CompactGrid, LibraryDisplayMode.CoverOnlyGrid -> {
+            LibraryCompactGrid(
+                items = items,
+                showTitle = displayMode is LibraryDisplayMode.CompactGrid,
+                columns = columns,
+                contentPadding = contentPadding,
+                selection = selection,
+                onClick = onClick,
+                onLongClick = onLongClick,
+                onClickContinueReading = onClickContinueReading,
+                searchQuery = searchQuery,
+                onGlobalSearchClicked = onGlobalSearchClicked,
+            )
+        }
+        LibraryDisplayMode.ComfortableGrid -> {
+            LibraryComfortableGrid(
+                items = items,
+                columns = columns,
+                contentPadding = contentPadding,
+                selection = selection,
+                onClick = onClick,
+                onLongClick = onLongClick,
+                onClickContinueReading = onClickContinueReading,
+                searchQuery = searchQuery,
+                onGlobalSearchClicked = onGlobalSearchClicked,
+            )
         }
     }
 }

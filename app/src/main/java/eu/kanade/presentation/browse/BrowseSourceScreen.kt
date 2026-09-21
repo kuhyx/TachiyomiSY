@@ -1,5 +1,6 @@
 package eu.kanade.presentation.browse
 
+import android.content.Context
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -59,90 +60,111 @@ internal fun BrowseSourceContent(
 ) {
     val context = LocalContext.current
 
-    val errorState = mangaList.loadState.refresh.takeIf { it is LoadState.Error }
-        ?: mangaList.loadState.append.takeIf { it is LoadState.Error }
+    val errorState = mangaList.loadState.refresh as? LoadState.Error
+        ?: mangaList.loadState.append as? LoadState.Error
 
     val getErrorMessage: (LoadState.Error) -> String = { state ->
         with(context) { state.error.formattedMessage }
     }
 
+    // With results already on screen a load error is a retry snackbar rather than an empty screen.
     LaunchedEffect(errorState) {
-        if (mangaList.itemCount > 0 && errorState != null && errorState is LoadState.Error) {
-            val result = snackbarHostState.showSnackbar(
-                message = getErrorMessage(errorState),
-                actionLabel = context.stringResource(MR.strings.action_retry),
-                duration = SnackbarDuration.Indefinite,
-            )
-            when (result) {
-                SnackbarResult.Dismissed -> snackbarHostState.currentSnackbarData?.dismiss()
-                SnackbarResult.ActionPerformed -> mangaList.retry()
-            }
+        if (mangaList.itemCount > 0 && errorState != null) {
+            mangaList.showRetrySnackbar(snackbarHostState, getErrorMessage(errorState), context)
         }
     }
 
-    if (mangaList.itemCount == 0 && mangaList.loadState.refresh is LoadState.Loading) {
-        LoadingScreen(Modifier.padding(contentPadding))
-        return
+    when {
+        mangaList.itemCount == 0 && mangaList.loadState.refresh is LoadState.Loading -> {
+            LoadingScreen(Modifier.padding(contentPadding))
+        }
+        mangaList.itemCount == 0 -> {
+            NoResultsScreen(
+                contentPadding = contentPadding,
+                message = errorState?.let(getErrorMessage) ?: stringResource(MR.strings.no_results_found),
+                localSourceHelp = onLocalSourceHelpClick.takeIf { source is LocalSource },
+                helpActions = emptyHelpActions(mangaList::refresh, onWebViewClick, onHelpClick),
+            )
+        }
+        // SY -->
+        source?.isEhBasedSource() == true && ehentaiBrowseDisplayMode -> {
+            BrowseSourceEHentaiList(
+                mangaList = mangaList,
+                contentPadding = contentPadding,
+                onMangaClick = onMangaClick,
+                onMangaLongClick = onMangaLongClick,
+            )
+        }
+        // SY <--
+        else -> {
+            BrowseSourceItems(
+                displayMode = displayMode,
+                mangaList = mangaList,
+                columns = columns,
+                contentPadding = contentPadding,
+                onMangaClick = onMangaClick,
+                onMangaLongClick = onMangaLongClick,
+            )
+        }
     }
+}
 
-    if (mangaList.itemCount == 0) {
-        EmptyScreen(
-            modifier = Modifier.padding(contentPadding),
-            message = if (errorState is LoadState.Error) {
-                getErrorMessage(errorState)
-            } else {
-                stringResource(MR.strings.no_results_found)
-            },
-            actions = if (source is LocalSource /* SY --> */ && onLocalSourceHelpClick != null /* SY <-- */) {
-                listOf(
-                    EmptyScreenAction(
-                        stringRes = MR.strings.local_source_help_guide,
-                        icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                        onClick = onLocalSourceHelpClick,
-                    ),
-                )
-            } else {
-                listOfNotNull(
-                    EmptyScreenAction(
-                        stringRes = MR.strings.action_retry,
-                        icon = Icons.Outlined.Refresh,
-                        onClick = mangaList::refresh,
-                    ),
-                    // SY -->
-                    onWebViewClick?.let {
-                        EmptyScreenAction(
-                            stringRes = MR.strings.action_open_in_web_view,
-                            icon = Icons.Outlined.Public,
-                            onClick = it,
-                        )
-                    },
-                    onHelpClick?.let {
-                        EmptyScreenAction(
-                            stringRes = MR.strings.label_help,
-                            icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                            onClick = it,
-                        )
-                    },
-                    // SY <--
-                )
-            },
-        )
-
-        return
+private suspend fun LazyPagingItems<*>.showRetrySnackbar(
+    snackbarHostState: SnackbarHostState,
+    message: String,
+    context: Context,
+) {
+    val result = snackbarHostState.showSnackbar(
+        message = message,
+        actionLabel = context.stringResource(MR.strings.action_retry),
+        duration = SnackbarDuration.Indefinite,
+    )
+    when (result) {
+        SnackbarResult.Dismissed -> snackbarHostState.currentSnackbarData?.dismiss()
+        SnackbarResult.ActionPerformed -> retry()
     }
+}
 
-    // SY -->
-    if (source?.isEhBasedSource() == true && ehentaiBrowseDisplayMode) {
-        BrowseSourceEHentaiList(
-            mangaList = mangaList,
-            contentPadding = contentPadding,
-            onMangaClick = onMangaClick,
-            onMangaLongClick = onMangaLongClick,
-        )
-        return
-    }
-    // SY <--
+// Retry always; web view and help only when the source offers them.
+private fun emptyHelpActions(
+    onRetry: () -> Unit,
+    onWebViewClick: (() -> Unit)?,
+    onHelpClick: (() -> Unit)?,
+): List<EmptyScreenAction> {
+    return listOfNotNull(
+        EmptyScreenAction(
+            stringRes = MR.strings.action_retry,
+            icon = Icons.Outlined.Refresh,
+            onClick = onRetry,
+        ),
+        // SY -->
+        onWebViewClick?.let {
+            EmptyScreenAction(
+                stringRes = MR.strings.action_open_in_web_view,
+                icon = Icons.Outlined.Public,
+                onClick = it,
+            )
+        },
+        onHelpClick?.let {
+            EmptyScreenAction(
+                stringRes = MR.strings.label_help,
+                icon = Icons.AutoMirrored.Outlined.HelpOutline,
+                onClick = it,
+            )
+        },
+        // SY <--
+    )
+}
 
+@Composable
+private fun BrowseSourceItems(
+    displayMode: LibraryDisplayMode,
+    mangaList: LazyPagingItems<StateFlow</* SY --> */Pair<Manga, RaisedSearchMetadata?>/* SY <-- */>>,
+    columns: GridCells,
+    contentPadding: PaddingValues,
+    onMangaClick: (Manga) -> Unit,
+    onMangaLongClick: (Manga) -> Unit,
+) {
     when (displayMode) {
         LibraryDisplayMode.ComfortableGrid -> {
             BrowseSourceComfortableGrid(
@@ -171,6 +193,31 @@ internal fun BrowseSourceContent(
             )
         }
     }
+}
+
+// A local source with nothing in it gets the setup guide; anything else gets retry / web view / help.
+@Composable
+private fun NoResultsScreen(
+    contentPadding: PaddingValues,
+    message: String,
+    localSourceHelp: (() -> Unit)?,
+    helpActions: List<EmptyScreenAction>,
+) {
+    EmptyScreen(
+        modifier = Modifier.padding(contentPadding),
+        message = message,
+        actions = if (localSourceHelp != null) {
+            listOf(
+                EmptyScreenAction(
+                    stringRes = MR.strings.local_source_help_guide,
+                    icon = Icons.AutoMirrored.Outlined.HelpOutline,
+                    onClick = localSourceHelp,
+                ),
+            )
+        } else {
+            helpActions
+        },
+    )
 }
 
 @Composable

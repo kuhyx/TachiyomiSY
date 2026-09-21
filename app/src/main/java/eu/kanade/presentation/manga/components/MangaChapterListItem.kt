@@ -46,6 +46,63 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
 
 @Composable
+private fun ChapterTitleRow(title: String, read: Boolean, bookmark: Boolean) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        var textHeight by remember { mutableIntStateOf(0) }
+        if (!read) {
+            Icon(
+                imageVector = Icons.Filled.Circle,
+                contentDescription = stringResource(MR.strings.unread),
+                modifier = Modifier
+                    .height(8.dp)
+                    .padding(end = 4.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+        if (bookmark) {
+            Icon(
+                imageVector = Icons.Filled.Bookmark,
+                contentDescription = stringResource(MR.strings.action_filter_bookmarked),
+                modifier = Modifier
+                    .sizeIn(maxHeight = with(LocalDensity.current) { textHeight.toDp() - 2.dp }),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { textHeight = it.size.height },
+            color = LocalContentColor.current.copy(alpha = if (read) DISABLED_ALPHA else 1f),
+        )
+    }
+}
+
+// Date, read progress, (SY) source name and scanlator, dot-separated; [parts] flags the dimmed ones.
+@Composable
+private fun ChapterSubtitleRow(read: Boolean, parts: List<Pair<String, Boolean>>) {
+    Row {
+        val subtitleStyle = MaterialTheme.typography.bodySmall
+            .merge(color = LocalContentColor.current.copy(alpha = if (read) DISABLED_ALPHA else SECONDARY_ALPHA))
+        ProvideTextStyle(value = subtitleStyle) {
+            parts.forEachIndexed { index, (text, dimmed) ->
+                if (index > 0) DotSeparatorText()
+                Text(
+                    text = text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = if (dimmed) LocalContentColor.current.copy(alpha = DISABLED_ALPHA) else Color.Unspecified,
+                )
+            }
+        }
+    }
+}
+
+@Composable
 internal fun MangaChapterListItem(
     title: String,
     date: String?,
@@ -105,88 +162,18 @@ internal fun MangaChapterListItem(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    var textHeight by remember { mutableIntStateOf(0) }
-                    if (!read) {
-                        Icon(
-                            imageVector = Icons.Filled.Circle,
-                            contentDescription = stringResource(MR.strings.unread),
-                            modifier = Modifier
-                                .height(8.dp)
-                                .padding(end = 4.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                    if (bookmark) {
-                        Icon(
-                            imageVector = Icons.Filled.Bookmark,
-                            contentDescription = stringResource(MR.strings.action_filter_bookmarked),
-                            modifier = Modifier
-                                .sizeIn(maxHeight = with(LocalDensity.current) { textHeight.toDp() - 2.dp }),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        onTextLayout = { textHeight = it.size.height },
-                        color = LocalContentColor.current.copy(alpha = if (read) DISABLED_ALPHA else 1f),
-                    )
-                }
-
-                Row {
-                    val subtitleStyle = MaterialTheme.typography.bodySmall
-                        .merge(
-                            color = LocalContentColor.current
-                                .copy(alpha = if (read) DISABLED_ALPHA else SECONDARY_ALPHA),
-                        )
-                    ProvideTextStyle(value = subtitleStyle) {
-                        if (date != null) {
-                            Text(
-                                text = date,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            if (readProgress != null ||
-                                scanlator != null/* SY --> */ ||
-                                sourceName != null/* SY <-- */
-                            ) {
-                                DotSeparatorText()
-                            }
-                        }
-                        if (readProgress != null) {
-                            Text(
-                                text = readProgress,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = LocalContentColor.current.copy(alpha = DISABLED_ALPHA),
-                            )
-                            if (scanlator != null/* SY --> */ || sourceName != null/* SY <-- */) DotSeparatorText()
-                        }
+                ChapterTitleRow(title, read, bookmark)
+                ChapterSubtitleRow(
+                    read = read,
+                    parts = listOfNotNull(
+                        date?.let { it to false },
+                        readProgress?.let { it to true },
                         // SY -->
-                        if (sourceName != null) {
-                            Text(
-                                text = sourceName,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            if (scanlator != null) DotSeparatorText()
-                        }
+                        sourceName?.let { it to false },
                         // SY <--
-                        if (scanlator != null) {
-                            Text(
-                                text = scanlator,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    }
-                }
+                        scanlator?.let { it to false },
+                    ),
+                )
             }
 
             ChapterDownloadIndicator(

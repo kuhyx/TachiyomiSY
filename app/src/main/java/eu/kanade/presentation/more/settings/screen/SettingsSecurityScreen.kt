@@ -1,53 +1,18 @@
 package eu.kanade.presentation.more.settings.screen
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextObfuscationMode
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SecureTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.FragmentActivity
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.tachiyomi.core.security.PrivacyPreferences
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.ui.base.delegate.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.category.biometric.BiometricTimesScreen
-import eu.kanade.tachiyomi.util.storage.CbzCrypto
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.authenticate
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
 import tachiyomi.core.common.i18n.stringResource
@@ -83,10 +48,6 @@ internal object SettingsSecurityScreen : SearchableSettings {
         val authSupported = remember { context.isAuthenticationSupported() }
         val useAuthPref = securityPreferences.useAuthenticator
         val useAuth by useAuthPref.collectAsState()
-
-        val scope = rememberCoroutineScope()
-        val isCbzPasswordSet by remember { CbzCrypto.isPasswordSetState(scope) }.collectAsState()
-        val passwordProtectDownloads by securityPreferences.passwordProtectDownloads.collectAsState()
 
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.pref_security),
@@ -129,88 +90,12 @@ internal object SettingsSecurityScreen : SearchableSettings {
                         .associateWith { stringResource(it.titleRes) },
                     title = stringResource(MR.strings.secure_screen),
                 ),
+            ) +
                 // SY -->
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = securityPreferences.passwordProtectDownloads,
-                    title = stringResource(SYMR.strings.password_protect_downloads),
-                    subtitle = stringResource(SYMR.strings.password_protect_downloads_summary),
-                    enabled = isCbzPasswordSet,
-                ),
-                Preference.PreferenceItem.ListPreference(
-                    preference = securityPreferences.encryptionType,
-                    title = stringResource(SYMR.strings.encryption_type),
-                    entries = SecurityPreferences.EncryptionType.entries
-                        .associateWith { stringResource(it.titleRes) },
-                    enabled = passwordProtectDownloads,
-
-                ),
-                kotlin.run {
-                    var dialogOpen by remember { mutableStateOf(false) }
-                    if (dialogOpen) {
-                        PasswordDialog(
-                            onDismissRequest = { dialogOpen = false },
-                            onReturnPassword = { password ->
-                                dialogOpen = false
-
-                                CbzCrypto.deleteKeyCbz()
-                                securityPreferences.cbzPassword.set(CbzCrypto.encryptCbz(password.replace("\n", "")))
-                            },
-                        )
-                    }
-                    Preference.PreferenceItem.TextPreference(
-                        title = stringResource(SYMR.strings.set_cbz_zip_password),
-                        onClick = {
-                            dialogOpen = true
-                        },
-                    )
-                },
-                Preference.PreferenceItem.TextPreference(
-                    title = stringResource(SYMR.strings.delete_cbz_archive_password),
-                    onClick = {
-                        CbzCrypto.deleteKeyCbz()
-                        securityPreferences.cbzPassword.set("")
-                    },
-                    enabled = isCbzPasswordSet,
-                ),
-                kotlin.run {
-                    val navigator = LocalNavigator.currentOrThrow
-                    val count by securityPreferences.authenticatorTimeRanges.collectAsState()
-                    Preference.PreferenceItem.TextPreference(
-                        title = stringResource(SYMR.strings.action_edit_biometric_lock_times),
-                        subtitle = pluralStringResource(
-                            SYMR.plurals.num_lock_times,
-                            count.size,
-                            count.size,
-                        ),
-                        onClick = {
-                            navigator.push(BiometricTimesScreen())
-                        },
-                        enabled = useAuth,
-                    )
-                },
-                kotlin.run {
-                    val selection by securityPreferences.authenticatorDays.collectAsState()
-                    var dialogOpen by remember { mutableStateOf(false) }
-                    if (dialogOpen) {
-                        SetLockedDaysDialog(
-                            onDismissRequest = { dialogOpen = false },
-                            initialSelection = selection,
-                            onDaysSelected = {
-                                dialogOpen = false
-                                securityPreferences.authenticatorDays.set(it)
-                            },
-                        )
-                    }
-                    Preference.PreferenceItem.TextPreference(
-                        title = stringResource(SYMR.strings.biometric_lock_days),
-                        subtitle = stringResource(SYMR.strings.biometric_lock_days_summary),
-                        onClick = { dialogOpen = true },
-                        enabled = useAuth,
-                    )
-                },
+                cbzPasswordPreferences(securityPreferences) +
+                lockSchedulePreferences(securityPreferences, useAuth) +
                 // SY <--
                 Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.secure_screen_summary)),
-            ),
         )
     }
 
@@ -224,146 +109,6 @@ internal object SettingsSecurityScreen : SearchableSettings {
         Friday(SecureActivityDelegate.LOCK_FRIDAY, SYMR.strings.friday),
         Saturday(SecureActivityDelegate.LOCK_SATURDAY, SYMR.strings.saturday),
     }
-
-    @Composable
-    fun SetLockedDaysDialog(
-        onDismissRequest: () -> Unit,
-        initialSelection: Int,
-        onDaysSelected: (Int) -> Unit,
-    ) {
-        val selected = remember(initialSelection) {
-            DayOption.entries.filter { it.day and initialSelection == it.day }
-                .toMutableStateList()
-        }
-        AlertDialog(
-            onDismissRequest = onDismissRequest,
-            title = { Text(text = stringResource(SYMR.strings.biometric_lock_days)) },
-            text = {
-                LazyColumn {
-                    DayOption.entries.forEach { day ->
-                        item {
-                            val isSelected = selected.contains(day)
-                            val onSelectionChanged = {
-                                when (!isSelected) {
-                                    true -> selected.add(day)
-                                    false -> selected.remove(day)
-                                }
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onSelectionChanged() },
-                            ) {
-                                Checkbox(
-                                    checked = isSelected,
-                                    onCheckedChange = { onSelectionChanged() },
-                                )
-                                Text(
-                                    text = stringResource(day.stringRes),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(start = 12.dp),
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = true,
-            ),
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDaysSelected(
-                            selected.fold(0) { i, day ->
-                                i or day.day
-                            },
-                        )
-                    },
-                ) {
-                    Text(text = stringResource(MR.strings.action_ok))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismissRequest) {
-                    Text(text = stringResource(MR.strings.action_cancel))
-                }
-            },
-        )
-    }
-
-    @Composable
-    fun PasswordDialog(
-        onDismissRequest: () -> Unit,
-        onReturnPassword: (String) -> Unit,
-    ) {
-        val password = rememberTextFieldState()
-        var passwordVisibility by remember { mutableStateOf(false) }
-        AlertDialog(
-            onDismissRequest = onDismissRequest,
-
-            title = { Text(text = stringResource(SYMR.strings.cbz_archive_password)) },
-            text = {
-                SecureTextField(
-                    state = password,
-                    placeholder = { Text(text = stringResource(MR.strings.password)) },
-                    label = { Text(text = stringResource(MR.strings.password)) },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = {
-                                passwordVisibility = !passwordVisibility
-                            },
-                        ) {
-                            Icon(
-                                imageVector = if (passwordVisibility) {
-                                    Icons.Default.Visibility
-                                } else {
-                                    Icons.Default.VisibilityOff
-                                },
-                                contentDescription = null,
-                            )
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done,
-                    ),
-                    onKeyboardAction = { onReturnPassword(password.text.toString()) },
-                    modifier = Modifier.onKeyEvent {
-                        if (it.key == Key.Enter) {
-                            true
-                        } else {
-                            false
-                        }
-                    },
-                    textObfuscationMode = if (passwordVisibility) {
-                        TextObfuscationMode.Visible
-                    } else {
-                        TextObfuscationMode.Hidden
-                    },
-                )
-            },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = true,
-            ),
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onReturnPassword(password.text.toString())
-                    },
-                ) {
-                    Text(text = stringResource(MR.strings.action_ok))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismissRequest) {
-                    Text(text = stringResource(MR.strings.action_cancel))
-                }
-            },
-        )
-    }
-    // SY <--
 
     @Composable
     private fun getFirebaseGroup(

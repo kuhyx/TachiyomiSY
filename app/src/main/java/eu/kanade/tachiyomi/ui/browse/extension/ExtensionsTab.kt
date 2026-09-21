@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.browse.ExtensionScreen
 import eu.kanade.presentation.components.AppBar
@@ -38,16 +39,7 @@ internal fun extensionsTab(
         titleRes = MR.strings.label_extensions,
         badgeNumber = state.updates.takeIf { it > 0 },
         searchEnabled = true,
-        actions = listOf(
-            AppBar.OverflowAction(
-                title = stringResource(MR.strings.action_filter),
-                onClick = { navigator.push(ExtensionFilterScreen()) },
-            ),
-            AppBar.OverflowAction(
-                title = stringResource(MR.strings.extensionStores),
-                onClick = { navigator.push(ExtensionStoresScreen()) },
-            ),
-        ),
+        actions = overflowActions(navigator),
         content = { contentPadding, _ ->
             BackHandler(enabled = state.searchQuery != null) {
                 extensionsScreenModel.search(null)
@@ -60,27 +52,15 @@ internal fun extensionsTab(
                 onLongClickItem = { extension ->
                     if (extension is Extension.Available) {
                         extensionsScreenModel.installExtension(extension)
+                    } else if (context.isPackageInstalled(extension.pkgName)) {
+                        extensionsScreenModel.uninstallExtension(extension)
                     } else {
-                        if (context.isPackageInstalled(extension.pkgName)) {
-                            extensionsScreenModel.uninstallExtension(extension)
-                        } else {
-                            privateExtensionToUninstall = extension
-                        }
+                        privateExtensionToUninstall = extension
                     }
                 },
                 onClickItemCancel = extensionsScreenModel::cancelInstallUpdateExtension,
                 onClickUpdateAll = extensionsScreenModel::updateAllExtensions,
-                onOpenWebView = { extension ->
-                    extension.sources.getOrNull(0)?.let {
-                        navigator.push(
-                            WebViewScreen(
-                                url = it.baseUrl,
-                                initialTitle = it.name,
-                                sourceId = it.id,
-                            ),
-                        )
-                    }
-                },
+                onOpenWebView = { extension -> extension.sources.getOrNull(0)?.let { navigator.push(webViewFor(it)) } },
                 onInstallExtension = extensionsScreenModel::installExtension,
                 onOpenExtension = { navigator.push(ExtensionDetailsScreen(it.pkgName)) },
                 onTrustExtension = { extensionsScreenModel.trustExtension(it) },
@@ -103,6 +83,21 @@ internal fun extensionsTab(
         },
     )
 }
+
+@Composable
+private fun overflowActions(navigator: Navigator): List<AppBar.AppBarAction> = listOf(
+    AppBar.OverflowAction(
+        title = stringResource(MR.strings.action_filter),
+        onClick = { navigator.push(ExtensionFilterScreen()) },
+    ),
+    AppBar.OverflowAction(
+        title = stringResource(MR.strings.extensionStores),
+        onClick = { navigator.push(ExtensionStoresScreen()) },
+    ),
+)
+
+private fun webViewFor(source: Extension.Available.Source) =
+    WebViewScreen(url = source.baseUrl, initialTitle = source.name, sourceId = source.id)
 
 @Composable
 private fun ExtensionUninstallConfirmation(

@@ -107,129 +107,169 @@ internal fun TrackerSearch(
 
     Scaffold(
         topBar = {
-            Column {
-                TopAppBar(
-                    navigationIcon = {
-                        IconButton(onClick = onDismissRequest) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    },
-                    title = {
-                        BasicTextField(
-                            state = state,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .focusRequester(focusRequester)
-                                .runOnEnterKeyPressed(action = dispatchQueryAndClearFocus),
-                            textStyle = MaterialTheme.typography.bodyLarge
-                                .copy(color = MaterialTheme.colorScheme.onSurface),
-                            lineLimits = TextFieldLineLimits.SingleLine,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                            onKeyboardAction = { dispatchQueryAndClearFocus() },
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            decorator = {
-                                if (state.text.isEmpty()) {
-                                    Text(
-                                        text = stringResource(MR.strings.action_search_hint),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                    )
-                                }
-                                it()
-                            },
-                        )
-                    },
-                    actions = {
-                        if (state.text.isNotEmpty()) {
-                            IconButton(
-                                onClick = {
-                                    state.clearText()
-                                    focusRequester.requestFocus()
-                                },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    },
-                )
-                HorizontalDivider()
-            }
+            TrackerSearchTopBar(
+                state = state,
+                focusRequester = focusRequester,
+                onDispatchQuery = dispatchQueryAndClearFocus,
+                onDismissRequest = onDismissRequest,
+            )
         },
         bottomBar = {
-            AnimatedVisibility(
+            TrackerSearchBottomBar(
                 visible = selected != null,
-                enter = fadeIn() + slideInVertically { it / 2 },
-                exit = slideOutVertically { it / 2 } + fadeOut(),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(MaterialTheme.padding.small)
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                ) {
-                    Button(
-                        onClick = { onConfirmSelection(false) },
-                        modifier = Modifier.weight(1f),
-                        elevation = ButtonDefaults.elevatedButtonElevation(),
-                    ) {
-                        Text(text = stringResource(MR.strings.action_track))
-                    }
-                    if (supportsPrivateTracking) {
-                        Button(
-                            onClick = { onConfirmSelection(true) },
-                            elevation = ButtonDefaults.elevatedButtonElevation(),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.VisibilityOff,
-                                contentDescription = stringResource(MR.strings.action_toggle_private_on),
-                            )
-                        }
-                    }
-                }
-            }
+                supportsPrivateTracking = supportsPrivateTracking,
+                onConfirmSelection = onConfirmSelection,
+            )
         },
     ) { innerPadding ->
-        if (queryResult == null) {
-            LoadingScreen(modifier = Modifier.padding(innerPadding))
-        } else {
-            val availableTracks = queryResult.getOrNull()
-            if (availableTracks != null) {
-                if (availableTracks.isEmpty()) {
-                    EmptyScreen(
-                        modifier = Modifier.padding(innerPadding),
-                        stringRes = MR.strings.no_results_found,
+        TrackerSearchResults(
+            queryResult = queryResult,
+            selected = selected,
+            onSelectedChange = onSelectedChange,
+            innerPadding = innerPadding,
+        )
+    }
+}
+
+@Composable
+private fun TrackerSearchTopBar(
+    state: TextFieldState,
+    focusRequester: FocusRequester,
+    onDispatchQuery: () -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    Column {
+        TopAppBar(
+            navigationIcon = {
+                IconButton(onClick = onDismissRequest) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                } else {
-                    ScrollbarLazyColumn(
-                        contentPadding = innerPadding + PaddingValues(vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        items(
-                            items = availableTracks,
-                            key = { it.hashCode() },
-                        ) {
-                            SearchResultItem(
-                                trackSearch = it,
-                                selected = it == selected,
-                                onClick = { onSelectedChange(it) },
+                }
+            },
+            title = {
+                BasicTextField(
+                    state = state,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .runOnEnterKeyPressed(action = onDispatchQuery),
+                    textStyle = MaterialTheme.typography.bodyLarge
+                        .copy(color = MaterialTheme.colorScheme.onSurface),
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    onKeyboardAction = { onDispatchQuery() },
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    decorator = {
+                        if (state.text.isEmpty()) {
+                            Text(
+                                text = stringResource(MR.strings.action_search_hint),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyLarge,
                             )
                         }
+                        it()
+                    },
+                )
+            },
+            actions = {
+                if (state.text.isNotEmpty()) {
+                    IconButton(
+                        onClick = {
+                            state.clearText()
+                            focusRequester.requestFocus()
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
-            } else {
-                EmptyScreen(
-                    modifier = Modifier.padding(innerPadding),
-                    message = queryResult.exceptionOrNull()?.message
-                        ?: stringResource(MR.strings.unknown_error),
+            },
+        )
+        HorizontalDivider()
+    }
+}
+
+@Composable
+private fun TrackerSearchBottomBar(
+    visible: Boolean,
+    supportsPrivateTracking: Boolean,
+    onConfirmSelection: (private: Boolean) -> Unit,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + slideInVertically { it / 2 },
+        exit = slideOutVertically { it / 2 } + fadeOut(),
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(MaterialTheme.padding.small)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+        ) {
+            Button(
+                onClick = { onConfirmSelection(false) },
+                modifier = Modifier.weight(1f),
+                elevation = ButtonDefaults.elevatedButtonElevation(),
+            ) {
+                Text(text = stringResource(MR.strings.action_track))
+            }
+            if (supportsPrivateTracking) {
+                Button(
+                    onClick = { onConfirmSelection(true) },
+                    elevation = ButtonDefaults.elevatedButtonElevation(),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.VisibilityOff,
+                        contentDescription = stringResource(MR.strings.action_toggle_private_on),
+                    )
+                }
+            }
+        }
+    }
+}
+
+// null result = still loading; a failed result shows its message; an empty list shows "no results".
+@Composable
+private fun TrackerSearchResults(
+    queryResult: Result<List<TrackSearch>>?,
+    selected: TrackSearch?,
+    onSelectedChange: (TrackSearch) -> Unit,
+    innerPadding: PaddingValues,
+) {
+    if (queryResult == null) {
+        LoadingScreen(modifier = Modifier.padding(innerPadding))
+        return
+    }
+    val availableTracks = queryResult.getOrNull()
+    when {
+        availableTracks == null -> EmptyScreen(
+            modifier = Modifier.padding(innerPadding),
+            message = queryResult.exceptionOrNull()?.message
+                ?: stringResource(MR.strings.unknown_error),
+        )
+        availableTracks.isEmpty() -> EmptyScreen(
+            modifier = Modifier.padding(innerPadding),
+            stringRes = MR.strings.no_results_found,
+        )
+        else -> ScrollbarLazyColumn(
+            contentPadding = innerPadding + PaddingValues(vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(
+                items = availableTracks,
+                key = { it.hashCode() },
+            ) {
+                SearchResultItem(
+                    trackSearch = it,
+                    selected = it == selected,
+                    onClick = { onSelectedChange(it) },
                 )
             }
         }
@@ -242,27 +282,12 @@ private fun SearchResultItem(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val clipboard: Clipboard = LocalClipboard.current
     val focusManager = LocalFocusManager.current
-    val type = trackSearch.publishingType.toLowerCase(Locale.current).capitalize(Locale.current)
-    val status = trackSearch.publishingStatus.toLowerCase(Locale.current).capitalize(Locale.current)
     val description = trackSearch.summary.trim()
-    val shape = RoundedCornerShape(16.dp)
-    val borderColor = if (selected) MaterialTheme.colorScheme.outline else Color.Transparent
     var dropDownMenuExpanded by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surface)
-            .border(
-                width = 2.dp,
-                color = borderColor,
-                shape = shape,
-            )
+            .resultCard(selected)
             .combinedClickable(
                 onLongClick = { dropDownMenuExpanded = true },
                 onClick = {
@@ -287,67 +312,11 @@ private fun SearchResultItem(
                     modifier = Modifier.height(96.dp),
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = trackSearch.title,
-                        modifier = Modifier.padding(end = 28.dp),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    SearchResultItemDropDownMenu(
-                        expanded = dropDownMenuExpanded,
-                        onCollapseMenu = { dropDownMenuExpanded = false },
-                        onCopyName = {
-                            scope.launch {
-                                val clipEntry = ClipData.newPlainText(
-                                    trackSearch.title,
-                                    trackSearch.title,
-                                ).toClipEntry()
-                                clipboard.setClipEntry(clipEntry)
-                            }
-                        },
-                        onOpenInBrowser = {
-                            val url = trackSearch.trackingUrl
-                            if (url.isNotBlank()) {
-                                context.openInBrowser(url)
-                            }
-                        },
-                    )
-                    if (trackSearch.authors.isNotEmpty() || trackSearch.artists.isNotEmpty()) {
-                        Text(
-                            text = (trackSearch.authors + trackSearch.artists).distinct().joinToString(),
-                            modifier = Modifier.secondaryItemAlpha(),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                    if (type.isNotBlank()) {
-                        SearchResultItemDetails(
-                            title = stringResource(MR.strings.track_type),
-                            text = type,
-                        )
-                    }
-                    if (trackSearch.startDate.isNotBlank()) {
-                        SearchResultItemDetails(
-                            title = stringResource(MR.strings.label_started),
-                            text = trackSearch.startDate,
-                        )
-                    }
-                    if (status.isNotBlank()) {
-                        SearchResultItemDetails(
-                            title = stringResource(MR.strings.track_status),
-                            text = status,
-                        )
-                    }
-                    if (trackSearch.score != -1.0) {
-                        SearchResultItemDetails(
-                            title = stringResource(MR.strings.score),
-                            text = trackSearch.score.toString(),
-                        )
-                    }
-                }
+                SearchResultInfo(
+                    trackSearch = trackSearch,
+                    menuExpanded = dropDownMenuExpanded,
+                    onCollapseMenu = { dropDownMenuExpanded = false },
+                )
             }
             if (description.isNotBlank()) {
                 Text(
@@ -360,6 +329,86 @@ private fun SearchResultItem(
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
+        }
+    }
+}
+
+// Rounded surface card; the outline is only drawn for the selected result.
+@Composable
+private fun Modifier.resultCard(selected: Boolean): Modifier {
+    val shape = RoundedCornerShape(16.dp)
+    val borderColor = if (selected) MaterialTheme.colorScheme.outline else Color.Transparent
+    return this
+        .fillMaxWidth()
+        .padding(horizontal = 12.dp)
+        .clip(shape)
+        .background(MaterialTheme.colorScheme.surface)
+        .border(
+            width = 2.dp,
+            color = borderColor,
+            shape = shape,
+        )
+}
+
+// Title, long-press menu, creators and the detail rows that have a value.
+@Composable
+private fun SearchResultInfo(
+    trackSearch: TrackSearch,
+    menuExpanded: Boolean,
+    onCollapseMenu: () -> Unit,
+) {
+    val context = LocalContext.current
+    val clipboard: Clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+    val type = trackSearch.publishingType.toLowerCase(Locale.current).capitalize(Locale.current)
+    val status = trackSearch.publishingStatus.toLowerCase(Locale.current).capitalize(Locale.current)
+    Column {
+        Text(
+            text = trackSearch.title,
+            modifier = Modifier.padding(end = 28.dp),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.titleMedium,
+        )
+        SearchResultItemDropDownMenu(
+            expanded = menuExpanded,
+            onCollapseMenu = onCollapseMenu,
+            onCopyName = {
+                scope.launch {
+                    val clipEntry = ClipData.newPlainText(
+                        trackSearch.title,
+                        trackSearch.title,
+                    ).toClipEntry()
+                    clipboard.setClipEntry(clipEntry)
+                }
+            },
+            onOpenInBrowser = {
+                val url = trackSearch.trackingUrl
+                if (url.isNotBlank()) {
+                    context.openInBrowser(url)
+                }
+            },
+        )
+        if (trackSearch.authors.isNotEmpty() || trackSearch.artists.isNotEmpty()) {
+            Text(
+                text = (trackSearch.authors + trackSearch.artists).distinct().joinToString(),
+                modifier = Modifier.secondaryItemAlpha(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        val details = listOf(
+            MR.strings.track_type to type,
+            MR.strings.label_started to trackSearch.startDate,
+            MR.strings.track_status to status,
+            MR.strings.score to trackSearch.score.takeIf { it != -1.0 }?.toString().orEmpty(),
+        )
+        details.filter { (_, text) -> text.isNotBlank() }.forEach { (title, text) ->
+            SearchResultItemDetails(
+                title = stringResource(title),
+                text = text,
+            )
         }
     }
 }

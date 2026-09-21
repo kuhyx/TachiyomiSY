@@ -74,6 +74,27 @@ internal fun LibraryToolbar(
     )
 }
 
+// The category (or library) name with its entry count in a pill.
+@Composable
+private fun LibraryTitle(title: LibraryToolbarTitle) {
+    val pillAlpha = if (isSystemInDarkTheme()) PILL_ALPHA_DARK else PILL_ALPHA_LIGHT
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = title.text,
+            maxLines = 1,
+            modifier = Modifier.weight(1f, false),
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (title.numberOfManga != null) {
+            Pill(
+                text = "${title.numberOfManga}",
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = pillAlpha),
+                fontSize = 14.sp,
+            )
+        }
+    }
+}
+
 @Composable
 private fun LibraryRegularToolbar(
     title: LibraryToolbarTitle,
@@ -91,25 +112,8 @@ private fun LibraryRegularToolbar(
     // SY <--
     scrollBehavior: TopAppBarScrollBehavior?,
 ) {
-    val pillAlpha = if (isSystemInDarkTheme()) PILL_ALPHA_DARK else PILL_ALPHA_LIGHT
     SearchToolbar(
-        titleContent = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = title.text,
-                    maxLines = 1,
-                    modifier = Modifier.weight(1f, false),
-                    overflow = TextOverflow.Ellipsis,
-                )
-                if (title.numberOfManga != null) {
-                    Pill(
-                        text = "${title.numberOfManga}",
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = pillAlpha),
-                        fontSize = 14.sp,
-                    )
-                }
-            }
-        },
+        titleContent = { LibraryTitle(title) },
         searchQuery = searchQuery,
         onChangeSearchQuery = onSearchQueryChange,
         actions = {

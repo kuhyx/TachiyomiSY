@@ -61,101 +61,15 @@ internal class BatchAddScreen : Screen() {
         ) { paddingValues ->
             when (state.state) {
                 BatchAddScreenModel.State.INPUT -> {
-                    Column(
-                        Modifier
-                            .padding(paddingValues)
-                            .verticalScroll(rememberScrollState())
-                            .padding(MaterialTheme.padding.medium),
-                    ) {
-                        Text(
-                            text = stringResource(SYMR.strings.eh_batch_add_title),
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        TextField(
-                            value = state.galleries,
-                            onValueChange = screenModel::updateGalleries,
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = {
-                                Text(
-                                    text = stringResource(SYMR.strings.eh_batch_add_description),
-                                )
-                            },
-                            keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
-                            textStyle = MaterialTheme.typography.bodyLarge,
-
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = { screenModel.addGalleries(context) },
-                        ) {
-                            Text(text = stringResource(SYMR.strings.eh_batch_add_button))
-                        }
-                    }
+                    GalleryInput(
+                        galleries = state.galleries,
+                        onGalleriesChange = screenModel::updateGalleries,
+                        onAdd = { screenModel.addGalleries(context) },
+                        modifier = Modifier.padding(paddingValues),
+                    )
                 }
                 BatchAddScreenModel.State.PROGRESS -> {
-                    LazyColumn(
-                        contentPadding = paddingValues + PaddingValues(MaterialTheme.padding.medium),
-                    ) {
-                        item(key = "top") {
-                            Column {
-                                Text(
-                                    text = stringResource(SYMR.strings.eh_batch_add_adding_galleries),
-                                    style = MaterialTheme.typography.titleLarge,
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    val progress = state.progress.toFloat()
-                                    if (state.progressTotal > 0 && !progress.isNaN()) {
-                                        val realProgress = progress / state.progressTotal
-                                        if (!realProgress.isNaN()) {
-                                            LinearProgressIndicator(
-                                                progress = { realProgress },
-                                                modifier = Modifier
-                                                    .padding(top = 2.dp)
-                                                    .weight(1f),
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = state.progress.toString() + "/" + state.progressTotal,
-                                        modifier = Modifier.weight(PROGRESS_WEIGHT),
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(12.dp))
-                            }
-                        }
-                        itemsIndexed(
-                            state.events,
-                            key = { index, text -> index + text.hashCode() },
-                        ) { _, text ->
-                            Text(
-                                text = text,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center,
-                            )
-                        }
-                        if (state.progress == state.progressTotal) {
-                            item(key = "finish") {
-                                Column {
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Button(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        onClick = screenModel::finish,
-                                    ) {
-                                        Text(text = stringResource(SYMR.strings.eh_batch_add_finish))
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    AddProgress(state, onFinish = screenModel::finish, contentPadding = paddingValues)
                 }
             }
         }
@@ -177,6 +91,113 @@ internal class BatchAddScreen : Screen() {
                 },
             )
             null -> Unit
+        }
+    }
+
+    @Composable
+    private fun GalleryInput(
+        galleries: String,
+        onGalleriesChange: (String) -> Unit,
+        onAdd: () -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        Column(
+            modifier
+                .verticalScroll(rememberScrollState())
+                .padding(MaterialTheme.padding.medium),
+        ) {
+            Text(
+                text = stringResource(SYMR.strings.eh_batch_add_title),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Spacer(Modifier.height(8.dp))
+            TextField(
+                value = galleries,
+                onValueChange = onGalleriesChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = {
+                    Text(text = stringResource(SYMR.strings.eh_batch_add_description))
+                },
+                keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
+                textStyle = MaterialTheme.typography.bodyLarge,
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onAdd,
+            ) {
+                Text(text = stringResource(SYMR.strings.eh_batch_add_button))
+            }
+        }
+    }
+
+    @Composable
+    private fun AddProgress(state: BatchAddState, onFinish: () -> Unit, contentPadding: PaddingValues) {
+        LazyColumn(
+            contentPadding = contentPadding + PaddingValues(MaterialTheme.padding.medium),
+        ) {
+            item(key = "top") {
+                Column {
+                    Text(
+                        text = stringResource(SYMR.strings.eh_batch_add_adding_galleries),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    ProgressRow(state.progress, state.progressTotal)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+            itemsIndexed(
+                state.events,
+                key = { index, text -> index + text.hashCode() },
+            ) { _, text ->
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                )
+            }
+            if (state.progress == state.progressTotal) {
+                item(key = "finish") {
+                    Column {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = onFinish,
+                        ) {
+                            Text(text = stringResource(SYMR.strings.eh_batch_add_finish))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ProgressRow(progress: Int, progressTotal: Int) {
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val progressFloat = progress.toFloat()
+            if (progressTotal > 0 && !progressFloat.isNaN()) {
+                val realProgress = progressFloat / progressTotal
+                if (!realProgress.isNaN()) {
+                    LinearProgressIndicator(
+                        progress = { realProgress },
+                        modifier = Modifier
+                            .padding(top = 2.dp)
+                            .weight(1f),
+                    )
+                }
+            }
+            Text(
+                text = "$progress/$progressTotal",
+                modifier = Modifier.weight(PROGRESS_WEIGHT),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
     }
 }

@@ -225,25 +225,7 @@ internal fun ChangeCategoryDialog(
     onConfirm: (List<Long>, List<Long>) -> Unit,
 ) {
     if (initialSelection.isEmpty()) {
-        AlertDialog(
-            onDismissRequest = onDismissRequest,
-            confirmButton = {
-                tachiyomi.presentation.core.components.material.TextButton(
-                    onClick = {
-                        onDismissRequest()
-                        onEditCategories()
-                    },
-                ) {
-                    Text(text = stringResource(MR.strings.action_edit_categories))
-                }
-            },
-            title = {
-                Text(text = stringResource(MR.strings.action_move_category))
-            },
-            text = {
-                Text(text = stringResource(MR.strings.information_empty_category_dialog))
-            },
-        )
+        NoCategoriesDialog(onDismissRequest, onEditCategories)
         return
     }
     var selection by remember { mutableStateOf(initialSelection) }
@@ -264,14 +246,7 @@ internal fun ChangeCategoryDialog(
                 tachiyomi.presentation.core.components.material.TextButton(
                     onClick = {
                         onDismissRequest()
-                        onConfirm(
-                            selection
-                                .filter { it is CheckboxState.State.Checked || it is CheckboxState.TriState.Include }
-                                .map { it.value.id },
-                            selection
-                                .filter { it is CheckboxState.State.None || it is CheckboxState.TriState.None }
-                                .map { it.value.id },
-                        )
+                        onConfirm(selection.includedIds(), selection.excludedIds())
                     },
                 ) {
                     Text(text = stringResource(MR.strings.action_ok))
@@ -286,42 +261,75 @@ internal fun ChangeCategoryDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
             ) {
                 selection.forEach { checkbox ->
-                    val onChange: (CheckboxState<Category>) -> Unit = {
-                        val index = selection.indexOf(it)
+                    CategoryCheckboxRow(checkbox) { changed ->
+                        val index = selection.indexOf(changed)
                         if (index != -1) {
                             val mutableList = selection.toMutableList()
-                            mutableList[index] = it.next()
+                            mutableList[index] = changed.next()
                             selection = mutableList.toList()
                         }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onChange(checkbox) },
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        when (checkbox) {
-                            is CheckboxState.TriState -> {
-                                TriStateCheckbox(
-                                    state = checkbox.asToggleableState(),
-                                    onClick = { onChange(checkbox) },
-                                )
-                            }
-                            is CheckboxState.State -> {
-                                Checkbox(
-                                    checked = checkbox.isChecked,
-                                    onCheckedChange = { onChange(checkbox) },
-                                )
-                            }
-                        }
-
-                        Text(
-                            text = checkbox.value.visualName,
-                            modifier = Modifier.padding(horizontal = MaterialTheme.padding.medium),
-                        )
                     }
                 }
             }
         },
     )
+}
+
+// Shown when there are no categories yet: the only way forward is to create one.
+@Composable
+private fun NoCategoriesDialog(onDismissRequest: () -> Unit, onEditCategories: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            tachiyomi.presentation.core.components.material.TextButton(
+                onClick = {
+                    onDismissRequest()
+                    onEditCategories()
+                },
+            ) {
+                Text(text = stringResource(MR.strings.action_edit_categories))
+            }
+        },
+        title = {
+            Text(text = stringResource(MR.strings.action_move_category))
+        },
+        text = {
+            Text(text = stringResource(MR.strings.information_empty_category_dialog))
+        },
+    )
+}
+
+private fun List<CheckboxState<Category>>.includedIds(): List<Long> =
+    filter { it is CheckboxState.State.Checked || it is CheckboxState.TriState.Include }.map { it.value.id }
+
+private fun List<CheckboxState<Category>>.excludedIds(): List<Long> =
+    filter { it is CheckboxState.State.None || it is CheckboxState.TriState.None }.map { it.value.id }
+
+@Composable
+private fun CategoryCheckboxRow(checkbox: CheckboxState<Category>, onChange: (CheckboxState<Category>) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onChange(checkbox) },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        when (checkbox) {
+            is CheckboxState.TriState -> {
+                TriStateCheckbox(
+                    state = checkbox.asToggleableState(),
+                    onClick = { onChange(checkbox) },
+                )
+            }
+            is CheckboxState.State -> {
+                Checkbox(
+                    checked = checkbox.isChecked,
+                    onCheckedChange = { onChange(checkbox) },
+                )
+            }
+        }
+        Text(
+            text = checkbox.value.visualName,
+            modifier = Modifier.padding(horizontal = MaterialTheme.padding.medium),
+        )
+    }
 }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
@@ -49,26 +50,7 @@ internal fun ExtensionStoreCreateDialog(
             Text(text = stringResource(MR.strings.extensionStoresScreen_addStore_title))
         },
         text = {
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                state = state,
-                label = {
-                    Text(text = stringResource(MR.strings.extensionStoresScreen_addStoreInput_inputLabel))
-                },
-                supportingText = {
-                    val msgRes = if (storeAlreadyExists) {
-                        MR.strings.extensionStoresScreen_addStore_alreadyExists
-                    } else {
-                        MR.strings.information_required_plain
-                    }
-                    Text(text = errorMessage ?: stringResource(msgRes))
-                },
-                isError = errorMessage != null || storeAlreadyExists,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-                lineLimits = TextFieldLineLimits.SingleLine,
-            )
+            StoreUrlField(state, focusRequester, errorMessage, storeAlreadyExists)
         },
         confirmButton = {
             TextButton(
@@ -98,6 +80,35 @@ internal fun ExtensionStoreCreateDialog(
         delay(0.1.seconds)
         focusRequester.requestFocus()
     }
+}
+
+@Composable
+private fun StoreUrlField(
+    state: TextFieldState,
+    focusRequester: FocusRequester,
+    errorMessage: String?,
+    storeAlreadyExists: Boolean,
+) {
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
+        state = state,
+        label = {
+            Text(text = stringResource(MR.strings.extensionStoresScreen_addStoreInput_inputLabel))
+        },
+        supportingText = {
+            val msgRes = if (storeAlreadyExists) {
+                MR.strings.extensionStoresScreen_addStore_alreadyExists
+            } else {
+                MR.strings.information_required_plain
+            }
+            Text(text = errorMessage ?: stringResource(msgRes))
+        },
+        isError = errorMessage != null || storeAlreadyExists,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+        lineLimits = TextFieldLineLimits.SingleLine,
+    )
 }
 
 @Composable

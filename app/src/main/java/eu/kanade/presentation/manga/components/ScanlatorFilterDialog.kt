@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckBoxOutlineBlank
@@ -21,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,52 +52,7 @@ internal fun ScanlatorFilterDialog(
             if (sortedAvailableScanlators.isEmpty()) {
                 Text(text = stringResource(MR.strings.no_scanlators_found))
             } else {
-                Box {
-                    val state = rememberLazyListState()
-                    LazyColumn(state = state) {
-                        sortedAvailableScanlators.forEach { scanlator ->
-                            item {
-                                val isExcluded = mutableExcludedScanlators.contains(scanlator)
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .clickable {
-                                            if (isExcluded) {
-                                                mutableExcludedScanlators.remove(scanlator)
-                                            } else {
-                                                mutableExcludedScanlators.add(scanlator)
-                                            }
-                                        }
-                                        .minimumInteractiveComponentSize()
-                                        .clip(MaterialTheme.shapes.small)
-                                        .fillMaxWidth()
-                                        .padding(horizontal = MaterialTheme.padding.small),
-                                ) {
-                                    Icon(
-                                        imageVector = if (isExcluded) {
-                                            Icons.Rounded.DisabledByDefault
-                                        } else {
-                                            Icons.Rounded.CheckBoxOutlineBlank
-                                        },
-                                        tint = if (isExcluded) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            LocalContentColor.current
-                                        },
-                                        contentDescription = null,
-                                    )
-                                    Text(
-                                        text = scanlator,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        modifier = Modifier.padding(start = 24.dp),
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    if (state.canScrollBackward) HorizontalDivider(modifier = Modifier.align(Alignment.TopCenter))
-                    if (state.canScrollForward) HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
-                }
+                ScanlatorList(sortedAvailableScanlators, mutableExcludedScanlators)
             }
         },
         properties = DialogProperties(
@@ -107,30 +64,88 @@ internal fun ScanlatorFilterDialog(
                     Text(text = stringResource(MR.strings.action_cancel))
                 }
             } else {
-                FlowRow {
-                    if (mutableExcludedScanlators.isEmpty()) {
-                        TextButton(onClick = { mutableExcludedScanlators.addAll(availableScanlators) }) {
-                            Text(text = stringResource(MR.strings.action_select_all))
-                        }
-                    } else {
-                        TextButton(onClick = mutableExcludedScanlators::clear) {
-                            Text(text = stringResource(MR.strings.action_reset))
-                        }
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    TextButton(onClick = onDismissRequest) {
-                        Text(text = stringResource(MR.strings.action_cancel))
-                    }
-                    TextButton(
-                        onClick = {
-                            onConfirm(mutableExcludedScanlators.toSet())
-                            onDismissRequest()
-                        },
-                    ) {
-                        Text(text = stringResource(MR.strings.action_ok))
-                    }
-                }
+                ScanlatorButtons(availableScanlators, mutableExcludedScanlators, onDismissRequest, onConfirm)
             }
         },
     )
+}
+
+// Tapping a scanlator toggles it in [excluded]; scroll shadows mark overflow at either end.
+@Composable
+private fun ScanlatorList(scanlators: List<String>, excluded: SnapshotStateList<String>) {
+    Box {
+        val state = rememberLazyListState()
+        LazyColumn(state = state) {
+            items(scanlators) { scanlator ->
+                val isExcluded = excluded.contains(scanlator)
+                ScanlatorRow(
+                    scanlator = scanlator,
+                    isExcluded = isExcluded,
+                    onClick = { if (isExcluded) excluded.remove(scanlator) else excluded.add(scanlator) },
+                )
+            }
+        }
+        if (state.canScrollBackward) HorizontalDivider(modifier = Modifier.align(Alignment.TopCenter))
+        if (state.canScrollForward) HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
+    }
+}
+
+@Composable
+private fun ScanlatorRow(scanlator: String, isExcluded: Boolean, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .minimumInteractiveComponentSize()
+            .clip(MaterialTheme.shapes.small)
+            .fillMaxWidth()
+            .padding(horizontal = MaterialTheme.padding.small),
+    ) {
+        Icon(
+            imageVector = if (isExcluded) {
+                Icons.Rounded.DisabledByDefault
+            } else {
+                Icons.Rounded.CheckBoxOutlineBlank
+            },
+            tint = if (isExcluded) MaterialTheme.colorScheme.primary else LocalContentColor.current,
+            contentDescription = null,
+        )
+        Text(
+            text = scanlator,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(start = 24.dp),
+        )
+    }
+}
+
+@Composable
+private fun ScanlatorButtons(
+    availableScanlators: Set<String>,
+    excluded: SnapshotStateList<String>,
+    onDismissRequest: () -> Unit,
+    onConfirm: (Set<String>) -> Unit,
+) {
+    FlowRow {
+        if (excluded.isEmpty()) {
+            TextButton(onClick = { excluded.addAll(availableScanlators) }) {
+                Text(text = stringResource(MR.strings.action_select_all))
+            }
+        } else {
+            TextButton(onClick = excluded::clear) {
+                Text(text = stringResource(MR.strings.action_reset))
+            }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        TextButton(onClick = onDismissRequest) {
+            Text(text = stringResource(MR.strings.action_cancel))
+        }
+        TextButton(
+            onClick = {
+                onConfirm(excluded.toSet())
+                onDismissRequest()
+            },
+        ) {
+            Text(text = stringResource(MR.strings.action_ok))
+        }
+    }
 }

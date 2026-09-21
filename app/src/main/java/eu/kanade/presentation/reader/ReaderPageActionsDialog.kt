@@ -19,13 +19,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AdaptiveSheet
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.components.ActionButton
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
+
+private data class PageAction(val title: StringResource, val icon: ImageVector, val onClick: () -> Unit)
 
 @Composable
 internal fun ReaderPageActionsDialog(
@@ -44,156 +48,46 @@ internal fun ReaderPageActionsDialog(
     var useExtraPage by remember { mutableStateOf(false) }
     // SY <--
 
+    // Every action closes the sheet except "set as cover", which asks for confirmation first.
+    val callbacks = PageCallbacks(
+        onSetCover = { extraPage ->
+            useExtraPage = extraPage
+            showSetCoverDialog = true
+        },
+        onShare = { copy, extraPage ->
+            onShare(copy, extraPage)
+            onDismissRequest()
+        },
+        onSave = { extraPage ->
+            onSave(extraPage)
+            onDismissRequest()
+        },
+    )
+
     AdaptiveSheet(onDismissRequest = onDismissRequest) {
         Column(modifier = Modifier.padding(vertical = 16.dp)) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-            ) {
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(
-                        // SY -->
-                        if (hasExtraPage) {
-                            SYMR.strings.action_set_first_page_cover
-                        } else {
-                            MR.strings.set_as_cover
-                        },
-                        // SY <--
-                    ),
-                    icon = Icons.Outlined.Photo,
-                    onClick = { showSetCoverDialog = true },
-                )
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(
-                        // SY -->
-                        if (hasExtraPage) {
-                            SYMR.strings.action_copy_first_page
-                        } else {
-                            MR.strings.action_copy_to_clipboard
-                        },
-                        // SY <--
-                    ),
-                    icon = Icons.Outlined.ContentCopy,
-                    onClick = {
-                        // SY -->
-                        onShare(true, false)
-                        // SY <--
-                        onDismissRequest()
-                    },
-                )
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(
-                        // SY -->
-                        if (hasExtraPage) {
-                            SYMR.strings.action_share_first_page
-                        } else {
-                            MR.strings.action_share
-                        },
-                        // SY <--
-                    ),
-                    icon = Icons.Outlined.Share,
-                    onClick = {
-                        // SY -->
-                        onShare(false, false)
-                        // SY <--
-                        onDismissRequest()
-                    },
-                )
-
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    title = stringResource(
-                        // SY -->
-                        if (hasExtraPage) {
-                            SYMR.strings.action_save_first_page
-                        } else {
-                            MR.strings.action_save
-                        },
-                        // SY <--
-                    ),
-                    icon = Icons.Outlined.Save,
-                    onClick = {
-                        // SY -->
-                        onSave(false)
-                        // SY <--
-                        onDismissRequest()
-                    },
-                )
-            }
+            // SY -->
+            ActionRow(callbacks.pageActions(false, if (hasExtraPage) FIRST_PAGE_TITLES else SINGLE_PAGE_TITLES))
             if (hasExtraPage) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                ) {
-                    ActionButton(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(SYMR.strings.action_set_second_page_cover),
-                        icon = Icons.Outlined.Photo,
-                        onClick = {
-                            showSetCoverDialog = true
-                        },
-                    )
-                    ActionButton(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(SYMR.strings.action_copy_second_page),
-                        icon = Icons.Outlined.ContentCopy,
-                        onClick = {
-                            onShare(true, true)
-                            onDismissRequest()
-                        },
-                    )
-                    ActionButton(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(SYMR.strings.action_share_second_page),
-                        icon = Icons.Outlined.Share,
-                        onClick = {
-                            onShare(false, true)
-                            onDismissRequest()
-                        },
-                    )
-                    ActionButton(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(SYMR.strings.action_save_second_page),
-                        icon = Icons.Outlined.Save,
-                        onClick = {
-                            onSave(true)
-                            onDismissRequest()
-                        },
-                    )
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                ) {
-                    ActionButton(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(SYMR.strings.action_copy_combined_page),
-                        icon = Icons.Outlined.ContentCopy,
-                        onClick = {
+                ActionRow(callbacks.pageActions(true, SECOND_PAGE_TITLES))
+                ActionRow(
+                    listOf(
+                        PageAction(SYMR.strings.action_copy_combined_page, Icons.Outlined.ContentCopy) {
                             onShareCombined(true)
                             onDismissRequest()
                         },
-                    )
-                    ActionButton(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(SYMR.strings.action_share_combined_page),
-                        icon = Icons.Outlined.Share,
-                        onClick = {
+                        PageAction(SYMR.strings.action_share_combined_page, Icons.Outlined.Share) {
                             onShareCombined(false)
                             onDismissRequest()
                         },
-                    )
-                    ActionButton(
-                        modifier = Modifier.weight(1f),
-                        title = stringResource(SYMR.strings.action_save_combined_page),
-                        icon = Icons.Outlined.Save,
-                        onClick = {
+                        PageAction(SYMR.strings.action_save_combined_page, Icons.Outlined.Save) {
                             onSaveCombined()
                             onDismissRequest()
                         },
-                    )
-                }
+                    ),
+                )
             }
+            // SY <--
         }
     }
 
@@ -208,6 +102,62 @@ internal fun ReaderPageActionsDialog(
             },
             onDismiss = { showSetCoverDialog = false },
         )
+    }
+}
+
+// Set-cover / copy / share / save titles for one page of the spread.
+private data class PageTitles(
+    val cover: StringResource,
+    val copy: StringResource,
+    val share: StringResource,
+    val save: StringResource,
+)
+
+private val SINGLE_PAGE_TITLES = PageTitles(
+    MR.strings.set_as_cover,
+    MR.strings.action_copy_to_clipboard,
+    MR.strings.action_share,
+    MR.strings.action_save,
+)
+private val FIRST_PAGE_TITLES = PageTitles(
+    SYMR.strings.action_set_first_page_cover,
+    SYMR.strings.action_copy_first_page,
+    SYMR.strings.action_share_first_page,
+    SYMR.strings.action_save_first_page,
+)
+private val SECOND_PAGE_TITLES = PageTitles(
+    SYMR.strings.action_set_second_page_cover,
+    SYMR.strings.action_copy_second_page,
+    SYMR.strings.action_share_second_page,
+    SYMR.strings.action_save_second_page,
+)
+
+private class PageCallbacks(
+    val onSetCover: (extraPage: Boolean) -> Unit,
+    val onShare: (copy: Boolean, extraPage: Boolean) -> Unit,
+    val onSave: (extraPage: Boolean) -> Unit,
+) {
+    fun pageActions(extraPage: Boolean, titles: PageTitles) = listOf(
+        PageAction(titles.cover, Icons.Outlined.Photo) { onSetCover(extraPage) },
+        PageAction(titles.copy, Icons.Outlined.ContentCopy) { onShare(true, extraPage) },
+        PageAction(titles.share, Icons.Outlined.Share) { onShare(false, extraPage) },
+        PageAction(titles.save, Icons.Outlined.Save) { onSave(extraPage) },
+    )
+}
+
+@Composable
+private fun ActionRow(actions: List<PageAction>) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+    ) {
+        actions.forEach { action ->
+            ActionButton(
+                modifier = Modifier.weight(1f),
+                title = stringResource(action.title),
+                icon = action.icon,
+                onClick = action.onClick,
+            )
+        }
     }
 }
 

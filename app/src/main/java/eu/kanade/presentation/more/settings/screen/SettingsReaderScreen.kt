@@ -216,204 +216,116 @@ internal object SettingsReaderScreen : SearchableSettings {
 
     @Composable
     private fun getPagedGroup(readerPreferences: ReaderPreferences): Preference.PreferenceGroup {
-        val navModePref = readerPreferences.navigationModePager
-        val imageScaleTypePref = readerPreferences.imageScaleType
-        val dualPageSplitPref = readerPreferences.dualPageSplitPaged
-        val rotateToFitPref = readerPreferences.dualPageRotateToFit
-
-        val navMode by navModePref.collectAsState()
-        val imageScaleType by imageScaleTypePref.collectAsState()
-        val dualPageSplit by dualPageSplitPref.collectAsState()
-        val rotateToFit by rotateToFitPref.collectAsState()
-
+        val navMode by readerPreferences.navigationModePager.collectAsState()
+        val imageScaleType by readerPreferences.imageScaleType.collectAsState()
+        val pagedItems = listOf(
+            Preference.PreferenceItem.ListPreference(
+                preference = readerPreferences.imageScaleType,
+                entries = ReaderPreferences.ImageScaleType
+                    .mapIndexed { index, titleRes -> index + 1 to stringResource(titleRes) }
+                    .toMap(),
+                title = stringResource(MR.strings.pref_image_scale_type),
+            ),
+            Preference.PreferenceItem.ListPreference(
+                preference = readerPreferences.zoomStart,
+                entries = ReaderPreferences.ZoomStart
+                    .mapIndexed { index, titleRes -> index + 1 to stringResource(titleRes) }
+                    .toMap(),
+                title = stringResource(MR.strings.pref_zoom_start),
+            ),
+            Preference.PreferenceItem.SwitchPreference(
+                preference = readerPreferences.cropBorders,
+                title = stringResource(MR.strings.pref_crop_borders),
+            ),
+            // SY -->
+            Preference.PreferenceItem.SwitchPreference(
+                preference = readerPreferences.pageTransitionsPager,
+                title = stringResource(MR.strings.pref_page_transitions),
+            ),
+            // SY <--
+            Preference.PreferenceItem.SwitchPreference(
+                preference = readerPreferences.landscapeZoom,
+                title = stringResource(MR.strings.pref_landscape_zoom),
+                enabled = imageScaleType == 1,
+            ),
+            Preference.PreferenceItem.SwitchPreference(
+                preference = readerPreferences.navigateToPan,
+                title = stringResource(MR.strings.pref_navigate_pan),
+                enabled = navMode != 5,
+            ),
+        )
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.pager_viewer),
-            preferenceItems = listOf(
-                Preference.PreferenceItem.ListPreference(
-                    preference = navModePref,
-                    entries = ReaderPreferences.TapZones
-                        .mapIndexed { index, titleRes -> index to stringResource(titleRes) }
-                        .toMap(),
-                    title = stringResource(MR.strings.pref_viewer_nav),
+            preferenceItems =
+            tapZonePreferences(readerPreferences.navigationModePager, readerPreferences.pagerNavInverted) +
+                pagedItems +
+                dualPagePreferences(
+                    splitPref = readerPreferences.dualPageSplitPaged,
+                    invertPref = readerPreferences.dualPageInvertPaged,
+                    rotatePref = readerPreferences.dualPageRotateToFit,
+                    rotateInvertPref = readerPreferences.dualPageRotateToFitInvert,
                 ),
-                Preference.PreferenceItem.ListPreference(
-                    preference = readerPreferences.pagerNavInverted,
-                    entries = listOf(
-                        ReaderPreferences.TappingInvertMode.NONE,
-                        ReaderPreferences.TappingInvertMode.HORIZONTAL,
-                        ReaderPreferences.TappingInvertMode.VERTICAL,
-                        ReaderPreferences.TappingInvertMode.BOTH,
-                    )
-                        .associateWith { stringResource(it.titleRes) },
-                    title = stringResource(MR.strings.pref_read_with_tapping_inverted),
-                    enabled = navMode != 5,
-                ),
-                Preference.PreferenceItem.ListPreference(
-                    preference = imageScaleTypePref,
-                    entries = ReaderPreferences.ImageScaleType
-                        .mapIndexed { index, titleRes -> index + 1 to stringResource(titleRes) }
-                        .toMap(),
-                    title = stringResource(MR.strings.pref_image_scale_type),
-                ),
-                Preference.PreferenceItem.ListPreference(
-                    preference = readerPreferences.zoomStart,
-                    entries = ReaderPreferences.ZoomStart
-                        .mapIndexed { index, titleRes -> index + 1 to stringResource(titleRes) }
-                        .toMap(),
-                    title = stringResource(MR.strings.pref_zoom_start),
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.cropBorders,
-                    title = stringResource(MR.strings.pref_crop_borders),
-                ),
-                // SY -->
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.pageTransitionsPager,
-                    title = stringResource(MR.strings.pref_page_transitions),
-                ),
-                // SY <--
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.landscapeZoom,
-                    title = stringResource(MR.strings.pref_landscape_zoom),
-                    enabled = imageScaleType == 1,
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.navigateToPan,
-                    title = stringResource(MR.strings.pref_navigate_pan),
-                    enabled = navMode != 5,
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = dualPageSplitPref,
-                    title = stringResource(MR.strings.pref_dual_page_split),
-                    onValueChanged = {
-                        rotateToFitPref.set(false)
-                        true
-                    },
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.dualPageInvertPaged,
-                    title = stringResource(MR.strings.pref_dual_page_invert),
-                    subtitle = stringResource(MR.strings.pref_dual_page_invert_summary),
-                    enabled = dualPageSplit,
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = rotateToFitPref,
-                    title = stringResource(MR.strings.pref_page_rotate),
-                    onValueChanged = {
-                        dualPageSplitPref.set(false)
-                        true
-                    },
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.dualPageRotateToFitInvert,
-                    title = stringResource(MR.strings.pref_page_rotate_invert),
-                    enabled = rotateToFit,
-                ),
-            ),
         )
     }
 
     @Composable
     private fun getWebtoonGroup(readerPreferences: ReaderPreferences): Preference.PreferenceGroup {
         val numberFormat = remember { NumberFormat.getPercentInstance() }
-
-        val navModePref = readerPreferences.navigationModeWebtoon
-        val dualPageSplitPref = readerPreferences.dualPageSplitWebtoon
-        val rotateToFitPref = readerPreferences.dualPageRotateToFitWebtoon
         val webtoonSidePaddingPref = readerPreferences.webtoonSidePadding
-
-        val navMode by navModePref.collectAsState()
-        val dualPageSplit by dualPageSplitPref.collectAsState()
-        val rotateToFit by rotateToFitPref.collectAsState()
         val webtoonSidePadding by webtoonSidePaddingPref.collectAsState()
-
+        val webtoonItems = listOf(
+            Preference.PreferenceItem.SliderPreference(
+                value = webtoonSidePadding,
+                valueRange = ReaderPreferences.let {
+                    it.WEBTOON_PADDING_MIN..it.WEBTOON_PADDING_MAX
+                },
+                title = stringResource(MR.strings.pref_webtoon_side_padding),
+                valueString = numberFormat.format(webtoonSidePadding / PERCENT),
+                onValueChanged = { webtoonSidePaddingPref.set(it) },
+            ),
+            Preference.PreferenceItem.ListPreference(
+                preference = readerPreferences.readerHideThreshold,
+                entries = mapOf(
+                    ReaderPreferences.ReaderHideThreshold.HIGHEST to stringResource(MR.strings.pref_highest),
+                    ReaderPreferences.ReaderHideThreshold.HIGH to stringResource(MR.strings.pref_high),
+                    ReaderPreferences.ReaderHideThreshold.LOW to stringResource(MR.strings.pref_low),
+                    ReaderPreferences.ReaderHideThreshold.LOWEST to stringResource(MR.strings.pref_lowest),
+                ),
+                title = stringResource(MR.strings.pref_hide_threshold),
+            ),
+            Preference.PreferenceItem.SwitchPreference(
+                preference = readerPreferences.cropBordersWebtoon,
+                title = stringResource(MR.strings.pref_crop_borders),
+            ),
+        )
+        val zoomItems = listOf(
+            Preference.PreferenceItem.SwitchPreference(
+                preference = readerPreferences.webtoonDoubleTapZoomEnabled,
+                title = stringResource(MR.strings.pref_double_tap_zoom),
+            ),
+            Preference.PreferenceItem.SwitchPreference(
+                preference = readerPreferences.webtoonDisableZoomOut,
+                title = stringResource(MR.strings.pref_webtoon_disable_zoom_out),
+            ),
+            // SY -->
+            Preference.PreferenceItem.SwitchPreference(
+                preference = readerPreferences.pageTransitionsWebtoon,
+                title = stringResource(MR.strings.pref_page_transitions),
+            ),
+            // SY <--
+        )
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.webtoon_viewer),
-            preferenceItems = listOf(
-                Preference.PreferenceItem.ListPreference(
-                    preference = navModePref,
-                    entries = ReaderPreferences.TapZones
-                        .mapIndexed { index, titleRes -> index to stringResource(titleRes) }
-                        .toMap(),
-                    title = stringResource(MR.strings.pref_viewer_nav),
-                ),
-                Preference.PreferenceItem.ListPreference(
-                    preference = readerPreferences.webtoonNavInverted,
-                    entries = listOf(
-                        ReaderPreferences.TappingInvertMode.NONE,
-                        ReaderPreferences.TappingInvertMode.HORIZONTAL,
-                        ReaderPreferences.TappingInvertMode.VERTICAL,
-                        ReaderPreferences.TappingInvertMode.BOTH,
-                    )
-                        .associateWith { stringResource(it.titleRes) },
-                    title = stringResource(MR.strings.pref_read_with_tapping_inverted),
-                    enabled = navMode != 5,
-                ),
-                Preference.PreferenceItem.SliderPreference(
-                    value = webtoonSidePadding,
-                    valueRange = ReaderPreferences.let {
-                        it.WEBTOON_PADDING_MIN..it.WEBTOON_PADDING_MAX
-                    },
-                    title = stringResource(MR.strings.pref_webtoon_side_padding),
-                    valueString = numberFormat.format(webtoonSidePadding / PERCENT),
-                    onValueChanged = { webtoonSidePaddingPref.set(it) },
-                ),
-                Preference.PreferenceItem.ListPreference(
-                    preference = readerPreferences.readerHideThreshold,
-                    entries = mapOf(
-                        ReaderPreferences.ReaderHideThreshold.HIGHEST to stringResource(MR.strings.pref_highest),
-                        ReaderPreferences.ReaderHideThreshold.HIGH to stringResource(MR.strings.pref_high),
-                        ReaderPreferences.ReaderHideThreshold.LOW to stringResource(MR.strings.pref_low),
-                        ReaderPreferences.ReaderHideThreshold.LOWEST to stringResource(MR.strings.pref_lowest),
-                    ),
-                    title = stringResource(MR.strings.pref_hide_threshold),
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.cropBordersWebtoon,
-                    title = stringResource(MR.strings.pref_crop_borders),
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = dualPageSplitPref,
-                    title = stringResource(MR.strings.pref_dual_page_split),
-                    onValueChanged = {
-                        rotateToFitPref.set(false)
-                        true
-                    },
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.dualPageInvertWebtoon,
-                    title = stringResource(MR.strings.pref_dual_page_invert),
-                    subtitle = stringResource(MR.strings.pref_dual_page_invert_summary),
-                    enabled = dualPageSplit,
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = rotateToFitPref,
-                    title = stringResource(MR.strings.pref_page_rotate),
-                    onValueChanged = {
-                        dualPageSplitPref.set(false)
-                        true
-                    },
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.dualPageRotateToFitInvertWebtoon,
-                    title = stringResource(MR.strings.pref_page_rotate_invert),
-                    enabled = rotateToFit,
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.webtoonDoubleTapZoomEnabled,
-                    title = stringResource(MR.strings.pref_double_tap_zoom),
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.webtoonDisableZoomOut,
-                    title = stringResource(MR.strings.pref_webtoon_disable_zoom_out),
-                ),
-                // SY -->
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = readerPreferences.pageTransitionsWebtoon,
-                    title = stringResource(MR.strings.pref_page_transitions),
-                ),
-                // SY <--
-            ),
+            preferenceItems =
+            tapZonePreferences(readerPreferences.navigationModeWebtoon, readerPreferences.webtoonNavInverted) +
+                webtoonItems +
+                dualPagePreferences(
+                    splitPref = readerPreferences.dualPageSplitWebtoon,
+                    invertPref = readerPreferences.dualPageInvertWebtoon,
+                    rotatePref = readerPreferences.dualPageRotateToFitWebtoon,
+                    rotateInvertPref = readerPreferences.dualPageRotateToFitInvertWebtoon,
+                ) +
+                zoomItems,
         )
     }
 

@@ -2,6 +2,7 @@ package eu.kanade.presentation.more.settings.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -187,65 +189,76 @@ internal object SettingsMainScreen : Screen() {
                 )
             },
             containerColor = containerColor,
-            content = { contentPadding ->
-                val state = rememberLazyListState()
-                // SY -->
-                val items = items.filter { it.screen !is SearchableSettings || it.screen.isEnabled() }
-                // SY <--
-                val indexSelected = if (twoPane) {
-                    items.indexOfFirst { it.screen::class == navigator.items.first()::class }
-                        .also {
-                            LaunchedEffect(Unit) {
-                                state.animateScrollToItem(it)
-                                if (it > 0) {
-                                    // Lift scroll
-                                    topBarState.contentOffset = topBarState.heightOffsetLimit
-                                }
-                            }
-                        }
-                } else {
-                    null
-                }
+            content = { contentPadding -> SettingsList(twoPane, topBarState, contentPadding) },
+        )
+    }
 
-                LazyColumn(
-                    state = state,
-                    contentPadding = contentPadding,
-                ) {
-                    itemsIndexed(
-                        items = items,
-                        key = { _, item -> item.hashCode() },
-                    ) { index, item ->
-                        val selected = indexSelected == index
-                        var modifier: Modifier = Modifier
-                        var contentColor = LocalContentColor.current
-                        if (twoPane) {
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .clip(RoundedCornerShape(24.dp))
-                                .then(
-                                    if (selected) {
-                                        Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
-                                    } else {
-                                        Modifier
-                                    },
-                                )
-                            if (selected) {
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                            }
-                        }
-                        CompositionLocalProvider(LocalContentColor provides contentColor) {
-                            TextPreferenceWidget(
-                                modifier = modifier,
-                                title = stringResource(item.titleRes),
-                                subtitle = item.formatSubtitle(),
-                                icon = item.icon,
-                                onPreferenceClick = { navigator.navigate(item.screen, twoPane) },
-                            )
+    // In two-pane mode the entry whose screen is open on the right is highlighted and scrolled into view.
+    @Composable
+    private fun SettingsList(twoPane: Boolean, topBarState: TopAppBarState, contentPadding: PaddingValues) {
+        val navigator = LocalNavigator.currentOrThrow
+        val state = rememberLazyListState()
+        // SY -->
+        val items = items.filter { it.screen !is SearchableSettings || it.screen.isEnabled() }
+        // SY <--
+        val indexSelected = if (twoPane) {
+            items.indexOfFirst { it.screen::class == navigator.items.first()::class }
+                .also {
+                    LaunchedEffect(Unit) {
+                        state.animateScrollToItem(it)
+                        if (it > 0) {
+                            // Lift scroll
+                            topBarState.contentOffset = topBarState.heightOffsetLimit
                         }
                     }
                 }
-            },
-        )
+        } else {
+            null
+        }
+
+        LazyColumn(
+            state = state,
+            contentPadding = contentPadding,
+        ) {
+            itemsIndexed(
+                items = items,
+                key = { _, item -> item.hashCode() },
+            ) { index, item ->
+                SettingsEntry(item, twoPane = twoPane, selected = indexSelected == index) {
+                    navigator.navigate(item.screen, twoPane)
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun SettingsEntry(item: Item, twoPane: Boolean, selected: Boolean, onClick: () -> Unit) {
+        var modifier: Modifier = Modifier
+        var contentColor = LocalContentColor.current
+        if (twoPane) {
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .then(
+                    if (selected) {
+                        Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                    } else {
+                        Modifier
+                    },
+                )
+            if (selected) {
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            }
+        }
+        CompositionLocalProvider(LocalContentColor provides contentColor) {
+            TextPreferenceWidget(
+                modifier = modifier,
+                title = stringResource(item.titleRes),
+                subtitle = item.formatSubtitle(),
+                icon = item.icon,
+                onPreferenceClick = onClick,
+            )
+        }
     }
 
     private fun Navigator.navigate(screen: VoyagerScreen, twoPane: Boolean) {

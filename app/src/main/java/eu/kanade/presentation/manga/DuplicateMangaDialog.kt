@@ -24,13 +24,6 @@ import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AttachMoney
-import androidx.compose.material.icons.outlined.Block
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Done
-import androidx.compose.material.icons.outlined.DoneAll
-import androidx.compose.material.icons.outlined.Pause
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -59,10 +52,10 @@ import coil3.request.crossfade
 import eu.kanade.presentation.components.AdaptiveSheet
 import eu.kanade.presentation.components.TabbedDialogPaddings
 import eu.kanade.presentation.manga.components.MangaCover
+import eu.kanade.presentation.manga.components.mangaStatusPresentation
 import eu.kanade.presentation.more.settings.LocalPreferenceMinHeight
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.model.SManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaWithChapterCount
 import tachiyomi.domain.source.model.StubSource
@@ -138,36 +131,44 @@ internal fun DuplicateMangaDialog(
                 }
             }
 
-            Column(modifier = horizontalPaddingModifier) {
-                HorizontalDivider()
-
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.action_add_anyway),
-                    icon = Icons.Outlined.Add,
-                    onPreferenceClick = {
-                        onDismissRequest()
-                        onConfirm()
-                    },
-                    modifier = Modifier.clip(CircleShape),
-                )
-            }
-
-            OutlinedButton(
-                onClick = onDismissRequest,
-                modifier = Modifier
-                    .then(horizontalPaddingModifier)
-                    .padding(bottom = MaterialTheme.padding.medium)
-                    .heightIn(min = minHeight)
-                    .fillMaxWidth(),
-            ) {
-                Text(
-                    modifier = Modifier.padding(vertical = MaterialTheme.padding.extraSmall),
-                    text = stringResource(MR.strings.action_cancel),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
+            DialogFooter(horizontalPaddingModifier, minHeight, onDismissRequest, onConfirm)
         }
+    }
+}
+
+@Composable
+private fun DialogFooter(
+    horizontalPaddingModifier: Modifier,
+    minHeight: Dp,
+    onDismissRequest: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    Column(modifier = horizontalPaddingModifier) {
+        HorizontalDivider()
+        TextPreferenceWidget(
+            title = stringResource(MR.strings.action_add_anyway),
+            icon = Icons.Outlined.Add,
+            onPreferenceClick = {
+                onDismissRequest()
+                onConfirm()
+            },
+            modifier = Modifier.clip(CircleShape),
+        )
+    }
+    OutlinedButton(
+        onClick = onDismissRequest,
+        modifier = Modifier
+            .then(horizontalPaddingModifier)
+            .padding(bottom = MaterialTheme.padding.medium)
+            .heightIn(min = minHeight)
+            .fillMaxWidth(),
+    ) {
+        Text(
+            modifier = Modifier.padding(vertical = MaterialTheme.padding.extraSmall),
+            text = stringResource(MR.strings.action_cancel),
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.bodyLarge,
+        )
     }
 }
 
@@ -195,30 +196,7 @@ private fun DuplicateMangaListItem(
             )
             .padding(MaterialTheme.padding.small),
     ) {
-        Box {
-            MangaCover.Book(
-                data = ImageRequest.Builder(LocalContext.current)
-                    .data(manga)
-                    .crossfade(true)
-                    .build(),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            BadgeGroup(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .align(Alignment.TopStart),
-            ) {
-                Badge(
-                    color = MaterialTheme.colorScheme.secondary,
-                    textColor = MaterialTheme.colorScheme.onSecondary,
-                    text = pluralStringResource(
-                        MR.plurals.manga_num_chapters,
-                        duplicate.chapterCount.toInt(),
-                        duplicate.chapterCount,
-                    ),
-                )
-            }
-        }
+        CoverWithChapterCount(duplicate)
 
         Spacer(modifier = Modifier.height(MaterialTheme.padding.extraSmall))
 
@@ -245,49 +223,73 @@ private fun DuplicateMangaListItem(
             )
         }
 
-        MangaDetailRow(
-            text = when (manga.status) {
-                SManga.ONGOING.toLong() -> stringResource(MR.strings.ongoing)
-                SManga.COMPLETED.toLong() -> stringResource(MR.strings.completed)
-                SManga.LICENSED.toLong() -> stringResource(MR.strings.licensed)
-                SManga.PUBLISHING_FINISHED.toLong() -> stringResource(MR.strings.publishing_finished)
-                SManga.CANCELLED.toLong() -> stringResource(MR.strings.cancelled)
-                SManga.ON_HIATUS.toLong() -> stringResource(MR.strings.on_hiatus)
-                else -> stringResource(MR.strings.unknown)
-            },
-            iconImageVector = when (manga.status) {
-                SManga.ONGOING.toLong() -> Icons.Outlined.Schedule
-                SManga.COMPLETED.toLong() -> Icons.Outlined.DoneAll
-                SManga.LICENSED.toLong() -> Icons.Outlined.AttachMoney
-                SManga.PUBLISHING_FINISHED.toLong() -> Icons.Outlined.Done
-                SManga.CANCELLED.toLong() -> Icons.Outlined.Close
-                SManga.ON_HIATUS.toLong() -> Icons.Outlined.Pause
-                else -> Icons.Outlined.Block
-            },
-        )
+        StatusRow(manga.status)
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Row(
+        SourceNameRow(source)
+    }
+}
+
+// Source name, with a warning icon when the source is no longer installed.
+@Composable
+private fun SourceNameRow(source: Source) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        if (source is StubSource) {
+            Icon(
+                imageVector = Icons.Filled.Warning,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.error,
+            )
+        }
+        Text(
+            text = source.name,
+            style = MaterialTheme.typography.labelSmall,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+        )
+    }
+}
+
+@Composable
+private fun CoverWithChapterCount(duplicate: MangaWithChapterCount) {
+    Box {
+        MangaCover.Book(
+            data = ImageRequest.Builder(LocalContext.current)
+                .data(duplicate.manga)
+                .crossfade(true)
+                .build(),
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
+        )
+        BadgeGroup(
+            modifier = Modifier
+                .padding(4.dp)
+                .align(Alignment.TopStart),
         ) {
-            if (source is StubSource) {
-                Icon(
-                    imageVector = Icons.Filled.Warning,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.error,
-                )
-            }
-            Text(
-                text = source.name,
-                style = MaterialTheme.typography.labelSmall,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
+            Badge(
+                color = MaterialTheme.colorScheme.secondary,
+                textColor = MaterialTheme.colorScheme.onSecondary,
+                text = pluralStringResource(
+                    MR.plurals.manga_num_chapters,
+                    duplicate.chapterCount.toInt(),
+                    duplicate.chapterCount,
+                ),
             )
         }
     }
+}
+
+@Composable
+private fun StatusRow(status: Long) {
+    val presentation = mangaStatusPresentation(status)
+    MangaDetailRow(
+        text = stringResource(presentation.label),
+        iconImageVector = presentation.icon,
+    )
 }
 
 @Composable

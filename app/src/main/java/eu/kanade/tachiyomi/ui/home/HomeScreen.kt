@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
@@ -101,41 +102,8 @@ internal object HomeScreen : Screen() {
             // Provide usable navigator to content screen
             CompositionLocalProvider(LocalNavigator provides navigator) {
                 Scaffold(
-                    startBar = {
-                        if (isTabletUi()) {
-                            NavigationRail {
-                                TABS
-                                    // SY -->
-                                    .fastFilter { it.isEnabled() }
-                                    // SY <--
-                                    .fastForEach {
-                                        NavigationRailItem(it/* SY --> */, alwaysShowLabel/* SY <-- */)
-                                    }
-                            }
-                        }
-                    },
-                    bottomBar = {
-                        if (!isTabletUi()) {
-                            val bottomNavVisible by produceState(initialValue = true) {
-                                showBottomNavEvent.receiveAsFlow().collectLatest { value = it }
-                            }
-                            AnimatedVisibility(
-                                visible = bottomNavVisible,
-                                enter = expandVertically(),
-                                exit = shrinkVertically(),
-                            ) {
-                                NavigationBar {
-                                    TABS
-                                        // SY -->
-                                        .fastFilter { it.isEnabled() }
-                                        // SY <--
-                                        .fastForEach {
-                                            NavigationBarItem(it/* SY --> */, alwaysShowLabel/* SY <-- */)
-                                        }
-                                }
-                            }
-                        }
-                    },
+                    startBar = { if (isTabletUi()) HomeNavigationRail(alwaysShowLabel) },
+                    bottomBar = { if (!isTabletUi()) HomeNavigationBar(alwaysShowLabel) },
                     contentWindowInsets = WindowInsets(0),
                 ) { contentPadding ->
                     Box(
@@ -163,45 +131,58 @@ internal object HomeScreen : Screen() {
 
             BackHandler(enabled = tabNavigator.current != LibraryTab, onBack = goToLibraryTab)
 
-            LaunchedEffect(Unit) {
-                launch {
-                    librarySearchEvent.receiveAsFlow().collectLatest {
-                        goToLibraryTab()
-                        LibraryTab.search(it)
-                    }
-                }
-                launch {
-                    openTabEvent.receiveAsFlow().collectLatest {
-                        tabNavigator.current = when (it) {
-                            is Tab.Library -> {
-                                LibraryTab
-                            }
-                            Tab.Updates -> {
-                                UpdatesTab
-                            }
-                            Tab.History -> {
-                                HistoryTab
-                            }
-                            is Tab.Browse -> {
-                                if (it.toExtensions) {
-                                    BrowseTab.showExtension()
-                                }
-                                BrowseTab
-                            }
+            TabRequestEffects(tabNavigator, goToLibraryTab)
+        }
+    }
 
-                            is Tab.More -> {
-                                MoreTab
-                            }
-                        }
-
-                        if (it is Tab.Library && it.mangaIdToOpen != null) {
-                            navigator.push(MangaScreen(it.mangaIdToOpen))
-                        }
-                        if (it is Tab.More && it.toDownloads) {
-                            navigator.push(DownloadQueueScreen)
-                        }
-                    }
+    @Composable
+    private fun HomeNavigationRail(alwaysShowLabel: Boolean) {
+        NavigationRail {
+            TABS
+                // SY -->
+                .fastFilter { it.isEnabled() }
+                // SY <--
+                .fastForEach {
+                    NavigationRailItem(it/* SY --> */, alwaysShowLabel/* SY <-- */)
                 }
+        }
+    }
+
+    @Composable
+    private fun HomeNavigationBar(alwaysShowLabel: Boolean) {
+        val bottomNavVisible by produceState(initialValue = true) {
+            showBottomNavEvent.receiveAsFlow().collectLatest { value = it }
+        }
+        AnimatedVisibility(
+            visible = bottomNavVisible,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+        ) {
+            NavigationBar {
+                TABS
+                    // SY -->
+                    .fastFilter { it.isEnabled() }
+                    // SY <--
+                    .fastForEach {
+                        NavigationBarItem(it/* SY --> */, alwaysShowLabel/* SY <-- */)
+                    }
+            }
+        }
+    }
+
+    // Tab switches requested from outside the home screen (search, deep links, notifications).
+    @Composable
+    private fun TabRequestEffects(tabNavigator: TabNavigator, goToLibraryTab: () -> Unit) {
+        val navigator = LocalNavigator.currentOrThrow
+        LaunchedEffect(Unit) {
+            launch {
+                librarySearchEvent.receiveAsFlow().collectLatest {
+                    goToLibraryTab()
+                    LibraryTab.search(it)
+                }
+            }
+            launch {
+                openTabEvent.receiveAsFlow().collectLatest { openTab(it, tabNavigator, navigator) }
             }
         }
     }
@@ -342,4 +323,25 @@ internal object HomeScreen : Screen() {
         data class Browse(val toExtensions: Boolean = false) : Tab
         data class More(val toDownloads: Boolean) : Tab
     }
+}
+
+// Switches to the requested tab, then pushes the screen the request points at inside it (if any).
+private fun openTab(request: HomeScreen.Tab, tabNavigator: TabNavigator, navigator: Navigator) {
+    tabNavigator.current = request.target()
+    when {
+        request is HomeScreen.Tab.Library && request.mangaIdToOpen != null -> {
+            navigator.push(MangaScreen(request.mangaIdToOpen))
+        }
+        request is HomeScreen.Tab.More && request.toDownloads -> {
+            navigator.push(DownloadQueueScreen)
+        }
+    }
+}
+
+private fun HomeScreen.Tab.target(): eu.kanade.presentation.util.Tab = when (this) {
+    is HomeScreen.Tab.Library -> LibraryTab
+    HomeScreen.Tab.Updates -> UpdatesTab
+    HomeScreen.Tab.History -> HistoryTab
+    is HomeScreen.Tab.Browse -> BrowseTab.also { if (toExtensions) it.showExtension() }
+    is HomeScreen.Tab.More -> MoreTab
 }

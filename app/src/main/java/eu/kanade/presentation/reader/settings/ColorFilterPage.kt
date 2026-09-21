@@ -10,6 +10,8 @@ import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
+import dev.icerock.moko.resources.StringResource
+import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences.Companion.ColorFilterMode
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsScreenModel
 import tachiyomi.core.common.preference.getAndSet
@@ -57,66 +59,7 @@ internal fun ColumnScope.ColorFilterPage(screenModel: ReaderSettingsScreenModel)
         pref = screenModel.preferences.colorFilter,
     )
     if (colorFilter) {
-        val colorFilterValue by screenModel.preferences.colorFilterValue.collectAsState()
-        SliderItem(
-            value = colorFilterValue.red,
-            valueRange = 0..255,
-            steps = 0,
-            label = stringResource(MR.strings.color_filter_r_value),
-            onChange = { newRValue ->
-                screenModel.preferences.colorFilterValue.getAndSet {
-                    getColorValue(it, newRValue, RED_MASK, RED_SHIFT)
-                }
-            },
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
-        SliderItem(
-            value = colorFilterValue.green,
-            valueRange = 0..255,
-            steps = 0,
-            label = stringResource(MR.strings.color_filter_g_value),
-            onChange = { newGValue ->
-                screenModel.preferences.colorFilterValue.getAndSet {
-                    getColorValue(it, newGValue, GREEN_MASK, GREEN_SHIFT)
-                }
-            },
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
-        SliderItem(
-            value = colorFilterValue.blue,
-            valueRange = 0..255,
-            steps = 0,
-            label = stringResource(MR.strings.color_filter_b_value),
-            onChange = { newBValue ->
-                screenModel.preferences.colorFilterValue.getAndSet {
-                    getColorValue(it, newBValue, BLUE_MASK, 0)
-                }
-            },
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
-        SliderItem(
-            value = colorFilterValue.alpha,
-            valueRange = 0..255,
-            steps = 0,
-            label = stringResource(MR.strings.color_filter_a_value),
-            onChange = { newAValue ->
-                screenModel.preferences.colorFilterValue.getAndSet {
-                    getColorValue(it, newAValue, ALPHA_MASK, ALPHA_SHIFT)
-                }
-            },
-            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        )
-
-        val colorFilterMode by screenModel.preferences.colorFilterMode.collectAsState()
-        SettingsChipRow(MR.strings.pref_color_filter_mode) {
-            ColorFilterMode.mapIndexed { index, mode ->
-                FilterChip(
-                    selected = colorFilterMode == index,
-                    onClick = { screenModel.preferences.colorFilterMode.set(index) },
-                    label = { Text(stringResource(mode.first)) },
-                )
-            }
-        }
+        ColorFilterSliders(screenModel.preferences)
     }
 
     CheckboxItem(
@@ -128,6 +71,45 @@ internal fun ColumnScope.ColorFilterPage(screenModel: ReaderSettingsScreenModel)
         pref = screenModel.preferences.invertedColors,
     )
 }
+
+// One slider per ARGB channel writing into the packed colorFilterValue, then the blend-mode chips.
+@Composable
+private fun ColorFilterSliders(preferences: ReaderPreferences) {
+    val colorFilterValue by preferences.colorFilterValue.collectAsState()
+    val channels = listOf(
+        ChannelSlider(colorFilterValue.red, MR.strings.color_filter_r_value, RED_MASK, RED_SHIFT),
+        ChannelSlider(colorFilterValue.green, MR.strings.color_filter_g_value, GREEN_MASK, GREEN_SHIFT),
+        ChannelSlider(colorFilterValue.blue, MR.strings.color_filter_b_value, BLUE_MASK, 0),
+        ChannelSlider(colorFilterValue.alpha, MR.strings.color_filter_a_value, ALPHA_MASK, ALPHA_SHIFT),
+    )
+    channels.forEach { channel ->
+        SliderItem(
+            value = channel.value,
+            valueRange = 0..255,
+            steps = 0,
+            label = stringResource(channel.label),
+            onChange = { newValue ->
+                preferences.colorFilterValue.getAndSet {
+                    getColorValue(it, newValue, channel.mask, channel.shift)
+                }
+            },
+            pillColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
+    }
+
+    val colorFilterMode by preferences.colorFilterMode.collectAsState()
+    SettingsChipRow(MR.strings.pref_color_filter_mode) {
+        ColorFilterMode.mapIndexed { index, mode ->
+            FilterChip(
+                selected = colorFilterMode == index,
+                onClick = { preferences.colorFilterMode.set(index) },
+                label = { Text(stringResource(mode.first)) },
+            )
+        }
+    }
+}
+
+private data class ChannelSlider(val value: Int, val label: StringResource, val mask: Long, val shift: Int)
 
 private fun getColorValue(currentColor: Int, color: Int, mask: Long, bitShift: Int): Int =
     (color shl bitShift) or (currentColor and mask.inv().toInt())

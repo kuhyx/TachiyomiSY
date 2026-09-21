@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
 import com.mohamedrejeb.richeditor.ui.material3.RichTextEditorDefaults.richTextEditorColors
@@ -118,74 +119,75 @@ internal fun MangaNotesTextArea(
                 .fillMaxWidth()
                 .focusRequester(focusRequester),
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .padding(vertical = MaterialTheme.padding.small)
-                .fillMaxWidth(),
-        ) {
-            LazyRow(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                item {
-                    MangaNotesTextAreaButton(
-                        onClick = { richTextState.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold)) },
-                        isSelected = richTextState.currentSpanStyle.fontWeight == FontWeight.Bold,
-                        icon = Icons.Outlined.FormatBold,
-                    )
-                }
-                item {
-                    MangaNotesTextAreaButton(
-                        onClick = { richTextState.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic)) },
-                        isSelected = richTextState.currentSpanStyle.fontStyle == FontStyle.Italic,
-                        icon = Icons.Outlined.FormatItalic,
-                    )
-                }
-                item {
-                    MangaNotesTextAreaButton(
-                        onClick = {
-                            richTextState.toggleSpanStyle(SpanStyle(textDecoration = TextDecoration.Underline))
-                        },
-                        isSelected = richTextState.currentSpanStyle.textDecoration
-                            ?.contains(TextDecoration.Underline)
-                            ?: false,
-                        icon = Icons.Outlined.FormatUnderlined,
-                    )
-                }
-                item {
-                    VerticalDivider(
-                        modifier = Modifier
-                            .padding(horizontal = MaterialTheme.padding.extraSmall)
-                            .height(MaterialTheme.padding.large),
-                    )
-                }
-                item {
-                    MangaNotesTextAreaButton(
-                        onClick = { richTextState.toggleUnorderedList() },
-                        isSelected = richTextState.isUnorderedList,
-                        icon = Icons.AutoMirrored.Outlined.FormatListBulleted,
-                    )
-                }
-                item {
-                    MangaNotesTextAreaButton(
-                        onClick = { richTextState.toggleOrderedList() },
-                        isSelected = richTextState.isOrderedList,
-                        icon = Icons.Outlined.FormatListNumbered,
-                    )
-                }
-            }
+        FormattingToolbar(richTextState, textLength)
+    }
+}
 
-            Box(
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = textLength.toString(),
-                    modifier = Modifier.padding(MaterialTheme.padding.extraSmall),
+// Bold / italic / underline, a divider, then the two list styles; the character count sits at the end.
+@Composable
+private fun FormattingToolbar(richTextState: RichTextState, textLength: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .padding(vertical = MaterialTheme.padding.small)
+            .fillMaxWidth(),
+    ) {
+        LazyRow(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            item { SpanStyleButtons(richTextState) }
+            item {
+                VerticalDivider(
+                    modifier = Modifier
+                        .padding(horizontal = MaterialTheme.padding.extraSmall)
+                        .height(MaterialTheme.padding.large),
+                )
+            }
+            item {
+                MangaNotesTextAreaButton(
+                    onClick = { richTextState.toggleUnorderedList() },
+                    isSelected = richTextState.isUnorderedList,
+                    icon = Icons.AutoMirrored.Outlined.FormatListBulleted,
+                )
+            }
+            item {
+                MangaNotesTextAreaButton(
+                    onClick = { richTextState.toggleOrderedList() },
+                    isSelected = richTextState.isOrderedList,
+                    icon = Icons.Outlined.FormatListNumbered,
                 )
             }
         }
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = textLength.toString(),
+                modifier = Modifier.padding(MaterialTheme.padding.extraSmall),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SpanStyleButtons(richTextState: RichTextState) {
+    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        MangaNotesTextAreaButton(
+            onClick = { richTextState.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold)) },
+            isSelected = richTextState.currentSpanStyle.fontWeight == FontWeight.Bold,
+            icon = Icons.Outlined.FormatBold,
+        )
+        MangaNotesTextAreaButton(
+            onClick = { richTextState.toggleSpanStyle(SpanStyle(fontStyle = FontStyle.Italic)) },
+            isSelected = richTextState.currentSpanStyle.fontStyle == FontStyle.Italic,
+            icon = Icons.Outlined.FormatItalic,
+        )
+        MangaNotesTextAreaButton(
+            onClick = { richTextState.toggleSpanStyle(SpanStyle(textDecoration = TextDecoration.Underline)) },
+            isSelected =
+            richTextState.currentSpanStyle.textDecoration?.contains(TextDecoration.Underline) ?: false,
+            icon = Icons.Outlined.FormatUnderlined,
+        )
     }
 }
 

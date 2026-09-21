@@ -71,7 +71,17 @@ internal class MigrationListScreen(
             openMigrationDialog = screenModel::showMigrateDialog,
         )
 
-        when (val dialog = state.dialog) {
+        MigrationDialogs(screenModel, state.dialog)
+
+        BackHandler(true) {
+            screenModel.showExitDialog()
+        }
+    }
+
+    @Composable
+    private fun MigrationDialogs(screenModel: MigrationListScreenModel, dialog: MigrationListScreenModel.Dialog?) {
+        val navigator = LocalNavigator.currentOrThrow
+        when (dialog) {
             is MigrationListScreenModel.Dialog.Migrate -> {
                 MigrationMangaDialog(
                     onDismissRequest = screenModel::dismissDialog,
@@ -102,10 +112,6 @@ internal class MigrationListScreen(
             null -> {
                 // Nothing to show.
             }
-        }
-
-        BackHandler(true) {
-            screenModel.showExitDialog()
         }
     }
 }

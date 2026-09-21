@@ -3,31 +3,20 @@ package eu.kanade.presentation.browse
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.DisplayMetrics
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Launch
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,27 +24,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import eu.kanade.domain.extension.interactor.ExtensionSourceItem
-import eu.kanade.presentation.browse.components.ExtensionIcon
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.WarningBanner
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TrailingWidgetBuffer
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.ui.browse.extension.details.ExtensionDetailsScreenModel
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import eu.kanade.tachiyomi.util.system.copyToClipboard
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
@@ -65,7 +45,6 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 
 // The NSFW badge shares its row with the version; the badge gets the wider column.
-private const val NSFW_LABEL_WEIGHT = 1.5f
 
 @Composable
 internal fun ExtensionDetailsScreen(
@@ -79,16 +58,7 @@ internal fun ExtensionDetailsScreen(
     onClickSource: (sourceId: Long) -> Unit,
     onClickIncognito: (Boolean) -> Unit,
 ) {
-    val uriHandler = LocalUriHandler.current
-    val url = remember(state.extension) {
-        val regex = """https://raw.githubusercontent.com/(.+?)/(.+?)/.+""".toRegex()
-        regex.find(state.extension?.store?.indexUrl.orEmpty())
-            ?.let {
-                val (user, repo) = it.destructured
-                "https://github.com/$user/$repo"
-            }
-            ?: state.extension?.store?.indexUrl
-    }
+    val repoUrl = remember(state.extension) { repoUrl(state.extension?.store?.indexUrl.orEmpty()) }
 
     Scaffold(
         topBar = { scrollBehavior ->
@@ -97,35 +67,12 @@ internal fun ExtensionDetailsScreen(
                 navigateUp = navigateUp,
                 actions = {
                     AppBarActions(
-                        actions = buildList {
-                            if (url != null) {
-                                add(
-                                    AppBar.Action(
-                                        title = stringResource(MR.strings.action_open_repo),
-                                        icon = Icons.AutoMirrored.Outlined.Launch,
-                                        onClick = {
-                                            uriHandler.openUri(url)
-                                        },
-                                    ),
-                                )
-                            }
-                            addAll(
-                                listOf(
-                                    AppBar.OverflowAction(
-                                        title = stringResource(MR.strings.action_enable_all),
-                                        onClick = onClickEnableAll,
-                                    ),
-                                    AppBar.OverflowAction(
-                                        title = stringResource(MR.strings.action_disable_all),
-                                        onClick = onClickDisableAll,
-                                    ),
-                                    AppBar.OverflowAction(
-                                        title = stringResource(MR.strings.pref_clear_cookies),
-                                        onClick = onClickClearCookies,
-                                    ),
-                                ),
-                            )
-                        },
+                        actions = detailsActions(
+                            repoUrl = repoUrl,
+                            onClickEnableAll = onClickEnableAll,
+                            onClickDisableAll = onClickDisableAll,
+                            onClickClearCookies = onClickClearCookies,
+                        ),
                     )
                 },
                 scrollBehavior = scrollBehavior,
@@ -150,6 +97,48 @@ internal fun ExtensionDetailsScreen(
             )
         }
     }
+}
+
+// GitHub-hosted repos link to the repo page; anything else links to the raw index URL.
+private fun repoUrl(indexUrl: String): String? {
+    val regex = """https://raw.githubusercontent.com/(.+?)/(.+?)/.+""".toRegex()
+    return regex.find(indexUrl)
+        ?.let {
+            val (user, repo) = it.destructured
+            "https://github.com/$user/$repo"
+        }
+        ?: indexUrl.ifEmpty { null }
+}
+
+@Composable
+private fun detailsActions(
+    repoUrl: String?,
+    onClickEnableAll: () -> Unit,
+    onClickDisableAll: () -> Unit,
+    onClickClearCookies: () -> Unit,
+): List<AppBar.AppBarAction> {
+    val uriHandler = LocalUriHandler.current
+    return listOfNotNull(
+        repoUrl?.let {
+            AppBar.Action(
+                title = stringResource(MR.strings.action_open_repo),
+                icon = Icons.AutoMirrored.Outlined.Launch,
+                onClick = { uriHandler.openUri(it) },
+            )
+        },
+        AppBar.OverflowAction(
+            title = stringResource(MR.strings.action_enable_all),
+            onClick = onClickEnableAll,
+        ),
+        AppBar.OverflowAction(
+            title = stringResource(MR.strings.action_disable_all),
+            onClick = onClickDisableAll,
+        ),
+        AppBar.OverflowAction(
+            title = stringResource(MR.strings.pref_clear_cookies),
+            onClick = onClickClearCookies,
+        ),
+    )
 }
 
 @Composable
@@ -218,205 +207,6 @@ private fun ExtensionDetails(
             },
         )
     }
-}
-
-@Composable
-private fun DetailsHeader(
-    extension: Extension,
-    extIncognitoMode: Boolean,
-    onClickAgeRating: () -> Unit,
-    onClickUninstall: () -> Unit,
-    onClickAppInfo: (() -> Unit)?,
-    onExtIncognitoChange: (Boolean) -> Unit,
-) {
-    val context = LocalContext.current
-
-    Column {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = MaterialTheme.padding.medium)
-                .padding(
-                    top = MaterialTheme.padding.medium,
-                    bottom = MaterialTheme.padding.small,
-                )
-                .clickable {
-                    val extDebugInfo = buildString {
-                        append(
-                            """
-                                Extension name: ${extension.name} (lang: ${extension.lang}; package: ${extension.pkgName})
-                                Extension version: ${extension.versionName} (lib: ${extension.libVersion}; version code: ${extension.versionCode})
-                                NSFW: ${extension.isNsfw}
-                            """.trimIndent(),
-                        )
-
-                        if (extension is Extension.Installed) {
-                            append("\n\n")
-                            appendLine(
-                                """
-                                    Update available: ${extension.hasUpdate}
-                                    Orphaned: ${extension.isObsolete}
-                                    Shared: ${extension.isShared}
-                                """.trimIndent(),
-                            )
-                            val store = extension.store
-                            if (store != null) {
-                                append("Repository: ${store.indexUrl}")
-                            }
-                        }
-                    }
-                    context.copyToClipboard("Extension Debug information", extDebugInfo)
-                },
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            ExtensionIcon(
-                modifier = Modifier
-                    .size(112.dp),
-                extension = extension,
-                density = DisplayMetrics.DENSITY_XXXHIGH,
-            )
-
-            Text(
-                text = extension.name,
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-            )
-
-            val strippedPkgName = extension.pkgName.substringAfter("eu.kanade.tachiyomi.extension.")
-
-            Text(
-                text = strippedPkgName,
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = MaterialTheme.padding.extraLarge,
-                    vertical = MaterialTheme.padding.small,
-                ),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            InfoText(
-                modifier = Modifier.weight(1f),
-                primaryText = extension.versionName,
-                secondaryText = stringResource(MR.strings.ext_info_version),
-            )
-
-            InfoDivider()
-
-            InfoText(
-                modifier = Modifier.weight(if (extension.isNsfw) NSFW_LABEL_WEIGHT else 1f),
-                primaryText = LocaleHelper.getSourceDisplayName(extension.lang, context),
-                secondaryText = stringResource(MR.strings.ext_info_language),
-            )
-
-            if (extension.isNsfw) {
-                InfoDivider()
-
-                InfoText(
-                    modifier = Modifier.weight(1f),
-                    primaryText = stringResource(MR.strings.ext_nsfw_short),
-                    primaryTextStyle = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.Medium,
-                    ),
-                    secondaryText = stringResource(MR.strings.ext_info_age_rating),
-                    onClick = onClickAgeRating,
-                )
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .padding(horizontal = MaterialTheme.padding.medium)
-                .padding(top = MaterialTheme.padding.small),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.medium),
-        ) {
-            OutlinedButton(
-                modifier = Modifier.weight(1f),
-                onClick = onClickUninstall,
-            ) {
-                Text(stringResource(MR.strings.ext_uninstall))
-            }
-
-            if (onClickAppInfo != null) {
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = onClickAppInfo,
-                ) {
-                    Text(
-                        text = stringResource(MR.strings.ext_app_info),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
-                }
-            }
-        }
-
-        TextPreferenceWidget(
-            modifier = Modifier.padding(horizontal = MaterialTheme.padding.small),
-            title = stringResource(MR.strings.pref_incognito_mode),
-            subtitle = stringResource(MR.strings.pref_incognito_mode_extension_summary),
-            icon = ImageVector.vectorResource(R.drawable.ic_glasses_24dp),
-            content = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Switch(
-                        checked = extIncognitoMode,
-                        onCheckedChange = onExtIncognitoChange,
-                        modifier = Modifier.padding(start = TrailingWidgetBuffer),
-                    )
-                }
-            },
-        )
-
-        HorizontalDivider()
-    }
-}
-
-@Composable
-private fun InfoText(
-    primaryText: String,
-    secondaryText: String,
-    modifier: Modifier = Modifier,
-    primaryTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
-    onClick: (() -> Unit)? = null,
-) {
-    val clickableModifier = if (onClick != null) {
-        Modifier.clickable(interactionSource = null, indication = null, onClick = onClick)
-    } else {
-        Modifier
-    }
-
-    Column(
-        modifier = modifier.then(clickableModifier),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = primaryText,
-            textAlign = TextAlign.Center,
-            style = primaryTextStyle,
-        )
-
-        Text(
-            text = secondaryText + if (onClick != null) " ⓘ" else "",
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-        )
-    }
-}
-
-@Composable
-private fun InfoDivider() {
-    VerticalDivider(
-        modifier = Modifier.height(20.dp),
-    )
 }
 
 @Composable

@@ -45,54 +45,73 @@ internal fun EditTextPreferenceWidget(
     )
 
     if (isDialogShown) {
-        val scope = rememberCoroutineScope()
-        val onDismissRequest = { isDialogShown = false }
-        var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-            mutableStateOf(TextFieldValue(value))
-        }
-        AlertDialog(
-            onDismissRequest = onDismissRequest,
-            title = { Text(text = title) },
-            text = {
-                OutlinedTextField(
-                    value = textFieldValue,
-                    onValueChange = { textFieldValue = it },
-                    trailingIcon = {
-                        if (textFieldValue.text.isBlank()) {
-                            Icon(imageVector = Icons.Filled.Error, contentDescription = null)
-                        } else {
-                            IconButton(onClick = { textFieldValue = TextFieldValue("") }) {
-                                Icon(imageVector = Icons.Filled.Cancel, contentDescription = null)
-                            }
-                        }
-                    },
-                    isError = textFieldValue.text.isBlank(),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = true,
-            ),
-            confirmButton = {
-                TextButton(
-                    enabled = textFieldValue.text != value && textFieldValue.text.isNotBlank(),
-                    onClick = {
-                        scope.launch {
-                            if (onConfirm(textFieldValue.text)) {
-                                onDismissRequest()
-                            }
-                        }
-                    },
-                ) {
-                    Text(text = stringResource(MR.strings.action_ok))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismissRequest) {
-                    Text(text = stringResource(MR.strings.action_cancel))
-                }
-            },
+        EditTextDialog(
+            title = title,
+            value = value,
+            onConfirm = onConfirm,
+            onDismissRequest = { isDialogShown = false },
         )
     }
+}
+
+@Composable
+private fun EditTextDialog(
+    title: String,
+    value: String,
+    onConfirm: suspend (String) -> Boolean,
+    onDismissRequest: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(value))
+    }
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = title) },
+        text = {
+            EditTextField(textFieldValue = textFieldValue, onValueChange = { textFieldValue = it })
+        },
+        properties = DialogProperties(
+            usePlatformDefaultWidth = true,
+        ),
+        confirmButton = {
+            TextButton(
+                enabled = textFieldValue.text != value && textFieldValue.text.isNotBlank(),
+                onClick = {
+                    scope.launch {
+                        if (onConfirm(textFieldValue.text)) {
+                            onDismissRequest()
+                        }
+                    }
+                },
+            ) {
+                Text(text = stringResource(MR.strings.action_ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = stringResource(MR.strings.action_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun EditTextField(textFieldValue: TextFieldValue, onValueChange: (TextFieldValue) -> Unit) {
+    OutlinedTextField(
+        value = textFieldValue,
+        onValueChange = onValueChange,
+        trailingIcon = {
+            if (textFieldValue.text.isBlank()) {
+                Icon(imageVector = Icons.Filled.Error, contentDescription = null)
+            } else {
+                IconButton(onClick = { onValueChange(TextFieldValue("")) }) {
+                    Icon(imageVector = Icons.Filled.Cancel, contentDescription = null)
+                }
+            }
+        },
+        isError = textFieldValue.text.isBlank(),
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }

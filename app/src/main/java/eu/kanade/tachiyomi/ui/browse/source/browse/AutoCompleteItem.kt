@@ -14,6 +14,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuBoxScope
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
@@ -83,33 +84,36 @@ internal fun AutoCompleteItem(
                 }
             },
         )
-        FlowRow(
-            modifier = Modifier.padding(end = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            state.forEach {
-                InputChip(
-                    selected = false,
-                    onClick = {
-                        onChange(state - it)
-                    },
-                    label = {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                    trailingIcon = {
-                        Icon(Icons.Default.Close, contentDescription = it)
-                    },
-                    colors = InputChipDefaults.inputChipColors(
-                        containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                        labelColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                )
-            }
+        SelectedTagChips(state, onRemove = { onChange(state - it) })
+    }
+}
+
+@Composable
+private fun SelectedTagChips(tags: List<String>, onRemove: (String) -> Unit) {
+    FlowRow(
+        modifier = Modifier.padding(end = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        tags.forEach {
+            InputChip(
+                selected = false,
+                onClick = { onRemove(it) },
+                label = {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                trailingIcon = {
+                    Icon(Icons.Default.Close, contentDescription = it)
+                },
+                colors = InputChipDefaults.inputChipColors(
+                    containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                    labelColor = MaterialTheme.colorScheme.onSurface,
+                ),
+            )
         }
     }
 }
@@ -140,27 +144,16 @@ internal fun AutoCompleteTextField(
         expanded = expanded,
         onExpandedChange = { expanded = it },
     ) {
-        OutlinedTextField(
+        AutoCompleteInput(
             value = value,
             onValueChange = {
                 value = it
                 expanded = true // todo remove if focus bug is fixed
             },
-            label = label?.let { text -> { Text(text) } },
-            placeholder = placeholder?.let { text -> { Text(text) } },
-            modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-                .fillMaxWidth()
-                .runOnEnterKeyPressed { submit() },
-            singleLine = true,
-            keyboardActions = KeyboardActions { submit() },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded,
-                )
-            },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            label = label,
+            placeholder = placeholder,
+            expanded = expanded,
+            onSubmit = ::submit,
         )
 
         val filteredValues by produceState(emptyList(), value) {
@@ -182,22 +175,64 @@ internal fun AutoCompleteTextField(
             }
         }
         if (value.text.length > 2 && filteredValues.isNotEmpty()) {
-            ExposedDropdownMenu(
-                modifier = Modifier
-                    .exposedDropdownSize(matchAnchorWidth = true),
+            SuggestionMenu(
+                suggestions = filteredValues,
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-            ) {
-                filteredValues.fastForEach {
-                    DropdownMenuItem(
-                        text = { Text(it) },
-                        onClick = {
-                            value = TextFieldValue(it, TextRange(it.length))
-                            submit()
-                        },
-                    )
-                }
-            }
+                onPick = {
+                    value = TextFieldValue(it, TextRange(it.length))
+                    submit()
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ExposedDropdownMenuBoxScope.AutoCompleteInput(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    label: String?,
+    placeholder: String?,
+    expanded: Boolean,
+    onSubmit: () -> Unit,
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = label?.let { text -> { Text(text) } },
+        placeholder = placeholder?.let { text -> { Text(text) } },
+        modifier = Modifier
+            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+            .fillMaxWidth()
+            .runOnEnterKeyPressed { onSubmit() },
+        singleLine = true,
+        keyboardActions = KeyboardActions { onSubmit() },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+        trailingIcon = {
+            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+        },
+        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+    )
+}
+
+@Composable
+private fun ExposedDropdownMenuBoxScope.SuggestionMenu(
+    suggestions: List<String>,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onPick: (String) -> Unit,
+) {
+    ExposedDropdownMenu(
+        modifier = Modifier.exposedDropdownSize(matchAnchorWidth = true),
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+    ) {
+        suggestions.fastForEach {
+            DropdownMenuItem(
+                text = { Text(it) },
+                onClick = { onPick(it) },
+            )
         }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.domain.manga.model.readerOrientation
 import eu.kanade.domain.manga.model.readingMode
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
@@ -15,6 +16,7 @@ import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsScreenModel
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
+import tachiyomi.core.common.preference.Preference
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.components.CheckboxItem
@@ -81,39 +83,16 @@ private fun ColumnScope.PagerViewerSettings(screenModel: ReaderSettingsScreenMod
         onSelectInvertMode = screenModel.preferences.pagerNavInverted::set,
     )
 
-    val imageScaleType by screenModel.preferences.imageScaleType.collectAsState()
-    SettingsChipRow(MR.strings.pref_image_scale_type) {
-        ReaderPreferences.ImageScaleType.mapIndexed { index, titleRes ->
-            FilterChip(
-                selected = imageScaleType == index + 1,
-                onClick = { screenModel.preferences.imageScaleType.set(index + 1) },
-                label = { Text(stringResource(titleRes)) },
-            )
-        }
-    }
-
-    val zoomStart by screenModel.preferences.zoomStart.collectAsState()
-    SettingsChipRow(MR.strings.pref_zoom_start) {
-        ReaderPreferences.ZoomStart.mapIndexed { index, titleRes ->
-            FilterChip(
-                selected = zoomStart == index + 1,
-                onClick = { screenModel.preferences.zoomStart.set(index + 1) },
-                label = { Text(stringResource(titleRes)) },
-            )
-        }
-    }
-
+    // Scale type and zoom start are stored 1-based; page layout and centre margin 0-based.
+    IndexedChipRow(
+        MR.strings.pref_image_scale_type,
+        ReaderPreferences.ImageScaleType,
+        screenModel.preferences.imageScaleType,
+        1,
+    )
+    IndexedChipRow(MR.strings.pref_zoom_start, ReaderPreferences.ZoomStart, screenModel.preferences.zoomStart, 1)
     // SY -->
-    val pageLayout by screenModel.preferences.pageLayout.collectAsState()
-    SettingsChipRow(SYMR.strings.page_layout) {
-        ReaderPreferences.PageLayouts.mapIndexed { index, titleRes ->
-            FilterChip(
-                selected = pageLayout == index,
-                onClick = { screenModel.preferences.pageLayout.set(index) },
-                label = { Text(stringResource(titleRes)) },
-            )
-        }
-    }
+    IndexedChipRow(SYMR.strings.page_layout, ReaderPreferences.PageLayouts, screenModel.preferences.pageLayout, 0)
     // SY <--
 
     CheckboxItem(
@@ -131,31 +110,12 @@ private fun ColumnScope.PagerViewerSettings(screenModel: ReaderSettingsScreenMod
         pref = screenModel.preferences.navigateToPan,
     )
 
-    val dualPageSplitPaged by screenModel.preferences.dualPageSplitPaged.collectAsState()
-    CheckboxItem(
-        label = stringResource(MR.strings.pref_dual_page_split),
-        pref = screenModel.preferences.dualPageSplitPaged,
+    DualPageItems(
+        split = screenModel.preferences.dualPageSplitPaged,
+        invert = screenModel.preferences.dualPageInvertPaged,
+        rotateToFit = screenModel.preferences.dualPageRotateToFit,
+        rotateToFitInvert = screenModel.preferences.dualPageRotateToFitInvert,
     )
-
-    if (dualPageSplitPaged) {
-        CheckboxItem(
-            label = stringResource(MR.strings.pref_dual_page_invert),
-            pref = screenModel.preferences.dualPageInvertPaged,
-        )
-    }
-
-    val dualPageRotateToFit by screenModel.preferences.dualPageRotateToFit.collectAsState()
-    CheckboxItem(
-        label = stringResource(MR.strings.pref_page_rotate),
-        pref = screenModel.preferences.dualPageRotateToFit,
-    )
-
-    if (dualPageRotateToFit) {
-        CheckboxItem(
-            label = stringResource(MR.strings.pref_page_rotate_invert),
-            pref = screenModel.preferences.dualPageRotateToFitInvert,
-        )
-    }
 
     // SY -->
     CheckboxItem(
@@ -168,16 +128,12 @@ private fun ColumnScope.PagerViewerSettings(screenModel: ReaderSettingsScreenMod
         pref = screenModel.preferences.invertDoublePages,
     )
 
-    val centerMarginType by screenModel.preferences.centerMarginType.collectAsState()
-    SettingsChipRow(SYMR.strings.pref_center_margin) {
-        ReaderPreferences.CenterMarginTypes.mapIndexed { index, titleRes ->
-            FilterChip(
-                selected = centerMarginType == index,
-                onClick = { screenModel.preferences.centerMarginType.set(index) },
-                label = { Text(stringResource(titleRes)) },
-            )
-        }
-    }
+    IndexedChipRow(
+        SYMR.strings.pref_center_margin,
+        ReaderPreferences.CenterMarginTypes,
+        screenModel.preferences.centerMarginType,
+        0,
+    )
     // SY <--
 }
 
@@ -225,31 +181,12 @@ private fun ColumnScope.WebtoonViewerSettings(screenModel: ReaderSettingsScreenM
     )
     // SY <--
 
-    val dualPageSplitWebtoon by screenModel.preferences.dualPageSplitWebtoon.collectAsState()
-    CheckboxItem(
-        label = stringResource(MR.strings.pref_dual_page_split),
-        pref = screenModel.preferences.dualPageSplitWebtoon,
+    DualPageItems(
+        split = screenModel.preferences.dualPageSplitWebtoon,
+        invert = screenModel.preferences.dualPageInvertWebtoon,
+        rotateToFit = screenModel.preferences.dualPageRotateToFitWebtoon,
+        rotateToFitInvert = screenModel.preferences.dualPageRotateToFitInvertWebtoon,
     )
-
-    if (dualPageSplitWebtoon) {
-        CheckboxItem(
-            label = stringResource(MR.strings.pref_dual_page_invert),
-            pref = screenModel.preferences.dualPageInvertWebtoon,
-        )
-    }
-
-    val dualPageRotateToFitWebtoon by screenModel.preferences.dualPageRotateToFitWebtoon.collectAsState()
-    CheckboxItem(
-        label = stringResource(MR.strings.pref_page_rotate),
-        pref = screenModel.preferences.dualPageRotateToFitWebtoon,
-    )
-
-    if (dualPageRotateToFitWebtoon) {
-        CheckboxItem(
-            label = stringResource(MR.strings.pref_page_rotate_invert),
-            pref = screenModel.preferences.dualPageRotateToFitInvertWebtoon,
-        )
-    }
 
     CheckboxItem(
         label = stringResource(MR.strings.pref_double_tap_zoom),
@@ -259,6 +196,61 @@ private fun ColumnScope.WebtoonViewerSettings(screenModel: ReaderSettingsScreenM
         label = stringResource(MR.strings.pref_webtoon_disable_zoom_out),
         pref = screenModel.preferences.webtoonDisableZoomOut,
     )
+}
+
+// A chip per entry; the preference stores the entry's index plus `offset`.
+@Composable
+private fun IndexedChipRow(
+    labelRes: StringResource,
+    entries: List<StringResource>,
+    pref: Preference<Int>,
+    offset: Int,
+) {
+    val selected by pref.collectAsState()
+    SettingsChipRow(labelRes) {
+        entries.mapIndexed { index, titleRes ->
+            FilterChip(
+                selected = selected == index + offset,
+                onClick = { pref.set(index + offset) },
+                label = { Text(stringResource(titleRes)) },
+            )
+        }
+    }
+}
+
+// Dual-page split and rotate-to-fit, each revealing its "invert" option once enabled.
+@Composable
+private fun DualPageItems(
+    split: Preference<Boolean>,
+    invert: Preference<Boolean>,
+    rotateToFit: Preference<Boolean>,
+    rotateToFitInvert: Preference<Boolean>,
+) {
+    val dualPageSplit by split.collectAsState()
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_dual_page_split),
+        pref = split,
+    )
+
+    if (dualPageSplit) {
+        CheckboxItem(
+            label = stringResource(MR.strings.pref_dual_page_invert),
+            pref = invert,
+        )
+    }
+
+    val dualPageRotateToFit by rotateToFit.collectAsState()
+    CheckboxItem(
+        label = stringResource(MR.strings.pref_page_rotate),
+        pref = rotateToFit,
+    )
+
+    if (dualPageRotateToFit) {
+        CheckboxItem(
+            label = stringResource(MR.strings.pref_page_rotate_invert),
+            pref = rotateToFitInvert,
+        )
+    }
 }
 
 // SY -->

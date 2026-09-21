@@ -63,64 +63,7 @@ internal fun MigrationConfigScreenSheet(
                     .verticalScroll(rememberScrollState())
                     .padding(top = MaterialTheme.padding.medium),
             ) {
-                Text(
-                    text = stringResource(MR.strings.migrationConfigScreen_dataToMigrateHeader),
-                    style = MaterialTheme.typography.header,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = MaterialTheme.padding.extraSmall)
-                        .padding(horizontal = MaterialTheme.padding.medium),
-                )
-                Spacer(modifier = Modifier.height(MaterialTheme.padding.extraSmall))
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = MaterialTheme.padding.medium)
-                        .padding(bottom = MaterialTheme.padding.extraSmall),
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                ) {
-                    MigrationFlag.entries
-                        .fastFilterNot { it == MigrationFlag.REMOVE_DOWNLOAD }
-                        .fastForEach { flag ->
-                            val selected = flag in migrationFlags
-                            FilterChip(
-                                selected = selected,
-                                onClick = {
-                                    preferences.migrationFlags.getAndSet { currentFlags ->
-                                        if (flag in currentFlags) {
-                                            currentFlags - flag
-                                        } else {
-                                            currentFlags + flag
-                                        }
-                                    }
-                                },
-                                label = { Text(stringResource(flag.getLabel())) },
-                                leadingIcon = {
-                                    if (selected) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.Check,
-                                            contentDescription = null,
-                                        )
-                                    }
-                                },
-                            )
-                        }
-                }
-                val removeDownloads = MigrationFlag.REMOVE_DOWNLOAD in migrationFlags
-                MigrationSheetSwitchItem(
-                    title = stringResource(MR.strings.migrationConfigScreen_removeDownloadsTitle),
-                    subtitle = null,
-                    checked = removeDownloads,
-                    onClick = {
-                        preferences.migrationFlags.getAndSet {
-                            if (removeDownloads) {
-                                it - MigrationFlag.REMOVE_DOWNLOAD
-                            } else {
-                                it + MigrationFlag.REMOVE_DOWNLOAD
-                            }
-                        }
-                    },
-                )
+                DataToMigrateSection(preferences, migrationFlags)
                 MigrationSheetDividerItem()
                 OutlinedTextField(
                     value = extraSearchQuery,
@@ -137,28 +80,7 @@ internal fun MigrationConfigScreenSheet(
                             vertical = MaterialTheme.padding.extraSmall,
                         ),
                 )
-                MigrationSheetSwitchItem(
-                    title = stringResource(MR.strings.migrationConfigScreen_hideUnmatchedTitle),
-                    subtitle = null,
-                    preference = preferences.migrationHideUnmatched,
-                )
-                MigrationSheetSwitchItem(
-                    title = stringResource(MR.strings.migrationConfigScreen_hideWithoutUpdatesTitle),
-                    subtitle = stringResource(MR.strings.migrationConfigScreen_hideWithoutUpdatesSubtitle),
-                    preference = preferences.migrationHideWithoutUpdates,
-                )
-                MigrationSheetDividerItem()
-                MigrationSheetWarningItem(stringResource(MR.strings.migrationConfigScreen_enhancedOptionsWarning))
-                MigrationSheetSwitchItem(
-                    title = stringResource(MR.strings.migrationConfigScreen_deepSearchModeTitle),
-                    subtitle = stringResource(MR.strings.migrationConfigScreen_deepSearchModeSubtitle),
-                    preference = preferences.migrationDeepSearchMode,
-                )
-                MigrationSheetSwitchItem(
-                    title = stringResource(MR.strings.migrationConfigScreen_prioritizeByChaptersTitle),
-                    subtitle = stringResource(MR.strings.migrationConfigScreen_prioritizeByChaptersSubtitle),
-                    preference = preferences.migrationPrioritizeByChapters,
-                )
+                ListOptionsSection(preferences)
             }
             HorizontalDivider()
             Button(
@@ -239,4 +161,76 @@ private fun MigrationSheetWarningItem(
             modifier = Modifier,
         )
     }
+}
+
+// Which parts of the entry move over: the flag chips plus the remove-downloads switch.
+@Composable
+private fun DataToMigrateSection(preferences: SourcePreferences, migrationFlags: Set<MigrationFlag>) {
+    Text(
+        text = stringResource(MR.strings.migrationConfigScreen_dataToMigrateHeader),
+        style = MaterialTheme.typography.header,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = MaterialTheme.padding.extraSmall)
+            .padding(horizontal = MaterialTheme.padding.medium),
+    )
+    Spacer(modifier = Modifier.height(MaterialTheme.padding.extraSmall))
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = MaterialTheme.padding.medium)
+            .padding(bottom = MaterialTheme.padding.extraSmall),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+    ) {
+        MigrationFlag.entries
+            .fastFilterNot { it == MigrationFlag.REMOVE_DOWNLOAD }
+            .fastForEach { flag ->
+                val selected = flag in migrationFlags
+                FilterChip(
+                    selected = selected,
+                    onClick = { preferences.migrationFlags.getAndSet { it.toggled(flag) } },
+                    label = { Text(stringResource(flag.getLabel())) },
+                    leadingIcon = {
+                        if (selected) {
+                            Icon(imageVector = Icons.Outlined.Check, contentDescription = null)
+                        }
+                    },
+                )
+            }
+    }
+    MigrationSheetSwitchItem(
+        title = stringResource(MR.strings.migrationConfigScreen_removeDownloadsTitle),
+        subtitle = null,
+        checked = MigrationFlag.REMOVE_DOWNLOAD in migrationFlags,
+        onClick = { preferences.migrationFlags.getAndSet { it.toggled(MigrationFlag.REMOVE_DOWNLOAD) } },
+    )
+}
+
+private fun Set<MigrationFlag>.toggled(flag: MigrationFlag): Set<MigrationFlag> =
+    if (flag in this) this - flag else this + flag
+
+@Composable
+private fun ListOptionsSection(preferences: SourcePreferences) {
+    MigrationSheetSwitchItem(
+        title = stringResource(MR.strings.migrationConfigScreen_hideUnmatchedTitle),
+        subtitle = null,
+        preference = preferences.migrationHideUnmatched,
+    )
+    MigrationSheetSwitchItem(
+        title = stringResource(MR.strings.migrationConfigScreen_hideWithoutUpdatesTitle),
+        subtitle = stringResource(MR.strings.migrationConfigScreen_hideWithoutUpdatesSubtitle),
+        preference = preferences.migrationHideWithoutUpdates,
+    )
+    MigrationSheetDividerItem()
+    MigrationSheetWarningItem(stringResource(MR.strings.migrationConfigScreen_enhancedOptionsWarning))
+    MigrationSheetSwitchItem(
+        title = stringResource(MR.strings.migrationConfigScreen_deepSearchModeTitle),
+        subtitle = stringResource(MR.strings.migrationConfigScreen_deepSearchModeSubtitle),
+        preference = preferences.migrationDeepSearchMode,
+    )
+    MigrationSheetSwitchItem(
+        title = stringResource(MR.strings.migrationConfigScreen_prioritizeByChaptersTitle),
+        subtitle = stringResource(MR.strings.migrationConfigScreen_prioritizeByChaptersSubtitle),
+        preference = preferences.migrationPrioritizeByChapters,
+    )
 }

@@ -99,42 +99,8 @@ internal data object UpdatesTab : Tab {
             hasActiveFilters = state.hasActiveFilters,
         )
 
-        val onDismissDialog = { screenModel.setDialog(null) }
-        when (val dialog = state.dialog) {
-            is UpdatesScreenModel.Dialog.DeleteConfirmation -> {
-                UpdatesDeleteConfirmDialog(
-                    onDismissRequest = onDismissDialog,
-                    onConfirm = { screenModel.deleteChapters(dialog.toDelete) },
-                )
-            }
-            is UpdatesScreenModel.Dialog.FilterSheet -> {
-                UpdatesFilterDialog(
-                    onDismissRequest = onDismissDialog,
-                    screenModel = settingsScreenModel,
-                )
-            }
-            null -> {}
-        }
-
-        LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { event ->
-                when (event) {
-                    Event.InternalError -> {
-                        screenModel.snackbarHostState.showSnackbar(
-                            context.stringResource(MR.strings.internal_error),
-                        )
-                    }
-                    is Event.LibraryUpdateTriggered -> {
-                        val msg = if (event.started) {
-                            MR.strings.updating_library
-                        } else {
-                            MR.strings.update_already_running
-                        }
-                        screenModel.snackbarHostState.showSnackbar(context.stringResource(msg))
-                    }
-                }
-            }
-        }
+        UpdatesDialog(screenModel, settingsScreenModel, state.dialog)
+        UpdatesEventsSnackbar(screenModel)
 
         LaunchedEffect(state.selectionMode) {
             HomeScreen.showBottomNav(!state.selectionMode)
@@ -150,6 +116,52 @@ internal data object UpdatesTab : Tab {
 
             onDispose {
                 screenModel.resetNewUpdatesCount()
+            }
+        }
+    }
+
+    @Composable
+    private fun UpdatesDialog(
+        screenModel: UpdatesScreenModel,
+        settingsScreenModel: UpdatesSettingsScreenModel,
+        dialog: UpdatesScreenModel.Dialog?,
+    ) {
+        val onDismissDialog = { screenModel.setDialog(null) }
+        when (dialog) {
+            is UpdatesScreenModel.Dialog.DeleteConfirmation -> {
+                UpdatesDeleteConfirmDialog(
+                    onDismissRequest = onDismissDialog,
+                    onConfirm = { screenModel.deleteChapters(dialog.toDelete) },
+                )
+            }
+            is UpdatesScreenModel.Dialog.FilterSheet -> {
+                UpdatesFilterDialog(
+                    onDismissRequest = onDismissDialog,
+                    screenModel = settingsScreenModel,
+                )
+            }
+            null -> {}
+        }
+    }
+
+    @Composable
+    private fun UpdatesEventsSnackbar(screenModel: UpdatesScreenModel) {
+        val context = LocalContext.current
+        LaunchedEffect(Unit) {
+            screenModel.events.collectLatest { event ->
+                when (event) {
+                    Event.InternalError -> {
+                        screenModel.snackbarHostState.showSnackbar(context.stringResource(MR.strings.internal_error))
+                    }
+                    is Event.LibraryUpdateTriggered -> {
+                        val msg = if (event.started) {
+                            MR.strings.updating_library
+                        } else {
+                            MR.strings.update_already_running
+                        }
+                        screenModel.snackbarHostState.showSnackbar(context.stringResource(msg))
+                    }
+                }
             }
         }
     }

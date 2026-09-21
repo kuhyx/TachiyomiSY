@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
@@ -92,63 +93,81 @@ internal fun MigrationListScreen(
             contentPadding = contentPadding + topSmallPaddingValues,
         ) {
             items(items, key = { it.manga.id }) { migrationItem ->
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .animateItemFastScroll()
-                        .padding(horizontal = 16.dp)
-                        .height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val result by migrationItem.searchResult.collectAsState()
-                    MigrationItem(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .weight(1f)
-                            .align(Alignment.Top)
-                            .fillMaxHeight(),
-                        manga = migrationItem.manga,
-                        sourcesString = migrationItem.sourcesString,
-                        chapterInfo = migrationItem.chapterInfo,
-                        onClick = { onMigrationItemClick(migrationItem.manga) },
-                    )
-
-                    Icon(
-                        Icons.AutoMirrored.Outlined.ArrowForward,
-                        contentDescription = stringResource(SYMR.strings.migrating_to),
-                        modifier = Modifier.weight(ACTION_COLUMN_WEIGHT),
-                    )
-
-                    MigrationItemResult(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .weight(1f)
-                            .align(Alignment.Top)
-                            .fillMaxHeight(),
-                        migrationItem = migrationItem,
-                        result = result,
-                        getManga = getManga,
-                        getChapterInfo = getChapterInfo,
-                        getSourceName = getSourceName,
-                        onMigrationItemClick = onMigrationItemClick,
-                    )
-
-                    MigrationActionIcon(
-                        modifier = Modifier
-                            .weight(ACTION_COLUMN_WEIGHT),
-                        result = result,
-                        skipManga = { skipManga(migrationItem.manga.id) },
-                        searchManually = { searchManually(migrationItem) },
-                        migrateNow = {
-                            migrateNow(migrationItem.manga.id)
-                        },
-                        copyNow = {
-                            copyNow(migrationItem.manga.id)
-                        },
-                    )
-                }
+                MigrationRow(
+                    migrationItem = migrationItem,
+                    getManga = getManga,
+                    getChapterInfo = getChapterInfo,
+                    getSourceName = getSourceName,
+                    onMigrationItemClick = onMigrationItemClick,
+                    skipManga = { skipManga(migrationItem.manga.id) },
+                    searchManually = { searchManually(migrationItem) },
+                    migrateNow = { migrateNow(migrationItem.manga.id) },
+                    copyNow = { copyNow(migrationItem.manga.id) },
+                )
             }
         }
+    }
+}
+
+// One entry: the current manga, an arrow, the match found for it, and the actions menu.
+@Composable
+private fun LazyItemScope.MigrationRow(
+    migrationItem: MigratingManga,
+    getManga: suspend (MigratingManga.SearchResult.Result) -> Manga?,
+    getChapterInfo: suspend (MigratingManga.SearchResult.Result) -> MigratingManga.ChapterInfo,
+    getSourceName: (Manga) -> String,
+    onMigrationItemClick: (Manga) -> Unit,
+    skipManga: () -> Unit,
+    searchManually: () -> Unit,
+    migrateNow: () -> Unit,
+    copyNow: () -> Unit,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .animateItemFastScroll()
+            .padding(horizontal = 16.dp)
+            .height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val result by migrationItem.searchResult.collectAsState()
+        MigrationItem(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .weight(1f)
+                .align(Alignment.Top)
+                .fillMaxHeight(),
+            manga = migrationItem.manga,
+            sourcesString = migrationItem.sourcesString,
+            chapterInfo = migrationItem.chapterInfo,
+            onClick = { onMigrationItemClick(migrationItem.manga) },
+        )
+        Icon(
+            Icons.AutoMirrored.Outlined.ArrowForward,
+            contentDescription = stringResource(SYMR.strings.migrating_to),
+            modifier = Modifier.weight(ACTION_COLUMN_WEIGHT),
+        )
+        MigrationItemResult(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .weight(1f)
+                .align(Alignment.Top)
+                .fillMaxHeight(),
+            migrationItem = migrationItem,
+            result = result,
+            getManga = getManga,
+            getChapterInfo = getChapterInfo,
+            getSourceName = getSourceName,
+            onMigrationItemClick = onMigrationItemClick,
+        )
+        MigrationActionIcon(
+            modifier = Modifier.weight(ACTION_COLUMN_WEIGHT),
+            result = result,
+            skipManga = skipManga,
+            searchManually = searchManually,
+            migrateNow = migrateNow,
+            copyNow = copyNow,
+        )
     }
 }

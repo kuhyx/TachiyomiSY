@@ -26,6 +26,7 @@ import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TitleFontSize
 import eu.kanade.presentation.more.settings.widget.TrackingPreferenceWidget
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import tachiyomi.presentation.core.components.BaseSliderItem
 import tachiyomi.presentation.core.util.collectAsState
@@ -66,84 +67,19 @@ internal fun PreferenceItem(
     ) {
         when (item) {
             is Preference.PreferenceItem.SwitchPreference -> {
-                val value by item.preference.collectAsState()
-                SwitchPreferenceWidget(
-                    title = item.title,
-                    subtitle = item.subtitle,
-                    icon = item.icon,
-                    checked = value,
-                    onCheckedChanged = { newValue ->
-                        scope.launch {
-                            if (item.onValueChanged(newValue)) {
-                                item.preference.set(newValue)
-                            }
-                        }
-                    },
-                )
+                SwitchItem(item, scope)
             }
             is Preference.PreferenceItem.SliderPreference -> {
-                BaseSliderItem(
-                    value = item.value,
-                    valueRange = item.valueRange,
-                    steps = item.steps,
-                    title = item.title,
-                    subtitle = item.subtitle,
-                    valueString = item.valueString.takeUnless { it.isNullOrEmpty() } ?: item.value.toString(),
-                    onChange = {
-                        scope.launch {
-                            item.onValueChanged(it)
-                        }
-                    },
-                    titleStyle = MaterialTheme.typography.titleLarge.copy(fontSize = TitleFontSize),
-                    modifier = Modifier.padding(
-                        horizontal = PrefsHorizontalPadding,
-                        vertical = PrefsVerticalPadding,
-                    ),
-                )
+                SliderItem(item, scope)
             }
             is Preference.PreferenceItem.ListPreference<*> -> {
-                val value by item.preference.collectAsState()
-                ListPreferenceWidget(
-                    value = value,
-                    title = item.title,
-                    subtitle = item.internalSubtitleProvider(value, item.entries),
-                    icon = item.icon,
-                    entries = item.entries,
-                    onValueChange = { newValue ->
-                        scope.launch {
-                            if (item.internalOnValueChanged(newValue!!)) {
-                                item.internalSet(newValue)
-                            }
-                        }
-                    },
-                )
+                ListItem(item, scope)
             }
             is Preference.PreferenceItem.BasicListPreference -> {
-                ListPreferenceWidget(
-                    value = item.value,
-                    title = item.title,
-                    subtitle = item.subtitleProvider(item.value, item.entries),
-                    icon = item.icon,
-                    entries = item.entries,
-                    onValueChange = { scope.launch { item.onValueChanged(it) } },
-                )
+                BasicListItem(item, scope)
             }
             is Preference.PreferenceItem.MultiSelectListPreference<*> -> {
-                val values by item.preference.collectAsState()
-                MultiSelectListPrefWidget(
-                    values = values,
-                    title = item.title,
-                    subtitle = item.internalSubtitleProvider(values, item.entries),
-                    icon = item.icon,
-                    entries = item.entries,
-                    onValuesChange = { newValues ->
-                        scope.launch {
-                            if (item.internalOnValueChanged(newValues)) {
-                                item.internalSet(newValues)
-                            }
-                        }
-                    },
-                )
+                MultiSelectItem(item, scope)
             }
             is Preference.PreferenceItem.TextPreference -> {
                 TextPreferenceWidget(
@@ -155,28 +91,10 @@ internal fun PreferenceItem(
                 )
             }
             is Preference.PreferenceItem.EditTextPreference -> {
-                val values by item.preference.collectAsState()
-                EditTextPreferenceWidget(
-                    title = item.title,
-                    subtitle = item.subtitle,
-                    icon = item.icon,
-                    value = values,
-                    onConfirm = {
-                        val accepted = item.onValueChanged(it)
-                        if (accepted) item.preference.set(it)
-                        accepted
-                    },
-                )
+                EditTextItem(item)
             }
             is Preference.PreferenceItem.TrackerPreference -> {
-                val isLoggedIn by item.tracker.let { tracker ->
-                    tracker.isLoggedInFlow.collectAsState(tracker.isLoggedIn)
-                }
-                TrackingPreferenceWidget(
-                    tracker = item.tracker,
-                    isLoggedIn = isLoggedIn,
-                    onClick = { if (isLoggedIn) item.logout() else item.login() },
-                )
+                TrackerItem(item)
             }
             is Preference.PreferenceItem.InfoPreference -> {
                 InfoWidget(text = item.title)
@@ -186,4 +104,124 @@ internal fun PreferenceItem(
             }
         }
     }
+}
+
+@Composable
+private fun BasicListItem(item: Preference.PreferenceItem.BasicListPreference, scope: CoroutineScope) {
+    ListPreferenceWidget(
+        value = item.value,
+        title = item.title,
+        subtitle = item.subtitleProvider(item.value, item.entries),
+        icon = item.icon,
+        entries = item.entries,
+        onValueChange = { scope.launch { item.onValueChanged(it) } },
+    )
+}
+
+@Composable
+private fun TrackerItem(item: Preference.PreferenceItem.TrackerPreference) {
+    val isLoggedIn by item.tracker.let { tracker ->
+        tracker.isLoggedInFlow.collectAsState(tracker.isLoggedIn)
+    }
+    TrackingPreferenceWidget(
+        tracker = item.tracker,
+        isLoggedIn = isLoggedIn,
+        onClick = { if (isLoggedIn) item.logout() else item.login() },
+    )
+}
+
+// The preference-backed items: the widget shows the stored value and a change is vetoable by the item.
+
+@Composable
+private fun SwitchItem(item: Preference.PreferenceItem.SwitchPreference, scope: CoroutineScope) {
+    val value by item.preference.collectAsState()
+    SwitchPreferenceWidget(
+        title = item.title,
+        subtitle = item.subtitle,
+        icon = item.icon,
+        checked = value,
+        onCheckedChanged = { newValue ->
+            scope.launch {
+                if (item.onValueChanged(newValue)) {
+                    item.preference.set(newValue)
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun SliderItem(item: Preference.PreferenceItem.SliderPreference, scope: CoroutineScope) {
+    BaseSliderItem(
+        value = item.value,
+        valueRange = item.valueRange,
+        steps = item.steps,
+        title = item.title,
+        subtitle = item.subtitle,
+        valueString = item.valueString.takeUnless { it.isNullOrEmpty() } ?: item.value.toString(),
+        onChange = {
+            scope.launch {
+                item.onValueChanged(it)
+            }
+        },
+        titleStyle = MaterialTheme.typography.titleLarge.copy(fontSize = TitleFontSize),
+        modifier = Modifier.padding(
+            horizontal = PrefsHorizontalPadding,
+            vertical = PrefsVerticalPadding,
+        ),
+    )
+}
+
+@Composable
+private fun ListItem(item: Preference.PreferenceItem.ListPreference<*>, scope: CoroutineScope) {
+    val value by item.preference.collectAsState()
+    ListPreferenceWidget(
+        value = value,
+        title = item.title,
+        subtitle = item.internalSubtitleProvider(value, item.entries),
+        icon = item.icon,
+        entries = item.entries,
+        onValueChange = { newValue ->
+            scope.launch {
+                if (item.internalOnValueChanged(newValue!!)) {
+                    item.internalSet(newValue)
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun MultiSelectItem(item: Preference.PreferenceItem.MultiSelectListPreference<*>, scope: CoroutineScope) {
+    val values by item.preference.collectAsState()
+    MultiSelectListPrefWidget(
+        values = values,
+        title = item.title,
+        subtitle = item.internalSubtitleProvider(values, item.entries),
+        icon = item.icon,
+        entries = item.entries,
+        onValuesChange = { newValues ->
+            scope.launch {
+                if (item.internalOnValueChanged(newValues)) {
+                    item.internalSet(newValues)
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun EditTextItem(item: Preference.PreferenceItem.EditTextPreference) {
+    val values by item.preference.collectAsState()
+    EditTextPreferenceWidget(
+        title = item.title,
+        subtitle = item.subtitle,
+        icon = item.icon,
+        value = values,
+        onConfirm = {
+            val accepted = item.onValueChanged(it)
+            if (accepted) item.preference.set(it)
+            accepted
+        },
+    )
 }

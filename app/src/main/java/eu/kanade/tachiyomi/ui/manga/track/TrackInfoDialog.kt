@@ -117,67 +117,21 @@ internal data class TrackInfoDialogHomeScreen(
         // SY -->
         Column(modifier = Modifier.animateContentSize()) {
             if (state.isLoading) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp)
-                        .windowInsetsPadding(WindowInsets.systemBars),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    CircularProgressIndicator()
-                    Text(
-                        stringResource(MR.strings.loading),
-                        fontSize = 14.sp,
-                    )
-                }
+                LoadingPlaceholder()
             } else {
                 // SY <--
                 TrackInfoDialogHome(
                     trackItems = state.trackItems,
                     dateFormat = dateFormat,
-                    onStatusClick = {
-                        navigator.push(
-                            TrackStatusSelectorScreen(
-                                track = it.track!!,
-                                serviceId = it.tracker.id,
-                            ),
-                        )
-                    },
+                    onStatusClick =
+                    { navigator.push(TrackStatusSelectorScreen(track = it.track!!, serviceId = it.tracker.id)) },
                     onChapterClick = {
-                        navigator.push(
-                            TrackChapterSelectorScreen(
-                                track = it.track!!,
-                                serviceId = it.tracker.id,
-                            ),
-                        )
+                        navigator.push(TrackChapterSelectorScreen(track = it.track!!, serviceId = it.tracker.id))
                     },
-                    onScoreClick = {
-                        navigator.push(
-                            TrackScoreSelectorScreen(
-                                track = it.track!!,
-                                serviceId = it.tracker.id,
-                            ),
-                        )
-                    },
-                    onStartDateEdit = {
-                        navigator.push(
-                            TrackDateSelectorScreen(
-                                track = it.track!!,
-                                serviceId = it.tracker.id,
-                                start = true,
-                            ),
-                        )
-                    },
-                    onEndDateEdit = {
-                        navigator.push(
-                            TrackDateSelectorScreen(
-                                track = it.track!!,
-                                serviceId = it.tracker.id,
-                                start = false,
-                            ),
-                        )
-                    },
+                    onScoreClick =
+                    { navigator.push(TrackScoreSelectorScreen(track = it.track!!, serviceId = it.tracker.id)) },
+                    onStartDateEdit = { navigator.push(dateSelector(it, start = true)) },
+                    onEndDateEdit = { navigator.push(dateSelector(it, start = false)) },
                     onNewSearch = {
                         if (it.tracker is EnhancedTracker) {
                             screenModel.registerEnhancedTracking(it)
@@ -191,9 +145,9 @@ internal data class TrackInfoDialogHomeScreen(
                     onRemoved = {
                         navigator.push(
                             TrackerRemoveScreen(
-                                mangaId = mangaId,
-                                track = it.track!!,
-                                serviceId = it.tracker.id,
+                                mangaId =
+                                mangaId,
+                                track = it.track!!, serviceId = it.tracker.id,
                             ),
                         )
                     },
@@ -203,6 +157,8 @@ internal data class TrackInfoDialogHomeScreen(
             }
         }
     }
+
+    // SY <--
 
     // Opens registered tracker url in browser.
 
@@ -881,47 +837,22 @@ private data class TrackerRemoveScreen(
                 )
             },
             text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                ) {
-                    Text(
-                        text = stringResource(MR.strings.track_delete_text, serviceName),
-                    )
-
-                    if (screenModel.isDeletable()) {
-                        LabeledCheckbox(
-                            label = stringResource(MR.strings.track_delete_remote_text, serviceName),
-                            checked = removeRemoteTrack,
-                            onCheckedChange = { removeRemoteTrack = it },
-                        )
-                    }
-                }
+                RemoveTrackText(
+                    serviceName = serviceName,
+                    isDeletable = screenModel.isDeletable(),
+                    removeRemoteTrack = removeRemoteTrack,
+                    onRemoveRemoteTrackChange = { removeRemoteTrack = it },
+                )
             },
             buttons = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(
-                        MaterialTheme.padding.small,
-                        Alignment.End,
-                    ),
-                ) {
-                    TextButton(onClick = navigator::pop) {
-                        Text(text = stringResource(MR.strings.action_cancel))
-                    }
-                    FilledTonalButton(
-                        onClick = {
-                            screenModel.unregisterTracking(serviceId)
-                            if (removeRemoteTrack) screenModel.deleteMangaFromService()
-                            navigator.pop()
-                        },
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        ),
-                    ) {
-                        Text(text = stringResource(MR.strings.action_ok))
-                    }
-                }
+                RemoveTrackButtons(
+                    onCancel = navigator::pop,
+                    onConfirm = {
+                        screenModel.unregisterTracking(serviceId)
+                        if (removeRemoteTrack) screenModel.deleteMangaFromService()
+                        navigator.pop()
+                    },
+                )
             },
         )
     }
@@ -950,6 +881,72 @@ private data class TrackerRemoveScreen(
 
         fun unregisterTracking(serviceId: Long) {
             screenModelScope.launchNonCancellable { deleteTrack.await(mangaId, serviceId) }
+        }
+    }
+}
+
+private fun dateSelector(item: TrackItem, start: Boolean) =
+    TrackDateSelectorScreen(track = item.track!!, serviceId = item.tracker.id, start = start)
+
+// SY -->
+@Composable
+private fun LoadingPlaceholder() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp)
+            .windowInsetsPadding(WindowInsets.systemBars),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        CircularProgressIndicator()
+        Text(
+            stringResource(MR.strings.loading),
+            fontSize = 14.sp,
+        )
+    }
+}
+
+@Composable
+private fun RemoveTrackText(
+    serviceName: String,
+    isDeletable: Boolean,
+    removeRemoteTrack: Boolean,
+    onRemoveRemoteTrackChange: (Boolean) -> Unit,
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+    ) {
+        Text(
+            text = stringResource(MR.strings.track_delete_text, serviceName),
+        )
+        if (isDeletable) {
+            LabeledCheckbox(
+                label = stringResource(MR.strings.track_delete_remote_text, serviceName),
+                checked = removeRemoteTrack,
+                onCheckedChange = onRemoveRemoteTrackChange,
+            )
+        }
+    }
+}
+
+@Composable
+private fun RemoveTrackButtons(onCancel: () -> Unit, onConfirm: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small, Alignment.End),
+    ) {
+        TextButton(onClick = onCancel) {
+            Text(text = stringResource(MR.strings.action_cancel))
+        }
+        FilledTonalButton(
+            onClick = onConfirm,
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+            ),
+        ) {
+            Text(text = stringResource(MR.strings.action_ok))
         }
     }
 }

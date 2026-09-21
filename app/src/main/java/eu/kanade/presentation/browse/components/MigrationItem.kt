@@ -54,49 +54,7 @@ internal fun MigrationItem(
             .padding(4.dp),
     ) {
         val context = LocalContext.current
-        Box(
-            Modifier.fillMaxWidth()
-                .aspectRatio(MangaCover.Book.ratio),
-        ) {
-            MangaCover.Book(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                data = manga,
-            )
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            0f to Color.Transparent,
-                            1f to Color(color = 0xAA000000),
-                        ),
-                    )
-                    .fillMaxHeight(COVER_OVERLAY_HEIGHT)
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
-            )
-            Text(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .align(Alignment.BottomStart),
-                text = manga.title.ifBlank { stringResource(MR.strings.unknown) },
-                fontSize = 12.sp,
-                lineHeight = 18.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    color = Color.White,
-                    shadow = Shadow(
-                        color = Color.Black,
-                        blurRadius = 4f,
-                    ),
-                ),
-            )
-            BadgeGroup(modifier = Modifier.padding(4.dp)) {
-                Badge(text = "${chapterInfo.chapterCount}")
-            }
-        }
+        TitledCover(manga, chapterInfo.chapterCount)
         Text(
             text = sourcesString,
             modifier = Modifier.padding(top = 4.dp, bottom = 1.dp, start = 8.dp),
@@ -117,5 +75,52 @@ internal fun MigrationItem(
             maxLines = 1,
             style = MaterialTheme.typography.bodyMedium,
         )
+    }
+}
+
+// The cover with the title over a dark bottom gradient and the chapter count badge.
+@Composable
+private fun TitledCover(manga: Manga, chapterCount: Int) {
+    Box(
+        Modifier.fillMaxWidth()
+            .aspectRatio(MangaCover.Book.ratio),
+    ) {
+        MangaCover.Book(
+            modifier = Modifier.fillMaxWidth(),
+            data = manga,
+        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
+                .background(
+                    Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        1f to Color(color = 0xAA000000),
+                    ),
+                )
+                .fillMaxHeight(COVER_OVERLAY_HEIGHT)
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+        )
+        Text(
+            modifier = Modifier
+                .padding(8.dp)
+                .align(Alignment.BottomStart),
+            text = manga.title.ifBlank { stringResource(MR.strings.unknown) },
+            fontSize = 12.sp,
+            lineHeight = 18.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.titleSmall.copy(
+                color = Color.White,
+                shadow = Shadow(
+                    color = Color.Black,
+                    blurRadius = 4f,
+                ),
+            ),
+        )
+        BadgeGroup(modifier = Modifier.padding(4.dp)) {
+            Badge(text = "$chapterCount")
+        }
     }
 }

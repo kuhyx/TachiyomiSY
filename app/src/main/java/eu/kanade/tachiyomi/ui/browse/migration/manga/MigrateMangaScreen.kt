@@ -76,24 +76,7 @@ internal data class MigrateMangaScreen(
                     scrollBehavior = scrollBehavior,
                 )
             },
-            floatingActionButton = {
-                SmallExtendedFloatingActionButton(
-                    text = { Text(text = stringResource(MR.strings.migrationConfigScreen_continueButtonText)) },
-                    icon = {
-                        Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null)
-                    },
-                    onClick = {
-                        val selection = state.selection
-                        screenModel.clearSelection()
-                        navigator.push(MigrationConfigScreen(selection))
-                    },
-                    expanded = lazyListState.shouldExpandFAB(),
-                    modifier = Modifier.animateFloatingActionButton(
-                        visible = state.selectionMode,
-                        alignment = Alignment.BottomEnd,
-                    ),
-                )
-            },
+            floatingActionButton = { ContinueFab(screenModel, state, expanded = lazyListState.shouldExpandFAB()) },
         ) { contentPadding ->
             if (state.isEmpty) {
                 EmptyScreen(
@@ -121,6 +104,27 @@ internal data class MigrateMangaScreen(
             }
         }
     }
+}
+
+@Composable
+private fun ContinueFab(screenModel: MigrateMangaScreenModel, state: MigrateMangaScreenModel.State, expanded: Boolean) {
+    val navigator = LocalNavigator.currentOrThrow
+    SmallExtendedFloatingActionButton(
+        text = { Text(text = stringResource(MR.strings.migrationConfigScreen_continueButtonText)) },
+        icon = {
+            Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null)
+        },
+        onClick = {
+            val selection = state.selection
+            screenModel.clearSelection()
+            navigator.push(MigrationConfigScreen(selection))
+        },
+        expanded = expanded,
+        modifier = Modifier.animateFloatingActionButton(
+            visible = state.selectionMode,
+            alignment = Alignment.BottomEnd,
+        ),
+    )
 }
 
 @Composable

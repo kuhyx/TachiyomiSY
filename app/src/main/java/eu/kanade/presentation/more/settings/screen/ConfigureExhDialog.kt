@@ -48,84 +48,98 @@ internal fun ConfigureExhDialog(run: Boolean, onRunning: () -> Unit) {
     }
 
     if (warnDialogOpen) {
-        AlertDialog(
-            onDismissRequest = { warnDialogOpen = false },
-            properties = DialogProperties(
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false,
-            ),
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        exhPreferences.exhShowSettingsUploadWarning.set(false)
-                        configureDialogOpen = true
-                        warnDialogOpen = false
-                    },
-                ) {
-                    Text(text = stringResource(MR.strings.action_ok))
-                }
-            },
-            title = {
-                Text(text = stringResource(SYMR.strings.settings_profile_note))
-            },
-            text = {
-                Text(text = stringResource(SYMR.strings.settings_profile_note_message))
-            },
-        )
+        UploadWarningDialog(onDismissRequest = { warnDialogOpen = false }) {
+            exhPreferences.exhShowSettingsUploadWarning.set(false)
+            configureDialogOpen = true
+            warnDialogOpen = false
+        }
     }
     if (configureDialogOpen) {
-        val context = LocalContext.current
-        LaunchedEffect(Unit) {
-            withContext(Dispatchers.IO + NonCancellable) {
-                try {
-                    delay(0.2.seconds)
-                    EHConfigurator(context).configureAll()
-                    launchUI {
-                        context.toast(SYMR.strings.eh_settings_successfully_uploaded)
-                    }
-                } catch (expected: Exception) {
-                    // Logged whatever the cause; the caller carries on.
-                    configureFailedDialogOpen = expected
-                    xLogE("Configuration error!", expected)
-                } finally {
-                    configureDialogOpen = false
+        UploadingDialog(
+            onFailed = { configureFailedDialogOpen = it },
+            onFinished = { configureDialogOpen = false },
+        )
+    }
+    configureFailedDialogOpen?.let { error ->
+        UploadFailedDialog(error) { configureFailedDialogOpen = null }
+    }
+}
+
+@Composable
+private fun UploadWarningDialog(onDismissRequest: () -> Unit, onAccept: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+        ),
+        confirmButton = {
+            TextButton(onClick = onAccept) {
+                Text(text = stringResource(MR.strings.action_ok))
+            }
+        },
+        title = {
+            Text(text = stringResource(SYMR.strings.settings_profile_note))
+        },
+        text = {
+            Text(text = stringResource(SYMR.strings.settings_profile_note_message))
+        },
+    )
+}
+
+// Uploads the settings profile to E-Hentai while the (uncancellable) dialog is up.
+@Composable
+private fun UploadingDialog(onFailed: (Exception) -> Unit, onFinished: () -> Unit) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO + NonCancellable) {
+            try {
+                delay(0.2.seconds)
+                EHConfigurator(context).configureAll()
+                launchUI {
+                    context.toast(SYMR.strings.eh_settings_successfully_uploaded)
                 }
+            } catch (expected: Exception) {
+                // Logged whatever the cause; the caller carries on.
+                onFailed(expected)
+                xLogE("Configuration error!", expected)
+            } finally {
+                onFinished()
             }
         }
-        AlertDialog(
-            onDismissRequest = {},
-            properties = DialogProperties(
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false,
-            ),
-            confirmButton = {},
-            title = {
-                Text(text = stringResource(SYMR.strings.eh_settings_uploading_to_server))
-            },
-            text = {
-                Text(text = stringResource(SYMR.strings.eh_settings_uploading_to_server_message))
-            },
-        )
     }
-    if (configureFailedDialogOpen != null) {
-        AlertDialog(
-            onDismissRequest = { configureFailedDialogOpen = null },
-            confirmButton = {
-                TextButton(onClick = { configureFailedDialogOpen = null }) {
-                    Text(text = stringResource(MR.strings.action_ok))
-                }
-            },
-            title = {
-                Text(text = stringResource(SYMR.strings.eh_settings_configuration_failed))
-            },
-            text = {
-                Text(
-                    text = stringResource(
-                        SYMR.strings.eh_settings_configuration_failed_message,
-                        configureFailedDialogOpen?.message.orEmpty(),
-                    ),
-                )
-            },
-        )
-    }
+    AlertDialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+        ),
+        confirmButton = {},
+        title = {
+            Text(text = stringResource(SYMR.strings.eh_settings_uploading_to_server))
+        },
+        text = {
+            Text(text = stringResource(SYMR.strings.eh_settings_uploading_to_server_message))
+        },
+    )
+}
+
+@Composable
+private fun UploadFailedDialog(error: Exception, onDismissRequest: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = stringResource(MR.strings.action_ok))
+            }
+        },
+        title = {
+            Text(text = stringResource(SYMR.strings.eh_settings_configuration_failed))
+        },
+        text = {
+            Text(
+                text = stringResource(SYMR.strings.eh_settings_configuration_failed_message, error.message.orEmpty()),
+            )
+        },
+    )
 }

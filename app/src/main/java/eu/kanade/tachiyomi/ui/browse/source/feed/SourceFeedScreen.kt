@@ -57,6 +57,15 @@ internal class SourceFeedScreen(val sourceId: Long) : Screen() {
             getMangaState = { screenModel.getManga(initialManga = it) },
         )
 
+        SourceFeedDialogs(screenModel, state)
+
+        BackHandler(state.searchQuery != null) {
+            screenModel.search(null)
+        }
+    }
+
+    @Composable
+    private fun SourceFeedDialogs(screenModel: SourceFeedScreenModel, state: SourceFeedState) {
         val onDismissRequest = screenModel::dismissDialog
         when (val dialog = state.dialog) {
             is SourceFeedScreenModel.Dialog.AddFeed -> {
@@ -79,76 +88,68 @@ internal class SourceFeedScreen(val sourceId: Long) : Screen() {
                 )
             }
             SourceFeedScreenModel.Dialog.Filter -> {
-                SourceFilterDialog(
-                    onDismissRequest = onDismissRequest,
-                    filters = state.filters,
-                    onReset = {},
-                    onFilter = {
-                        screenModel.onFilter { query, filters ->
-                            onBrowseClick(
-                                navigator = navigator,
-                                sourceId = sourceId,
-                                search = query,
-                                filters = filters,
-                            )
-                        }
-                    },
-                    onUpdate = screenModel::setFilters,
-                    startExpanded = screenModel.startExpanded,
-                    onSave = {},
-                    savedSearches = state.savedSearches,
-                    onSavedSearch = { search ->
-                        screenModel.onSavedSearch(
-                            search,
-                            onBrowseClick = { query, searchId ->
-                                onBrowseClick(
-                                    navigator = navigator,
-                                    sourceId = sourceId,
-                                    search = query,
-                                    savedSearch = searchId,
-                                )
-                            },
-                            onToast = {
-                                context.toast(it)
-                            },
-                        )
-                    },
-                    onSavedSearchPress = { search ->
-                        screenModel.onSavedSearchAddToFeed(search) {
-                            context.toast(it)
-                        }
-                    },
-                    openMangaDexRandom = if (screenModel.sourceIsMangaDex) {
-                        {
-                            screenModel.onMangaDexRandom {
-                                navigator.replace(
-                                    BrowseSourceScreen(
-                                        sourceId,
-                                        "id:$it",
-                                    ),
-                                )
-                            }
-                        }
-                    } else {
-                        null
-                    },
-                    openMangaDexFollows = if (screenModel.sourceIsMangaDex) {
-                        {
-                            navigator.replace(MangaDexFollowsScreen(sourceId))
-                        }
-                    } else {
-                        null
-                    },
-                )
+                SourceFeedFilterDialog(screenModel, state, onDismissRequest)
             }
             null -> {
                 // Nothing to show.
             }
         }
+    }
 
-        BackHandler(state.searchQuery != null) {
-            screenModel.search(null)
-        }
+    @Composable
+    private fun SourceFeedFilterDialog(
+        screenModel: SourceFeedScreenModel,
+        state: SourceFeedState,
+        onDismissRequest: () -> Unit,
+    ) {
+        val navigator = LocalNavigator.currentOrThrow
+        val context = LocalContext.current
+        SourceFilterDialog(
+            onDismissRequest = onDismissRequest,
+            filters = state.filters,
+            onReset = {},
+            onFilter = {
+                screenModel.onFilter { query, filters ->
+                    onBrowseClick(navigator = navigator, sourceId = sourceId, search = query, filters = filters)
+                }
+            },
+            onUpdate = screenModel::setFilters,
+            startExpanded = screenModel.startExpanded,
+            onSave = {},
+            savedSearches = state.savedSearches,
+            onSavedSearch = { search ->
+                screenModel.onSavedSearch(
+                    search,
+                    onBrowseClick = { query, searchId ->
+                        onBrowseClick(
+                            navigator =
+                            navigator,
+                            sourceId = sourceId, search = query, savedSearch = searchId,
+                        )
+                    },
+                    onToast = { context.toast(it) },
+                )
+            },
+            onSavedSearchPress = { search ->
+                screenModel.onSavedSearchAddToFeed(search) {
+                    context.toast(it)
+                }
+            },
+            openMangaDexRandom = if (screenModel.sourceIsMangaDex) {
+                {
+                    screenModel.onMangaDexRandom {
+                        navigator.replace(BrowseSourceScreen(sourceId, "id:$it"))
+                    }
+                }
+            } else {
+                null
+            },
+            openMangaDexFollows = if (screenModel.sourceIsMangaDex) {
+                { navigator.replace(MangaDexFollowsScreen(sourceId)) }
+            } else {
+                null
+            },
+        )
     }
 
     private fun onMangaClick(navigator: Navigator, manga: Manga) {

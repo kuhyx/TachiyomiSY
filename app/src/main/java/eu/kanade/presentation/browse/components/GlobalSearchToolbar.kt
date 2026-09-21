@@ -16,7 +16,6 @@ import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +25,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import eu.kanade.presentation.components.SearchToolbar
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.SourceFilter
 import tachiyomi.i18n.MR
@@ -76,57 +76,42 @@ internal fun GlobalSearchToolbar(
             // Follow-up: make this UX better; it only applies when triggering a new search
             // https://github.com/kuhyx/TachiyomiSY/issues/8
             if (!hideSourceFilter) {
-                FilterChip(
+                IconFilterChip(
                     selected = sourceFilter == SourceFilter.PinnedOnly,
                     onClick = { onChangeSearchFilter(SourceFilter.PinnedOnly) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.PushPin,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize),
-                        )
-                    },
-                    label = {
-                        Text(text = stringResource(MR.strings.pinned_sources))
-                    },
+                    icon = Icons.Outlined.PushPin,
+                    label = stringResource(MR.strings.pinned_sources),
                 )
-                FilterChip(
+                IconFilterChip(
                     selected = sourceFilter == SourceFilter.All,
                     onClick = { onChangeSearchFilter(SourceFilter.All) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.DoneAll,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(FilterChipDefaults.IconSize),
-                        )
-                    },
-                    label = {
-                        Text(text = stringResource(MR.strings.all))
-                    },
+                    icon = Icons.Outlined.DoneAll,
+                    label = stringResource(MR.strings.all),
                 )
-
                 VerticalDivider()
             }
-
-            FilterChip(
+            IconFilterChip(
                 selected = onlyShowHasResults,
                 onClick = { onToggleResults() },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.FilterList,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(FilterChipDefaults.IconSize),
-                    )
-                },
-                label = {
-                    Text(text = stringResource(MR.strings.has_results))
-                },
+                icon = Icons.Outlined.FilterList,
+                label = stringResource(MR.strings.has_results),
             )
         }
-
-        HorizontalDivider()
     }
+}
+
+@Composable
+private fun IconFilterChip(selected: Boolean, onClick: () -> Unit, icon: ImageVector, label: String) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        leadingIcon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(FilterChipDefaults.IconSize),
+            )
+        },
+        label = { Text(text = label) },
+    )
 }

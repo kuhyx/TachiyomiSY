@@ -35,98 +35,113 @@ internal object SettingsBrowseScreen : SearchableSettings {
 
     @Composable
     override fun getPreferences(): List<Preference> {
-        val context = LocalContext.current
-        val navigator = LocalNavigator.currentOrThrow
-
         val sourcePreferences = remember { Injekt.get<SourcePreferences>() }
-        val getExtensionStoreCountAsFlow = remember { Injekt.get<GetExtensionStoreCountAsFlow>() }
-
-        val reposCount by getExtensionStoreCountAsFlow().collectAsState(0)
-
-        // SY -->
-        val scope = rememberCoroutineScope()
-        val hideFeedTab by remember { Injekt.get<UiPreferences>().hideFeedTab.asState(scope) }
         val uiPreferences = remember { Injekt.get<UiPreferences>() }
-        // SY <--
         return listOf(
             // SY -->
-            Preference.PreferenceGroup(
-                title = stringResource(MR.strings.label_sources),
-                preferenceItems = listOf(
-                    kotlin.run {
-                        val count by sourcePreferences.sourcesTabCategories.collectAsState()
-                        Preference.PreferenceItem.TextPreference(
-                            title = stringResource(MR.strings.action_edit_categories),
-                            subtitle = pluralStringResource(MR.plurals.num_categories, count.size, count.size),
-                            onClick = {
-                                navigator.push(SourceCategoryScreen())
-                            },
+            sySourcesGroup(sourcePreferences, uiPreferences),
+            feedGroup(uiPreferences),
+            // SY <--
+            sourcesGroup(sourcePreferences),
+            nsfwGroup(sourcePreferences),
+        )
+    }
+
+    // SY -->
+    @Composable
+    private fun sySourcesGroup(
+        sourcePreferences: SourcePreferences,
+        uiPreferences: UiPreferences,
+    ): Preference.PreferenceGroup {
+        val navigator = LocalNavigator.currentOrThrow
+        val count by sourcePreferences.sourcesTabCategories.collectAsState()
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.label_sources),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.action_edit_categories),
+                    subtitle = pluralStringResource(MR.plurals.num_categories, count.size, count.size),
+                    onClick = { navigator.push(SourceCategoryScreen()) },
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = sourcePreferences.sourcesTabCategoriesFilter,
+                    title = stringResource(SYMR.strings.pref_source_source_filtering),
+                    subtitle = stringResource(SYMR.strings.pref_source_source_filtering_summery),
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = uiPreferences.useNewSourceNavigation,
+                    title = stringResource(SYMR.strings.pref_source_navigation),
+                    subtitle = stringResource(SYMR.strings.pref_source_navigation_summery),
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = sourcePreferences.allowLocalSourceHiddenFolders,
+                    title = stringResource(SYMR.strings.pref_local_source_hidden_folders),
+                    subtitle = stringResource(SYMR.strings.pref_local_source_hidden_folders_summery),
+                ),
+            ),
+        )
+    }
+
+    @Composable
+    private fun feedGroup(uiPreferences: UiPreferences): Preference.PreferenceGroup {
+        val scope = rememberCoroutineScope()
+        val hideFeedTab by remember { uiPreferences.hideFeedTab.asState(scope) }
+        return Preference.PreferenceGroup(
+            title = stringResource(SYMR.strings.feed),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = uiPreferences.hideFeedTab,
+                    title = stringResource(SYMR.strings.pref_hide_feed),
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = uiPreferences.feedTabInFront,
+                    title = stringResource(SYMR.strings.pref_feed_position),
+                    subtitle = stringResource(SYMR.strings.pref_feed_position_summery),
+                    enabled = hideFeedTab.not(),
+                ),
+            ),
+        )
+    }
+    // SY <--
+
+    @Composable
+    private fun sourcesGroup(sourcePreferences: SourcePreferences): Preference.PreferenceGroup {
+        val navigator = LocalNavigator.currentOrThrow
+        val getExtensionStoreCountAsFlow = remember { Injekt.get<GetExtensionStoreCountAsFlow>() }
+        val reposCount by getExtensionStoreCountAsFlow().collectAsState(0)
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.label_sources),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = sourcePreferences.hideInLibraryItems,
+                    title = stringResource(MR.strings.pref_hide_in_library_items),
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.extensionStores),
+                    subtitle = pluralStringResource(MR.plurals.num_repos, reposCount.toInt(), reposCount),
+                    onClick = { navigator.push(ExtensionStoresScreen()) },
+                ),
+            ),
+        )
+    }
+
+    @Composable
+    private fun nsfwGroup(sourcePreferences: SourcePreferences): Preference.PreferenceGroup {
+        val context = LocalContext.current
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.pref_category_nsfw_content),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = sourcePreferences.showNsfwSource,
+                    title = stringResource(MR.strings.pref_show_nsfw_source),
+                    subtitle = stringResource(MR.strings.requires_app_restart),
+                    onValueChanged = {
+                        (context as FragmentActivity).authenticate(
+                            title = context.stringResource(MR.strings.pref_category_nsfw_content),
                         )
                     },
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.sourcesTabCategoriesFilter,
-                        title = stringResource(SYMR.strings.pref_source_source_filtering),
-                        subtitle = stringResource(SYMR.strings.pref_source_source_filtering_summery),
-                    ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = uiPreferences.useNewSourceNavigation,
-                        title = stringResource(SYMR.strings.pref_source_navigation),
-                        subtitle = stringResource(SYMR.strings.pref_source_navigation_summery),
-                    ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.allowLocalSourceHiddenFolders,
-                        title = stringResource(SYMR.strings.pref_local_source_hidden_folders),
-                        subtitle = stringResource(SYMR.strings.pref_local_source_hidden_folders_summery),
-                    ),
                 ),
-            ),
-            Preference.PreferenceGroup(
-                title = stringResource(SYMR.strings.feed),
-                preferenceItems = listOf(
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = uiPreferences.hideFeedTab,
-                        title = stringResource(SYMR.strings.pref_hide_feed),
-                    ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = uiPreferences.feedTabInFront,
-                        title = stringResource(SYMR.strings.pref_feed_position),
-                        subtitle = stringResource(SYMR.strings.pref_feed_position_summery),
-                        enabled = hideFeedTab.not(),
-                    ),
-                ),
-            ),
-            // SY <--
-            Preference.PreferenceGroup(
-                title = stringResource(MR.strings.label_sources),
-                preferenceItems = listOf(
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.hideInLibraryItems,
-                        title = stringResource(MR.strings.pref_hide_in_library_items),
-                    ),
-                    Preference.PreferenceItem.TextPreference(
-                        title = stringResource(MR.strings.extensionStores),
-                        subtitle = pluralStringResource(MR.plurals.num_repos, reposCount.toInt(), reposCount),
-                        onClick = {
-                            navigator.push(ExtensionStoresScreen())
-                        },
-                    ),
-                ),
-            ),
-            Preference.PreferenceGroup(
-                title = stringResource(MR.strings.pref_category_nsfw_content),
-                preferenceItems = listOf(
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = sourcePreferences.showNsfwSource,
-                        title = stringResource(MR.strings.pref_show_nsfw_source),
-                        subtitle = stringResource(MR.strings.requires_app_restart),
-                        onValueChanged = {
-                            (context as FragmentActivity).authenticate(
-                                title = context.stringResource(MR.strings.pref_category_nsfw_content),
-                            )
-                        },
-                    ),
-                    Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.parental_controls_info)),
-                ),
+                Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.parental_controls_info)),
             ),
         )
     }

@@ -2,10 +2,13 @@ package mihon.feature.migration.config
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -116,30 +119,7 @@ internal class MigrationConfigScreen(private val mangaIds: Collection<Long>) : S
                     title = null,
                     navigateUp = navigator::pop,
                     scrollBehavior = it,
-                    actions = {
-                        AppBarActions(
-                            listOf(
-                                AppBar.Action(
-                                    title = stringResource(MR.strings.migrationConfigScreen_selectAllLabel),
-                                    icon = Icons.Outlined.SelectAll,
-                                    onClick = { screenModel.toggleSelection(ScreenModel.SelectionConfig.All) },
-                                ),
-                                AppBar.Action(
-                                    title = stringResource(MR.strings.migrationConfigScreen_selectNoneLabel),
-                                    icon = Icons.Outlined.Deselect,
-                                    onClick = { screenModel.toggleSelection(ScreenModel.SelectionConfig.None) },
-                                ),
-                                AppBar.OverflowAction(
-                                    title = stringResource(MR.strings.migrationConfigScreen_selectEnabledLabel),
-                                    onClick = { screenModel.toggleSelection(ScreenModel.SelectionConfig.Enabled) },
-                                ),
-                                AppBar.OverflowAction(
-                                    title = stringResource(MR.strings.migrationConfigScreen_selectPinnedLabel),
-                                    onClick = { screenModel.toggleSelection(ScreenModel.SelectionConfig.Pinned) },
-                                ),
-                            ),
-                        )
-                    },
+                    actions = { SelectionActions(screenModel) },
                 )
             },
             floatingActionButton = {
@@ -154,56 +134,7 @@ internal class MigrationConfigScreen(private val mangaIds: Collection<Long>) : S
                 )
             },
         ) { contentPadding ->
-            val reorderableState = rememberReorderableLazyListState(lazyListState, contentPadding) { from, to ->
-                val fromIndex = selectedSources.indexOfFirst { it.id == from.key }
-                val toIndex = selectedSources.indexOfFirst { it.id == to.key }
-                if (!(fromIndex == -1 || toIndex == -1)) {
-                    screenModel.orderSource(fromIndex, toIndex)
-                }
-            }
-
-            FastScrollLazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                state = lazyListState,
-                contentPadding = contentPadding,
-            ) {
-                listOf(selectedSources, availableSources).fastForEachIndexed { listIndex, sources ->
-                    val selectedSourceList = listIndex == 0
-                    if (sources.isNotEmpty()) {
-                        val headerPrefix = if (selectedSourceList) "selected" else "available"
-                        item("$headerPrefix-header") {
-                            Text(
-                                text = stringResource(
-                                    resource = if (selectedSourceList) {
-                                        MR.strings.migrationConfigScreen_selectedHeader
-                                    } else {
-                                        MR.strings.migrationConfigScreen_availableHeader
-                                    },
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier
-                                    .padding(MaterialTheme.padding.medium)
-                                    .animateItem(),
-                            )
-                        }
-                    }
-                    itemsIndexed(
-                        items = sources,
-                        key = { _, item -> item.id },
-                    ) { index, item ->
-                        SourceItemContainer(
-                            firstItem = index == 0,
-                            lastItem = index == sources.size - 1,
-                            source = item,
-                            showLanguage = showLanguage,
-                            dragEnabled = selectedSourceList && sources.size > 1,
-                            state = reorderableState,
-                            key = { if (selectedSourceList) it.id else "available-${it.id}" },
-                            onClick = { screenModel.toggleSelection(item.id) },
-                        )
-                    }
-                }
-            }
+            SourceLists(screenModel, selectedSources, availableSources, showLanguage, lazyListState, contentPadding)
         }
 
         if (migrationSheetOpen) {
@@ -215,6 +146,78 @@ internal class MigrationConfigScreen(private val mangaIds: Collection<Long>) : S
                     continueMigration(openSheet = false, extraSearchQuery = extraSearchQuery)
                 },
             )
+        }
+    }
+
+    @Composable
+    private fun SelectionActions(screenModel: ScreenModel) {
+        AppBarActions(
+            listOf(
+                AppBar.Action(
+                    title = stringResource(MR.strings.migrationConfigScreen_selectAllLabel),
+                    icon = Icons.Outlined.SelectAll,
+                    onClick = { screenModel.toggleSelection(ScreenModel.SelectionConfig.All) },
+                ),
+                AppBar.Action(
+                    title = stringResource(MR.strings.migrationConfigScreen_selectNoneLabel),
+                    icon = Icons.Outlined.Deselect,
+                    onClick = { screenModel.toggleSelection(ScreenModel.SelectionConfig.None) },
+                ),
+                AppBar.OverflowAction(
+                    title = stringResource(MR.strings.migrationConfigScreen_selectEnabledLabel),
+                    onClick = { screenModel.toggleSelection(ScreenModel.SelectionConfig.Enabled) },
+                ),
+                AppBar.OverflowAction(
+                    title = stringResource(MR.strings.migrationConfigScreen_selectPinnedLabel),
+                    onClick = { screenModel.toggleSelection(ScreenModel.SelectionConfig.Pinned) },
+                ),
+            ),
+        )
+    }
+
+    // The selected sources (reorderable) above the available ones, each under its header.
+    @Composable
+    private fun SourceLists(
+        screenModel: ScreenModel,
+        selectedSources: List<MigrationSource>,
+        availableSources: List<MigrationSource>,
+        showLanguage: Boolean,
+        lazyListState: LazyListState,
+        contentPadding: PaddingValues,
+    ) {
+        val reorderableState = rememberReorderableLazyListState(lazyListState, contentPadding) { from, to ->
+            val fromIndex = selectedSources.indexOfFirst { it.id == from.key }
+            val toIndex = selectedSources.indexOfFirst { it.id == to.key }
+            if (!(fromIndex == -1 || toIndex == -1)) {
+                screenModel.orderSource(fromIndex, toIndex)
+            }
+        }
+        FastScrollLazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = lazyListState,
+            contentPadding = contentPadding,
+        ) {
+            listOf(selectedSources, availableSources).fastForEachIndexed { listIndex, sources ->
+                val selectedSourceList = listIndex == 0
+                if (sources.isNotEmpty()) {
+                    sourceHeader(selected = selectedSourceList)
+                }
+                itemsIndexed(
+                    items = sources,
+                    key = { _, item -> item.id },
+                ) { index, item ->
+                    SourceItemContainer(
+                        firstItem = index == 0,
+                        lastItem = index == sources.size - 1,
+                        source = item,
+                        showLanguage = showLanguage,
+                        dragEnabled = selectedSourceList && sources.size > 1,
+                        state = reorderableState,
+                        key = { if (selectedSourceList) it.id else "available-${it.id}" },
+                        onClick = { screenModel.toggleSelection(item.id) },
+                    )
+                }
+            }
         }
     }
 
@@ -440,5 +443,24 @@ internal class MigrationConfigScreen(private val mangaIds: Collection<Long>) : S
             inline get() = source.name
 
         val shortLanguage: String = LocaleHelper.getShortDisplayName(source.lang)
+    }
+}
+
+private fun LazyListScope.sourceHeader(selected: Boolean) {
+    val headerPrefix = if (selected) "selected" else "available"
+    item("$headerPrefix-header") {
+        Text(
+            text = stringResource(
+                resource = if (selected) {
+                    MR.strings.migrationConfigScreen_selectedHeader
+                } else {
+                    MR.strings.migrationConfigScreen_availableHeader
+                },
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .padding(MaterialTheme.padding.medium)
+                .animateItem(),
+        )
     }
 }

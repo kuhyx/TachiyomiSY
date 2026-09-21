@@ -21,6 +21,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -262,31 +264,24 @@ internal fun settingsLanguages(
 internal class FrontPageCategoriesDialogState(
     preference: String,
 ) {
-    private val enabledCategories = preference.split(",").map { !it.toBoolean() }
-    var doujinshi by mutableStateOf(enabledCategories[EhCategory.DOUJINSHI.ordinal])
-    var manga by mutableStateOf(enabledCategories[EhCategory.MANGA.ordinal])
-    var artistCg by mutableStateOf(enabledCategories[EhCategory.ARTIST_CG.ordinal])
-    var gameCg by mutableStateOf(enabledCategories[EhCategory.GAME_CG.ordinal])
-    var western by mutableStateOf(enabledCategories[EhCategory.WESTERN.ordinal])
-    var nonH by mutableStateOf(enabledCategories[EhCategory.NON_H.ordinal])
-    var imageSet by mutableStateOf(enabledCategories[EhCategory.IMAGE_SET.ordinal])
-    var cosplay by mutableStateOf(enabledCategories[EhCategory.COSPLAY.ordinal])
-    var asianPorn by mutableStateOf(enabledCategories[EhCategory.ASIAN_PORN.ordinal])
-    var misc by mutableStateOf(enabledCategories[EhCategory.MISC.ordinal])
+    // One flag per EhCategory, in enum order; the preference stores "disabled" so the flags are inverted.
+    val enabled: SnapshotStateList<Boolean> = preference.split(",").map { !it.toBoolean() }.toMutableStateList()
 
-    fun toPreference() = listOf(
-        doujinshi,
-        manga,
-        artistCg,
-        gameCg,
-        western,
-        nonH,
-        imageSet,
-        cosplay,
-        asianPorn,
-        misc,
-    ).joinToString(separator = ",") { (!it).toString() }
+    fun toPreference() = enabled.joinToString(separator = ",") { (!it).toString() }
 }
+
+private val frontPageCategoryTitles = listOf(
+    EhCategory.DOUJINSHI to "Doujinshi",
+    EhCategory.MANGA to "Manga",
+    EhCategory.ARTIST_CG to "Artist CG",
+    EhCategory.GAME_CG to "Game CG",
+    EhCategory.WESTERN to "Western",
+    EhCategory.NON_H to "Non-H",
+    EhCategory.IMAGE_SET to "Image Set",
+    EhCategory.COSPLAY to "Cosplay",
+    EhCategory.ASIAN_PORN to "Asian Porn",
+    EhCategory.MISC to "Misc",
+)
 
 @Composable
 internal fun FrontPageCategoriesDialogRow(
@@ -333,56 +328,13 @@ internal fun FrontPageCategoriesDialog(
                     Text(text = "Category", modifier = Modifier.padding(4.dp))
                     Text(text = "Enabled", modifier = Modifier.padding(4.dp))
                 }
-                FrontPageCategoriesDialogRow(
-                    title = "Doujinshi",
-                    value = state.doujinshi,
-                    onValueChange = { state.doujinshi = it },
-                )
-                FrontPageCategoriesDialogRow(
-                    title = "Manga",
-                    value = state.manga,
-                    onValueChange = { state.manga = it },
-                )
-                FrontPageCategoriesDialogRow(
-                    title = "Artist CG",
-                    value = state.artistCg,
-                    onValueChange = { state.artistCg = it },
-                )
-                FrontPageCategoriesDialogRow(
-                    title = "Game CG",
-                    value = state.gameCg,
-                    onValueChange = { state.gameCg = it },
-                )
-                FrontPageCategoriesDialogRow(
-                    title = "Western",
-                    value = state.western,
-                    onValueChange = { state.western = it },
-                )
-                FrontPageCategoriesDialogRow(
-                    title = "Non-H",
-                    value = state.nonH,
-                    onValueChange = { state.nonH = it },
-                )
-                FrontPageCategoriesDialogRow(
-                    title = "Image Set",
-                    value = state.imageSet,
-                    onValueChange = { state.imageSet = it },
-                )
-                FrontPageCategoriesDialogRow(
-                    title = "Cosplay",
-                    value = state.cosplay,
-                    onValueChange = { state.cosplay = it },
-                )
-                FrontPageCategoriesDialogRow(
-                    title = "Asian Porn",
-                    value = state.asianPorn,
-                    onValueChange = { state.asianPorn = it },
-                )
-                FrontPageCategoriesDialogRow(
-                    title = "Misc",
-                    value = state.misc,
-                    onValueChange = { state.misc = it },
-                )
+                frontPageCategoryTitles.forEach { (category, title) ->
+                    FrontPageCategoriesDialogRow(
+                        title = title,
+                        value = state.enabled[category.ordinal],
+                        onValueChange = { state.enabled[category.ordinal] = it },
+                    )
+                }
             }
         },
         confirmButton = {

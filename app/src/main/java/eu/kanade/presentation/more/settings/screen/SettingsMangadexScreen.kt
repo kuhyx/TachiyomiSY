@@ -1,5 +1,6 @@
 package eu.kanade.presentation.more.settings.screen
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -118,25 +119,7 @@ internal object SettingsMangadexScreen : SearchableSettings {
                 onDismissRequest = { logoutDialogOpen = false },
                 onLogoutRequest = {
                     logoutDialogOpen = false
-                    scope.launchIO {
-                        try {
-                            if (mdex.logout()) {
-                                withUIContext {
-                                    context.toast(MR.strings.logout_success)
-                                }
-                            } else {
-                                withUIContext {
-                                    context.toast(MR.strings.unknown_error)
-                                }
-                            }
-                        } catch (expected: Exception) {
-                            // Logged whatever the cause; the caller carries on.
-                            logcat(LogPriority.ERROR, expected) { "Logout error" }
-                            withUIContext {
-                                context.toast(MR.strings.unknown_error)
-                            }
-                        }
-                    }
+                    scope.launchIO { context.logoutFrom(mdex) }
                 },
             )
         }
@@ -145,25 +128,10 @@ internal object SettingsMangadexScreen : SearchableSettings {
             content = {
                 BasePreferenceWidget(
                     title = mdex.name + " Login",
-                    widget = {
-                        Icon(
-                            imageVector = Icons.Outlined.PeopleAlt,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(start = 12.dp, end = PrefsHorizontalPadding)
-                                .secondaryItemAlpha(),
-                            tint = if (loggedIn.isNotEmpty()) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            },
-                        )
-                    },
+                    widget = { LoginStateIcon(loggedIn = loggedIn.isNotEmpty()) },
                     subcomponent = null,
                     onClick = if (loggedIn.isNotEmpty()) {
-                        {
-                            logoutDialogOpen = true
-                        }
+                        { logoutDialogOpen = true }
                     } else {
                         {
                             context.openInBrowser(
@@ -175,6 +143,38 @@ internal object SettingsMangadexScreen : SearchableSettings {
                 )
             },
         )
+    }
+
+    @Composable
+    private fun LoginStateIcon(loggedIn: Boolean) {
+        Icon(
+            imageVector = Icons.Outlined.PeopleAlt,
+            contentDescription = null,
+            modifier = Modifier
+                .padding(start = 12.dp, end = PrefsHorizontalPadding)
+                .secondaryItemAlpha(),
+            tint = if (loggedIn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        )
+    }
+
+    private suspend fun Context.logoutFrom(mdex: MangaDex) {
+        try {
+            if (mdex.logout()) {
+                withUIContext {
+                    toast(MR.strings.logout_success)
+                }
+            } else {
+                withUIContext {
+                    toast(MR.strings.unknown_error)
+                }
+            }
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the caller carries on.
+            logcat(LogPriority.ERROR, expected) { "Logout error" }
+            withUIContext {
+                toast(MR.strings.unknown_error)
+            }
+        }
     }
 
     @Composable

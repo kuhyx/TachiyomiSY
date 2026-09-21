@@ -36,24 +36,11 @@ internal class CreateBackupScreen : Screen() {
 
     @Composable
     override fun Content() {
-        val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
         val model = rememberScreenModel { CreateBackupScreenModel() }
         val state by model.state.collectAsState()
 
-        val chooseBackupDir = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.CreateDocument("application/*"),
-        ) {
-            if (it != null) {
-                context.contentResolver.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-                )
-                model.createBackup(context, it)
-                navigator.pop()
-            }
-        }
+        val onClickCreate = rememberCreateAction(model)
 
         Scaffold(
             topBar = {
@@ -68,17 +55,7 @@ internal class CreateBackupScreen : Screen() {
                 contentPadding = contentPadding,
                 actionLabel = stringResource(MR.strings.action_create),
                 actionEnabled = state.options.canCreate(),
-                onClickAction = {
-                    if (!BackupCreateJob.isManualJobRunning(context)) {
-                        try {
-                            chooseBackupDir.launch(BackupCreator.getFilename())
-                        } catch (_: ActivityNotFoundException) {
-                            context.toast(MR.strings.file_picker_error)
-                        }
-                    } else {
-                        context.toast(MR.strings.backup_in_progress)
-                    }
-                },
+                onClickAction = onClickCreate,
             ) {
                 if (DeviceUtil.isMiui && DeviceUtil.isMiuiOptimizationDisabled()) {
                     item {
@@ -97,6 +74,37 @@ internal class CreateBackupScreen : Screen() {
                         Options(BackupOptions.settingsOptions, state, model)
                     }
                 }
+            }
+        }
+    }
+
+    // Opens the document picker for the backup file; the persistable grant is what lets the job write there.
+    @Composable
+    private fun rememberCreateAction(model: CreateBackupScreenModel): () -> Unit {
+        val context = LocalContext.current
+        val navigator = LocalNavigator.currentOrThrow
+        val chooseBackupDir = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.CreateDocument("application/*"),
+        ) {
+            if (it != null) {
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                )
+                model.createBackup(context, it)
+                navigator.pop()
+            }
+        }
+        return {
+            if (!BackupCreateJob.isManualJobRunning(context)) {
+                try {
+                    chooseBackupDir.launch(BackupCreator.getFilename())
+                } catch (_: ActivityNotFoundException) {
+                    context.toast(MR.strings.file_picker_error)
+                }
+            } else {
+                context.toast(MR.strings.backup_in_progress)
             }
         }
     }

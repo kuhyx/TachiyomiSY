@@ -571,56 +571,11 @@ internal class ChipElevation internal constructor(
     ): State<Dp> {
         val interactions = remember { mutableStateListOf<Interaction>() }
         LaunchedEffect(interactionSource) {
-            interactionSource.interactions.collect { interaction ->
-                when (interaction) {
-                    is HoverInteraction.Enter -> {
-                        interactions.add(interaction)
-                    }
-                    is HoverInteraction.Exit -> {
-                        interactions.remove(interaction.enter)
-                    }
-                    is FocusInteraction.Focus -> {
-                        interactions.add(interaction)
-                    }
-                    is FocusInteraction.Unfocus -> {
-                        interactions.remove(interaction.focus)
-                    }
-                    is PressInteraction.Press -> {
-                        interactions.add(interaction)
-                    }
-                    is PressInteraction.Release -> {
-                        interactions.remove(interaction.press)
-                    }
-                    is PressInteraction.Cancel -> {
-                        interactions.remove(interaction.press)
-                    }
-                    is DragInteraction.Start -> {
-                        interactions.add(interaction)
-                    }
-                    is DragInteraction.Stop -> {
-                        interactions.remove(interaction.start)
-                    }
-                    is DragInteraction.Cancel -> {
-                        interactions.remove(interaction.start)
-                    }
-                }
-            }
+            interactionSource.interactions.collect { interactions.apply(it) }
         }
 
         val interaction = interactions.lastOrNull()
-
-        val target = if (!enabled) {
-            disabledElevation
-        } else {
-            when (interaction) {
-                is PressInteraction.Press -> pressedElevation
-                is HoverInteraction.Enter -> hoveredElevation
-                is FocusInteraction.Focus -> focusedElevation
-                is DragInteraction.Start -> draggedElevation
-                else -> defaultElevation
-            }
-        }
-
+        val target = if (!enabled) disabledElevation else elevationFor(interaction)
         val animatable = remember { Animatable(target, Dp.VectorConverter) }
 
         if (!enabled) {
@@ -628,15 +583,8 @@ internal class ChipElevation internal constructor(
             LaunchedEffect(target) { animatable.snapTo(target) }
         } else {
             LaunchedEffect(target) {
-                val lastInteraction = when (animatable.targetValue) {
-                    pressedElevation -> PressInteraction.Press(Offset.Zero)
-                    hoveredElevation -> HoverInteraction.Enter()
-                    focusedElevation -> FocusInteraction.Focus()
-                    draggedElevation -> DragInteraction.Start()
-                    else -> null
-                }
                 animatable.animateElevation(
-                    from = lastInteraction,
+                    from = interactionFor(animatable.targetValue),
                     to = interaction,
                     target = target,
                 )
@@ -644,6 +592,23 @@ internal class ChipElevation internal constructor(
         }
 
         return animatable.asState()
+    }
+
+    private fun elevationFor(interaction: Interaction?): Dp = when (interaction) {
+        is PressInteraction.Press -> pressedElevation
+        is HoverInteraction.Enter -> hoveredElevation
+        is FocusInteraction.Focus -> focusedElevation
+        is DragInteraction.Start -> draggedElevation
+        else -> defaultElevation
+    }
+
+    // The interaction an elevation value stands for, so the animation can pick its spec by transition.
+    private fun interactionFor(elevation: Dp): Interaction? = when (elevation) {
+        pressedElevation -> PressInteraction.Press(Offset.Zero)
+        hoveredElevation -> HoverInteraction.Enter()
+        focusedElevation -> FocusInteraction.Focus()
+        draggedElevation -> DragInteraction.Start()
+        else -> null
     }
 
     override fun equals(other: Any?): Boolean {
@@ -674,3 +639,19 @@ private val HorizontalElementsPadding = 8.dp
 
 // Returns the [PaddingValues] for the suggestion chip.
 private val SuggestionChipPadding = PaddingValues(horizontal = HorizontalElementsPadding)
+
+// Keeps the list of active interactions: a start adds itself, its matching end removes the start.
+private fun MutableList<Interaction>.apply(interaction: Interaction) {
+    when (interaction) {
+        is HoverInteraction.Enter -> add(interaction)
+        is HoverInteraction.Exit -> remove(interaction.enter)
+        is FocusInteraction.Focus -> add(interaction)
+        is FocusInteraction.Unfocus -> remove(interaction.focus)
+        is PressInteraction.Press -> add(interaction)
+        is PressInteraction.Release -> remove(interaction.press)
+        is PressInteraction.Cancel -> remove(interaction.press)
+        is DragInteraction.Start -> add(interaction)
+        is DragInteraction.Stop -> remove(interaction.start)
+        is DragInteraction.Cancel -> remove(interaction.start)
+    }
+}

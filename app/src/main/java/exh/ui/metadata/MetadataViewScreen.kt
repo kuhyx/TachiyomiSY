@@ -1,5 +1,6 @@
 package exh.ui.metadata
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -61,45 +62,44 @@ internal class MetadataViewScreen(private val mangaId: Long, private val sourceI
                     EmptyScreen(MR.strings.source_empty_screen)
                 }
                 is MetadataViewState.Success -> {
-                    val context = LocalContext.current
-                    val items = remember(viewState.meta) { viewState.meta.getExtraInfoPairs(context) }
-                    ScrollbarLazyColumn(
-                        contentPadding =
-                        paddingValues + WindowInsets.navigationBars.asPaddingValues() + topSmallPaddingValues,
-                    ) {
-                        items(items) { (title, text) ->
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .clickableNoIndication(
-                                        onLongClick = {
-                                            context.copyToClipboard(
-                                                title,
-                                                text,
-                                            )
-                                        },
-                                        onClick = {},
-                                    )
-                                    .padding(vertical = 8.dp),
-                            ) {
-                                Text(
-                                    title,
-                                    modifier = Modifier
-                                        .width(140.dp)
-                                        .padding(start = 16.dp),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                                Text(
-                                    text,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 8.dp, end = 8.dp),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = LocalContentColor.current.copy(alpha = 0.7F),
-                                )
-                            }
-                        }
-                    }
+                    MetadataList(viewState, paddingValues)
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun MetadataList(viewState: MetadataViewState.Success, paddingValues: PaddingValues) {
+        val context = LocalContext.current
+        val items = remember(viewState.meta) { viewState.meta.getExtraInfoPairs(context) }
+        ScrollbarLazyColumn(
+            contentPadding = paddingValues + WindowInsets.navigationBars.asPaddingValues() + topSmallPaddingValues,
+        ) {
+            items(items) { (title, text) ->
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickableNoIndication(
+                            onLongClick = { context.copyToClipboard(title, text) },
+                            onClick = {},
+                        )
+                        .padding(vertical = 8.dp),
+                ) {
+                    Text(
+                        title,
+                        modifier = Modifier
+                            .width(140.dp)
+                            .padding(start = 16.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        text,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp, end = 8.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = LocalContentColor.current.copy(alpha = 0.7F),
+                    )
                 }
             }
         }

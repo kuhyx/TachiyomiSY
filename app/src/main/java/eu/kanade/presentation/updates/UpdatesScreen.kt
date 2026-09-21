@@ -1,6 +1,7 @@
 package eu.kanade.presentation.updates
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -106,44 +107,71 @@ internal fun UpdateScreen(
                 )
             }
             else -> {
-                val scope = rememberCoroutineScope()
-                var isRefreshing by remember { mutableStateOf(false) }
+                UpdatesList(
+                    state = state,
+                    lastUpdated = lastUpdated,
+                    preserveReadingPosition = preserveReadingPosition,
+                    contentPadding = contentPadding,
+                    onUpdateLibrary = onUpdateLibrary,
+                    onUpdateSelected = onUpdateSelected,
+                    onClickCover = onClickCover,
+                    onOpenChapter = onOpenChapter,
+                    onDownloadChapter = onDownloadChapter,
+                )
+            }
+        }
+    }
+}
 
-                PullRefresh(
-                    refreshing = isRefreshing,
-                    onRefresh = {
-                        val started = onUpdateLibrary()
-                        if (started) {
-                            scope.launch {
-                                // Fake refresh status but hide it after a second as it's a long running task
-                                isRefreshing = true
-                                delay(1.seconds)
-                                isRefreshing = false
-                            }
-                        }
-                    },
-                    enabled = !state.selectionMode,
-                    indicatorPadding = contentPadding,
-                ) {
-                    FastScrollLazyColumn(
-                        contentPadding = contentPadding,
-                    ) {
-                        updatesLastUpdatedItem(lastUpdated)
+@Composable
+private fun UpdatesList(
+    state: UpdatesScreenModel.State,
+    lastUpdated: Long,
+    // SY -->
+    preserveReadingPosition: Boolean,
+    // SY <--
+    contentPadding: PaddingValues,
+    onUpdateLibrary: () -> Boolean,
+    onUpdateSelected: (UpdatesItem, Boolean, Boolean) -> Unit,
+    onClickCover: (UpdatesItem) -> Unit,
+    onOpenChapter: (UpdatesItem) -> Unit,
+    onDownloadChapter: (List<UpdatesItem>, ChapterDownloadAction) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var isRefreshing by remember { mutableStateOf(false) }
 
-                        updatesUiItems(
-                            uiModels = state.getUiModel(),
-                            selectionMode = state.selectionMode,
-                            // SY -->
-                            preserveReadingPosition = preserveReadingPosition,
-                            // SY <--
-                            onUpdateSelected = onUpdateSelected,
-                            onClickCover = onClickCover,
-                            onClickUpdate = onOpenChapter,
-                            onDownloadChapter = onDownloadChapter,
-                        )
-                    }
+    PullRefresh(
+        refreshing = isRefreshing,
+        onRefresh = {
+            val started = onUpdateLibrary()
+            if (started) {
+                scope.launch {
+                    // Fake refresh status but hide it after a second as it's a long running task
+                    isRefreshing = true
+                    delay(1.seconds)
+                    isRefreshing = false
                 }
             }
+        },
+        enabled = !state.selectionMode,
+        indicatorPadding = contentPadding,
+    ) {
+        FastScrollLazyColumn(
+            contentPadding = contentPadding,
+        ) {
+            updatesLastUpdatedItem(lastUpdated)
+
+            updatesUiItems(
+                uiModels = state.getUiModel(),
+                selectionMode = state.selectionMode,
+                // SY -->
+                preserveReadingPosition = preserveReadingPosition,
+                // SY <--
+                onUpdateSelected = onUpdateSelected,
+                onClickCover = onClickCover,
+                onClickUpdate = onOpenChapter,
+                onDownloadChapter = onDownloadChapter,
+            )
         }
     }
 }

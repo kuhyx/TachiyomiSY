@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
@@ -90,57 +91,7 @@ internal class SettingsSearchScreen : Screen() {
 
         val textFieldState = rememberTextFieldState()
         Scaffold(
-            topBar = {
-                Column {
-                    TopAppBar(
-                        navigationIcon = {
-                            val canPop = remember { navigator.canPop }
-                            if (canPop) {
-                                IconButton(onClick = navigator::pop) {
-                                    UpIcon()
-                                }
-                            }
-                        },
-                        title = {
-                            BasicTextField(
-                                state = textFieldState,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .focusRequester(focusRequester)
-                                    .runOnEnterKeyPressed(action = focusManager::clearFocus),
-                                textStyle = MaterialTheme.typography.bodyLarge
-                                    .copy(color = MaterialTheme.colorScheme.onSurface),
-                                lineLimits = TextFieldLineLimits.SingleLine,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                onKeyboardAction = { focusManager.clearFocus() },
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                decorator = {
-                                    if (textFieldState.text.isEmpty()) {
-                                        Text(
-                                            text = stringResource(MR.strings.action_search_settings),
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                        )
-                                    }
-                                    it()
-                                },
-                            )
-                        },
-                        actions = {
-                            if (textFieldState.text.isNotEmpty()) {
-                                IconButton(onClick = { textFieldState.clearText() }) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Close,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        },
-                    )
-                    HorizontalDivider()
-                }
-            },
+            topBar = { SearchTopBar(textFieldState, focusRequester) },
         ) { contentPadding ->
             SearchResult(
                 searchKey = textFieldState.text.toString(),
@@ -151,6 +102,61 @@ internal class SettingsSearchScreen : Screen() {
                 navigator.replace(result.route)
             }
         }
+    }
+}
+
+@Composable
+private fun SearchTopBar(textFieldState: TextFieldState, focusRequester: FocusRequester) {
+    val navigator = LocalNavigator.currentOrThrow
+    val focusManager = LocalFocusManager.current
+    Column {
+        TopAppBar(
+            navigationIcon = {
+                val canPop = remember { navigator.canPop }
+                if (canPop) {
+                    IconButton(onClick = navigator::pop) {
+                        UpIcon()
+                    }
+                }
+            },
+            title = {
+                BasicTextField(
+                    state = textFieldState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .runOnEnterKeyPressed(action = focusManager::clearFocus),
+                    textStyle = MaterialTheme.typography.bodyLarge
+                        .copy(color = MaterialTheme.colorScheme.onSurface),
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    onKeyboardAction = { focusManager.clearFocus() },
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    decorator = {
+                        if (textFieldState.text.isEmpty()) {
+                            Text(
+                                text = stringResource(MR.strings.action_search_settings),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
+                        it()
+                    },
+                )
+            },
+            actions = {
+                if (textFieldState.text.isNotEmpty()) {
+                    IconButton(onClick = { textFieldState.clearText() }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            },
+        )
+        HorizontalDivider()
     }
 }
 
@@ -168,52 +174,7 @@ internal fun SearchResult(
 
     val index = getIndex()
     val result by produceState<List<SearchResultItem>?>(initialValue = null, searchKey) {
-        value = index.asSequence()
-            .flatMap { settingsData ->
-                settingsData.contents.asSequence()
-                    // Only search from enabled prefs and one with valid title
-                    .filter { it.enabled && it.title.isNotBlank() }
-                    // Flatten items contained inside *enabled* PreferenceGroup
-                    .flatMap { p ->
-                        when (p) {
-                            is Preference.PreferenceGroup -> {
-                                if (p.enabled) {
-                                    p.preferenceItems.asSequence()
-                                        .filter { it.enabled && it.title.isNotBlank() }
-                                        .map { p.title to it }
-                                } else {
-                                    emptySequence()
-                                }
-                            }
-                            is Preference.PreferenceItem<*, *> -> {
-                                sequenceOf(null to p)
-                            }
-                        }
-                    }
-                    // Don't show info preference
-                    .filterNot { it.second is Preference.PreferenceItem.InfoPreference }
-                    // Filter by search query
-                    .filter { (_, p) ->
-                        val inTitle = p.title.contains(searchKey, true)
-                        val inSummary = p.subtitle?.contains(searchKey, true) ?: false
-                        inTitle || inSummary
-                    }
-                    // Map result data
-                    .map { (categoryTitle, p) ->
-                        SearchResultItem(
-                            route = settingsData.route,
-                            title = p.title,
-                            breadcrumbs = getLocalizedBreadcrumb(
-                                path = settingsData.title,
-                                node = categoryTitle,
-                                isLtr = isLtr,
-                            ),
-                            highlightKey = p.title,
-                        )
-                    }
-            }
-            .take(MAX_RESULTS) // Just take the top results for a quicker answer
-            .toList()
+        value = searchIndex(index, searchKey, isLtr)
     }
 
     Crossfade(targetState = result) {
@@ -233,32 +194,91 @@ internal fun SearchResult(
                         items = it,
                         key = { i -> i.hashCode() },
                     ) { item ->
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onItemClick(item) }
-                                .padding(horizontal = 24.dp, vertical = 14.dp),
-                        ) {
-                            Text(
-                                text = item.title,
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1,
-                                fontWeight = FontWeight.Normal,
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                            Text(
-                                text = item.breadcrumbs,
-                                modifier = Modifier.paddingFromBaseline(top = 16.dp),
-                                maxLines = 1,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        }
+                        SearchResultRow(item = item, onClick = { onItemClick(item) })
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun SearchResultRow(item: SearchResultItem, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 24.dp, vertical = 14.dp),
+    ) {
+        Text(
+            text = item.title,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            fontWeight = FontWeight.Normal,
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Text(
+            text = item.breadcrumbs,
+            modifier = Modifier.paddingFromBaseline(top = 16.dp),
+            maxLines = 1,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
+}
+
+// Pure search over the settings index; only the top MAX_RESULTS hits are kept for a quicker answer.
+private fun searchIndex(index: List<SettingsData>, searchKey: String, isLtr: Boolean): List<SearchResultItem> {
+    return index.asSequence()
+        .flatMap { settingsData ->
+            searchableEntries(settingsData.contents)
+                // Filter by search query
+                .filter { (_, p) ->
+                    val inTitle = p.title.contains(searchKey, true)
+                    val inSummary = p.subtitle?.contains(searchKey, true) ?: false
+                    inTitle || inSummary
+                }
+                .map { (categoryTitle, p) ->
+                    SearchResultItem(
+                        route = settingsData.route,
+                        title = p.title,
+                        breadcrumbs = getLocalizedBreadcrumb(
+                            path = settingsData.title,
+                            node = categoryTitle,
+                            isLtr = isLtr,
+                        ),
+                        highlightKey = p.title,
+                    )
+                }
+        }
+        .take(MAX_RESULTS)
+        .toList()
+}
+
+// (group title or null) -> item, for every enabled, titled, non-info preference on a screen.
+private fun searchableEntries(contents: List<Preference>): Sequence<Pair<String?, Preference.PreferenceItem<*, *>>> {
+    return contents.asSequence()
+        // Only search from enabled prefs and one with valid title
+        .filter { it.enabled && it.title.isNotBlank() }
+        // Flatten items contained inside *enabled* PreferenceGroup
+        .flatMap { p ->
+            when (p) {
+                is Preference.PreferenceGroup -> {
+                    if (p.enabled) {
+                        p.preferenceItems.asSequence()
+                            .filter { it.enabled && it.title.isNotBlank() }
+                            .map { p.title to it }
+                    } else {
+                        emptySequence()
+                    }
+                }
+                is Preference.PreferenceItem<*, *> -> {
+                    sequenceOf(null to p)
+                }
+            }
+        }
+        // Don't show info preference
+        .filterNot { it.second is Preference.PreferenceItem.InfoPreference }
 }
 
 @Composable

@@ -43,6 +43,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +55,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.DownloadDropdownMenu
 import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.presentation.manga.DownloadAction
@@ -85,24 +87,22 @@ internal fun MangaBottomActionMenu(
         enter = expandVertically(expandFrom = Alignment.Bottom),
         exit = shrinkVertically(shrinkTowards = Alignment.Bottom),
     ) {
-        val scope = rememberCoroutineScope()
         Surface(
             modifier = modifier,
             shape = MaterialTheme.shapes.large.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
-            val haptic = LocalHapticFeedback.current
-            val confirm = remember { List(ChapterAction.entries.size) { false }.toMutableStateList() }
-            var resetJob by remember { mutableStateOf<Job?>(null) }
-            val onLongClickItem: (Int) -> Unit = { toConfirmIndex ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                confirm.indices.forEach { i -> confirm[i] = i == toConfirmIndex }
-                resetJob?.cancel()
-                resetJob = scope.launch {
-                    delay(1.seconds)
-                    if (isActive) confirm[toConfirmIndex] = false
-                }
-            }
+            val slots = rememberConfirmSlots(ChapterAction.entries.size)
+            // Callbacks in ChapterAction order; a button shows only when its action applies to the selection.
+            val callbacks = listOf(
+                onBookmarkClicked,
+                onRemoveBookmarkClicked,
+                onMarkAsReadClicked,
+                onMarkAsUnreadClicked,
+                onMarkPreviousAsReadClicked,
+                onDownloadClicked,
+                onDeleteClicked,
+            )
             Row(
                 modifier = Modifier
                     .padding(
@@ -112,69 +112,53 @@ internal fun MangaBottomActionMenu(
                     )
                     .padding(horizontal = 8.dp, vertical = 12.dp),
             ) {
-                if (onBookmarkClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_bookmark),
-                        icon = Icons.Outlined.BookmarkAdd,
-                        toConfirm = confirm[ChapterAction.BOOKMARK.ordinal],
-                        onLongClick = { onLongClickItem(ChapterAction.BOOKMARK.ordinal) },
-                        onClick = onBookmarkClicked,
-                    )
+                ChapterAction.entries.zip(callbacks).forEach { (action, onClick) ->
+                    if (onClick != null) {
+                        SlotButton(slots, action, action.label, action.icon(), onClick = onClick)
+                    }
                 }
-                if (onRemoveBookmarkClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_remove_bookmark),
-                        icon = Icons.Outlined.BookmarkRemove,
-                        toConfirm = confirm[ChapterAction.REMOVE_BOOKMARK.ordinal],
-                        onLongClick = { onLongClickItem(ChapterAction.REMOVE_BOOKMARK.ordinal) },
-                        onClick = onRemoveBookmarkClicked,
-                    )
-                }
-                if (onMarkAsReadClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_mark_as_read),
-                        icon = Icons.Outlined.DoneAll,
-                        toConfirm = confirm[ChapterAction.MARK_READ.ordinal],
-                        onLongClick = { onLongClickItem(ChapterAction.MARK_READ.ordinal) },
-                        onClick = onMarkAsReadClicked,
-                    )
-                }
-                if (onMarkAsUnreadClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_mark_as_unread),
-                        icon = Icons.Outlined.RemoveDone,
-                        toConfirm = confirm[ChapterAction.MARK_UNREAD.ordinal],
-                        onLongClick = { onLongClickItem(ChapterAction.MARK_UNREAD.ordinal) },
-                        onClick = onMarkAsUnreadClicked,
-                    )
-                }
-                if (onMarkPreviousAsReadClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_mark_previous_as_read),
-                        icon = ImageVector.vectorResource(R.drawable.ic_done_prev_24dp),
-                        toConfirm = confirm[ChapterAction.MARK_PREVIOUS_READ.ordinal],
-                        onLongClick = { onLongClickItem(ChapterAction.MARK_PREVIOUS_READ.ordinal) },
-                        onClick = onMarkPreviousAsReadClicked,
-                    )
-                }
-                if (onDownloadClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_download),
-                        icon = Icons.Outlined.Download,
-                        toConfirm = confirm[ChapterAction.DOWNLOAD.ordinal],
-                        onLongClick = { onLongClickItem(ChapterAction.DOWNLOAD.ordinal) },
-                        onClick = onDownloadClicked,
-                    )
-                }
-                if (onDeleteClicked != null) {
-                    Button(
-                        title = stringResource(MR.strings.action_delete),
-                        icon = Icons.Outlined.Delete,
-                        toConfirm = confirm[ChapterAction.DELETE.ordinal],
-                        onLongClick = { onLongClickItem(ChapterAction.DELETE.ordinal) },
-                        onClick = onDeleteClicked,
-                    )
-                }
+            }
+        }
+    }
+}
+
+// A menu button wired to its long-press confirmation slot.
+@Composable
+private fun RowScope.SlotButton(
+    slots: ConfirmSlots,
+    slot: Enum<*>,
+    label: StringResource,
+    icon: ImageVector,
+    content: (@Composable () -> Unit)? = null,
+    onClick: () -> Unit,
+) {
+    Button(
+        title = stringResource(label),
+        icon = icon,
+        toConfirm = slots.confirm[slot.ordinal],
+        onLongClick = { slots.onLongClickItem(slot.ordinal) },
+        onClick = onClick,
+        content = content,
+    )
+}
+
+// Long-pressing a button widens it for a second as a "tap again to confirm" affordance; one slot per action.
+private data class ConfirmSlots(val confirm: SnapshotStateList<Boolean>, val onLongClickItem: (Int) -> Unit)
+
+@Composable
+private fun rememberConfirmSlots(size: Int): ConfirmSlots {
+    val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
+    val confirm = remember { List(size) { false }.toMutableStateList() }
+    var resetJob by remember { mutableStateOf<Job?>(null) }
+    return remember(confirm) {
+        ConfirmSlots(confirm) { toConfirmIndex ->
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            confirm.indices.forEach { i -> confirm[i] = i == toConfirmIndex }
+            resetJob?.cancel()
+            resetJob = scope.launch {
+                delay(1.seconds)
+                if (isActive) confirm[toConfirmIndex] = false
             }
         }
     }
@@ -252,147 +236,55 @@ internal fun LibraryBottomActionMenu(
         enter = expandVertically(animationSpec = tween(delayMillis = 300)),
         exit = shrinkVertically(animationSpec = tween()),
     ) {
-        val scope = rememberCoroutineScope()
         Surface(
             modifier = modifier,
             shape = MaterialTheme.shapes.large.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
-            val haptic = LocalHapticFeedback.current
-            val confirm = remember { List(LibraryAction.entries.size) { false }.toMutableStateList() }
-            var resetJob by remember { mutableStateOf<Job?>(null) }
-            val onLongClickItem: (Int) -> Unit = { toConfirmIndex ->
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                confirm.indices.forEach { i -> confirm[i] = i == toConfirmIndex }
-                resetJob?.cancel()
-                resetJob = scope.launch {
-                    delay(1.seconds)
-                    if (isActive) confirm[toConfirmIndex] = false
-                }
-            }
+            val slots = rememberConfirmSlots(LibraryAction.entries.size)
             // SY -->
-            val showOverflow = onClickCleanTitles != null ||
-                onClickAddToMangaDex != null ||
-                onClickResetInfo != null ||
-                onClickCollectRecommendations != null ||
-                onMigrateClicked != null
-            val configuration = LocalConfiguration.current
-            val moveMarkPrev = remember { !configuration.isTabletUi() }
-            var overFlowOpen by remember { mutableStateOf(false) }
+            val overflow = LibraryOverflowActions(
+                onClickCleanTitles = onClickCleanTitles,
+                onMigrateClicked = onMigrateClicked,
+                onClickCollectRecommendations = onClickCollectRecommendations,
+                onClickAddToMangaDex = onClickAddToMangaDex,
+                onClickResetInfo = onClickResetInfo,
+            )
+            val moveMarkPrev = rememberMarkUnreadInOverflow()
             // SY <--
-            Row(
-                modifier = Modifier
-                    .windowInsetsPadding(
-                        WindowInsets.navigationBars
-                            .only(WindowInsetsSides.Bottom),
-                    )
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-            ) {
-                Button(
-                    title = stringResource(MR.strings.action_move_category),
-                    icon = Icons.AutoMirrored.Outlined.Label,
-                    toConfirm = confirm[LibraryAction.MOVE_CATEGORY.ordinal],
-                    onLongClick = { onLongClickItem(LibraryAction.MOVE_CATEGORY.ordinal) },
+            Row(modifier = Modifier.bottomMenuPadding()) {
+                SlotButton(
+                    slots,
+                    LibraryAction.MOVE_CATEGORY,
+                    MR.strings.action_move_category,
+                    Icons.AutoMirrored.Outlined.Label,
                     onClick = onChangeCategoryClicked,
                 )
                 if (onDownloadClicked != null) {
-                    var downloadExpanded by remember { mutableStateOf(false) }
-                    Button(
-                        title = stringResource(MR.strings.action_download),
-                        icon = Icons.Outlined.Download,
-                        toConfirm = confirm[LibraryAction.DOWNLOAD.ordinal],
-                        onLongClick = { onLongClickItem(LibraryAction.DOWNLOAD.ordinal) },
-                        onClick = { downloadExpanded = !downloadExpanded },
-                    ) {
-                        DownloadDropdownMenu(
-                            expanded = downloadExpanded,
-                            onDismissRequest = { downloadExpanded = false },
-                            onDownloadClicked = onDownloadClicked,
-                            offset = BottomBarMenuDpOffset,
-                        )
-                    }
+                    LibraryDownloadButton(slots, onDownloadClicked)
                 }
-                Button(
-                    title = stringResource(MR.strings.action_delete),
-                    icon = Icons.Outlined.Delete,
-                    toConfirm = confirm[LibraryAction.DELETE.ordinal],
-                    onLongClick = { onLongClickItem(LibraryAction.DELETE.ordinal) },
-                    onClick = onDeleteClicked,
-                )
+                SlotButton(slots, LibraryAction.DELETE, MR.strings.action_delete, Icons.Outlined.Delete) {
+                    onDeleteClicked()
+                }
                 // SY -->
-                Button(
-                    title = stringResource(MR.strings.action_mark_as_read),
-                    icon = Icons.Outlined.DoneAll,
-                    toConfirm = confirm[LibraryAction.MARK_READ.ordinal],
-                    onLongClick = { onLongClickItem(LibraryAction.MARK_READ.ordinal) },
+                SlotButton(
+                    slots,
+                    LibraryAction.MARK_READ,
+                    MR.strings.action_mark_as_read,
+                    Icons.Outlined.DoneAll,
                     onClick = onMarkAsReadClicked,
                 )
-                if (showOverflow) {
-                    if (!moveMarkPrev) {
-                        Button(
-                            title = stringResource(MR.strings.action_mark_as_unread),
-                            icon = Icons.Outlined.RemoveDone,
-                            toConfirm = confirm[LibraryAction.MARK_UNREAD.ordinal],
-                            onLongClick = { onLongClickItem(LibraryAction.MARK_UNREAD.ordinal) },
-                            onClick = onMarkAsUnreadClicked,
-                        )
-                    }
-                    Button(
-                        title = stringResource(MR.strings.label_more),
-                        icon = Icons.Outlined.MoreVert,
-                        toConfirm = confirm[LibraryAction.MORE.ordinal],
-                        onLongClick = { onLongClickItem(LibraryAction.MORE.ordinal) },
-                        onClick = { overFlowOpen = true },
-                    )
-                    DropdownMenu(
-                        expanded = overFlowOpen,
-                        onDismissRequest = { overFlowOpen = false },
-                    ) {
-                        if (moveMarkPrev) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(MR.strings.action_mark_as_unread)) },
-                                onClick = onMarkAsUnreadClicked,
-                            )
-                        }
-                        if (onClickCleanTitles != null) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(SYMR.strings.action_clean_titles)) },
-                                onClick = onClickCleanTitles,
-                            )
-                        }
-                        if (onMigrateClicked != null) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(MR.strings.migrate)) },
-                                onClick = onMigrateClicked,
-                            )
-                        }
-                        if (onClickCollectRecommendations != null) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(SYMR.strings.rec_search_short)) },
-                                onClick = onClickCollectRecommendations,
-                            )
-                        }
-                        if (onClickAddToMangaDex != null) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(SYMR.strings.mangadex_add_to_follows)) },
-                                onClick = onClickAddToMangaDex,
-                            )
-                        }
-                        if (onClickResetInfo != null) {
-                            DropdownMenuItem(
-                                text = { Text(text = stringResource(SYMR.strings.reset_info)) },
-                                onClick = onClickResetInfo,
-                            )
-                        }
-                    }
-                } else {
-                    Button(
-                        title = stringResource(MR.strings.action_mark_as_unread),
-                        icon = Icons.Outlined.RemoveDone,
-                        toConfirm = confirm[LibraryAction.MARK_UNREAD.ordinal],
-                        onLongClick = { onLongClickItem(LibraryAction.MARK_UNREAD.ordinal) },
+                if (overflow.isEmpty || !moveMarkPrev) {
+                    SlotButton(
+                        slots,
+                        LibraryAction.MARK_UNREAD,
+                        MR.strings.action_mark_as_unread,
+                        Icons.Outlined.RemoveDone,
                         onClick = onMarkAsUnreadClicked,
                     )
+                }
+                if (!overflow.isEmpty) {
+                    LibraryMoreButton(slots, overflow, onMarkAsUnreadClicked.takeIf { moveMarkPrev })
                 }
                 // SY <--
             }
@@ -400,17 +292,116 @@ internal fun LibraryBottomActionMenu(
     }
 }
 
-private val BottomBarMenuDpOffset = DpOffset(0.dp, 0.dp)
+// Phones move "mark as unread" into the overflow to make room for the More button.
+@Composable
+private fun rememberMarkUnreadInOverflow(): Boolean {
+    val configuration = LocalConfiguration.current
+    return remember { !configuration.isTabletUi() }
+}
 
-/** The buttons of the chapter menu, in order; each has a long-press confirmation slot. */
-private enum class ChapterAction {
-    BOOKMARK,
-    REMOVE_BOOKMARK,
-    MARK_READ,
-    MARK_UNREAD,
-    MARK_PREVIOUS_READ,
-    DOWNLOAD,
-    DELETE,
+@Composable
+private fun Modifier.bottomMenuPadding(): Modifier = this
+    .windowInsetsPadding(
+        WindowInsets.navigationBars
+            .only(WindowInsetsSides.Bottom),
+    )
+    .padding(horizontal = 8.dp, vertical = 12.dp)
+
+@Composable
+private fun RowScope.LibraryDownloadButton(slots: ConfirmSlots, onDownloadClicked: (DownloadAction) -> Unit) {
+    var downloadExpanded by remember { mutableStateOf(false) }
+    SlotButton(
+        slots,
+        LibraryAction.DOWNLOAD,
+        MR.strings.action_download,
+        Icons.Outlined.Download,
+        content = {
+            DownloadDropdownMenu(
+                expanded = downloadExpanded,
+                onDismissRequest = { downloadExpanded = false },
+                onDownloadClicked = onDownloadClicked,
+                offset = BottomBarMenuDpOffset,
+            )
+        },
+    ) {
+        downloadExpanded = !downloadExpanded
+    }
+}
+
+// SY -->
+private data class LibraryOverflowActions(
+    val onClickCleanTitles: (() -> Unit)?,
+    val onMigrateClicked: (() -> Unit)?,
+    val onClickCollectRecommendations: (() -> Unit)?,
+    val onClickAddToMangaDex: (() -> Unit)?,
+    val onClickResetInfo: (() -> Unit)?,
+) {
+    val isEmpty: Boolean
+        get() = onClickCleanTitles == null &&
+            onClickAddToMangaDex == null &&
+            onClickResetInfo == null &&
+            onClickCollectRecommendations == null &&
+            onMigrateClicked == null
+}
+
+@Composable
+private fun RowScope.LibraryMoreButton(
+    slots: ConfirmSlots,
+    overflow: LibraryOverflowActions,
+    onMarkAsUnreadClicked: (() -> Unit)?,
+) {
+    var overFlowOpen by remember { mutableStateOf(false) }
+    Button(
+        title = stringResource(MR.strings.label_more),
+        icon = Icons.Outlined.MoreVert,
+        toConfirm = slots.confirm[LibraryAction.MORE.ordinal],
+        onLongClick = { slots.onLongClickItem(LibraryAction.MORE.ordinal) },
+        onClick = { overFlowOpen = true },
+    )
+    DropdownMenu(
+        expanded = overFlowOpen,
+        onDismissRequest = { overFlowOpen = false },
+    ) {
+        val entries = listOf(
+            MR.strings.action_mark_as_unread to onMarkAsUnreadClicked,
+            SYMR.strings.action_clean_titles to overflow.onClickCleanTitles,
+            MR.strings.migrate to overflow.onMigrateClicked,
+            SYMR.strings.rec_search_short to overflow.onClickCollectRecommendations,
+            SYMR.strings.mangadex_add_to_follows to overflow.onClickAddToMangaDex,
+            SYMR.strings.reset_info to overflow.onClickResetInfo,
+        )
+        entries.forEach { (label, onClick) ->
+            if (onClick != null) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(label)) },
+                    onClick = onClick,
+                )
+            }
+        }
+    }
+}
+// SY <--
+
+private enum class ChapterAction(val label: StringResource) {
+    BOOKMARK(MR.strings.action_bookmark),
+    REMOVE_BOOKMARK(MR.strings.action_remove_bookmark),
+    MARK_READ(MR.strings.action_mark_as_read),
+    MARK_UNREAD(MR.strings.action_mark_as_unread),
+    MARK_PREVIOUS_READ(MR.strings.action_mark_previous_as_read),
+    DOWNLOAD(MR.strings.action_download),
+    DELETE(MR.strings.action_delete),
+}
+
+// Resolved in composition because the "mark previous" glyph is a drawable resource.
+@Composable
+private fun ChapterAction.icon(): ImageVector = when (this) {
+    ChapterAction.BOOKMARK -> Icons.Outlined.BookmarkAdd
+    ChapterAction.REMOVE_BOOKMARK -> Icons.Outlined.BookmarkRemove
+    ChapterAction.MARK_READ -> Icons.Outlined.DoneAll
+    ChapterAction.MARK_UNREAD -> Icons.Outlined.RemoveDone
+    ChapterAction.MARK_PREVIOUS_READ -> ImageVector.vectorResource(R.drawable.ic_done_prev_24dp)
+    ChapterAction.DOWNLOAD -> Icons.Outlined.Download
+    ChapterAction.DELETE -> Icons.Outlined.Delete
 }
 
 /** The buttons of the library menu, in order; each has a long-press confirmation slot. */
@@ -422,3 +413,5 @@ private enum class LibraryAction {
     DELETE,
     MORE,
 }
+
+private val BottomBarMenuDpOffset = DpOffset(0.dp, 0.dp)

@@ -1,12 +1,14 @@
 package eu.kanade.presentation.more.settings.screen
 
 import android.content.Context
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
@@ -87,7 +89,6 @@ internal object SettingsTrackingScreen : SearchableSettings {
 
     @Composable
     override fun getPreferences(): List<Preference> {
-        val context = LocalContext.current
         val trackPreferences = remember { Injekt.get<TrackPreferences>() }
         val trackerManager = remember { Injekt.get<TrackerManager>() }
         val sourceManager = remember { Injekt.get<SourceManager>() }
@@ -111,21 +112,6 @@ internal object SettingsTrackingScreen : SearchableSettings {
             }
         }
 
-        val enhancedTrackers = trackerManager.trackers
-            .filter { it is EnhancedTracker }
-            .partition { service ->
-                val acceptedSources = (service as EnhancedTracker).getAcceptedSources()
-                sourceManager.getAll().any { it::class.qualifiedName in acceptedSources }
-            }
-        var enhancedTrackerInfo = stringResource(MR.strings.enhanced_tracking_info)
-        if (enhancedTrackers.second.isNotEmpty()) {
-            val missingSourcesInfo = stringResource(
-                MR.strings.enhanced_services_not_installed,
-                enhancedTrackers.second.joinToString { it.name },
-            )
-            enhancedTrackerInfo += "\n\n$missingSourcesInfo"
-        }
-
         return listOf(
             Preference.PreferenceItem.SwitchPreference(
                 preference = trackPreferences.autoUpdateTrack,
@@ -146,61 +132,73 @@ internal object SettingsTrackingScreen : SearchableSettings {
             // SY <--
             Preference.PreferenceGroup(
                 title = stringResource(MR.strings.services),
-                preferenceItems = listOf(
-                    Preference.PreferenceItem.TrackerPreference(
-                        tracker = trackerManager.mangaBaka,
-                        login = { context.openInBrowser(MangaBakaApi.authUrl(), forceDefaultBrowser = true) },
-                        logout = { dialog = LogoutDialog(trackerManager.mangaBaka) },
-                    ),
-                    Preference.PreferenceItem.TrackerPreference(
-                        tracker = trackerManager.myAnimeList,
-                        login = { context.openInBrowser(MyAnimeListApi.authUrl(), forceDefaultBrowser = true) },
-                        logout = { dialog = LogoutDialog(trackerManager.myAnimeList) },
-                    ),
-                    Preference.PreferenceItem.TrackerPreference(
-                        tracker = trackerManager.aniList,
-                        login = { context.openInBrowser(AnilistApi.authUrl(), forceDefaultBrowser = true) },
-                        logout = { dialog = LogoutDialog(trackerManager.aniList) },
-                    ),
-                    Preference.PreferenceItem.TrackerPreference(
-                        tracker = trackerManager.kitsu,
-                        login = { dialog = LoginDialog(trackerManager.kitsu, MR.strings.email) },
-                        logout = { dialog = LogoutDialog(trackerManager.kitsu) },
-                    ),
-                    Preference.PreferenceItem.TrackerPreference(
-                        tracker = trackerManager.mangaUpdates,
-                        login = { dialog = LoginDialog(trackerManager.mangaUpdates, MR.strings.username) },
-                        logout = { dialog = LogoutDialog(trackerManager.mangaUpdates) },
-                    ),
-                    Preference.PreferenceItem.TrackerPreference(
-                        tracker = trackerManager.shikimori,
-                        login = { context.openInBrowser(ShikimoriApi.authUrl(), forceDefaultBrowser = true) },
-                        logout = { dialog = LogoutDialog(trackerManager.shikimori) },
-                    ),
-                    Preference.PreferenceItem.TrackerPreference(
-                        tracker = trackerManager.bangumi,
-                        login = { context.openInBrowser(BangumiApi.authUrl(), forceDefaultBrowser = true) },
-                        logout = { dialog = LogoutDialog(trackerManager.bangumi) },
-                    ),
-                    Preference.PreferenceItem.TrackerPreference(
-                        tracker = trackerManager.hikka,
-                        login = { context.openInBrowser(HikkaApi.authUrl(), forceDefaultBrowser = true) },
-                        logout = { dialog = LogoutDialog(trackerManager.hikka) },
-                    ),
-                    Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.tracking_info)),
-                ),
+                preferenceItems = servicePreferences(trackerManager) { dialog = it },
             ),
-            Preference.PreferenceGroup(
-                title = stringResource(MR.strings.enhanced_services),
-                preferenceItems = enhancedTrackers.first
-                    .map { service ->
-                        Preference.PreferenceItem.TrackerPreference(
-                            tracker = service,
-                            login = { (service as EnhancedTracker).loginNoop() },
-                            logout = service::logout,
-                        )
-                    } + listOf(Preference.PreferenceItem.InfoPreference(enhancedTrackerInfo)),
-            ),
+            enhancedServicesGroup(trackerManager, sourceManager),
+        )
+    }
+
+    // OAuth trackers log in through the browser; the credential-based ones open the login dialog.
+    @Composable
+    private fun servicePreferences(
+        trackerManager: TrackerManager,
+        openDialog: (Any) -> Unit,
+    ): List<Preference.PreferenceItem<out Any, out Any>> {
+        val context = LocalContext.current
+        fun browserLogin(tracker: Tracker, authUrl: Uri) = Preference.PreferenceItem.TrackerPreference(
+            tracker = tracker,
+            login = { context.openInBrowser(authUrl, forceDefaultBrowser = true) },
+            logout = { openDialog(LogoutDialog(tracker)) },
+        )
+        fun credentialLogin(tracker: Tracker, uNameStringRes: StringResource) =
+            Preference.PreferenceItem.TrackerPreference(
+                tracker = tracker,
+                login = { openDialog(LoginDialog(tracker, uNameStringRes)) },
+                logout = { openDialog(LogoutDialog(tracker)) },
+            )
+        return listOf(
+            browserLogin(trackerManager.mangaBaka, MangaBakaApi.authUrl()),
+            browserLogin(trackerManager.myAnimeList, MyAnimeListApi.authUrl()),
+            browserLogin(trackerManager.aniList, AnilistApi.authUrl()),
+            credentialLogin(trackerManager.kitsu, MR.strings.email),
+            credentialLogin(trackerManager.mangaUpdates, MR.strings.username),
+            browserLogin(trackerManager.shikimori, ShikimoriApi.authUrl()),
+            browserLogin(trackerManager.bangumi, BangumiApi.authUrl()),
+            browserLogin(trackerManager.hikka, HikkaApi.authUrl()),
+            Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.tracking_info)),
+        )
+    }
+
+    // Enhanced trackers that have a matching source installed are listed; the rest are named in the info text.
+    @Composable
+    private fun enhancedServicesGroup(
+        trackerManager: TrackerManager,
+        sourceManager: SourceManager,
+    ): Preference.PreferenceGroup {
+        val enhancedTrackers = trackerManager.trackers
+            .filter { it is EnhancedTracker }
+            .partition { service ->
+                val acceptedSources = (service as EnhancedTracker).getAcceptedSources()
+                sourceManager.getAll().any { it::class.qualifiedName in acceptedSources }
+            }
+        var enhancedTrackerInfo = stringResource(MR.strings.enhanced_tracking_info)
+        if (enhancedTrackers.second.isNotEmpty()) {
+            val missingSourcesInfo = stringResource(
+                MR.strings.enhanced_services_not_installed,
+                enhancedTrackers.second.joinToString { it.name },
+            )
+            enhancedTrackerInfo += "\n\n$missingSourcesInfo"
+        }
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.enhanced_services),
+            preferenceItems = enhancedTrackers.first
+                .map { service ->
+                    Preference.PreferenceItem.TrackerPreference(
+                        tracker = service,
+                        login = { (service as EnhancedTracker).loginNoop() },
+                        logout = service::logout,
+                    )
+                } + listOf(Preference.PreferenceItem.InfoPreference(enhancedTrackerInfo)),
         )
     }
 
@@ -220,20 +218,7 @@ internal object SettingsTrackingScreen : SearchableSettings {
 
         AlertDialog(
             onDismissRequest = onDismissRequest,
-            title = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(MR.strings.login_title, tracker.name),
-                        modifier = Modifier.weight(1f),
-                    )
-                    IconButton(onClick = onDismissRequest) {
-                        Icon(
-                            imageVector = Icons.Outlined.Close,
-                            contentDescription = stringResource(MR.strings.action_close),
-                        )
-                    }
-                }
-            },
+            title = { LoginTitle(tracker.name, onDismissRequest) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedTextField(
@@ -247,37 +232,7 @@ internal object SettingsTrackingScreen : SearchableSettings {
                         singleLine = true,
                         isError = inputError && !processing,
                     )
-
-                    var hidePassword by remember { mutableStateOf(true) }
-                    OutlinedSecureTextField(
-                        state = password,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .semantics { contentType = ContentType.Password },
-                        label = { Text(text = stringResource(MR.strings.password)) },
-                        trailingIcon = {
-                            IconButton(onClick = { hidePassword = !hidePassword }) {
-                                Icon(
-                                    imageVector = if (hidePassword) {
-                                        Icons.Filled.Visibility
-                                    } else {
-                                        Icons.Filled.VisibilityOff
-                                    },
-                                    contentDescription = null,
-                                )
-                            }
-                        },
-                        textObfuscationMode = if (hidePassword) {
-                            TextObfuscationMode.Hidden
-                        } else {
-                            TextObfuscationMode.Visible
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done,
-                        ),
-                        isError = inputError && !processing,
-                    )
+                    PasswordField(password, isError = inputError && !processing)
                 }
             },
             confirmButton = {
@@ -303,6 +258,48 @@ internal object SettingsTrackingScreen : SearchableSettings {
                     Text(text = stringResource(id))
                 }
             },
+        )
+    }
+
+    @Composable
+    private fun LoginTitle(trackerName: String, onDismissRequest: () -> Unit) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(MR.strings.login_title, trackerName),
+                modifier = Modifier.weight(1f),
+            )
+            IconButton(onClick = onDismissRequest) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = stringResource(MR.strings.action_close),
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun PasswordField(password: TextFieldState, isError: Boolean) {
+        var hidePassword by remember { mutableStateOf(true) }
+        OutlinedSecureTextField(
+            state = password,
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { contentType = ContentType.Password },
+            label = { Text(text = stringResource(MR.strings.password)) },
+            trailingIcon = {
+                IconButton(onClick = { hidePassword = !hidePassword }) {
+                    Icon(
+                        imageVector = if (hidePassword) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        contentDescription = null,
+                    )
+                }
+            },
+            textObfuscationMode = if (hidePassword) TextObfuscationMode.Hidden else TextObfuscationMode.Visible,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+            ),
+            isError = isError,
         )
     }
 

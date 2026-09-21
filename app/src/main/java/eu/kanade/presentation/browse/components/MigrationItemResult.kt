@@ -54,27 +54,7 @@ internal fun MigrationItemResult(
                 }
             }
             MigratingManga.SearchResult.NotFound -> {
-                Column(
-                    Modifier
-                        .widthIn(max = 150.dp)
-                        .fillMaxSize()
-                        .padding(top = 4.dp),
-                ) {
-                    Image(
-                        painter = rememberResourceBitmapPainter(id = R.drawable.cover_error),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(MangaCover.Book.ratio)
-                            .clip(MaterialTheme.shapes.extraSmall),
-                        contentScale = ContentScale.Crop,
-                    )
-                    Text(
-                        text = stringResource(SYMR.strings.no_alternatives_found),
-                        modifier = Modifier.padding(top = 4.dp, bottom = 1.dp, start = 8.dp),
-                        style = MaterialTheme.typography.titleSmall,
-                    )
-                }
+                NoAlternativesFound()
             }
             is MigratingManga.SearchResult.Result -> {
                 val item by produceState<Triple<Manga, MigratingManga.ChapterInfo, String>?>(
@@ -106,5 +86,30 @@ internal fun MigrationItemResult(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun NoAlternativesFound() {
+    Column(
+        Modifier
+            .widthIn(max = 150.dp)
+            .fillMaxSize()
+            .padding(top = 4.dp),
+    ) {
+        Image(
+            painter = rememberResourceBitmapPainter(id = R.drawable.cover_error),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(MangaCover.Book.ratio)
+                .clip(MaterialTheme.shapes.extraSmall),
+            contentScale = ContentScale.Crop,
+        )
+        Text(
+            text = stringResource(SYMR.strings.no_alternatives_found),
+            modifier = Modifier.padding(top = 4.dp, bottom = 1.dp, start = 8.dp),
+            style = MaterialTheme.typography.titleSmall,
+        )
     }
 }

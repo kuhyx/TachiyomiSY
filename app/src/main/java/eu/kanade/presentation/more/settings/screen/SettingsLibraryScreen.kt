@@ -127,38 +127,12 @@ internal object SettingsLibraryScreen : SearchableSettings {
         libraryPreferences: LibraryPreferences,
     ): Preference.PreferenceGroup {
         val context = LocalContext.current
-
-        val autoUpdateIntervalPref = libraryPreferences.autoUpdateInterval
-        val autoUpdateCategoriesPref = libraryPreferences.updateCategories
-        val autoUpdateCategoriesExcludePref = libraryPreferences.updateCategoriesExclude
-
-        val autoUpdateInterval by autoUpdateIntervalPref.collectAsState()
-
-        val included by autoUpdateCategoriesPref.collectAsState()
-        val excluded by autoUpdateCategoriesExcludePref.collectAsState()
-        var showCategoriesDialog by rememberSaveable { mutableStateOf(false) }
-        if (showCategoriesDialog) {
-            TriStateListDialog(
-                title = stringResource(MR.strings.categories),
-                message = stringResource(MR.strings.pref_library_update_categories_details),
-                items = allCategories,
-                initialChecked = included.mapNotNull { id -> allCategories.find { it.id.toString() == id } },
-                initialInversed = excluded.mapNotNull { id -> allCategories.find { it.id.toString() == id } },
-                itemLabel = { it.visualName },
-                onDismissRequest = { showCategoriesDialog = false },
-                onValueChanged = { newIncluded, newExcluded ->
-                    autoUpdateCategoriesPref.set(newIncluded.map { it.id.toString() }.toSet())
-                    autoUpdateCategoriesExcludePref.set(newExcluded.map { it.id.toString() }.toSet())
-                    showCategoriesDialog = false
-                },
-            )
-        }
-
+        val autoUpdateInterval by libraryPreferences.autoUpdateInterval.collectAsState()
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.pref_category_library_update),
             preferenceItems = listOf(
                 Preference.PreferenceItem.ListPreference(
-                    preference = autoUpdateIntervalPref,
+                    preference = libraryPreferences.autoUpdateInterval,
                     entries = mapOf(
                         0 to stringResource(MR.strings.update_never),
                         TWELVE_HOURS to stringResource(MR.strings.update_12hour),
@@ -189,46 +163,84 @@ internal object SettingsLibraryScreen : SearchableSettings {
                         true
                     },
                 ),
-                Preference.PreferenceItem.TextPreference(
-                    title = stringResource(MR.strings.categories),
-                    subtitle = getCategoriesLabel(
-                        allCategories = allCategories,
-                        included = included,
-                        excluded = excluded,
-                    ),
-                    onClick = { showCategoriesDialog = true },
+                updateCategoriesPreference(allCategories, libraryPreferences),
+            ) + updateScopePreferences(libraryPreferences),
+        )
+    }
+
+    // Which categories a global update covers; the tri-state dialog writes the include/exclude sets.
+    @Composable
+    private fun updateCategoriesPreference(
+        allCategories: List<Category>,
+        libraryPreferences: LibraryPreferences,
+    ): Preference.PreferenceItem<out Any, out Any> {
+        val autoUpdateCategoriesPref = libraryPreferences.updateCategories
+        val autoUpdateCategoriesExcludePref = libraryPreferences.updateCategoriesExclude
+        val included by autoUpdateCategoriesPref.collectAsState()
+        val excluded by autoUpdateCategoriesExcludePref.collectAsState()
+        var showCategoriesDialog by rememberSaveable { mutableStateOf(false) }
+        if (showCategoriesDialog) {
+            TriStateListDialog(
+                title = stringResource(MR.strings.categories),
+                message = stringResource(MR.strings.pref_library_update_categories_details),
+                items = allCategories,
+                initialChecked = included.mapNotNull { id -> allCategories.find { it.id.toString() == id } },
+                initialInversed = excluded.mapNotNull { id -> allCategories.find { it.id.toString() == id } },
+                itemLabel = { it.visualName },
+                onDismissRequest = { showCategoriesDialog = false },
+                onValueChanged = { newIncluded, newExcluded ->
+                    autoUpdateCategoriesPref.set(newIncluded.map { it.id.toString() }.toSet())
+                    autoUpdateCategoriesExcludePref.set(newExcluded.map { it.id.toString() }.toSet())
+                    showCategoriesDialog = false
+                },
+            )
+        }
+        return Preference.PreferenceItem.TextPreference(
+            title = stringResource(MR.strings.categories),
+            subtitle = getCategoriesLabel(
+                allCategories = allCategories,
+                included = included,
+                excluded = excluded,
+            ),
+            onClick = { showCategoriesDialog = true },
+        )
+    }
+
+    @Composable
+    private fun updateScopePreferences(
+        libraryPreferences: LibraryPreferences,
+    ): List<Preference.PreferenceItem<out Any, out Any>> {
+        return listOf(
+            // SY -->
+            Preference.PreferenceItem.ListPreference(
+                preference = libraryPreferences.groupLibraryUpdateType,
+                title = stringResource(SYMR.strings.library_group_updates),
+                entries = mapOf(
+                    GroupLibraryMode.GLOBAL to stringResource(SYMR.strings.library_group_updates_global),
+                    GroupLibraryMode.ALL_BUT_UNGROUPED to
+                        stringResource(SYMR.strings.library_group_updates_all_but_ungrouped),
+                    GroupLibraryMode.ALL to stringResource(SYMR.strings.library_group_updates_all),
                 ),
-                // SY -->
-                Preference.PreferenceItem.ListPreference(
-                    preference = libraryPreferences.groupLibraryUpdateType,
-                    title = stringResource(SYMR.strings.library_group_updates),
-                    entries = mapOf(
-                        GroupLibraryMode.GLOBAL to stringResource(SYMR.strings.library_group_updates_global),
-                        GroupLibraryMode.ALL_BUT_UNGROUPED to
-                            stringResource(SYMR.strings.library_group_updates_all_but_ungrouped),
-                        GroupLibraryMode.ALL to stringResource(SYMR.strings.library_group_updates_all),
-                    ),
+            ),
+            // SY <--
+            Preference.PreferenceItem.SwitchPreference(
+                preference = libraryPreferences.autoUpdateMetadata,
+                title = stringResource(MR.strings.pref_library_update_refresh_metadata),
+                subtitle = stringResource(MR.strings.pref_library_update_refresh_metadata_summary),
+            ),
+            Preference.PreferenceItem.MultiSelectListPreference(
+                preference = libraryPreferences.autoUpdateMangaRestrictions,
+                entries = mapOf(
+                    MANGA_HAS_UNREAD to stringResource(MR.strings.pref_update_only_completely_read),
+                    MANGA_NON_READ to stringResource(MR.strings.pref_update_only_started),
+                    MANGA_NON_COMPLETED to stringResource(MR.strings.pref_update_only_non_completed),
+                    MANGA_OUTSIDE_RELEASE_PERIOD to stringResource(MR.strings.pref_update_only_in_release_period),
                 ),
-                // SY <--
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = libraryPreferences.autoUpdateMetadata,
-                    title = stringResource(MR.strings.pref_library_update_refresh_metadata),
-                    subtitle = stringResource(MR.strings.pref_library_update_refresh_metadata_summary),
-                ),
-                Preference.PreferenceItem.MultiSelectListPreference(
-                    preference = libraryPreferences.autoUpdateMangaRestrictions,
-                    entries = mapOf(
-                        MANGA_HAS_UNREAD to stringResource(MR.strings.pref_update_only_completely_read),
-                        MANGA_NON_READ to stringResource(MR.strings.pref_update_only_started),
-                        MANGA_NON_COMPLETED to stringResource(MR.strings.pref_update_only_non_completed),
-                        MANGA_OUTSIDE_RELEASE_PERIOD to stringResource(MR.strings.pref_update_only_in_release_period),
-                    ),
-                    title = stringResource(MR.strings.pref_library_update_smart_update),
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = libraryPreferences.newShowUpdatesCount,
-                    title = stringResource(MR.strings.pref_library_update_show_tab_badge),
-                ),
+                title = stringResource(MR.strings.pref_library_update_smart_update),
+            ),
+            Preference.PreferenceItem.SwitchPreference(
+                preference = libraryPreferences.newShowUpdatesCount,
+                title = stringResource(MR.strings.pref_library_update_show_tab_badge),
             ),
         )
     }

@@ -65,11 +65,9 @@ internal class ClearDatabaseScreen : Screen() {
 
     @Composable
     override fun Content() {
-        val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
         val model = rememberScreenModel { ClearDatabaseScreenModel() }
         val state by model.state.collectAsState()
-        val scope = rememberCoroutineScope()
 
         when (val s = state) {
             is ClearDatabaseScreenModel.State.Loading -> {
@@ -77,60 +75,7 @@ internal class ClearDatabaseScreen : Screen() {
             }
             is ClearDatabaseScreenModel.State.Ready -> {
                 if (s.showConfirmation) {
-                    var keepReadManga by remember { mutableStateOf(true) }
-                    AlertDialog(
-                        title = {
-                            Text(text = stringResource(MR.strings.are_you_sure))
-                        },
-                        text = {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                            ) {
-                                Text(text = stringResource(MR.strings.clear_database_text))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text(
-                                        text = stringResource(MR.strings.clear_db_exclude_read),
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                    Switch(
-                                        checked = keepReadManga,
-                                        onCheckedChange = { keepReadManga = it },
-                                    )
-                                }
-                                if (!keepReadManga) {
-                                    Text(
-                                        text = stringResource(MR.strings.clear_database_history_warning),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.error,
-                                    )
-                                }
-                            }
-                        },
-                        onDismissRequest = model::hideConfirmation,
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    scope.launchUI {
-                                        model.removeMangaBySourceId(keepReadManga)
-                                        model.clearSelection()
-                                        model.hideConfirmation()
-                                        context.toast(MR.strings.clear_database_completed)
-                                    }
-                                },
-                            ) {
-                                Text(text = stringResource(MR.strings.action_ok))
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = model::hideConfirmation) {
-                                Text(text = stringResource(MR.strings.action_cancel))
-                            }
-                        },
-                    )
+                    ConfirmClearDialog(model)
                 }
 
                 Scaffold(
@@ -138,24 +83,7 @@ internal class ClearDatabaseScreen : Screen() {
                         AppBar(
                             title = stringResource(MR.strings.pref_clear_database),
                             navigateUp = navigator::pop,
-                            actions = {
-                                if (s.items.isNotEmpty()) {
-                                    AppBarActions(
-                                        actions = listOf(
-                                            AppBar.Action(
-                                                title = stringResource(MR.strings.action_select_all),
-                                                icon = Icons.Outlined.SelectAll,
-                                                onClick = model::selectAll,
-                                            ),
-                                            AppBar.Action(
-                                                title = stringResource(MR.strings.action_select_inverse),
-                                                icon = Icons.Outlined.FlipToBack,
-                                                onClick = model::invertSelection,
-                                            ),
-                                        ),
-                                    )
-                                }
-                            },
+                            actions = { if (s.items.isNotEmpty()) SelectionActions(model) },
                             scrollBehavior = scrollBehavior,
                         )
                     },
@@ -185,6 +113,85 @@ internal class ClearDatabaseScreen : Screen() {
                 }
             }
         }
+    }
+
+    @Composable
+    private fun SelectionActions(model: ClearDatabaseScreenModel) {
+        AppBarActions(
+            actions = listOf(
+                AppBar.Action(
+                    title = stringResource(MR.strings.action_select_all),
+                    icon = Icons.Outlined.SelectAll,
+                    onClick = model::selectAll,
+                ),
+                AppBar.Action(
+                    title = stringResource(MR.strings.action_select_inverse),
+                    icon = Icons.Outlined.FlipToBack,
+                    onClick = model::invertSelection,
+                ),
+            ),
+        )
+    }
+
+    // The keep-read switch defaults on; turning it off also wipes the history of what is removed.
+    @Composable
+    private fun ConfirmClearDialog(model: ClearDatabaseScreenModel) {
+        val context = LocalContext.current
+        val scope = rememberCoroutineScope()
+        var keepReadManga by remember { mutableStateOf(true) }
+        AlertDialog(
+            title = {
+                Text(text = stringResource(MR.strings.are_you_sure))
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+                ) {
+                    Text(text = stringResource(MR.strings.clear_database_text))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = stringResource(MR.strings.clear_db_exclude_read),
+                            modifier = Modifier.weight(1f),
+                        )
+                        Switch(
+                            checked = keepReadManga,
+                            onCheckedChange = { keepReadManga = it },
+                        )
+                    }
+                    if (!keepReadManga) {
+                        Text(
+                            text = stringResource(MR.strings.clear_database_history_warning),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            },
+            onDismissRequest = model::hideConfirmation,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launchUI {
+                            model.removeMangaBySourceId(keepReadManga)
+                            model.clearSelection()
+                            model.hideConfirmation()
+                            context.toast(MR.strings.clear_database_completed)
+                        }
+                    },
+                ) {
+                    Text(text = stringResource(MR.strings.action_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = model::hideConfirmation) {
+                    Text(text = stringResource(MR.strings.action_cancel))
+                }
+            },
+        )
     }
 
     @Composable

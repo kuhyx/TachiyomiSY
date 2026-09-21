@@ -1,6 +1,7 @@
 package exh.ui.metadata.adapters
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.LayoutInflater
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -32,76 +33,64 @@ internal fun EHentaiDescription(state: State.Success, openMetadataViewer: () -> 
             val meta = state.meta
             if (!(meta == null || meta !is EHentaiSearchMetadata)) {
                 val binding = DescriptionAdapterEhBinding.bind(it)
-
-                binding.genre.text =
-                    meta.genre?.let { MetadataUIUtil.getGenreAndColour(context, it) }
-                        ?.let {
-                            binding.genre.setBackgroundColor(it.first)
-                            it.second
-                        }
-                        ?: meta.genre
-                        ?: context.stringResource(MR.strings.unknown)
-
-                binding.visible.text =
-                    context.stringResource(
-                        SYMR.strings.is_visible,
-                        meta.visible ?: context.stringResource(MR.strings.unknown),
-                    )
-
-                binding.favorites.text = NumberFormat.getIntegerInstance().format(meta.favorites ?: 0)
-                binding.favorites.bindDrawable(context, R.drawable.ic_book_24dp)
-
-                binding.uploader.text = meta.uploader ?: context.stringResource(MR.strings.unknown)
-
-                binding.size.text = MetadataUtil.humanReadableByteCount(meta.size ?: 0, true)
-                binding.size.bindDrawable(context, R.drawable.ic_outline_sd_card_24)
-
-                val length = meta.length ?: 0
-                binding.pages.text = context.pluralStringResource(SYMR.plurals.num_pages, length, length)
-                binding.pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
-
-                val language = meta.language ?: context.stringResource(MR.strings.unknown)
-                binding.language.text = if (meta.translated == true) {
-                    context.stringResource(SYMR.strings.language_translated, language)
-                } else {
-                    language
-                }
-
-                val ratingFloat = meta.averageRating?.toFloat()
-                binding.ratingBar.rating = ratingFloat ?: 0F
-                @SuppressLint("SetTextI18n")
-                binding.rating.text =
-                    (ratingFloat ?: 0F).toString() + " - " +
-                    MetadataUIUtil.getRatingString(context, ratingFloat?.times(2))
-
-                binding.moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
-
-                listOf(
-                    binding.favorites,
-                    binding.genre,
-                    binding.language,
-                    binding.pages,
-                    binding.rating,
-                    binding.uploader,
-                    binding.visible,
-                ).forEach { textView ->
-                    textView.setOnLongClickListener {
-                        context.copyToClipboard(
-                            textView.text.toString(),
-                            textView.text.toString(),
-                        )
-                        true
-                    }
-                }
-
-                binding.uploader.setOnClickListener {
-                    meta.uploader?.let { search("uploader:\"$it\"") }
-                }
-
-                binding.moreInfo.setOnClickListener {
-                    openMetadataViewer()
-                }
+                binding.bindMetadata(context, meta)
+                binding.bindActions(context, meta, openMetadataViewer, search)
             }
         },
     )
+}
+
+private fun DescriptionAdapterEhBinding.bindMetadata(context: Context, meta: EHentaiSearchMetadata) {
+    genre.text =
+        meta.genre?.let { MetadataUIUtil.getGenreAndColour(context, it) }
+            ?.let {
+                genre.setBackgroundColor(it.first)
+                it.second
+            }
+            ?: meta.genre
+            ?: context.stringResource(MR.strings.unknown)
+    visible.text = context.stringResource(
+        SYMR.strings.is_visible,
+        meta.visible ?: context.stringResource(MR.strings.unknown),
+    )
+    favorites.text = NumberFormat.getIntegerInstance().format(meta.favorites ?: 0)
+    favorites.bindDrawable(context, R.drawable.ic_book_24dp)
+    uploader.text = meta.uploader ?: context.stringResource(MR.strings.unknown)
+    size.text = MetadataUtil.humanReadableByteCount(meta.size ?: 0, true)
+    size.bindDrawable(context, R.drawable.ic_outline_sd_card_24)
+    val length = meta.length ?: 0
+    pages.text = context.pluralStringResource(SYMR.plurals.num_pages, length, length)
+    pages.bindDrawable(context, R.drawable.ic_baseline_menu_book_24)
+    val languageText = meta.language ?: context.stringResource(MR.strings.unknown)
+    language.text = if (meta.translated == true) {
+        context.stringResource(SYMR.strings.language_translated, languageText)
+    } else {
+        languageText
+    }
+    val ratingFloat = meta.averageRating?.toFloat()
+    ratingBar.rating = ratingFloat ?: 0F
+    @SuppressLint("SetTextI18n")
+    rating.text =
+        (ratingFloat ?: 0F).toString() + " - " + MetadataUIUtil.getRatingString(context, ratingFloat?.times(2))
+    moreInfo.bindDrawable(context, R.drawable.ic_info_24dp)
+}
+
+private fun DescriptionAdapterEhBinding.bindActions(
+    context: Context,
+    meta: EHentaiSearchMetadata,
+    openMetadataViewer: () -> Unit,
+    search: (String) -> Unit,
+) {
+    listOf(favorites, genre, language, pages, rating, uploader, visible).forEach { textView ->
+        textView.setOnLongClickListener {
+            context.copyToClipboard(textView.text.toString(), textView.text.toString())
+            true
+        }
+    }
+    uploader.setOnClickListener {
+        meta.uploader?.let { search("uploader:\"$it\"") }
+    }
+    moreInfo.setOnClickListener {
+        openMetadataViewer()
+    }
 }

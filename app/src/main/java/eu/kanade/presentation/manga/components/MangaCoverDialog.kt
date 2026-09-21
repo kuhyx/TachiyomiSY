@@ -75,79 +75,7 @@ internal fun MangaCoverDialog(
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             containerColor = Color.Transparent,
-            bottomBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp)
-                        .navigationBarsPadding(),
-                ) {
-                    ActionsPill {
-                        IconButton(onClick = onDismissRequest) {
-                            Icon(
-                                imageVector = Icons.Outlined.Close,
-                                contentDescription = stringResource(MR.strings.action_close),
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    ActionsPill {
-                        AppBarActions(
-                            actions = listOf(
-                                AppBar.Action(
-                                    title = stringResource(MR.strings.action_share),
-                                    icon = Icons.Outlined.Share,
-                                    onClick = onShareClick,
-                                ),
-                                AppBar.Action(
-                                    title = stringResource(MR.strings.action_save),
-                                    icon = Icons.Outlined.Save,
-                                    onClick = onSaveClick,
-                                ),
-                            ),
-                        )
-                        if (onEditClick != null) {
-                            Box {
-                                var expanded by remember { mutableStateOf(false) }
-                                IconButton(
-                                    onClick = {
-                                        if (isCustomCover) {
-                                            expanded = true
-                                        } else {
-                                            onEditClick(EditCoverAction.EDIT)
-                                        }
-                                    },
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Edit,
-                                        contentDescription = stringResource(MR.strings.action_edit_cover),
-                                    )
-                                }
-                                DropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false },
-                                    offset = DpOffset(8.dp, 0.dp),
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text(text = stringResource(MR.strings.action_edit)) },
-                                        onClick = {
-                                            onEditClick(EditCoverAction.EDIT)
-                                            expanded = false
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(text = stringResource(MR.strings.action_delete)) },
-                                        onClick = {
-                                            onEditClick(EditCoverAction.DELETE)
-                                            expanded = false
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            },
+            bottomBar = { CoverActionsBar(isCustomCover, onShareClick, onSaveClick, onEditClick, onDismissRequest) },
         ) { contentPadding ->
             val statusBarPaddingPx = with(LocalDensity.current) { contentPadding.calculateTopPadding().roundToPx() }
             val bottomPaddingPx = with(LocalDensity.current) { contentPadding.calculateBottomPadding().roundToPx() }
@@ -157,40 +85,132 @@ internal fun MangaCoverDialog(
                     .fillMaxSize()
                     .clickableNoIndication(onClick = onDismissRequest),
             ) {
-                AndroidView(
-                    factory = {
-                        ReaderPageImageView(it).apply {
-                            onViewClicked = onDismissRequest
-                            clipToPadding = false
-                            clipChildren = false
-                        }
-                    },
-                    update = { view ->
-                        val request = ImageRequest.Builder(view.context)
-                            .data(manga)
-                            .size(Size.ORIGINAL)
-                            .memoryCachePolicy(CachePolicy.DISABLED)
-                            .target { image ->
-                                val drawable = image.asDrawable(view.context.resources)
-                                // Copy bitmap in case it came from memory cache
-                                // Because SSIV needs to thoroughly read the image
-                                val copy = (drawable as? BitmapDrawable)
-                                    ?.bitmap
-                                    ?.copy(Bitmap.Config.HARDWARE, false)
-                                    ?.toDrawable(view.context.resources)
-                                    ?: drawable
-                                view.setImage(copy, ReaderPageImageView.Config(zoomDuration = 500))
-                            }
-                            .build()
-                        view.context.imageLoader.enqueue(request)
-
-                        view.updatePadding(top = statusBarPaddingPx, bottom = bottomPaddingPx)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                )
+                CoverImage(manga, statusBarPaddingPx, bottomPaddingPx, onDismissRequest)
             }
         }
     }
+}
+
+@Composable
+private fun CoverActionsBar(
+    isCustomCover: Boolean,
+    onShareClick: () -> Unit,
+    onSaveClick: () -> Unit,
+    onEditClick: ((EditCoverAction) -> Unit)?,
+    onDismissRequest: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+            .navigationBarsPadding(),
+    ) {
+        ActionsPill {
+            IconButton(onClick = onDismissRequest) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = stringResource(MR.strings.action_close),
+                )
+            }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        ActionsPill {
+            AppBarActions(
+                actions = listOf(
+                    AppBar.Action(
+                        title = stringResource(MR.strings.action_share),
+                        icon = Icons.Outlined.Share,
+                        onClick = onShareClick,
+                    ),
+                    AppBar.Action(
+                        title = stringResource(MR.strings.action_save),
+                        icon = Icons.Outlined.Save,
+                        onClick = onSaveClick,
+                    ),
+                ),
+            )
+            if (onEditClick != null) {
+                EditCoverButton(isCustomCover, onEditClick)
+            }
+        }
+    }
+}
+
+// A custom cover offers edit/delete in a menu; a source cover goes straight to the picker.
+@Composable
+private fun EditCoverButton(isCustomCover: Boolean, onEditClick: (EditCoverAction) -> Unit) {
+    Box {
+        var expanded by remember { mutableStateOf(false) }
+        IconButton(
+            onClick = {
+                if (isCustomCover) {
+                    expanded = true
+                } else {
+                    onEditClick(EditCoverAction.EDIT)
+                }
+            },
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Edit,
+                contentDescription = stringResource(MR.strings.action_edit_cover),
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            offset = DpOffset(8.dp, 0.dp),
+        ) {
+            DropdownMenuItem(
+                text = { Text(text = stringResource(MR.strings.action_edit)) },
+                onClick = {
+                    onEditClick(EditCoverAction.EDIT)
+                    expanded = false
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(text = stringResource(MR.strings.action_delete)) },
+                onClick = {
+                    onEditClick(EditCoverAction.DELETE)
+                    expanded = false
+                },
+            )
+        }
+    }
+}
+
+// The zoomable cover, loaded uncached so the subsampling view reads the full bitmap.
+@Composable
+private fun CoverImage(manga: Manga, statusBarPaddingPx: Int, bottomPaddingPx: Int, onDismissRequest: () -> Unit) {
+    AndroidView(
+        factory = {
+            ReaderPageImageView(it).apply {
+                onViewClicked = onDismissRequest
+                clipToPadding = false
+                clipChildren = false
+            }
+        },
+        update = { view ->
+            val request = ImageRequest.Builder(view.context)
+                .data(manga)
+                .size(Size.ORIGINAL)
+                .memoryCachePolicy(CachePolicy.DISABLED)
+                .target { image ->
+                    val drawable = image.asDrawable(view.context.resources)
+                    // Copy bitmap in case it came from memory cache
+                    // Because SSIV needs to thoroughly read the image
+                    val copy = (drawable as? BitmapDrawable)
+                        ?.bitmap
+                        ?.copy(Bitmap.Config.HARDWARE, false)
+                        ?.toDrawable(view.context.resources)
+                        ?: drawable
+                    view.setImage(copy, ReaderPageImageView.Config(zoomDuration = 500))
+                }
+                .build()
+            view.context.imageLoader.enqueue(request)
+            view.updatePadding(top = statusBarPaddingPx, bottom = bottomPaddingPx)
+        },
+        modifier = Modifier.fillMaxSize(),
+    )
 }
 
 @Composable

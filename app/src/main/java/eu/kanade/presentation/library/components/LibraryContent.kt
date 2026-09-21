@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,32 +60,16 @@ internal fun LibraryContent(
 
         val scope = rememberCoroutineScope()
         var isRefreshing by remember(pagerState.currentPage) { mutableStateOf(false) }
-
         val hasRealCategories = categories.size > 1 || categories.firstOrNull()?.isSystemCategory == false
         if (showPageTabs && hasRealCategories) {
-            LaunchedEffect(categories) {
-                if (categories.size <= pagerState.currentPage) {
-                    pagerState.scrollToPage(categories.size - 1)
-                }
-            }
-            LibraryTabs(
-                categories = categories,
-                pagerState = pagerState,
-                getItemCountForCategory = getItemCountForCategory,
-                onTabItemClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(it)
-                    }
-                },
-            )
+            CategoryTabs(categories, pagerState, getItemCountForCategory)
         }
 
         PullRefresh(
             refreshing = isRefreshing,
             enabled = selection.isEmpty(),
             onRefresh = {
-                val started = onRefresh()
-                if (started) {
+                if (onRefresh()) {
                     scope.launch {
                         // Fake refresh status but hide it after a second as it's a long running task
                         isRefreshing = true
@@ -121,4 +106,29 @@ internal fun LibraryContent(
             onChangeCurrentPage(pagerState.currentPage)
         }
     }
+}
+
+// The category tab strip; a category that disappears under the pager snaps it back to the last one.
+@Composable
+private fun CategoryTabs(
+    categories: List<Category>,
+    pagerState: PagerState,
+    getItemCountForCategory: (Category) -> Int?,
+) {
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(categories) {
+        if (categories.size <= pagerState.currentPage) {
+            pagerState.scrollToPage(categories.size - 1)
+        }
+    }
+    LibraryTabs(
+        categories = categories,
+        pagerState = pagerState,
+        getItemCountForCategory = getItemCountForCategory,
+        onTabItemClick = {
+            scope.launch {
+                pagerState.animateScrollToPage(it)
+            }
+        },
+    )
 }

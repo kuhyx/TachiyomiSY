@@ -48,21 +48,31 @@ private const val HALF_ROW_FRACTION = 0.5f
 private const val BUTTON_WIDTH_FRACTION = 0.75f
 private const val LABEL_WEIGHT = 3f
 
+// The E-Hentai auto-scroll toggle, its frequency field and the help button next to it.
+internal data class AutoScrollControls(
+    val isAutoScroll: Boolean,
+    val isAutoScrollEnabled: Boolean,
+    val onToggleAutoscroll: (Boolean) -> Unit,
+    val autoScrollFrequency: String,
+    val onSetAutoScrollFrequency: (String) -> Unit,
+    val onClickHelp: () -> Unit,
+)
+
+// The E-Hentai "retry all" / "boost page" actions with their help buttons.
+internal data class ExhPageActions(
+    val onClickRetryAll: () -> Unit,
+    val onClickRetryAllHelp: () -> Unit,
+    val onClickBoostPage: () -> Unit,
+    val onClickBoostPageHelp: () -> Unit,
+)
+
 @Composable
 internal fun ExhUtils(
     isVisible: Boolean,
     onSetExhUtilsVisibility: (Boolean) -> Unit,
     backgroundColor: Color,
-    isAutoScroll: Boolean,
-    isAutoScrollEnabled: Boolean,
-    onToggleAutoscroll: (Boolean) -> Unit,
-    autoScrollFrequency: String,
-    onSetAutoScrollFrequency: (String) -> Unit,
-    onClickAutoScrollHelp: () -> Unit,
-    onClickRetryAll: () -> Unit,
-    onClickRetryAllHelp: () -> Unit,
-    onClickBoostPage: () -> Unit,
-    onClickBoostPageHelp: () -> Unit,
+    autoScroll: AutoScrollControls,
+    pageActions: ExhPageActions,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -79,152 +89,25 @@ internal fun ExhUtils(
                         .height(IntrinsicSize.Min),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth(HALF_ROW_FRACTION)
-                            .fillMaxHeight()
-                            .padding(5.dp)
-                            .clickable(enabled = isAutoScrollEnabled) { onToggleAutoscroll(!isAutoScroll) },
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(
-                            Modifier.weight(LABEL_WEIGHT),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text(
-                                text = stringResource(SYMR.strings.eh_autoscroll),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 13.sp,
-                                fontFamily = FontFamily.SansSerif,
-                                style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier.fillMaxWidth(BUTTON_WIDTH_FRACTION),
-                                textAlign = TextAlign.Center,
-                            )
-                        }
-                        Column(
-                            Modifier.weight(1f),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Switch(
-                                checked = isAutoScroll,
-                                onCheckedChange = null,
-                                enabled = isAutoScrollEnabled,
-                            )
-                        }
-                    }
-                    Row(
-                        Modifier.fillMaxWidth(ROW_WIDTH_FRACTION).padding(5.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(
-                            Modifier.weight(LABEL_WEIGHT),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            var autoScrollFrequencyState by remember {
-                                mutableStateOf(autoScrollFrequency)
-                            }
-                            TextField(
-                                value = autoScrollFrequencyState,
-                                onValueChange = {
-                                    autoScrollFrequencyState = it
-                                    onSetAutoScrollFrequency(it)
-                                },
-                                isError = !isAutoScrollEnabled,
-                                singleLine = true,
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                ),
-                                modifier = Modifier.fillMaxWidth(BUTTON_WIDTH_FRACTION),
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Decimal,
-                                ),
-                            )
-                            AnimatedVisibility(!isAutoScrollEnabled) {
-                                Text(
-                                    text = stringResource(SYMR.strings.eh_autoscroll_freq_invalid),
-                                    color = MaterialTheme.colorScheme.error,
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
-                            }
-                        }
-                        TextButton(
-                            onClick = onClickAutoScrollHelp,
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text(
-                                text = "?",
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
-                    }
+                    AutoScrollToggle(autoScroll)
+                    AutoScrollFrequencyField(autoScroll)
                 }
                 Row(
                     Modifier.fillMaxWidth(ROW_WIDTH_FRACTION),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        Modifier.fillMaxWidth(HALF_ROW_FRACTION).padding(5.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        TextButton(
-                            onClick = onClickRetryAll,
-                            modifier = Modifier.weight(LABEL_WEIGHT),
-                        ) {
-                            Text(
-                                text = stringResource(SYMR.strings.eh_retry_all),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 13.sp,
-                                fontFamily = FontFamily.SansSerif,
-                            )
-                        }
-                        TextButton(
-                            onClick = onClickRetryAllHelp,
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text(
-                                text = "?",
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
-                    }
-                    Row(
-                        Modifier.fillMaxWidth(ROW_WIDTH_FRACTION).padding(5.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        TextButton(
-                            onClick = onClickBoostPage,
-                            modifier = Modifier.weight(LABEL_WEIGHT),
-                        ) {
-                            Text(
-                                text = stringResource(SYMR.strings.eh_boost_page),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 13.sp,
-                                fontFamily = FontFamily.SansSerif,
-                            )
-                        }
-                        TextButton(
-                            onClick = onClickBoostPageHelp,
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text(
-                                text = "?",
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
-                    }
+                    ActionWithHelp(
+                        label = stringResource(SYMR.strings.eh_retry_all),
+                        onClick = pageActions.onClickRetryAll,
+                        onClickHelp = pageActions.onClickRetryAllHelp,
+                        modifier = Modifier.fillMaxWidth(HALF_ROW_FRACTION),
+                    )
+                    ActionWithHelp(
+                        label = stringResource(SYMR.strings.eh_boost_page),
+                        onClick = pageActions.onClickBoostPage,
+                        onClickHelp = pageActions.onClickBoostPageHelp,
+                        modifier = Modifier.fillMaxWidth(ROW_WIDTH_FRACTION),
+                    )
                 }
             }
         }
@@ -246,6 +129,132 @@ internal fun ExhUtils(
 }
 
 @Composable
+private fun AutoScrollToggle(controls: AutoScrollControls) {
+    Row(
+        Modifier
+            .fillMaxWidth(HALF_ROW_FRACTION)
+            .fillMaxHeight()
+            .padding(5.dp)
+            .clickable(enabled = controls.isAutoScrollEnabled) { controls.onToggleAutoscroll(!controls.isAutoScroll) },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            Modifier.weight(LABEL_WEIGHT),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(SYMR.strings.eh_autoscroll),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 13.sp,
+                fontFamily = FontFamily.SansSerif,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.fillMaxWidth(BUTTON_WIDTH_FRACTION),
+                textAlign = TextAlign.Center,
+            )
+        }
+        Column(
+            Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Switch(
+                checked = controls.isAutoScroll,
+                onCheckedChange = null,
+                enabled = controls.isAutoScrollEnabled,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AutoScrollFrequencyField(controls: AutoScrollControls) {
+    Row(
+        Modifier.fillMaxWidth(ROW_WIDTH_FRACTION).padding(5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            Modifier.weight(LABEL_WEIGHT),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            var autoScrollFrequencyState by remember {
+                mutableStateOf(controls.autoScrollFrequency)
+            }
+            TextField(
+                value = autoScrollFrequencyState,
+                onValueChange = {
+                    autoScrollFrequencyState = it
+                    controls.onSetAutoScrollFrequency(it)
+                },
+                isError = !controls.isAutoScrollEnabled,
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                modifier = Modifier.fillMaxWidth(BUTTON_WIDTH_FRACTION),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                ),
+            )
+            AnimatedVisibility(!controls.isAutoScrollEnabled) {
+                Text(
+                    text = stringResource(SYMR.strings.eh_autoscroll_freq_invalid),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
+        }
+        HelpButton(onClick = controls.onClickHelp, modifier = Modifier.weight(1f))
+    }
+}
+
+// A labelled action button followed by its "?" help button, sharing one padded row.
+@Composable
+private fun ActionWithHelp(
+    label: String,
+    onClick: () -> Unit,
+    onClickHelp: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier.padding(5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TextButton(
+            onClick = onClick,
+            modifier = Modifier.weight(LABEL_WEIGHT),
+        ) {
+            Text(
+                text = label,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 13.sp,
+                fontFamily = FontFamily.SansSerif,
+            )
+        }
+        HelpButton(onClick = onClickHelp, modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun HelpButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    TextButton(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Text(
+            text = "?",
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+        )
+    }
+}
+
+@Composable
 @PreviewLightDark
 internal fun ExhUtilsPreview() {
     Surface {
@@ -253,16 +262,20 @@ internal fun ExhUtilsPreview() {
             isVisible = true,
             onSetExhUtilsVisibility = {},
             backgroundColor = Color.Black,
-            isAutoScroll = true,
-            isAutoScrollEnabled = true,
-            onToggleAutoscroll = {},
-            autoScrollFrequency = "3.0",
-            onSetAutoScrollFrequency = {},
-            onClickAutoScrollHelp = {},
-            onClickBoostPage = {},
-            onClickBoostPageHelp = {},
-            onClickRetryAll = {},
-            onClickRetryAllHelp = {},
+            autoScroll = AutoScrollControls(
+                isAutoScroll = true,
+                isAutoScrollEnabled = true,
+                onToggleAutoscroll = {},
+                autoScrollFrequency = "3.0",
+                onSetAutoScrollFrequency = {},
+                onClickHelp = {},
+            ),
+            pageActions = ExhPageActions(
+                onClickRetryAll = {},
+                onClickRetryAllHelp = {},
+                onClickBoostPage = {},
+                onClickBoostPageHelp = {},
+            ),
         )
     }
 }

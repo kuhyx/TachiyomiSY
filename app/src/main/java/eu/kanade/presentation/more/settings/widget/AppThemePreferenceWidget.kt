@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -150,108 +151,118 @@ internal fun AppThemePreviewItem(
             .background(MaterialTheme.colorScheme.background)
             .clickable(onClick = onClick),
     ) {
-        // App Bar
+        PreviewAppBar(selected = selected)
+        PreviewCover()
+        PreviewBottomBar()
+    }
+}
+
+@Composable
+private fun PreviewAppBar(selected: Boolean) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(40.dp)
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight(PREVIEW_TITLE_HEIGHT)
+                .weight(PREVIEW_TITLE_WEIGHT)
+                .padding(end = 4.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    shape = MaterialTheme.shapes.small,
+                ),
+        )
+
+        Box(
+            modifier = Modifier.weight(PREVIEW_ACTION_WEIGHT),
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            if (selected) {
+                Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = stringResource(MR.strings.selected),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PreviewCover() {
+    Box(
+        modifier = Modifier
+            .padding(start = 8.dp, top = 2.dp)
+            .background(
+                color = DividerDefaults.color,
+                shape = MaterialTheme.shapes.small,
+            )
+            .fillMaxWidth(PREVIEW_COVER_WIDTH)
+            .aspectRatio(MangaCover.Book.ratio),
+    ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(4.dp)
+                .size(width = 24.dp, height = 16.dp)
+                .clip(RoundedCornerShape(5.dp)),
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxHeight(PREVIEW_TITLE_HEIGHT)
-                    .weight(PREVIEW_TITLE_WEIGHT)
-                    .padding(end = 4.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        shape = MaterialTheme.shapes.small,
-                    ),
+                    .fillMaxHeight()
+                    .width(12.dp)
+                    .background(MaterialTheme.colorScheme.tertiary),
             )
-
             Box(
-                modifier = Modifier.weight(PREVIEW_ACTION_WEIGHT),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                if (selected) {
-                    Icon(
-                        imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = stringResource(MR.strings.selected),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            }
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(12.dp)
+                    .background(MaterialTheme.colorScheme.secondary),
+            )
         }
+    }
+}
 
-        // Cover
-        Box(
-            modifier = Modifier
-                .padding(start = 8.dp, top = 2.dp)
-                .background(
-                    color = DividerDefaults.color,
-                    shape = MaterialTheme.shapes.small,
-                )
-                .fillMaxWidth(PREVIEW_COVER_WIDTH)
-                .aspectRatio(MangaCover.Book.ratio),
+@Composable
+private fun ColumnScope.PreviewBottomBar() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f),
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer,
         ) {
             Row(
                 modifier = Modifier
-                    .padding(4.dp)
-                    .size(width = 24.dp, height = 16.dp)
-                    .clip(RoundedCornerShape(5.dp)),
+                    .height(32.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .width(12.dp)
-                        .background(MaterialTheme.colorScheme.tertiary),
+                        .size(17.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape,
+                        ),
                 )
                 Box(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .width(12.dp)
-                        .background(MaterialTheme.colorScheme.secondary),
+                        .padding(start = 8.dp)
+                        .alpha(PREVIEW_SUBTITLE_ALPHA)
+                        .height(17.dp)
+                        .weight(1f)
+                        .background(
+                            color = MaterialTheme.colorScheme.onSurface,
+                            shape = MaterialTheme.shapes.small,
+                        ),
                 )
-            }
-        }
-
-        // Bottom bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            contentAlignment = Alignment.BottomCenter,
-        ) {
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainer,
-            ) {
-                Row(
-                    modifier = Modifier
-                        .height(32.dp)
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(17.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = CircleShape,
-                            ),
-                    )
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .alpha(PREVIEW_SUBTITLE_ALPHA)
-                            .height(17.dp)
-                            .weight(1f)
-                            .background(
-                                color = MaterialTheme.colorScheme.onSurface,
-                                shape = MaterialTheme.shapes.small,
-                            ),
-                    )
-                }
             }
         }
     }

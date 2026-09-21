@@ -122,40 +122,7 @@ private fun DownloadingIndicator(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        val arrowColor: Color
-        val strokeColor = MaterialTheme.colorScheme.onSurfaceVariant
-        val downloadProgress = downloadProgressProvider()
-        val indeterminate = downloadState == Download.State.QUEUE ||
-            (downloadState == Download.State.DOWNLOADING && downloadProgress == 0)
-        if (indeterminate) {
-            arrowColor = strokeColor
-            CircularProgressIndicator(
-                modifier = IndicatorModifier,
-                color = strokeColor,
-                strokeWidth = IndicatorStrokeWidth,
-                trackColor = Color.Transparent,
-                strokeCap = StrokeCap.Butt,
-            )
-        } else {
-            val animatedProgress by animateFloatAsState(
-                targetValue = downloadProgress / 100f,
-                animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-            )
-            arrowColor = if (animatedProgress < HALF_PROGRESS) {
-                strokeColor
-            } else {
-                MaterialTheme.colorScheme.background
-            }
-            CircularProgressIndicator(
-                progress = { animatedProgress },
-                modifier = IndicatorModifier,
-                color = strokeColor,
-                strokeWidth = IndicatorSize / 2,
-                trackColor = Color.Transparent,
-                strokeCap = StrokeCap.Butt,
-                gapSize = 0.dp,
-            )
-        }
+        val arrowColor = ProgressRing(downloadState, downloadProgressProvider())
         DropdownMenu(expanded = isMenuExpanded, onDismissRequest = { isMenuExpanded = false }) {
             DropdownMenuItem(
                 text = { Text(text = stringResource(MR.strings.action_start_downloading_now)) },
@@ -179,6 +146,39 @@ private fun DownloadingIndicator(
             tint = arrowColor,
         )
     }
+}
+
+// The ring: indeterminate while queued or at 0%, otherwise filling; returns the arrow colour that stays legible over
+// it.
+@Composable
+private fun ProgressRing(downloadState: Download.State, downloadProgress: Int): Color {
+    val strokeColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val indeterminate = downloadState == Download.State.QUEUE ||
+        (downloadState == Download.State.DOWNLOADING && downloadProgress == 0)
+    if (indeterminate) {
+        CircularProgressIndicator(
+            modifier = IndicatorModifier,
+            color = strokeColor,
+            strokeWidth = IndicatorStrokeWidth,
+            trackColor = Color.Transparent,
+            strokeCap = StrokeCap.Butt,
+        )
+        return strokeColor
+    }
+    val animatedProgress by animateFloatAsState(
+        targetValue = downloadProgress / 100f,
+        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+    )
+    CircularProgressIndicator(
+        progress = { animatedProgress },
+        modifier = IndicatorModifier,
+        color = strokeColor,
+        strokeWidth = IndicatorSize / 2,
+        trackColor = Color.Transparent,
+        strokeCap = StrokeCap.Butt,
+        gapSize = 0.dp,
+    )
+    return if (animatedProgress < HALF_PROGRESS) strokeColor else MaterialTheme.colorScheme.background
 }
 
 @Composable

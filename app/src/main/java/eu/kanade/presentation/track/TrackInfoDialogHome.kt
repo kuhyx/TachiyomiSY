@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -158,55 +159,17 @@ private fun TrackInfoItem(
     private: Boolean,
     onTogglePrivate: (() -> Unit)?,
 ) {
-    val context = LocalContext.current
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BadgedBox(
-                badge = {
-                    if (private) {
-                        Badge(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.absoluteOffset(x = (-5).dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.VisibilityOff,
-                                contentDescription = stringResource(MR.strings.tracked_privately),
-                                modifier = Modifier.size(14.dp),
-                            )
-                        }
-                    }
-                },
-            ) {
-                TrackLogoIcon(
-                    tracker = tracker,
-                    onClick = onOpenInBrowser,
-                    onLongClick = onCopyLink,
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .height(48.dp)
-                    .weight(1f)
-                    .combinedClickable(
-                        onClick = onNewSearch,
-                        onLongClick = {
-                            context.copyToClipboard(title, title)
-                        },
-                    )
-                    .padding(start = 16.dp),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                Text(
-                    text = title,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
+            TrackLogoWithPrivateBadge(
+                tracker = tracker,
+                private = private,
+                onOpenInBrowser = onOpenInBrowser,
+                onCopyLink = onCopyLink,
+            )
+            TrackTitle(title = title, onNewSearch = onNewSearch)
             VerticalDivider()
             TrackInfoItemMenu(
                 onOpenInBrowser = onOpenInBrowser,
@@ -217,58 +180,145 @@ private fun TrackInfoItem(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .padding(top = 12.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .padding(8.dp)
-                .clip(RoundedCornerShape(6.dp)),
-        ) {
-            Column {
-                Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-                    TrackDetailsItem(
-                        modifier = Modifier.weight(1f),
-                        text = status?.let { stringResource(it) } ?: "",
-                        onClick = onStatusClick,
-                    )
+        TrackDetailsGrid(
+            status = status,
+            onStatusClick = onStatusClick,
+            chapters = chapters,
+            onChaptersClick = onChaptersClick,
+            score = score,
+            onScoreClick = onScoreClick,
+            startDate = startDate,
+            onStartDateClick = onStartDateClick,
+            endDate = endDate,
+            onEndDateClick = onEndDateClick,
+        )
+    }
+}
+
+// Status / chapters / score on the first row; start and end dates below when the tracker supports them.
+@Composable
+private fun TrackDetailsGrid(
+    status: StringResource?,
+    onStatusClick: () -> Unit,
+    chapters: String,
+    onChaptersClick: () -> Unit,
+    score: String?,
+    onScoreClick: (() -> Unit)?,
+    startDate: String?,
+    onStartDateClick: (() -> Unit)?,
+    endDate: String?,
+    onEndDateClick: (() -> Unit)?,
+) {
+    Box(
+        modifier = Modifier
+            .padding(top = 12.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .padding(8.dp)
+            .clip(RoundedCornerShape(6.dp)),
+    ) {
+        Column {
+            Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+                TrackDetailsItem(
+                    modifier = Modifier.weight(1f),
+                    text = status?.let { stringResource(it) } ?: "",
+                    onClick = onStatusClick,
+                )
+                VerticalDivider()
+                TrackDetailsItem(
+                    modifier = Modifier.weight(1f),
+                    text = chapters,
+                    onClick = onChaptersClick,
+                )
+                if (onScoreClick != null) {
                     VerticalDivider()
                     TrackDetailsItem(
                         modifier = Modifier.weight(1f),
-                        text = chapters,
-                        onClick = onChaptersClick,
+                        text = score,
+                        placeholder = stringResource(MR.strings.score),
+                        onClick = onScoreClick,
                     )
-                    if (onScoreClick != null) {
-                        VerticalDivider()
-                        TrackDetailsItem(
-                            modifier = Modifier.weight(1f),
-                            text = score,
-                            placeholder = stringResource(MR.strings.score),
-                            onClick = onScoreClick,
-                        )
-                    }
                 }
+            }
 
-                if (onStartDateClick != null && onEndDateClick != null) {
-                    HorizontalDivider()
-                    Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-                        TrackDetailsItem(
-                            modifier = Modifier.weight(1F),
-                            text = startDate,
-                            placeholder = stringResource(MR.strings.track_started_reading_date),
-                            onClick = onStartDateClick,
-                        )
-                        VerticalDivider()
-                        TrackDetailsItem(
-                            modifier = Modifier.weight(1F),
-                            text = endDate,
-                            placeholder = stringResource(MR.strings.track_finished_reading_date),
-                            onClick = onEndDateClick,
-                        )
-                    }
+            if (onStartDateClick != null && onEndDateClick != null) {
+                HorizontalDivider()
+                Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+                    TrackDetailsItem(
+                        modifier = Modifier.weight(1F),
+                        text = startDate,
+                        placeholder = stringResource(MR.strings.track_started_reading_date),
+                        onClick = onStartDateClick,
+                    )
+                    VerticalDivider()
+                    TrackDetailsItem(
+                        modifier = Modifier.weight(1F),
+                        text = endDate,
+                        placeholder = stringResource(MR.strings.track_finished_reading_date),
+                        onClick = onEndDateClick,
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun TrackLogoWithPrivateBadge(
+    tracker: Tracker,
+    private: Boolean,
+    onOpenInBrowser: () -> Unit,
+    onCopyLink: () -> Unit,
+) {
+    BadgedBox(
+        badge = {
+            if (private) {
+                Badge(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.absoluteOffset(x = (-5).dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.VisibilityOff,
+                        contentDescription = stringResource(MR.strings.tracked_privately),
+                        modifier = Modifier.size(14.dp),
+                    )
+                }
+            }
+        },
+    ) {
+        TrackLogoIcon(
+            tracker = tracker,
+            onClick = onOpenInBrowser,
+            onLongClick = onCopyLink,
+        )
+    }
+}
+
+// Tap opens a new search; long-press copies the tracked title.
+@Composable
+private fun RowScope.TrackTitle(title: String, onNewSearch: () -> Unit) {
+    val context = LocalContext.current
+    Box(
+        modifier = Modifier
+            .height(48.dp)
+            .weight(1f)
+            .combinedClickable(
+                onClick = onNewSearch,
+                onLongClick = {
+                    context.copyToClipboard(title, title)
+                },
+            )
+            .padding(start = 16.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Text(
+            text = title,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 

@@ -14,6 +14,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -29,14 +30,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import eu.kanade.presentation.reader.components.ChapterNavigation
 import eu.kanade.presentation.reader.components.ChapterNavigator
 import eu.kanade.presentation.reader.components.ChapterNavigatorType
-import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
-import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import tachiyomi.presentation.core.components.material.padding
 
 private const val SLIDE_MS = 200
@@ -54,53 +55,38 @@ internal fun ReaderAppBars(
     onClickTopAppBar: () -> Unit,
     // bookmarked: Boolean,
     // onToggleBookmarked: () -> Unit,
-    onOpenInWebView: (() -> Unit)?,
-    onOpenInBrowser: (() -> Unit)?,
-    onShare: (() -> Unit)?,
 
     chapterNavigatorType: ChapterNavigatorType,
-    onNextChapter: () -> Unit,
-    enabledNext: Boolean,
-    onPreviousChapter: () -> Unit,
-    enabledPrevious: Boolean,
+    navigation: ChapterNavigation,
     currentPage: Int,
     totalPages: Int,
-    onPageIndexChange: (Int) -> Unit,
-    onPageIndexChangeFinished: () -> Unit,
 
-    readingMode: ReadingMode,
-    onClickReadingMode: () -> Unit,
-    orientation: ReaderOrientation,
-    onClickOrientation: () -> Unit,
-    cropEnabled: Boolean,
-    onClickCropBorder: () -> Unit,
+    settings: ReaderSettingButtons,
     onClickSettings: () -> Unit,
     // SY -->
     isExhToolsVisible: Boolean,
     onSetExhUtilsVisibility: (Boolean) -> Unit,
-    isAutoScroll: Boolean,
-    isAutoScrollEnabled: Boolean,
-    onToggleAutoscroll: (Boolean) -> Unit,
-    autoScrollFrequency: String,
-    onSetAutoScrollFrequency: (String) -> Unit,
-    onClickAutoScrollHelp: () -> Unit,
-    onClickRetryAll: () -> Unit,
-    onClickRetryAllHelp: () -> Unit,
-    onClickBoostPage: () -> Unit,
-    onClickBoostPageHelp: () -> Unit,
+    autoScroll: AutoScrollControls,
+    exhPageActions: ExhPageActions,
     currentPageText: String,
-    enabledButtons: Set<String>,
-    currentReadingMode: ReadingMode,
-    dualPageSplitEnabled: Boolean,
-    doublePages: Boolean,
-    onClickChapterList: () -> Unit,
-    onClickPageLayout: () -> Unit,
-    onClickShiftPage: () -> Unit,
+    syBottomBar: SyBottomBarState,
+    syBottomBarActions: SyBottomBarActions,
     // SY <--
 ) {
     val backgroundColor = MaterialTheme.colorScheme
         .surfaceColorAtElevation(3.dp)
         .copy(alpha = if (isSystemInDarkTheme()) 0.9f else 0.95f)
+    val navigator: @Composable () -> Unit = {
+        ChapterNavigator(
+            type = chapterNavigatorType,
+            navigation = navigation,
+            currentPage = currentPage,
+            // SY -->
+            currentPageText = currentPageText,
+            // SY <--
+            totalPages = totalPages,
+        )
+    }
 
     Column(modifier = Modifier.fillMaxHeight()) {
         AnimatedVisibility(
@@ -131,113 +117,99 @@ internal fun ReaderAppBars(
                     isVisible = isExhToolsVisible,
                     onSetExhUtilsVisibility = onSetExhUtilsVisibility,
                     backgroundColor = backgroundColor,
-                    isAutoScroll = isAutoScroll,
-                    isAutoScrollEnabled = isAutoScrollEnabled,
-                    onToggleAutoscroll = onToggleAutoscroll,
-                    autoScrollFrequency = autoScrollFrequency,
-                    onSetAutoScrollFrequency = onSetAutoScrollFrequency,
-                    onClickAutoScrollHelp = onClickAutoScrollHelp,
-                    onClickRetryAll = onClickRetryAll,
-                    onClickRetryAllHelp = onClickRetryAllHelp,
-                    onClickBoostPage = onClickBoostPage,
-                    onClickBoostPageHelp = onClickBoostPageHelp,
+                    autoScroll = autoScroll,
+                    pageActions = exhPageActions,
                 )
             }
             // SY <--
         }
 
         if (!chapterNavigatorType.isHorizontal()) {
-            val sliderOnLeft = chapterNavigatorType == ChapterNavigatorType.VERTICAL_LEFT
-            CompositionLocalProvider(
-                LocalLayoutDirection provides if (sliderOnLeft) LayoutDirection.Ltr else LayoutDirection.Rtl,
-            ) {
-                Row(modifier = Modifier.weight(1f)) {
-                    AnimatedVisibility(
-                        visible = visible,
-                        enter = slideInHorizontally(readerBarsSlideAnimationSpec) { if (sliderOnLeft) -it else it } +
-                            fadeIn(readerBarsFadeAnimationSpec),
-                        exit = slideOutHorizontally(readerBarsSlideAnimationSpec) { if (sliderOnLeft) -it else it } +
-                            fadeOut(readerBarsFadeAnimationSpec),
-                    ) {
-                        Row {
-                            Spacer(modifier = Modifier.width(MaterialTheme.padding.small))
-                            Box(
-                                modifier = Modifier.fillMaxHeight(),
-                                contentAlignment = Alignment.BottomCenter,
-                            ) {
-                                ChapterNavigator(
-                                    type = chapterNavigatorType,
-                                    onNextChapter = onNextChapter,
-                                    enabledNext = enabledNext,
-                                    onPreviousChapter = onPreviousChapter,
-                                    enabledPrevious = enabledPrevious,
-                                    currentPage = currentPage,
-                                    // SY -->
-                                    currentPageText = currentPageText,
-                                    // SY <--
-                                    totalPages = totalPages,
-                                    onPageIndexChange = onPageIndexChange,
-                                    onPageIndexChangeFinished = onPageIndexChangeFinished,
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
+            VerticalNavigatorRail(
+                visible = visible,
+                sliderOnLeft = chapterNavigatorType == ChapterNavigatorType.VERTICAL_LEFT,
+                navigator = navigator,
+            )
         } else {
             Spacer(Modifier.weight(1f))
         }
 
-        AnimatedVisibility(
+        BottomBars(
             visible = visible,
-            enter = slideInVertically(readerBarsSlideAnimationSpec) { it } + fadeIn(readerBarsFadeAnimationSpec),
-            exit = slideOutVertically(readerBarsSlideAnimationSpec) { it } + fadeOut(readerBarsFadeAnimationSpec),
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small)) {
-                if (chapterNavigatorType.isHorizontal()) {
-                    ChapterNavigator(
-                        type = chapterNavigatorType,
-                        onNextChapter = onNextChapter,
-                        enabledNext = enabledNext,
-                        onPreviousChapter = onPreviousChapter,
-                        enabledPrevious = enabledPrevious,
-                        currentPage = currentPage,
-                        // SY -->
-                        currentPageText = currentPageText,
-                        // SY <--
-                        totalPages = totalPages,
-                        onPageIndexChange = onPageIndexChange,
-                        onPageIndexChangeFinished = onPageIndexChangeFinished,
-                    )
+            backgroundColor = backgroundColor,
+            navigator = navigator.takeIf { chapterNavigatorType.isHorizontal() },
+            settings = settings,
+            onClickSettings = onClickSettings,
+            syBottomBar = syBottomBar,
+            syBottomBarActions = syBottomBarActions,
+        )
+    }
+}
+
+// Horizontal page slider (when the navigator is horizontal) above the bottom action bar, sliding up.
+@Composable
+private fun BottomBars(
+    visible: Boolean,
+    backgroundColor: Color,
+    navigator: (@Composable () -> Unit)?,
+    settings: ReaderSettingButtons,
+    onClickSettings: () -> Unit,
+    syBottomBar: SyBottomBarState,
+    syBottomBarActions: SyBottomBarActions,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = slideInVertically(readerBarsSlideAnimationSpec) { it } + fadeIn(readerBarsFadeAnimationSpec),
+        exit = slideOutVertically(readerBarsSlideAnimationSpec) { it } + fadeOut(readerBarsFadeAnimationSpec),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small)) {
+            navigator?.invoke()
+            ReaderBottomBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(backgroundColor)
+                    .padding(horizontal = MaterialTheme.padding.small)
+                    .windowInsetsPadding(WindowInsets.navigationBars),
+                settings = settings,
+                onClickSettings = onClickSettings,
+                // SY -->
+                sy = syBottomBar,
+                syActions = syBottomBarActions,
+                // SY <--
+            )
+        }
+    }
+}
+
+// The vertical page slider docked to one side, sliding in from that side.
+@Composable
+private fun ColumnScope.VerticalNavigatorRail(
+    visible: Boolean,
+    sliderOnLeft: Boolean,
+    navigator: @Composable () -> Unit,
+) {
+    CompositionLocalProvider(
+        LocalLayoutDirection provides if (sliderOnLeft) LayoutDirection.Ltr else LayoutDirection.Rtl,
+    ) {
+        Row(modifier = Modifier.weight(1f)) {
+            AnimatedVisibility(
+                visible = visible,
+                enter = slideInHorizontally(readerBarsSlideAnimationSpec) { if (sliderOnLeft) -it else it } +
+                    fadeIn(readerBarsFadeAnimationSpec),
+                exit = slideOutHorizontally(readerBarsSlideAnimationSpec) { if (sliderOnLeft) -it else it } +
+                    fadeOut(readerBarsFadeAnimationSpec),
+            ) {
+                Row {
+                    Spacer(modifier = Modifier.width(MaterialTheme.padding.small))
+                    Box(
+                        modifier = Modifier.fillMaxHeight(),
+                        contentAlignment = Alignment.BottomCenter,
+                    ) {
+                        navigator()
+                    }
                 }
-                ReaderBottomBar(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(backgroundColor)
-                        .padding(horizontal = MaterialTheme.padding.small)
-                        .windowInsetsPadding(WindowInsets.navigationBars),
-                    readingMode = readingMode,
-                    onClickReadingMode = onClickReadingMode,
-                    orientation = orientation,
-                    onClickOrientation = onClickOrientation,
-                    cropEnabled = cropEnabled,
-                    onClickCropBorder = onClickCropBorder,
-                    onClickSettings = onClickSettings,
-                    // SY -->
-                    enabledButtons = enabledButtons,
-                    currentReadingMode = currentReadingMode,
-                    dualPageSplitEnabled = dualPageSplitEnabled,
-                    doublePages = doublePages,
-                    onClickChapterList = onClickChapterList,
-                    onClickWebView = onOpenInWebView,
-                    onClickBrowser = onOpenInBrowser,
-                    onClickShare = onShare,
-                    onClickPageLayout = onClickPageLayout,
-                    onClickShiftPage = onClickShiftPage,
-                    // SY <--
-                )
             }
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }

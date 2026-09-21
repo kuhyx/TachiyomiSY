@@ -22,28 +22,41 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
+// Bottom-bar buttons that toggle a reader setting, with the value they currently display.
+internal data class ReaderSettingButtons(
+    val readingMode: ReadingMode,
+    val onClickReadingMode: () -> Unit,
+    val orientation: ReaderOrientation,
+    val onClickOrientation: () -> Unit,
+    val cropEnabled: Boolean,
+    val onClickCropBorder: () -> Unit,
+)
+
+// SY --> Which of the fork's optional bottom buttons are shown, and the state they depend on.
+internal data class SyBottomBarState(
+    val enabledButtons: Set<String>,
+    val currentReadingMode: ReadingMode,
+    val dualPageSplitEnabled: Boolean,
+    val doublePages: Boolean,
+)
+
+internal data class SyBottomBarActions(
+    val onClickChapterList: () -> Unit,
+    val onClickWebView: (() -> Unit)?,
+    val onClickBrowser: (() -> Unit)?,
+    val onClickShare: (() -> Unit)?,
+    val onClickPageLayout: () -> Unit,
+    val onClickShiftPage: () -> Unit,
+)
+// SY <--
+
 @Composable
 internal fun ReaderBottomBar(
-    // SY -->
-    enabledButtons: Set<String>,
-    // SY <--
-    readingMode: ReadingMode,
-    onClickReadingMode: () -> Unit,
-    orientation: ReaderOrientation,
-    onClickOrientation: () -> Unit,
-    cropEnabled: Boolean,
-    onClickCropBorder: () -> Unit,
+    settings: ReaderSettingButtons,
     onClickSettings: () -> Unit,
     // SY -->
-    currentReadingMode: ReadingMode,
-    dualPageSplitEnabled: Boolean,
-    doublePages: Boolean,
-    onClickChapterList: () -> Unit,
-    onClickWebView: (() -> Unit)?,
-    onClickBrowser: (() -> Unit)?,
-    onClickShare: (() -> Unit)?,
-    onClickPageLayout: () -> Unit,
-    onClickShiftPage: () -> Unit,
+    sy: SyBottomBarState,
+    syActions: SyBottomBarActions,
     // SY <--
     modifier: Modifier = Modifier,
 ) {
@@ -54,97 +67,12 @@ internal fun ReaderBottomBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // SY -->
-        if (ReaderBottomButton.ViewChapters.isIn(enabledButtons)) {
-            IconButton(onClick = onClickChapterList) {
-                Icon(
-                    imageVector = Icons.Outlined.FormatListNumbered,
-                    contentDescription = stringResource(MR.strings.chapters),
-                )
-            }
-        }
-
-        if (ReaderBottomButton.WebView.isIn(enabledButtons) && onClickWebView != null) {
-            IconButton(onClick = onClickWebView) {
-                Icon(
-                    imageVector = Icons.Outlined.Public,
-                    contentDescription = stringResource(MR.strings.action_open_in_web_view),
-                )
-            }
-        }
-
-        if (ReaderBottomButton.Browser.isIn(enabledButtons) && onClickBrowser != null) {
-            IconButton(onClick = onClickBrowser) {
-                Icon(
-                    imageVector = Icons.Outlined.Public,
-                    contentDescription = stringResource(MR.strings.action_open_in_browser),
-                )
-            }
-        }
-
-        if (ReaderBottomButton.Share.isIn(enabledButtons) && onClickShare != null) {
-            IconButton(onClick = onClickShare) {
-                Icon(
-                    imageVector = Icons.Outlined.Share,
-                    contentDescription = stringResource(MR.strings.action_share),
-                )
-            }
-        }
-
-        if (ReaderBottomButton.ReadingMode.isIn(enabledButtons)) {
-            IconButton(onClick = onClickReadingMode) {
-                Icon(
-                    painter = painterResource(readingMode.iconRes),
-                    contentDescription = stringResource(MR.strings.viewer),
-                )
-            }
-        }
-
-        if (ReaderBottomButton.Rotation.isIn(enabledButtons)) {
-            IconButton(onClick = onClickOrientation) {
-                Icon(
-                    imageVector = orientation.icon,
-                    contentDescription = stringResource(MR.strings.pref_rotation_type),
-                )
-            }
-        }
-
-        val cropBorders = when (currentReadingMode) {
-            ReadingMode.WEBTOON -> ReaderBottomButton.CropBordersWebtoon
-            ReadingMode.CONTINUOUS_VERTICAL -> ReaderBottomButton.CropBordersContinuesVertical
-            else -> ReaderBottomButton.CropBordersPager
-        }
-        if (cropBorders.isIn(enabledButtons)) {
-            IconButton(onClick = onClickCropBorder) {
-                Icon(
-                    painter = painterResource(
-                        if (cropEnabled) R.drawable.ic_crop_24dp else R.drawable.ic_crop_off_24dp,
-                    ),
-                    contentDescription = stringResource(MR.strings.pref_crop_borders),
-                )
-            }
-        }
-
-        if (
-            !dualPageSplitEnabled &&
-            ReaderBottomButton.PageLayout.isIn(enabledButtons) &&
-            ReadingMode.isPagerType(currentReadingMode.flagValue)
-        ) {
-            IconButton(onClick = onClickPageLayout) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_book_open_variant_24dp),
-                    contentDescription = stringResource(SYMR.strings.page_layout),
-                )
-            }
-        }
-
-        if (doublePages) {
-            IconButton(onClick = onClickShiftPage) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_page_next_outline_24dp),
-                    contentDescription = stringResource(SYMR.strings.shift_double_pages),
-                )
-            }
-        }
+        ChapterLinkButtons(enabledButtons = sy.enabledButtons, actions = syActions)
+        // SY <--
+        SettingButtons(settings = settings, sy = sy)
+        // SY -->
+        PageLayoutButtons(sy = sy, actions = syActions)
+        // SY <--
 
         IconButton(onClick = onClickSettings) {
             Icon(
@@ -152,6 +80,111 @@ internal fun ReaderBottomBar(
                 contentDescription = stringResource(MR.strings.action_settings),
             )
         }
-        // SY <--
     }
 }
+
+// SY --> Chapter list, web view, browser and share; each only when enabled in settings (and available).
+@Composable
+private fun ChapterLinkButtons(enabledButtons: Set<String>, actions: SyBottomBarActions) {
+    if (ReaderBottomButton.ViewChapters.isIn(enabledButtons)) {
+        IconButton(onClick = actions.onClickChapterList) {
+            Icon(
+                imageVector = Icons.Outlined.FormatListNumbered,
+                contentDescription = stringResource(MR.strings.chapters),
+            )
+        }
+    }
+
+    if (ReaderBottomButton.WebView.isIn(enabledButtons) && actions.onClickWebView != null) {
+        IconButton(onClick = actions.onClickWebView) {
+            Icon(
+                imageVector = Icons.Outlined.Public,
+                contentDescription = stringResource(MR.strings.action_open_in_web_view),
+            )
+        }
+    }
+
+    if (ReaderBottomButton.Browser.isIn(enabledButtons) && actions.onClickBrowser != null) {
+        IconButton(onClick = actions.onClickBrowser) {
+            Icon(
+                imageVector = Icons.Outlined.Public,
+                contentDescription = stringResource(MR.strings.action_open_in_browser),
+            )
+        }
+    }
+
+    if (ReaderBottomButton.Share.isIn(enabledButtons) && actions.onClickShare != null) {
+        IconButton(onClick = actions.onClickShare) {
+            Icon(
+                imageVector = Icons.Outlined.Share,
+                contentDescription = stringResource(MR.strings.action_share),
+            )
+        }
+    }
+}
+// SY <--
+
+@Composable
+private fun SettingButtons(settings: ReaderSettingButtons, sy: SyBottomBarState) {
+    val enabledButtons = sy.enabledButtons
+    if (ReaderBottomButton.ReadingMode.isIn(enabledButtons)) {
+        IconButton(onClick = settings.onClickReadingMode) {
+            Icon(
+                painter = painterResource(settings.readingMode.iconRes),
+                contentDescription = stringResource(MR.strings.viewer),
+            )
+        }
+    }
+
+    if (ReaderBottomButton.Rotation.isIn(enabledButtons)) {
+        IconButton(onClick = settings.onClickOrientation) {
+            Icon(
+                imageVector = settings.orientation.icon,
+                contentDescription = stringResource(MR.strings.pref_rotation_type),
+            )
+        }
+    }
+
+    val cropBorders = when (sy.currentReadingMode) {
+        ReadingMode.WEBTOON -> ReaderBottomButton.CropBordersWebtoon
+        ReadingMode.CONTINUOUS_VERTICAL -> ReaderBottomButton.CropBordersContinuesVertical
+        else -> ReaderBottomButton.CropBordersPager
+    }
+    if (cropBorders.isIn(enabledButtons)) {
+        IconButton(onClick = settings.onClickCropBorder) {
+            Icon(
+                painter = painterResource(
+                    if (settings.cropEnabled) R.drawable.ic_crop_24dp else R.drawable.ic_crop_off_24dp,
+                ),
+                contentDescription = stringResource(MR.strings.pref_crop_borders),
+            )
+        }
+    }
+}
+
+// SY --> Page layout picker (pager modes without dual-page split) and the double-page shift.
+@Composable
+private fun PageLayoutButtons(sy: SyBottomBarState, actions: SyBottomBarActions) {
+    if (
+        !sy.dualPageSplitEnabled &&
+        ReaderBottomButton.PageLayout.isIn(sy.enabledButtons) &&
+        ReadingMode.isPagerType(sy.currentReadingMode.flagValue)
+    ) {
+        IconButton(onClick = actions.onClickPageLayout) {
+            Icon(
+                painter = painterResource(R.drawable.ic_book_open_variant_24dp),
+                contentDescription = stringResource(SYMR.strings.page_layout),
+            )
+        }
+    }
+
+    if (sy.doublePages) {
+        IconButton(onClick = actions.onClickShiftPage) {
+            Icon(
+                painter = painterResource(R.drawable.ic_page_next_outline_24dp),
+                contentDescription = stringResource(SYMR.strings.shift_double_pages),
+            )
+        }
+    }
+}
+// SY <--

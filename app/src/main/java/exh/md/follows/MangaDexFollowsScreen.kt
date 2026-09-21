@@ -98,8 +98,14 @@ internal class MangaDexFollowsScreen(private val sourceId: Long) : Screen() {
             )
         }
 
+        FollowsDialogs(screenModel, state.dialog)
+    }
+
+    @Composable
+    private fun FollowsDialogs(screenModel: MangaDexFollowsScreenModel, dialog: BrowseSourceScreenModel.Dialog?) {
+        val navigator = LocalNavigator.currentOrThrow
         val onDismissRequest = { screenModel.setDialog(null) }
-        when (val dialog = state.dialog) {
+        when (dialog) {
             is BrowseSourceScreenModel.Dialog.Migrate -> {
                 MigrateMangaDialog(
                     current = dialog.current,

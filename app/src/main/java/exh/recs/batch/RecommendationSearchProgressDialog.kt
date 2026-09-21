@@ -1,5 +1,6 @@
 package exh.recs.batch
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -41,78 +42,79 @@ internal fun RecSearchProgressDialog(
     }
 
     val properties by produceState<RecommendationSearchProgressProperties?>(initialValue = null, status) {
-        value = when (status) {
-            is SearchStatus.Initializing -> {
-                RecommendationSearchProgressProperties(
-                    title = context.stringResource(SYMR.strings.rec_collecting),
-                    text = context.stringResource(SYMR.strings.rec_initializing),
-                    negativeButtonText = context.stringResource(MR.strings.action_cancel),
-                    negativeButton = setStatusCancelling,
-                )
-            }
-            is SearchStatus.Error -> {
-                RecommendationSearchProgressProperties(
-                    title = context.stringResource(SYMR.strings.rec_error_title),
-                    text = context.stringResource(SYMR.strings.rec_error_string, status.message),
-                    positiveButtonText = context.stringResource(MR.strings.action_ok),
-                    positiveButton = setStatusIdle,
-                )
-            }
-            is SearchStatus.Processing -> {
-                RecommendationSearchProgressProperties(
-                    title = context.stringResource(SYMR.strings.rec_collecting),
-                    text = context.stringResource(
-                        SYMR.strings.rec_processing_state,
-                        status.current,
-                        status.total,
-                    ) + "\n\n" + status.manga.title,
-                    negativeButtonText = context.stringResource(MR.strings.action_cancel),
-                    negativeButton = setStatusCancelling,
-                )
-            }
-            else -> {
-                null
-            }
-        }
+        value = progressProperties(context, status, setStatusIdle, setStatusCancelling)
     }
     val dialog = properties
     if (dialog != null) {
-        AlertDialog(
-            onDismissRequest = {},
-            confirmButton = {
-                if (dialog.positiveButton != null && dialog.positiveButtonText != null) {
-                    TextButton(onClick = dialog.positiveButton) {
-                        Text(text = dialog.positiveButtonText)
-                    }
-                }
-            },
-            dismissButton = {
-                if (dialog.negativeButton != null && dialog.negativeButtonText != null) {
-                    TextButton(onClick = dialog.negativeButton) {
-                        Text(text = dialog.negativeButtonText)
-                    }
-                }
-            },
-            title = {
-                Text(text = dialog.title)
-            },
-            text = {
-                Column(
-                    Modifier.verticalScroll(rememberScrollState()),
-                ) {
-                    Text(text = dialog.text)
-                    if (status is SearchStatus.Processing) {
-                        LinearProgressIndicator(
-                            progress = { status.current.toFloat() / status.total },
-                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                        )
-                    }
-                }
-            },
-            properties = DialogProperties(
-                dismissOnClickOutside = false,
-                dismissOnBackPress = false,
-            ),
-        )
+        ProgressDialog(dialog, status)
     }
+}
+
+private fun progressProperties(
+    context: Context,
+    status: SearchStatus,
+    setStatusIdle: () -> Unit,
+    setStatusCancelling: () -> Unit,
+): RecommendationSearchProgressProperties? = when (status) {
+    is SearchStatus.Initializing -> RecommendationSearchProgressProperties(
+        title = context.stringResource(SYMR.strings.rec_collecting),
+        text = context.stringResource(SYMR.strings.rec_initializing),
+        negativeButtonText = context.stringResource(MR.strings.action_cancel),
+        negativeButton = setStatusCancelling,
+    )
+    is SearchStatus.Error -> RecommendationSearchProgressProperties(
+        title = context.stringResource(SYMR.strings.rec_error_title),
+        text = context.stringResource(SYMR.strings.rec_error_string, status.message),
+        positiveButtonText = context.stringResource(MR.strings.action_ok),
+        positiveButton = setStatusIdle,
+    )
+    is SearchStatus.Processing -> RecommendationSearchProgressProperties(
+        title = context.stringResource(SYMR.strings.rec_collecting),
+        text = context.stringResource(SYMR.strings.rec_processing_state, status.current, status.total) +
+            "\n\n" + status.manga.title,
+        negativeButtonText = context.stringResource(MR.strings.action_cancel),
+        negativeButton = setStatusCancelling,
+    )
+    else -> null
+}
+
+@Composable
+private fun ProgressDialog(dialog: RecommendationSearchProgressProperties, status: SearchStatus) {
+    AlertDialog(
+        onDismissRequest = {},
+        confirmButton = {
+            if (dialog.positiveButton != null && dialog.positiveButtonText != null) {
+                TextButton(onClick = dialog.positiveButton) {
+                    Text(text = dialog.positiveButtonText)
+                }
+            }
+        },
+        dismissButton = {
+            if (dialog.negativeButton != null && dialog.negativeButtonText != null) {
+                TextButton(onClick = dialog.negativeButton) {
+                    Text(text = dialog.negativeButtonText)
+                }
+            }
+        },
+        title = {
+            Text(text = dialog.title)
+        },
+        text = {
+            Column(
+                Modifier.verticalScroll(rememberScrollState()),
+            ) {
+                Text(text = dialog.text)
+                if (status is SearchStatus.Processing) {
+                    LinearProgressIndicator(
+                        progress = { status.current.toFloat() / status.total },
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    )
+                }
+            }
+        },
+        properties = DialogProperties(
+            dismissOnClickOutside = false,
+            dismissOnBackPress = false,
+        ),
+    )
 }

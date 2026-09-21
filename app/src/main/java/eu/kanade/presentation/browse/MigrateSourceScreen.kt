@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -189,43 +190,46 @@ private fun MigrateSourceItem(
             }
             // SY <--
         },
-        content = { _, sourceLangString ->
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = MaterialTheme.padding.medium)
-                    .weight(1f),
-            ) {
+        content = { _, sourceLangString -> MigrateSourceText(source, sourceLangString) },
+    )
+}
+
+@Composable
+private fun RowScope.MigrateSourceText(source: Source, sourceLangString: String?) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = MaterialTheme.padding.medium)
+            .weight(1f),
+    ) {
+        Text(
+            text = source.name.ifBlank { source.id.toString() },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (sourceLangString != null) {
                 Text(
-                    text = source.name.ifBlank { source.id.toString() },
+                    modifier = Modifier.secondaryItemAlpha(),
+                    text = sourceLangString,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                 )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (sourceLangString != null) {
-                        Text(
-                            modifier = Modifier.secondaryItemAlpha(),
-                            text = sourceLangString,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                    if (source.isStub) {
-                        Text(
-                            modifier = Modifier.secondaryItemAlpha(),
-                            text = stringResource(MR.strings.not_installed),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                }
             }
-        },
-    )
+            if (source.isStub) {
+                Text(
+                    modifier = Modifier.secondaryItemAlpha(),
+                    text = stringResource(MR.strings.not_installed),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        }
+    }
 }

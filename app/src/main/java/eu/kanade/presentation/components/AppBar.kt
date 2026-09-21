@@ -195,51 +195,20 @@ internal fun AppBarActions(
     var showMenu by remember { mutableStateOf(false) }
 
     actions.filterIsInstance<AppBar.Action>().map {
-        TooltipBox(
-            positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-            tooltip = {
-                PlainTooltip {
-                    Text(it.title)
-                }
-            },
-            state = rememberTooltipState(),
-            focusable = false,
-        ) {
-            IconButton(
-                onClick = it.onClick,
-                enabled = it.enabled,
-            ) {
-                Icon(
-                    imageVector = it.icon,
-                    tint = it.iconTint ?: LocalContentColor.current,
-                    contentDescription = it.title,
-                )
-            }
-        }
+        TooltipIconButton(
+            title =
+            it.title,
+            icon = it.icon, onClick = it.onClick, enabled = it.enabled, tint = it.iconTint,
+        )
     }
 
     val overflowActions = actions.filterIsInstance<AppBar.OverflowAction>()
     if (overflowActions.isNotEmpty()) {
-        TooltipBox(
-            positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-            tooltip = {
-                PlainTooltip {
-                    Text(stringResource(MR.strings.action_menu_overflow_description))
-                }
-            },
-            state = rememberTooltipState(),
-            focusable = false,
-        ) {
-            IconButton(
-                onClick = { showMenu = !showMenu },
-            ) {
-                Icon(
-                    Icons.Outlined.MoreVert,
-                    contentDescription = stringResource(MR.strings.action_menu_overflow_description),
-                )
-            }
-        }
-
+        TooltipIconButton(
+            title = stringResource(MR.strings.action_menu_overflow_description),
+            icon = Icons.Outlined.MoreVert,
+            onClick = { showMenu = !showMenu },
+        )
         DropdownMenu(
             expanded = showMenu,
             onDismissRequest = { showMenu = false },
@@ -253,6 +222,35 @@ internal fun AppBarActions(
                     text = { Text(it.title, fontWeight = FontWeight.Normal) },
                 )
             }
+        }
+    }
+}
+
+// An icon button whose title doubles as its tooltip and content description.
+@Composable
+private fun TooltipIconButton(
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    tint: Color? = null,
+) {
+    TooltipBox(
+        positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = {
+            PlainTooltip {
+                Text(title)
+            }
+        },
+        state = rememberTooltipState(),
+        focusable = false,
+    ) {
+        IconButton(onClick = onClick, enabled = enabled) {
+            Icon(
+                imageVector = icon,
+                tint = tint ?: LocalContentColor.current,
+                contentDescription = title,
+            )
         }
     }
 }
@@ -285,131 +283,128 @@ internal fun SearchToolbar(
             if (searchQuery == null) {
                 titleContent()
             } else {
-                val keyboardController = LocalSoftwareKeyboardController.current
-                val focusManager = LocalFocusManager.current
-
-                val searchAndClearFocus: () -> Unit = {
-                    if (searchQuery.isNotBlank()) {
-                        onSearch(searchQuery)
-                        focusManager.clearFocus()
-                        keyboardController?.hide()
-                        focusManager.moveFocus(FocusDirection.Next)
-                    }
-                }
-
-                // Callers own the query as a String; the field's own state is bridged both ways
-                // through SearchQueryBridge, which keeps the caller's stale echoes out of the field.
-                val textFieldState = rememberTextFieldState(searchQuery)
-                val bridge = remember(textFieldState) { SearchQueryBridge(searchQuery) }
-                LaunchedEffect(textFieldState) {
-                    snapshotFlow { textFieldState.text.toString() }
-                        .collect { if (bridge.fieldChanged(it)) onChangeSearchQuery(it) }
-                }
-                LaunchedEffect(searchQuery) {
-                    if (bridge.callerChanged(searchQuery)) {
-                        textFieldState.setTextAndPlaceCursorAtEnd(searchQuery)
-                    }
-                }
-                val textStyle = MaterialTheme.typography.titleMedium.copy(
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,
-                )
-
-                BasicTextField(
-                    state = textFieldState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester)
-                        .runOnEnterKeyPressed(action = searchAndClearFocus)
-                        .showSoftKeyboard(remember { searchQuery.isEmpty() })
-                        .clearFocusOnSoftKeyboardHide(),
-                    textStyle = textStyle,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    onKeyboardAction = { searchAndClearFocus() },
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
-                    interactionSource = interactionSource,
-                    decorator = TextFieldDefaults.decorator(
-                        state = textFieldState,
-                        enabled = true,
-                        lineLimits = TextFieldLineLimits.SingleLine,
-                        outputTransformation = null,
-                        interactionSource = interactionSource,
-                        placeholder = {
-                            Text(
-                                modifier = Modifier.secondaryItemAlpha(),
-                                text = placeholderText ?: stringResource(MR.strings.action_search_hint),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Normal,
-                                ),
-                            )
-                        },
-                        container = {},
-                    ),
+                SearchField(
+                    searchQuery,
+                    onChangeSearchQuery,
+                    onSearch,
+                    placeholderText,
+                    focusRequester,
+                    interactionSource,
                 )
             }
         },
         navigateUp = if (searchQuery == null) navigateUp else onClickCloseSearch,
         actions = {
             key("search") {
-                val onClick = { onChangeSearchQuery("") }
-
-                if (!searchEnabled) {
-                    // Don't show search action
-                } else if (searchQuery == null) {
-                    TooltipBox(
-                        positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                        tooltip = {
-                            PlainTooltip {
-                                Text(stringResource(MR.strings.action_search))
-                            }
-                        },
-                        state = rememberTooltipState(),
-                        focusable = false,
-                    ) {
-                        IconButton(
-                            onClick = onClick,
-                        ) {
-                            Icon(
-                                Icons.Outlined.Search,
-                                contentDescription = stringResource(MR.strings.action_search),
-                            )
-                        }
-                    }
-                } else if (searchQuery.isNotEmpty()) {
-                    TooltipBox(
-                        positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                        tooltip = {
-                            PlainTooltip {
-                                Text(stringResource(MR.strings.action_reset))
-                            }
-                        },
-                        state = rememberTooltipState(),
-                        focusable = false,
-                    ) {
-                        IconButton(
-                            onClick = {
-                                onClick()
-                                focusRequester.requestFocus()
-                            },
-                        ) {
-                            Icon(
-                                Icons.Outlined.Close,
-                                contentDescription = stringResource(MR.strings.action_reset),
-                            )
-                        }
-                    }
-                }
+                if (searchEnabled) SearchActions(searchQuery, onChangeSearchQuery, focusRequester)
             }
-
             key("actions") { actions() }
         },
         isActionMode = false,
         scrollBehavior = scrollBehavior,
+    )
+}
+
+// The search action when the field is closed; a reset action once it holds text.
+@Composable
+private fun SearchActions(
+    searchQuery: String?,
+    onChangeSearchQuery: (String?) -> Unit,
+    focusRequester: FocusRequester,
+) {
+    val onClick = { onChangeSearchQuery("") }
+    if (searchQuery == null) {
+        TooltipIconButton(
+            title =
+            stringResource(MR.strings.action_search),
+            icon = Icons.Outlined.Search, onClick = onClick,
+        )
+    } else if (searchQuery.isNotEmpty()) {
+        TooltipIconButton(
+            title = stringResource(MR.strings.action_reset),
+            icon = Icons.Outlined.Close,
+            onClick = {
+                onClick()
+                focusRequester.requestFocus()
+            },
+        )
+    }
+}
+
+@Composable
+private fun SearchField(
+    searchQuery: String,
+    onChangeSearchQuery: (String?) -> Unit,
+    onSearch: (String) -> Unit,
+    placeholderText: String?,
+    focusRequester: FocusRequester,
+    interactionSource: MutableInteractionSource,
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val searchAndClearFocus: () -> Unit = {
+        if (searchQuery.isNotBlank()) {
+            onSearch(searchQuery)
+            focusManager.clearFocus()
+            keyboardController?.hide()
+            focusManager.moveFocus(FocusDirection.Next)
+        }
+    }
+    // Callers own the query as a String; the field's own state is bridged both ways
+    // through SearchQueryBridge, which keeps the caller's stale echoes out of the field.
+    val textFieldState = rememberTextFieldState(searchQuery)
+    val bridge = remember(textFieldState) { SearchQueryBridge(searchQuery) }
+    LaunchedEffect(textFieldState) {
+        snapshotFlow { textFieldState.text.toString() }
+            .collect { if (bridge.fieldChanged(it)) onChangeSearchQuery(it) }
+    }
+    LaunchedEffect(searchQuery) {
+        if (bridge.callerChanged(searchQuery)) {
+            textFieldState.setTextAndPlaceCursorAtEnd(searchQuery)
+        }
+    }
+    val textStyle = MaterialTheme.typography.titleMedium.copy(
+        color = MaterialTheme.colorScheme.onBackground,
+        fontWeight = FontWeight.Normal,
+        fontSize = 18.sp,
+    )
+    BasicTextField(
+        state = textFieldState,
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester)
+            .runOnEnterKeyPressed(action = searchAndClearFocus)
+            .showSoftKeyboard(remember { searchQuery.isEmpty() })
+            .clearFocusOnSoftKeyboardHide(),
+        textStyle = textStyle,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        onKeyboardAction = { searchAndClearFocus() },
+        lineLimits = TextFieldLineLimits.SingleLine,
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+        interactionSource = interactionSource,
+        decorator = TextFieldDefaults.decorator(
+            state = textFieldState,
+            enabled = true,
+            lineLimits = TextFieldLineLimits.SingleLine,
+            outputTransformation = null,
+            interactionSource = interactionSource,
+            placeholder = { SearchPlaceholder(placeholderText) },
+            container = {},
+        ),
+    )
+}
+
+@Composable
+private fun SearchPlaceholder(placeholderText: String?) {
+    Text(
+        modifier = Modifier.secondaryItemAlpha(),
+        text = placeholderText ?: stringResource(MR.strings.action_search_hint),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.titleMedium.copy(
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Normal,
+        ),
     )
 }
 

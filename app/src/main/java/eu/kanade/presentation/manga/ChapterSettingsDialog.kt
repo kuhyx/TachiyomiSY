@@ -80,19 +80,10 @@ internal fun ChapterSettingsDialog(
             stringResource(MR.strings.action_display),
         ),
         tabOverflowMenuContent = { closeMenu ->
-            DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.set_chapter_settings_as_default)) },
-                onClick = {
-                    showSetAsDefaultDialog = true
-                    closeMenu()
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(MR.strings.action_reset)) },
-                onClick = {
-                    onResetToDefault()
-                    closeMenu()
-                },
+            DefaultsMenu(
+                closeMenu = closeMenu,
+                onSetAsDefault = { showSetAsDefaultDialog = true },
+                onResetToDefault = onResetToDefault,
             )
         },
     ) { page ->
@@ -102,35 +93,47 @@ internal fun ChapterSettingsDialog(
                 .verticalScroll(rememberScrollState()),
         ) {
             when (page) {
-                0 -> {
-                    FilterPage(
-                        downloadFilter = manga?.downloadedFilter ?: TriState.DISABLED,
-                        onDownloadFilterChanged = onDownloadFilterChanged
-                            .takeUnless { downloadedOnly },
-                        unreadFilter = manga?.unreadFilter ?: TriState.DISABLED,
-                        onUnreadFilterChanged = onUnreadFilterChanged,
-                        bookmarkedFilter = manga?.bookmarkedFilter ?: TriState.DISABLED,
-                        onBookmarkedFilterChanged = onBookmarkedFilterChanged,
-                        scanlatorFilterActive = scanlatorFilterActive,
-                        onScanlatorFilterClicked = onScanlatorFilterClicked,
-                    )
-                }
-                1 -> {
-                    SortPage(
-                        sortingMode = manga?.sorting ?: 0,
-                        sortDescending = manga?.sortDescending() ?: false,
-                        onItemSelected = onSortModeChanged,
-                    )
-                }
-                2 -> {
-                    DisplayPage(
-                        displayMode = manga?.displayMode ?: 0,
-                        onItemSelected = onDisplayModeChanged,
-                    )
-                }
+                0 -> FilterPage(
+                    downloadFilter = manga?.downloadedFilter ?: TriState.DISABLED,
+                    onDownloadFilterChanged = onDownloadFilterChanged
+                        .takeUnless { downloadedOnly },
+                    unreadFilter = manga?.unreadFilter ?: TriState.DISABLED,
+                    onUnreadFilterChanged = onUnreadFilterChanged,
+                    bookmarkedFilter = manga?.bookmarkedFilter ?: TriState.DISABLED,
+                    onBookmarkedFilterChanged = onBookmarkedFilterChanged,
+                    scanlatorFilterActive = scanlatorFilterActive,
+                    onScanlatorFilterClicked = onScanlatorFilterClicked,
+                )
+                1 -> SortPage(
+                    sortingMode = manga?.sorting ?: 0,
+                    sortDescending = manga?.sortDescending() ?: false,
+                    onItemSelected = onSortModeChanged,
+                )
+                2 -> DisplayPage(
+                    displayMode = manga?.displayMode ?: 0,
+                    onItemSelected = onDisplayModeChanged,
+                )
             }
         }
     }
+}
+
+@Composable
+private fun DefaultsMenu(closeMenu: () -> Unit, onSetAsDefault: () -> Unit, onResetToDefault: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(stringResource(MR.strings.set_chapter_settings_as_default)) },
+        onClick = {
+            onSetAsDefault()
+            closeMenu()
+        },
+    )
+    DropdownMenuItem(
+        text = { Text(stringResource(MR.strings.action_reset)) },
+        onClick = {
+            onResetToDefault()
+            closeMenu()
+        },
+    )
 }
 
 @Composable

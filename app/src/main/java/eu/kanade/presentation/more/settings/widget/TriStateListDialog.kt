@@ -23,18 +23,29 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.StringResource
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
-private enum class State {
-    CHECKED,
-    INVERSED,
-    UNCHECKED,
+private enum class State(val icon: ImageVector, val description: StringResource) {
+    CHECKED(Icons.Rounded.CheckBox, MR.strings.selected),
+    INVERSED(Icons.Rounded.DisabledByDefault, MR.strings.disabled),
+    UNCHECKED(Icons.Rounded.CheckBoxOutlineBlank, MR.strings.not_selected),
+    ;
+
+    // Tap cycle: unchecked -> checked (include) -> inversed (exclude) -> unchecked.
+    fun next(): State = when (this) {
+        UNCHECKED -> CHECKED
+        CHECKED -> INVERSED
+        INVERSED -> UNCHECKED
+    }
 }
 
 @Composable
@@ -70,54 +81,7 @@ internal fun <T> TriStateListDialog(
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                 }
-
-                Box {
-                    val listState = rememberLazyListState()
-                    LazyColumn(state = listState) {
-                        itemsIndexed(items = items) { index, item ->
-                            val state = selected[index]
-                            Row(
-                                modifier = Modifier
-                                    .clip(MaterialTheme.shapes.small)
-                                    .clickable {
-                                        selected[index] = when (state) {
-                                            State.UNCHECKED -> State.CHECKED
-                                            State.CHECKED -> State.INVERSED
-                                            State.INVERSED -> State.UNCHECKED
-                                        }
-                                    }
-                                    .defaultMinSize(minHeight = 48.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    modifier = Modifier.padding(end = 20.dp),
-                                    imageVector = when (state) {
-                                        State.UNCHECKED -> Icons.Rounded.CheckBoxOutlineBlank
-                                        State.CHECKED -> Icons.Rounded.CheckBox
-                                        State.INVERSED -> Icons.Rounded.DisabledByDefault
-                                    },
-                                    tint = if (state == State.UNCHECKED) {
-                                        LocalContentColor.current
-                                    } else {
-                                        MaterialTheme.colorScheme.primary
-                                    },
-                                    contentDescription = stringResource(
-                                        when (state) {
-                                            State.UNCHECKED -> MR.strings.not_selected
-                                            State.CHECKED -> MR.strings.selected
-                                            State.INVERSED -> MR.strings.disabled
-                                        },
-                                    ),
-                                )
-                                Text(text = itemLabel(item))
-                            }
-                        }
-                    }
-
-                    if (listState.canScrollBackward) HorizontalDivider(modifier = Modifier.align(Alignment.TopCenter))
-                    if (listState.canScrollForward) HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
-                }
+                TriStateList(items = items, selected = selected, itemLabel = itemLabel)
             }
         },
         dismissButton = {
@@ -128,17 +92,61 @@ internal fun <T> TriStateListDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    val included = items.mapIndexedNotNull { index, category ->
-                        if (selected[index] == State.CHECKED) category else null
-                    }
-                    val excluded = items.mapIndexedNotNull { index, category ->
-                        if (selected[index] == State.INVERSED) category else null
-                    }
-                    onValueChanged(included, excluded)
+                    onValueChanged(items.withState(selected, State.CHECKED), items.withState(selected, State.INVERSED))
                 },
             ) {
                 Text(text = stringResource(MR.strings.action_ok))
             }
         },
     )
+}
+
+private fun <T> List<T>.withState(selected: List<State>, state: State): List<T> =
+    mapIndexedNotNull { index, category -> if (selected[index] == state) category else null }
+
+@Composable
+private fun <T> TriStateList(
+    items: List<T>,
+    selected: SnapshotStateList<State>,
+    itemLabel: @Composable (T) -> String,
+) {
+    Box {
+        val listState = rememberLazyListState()
+        LazyColumn(state = listState) {
+            itemsIndexed(items = items) { index, item ->
+                TriStateRow(
+                    state = selected[index],
+                    label = itemLabel(item),
+                    onClick = { selected[index] = selected[index].next() },
+                )
+            }
+        }
+
+        if (listState.canScrollBackward) HorizontalDivider(modifier = Modifier.align(Alignment.TopCenter))
+        if (listState.canScrollForward) HorizontalDivider(modifier = Modifier.align(Alignment.BottomCenter))
+    }
+}
+
+@Composable
+private fun TriStateRow(state: State, label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = onClick)
+            .defaultMinSize(minHeight = 48.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            modifier = Modifier.padding(end = 20.dp),
+            imageVector = state.icon,
+            tint = if (state == State.UNCHECKED) {
+                LocalContentColor.current
+            } else {
+                MaterialTheme.colorScheme.primary
+            },
+            contentDescription = stringResource(state.description),
+        )
+        Text(text = label)
+    }
 }

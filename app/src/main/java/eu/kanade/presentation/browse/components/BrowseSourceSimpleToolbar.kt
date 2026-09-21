@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.DropdownMenu
@@ -46,44 +47,33 @@ internal fun BrowseSourceSimpleToolbar(
                 expanded = selectingDisplayMode,
                 onDismissRequest = { selectingDisplayMode = false },
             ) {
-                DropdownMenuItem(
-                    text = { Text(text = stringResource(MR.strings.action_display_comfortable_grid)) },
-                    onClick = { onDisplayModeChange(LibraryDisplayMode.ComfortableGrid) },
-                    trailingIcon = {
-                        if (displayMode == LibraryDisplayMode.ComfortableGrid) {
-                            Icon(
-                                imageVector = Icons.Outlined.Check,
-                                contentDescription = "",
-                            )
-                        }
-                    },
-                )
-                DropdownMenuItem(
-                    text = { Text(text = stringResource(MR.strings.action_display_grid)) },
-                    onClick = { onDisplayModeChange(LibraryDisplayMode.CompactGrid) },
-                    trailingIcon = {
-                        if (displayMode == LibraryDisplayMode.CompactGrid) {
-                            Icon(
-                                imageVector = Icons.Outlined.Check,
-                                contentDescription = "",
-                            )
-                        }
-                    },
-                )
-                DropdownMenuItem(
-                    text = { Text(text = stringResource(MR.strings.action_display_list)) },
-                    onClick = { onDisplayModeChange(LibraryDisplayMode.List) },
-                    trailingIcon = {
-                        if (displayMode == LibraryDisplayMode.List) {
-                            Icon(
-                                imageVector = Icons.Outlined.Check,
-                                contentDescription = "",
-                            )
-                        }
-                    },
-                )
+                DISPLAY_MODES.forEach { (label, mode) ->
+                    DisplayModeItem(label, selected = displayMode == mode) { onDisplayModeChange(mode) }
+                }
             }
         },
         scrollBehavior = scrollBehavior,
+    )
+}
+
+private val DISPLAY_MODES = listOf(
+    MR.strings.action_display_comfortable_grid to LibraryDisplayMode.ComfortableGrid,
+    MR.strings.action_display_grid to LibraryDisplayMode.CompactGrid,
+    MR.strings.action_display_list to LibraryDisplayMode.List,
+)
+
+@Composable
+private fun DisplayModeItem(label: StringResource, selected: Boolean, onClick: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(text = stringResource(label)) },
+        onClick = onClick,
+        trailingIcon = {
+            if (selected) {
+                Icon(
+                    imageVector = Icons.Outlined.Check,
+                    contentDescription = "",
+                )
+            }
+        },
     )
 }

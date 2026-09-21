@@ -59,24 +59,7 @@ internal class PermissionStep : OnboardingStep {
 
         val installGranted = rememberInstallPermissionState()
 
-        DisposableEffect(lifecycleOwner.lifecycle) {
-            val observer = object : DefaultLifecycleObserver {
-                override fun onResume(owner: LifecycleOwner) {
-                    notificationGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
-                            PackageManager.PERMISSION_GRANTED
-                    } else {
-                        true
-                    }
-                    batteryGranted = context.getSystemService<PowerManager>()!!
-                        .isIgnoringBatteryOptimizations(context.packageName)
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
+        RecheckOnResume(lifecycleOwner)
 
         Column {
             PermissionCheckbox(
@@ -120,25 +103,52 @@ internal class PermissionStep : OnboardingStep {
                 modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
-
-            val crashlyticsPref = privacyPreferences.crashlytics
-            val crashlytics by crashlyticsPref.collectAsState()
-            PermissionSwitch(
-                title = stringResource(MR.strings.onboarding_permission_crashlytics),
-                subtitle = stringResource(MR.strings.onboarding_permission_crashlytics_description),
-                granted = crashlytics,
-                onToggleChange = crashlyticsPref::set,
-            )
-
-            val analyticsPref = privacyPreferences.analytics
-            val analytics by analyticsPref.collectAsState()
-            PermissionSwitch(
-                title = stringResource(MR.strings.onboarding_permission_analytics),
-                subtitle = stringResource(MR.strings.onboarding_permission_analytics_description),
-                granted = analytics,
-                onToggleChange = analyticsPref::set,
-            )
+            PrivacySwitches()
         }
+    }
+
+    // The system permission states are re-read whenever the step comes back to the foreground.
+    @Composable
+    private fun RecheckOnResume(lifecycleOwner: LifecycleOwner) {
+        val context = LocalContext.current
+        DisposableEffect(lifecycleOwner.lifecycle) {
+            val observer = object : DefaultLifecycleObserver {
+                override fun onResume(owner: LifecycleOwner) {
+                    notificationGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
+                            PackageManager.PERMISSION_GRANTED
+                    } else {
+                        true
+                    }
+                    batteryGranted = context.getSystemService<PowerManager>()!!
+                        .isIgnoringBatteryOptimizations(context.packageName)
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+    }
+
+    @Composable
+    private fun PrivacySwitches() {
+        val crashlyticsPref = privacyPreferences.crashlytics
+        val crashlytics by crashlyticsPref.collectAsState()
+        PermissionSwitch(
+            title = stringResource(MR.strings.onboarding_permission_crashlytics),
+            subtitle = stringResource(MR.strings.onboarding_permission_crashlytics_description),
+            granted = crashlytics,
+            onToggleChange = crashlyticsPref::set,
+        )
+        val analyticsPref = privacyPreferences.analytics
+        val analytics by analyticsPref.collectAsState()
+        PermissionSwitch(
+            title = stringResource(MR.strings.onboarding_permission_analytics),
+            subtitle = stringResource(MR.strings.onboarding_permission_analytics_description),
+            granted = analytics,
+            onToggleChange = analyticsPref::set,
+        )
     }
 
     @Composable

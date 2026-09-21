@@ -38,18 +38,6 @@ private val flashColors = listOf(
 @Composable
 internal fun ColumnScope.GeneralPage(screenModel: ReaderSettingsScreenModel) {
     val readerTheme by screenModel.preferences.readerTheme.collectAsState()
-
-    val flashPageState by screenModel.preferences.flashOnPageChange.collectAsState()
-
-    val flashMillisPref = screenModel.preferences.flashDurationMillis
-    val flashMillis by flashMillisPref.collectAsState()
-
-    val flashIntervalPref = screenModel.preferences.flashPageInterval
-    val flashInterval by flashIntervalPref.collectAsState()
-
-    val flashColorPref = screenModel.preferences.flashColor
-    val flashColor by flashColorPref.collectAsState()
-
     SettingsChipRow(MR.strings.pref_reader_theme) {
         themes.map { (labelRes, value) ->
             FilterChip(
@@ -65,42 +53,7 @@ internal fun ColumnScope.GeneralPage(screenModel: ReaderSettingsScreenModel) {
         pref = screenModel.preferences.showPageNumber,
     )
 
-    val verticalNavigatorModes by screenModel.preferences.verticalNavigator.collectAsState()
-
-    SettingsChipRow(MR.strings.pref_vertical_navigator) {
-        ReadingMode.entries.filter { it != ReadingMode.DEFAULT }.forEach { mode ->
-            FilterChip(
-                selected = verticalNavigatorModes.contains(mode),
-                onClick = {
-                    val newModes = if (verticalNavigatorModes.contains(mode)) {
-                        verticalNavigatorModes - mode
-                    } else {
-                        verticalNavigatorModes + mode
-                    }
-                    screenModel.preferences.verticalNavigator.set(newModes)
-                },
-                label = { Text(stringResource(mode.stringRes)) },
-            )
-        }
-    }
-
-    if (verticalNavigatorModes.isNotEmpty()) {
-        val verticalNavigatorHeightPref = screenModel.preferences.verticalNavigatorHeight
-        val verticalNavigatorHeight by verticalNavigatorHeightPref.collectAsState()
-
-        CheckboxItem(
-            label = stringResource(MR.strings.pref_webtoon_vertical_navigator_on_left),
-            pref = screenModel.preferences.verticalNavigatorOnLeft,
-        )
-
-        SliderItem(
-            label = stringResource(MR.strings.pref_vertical_navigator_height),
-            value = verticalNavigatorHeight,
-            valueRange = 65..100,
-            steps = 6,
-            onChange = { verticalNavigatorHeightPref.set(it) },
-        )
-    }
+    VerticalNavigatorSettings(screenModel.preferences)
 
     CheckboxItem(
         label = stringResource(MR.strings.pref_fullscreen),
@@ -136,9 +89,73 @@ internal fun ColumnScope.GeneralPage(screenModel: ReaderSettingsScreenModel) {
         pref = screenModel.preferences.pageTransitions,
     ) SY <-- */
 
+    FlashOnPageChangeSettings(screenModel.preferences)
+
+    // SY -->
+    CheckboxItem(
+        label = stringResource(SYMR.strings.auto_webtoon_mode),
+        pref = screenModel.preferences.useAutoWebtoon,
+    )
+    // SY <--
+}
+
+// Which reading modes show the vertical page slider, plus its side and height once any is picked.
+@Composable
+private fun VerticalNavigatorSettings(preferences: ReaderPreferences) {
+    val verticalNavigatorModes by preferences.verticalNavigator.collectAsState()
+
+    SettingsChipRow(MR.strings.pref_vertical_navigator) {
+        ReadingMode.entries.filter { it != ReadingMode.DEFAULT }.forEach { mode ->
+            FilterChip(
+                selected = verticalNavigatorModes.contains(mode),
+                onClick = {
+                    val newModes = if (verticalNavigatorModes.contains(mode)) {
+                        verticalNavigatorModes - mode
+                    } else {
+                        verticalNavigatorModes + mode
+                    }
+                    preferences.verticalNavigator.set(newModes)
+                },
+                label = { Text(stringResource(mode.stringRes)) },
+            )
+        }
+    }
+
+    if (verticalNavigatorModes.isNotEmpty()) {
+        val verticalNavigatorHeightPref = preferences.verticalNavigatorHeight
+        val verticalNavigatorHeight by verticalNavigatorHeightPref.collectAsState()
+
+        CheckboxItem(
+            label = stringResource(MR.strings.pref_webtoon_vertical_navigator_on_left),
+            pref = preferences.verticalNavigatorOnLeft,
+        )
+
+        SliderItem(
+            label = stringResource(MR.strings.pref_vertical_navigator_height),
+            value = verticalNavigatorHeight,
+            valueRange = 65..100,
+            steps = 6,
+            onChange = { verticalNavigatorHeightPref.set(it) },
+        )
+    }
+}
+
+@Composable
+private fun FlashOnPageChangeSettings(preferences: ReaderPreferences) {
+    val flashPageState by preferences.flashOnPageChange.collectAsState()
+
+    val flashMillisPref = preferences.flashDurationMillis
+    val flashMillis by flashMillisPref.collectAsState()
+
+    val flashIntervalPref = preferences.flashPageInterval
+    val flashInterval by flashIntervalPref.collectAsState()
+
+    val flashColorPref = preferences.flashColor
+    val flashColor by flashColorPref.collectAsState()
+
     CheckboxItem(
         label = stringResource(MR.strings.pref_flash_page),
-        pref = screenModel.preferences.flashOnPageChange,
+        pref = preferences.flashOnPageChange,
     )
     if (flashPageState) {
         SliderItem(
@@ -169,11 +186,4 @@ internal fun ColumnScope.GeneralPage(screenModel: ReaderSettingsScreenModel) {
             }
         }
     }
-
-    // SY -->
-    CheckboxItem(
-        label = stringResource(SYMR.strings.auto_webtoon_mode),
-        pref = screenModel.preferences.useAutoWebtoon,
-    )
-    // SY <--
 }

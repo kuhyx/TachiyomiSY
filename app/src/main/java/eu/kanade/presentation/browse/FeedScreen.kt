@@ -87,37 +87,56 @@ internal fun FeedScreen(
                 },
                 enabled = !state.isLoadingItems,
             ) {
-                ScrollbarLazyColumn(
-                    contentPadding = contentPadding + topSmallPaddingValues,
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    items(
-                        state.items.orEmpty(),
-                        key = { it.feed.id },
-                    ) { item ->
-                        GlobalSearchResultItem(
-                            title = item.title,
-                            subtitle = item.subtitle,
-                            onLongClick = {
-                                onClickDelete(item.feed)
-                            },
-                            onClick = {
-                                if (item.savedSearch != null && item.source != null) {
-                                    onClickSavedSearch(item.savedSearch, item.source)
-                                } else if (item.source != null) {
-                                    onClickSource(item.source)
-                                }
-                            },
-                            modifier = Modifier.animateItem(),
-                        ) {
-                            FeedItem(
-                                item = item,
-                                getMangaState = { getMangaState(it) },
-                                onClickManga = onClickManga,
-                            )
-                        }
+                FeedList(
+                    state,
+                    contentPadding,
+                    onClickSavedSearch,
+                    onClickSource,
+                    onClickDelete,
+                    onClickManga,
+                    getMangaState,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FeedList(
+    state: FeedScreenState,
+    contentPadding: PaddingValues,
+    onClickSavedSearch: (SavedSearch, Source) -> Unit,
+    onClickSource: (Source) -> Unit,
+    onClickDelete: (FeedSavedSearch) -> Unit,
+    onClickManga: (Manga) -> Unit,
+    getMangaState: @Composable (Manga) -> State<Manga>,
+) {
+    ScrollbarLazyColumn(
+        contentPadding = contentPadding + topSmallPaddingValues,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        items(
+            state.items.orEmpty(),
+            key = { it.feed.id },
+        ) { item ->
+            GlobalSearchResultItem(
+                title = item.title,
+                subtitle = item.subtitle,
+                onLongClick = { onClickDelete(item.feed) },
+                onClick = {
+                    if (item.savedSearch != null && item.source != null) {
+                        onClickSavedSearch(item.savedSearch, item.source)
+                    } else if (item.source != null) {
+                        onClickSource(item.source)
                     }
-                }
+                },
+                modifier = Modifier.animateItem(),
+            ) {
+                FeedItem(
+                    item = item,
+                    getMangaState = { getMangaState(it) },
+                    onClickManga = onClickManga,
+                )
             }
         }
     }

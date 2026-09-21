@@ -65,7 +65,7 @@ import uy.kohesive.injekt.api.get
 import xyz.nulldev.ts.api.http.serializer.FilterSerializer
 
 internal open class BrowseSourceScreenModel(
-    private val sourceId: Long,
+    internal val sourceId: Long,
     listingQuery: String?,
     // SY -->
     private val filtersJson: String? = null,

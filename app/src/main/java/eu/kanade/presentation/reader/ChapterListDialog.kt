@@ -43,10 +43,8 @@ internal fun ChapterListDialog(
     dateRelativeTime: Boolean,
 ) {
     val manga by screenModel.mangaFlow.collectAsState()
-    val context = LocalContext.current
     val state = rememberLazyListState(chapters.indexOfFirst { it.isCurrent }.coerceAtLeast(0))
     val downloadManager: DownloadManager = remember { Injekt.get() }
-    val downloadQueueState by downloadManager.queueState.collectAsState()
 
     AdaptiveSheet(
         onDismissRequest = onDismissRequest,
@@ -60,66 +58,86 @@ internal fun ChapterListDialog(
                 items = chapters,
                 key = { "chapter-${it.chapter.id}" },
             ) { chapterItem ->
-                val activeDownload = downloadQueueState.find { it.chapter.id == chapterItem.chapter.id }
-                val progress = activeDownload?.let {
-                    downloadManager.progressFlow()
-                        .filter { it.chapter.id == chapterItem.chapter.id }
-                        .map { it.progress }
-                        .collectAsState(0)
-                        .value
-                } ?: 0
-                val downloaded = if (chapterItem.manga.isLocal()) {
-                    true
-                } else {
-                    downloadManager.isChapterDownloaded(
-                        chapterItem.chapter.name,
-                        chapterItem.chapter.scanlator,
-                        chapterItem.chapter.url,
-                        chapterItem.manga.ogTitle,
-                        chapterItem.manga.source,
-                    )
-                }
-                val downloadState = when {
-                    activeDownload != null -> activeDownload.status
-                    downloaded -> Download.State.DOWNLOADED
-                    else -> Download.State.NOT_DOWNLOADED
-                }
-                MangaChapterListItem(
-                    title = chapterItem.chapter.name,
-                    date = chapterItem.chapter.dateUpload
-                        .takeIf { it > 0L }
-                        ?.let {
-                            // SY -->
-                            if (manga?.isEhBasedManga() == true) {
-                                MetadataUtil.EX_DATE_FORMAT
-                                    .format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.systemDefault()))
-                            } else {
-                                LocalDate.ofInstant(
-                                    Instant.ofEpochMilli(it),
-                                    ZoneId.systemDefault(),
-                                ).toRelativeString(context, dateRelativeTime, chapterItem.dateFormat)
-                            }
-                            // SY <--
-                        },
-                    readProgress = null,
-                    scanlator = chapterItem.chapter.scanlator,
-                    sourceName = null,
-                    read = chapterItem.chapter.read,
-                    bookmark = chapterItem.chapter.bookmark,
-                    selected = false,
-                    downloadIndicatorEnabled = false,
-                    downloadStateProvider = { downloadState },
-                    downloadProgressProvider = { progress },
-                    chapterSwipeStartAction = LibraryPreferences.ChapterSwipeAction.ToggleBookmark,
-                    chapterSwipeEndAction = LibraryPreferences.ChapterSwipeAction.ToggleBookmark,
-                    onLongClick = { /*TODO*/ },
+                ChapterListRow(
+                    chapterItem = chapterItem,
+                    downloadManager = downloadManager,
+                    date = chapterDate(chapterItem, isEhManga = manga?.isEhBasedManga() == true, dateRelativeTime),
                     onClick = { onClickChapter(chapterItem.chapter) },
-                    onDownloadClick = null,
-                    onChapterSwipe = {
-                        onBookmark(chapterItem.chapter)
-                    },
+                    onBookmark = { onBookmark(chapterItem.chapter) },
                 )
             }
         }
     }
 }
+
+@Composable
+private fun ChapterListRow(
+    chapterItem: ReaderChapterItem,
+    downloadManager: DownloadManager,
+    date: String?,
+    onClick: () -> Unit,
+    onBookmark: () -> Unit,
+) {
+    val downloadQueueState by downloadManager.queueState.collectAsState()
+    val activeDownload = downloadQueueState.find { it.chapter.id == chapterItem.chapter.id }
+    val progress = activeDownload?.let {
+        downloadManager.progressFlow()
+            .filter { it.chapter.id == chapterItem.chapter.id }
+            .map { it.progress }
+            .collectAsState(0)
+            .value
+    } ?: 0
+    val downloadState = when {
+        activeDownload != null -> activeDownload.status
+        downloadManager.isDownloaded(chapterItem) -> Download.State.DOWNLOADED
+        else -> Download.State.NOT_DOWNLOADED
+    }
+    MangaChapterListItem(
+        title = chapterItem.chapter.name,
+        date = date,
+        readProgress = null,
+        scanlator = chapterItem.chapter.scanlator,
+        sourceName = null,
+        read = chapterItem.chapter.read,
+        bookmark = chapterItem.chapter.bookmark,
+        selected = false,
+        downloadIndicatorEnabled = false,
+        downloadStateProvider = { downloadState },
+        downloadProgressProvider = { progress },
+        chapterSwipeStartAction = LibraryPreferences.ChapterSwipeAction.ToggleBookmark,
+        chapterSwipeEndAction = LibraryPreferences.ChapterSwipeAction.ToggleBookmark,
+        onLongClick = { /*TODO*/ },
+        onClick = onClick,
+        onDownloadClick = null,
+        onChapterSwipe = { onBookmark() },
+    )
+}
+
+// Local manga are always "downloaded"; everything else asks the download manager.
+private fun DownloadManager.isDownloaded(chapterItem: ReaderChapterItem): Boolean {
+    return chapterItem.manga.isLocal() ||
+        isChapterDownloaded(
+            chapterItem.chapter.name,
+            chapterItem.chapter.scanlator,
+            chapterItem.chapter.url,
+            chapterItem.manga.ogTitle,
+            chapterItem.manga.source,
+        )
+}
+
+// SY --> E-Hentai galleries show the exact upload timestamp; everything else the usual (relative) date.
+@Composable
+private fun chapterDate(chapterItem: ReaderChapterItem, isEhManga: Boolean, dateRelativeTime: Boolean): String? {
+    val context = LocalContext.current
+    val uploaded = chapterItem.chapter.dateUpload.takeIf { it > 0L } ?: return null
+    return if (isEhManga) {
+        MetadataUtil.EX_DATE_FORMAT
+            .format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(uploaded), ZoneId.systemDefault()))
+    } else {
+        LocalDate.ofInstant(
+            Instant.ofEpochMilli(uploaded),
+            ZoneId.systemDefault(),
+        ).toRelativeString(context, dateRelativeTime, chapterItem.dateFormat)
+    }
+}
+// SY <--
