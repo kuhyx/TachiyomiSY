@@ -5,16 +5,10 @@ import androidx.core.net.toUri
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackerManager
-import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaItem
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaItemResult
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaListResult
-import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaOAuth
-import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaSearchResult
-import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaUserProfile
-import eu.kanade.tachiyomi.data.track.mangabaka.dto.MangaBakaUserProfileResponse
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.chooseBestTitle
 import eu.kanade.tachiyomi.data.track.mangabaka.dto.getStatus
-import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.DELETE
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.HttpException
@@ -33,11 +27,9 @@ import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
-import java.math.RoundingMode
 import java.net.HttpURLConnection
 import java.security.SecureRandom
 import java.util.Base64
-import java.util.Locale
 import kotlin.time.Instant
 import tachiyomi.domain.track.model.Track as DomainTrack
 
@@ -53,14 +45,14 @@ private const val MAX_RATING = 100
 private const val OAUTH_STATE_BYTES = 16
 
 internal class MangaBakaApi(
-    private val trackId: Long,
+    internal val trackId: Long,
     baseClient: OkHttpClient,
     interceptor: MangaBakaInterceptor,
 ) {
 
-    private val json: Json by injectLazy()
+    internal val json: Json by injectLazy()
 
-    private val client = baseClient.newBuilder().addInterceptor {
+    internal val client = baseClient.newBuilder().addInterceptor {
         it.request().newBuilder()
             .header(
                 "User-Agent",
@@ -74,7 +66,7 @@ internal class MangaBakaApi(
             .let(it::proceed)
     }.build()
 
-    private val authClient = client.newBuilder().addInterceptor(interceptor).build()
+    internal val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
     suspend fun addLibManga(track: Track): Track {
         return withIOContext {
@@ -177,108 +169,23 @@ internal class MangaBakaApi(
         }
     }
 
-    suspend fun search(search: String): List<TrackSearch> {
-        return withIOContext {
-            val url = "$API_BASE_URL/v1/series/search".toUri().buildUpon()
-                .appendQueryParameter("q", search)
-                .appendQueryParameter("type_not", "novel")
-                .build()
-            with(json) {
-                client.newCall(GET(url.toString()))
-                    .awaitSuccess()
-                    .parseAs<MangaBakaSearchResult>()
-                    .data
-                    .map { parseSearchItem(it) }
-            }
-        }
-    }
-
-    private fun parseSearchItem(item: MangaBakaItem): TrackSearch {
-        return TrackSearch.create(trackId).apply {
-            remoteId = item.id
-            title = item.chooseBestTitle()
-            summary = item.description?.trim().orEmpty()
-            score = item.rating?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)?.toDouble() ?: -1.0
-            coverUrl = item.cover.x250.x1.orEmpty()
-            trackingUrl = "$BASE_URL/${item.id}"
-            startDate = item.published.startDate.orEmpty()
-            publishingStatus = item.status
-            publishingType = item.type.replaceFirstChar { c ->
-                if (c.isLowerCase()) c.titlecase(Locale.getDefault()) else c.toString()
-            }
-            authors = item.authors.orEmpty()
-            artists = item.artists.orEmpty()
-        }
-    }
-
-    suspend fun getMangaDetails(id: Int): TrackSearch? {
-        return withIOContext {
-            val url = "$API_BASE_URL/v1/series".toUri().buildUpon()
-                .appendPath(id.toString())
-                .build()
-            with(json) {
-                try {
-                    authClient.newCall(GET(url.toString()))
-                        .awaitSuccess()
-                        .parseAs<MangaBakaItemResult>()
-                        .data
-                        .let { parseSearchItem(it) }
-                } catch (e: HttpException) {
-                    if (e.code != HttpURLConnection.HTTP_NOT_FOUND) throw e
-                    null
-                }
-            }
-        }
-    }
-
-    suspend fun getCurrentUser(): MangaBakaUserProfile {
-        return withIOContext {
-            with(json) {
-                authClient.newCall(GET("$API_BASE_URL/v1/my/profile"))
-                    .awaitSuccess()
-                    .parseAs<MangaBakaUserProfileResponse>()
-                    .data
-            }
-        }
-    }
-
-    suspend fun getAccessToken(code: String): MangaBakaOAuth {
-        return withIOContext {
-            val formBody = FormBody.Builder()
-                .add(CLIENT_ID_KEY, CLIENT_ID)
-                .add("code", code)
-                .add("code_verifier", codeVerifier)
-                .add("code_challenge_method", "S256")
-                .add("grant_type", "authorization_code")
-                .add(REDIRECT_URI_KEY, REDIRECT_URI)
-                .add("scope", SCOPES)
-                .build()
-
-            with(json) {
-                client.newCall(POST("${OAUTH_URL}/token", body = formBody))
-                    .awaitSuccess()
-                    .parseAs()
-            }
-        }
-    }
-
     fun verifyOAuthState(state: String): Boolean = state == oauthStateParam
 
     companion object {
-        private const val CLIENT_ID = "zEZYMHXLWsLsafgbvJHXqzGvqQNOdkpo"
+        internal const val CLIENT_ID = "zEZYMHXLWsLsafgbvJHXqzGvqQNOdkpo"
 
-        private const val BASE_URL = "https://mangabaka.org"
-        private const val API_BASE_URL = "https://api.mangabaka.org"
+        internal const val BASE_URL = "https://mangabaka.org"
+        internal const val API_BASE_URL = "https://api.mangabaka.org"
         private const val LIBRARY_API_URL = "$API_BASE_URL/v1/my/library"
 
-        private const val OAUTH_URL = "$BASE_URL/auth/oauth2"
-        private const val SCOPES = "library.read library.write offline_access openid"
+        internal const val OAUTH_URL = "$BASE_URL/auth/oauth2"
+        internal const val SCOPES = "library.read library.write offline_access openid"
 
-        private const val REDIRECT_URI = "mihon://mangabaka-auth"
+        internal const val REDIRECT_URI = "mihon://mangabaka-auth"
 
         private const val APP_JSON = "application/json"
 
-        private var codeVerifier: String = ""
+        internal var codeVerifier: String = ""
         private var oauthStateParam: String = ""
 
         internal fun libraryEntryUrl(remoteId: Long) = "$LIBRARY_API_URL/$remoteId"
