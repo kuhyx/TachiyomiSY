@@ -145,6 +145,10 @@ gradlePlugin {
             id = mihonx.plugins.lint.get().pluginId
             implementationClass = "mihon.gradle.plugins.PluginLint"
         }
+        register("robolectric") {
+            id = mihonx.plugins.robolectric.get().pluginId
+            implementationClass = "mihon.gradle.plugins.PluginRobolectric"
+        }
         register("sy-release") {
             id = mihonx.plugins.sy.release.get().pluginId
             implementationClass = "mihon.gradle.plugins.PluginSyRelease"

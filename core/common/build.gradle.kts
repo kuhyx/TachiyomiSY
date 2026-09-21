@@ -17,19 +17,6 @@ android {
     testOptions.unitTests.isIncludeAndroidResources = true
 }
 
-kover {
-    reports {
-        filters {
-            excludes {
-                // Native-bound code cannot run on the JVM; see NativeBinding's KDoc.
-                annotatedBy("mihon.core.common.NativeBinding")
-                // Reified inline stubs only throw; see InlinedOnly's KDoc.
-                annotatedBy("mihon.core.common.InlinedOnly")
-            }
-        }
-    }
-}
-
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll(

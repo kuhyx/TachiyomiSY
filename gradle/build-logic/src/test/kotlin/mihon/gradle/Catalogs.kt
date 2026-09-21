@@ -53,6 +53,14 @@ private fun mockLibs(project: Project): LibrariesForLibs = mockk {
     every { androidx.compose.bom } returns project.library("androidx.compose", "compose-bom")
     every { androidx.compose.uiToolingPreview } returns project.library("androidx.compose.ui", "ui-tooling-preview")
     every { androidx.compose.uiTooling } returns project.library("androidx.compose.ui", "ui-tooling")
+    every { robolectric } returns project.library("org.robolectric", "robolectric")
+    every { junit4 } returns project.library("junit", "junit")
+    every { junit.vintage } returns project.library("org.junit.vintage", "junit-vintage-engine")
+    every { androidx.compose.uiTestJunit4 } returns project.library("androidx.compose.ui", "ui-test-junit4")
+    every { androidx.compose.uiTestManifest } returns project.library("androidx.compose.ui", "ui-test-manifest")
+    every { okhttp.mockwebserver } returns project.library("com.squareup.okhttp3", "mockwebserver3")
+    every { kotlin.reflect } returns project.library("org.jetbrains.kotlin", "kotlin-reflect")
+    every { kotlinx.coroutines.test } returns project.library("org.jetbrains.kotlinx", "kotlinx-coroutines-test")
     every { ktlint.bom } returns project.library("com.pinterest.ktlint", "ktlint-bom")
     every { versions.jacoco } returns project.provider { "0.8.15" }
 }

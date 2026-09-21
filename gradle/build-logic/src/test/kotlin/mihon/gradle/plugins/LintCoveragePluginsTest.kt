@@ -5,8 +5,10 @@ import com.android.build.api.dsl.LibraryExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import mihon.gradle.catalogProject
 import mihon.gradle.extensions.GATE_MODULES_PROPERTY
 import org.gradle.api.Project
@@ -16,6 +18,8 @@ import org.jetbrains.kotlin.gradle.dsl.HasConfigurableKotlinCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
 
 internal class LintCoveragePluginsTest {
     @Test
@@ -79,6 +83,27 @@ internal class LintCoveragePluginsTest {
         project.plugins.hasPlugin("org.jetbrains.kotlinx.kover") shouldBe true
         (project.tasks.findByName("koverVerify") != null) shouldBe true
         project.tasks.getByName("check").dependsOn.contains("koverVerify") shouldBe true
+    }
+
+    @Test
+    fun coverageVerifiesDebugForAnApp(@TempDir dir: File) {
+        dir.resolve("src/main/aidl/mihon/app/shizuku").mkdirs()
+        dir.resolve("src/main/aidl/mihon/app/shizuku/IShellInterface.aidl").writeText("interface IShellInterface {}")
+        dir.resolve("src/main/aidl/mihon/app/shizuku/notes.txt").writeText("not an aidl file")
+        val project = catalogProject(dir)
+        project.plugins.apply(PluginAndroidApplication::class.java)
+        project.plugins.apply(PluginCoverage::class.java)
+        project.tasks.getByName("check").dependsOn.contains("koverVerifyDebug") shouldBe true
+        project.tasks.getByName("check").dependsOn.contains("koverVerify") shouldBe false
+        val kover = project.extensions.getByType(KoverProjectExtension::class.java)
+        val excluded = kover.reports.filters.excludes
+        excluded.classes.get() shouldContainAll listOf(
+            "*.BuildConfig",
+            "*.databinding.*",
+            "mihon.app.shizuku.IShellInterface",
+            "mihon.app.shizuku.IShellInterface$*",
+        )
+        excluded.annotatedBy.get() shouldContain "mihon.core.common.NativeBinding"
     }
 
     @Test

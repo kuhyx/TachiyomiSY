@@ -1,4 +1,3 @@
-
 import mihon.gradle.getBuildTime
 import mihon.gradle.getLatestCommitCount
 import mihon.gradle.getLatestCommitSha
@@ -13,6 +12,8 @@ plugins {
     alias(mihonx.plugins.sy.release)
     // Splits, packaging, build features, opt-ins and the shortcuts task (gradle/build-logic).
     alias(mihonx.plugins.app.packaging)
+    // Host tests under Robolectric with Compose's test rule and MockWebServer (gradle/build-logic).
+    alias(mihonx.plugins.robolectric)
 
     kotlin("plugin.parcelize")
 
@@ -209,15 +210,13 @@ dependencies {
     // String similarity
     implementation(libs.stringSimilarity)
 
-    // Tests
+    // Tests; the Robolectric stack comes from mihonx.plugins.robolectric
     testImplementation(libs.bundles.test)
     testRuntimeOnly(libs.junit.platform.launcher)
 
     // For detecting memory leaks; see https://square.github.io/leakcanary/
     // debugImplementation(libs.leakCanary.android)
     implementation(libs.leakCanary.plumber)
-
-    testImplementation(libs.kotlinx.coroutines.test)
 
     // SY -->
     // Firebase (EH)
@@ -242,4 +241,10 @@ dependencies {
 
     // ZXing Android Embedded
     implementation(sylibs.zxing.android.embedded)
+}
+
+// SY fork (kuhy): Kover at 100% (build-logic PluginCoverage) goes on unconditionally in the commit
+// that brings this module to 100%; until then `-PsyAppCoverage` measures what is left, pushes stay green.
+if (hasProperty("syAppCoverage")) {
+    pluginManager.apply(mihonx.plugins.coverage.get().pluginId)
 }

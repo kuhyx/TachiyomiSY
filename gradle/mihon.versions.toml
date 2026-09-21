@@ -16,5 +16,6 @@ compose = { id = "mihon.plugins.compose.android" }
 coverage = { id = "mihon.plugins.coverage" }
 kotlin-multiplatform = { id = "mihon.plugins.kotlin.multiplatform" }
 lint = { id = "mihon.plugins.lint" }
+robolectric = { id = "mihon.plugins.robolectric" }
 spotless = { id = "mihon.plugins.spotless" }
 sy-release = { id = "mihon.plugins.sy.release" }

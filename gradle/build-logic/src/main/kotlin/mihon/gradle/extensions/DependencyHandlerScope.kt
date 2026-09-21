@@ -38,3 +38,13 @@ public fun DependencyHandlerScope.implementation(dependencyNotation: Provider<Mi
 public fun DependencyHandlerScope.implementation(dependencyNotation: Project) {
     add(IMPLEMENTATION, dependencyNotation)
 }
+
+/** `testImplementation` for a catalog entry. */
+public fun DependencyHandlerScope.testImplementation(dependencyNotation: Provider<MinimalExternalModuleDependency>) {
+    add("testImplementation", dependencyNotation)
+}
+
+/** `testRuntimeOnly` for a catalog entry. */
+public fun DependencyHandlerScope.testRuntimeOnly(dependencyNotation: Provider<MinimalExternalModuleDependency>) {
+    add("testRuntimeOnly", dependencyNotation)
+}
