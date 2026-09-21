@@ -46,6 +46,7 @@ import eu.kanade.tachiyomi.util.system.isBenchmarkBuildType
 import eu.kanade.tachiyomi.util.system.isNavigationBarNeedsScrim
 import exh.debug.DebugToggles
 import exh.eh.EHentaiUpdateWorker
+import exh.eh.scheduleBackground
 import exh.log.DebugModeOverlay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop

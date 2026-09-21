@@ -17,6 +17,7 @@ import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.tachiyomi.util.system.toast
 import exh.eh.EHentaiUpdateWorker
 import exh.eh.EHentaiUpdateWorkerConstants
+import exh.eh.scheduleBackground
 import exh.source.ExhPreferences
 import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource

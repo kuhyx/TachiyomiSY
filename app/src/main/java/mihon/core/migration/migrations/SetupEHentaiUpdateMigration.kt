@@ -2,6 +2,7 @@ package mihon.core.migration.migrations
 
 import android.app.Application
 import exh.eh.EHentaiUpdateWorker
+import exh.eh.scheduleBackground
 import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext
 

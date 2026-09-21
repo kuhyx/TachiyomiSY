@@ -3,14 +3,8 @@ package exh.eh
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
-import androidx.work.Constraints
 import androidx.work.CoroutineWorker
-import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ForegroundInfo
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import com.elvishew.xlog.Logger
 import com.elvishew.xlog.XLog
@@ -20,7 +14,6 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.source.online.all.EHentai
 import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import eu.kanade.tachiyomi.util.system.setForegroundSafely
-import eu.kanade.tachiyomi.util.system.workManager
 import exh.debug.DebugToggles
 import exh.eh.EHentaiUpdateWorkerConstants.UPDATES_PER_ITERATION
 import exh.log.xLog
@@ -33,24 +26,18 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.serialization.json.Json
 import mihon.domain.source.interactor.UpdateMangaFromRemote
-import tachiyomi.core.common.preference.getAndSet
 import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.library.service.LibraryPreferences
-import tachiyomi.domain.library.service.LibraryPreferences.Companion.DEVICE_CHARGING
 import tachiyomi.domain.library.service.LibraryPreferences.Companion.DEVICE_ONLY_ON_WIFI
 import tachiyomi.domain.manga.interactor.GetExhFavoriteMangaWithMetadata
 import tachiyomi.domain.manga.interactor.GetFlatMetadataById
 import tachiyomi.domain.manga.interactor.InsertFlatMetadata
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.days
-
-private const val FLEX_MINUTES = 10L
 
 internal class EHentaiUpdateWorker(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -111,7 +98,7 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
         logger.d("Found %s manga to update, starting updates!", allMeta.size)
         val mangaMetaToUpdateThisIter = allMeta.take(UPDATES_PER_ITERATION)
 
-        val iteration = UpdateIteration(mangaMetaToUpdateThisIter.size)
+        val iteration = UpdateIteration(this, mangaMetaToUpdateThisIter.size)
         try {
             for ((index, entry) in mangaMetaToUpdateThisIter.withIndex()) {
                 if (iteration.failures > MAX_UPDATE_FAILURES) {
@@ -156,97 +143,6 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
         return UpdateEntry(manga, meta, chapter)
     }
 
-    // Mutable bookkeeping for one updater run.
-    private inner class UpdateIteration(private val total: Int) {
-        var failures: Int = 0
-        var updated: Int = 0
-        val updatedManga: MutableList<Pair<Manga, Array<Chapter>>> = mutableListOf()
-        private val modified = mutableSetOf<Long>()
-
-        suspend fun updateGallery(index: Int, entry: UpdateEntry) {
-            val (manga, meta) = entry
-            logger.d(
-                "Updating gallery (index: %s, manga.id: %s, meta.gId: %s, meta.gToken: %s, " +
-                    "failures-so-far: %s, modifiedThisIteration.size: %s)...",
-                index,
-                manga.id,
-                meta.gId,
-                meta.gToken,
-                failures,
-                modified.size,
-            )
-
-            if (manga.id in modified) {
-                // We already processed this manga!
-                logger.w("Gallery already updated this iteration, skipping...")
-                updated++
-                return
-            }
-
-            val (new, chapters) = fetchChapters(manga, meta) ?: return
-
-            // Find accepted root and discard others
-            val (acceptedRoot, discardedRoots, exhNew) =
-                updateHelper.acceptRootAndDiscardOthers(manga.source, chapters)
-
-            if (new.isNotEmpty() && manga.id == acceptedRoot.manga.id) {
-                libraryPreferences.newUpdatesCount.getAndSet { it + new.size }
-                updatedManga += acceptedRoot.manga to new.toTypedArray()
-            } else if (exhNew.isNotEmpty() && updatedManga.none { it.first.id == acceptedRoot.manga.id }) {
-                libraryPreferences.newUpdatesCount.getAndSet { it + exhNew.size }
-                updatedManga += acceptedRoot.manga to exhNew.toTypedArray()
-            }
-
-            modified += acceptedRoot.manga.id
-            modified += discardedRoots.map { it.manga.id }
-            updated++
-        }
-
-        // (new, current) chapters, or null when the gallery could not be updated or came back empty.
-        private suspend fun fetchChapters(
-            manga: Manga,
-            meta: EHentaiSearchMetadata,
-        ): Pair<List<Chapter>, List<Chapter>>? {
-            val fetched = fetchOrNull(manga, meta)
-            if (fetched != null && fetched.second.isEmpty()) {
-                logger.e(
-                    "No chapters found for gallery (manga.id: %s, meta.gId: %s, meta.gToken: %s, " +
-                        "failures-so-far: %s)!",
-                    manga.id,
-                    meta.gId,
-                    meta.gToken,
-                    failures,
-                )
-                return null
-            }
-            return fetched
-        }
-
-        // Network failures count towards the run's failure tally.
-        private suspend fun fetchOrNull(
-            manga: Manga,
-            meta: EHentaiSearchMetadata,
-        ): Pair<List<Chapter>, List<Chapter>>? =
-            try {
-                updateNotifier.showProgressNotification(manga, updated + failures, total)
-                updateEntryAndGetChapters(manga)
-            } catch (e: GalleryNotUpdatedException) {
-                if (e.network) {
-                    failures++
-
-                    logger.e("> Network error while updating gallery!", e)
-                    logger.e(
-                        "> (manga.id: %s, meta.gId: %s, meta.gToken: %s, failures-so-far: %s)",
-                        manga.id,
-                        meta.gId,
-                        meta.gToken,
-                        failures,
-                    )
-                }
-                null
-            }
-    }
-
     // New, current
     internal suspend fun updateEntryAndGetChapters(manga: Manga): Pair<List<Chapter>, List<Chapter>> {
         val source = ehSourceOf(manga)
@@ -289,51 +185,9 @@ internal class EHentaiUpdateWorker(private val context: Context, workerParams: W
 
         private val MIN_BACKGROUND_UPDATE_FREQ = 1.days.inWholeMilliseconds
 
-        private const val TAG = "EHBackgroundUpdater"
+        internal const val TAG = "EHBackgroundUpdater"
 
-        private val logger by lazy { XLog.tag("EHUpdaterScheduler") }
-
-        fun launchBackgroundTest(context: Context) {
-            context.workManager.enqueue(
-                OneTimeWorkRequestBuilder<EHentaiUpdateWorker>()
-                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .addTag(TAG)
-                    .build(),
-            )
-        }
-
-        fun scheduleBackground(context: Context, prefInterval: Int? = null, prefRestrictions: Set<String>? = null) {
-            val exhPreferences = Injekt.get<ExhPreferences>()
-            val interval = prefInterval ?: exhPreferences.exhAutoUpdateFrequency.get()
-            if (interval > 0) {
-                val restrictions = prefRestrictions ?: exhPreferences.exhAutoUpdateRequirements.get()
-                val acRestriction = DEVICE_CHARGING in restrictions
-
-                val constraints = Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .setRequiresCharging(acRestriction)
-                    .build()
-
-                val request = PeriodicWorkRequestBuilder<EHentaiUpdateWorker>(
-                    interval.toLong(),
-                    TimeUnit.HOURS,
-                    FLEX_MINUTES,
-                    TimeUnit.MINUTES,
-                )
-                    .addTag(TAG)
-                    .setConstraints(constraints)
-                    .build()
-
-                context.workManager.enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.UPDATE, request)
-                logger.d("Successfully scheduled background update job!")
-            } else {
-                cancelBackground(context)
-            }
-        }
-
-        fun cancelBackground(context: Context) {
-            context.workManager.cancelAllWorkByTag(TAG)
-        }
+        internal val logger by lazy { XLog.tag("EHUpdaterScheduler") }
     }
 }
 

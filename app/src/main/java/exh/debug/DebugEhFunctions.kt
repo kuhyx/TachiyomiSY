@@ -2,6 +2,8 @@ package exh.debug
 
 import android.app.Application
 import exh.eh.EHentaiUpdateWorker
+import exh.eh.launchBackgroundTest
+import exh.eh.scheduleBackground
 import exh.metadata.metadata.EHentaiSearchMetadata
 import exh.metadata.metadata.base.raise
 import exh.source.EH_SOURCE_ID

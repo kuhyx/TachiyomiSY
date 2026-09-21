@@ -10,6 +10,8 @@ import eu.kanade.tachiyomi.source.online.all.fetchFavorites
 import eu.kanade.tachiyomi.util.system.toast
 import exh.GalleryAdder
 import exh.eh.EHentaiUpdateWorker
+import exh.eh.cancelBackground
+import exh.eh.scheduleBackground
 import exh.log.xLog
 import exh.source.EXH_SOURCE_ID
 import exh.source.ExhPreferences
