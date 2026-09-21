@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.util.chapter
 
 import eu.kanade.tachiyomi.data.download.DownloadCache
+import eu.kanade.tachiyomi.data.download.isChapterDownloaded
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.source.local.isLocal
