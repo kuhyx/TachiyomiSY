@@ -9,17 +9,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ChromeReaderMode
-import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.CollectionsBookmark
-import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material.icons.outlined.GetApp
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Security
-import androidx.compose.material.icons.outlined.Storage
-import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
@@ -33,22 +23,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
-import eu.kanade.presentation.more.settings.screen.about.AboutScreen
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.presentation.util.LocalBackPress
 import eu.kanade.presentation.util.Screen
-import exh.assets.EhAssets
 import tachiyomi.i18n.MR
-import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import cafe.adriel.voyager.core.screen.Screen as VoyagerScreen
@@ -59,86 +44,6 @@ private const val DARK_VALUE_SHIFT = 0.05f
 private const val LIGHT_VALUE_SHIFT = 0.02f
 
 internal object SettingsMainScreen : Screen() {
-
-    private val items = listOf(
-        Item(
-            titleRes = MR.strings.pref_category_appearance,
-            subtitleRes = MR.strings.pref_appearance_summary,
-            icon = Icons.Outlined.Palette,
-            screen = SettingsAppearanceScreen,
-        ),
-        Item(
-            titleRes = MR.strings.pref_category_library,
-            subtitleRes = MR.strings.pref_library_summary,
-            icon = Icons.Outlined.CollectionsBookmark,
-            screen = SettingsLibraryScreen,
-        ),
-        Item(
-            titleRes = MR.strings.pref_category_reader,
-            subtitleRes = MR.strings.pref_reader_summary,
-            icon = Icons.AutoMirrored.Outlined.ChromeReaderMode,
-            screen = SettingsReaderScreen,
-        ),
-        Item(
-            titleRes = MR.strings.pref_category_downloads,
-            subtitleRes = MR.strings.pref_downloads_summary,
-            icon = Icons.Outlined.GetApp,
-            screen = SettingsDownloadScreen,
-        ),
-        Item(
-            titleRes = MR.strings.pref_category_tracking,
-            subtitleRes = MR.strings.pref_tracking_summary,
-            icon = Icons.Outlined.Sync,
-            screen = SettingsTrackingScreen,
-        ),
-        Item(
-            titleRes = MR.strings.browse,
-            subtitleRes = MR.strings.pref_browse_summary,
-            icon = Icons.Outlined.Explore,
-            screen = SettingsBrowseScreen,
-        ),
-        Item(
-            titleRes = MR.strings.label_data_storage,
-            subtitleRes = MR.strings.pref_backup_summary,
-            icon = Icons.Outlined.Storage,
-            screen = SettingsDataScreen,
-        ),
-        Item(
-            titleRes = MR.strings.pref_category_security,
-            subtitleRes = MR.strings.pref_security_summary,
-            icon = Icons.Outlined.Security,
-            screen = SettingsSecurityScreen,
-        ),
-        // SY -->
-        Item(
-            titleRes = SYMR.strings.pref_category_eh,
-            subtitleRes = SYMR.strings.pref_ehentai_summary,
-            icon = EhAssets.EhLogo,
-            screen = SettingsEhScreen,
-        ),
-        Item(
-            titleRes = SYMR.strings.pref_category_mangadex,
-            subtitleRes = SYMR.strings.pref_mangadex_summary,
-            icon = EhAssets.MangadexLogo,
-            screen = SettingsMangadexScreen,
-        ),
-        // SY <--
-        Item(
-            titleRes = MR.strings.pref_category_advanced,
-            subtitleRes = MR.strings.pref_advanced_summary,
-            icon = Icons.Outlined.Code,
-            screen = SettingsAdvancedScreen,
-        ),
-        Item(
-            titleRes = MR.strings.pref_category_about,
-            subtitleRes = StringResource(0),
-            formatSubtitle = {
-                "${stringResource(MR.strings.app_name)} ${AboutScreen.getVersionName(withBuildDate = false)}"
-            },
-            icon = Icons.Outlined.Info,
-            screen = AboutScreen,
-        ),
-    )
 
     @Composable
     override fun Content() {
@@ -199,7 +104,7 @@ internal object SettingsMainScreen : Screen() {
         val navigator = LocalNavigator.currentOrThrow
         val state = rememberLazyListState()
         // SY -->
-        val items = items.filter { it.screen !is SearchableSettings || it.screen.isEnabled() }
+        val items = settingsMainItems.filter { it.screen !is SearchableSettings || it.screen.isEnabled() }
         // SY <--
         val indexSelected = if (twoPane) {
             items.indexOfFirst { it.screen::class == navigator.items.first()::class }
@@ -232,7 +137,7 @@ internal object SettingsMainScreen : Screen() {
     }
 
     @Composable
-    private fun SettingsEntry(item: Item, twoPane: Boolean, selected: Boolean, onClick: () -> Unit) {
+    private fun SettingsEntry(item: SettingsMainItem, twoPane: Boolean, selected: Boolean, onClick: () -> Unit) {
         var modifier: Modifier = Modifier
         var contentColor = LocalContentColor.current
         if (twoPane) {
@@ -264,12 +169,4 @@ internal object SettingsMainScreen : Screen() {
     private fun Navigator.navigate(screen: VoyagerScreen, twoPane: Boolean) {
         if (twoPane) replaceAll(screen) else push(screen)
     }
-
-    private data class Item(
-        val titleRes: StringResource,
-        val subtitleRes: StringResource,
-        val formatSubtitle: @Composable () -> String = { stringResource(subtitleRes) },
-        val icon: ImageVector,
-        val screen: VoyagerScreen,
-    )
 }
