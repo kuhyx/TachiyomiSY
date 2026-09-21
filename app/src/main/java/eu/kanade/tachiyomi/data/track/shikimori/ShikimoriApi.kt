@@ -3,13 +3,8 @@ package eu.kanade.tachiyomi.data.track.shikimori
 import android.net.Uri
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.model.TrackMangaMetadata
-import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMAddMangaResponse
-import eu.kanade.tachiyomi.data.track.shikimori.dto.SMMetadata
-import eu.kanade.tachiyomi.data.track.shikimori.dto.SMMetadataResult
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMOAuth
-import eu.kanade.tachiyomi.data.track.shikimori.dto.SMSearchResult
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMUser
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMUserListResult
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMUserResult
@@ -29,38 +24,19 @@ import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.injectLazy
 import tachiyomi.domain.track.model.Track as DomainTrack
 
-private const val VARIABLES = "variables"
+internal const val VARIABLES = "variables"
 private const val CLIENT_ID_KEY = "client_id"
-private const val QUERY = "query"
-
-private val MANGA_METADATA_QUERY = """
-    |query(${'$'}ids: String!) {
-        |mangas(ids: ${'$'}ids) {
-            |id
-            |name
-            |description
-            |poster {
-                |originalUrl
-            |}
-            |personRoles {
-                |person {
-                    |name
-                |}
-                |rolesEn
-            |}
-        |}
-    |}
-""".trimMargin()
+internal const val QUERY = "query"
 
 internal class ShikimoriApi(
-    private val trackId: Long,
+    internal val trackId: Long,
     private val client: OkHttpClient,
     interceptor: ShikimoriInterceptor,
 ) {
 
-    private val json: Json by injectLazy()
+    internal val json: Json by injectLazy()
 
-    private val authClient = client.newBuilder().addInterceptor(interceptor).build()
+    internal val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
     suspend fun addLibManga(track: Track, userId: String): Track {
         return withIOContext {
@@ -98,56 +74,6 @@ internal class ShikimoriApi(
             authClient
                 .newCall(DELETE("$API_URL/v2/user_rates/${track.libraryId}"))
                 .awaitSuccess()
-        }
-    }
-
-    suspend fun search(search: String): List<TrackSearch> {
-        return withIOContext {
-            val query = $$"""
-            |query($query: String) {
-                |mangas(search: $query, limit: 20, kind:"!light_novel,!novel") {
-                    |id
-                    |name
-                    |chapters
-                    |kind
-                    |poster {
-                        |mainUrl
-                    |}
-                    |score
-                    |url
-                    |status
-                    |airedOn {
-                        |date
-                    |}
-                    |description
-                    |personRoles {
-                        |person {
-                            |name
-                        |}
-                        |rolesEn
-                    |}
-                |}
-            |}
-            """.trimMargin()
-            val payload = buildJsonObject {
-                put(QUERY, query)
-                putJsonObject(VARIABLES) {
-                    put(QUERY, search)
-                }
-            }
-            with(json) {
-                authClient.newCall(
-                    POST(
-                        GRAPHQL_API_URL,
-                        body = payload.toString().toRequestBody(jsonMime),
-                    ),
-                )
-                    .awaitSuccess()
-                    .parseAs<SMSearchResult>()
-                    .data
-                    .mangas
-                    .map { it.toTrack(trackId) }
-            }
         }
     }
 
@@ -228,32 +154,6 @@ internal class ShikimoriApi(
         }
     }
 
-    suspend fun getMangaMetadata(track: DomainTrack): TrackMangaMetadata {
-        return withIOContext {
-            val payload = buildJsonObject {
-                put(QUERY, MANGA_METADATA_QUERY)
-                putJsonObject(VARIABLES) {
-                    put("ids", "${track.remoteId}")
-                }
-            }
-            with(json) {
-                authClient.newCall(
-                    POST(
-                        "https://shikimori.one/api/graphql",
-                        body = payload.toString().toRequestBody(jsonMime),
-                    ),
-                )
-                    .awaitSuccess()
-                    .parseAs<SMMetadata>()
-                    .data
-                    .mangas
-                    .firstOrNull()
-                    ?.toTrackMangaMetadata()
-                    ?: throw NoSuchElementException("Could not get metadata from Shikimori")
-            }
-        }
-    }
-
     suspend fun accessToken(code: String): SMOAuth {
         return withIOContext {
             with(json) {
@@ -278,7 +178,7 @@ internal class ShikimoriApi(
     companion object {
         private const val BASE_URL = "https://shikimori.io"
         private const val API_URL = "$BASE_URL/api"
-        private const val GRAPHQL_API_URL = "$BASE_URL/api/graphql"
+        internal const val GRAPHQL_API_URL = "$BASE_URL/api/graphql"
         private const val OAUTH_URL = "$BASE_URL/oauth/token"
         private const val LOGIN_URL = "$BASE_URL/oauth/authorize"
 
@@ -303,20 +203,4 @@ internal class ShikimoriApi(
                 .build(),
         )
     }
-}
-
-internal fun SMMetadataResult.toTrackMangaMetadata(): TrackMangaMetadata {
-    fun namedWithRole(vararg roles: String): String? = personRoles
-        .filter { role -> roles.any { it in role.roles } }
-        .map { it.person.name }
-        .joinToString(", ")
-        .ifEmpty { null }
-    return TrackMangaMetadata(
-        remoteId = id.toLong(),
-        title = name,
-        thumbnailUrl = poster.originalUrl,
-        description = description,
-        authors = namedWithRole("Story", "Story & Art"),
-        artists = namedWithRole("Art", "Story & Art"),
-    )
 }
