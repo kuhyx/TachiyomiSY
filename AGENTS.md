@@ -78,7 +78,9 @@ it clean; nothing runs warn-only. `gradle/build-logic` (convention plugins,
 where the shared lint config lives), `source-api`, `core-metadata`,
 `core/common`, `domain`, `data`, `presentation-core`, `presentation-widget`,
 `source-local`, `i18n`, `i18n-sy`, `baseline-profile`, `app`. The enabled
-list is `CAPPED_MODULES` in `scripts/ci_gates.sh`. Session prompts live in
+list is `CAPPED_MODULES` in `scripts/capped_modules.sh`; since 2026-09-21 it
+holds every module, so the cap covers the whole repository (the only
+exemption is `.file-length-exempt`). Session prompts live in
 `~/.claude/plans/tachiyomisy/`.
 
 Split rules for the 250 cap: screen models -> one class per concern composed

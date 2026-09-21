@@ -14,7 +14,7 @@
 #: Rollout order (AGENTS.md): gradle/build-logic source-api core-metadata
 #: core/common domain data presentation-core presentation-widget
 #: source-local i18n i18n-sy baseline-profile app.
-readonly CAPPED_MODULES=(gradle/build-logic source-api core-metadata core/common domain data i18n i18n-sy baseline-profile source-local presentation-widget presentation-core)
+readonly CAPPED_MODULES=(gradle/build-logic source-api core-metadata core/common domain data i18n i18n-sy baseline-profile source-local presentation-widget presentation-core app)
 
 # Every Gradle module directory, relative to the repo root, one per line.
 module_dirs() {
