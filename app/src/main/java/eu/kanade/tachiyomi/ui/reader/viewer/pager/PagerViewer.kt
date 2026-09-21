@@ -1,15 +1,12 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
-import android.graphics.PointF
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup.LayoutParams
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.viewpager.widget.ViewPager
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.hideMenu
@@ -17,13 +14,8 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderItem
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
-import eu.kanade.tachiyomi.ui.reader.onPageLongTap
-import eu.kanade.tachiyomi.ui.reader.onPageSelected
-import eu.kanade.tachiyomi.ui.reader.reloadChapters
 import eu.kanade.tachiyomi.ui.reader.requestPreloadChapter
-import eu.kanade.tachiyomi.ui.reader.toggleMenu
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
-import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
 import eu.kanade.tachiyomi.ui.reader.viewer.canPanLeft
 import eu.kanade.tachiyomi.ui.reader.viewer.canPanRight
 import eu.kanade.tachiyomi.ui.reader.viewer.panLeft
@@ -84,7 +76,7 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
             }
         }
 
-    private val pagerListener = object : ViewPager.SimpleOnPageChangeListener() {
+    internal val pagerListener = object : ViewPager.SimpleOnPageChangeListener() {
         override fun onPageSelected(position: Int) {
             // SY -->
             if (pager.isRestoring) return
@@ -101,56 +93,9 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
     }
 
     init {
-        pager.isVisible = false // Don't layout the pager yet
-        pager.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        pager.isFocusable = false
-        pager.offscreenPageLimit = 1
-        pager.id = R.id.reader_pager
-        pager.adapter = adapter
-        pager.addOnPageChangeListener(pagerListener)
-        pager.tapListener = { event ->
-            val viewPosition = IntArray(2)
-            pager.getLocationOnScreen(viewPosition)
-            val viewPositionRelativeToWindow = IntArray(2)
-            pager.getLocationInWindow(viewPositionRelativeToWindow)
-            val pos = PointF(
-                (event.rawX - viewPosition[0] + viewPositionRelativeToWindow[0]) / pager.width,
-                (event.rawY - viewPosition[1] + viewPositionRelativeToWindow[1]) / pager.height,
-            )
-            when (config.navigator.getAction(pos)) {
-                NavigationRegion.MENU -> activity.toggleMenu()
-                NavigationRegion.NEXT -> moveToNext()
-                NavigationRegion.PREV -> moveToPrevious()
-                NavigationRegion.RIGHT -> moveRight()
-                NavigationRegion.LEFT -> moveLeft()
-            }
-        }
-        pager.longTapListener = {
-            val item = adapter.joinedItems.getOrNull(pager.currentItem)
-            val firstPage = (item?.first as? ReaderPage)
-                ?.takeIf { activity.viewModel.state.value.menuVisible || config.longTapEnabled }
-            if (firstPage != null) activity.onPageLongTap(firstPage, item.second as? ReaderPage)
-            firstPage != null
-        }
-
-        config.dualPageSplitChangedListener = { enabled ->
-            if (!enabled) {
-                cleanupPageSplit()
-            }
-        }
-
-        config.reloadChapterListener = {
-            activity.reloadChapters(it)
-        }
-
-        config.imagePropertyChangedListener = {
-            refreshAdapter()
-        }
-
-        config.navigationModeChangedListener = {
-            val showOnStart = config.navigationOverlayOnStart || config.forceNavigationOverlay
-            activity.binding.navigationOverlay.setNavigation(config.navigator, showOnStart)
-        }
+        setUpPager()
+        setUpTapListeners()
+        setUpConfigListeners()
     }
 
     override fun destroy() {
@@ -206,27 +151,7 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
     /**
      * Tells this viewer to move to the given [page].
      */
-    override fun moveToPage(page: ReaderPage) {
-        val position = adapter.joinedItems.indexOfFirst { it.first == page || it.second == page }
-        if (position != -1) {
-            val currentPosition = pager.currentItem
-            pager.setCurrentItem(position, true)
-            // manually call onPageChange since ViewPager listener is not triggered in this case
-            if (currentPosition == position) {
-                onPageChange(position)
-            } else {
-                // Call this since with double shift onPageChange wont get called (it shouldn't)
-                // Instead just update the page count in ui
-                val joinedItem = adapter.joinedItems.firstOrNull { it.first == page || it.second == page }
-                activity.onPageSelected(
-                    joinedItem?.first as? ReaderPage ?: page,
-                    joinedItem?.second != null,
-                )
-            }
-        } else {
-            logcat { "Page $page not found in adapter" }
-        }
-    }
+    override fun moveToPage(page: ReaderPage) = moveToReaderPage(page)
 
     /**
      * Moves to the next page.
@@ -245,7 +170,7 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
     /**
      * Moves to the page at the right.
      */
-    protected open fun moveRight() {
+    internal open fun moveRight() {
         if (pager.currentItem != adapter.count - 1) {
             val holder = (currentPage as? ReaderPage)?.let(::getPageHolder)
             if (holder != null && config.navigateToPan && holder.canPanRight()) {
@@ -259,7 +184,7 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
     /**
      * Moves to the page at the left.
      */
-    protected open fun moveLeft() {
+    internal open fun moveLeft() {
         if (pager.currentItem != 0) {
             val holder = (currentPage as? ReaderPage)?.let(::getPageHolder)
             if (holder != null && config.navigateToPan && holder.canPanLeft()) {
@@ -273,24 +198,15 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
     /**
      * Moves to the page at the top (or previous).
      */
-    protected open fun moveUp() {
+    internal open fun moveUp() {
         moveToPrevious()
     }
 
     /**
      * Moves to the page at the bottom (or next).
      */
-    protected open fun moveDown() {
+    internal open fun moveDown() {
         moveToNext()
-    }
-
-    // Resets the adapter in order to recreate all the views. Used when a image configuration is
-    // changed.
-    private fun refreshAdapter() {
-        val currentItem = pager.currentItem
-        adapter.refresh()
-        pager.adapter = adapter
-        pager.setCurrentItem(currentItem, false)
     }
 
     /**
@@ -305,23 +221,6 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
         // The key is claimed on the way down too; the move happens on release.
         if (event.action == KeyEvent.ACTION_UP) action()
         return true
-    }
-
-    // What a key does, or null for a key the viewer does not handle.
-    private fun keyAction(event: KeyEvent): (() -> Unit)? {
-        val ctrlPressed = event.metaState.and(KeyEvent.META_CTRL_ON) > 0
-        return when (event.keyCode) {
-            KeyEvent.KEYCODE_VOLUME_DOWN -> if (config.volumeKeysInverted) ::moveUp else ::moveDown
-            KeyEvent.KEYCODE_VOLUME_UP -> if (config.volumeKeysInverted) ::moveDown else ::moveUp
-            KeyEvent.KEYCODE_DPAD_RIGHT -> if (ctrlPressed) ::moveToNext else ::moveRight
-            KeyEvent.KEYCODE_DPAD_LEFT -> if (ctrlPressed) ::moveToPrevious else ::moveLeft
-            KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_PAGE_DOWN -> ::moveDown
-            KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_PAGE_UP -> ::moveUp
-            KeyEvent.KEYCODE_MENU -> {
-                { activity.toggleMenu() }
-            }
-            else -> null
-        }
     }
 
     /**
