@@ -11,14 +11,11 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.calculateChapterGap
 import eu.kanade.tachiyomi.util.system.createReaderThemeContext
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
-import kotlinx.coroutines.delay
-import tachiyomi.core.common.util.lang.launchUI
 import tachiyomi.core.common.util.system.logcat
 
 // Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.
-private const val SPLIT_DELAY_MS = 100L
 
-internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
+internal class PagerViewerAdapter(internal val viewer: PagerViewer) : ViewPagerAdapter() {
 
     /**
      * Paired list of currently set items.
@@ -30,7 +27,7 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
     private var subItems: MutableList<ReaderItem> = mutableListOf()
 
     // Holds preprocessed items so they don't get removed when changing chapter.
-    private var preprocessed: MutableMap<Int, InsertPage> = mutableMapOf()
+    internal var preprocessed: MutableMap<Int, InsertPage> = mutableMapOf()
 
     var nextTransition: ChapterTransition.Next? = null
         private set
@@ -171,47 +168,12 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
         return POSITION_NONE
     }
 
-    fun onPageSplit(currentPage: Any?, newPage: InsertPage) {
-        if (currentPage !is ReaderPage) return
-
-        val currentIndex = joinedItems.indexOfFirst { it.first == currentPage }
-
-        // Put aside preprocessed pages for next chapter so they don't get removed when changing chapter
-        if (currentPage.chapter.chapter.id != currentChapter?.chapter?.id) {
-            preprocessed[newPage.index] = newPage
-            return
-        }
-
-        val placeAtIndex = when (viewer) {
-            is L2RPagerViewer,
-            is VerticalPagerViewer,
-            -> currentIndex + 1
-            else -> currentIndex
-        }
-
-        // It will enter a endless cycle of insert pages
-        val nextToInsertPage =
-            (viewer is R2LPagerViewer && placeAtIndex - 1 >= 0 && joinedItems[placeAtIndex - 1].first is InsertPage) ||
-                joinedItems[placeAtIndex].first is InsertPage
-        if (nextToInsertPage) return
-
-        joinedItems.add(placeAtIndex, newPage to null)
-
-        notifyDataSetChanged()
-    }
-
-    fun cleanupPageSplit() {
-        val insertPages = joinedItems.filter { it.first is InsertPage }
-        joinedItems.removeAll(insertPages)
-        notifyDataSetChanged()
-    }
-
     fun refresh() {
         readerThemedContext = viewer.activity.createReaderThemeContext()
     }
 
     // SY -->
-    private fun setJoinedItems(useSecondPage: Boolean = false) {
+    internal fun setJoinedItems(useSecondPage: Boolean = false) {
         val oldCurrent = joinedItems.getOrNull(viewer.pager.currentItem)
         val joined = if (!viewer.config.doublePages) {
             // If not in double mode, set up items like before
@@ -237,20 +199,5 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
         viewer.pager.setCurrentItem(joinedItems.joinedIndexOf(newPage), false)
     }
 
-    fun splitDoublePages(current: ReaderPage) {
-        val oldCurrent = joinedItems.getOrNull(viewer.pager.currentItem)
-        val oldSecondPage = oldCurrent?.second as? ReaderPage
-        val oldFirstPage = oldCurrent?.first as? ReaderPage
-        val oldPage = oldSecondPage ?: oldFirstPage
-
-        setJoinedItems(oldSecondPage == current || current.index + 1 < (oldPage?.index ?: 0))
-
-        // The listener may be removed when we split a page, so the ui may not have updated properly
-        // This case usually happens when we load a new chapter and the first 2 pages need to split og
-        viewer.scope.launchUI {
-            delay(SPLIT_DELAY_MS)
-            viewer.onPageChange(viewer.pager.currentItem)
-        }
-    }
     // SY <--
 }
