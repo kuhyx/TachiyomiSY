@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALListItem
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALListItemStatus
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALManga
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALOAuth
@@ -158,74 +157,18 @@ internal class MyAnimeListApi(
         }
     }
 
-    suspend fun findListItem(track: Track): Track? {
-        return withIOContext {
-            val uri = MANGA_API_URL.toUri().buildUpon()
-                .appendPath(track.remoteId.toString())
-                .appendQueryParameter(FIELDS, "num_chapters,my_list_status{start_date,finish_date}")
-                .build()
-            with(json) {
-                authClient.newCall(GET(uri.toString()))
-                    .awaitSuccess()
-                    .parseAs<MALListItem>()
-                    .let { item ->
-                        track.totalChapters = item.numChapters
-                        item.myListStatus?.let { parseMangaItem(it, track) }
-                    }
-            }
-        }
-    }
-
-    suspend fun findListItems(query: String, offset: Int = 0): List<TrackSearch> {
-        return withIOContext {
-            val myListSearchResult = getListPage(offset)
-
-            val matches = myListSearchResult.data
-                .filter { it.node.title.contains(query, ignoreCase = true) }
-                .map { parseSearchItem(it.node) }
-
-            // Check next page if there's more
-            if (!myListSearchResult.paging.next.isNullOrBlank()) {
-                matches + findListItems(query, offset + LIST_PAGINATION_AMOUNT)
-            } else {
-                matches
-            }
-        }
-    }
-
-    private suspend fun getListPage(offset: Int): MALSearchResult {
-        return withIOContext {
-            val urlBuilder = "$BASE_API_URL/users/@me/mangalist".toUri().buildUpon()
-                .appendQueryParameter(FIELDS, SEARCH_FIELDS)
-                .appendQueryParameter("limit", LIST_PAGINATION_AMOUNT.toString())
-            if (offset > 0) {
-                urlBuilder.appendQueryParameter("offset", offset.toString())
-            }
-
-            val request = Request.Builder()
-                .url(urlBuilder.build().toString())
-                .get()
-                .build()
-            with(json) {
-                authClient.newCall(request)
-                    .awaitSuccess()
-                    .parseAs()
-            }
-        }
-    }
-
     companion object {
         private const val CLIENT_ID = "c46c9e24640a64dad5be5ca7a1a53a0f"
 
         private const val BASE_OAUTH_URL = "https://myanimelist.net/v1/oauth2"
-        private const val BASE_API_URL = "https://api.myanimelist.net/v2"
+        internal const val BASE_API_URL = "https://api.myanimelist.net/v2"
         internal const val MANGA_API_URL = "$BASE_API_URL/manga"
 
-        private const val SEARCH_FIELDS =
+        internal const val SEARCH_FIELDS =
             "id,title,synopsis,num_chapters,mean,main_picture,status,media_type,start_date," +
                 "authors{first_name,last_name}"
 
-        private const val LIST_PAGINATION_AMOUNT = 250
+        internal const val LIST_PAGINATION_AMOUNT = 250
 
         private var codeVerifier: String = ""
 
