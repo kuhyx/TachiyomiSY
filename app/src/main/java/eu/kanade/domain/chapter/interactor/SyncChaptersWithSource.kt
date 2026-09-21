@@ -12,14 +12,12 @@ import eu.kanade.tachiyomi.data.download.renameChapter
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
-import exh.source.isEhBasedManga
 import tachiyomi.data.chapter.ChapterSanitizer
 import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.chapter.interactor.ShouldUpdateDbChapter
 import tachiyomi.domain.chapter.interactor.UpdateChapter
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.chapter.model.NoChaptersException
-import tachiyomi.domain.chapter.model.toChapterUpdate
 import tachiyomi.domain.chapter.repository.ChapterRepository
 import tachiyomi.domain.chapter.service.ChapterRecognition
 import tachiyomi.domain.library.service.LibraryPreferences
@@ -27,18 +25,17 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.source.local.isLocal
 import java.lang.Long.max
 import java.time.ZonedDateTime
-import java.util.TreeSet
 
 internal class SyncChaptersWithSource(collaborators: Collaborators) {
     private val downloadManager = collaborators.downloadManager
     private val downloadProvider = collaborators.downloadProvider
-    private val chapterRepository = collaborators.chapterRepository
+    internal val chapterRepository = collaborators.chapterRepository
     private val shouldUpdateDbChapter = collaborators.shouldUpdateDbChapter
-    private val updateManga = collaborators.updateManga
-    private val updateChapter = collaborators.updateChapter
+    internal val updateManga = collaborators.updateManga
+    internal val updateChapter = collaborators.updateChapter
     private val getChaptersByMangaId = collaborators.getChaptersByMangaId
     private val getExcludedScanlators = collaborators.getExcludedScanlators
-    private val libraryPreferences = collaborators.libraryPreferences
+    internal val libraryPreferences = collaborators.libraryPreferences
 
     /** Everything [SyncChaptersWithSource] talks to, resolved by the DI graph. */
     data class Collaborators(
@@ -109,7 +106,7 @@ internal class SyncChaptersWithSource(collaborators: Collaborators) {
     }
 
     /** The source list against the db: what to insert, what to update in place, what disappeared. */
-    private class Diff(
+    internal class Diff(
         val new: MutableList<Chapter> = mutableListOf(),
         val updated: MutableList<Chapter> = mutableListOf(),
         val removed: List<Chapter>,
@@ -187,92 +184,5 @@ internal class SyncChaptersWithSource(collaborators: Collaborators) {
             memo = chapter.memo,
         )
         return if (chapter.dateUpload != 0L) toChangeChapter.copy(dateUpload = chapter.dateUpload) else toChangeChapter
-    }
-
-    // Stamps the new chapters with a descending fetch date and carries read/bookmark state over from
-    // the removed chapters that share a chapter number (a re-uploaded chapter keeps its progress).
-    private fun carryOverRemovedState(
-        diff: Diff,
-        dbChapters: List<Chapter>,
-        nowMillis: Long,
-        changedOrDuplicateReadUrls: MutableSet<String>,
-    ): List<Chapter> {
-        val deletedChapterNumbers = TreeSet<Double>()
-        val deletedReadChapterNumbers = TreeSet<Double>()
-        val deletedBookmarkedChapterNumbers = TreeSet<Double>()
-        val readChapterNumbers = dbChapters
-            .asSequence()
-            .filter { it.read && it.isRecognizedNumber }
-            .map { it.chapterNumber }
-            .toSet()
-        diff.removed.forEach { chapter ->
-            if (chapter.read) deletedReadChapterNumbers.add(chapter.chapterNumber)
-            if (chapter.bookmark) deletedBookmarkedChapterNumbers.add(chapter.chapterNumber)
-            deletedChapterNumbers.add(chapter.chapterNumber)
-        }
-        val deletedChapterNumberDateFetchMap = diff.removed.sortedByDescending { it.dateFetch }
-            .associate { it.chapterNumber to it.dateFetch }
-        val markDuplicateAsRead = libraryPreferences.markDuplicateReadChapterAsRead.get()
-            .contains(LibraryPreferences.MARK_DUPLICATE_CHAPTER_READ_NEW)
-
-        // Date fetch is set in such a way that the upper ones will have bigger value than the lower ones
-        // Sources MUST return the chapters from most to less recent, which is common.
-        var itemCount = diff.new.size
-        return diff.new.map { toAddItem ->
-            var chapter = toAddItem.copy(dateFetch = nowMillis + itemCount--)
-            if (chapter.chapterNumber in readChapterNumbers && markDuplicateAsRead) {
-                changedOrDuplicateReadUrls.add(chapter.url)
-                chapter = chapter.copy(read = true)
-            }
-            if (!chapter.isRecognizedNumber || chapter.chapterNumber !in deletedChapterNumbers) {
-                chapter
-            } else {
-                chapter = chapter.copy(
-                    read = chapter.chapterNumber in deletedReadChapterNumbers,
-                    bookmark = chapter.chapterNumber in deletedBookmarkedChapterNumbers,
-                )
-                // Try to to use the fetch date of the original entry to not pollute 'Updates' tab
-                deletedChapterNumberDateFetchMap[chapter.chapterNumber]?.let {
-                    chapter = chapter.copy(dateFetch = it)
-                }
-                changedOrDuplicateReadUrls.add(chapter.url)
-                chapter
-            }
-        }
-    }
-
-    // EXH: an E-Hentai gallery is one "chapter" per revision, so a new revision inherits the page reached.
-    private fun carryOverEhProgress(
-        manga: Manga,
-        dbChapters: List<Chapter>,
-        toAdd: List<Chapter>,
-        changedOrDuplicateReadUrls: Set<String>,
-    ): List<Chapter> {
-        val max = dbChapters.maxOfOrNull { it.lastPageRead } ?: 0
-        val applies = manga.isEhBasedManga() && max > 0 && toAdd.any { it.url !in changedOrDuplicateReadUrls }
-        if (!applies) return toAdd
-        return toAdd.map { if (it.url !in changedOrDuplicateReadUrls) it.copy(lastPageRead = max) else it }
-    }
-
-    // Writes the diff and returns the inserted chapters with their db ids.
-    private suspend fun persist(
-        diff: Diff,
-        toAdd: List<Chapter>,
-        manga: Manga,
-        now: ZonedDateTime,
-        fetchWindow: Pair<Long, Long>,
-    ): List<Chapter> {
-        if (diff.removed.isNotEmpty()) {
-            chapterRepository.removeChaptersWithIds(diff.removed.map { it.id })
-        }
-        val added = if (toAdd.isNotEmpty()) chapterRepository.addAll(toAdd) else toAdd
-        if (diff.updated.isNotEmpty()) {
-            updateChapter.awaitAll(diff.updated.map { it.toChapterUpdate() })
-        }
-        updateManga.awaitUpdateFetchInterval(manga, now, fetchWindow)
-        // Set this manga as updated since chapters were changed
-        // Note that last_update actually represents last time the chapter list changed at all
-        updateManga.awaitUpdateLastUpdate(manga.id)
-        return added
     }
 }
