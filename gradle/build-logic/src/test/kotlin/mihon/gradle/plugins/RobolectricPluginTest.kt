@@ -4,6 +4,7 @@ import com.android.build.api.dsl.LibraryExtension
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import mihon.gradle.catalogProject
+import org.gradle.api.internal.project.ProjectInternal
 import org.junit.jupiter.api.Test
 
 internal class RobolectricPluginTest {
@@ -26,5 +27,27 @@ internal class RobolectricPluginTest {
         )
         val runtimeOnly = project.configurations.getByName("testRuntimeOnly").dependencies.map { it.name }
         runtimeOnly shouldContainAll listOf("junit-vintage-engine")
+        project.configurations.getByName("debugImplementation").dependencies.isEmpty() shouldBe true
+    }
+
+    @Test
+    fun appDebugGetsTestManifest() {
+        val project = catalogProject()
+        project.plugins.apply(PluginAndroidApplication::class.java)
+        project.plugins.apply(PluginRobolectric::class.java)
+        val debug = project.configurations.getByName("debugImplementation").dependencies.map { it.name }
+        debug shouldContainAll listOf("ui-test-manifest")
+    }
+
+    @Test
+    fun conscryptAndroidIsExcluded() {
+        val project = catalogProject()
+        project.plugins.apply(PluginAndroidLibrary::class.java)
+        project.plugins.apply(PluginRobolectric::class.java)
+        project.extensions.getByType(LibraryExtension::class.java).namespace = "mihon.test"
+        (project as ProjectInternal).evaluate()
+        val excluded = project.configurations.getByName("debugUnitTestRuntimeClasspath").excludeRules
+        excluded.any { it.group == "org.conscrypt" && it.module == "conscrypt-android" } shouldBe true
+        project.configurations.getByName("debugRuntimeClasspath").excludeRules.isEmpty() shouldBe true
     }
 }
