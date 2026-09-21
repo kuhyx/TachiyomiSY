@@ -13,21 +13,19 @@ import exh.source.getMainSource
 import mihon.domain.source.interactor.UpdateMangaFromRemote
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.domain.chapter.interactor.GetChapter
-import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
-import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 internal class GalleryAdder(
-    private val getManga: GetManga = Injekt.get(),
-    private val updateManga: UpdateManga = Injekt.get(),
-    private val updateMangaFromRemote: UpdateMangaFromRemote = Injekt.get(),
-    private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
-    private val getChapter: GetChapter = Injekt.get(),
+    internal val getManga: GetManga = Injekt.get(),
+    internal val updateManga: UpdateManga = Injekt.get(),
+    internal val updateMangaFromRemote: UpdateMangaFromRemote = Injekt.get(),
+    internal val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
+    internal val getChapter: GetChapter = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
 ) {
 
@@ -173,52 +171,7 @@ internal class GalleryAdder(
         }
     }
 
-    // Use manga in DB if possible, otherwise make a new one; then fetch details and chapters.
-    private suspend fun importManga(
-        source: UrlImportableSource,
-        mangaUrl: String,
-        fav: Boolean,
-        throttleFunc: suspend () -> Unit,
-        retryCount: Int,
-    ): Manga {
-        var manga = getManga.await(mangaUrl, source.id)
-            ?: networkToLocalManga(Manga.create().copy(source = source.id, url = mangaUrl))
-        // Fetch and copy details
-        manga = retry(retryCount) {
-            updateMangaFromRemote(
-                manga,
-                fetchDetails = true,
-                fetchChapters = true,
-                manualFetch = false,
-                throttleFunc = throttleFunc,
-            ).getOrThrow().manga
-        }
-        if (fav) {
-            updateManga.awaitUpdateFavorite(manga.id, true)
-            manga = manga.copy(favorite = true)
-        }
-        return manga
-    }
-
-    private suspend fun successEvent(
-        url: String,
-        manga: Manga,
-        chapterUrl: String?,
-        context: Context,
-    ): GalleryAddEvent {
-        if (chapterUrl == null) return GalleryAddEvent.Success(url, manga, context)
-        val chapter = getChapter.await(chapterUrl, manga.id)
-        return if (chapter != null) {
-            GalleryAddEvent.Success(url, manga, context, chapter)
-        } else {
-            GalleryAddEvent.Fail.Error(
-                url,
-                context.stringResource(SYMR.strings.gallery_adder_could_not_identify_chapter, url),
-            )
-        }
-    }
-
-    private inline fun <T : Any> retry(retryCount: Int, block: () -> T): T {
+    internal inline fun <T : Any> retry(retryCount: Int, block: () -> T): T {
         var result: T? = null
         var lastError: Exception? = null
 
@@ -240,41 +193,5 @@ internal class GalleryAdder(
         }
 
         return result!!
-    }
-}
-
-internal sealed class GalleryAddEvent {
-    abstract val logMessage: String
-    abstract val galleryUrl: String
-    open val galleryTitle: String? = null
-
-    class Success(
-        override val galleryUrl: String,
-        val manga: Manga,
-        val context: Context,
-        val chapter: Chapter? = null,
-    ) : GalleryAddEvent() {
-        override val galleryTitle = manga.title
-        override val logMessage = context.stringResource(SYMR.strings.batch_add_success_log_message, galleryTitle)
-    }
-
-    sealed class Fail : GalleryAddEvent() {
-        class UnknownType(override val galleryUrl: String, val context: Context) : Fail() {
-            override val logMessage =
-                context.stringResource(SYMR.strings.batch_add_unknown_type_log_message, galleryUrl)
-        }
-
-        open class Error(
-            override val galleryUrl: String,
-            override val logMessage: String,
-        ) : Fail()
-
-        class NotFound(galleryUrl: String, context: Context) :
-            Error(galleryUrl, context.stringResource(SYMR.strings.batch_add_not_exist_log_message, galleryUrl))
-
-        class UnknownSource(override val galleryUrl: String, val context: Context) : Fail() {
-            override val logMessage =
-                context.stringResource(SYMR.strings.batch_add_unknown_source_log_message, galleryUrl)
-        }
     }
 }
