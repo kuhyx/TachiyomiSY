@@ -7,25 +7,19 @@ import eu.kanade.tachiyomi.data.download.renameSource
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.getSourceData
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.all.EHentai
 import eu.kanade.tachiyomi.source.online.all.Lanraragi
 import eu.kanade.tachiyomi.source.online.all.MangaDex
-import eu.kanade.tachiyomi.source.online.all.MergedSource
 import eu.kanade.tachiyomi.source.online.all.NHentai
 import eu.kanade.tachiyomi.source.online.english.EightMuses
 import eu.kanade.tachiyomi.source.online.english.HBrowse
 import eu.kanade.tachiyomi.source.online.english.Pururin
 import eu.kanade.tachiyomi.source.online.english.Tsumino
-import exh.log.xLogD
 import exh.source.BlacklistedSources
 import exh.source.DelegatedHttpSource
-import exh.source.EH_SOURCE_ID
 import exh.source.EIGHTMUSES_SOURCE_ID
-import exh.source.EXH_SOURCE_ID
 import exh.source.EnhancedHttpSource
 import exh.source.ExhPreferences
 import exh.source.HBROWSE_SOURCE_ID
-import exh.source.MERGED_SOURCE_ID
 import exh.source.PURURIN_SOURCE_ID
 import exh.source.TSUMINO_SOURCE_ID
 import exh.source.handleSourceLibrary
@@ -36,25 +30,21 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import tachiyomi.domain.source.model.StubSource
 import tachiyomi.domain.source.repository.StubSourceRepository
 import tachiyomi.domain.source.service.SourceManager
-import tachiyomi.source.local.LocalSource
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 internal class AndroidSourceManager(
-    private val context: Context,
-    private val extensionManager: ExtensionManager,
-    private val sourceRepository: StubSourceRepository,
+    internal val context: Context,
+    internal val extensionManager: ExtensionManager,
+    internal val sourceRepository: StubSourceRepository,
 ) : SourceManager {
 
     private val _isInitialized = MutableStateFlow(false)
@@ -62,114 +52,26 @@ internal class AndroidSourceManager(
 
     private val downloadManager: DownloadManager by injectLazy()
 
-    private val scope = CoroutineScope(Job() + Dispatchers.IO)
+    internal val scope = CoroutineScope(Job() + Dispatchers.IO)
 
-    private val sourcesMapFlow = MutableStateFlow(ConcurrentHashMap<Long, Source>())
+    internal val sourcesMapFlow = MutableStateFlow(ConcurrentHashMap<Long, Source>())
 
-    private val stubSourcesMap = ConcurrentHashMap<Long, StubSource>()
+    internal val stubSourcesMap = ConcurrentHashMap<Long, StubSource>()
 
     override val sources: Flow<List<Source>> = sourcesMapFlow.map { it.values.toList() }
 
     // SY -->
-    private val exhPreferences: ExhPreferences by injectLazy()
-    private val sourcePreferences: SourcePreferences by injectLazy()
+    internal val exhPreferences: ExhPreferences by injectLazy()
+    internal val sourcePreferences: SourcePreferences by injectLazy()
     // SY <--
 
     init {
-        scope.launch {
-            extensionManager.installedExtensionsFlow
-                // SY -->
-                .combine(exhPreferences.enableExhentai.changes()) { extensions, enableExhentai ->
-                    extensions to enableExhentai
-                }
-                // SY <--
-                .collectLatest { (extensions, enableExhentai) ->
-                    val mutableMap: ConcurrentHashMap<Long, Source> = ConcurrentHashMap<Long, Source>(
-                        mapOf(
-                            LocalSource.ID to LocalSource(
-                                context,
-                                Injekt.get(),
-                                Injekt.get(),
-                                // SY -->
-                                sourcePreferences.allowLocalSourceHiddenFolders::get,
-                                // SY <--
-                            ),
-                        ),
-                    )
-
-                    mutableMap.apply {
-                        // SY -->
-                        put(EH_SOURCE_ID, EHentai(EH_SOURCE_ID, false, context))
-                        if (enableExhentai) {
-                            put(EXH_SOURCE_ID, EHentai(EXH_SOURCE_ID, true, context))
-                        }
-                        put(MERGED_SOURCE_ID, MergedSource())
-                        // SY <--
-                    }
-
-                    extensions.forEach { extension ->
-                        extension.sources.mapNotNull { it.toInternalSource() }.forEach {
-                            mutableMap[it.id] = it
-                            registerStubSource(StubSource.from(it))
-                        }
-                    }
-                    sourcesMapFlow.value = mutableMap
-                    _isInitialized.value = true
-                }
-        }
-
-        scope.launch {
-            sourceRepository.subscribeAll()
-                .collectLatest { sources ->
-                    val mutableMap = stubSourcesMap.toMutableMap()
-                    sources.forEach {
-                        mutableMap[it.id] = it
-                    }
-                }
-        }
+        observeExtensions()
+        observeStubSources()
     }
 
-    private fun Source.toInternalSource(): Source? {
-        // EXH -->
-        val sourceQName = this::class.qualifiedName
-        val factories = DELEGATED_SOURCES.entries
-            .filter { it.value.factory }
-            .map { it.value.originalSourceQualifiedClassName }
-        val delegate = sourceQName?.let { qualifiedName ->
-            val matched = factories.find { qualifiedName.startsWith(it) }
-            DELEGATED_SOURCES[matched ?: qualifiedName]
-        }
-        val newSource = if (this is HttpSource && delegate != null) {
-            xLogD("Delegating source: %s -> %s!", sourceQName, delegate.newSourceClass.qualifiedName)
-            val enhancedSource = EnhancedHttpSource(
-                this,
-                delegate.newSourceClass.constructors.find { it.parameters.size == 2 }!!.call(this, context),
-            )
-
-            currentDelegatedSources[enhancedSource.originalSource.id] = DelegatedSource(
-                enhancedSource.originalSource.name,
-                enhancedSource.originalSource.id,
-                enhancedSource.originalSource::class.qualifiedName ?: delegate.originalSourceQualifiedClassName,
-                (enhancedSource.enhancedSource as DelegatedHttpSource)::class,
-                delegate.factory,
-            )
-            enhancedSource
-        } else {
-            this
-        }
-
-        return if (id in BlacklistedSources.BLACKLISTED_EXT_SOURCES) {
-            xLogD(
-                "Removing blacklisted source: (id: %s, name: %s, lang: %s)!",
-                id,
-                name,
-                lang,
-            )
-            null
-        } else {
-            newSource
-        }
-        // EXH <--
+    internal fun markInitialized() {
+        _isInitialized.value = true
     }
 
     override fun get(sourceKey: Long): Source? = sourcesMapFlow.value[sourceKey]
@@ -208,7 +110,7 @@ internal class AndroidSourceManager(
         }
     // SY <--
 
-    private fun registerStubSource(source: StubSource) {
+    internal fun registerStubSource(source: StubSource) {
         scope.launch {
             val dbSource = sourceRepository.getStubSource(source.id)
             if (dbSource != source) {
@@ -287,38 +189,6 @@ internal class AndroidSourceManager(
             val newSourceClass: KClass<out DelegatedHttpSource>,
             val factory: Boolean = false,
         )
-    }
-
-    private class ListenMutableMap<K, V>(
-        private val internalMap: MutableMap<K, V>,
-        private val listener: () -> Unit,
-    ) : MutableMap<K, V> by internalMap {
-        override fun clear() {
-            val clearResult = internalMap.clear()
-            listener()
-            return clearResult
-        }
-
-        override fun put(key: K, value: V): V? {
-            val putResult = internalMap.put(key, value)
-            if (putResult == null) {
-                listener()
-            }
-            return putResult
-        }
-
-        override fun putAll(from: Map<out K, V>) {
-            internalMap.putAll(from)
-            listener()
-        }
-
-        override fun remove(key: K): V? {
-            val removeResult = internalMap.remove(key)
-            if (removeResult != null) {
-                listener()
-            }
-            return removeResult
-        }
     }
 
     // SY <--
