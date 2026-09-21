@@ -5,18 +5,11 @@ import androidx.compose.material3.SnackbarResult
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import cafe.adriel.voyager.core.model.screenModelScope
-import eu.kanade.presentation.manga.DownloadAction
-import eu.kanade.presentation.manga.components.ChapterDownloadAction
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.download.cancelQueuedDownloads
-import eu.kanade.tachiyomi.data.download.deleteChapters
 import eu.kanade.tachiyomi.data.download.deleteManga
-import eu.kanade.tachiyomi.data.download.getQueuedDownloadOrNull
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.startDownloadNow
-import eu.kanade.tachiyomi.data.download.startDownloads
 import eu.kanade.tachiyomi.source.online.all.MergedSource
-import exh.source.isEhBasedManga
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import logcat.LogPriority
@@ -39,12 +32,12 @@ import uy.kohesive.injekt.api.get
  * updates.
  */
 internal class MangaDownloads(
-    private val model: MangaScreenModel,
+    internal val model: MangaScreenModel,
     private val context: Context,
     private val lifecycle: Lifecycle,
     private val sourceManager: SourceManager = Injekt.get(),
-    private val downloadManager: DownloadManager = Injekt.get(),
-    private val filterChaptersForDownload: FilterChaptersForDownload = Injekt.get(),
+    internal val downloadManager: DownloadManager = Injekt.get(),
+    internal val filterChaptersForDownload: FilterChaptersForDownload = Injekt.get(),
 ) {
     fun observe() {
         // SY -->
@@ -92,7 +85,7 @@ internal class MangaDownloads(
         }
     }
 
-    private fun updateDownloadState(download: Download) {
+    internal fun updateDownloadState(download: Download) {
         model.updateSuccessState { successState ->
             val modifiedIndex = successState.chapters.indexOfFirst { it.id == download.chapter.id }
             if (modifiedIndex < 0) {
@@ -128,7 +121,7 @@ internal class MangaDownloads(
         }
     }
 
-    private fun startDownload(
+    internal fun startDownload(
         chapters: List<Chapter>,
         startNow: Boolean,
     ) {
@@ -157,97 +150,5 @@ internal class MangaDownloads(
             }
         }
         model.screenModelScope.launchNonCancellable { work() }
-    }
-
-    fun runChapterDownloadActions(
-        items: List<ChapterList.Item>,
-        action: ChapterDownloadAction,
-    ) {
-        when (action) {
-            ChapterDownloadAction.START -> {
-                startDownload(items.map { it.chapter }, false)
-                if (items.any { it.downloadState == Download.State.ERROR }) {
-                    downloadManager.startDownloads()
-                }
-            }
-            ChapterDownloadAction.START_NOW -> {
-                val chapter = items.singleOrNull()?.chapter ?: return
-                startDownload(listOf(chapter), true)
-            }
-            ChapterDownloadAction.CANCEL -> {
-                val chapterId = items.singleOrNull()?.id ?: return
-                val activeDownload = downloadManager.getQueuedDownloadOrNull(chapterId) ?: return
-                downloadManager.cancelQueuedDownloads(listOf(activeDownload))
-                updateDownloadState(activeDownload.apply { transition(Download.State.NOT_DOWNLOADED) })
-            }
-            ChapterDownloadAction.DELETE -> {
-                deleteChapters(items.map { it.chapter })
-            }
-        }
-    }
-
-    fun runDownloadAction(action: DownloadAction) {
-        val chaptersToDownload = when (action) {
-            DownloadAction.UNREAD_CHAPTERS -> model.getUnreadChapters()
-            DownloadAction.BOOKMARKED_CHAPTERS -> model.getBookmarkedChapters()
-            else -> model.getUnreadChaptersSorted().take(checkNotNull(action.nextChapters))
-        }
-        if (chaptersToDownload.isNotEmpty()) {
-            startDownload(chaptersToDownload, false)
-        }
-    }
-
-    // Downloads the given list of chapters with the manager.
-    // @param chapters the list of chapters to download.
-    private fun downloadChapters(chapters: List<Chapter>) {
-        val state = model.successState ?: return
-        if (state.source is MergedSource) {
-            chapters.groupBy { it.mangaId }.forEach { map ->
-                val manga = state.mergedData?.manga?.get(map.key)
-                if (manga != null) {
-                    downloadManager.downloadChapters(manga, map.value)
-                }
-            }
-        } else {
-            /* SY <-- */
-            val manga = state.manga
-            downloadManager.downloadChapters(manga, chapters)
-        }
-        model.toggleAllSelection(false)
-    }
-
-    /**
-     * Deletes the given list of chapter.
-     *
-     * @param chapters the list of chapters to delete.
-     */
-    fun deleteChapters(chapters: List<Chapter>) {
-        model.screenModelScope.launchNonCancellable {
-            try {
-                model.successState?.let { state ->
-                    downloadManager.deleteChapters(
-                        chapters,
-                        state.manga,
-                        state.source,
-                    )
-                }
-            } catch (expected: Throwable) {
-                // Logged whatever the cause; the caller carries on.
-                logcat(LogPriority.ERROR, expected)
-            }
-        }
-    }
-
-    fun downloadNewChapters(chapters: List<Chapter>) {
-        model.screenModelScope.launchNonCancellable {
-            val manga = model.successState?.manga
-            if (manga != null) {
-                val chaptersToDownload = filterChaptersForDownload.await(manga, chapters)
-
-                if (chaptersToDownload.isNotEmpty() /* SY --> */ && !manga.isEhBasedManga() /* SY <-- */) {
-                    downloadChapters(chaptersToDownload)
-                }
-            }
-        }
     }
 }
