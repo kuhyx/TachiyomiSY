@@ -11,25 +11,19 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.Dialog
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.Event
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SaveImageResult
-import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
-import eu.kanade.tachiyomi.util.editCover
 import eu.kanade.tachiyomi.util.lang.byteSize
 import eu.kanade.tachiyomi.util.lang.takeBytes
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.DiskUtil.MAX_FILE_NAME_BYTES
-import eu.kanade.tachiyomi.util.storage.cacheImageDir
-import logcat.LogPriority
 import tachiyomi.core.common.util.lang.launchNonCancellable
 import tachiyomi.core.common.util.lang.withUIContext
 import tachiyomi.core.common.util.system.ImageUtil
-import tachiyomi.core.common.util.system.logcat
 import tachiyomi.decoder.ImageDecoder
 import tachiyomi.domain.manga.model.Manga
-import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -38,19 +32,19 @@ import uy.kohesive.injekt.api.get
  * set it as the cover. Composed by [ReaderViewModel], whose state and event channel it uses.
  */
 internal class ReaderImageActions(
-    private val model: ReaderViewModel,
+    internal val model: ReaderViewModel,
     private val readerPreferences: ReaderPreferences,
-    private val imageSaver: ImageSaver = Injekt.get(),
+    internal val imageSaver: ImageSaver = Injekt.get(),
 ) {
     // Generate a filename for the given [manga] and [page].
     // SY --> The page the open page-actions dialog is about, or the second page of its spread.
-    private fun selectedPage(useExtraPage: Boolean): ReaderPage? {
+    internal fun selectedPage(useExtraPage: Boolean): ReaderPage? {
         val dialog = model.state.value.dialog as? Dialog.PageActions
         return if (useExtraPage) dialog?.extraPage else dialog?.page
     }
     // SY <--
 
-    private fun generateFilename(
+    internal fun generateFilename(
         manga: Manga,
         page: ReaderPage,
     ): String {
@@ -138,7 +132,7 @@ internal class ReaderImageActions(
         }
     }
 
-    private fun saveImages(
+    internal fun saveImages(
         page1: ReaderPage,
         page2: ReaderPage,
         isLTR: Boolean,
@@ -171,96 +165,5 @@ internal class ReaderImageActions(
     }
     // SY <--
 
-    /**
-     * Shares the image of the selected page and notifies the UI with the path of the file to share.
-     * The image must be first copied to the internal partition because there are many possible
-     * formats it can come from, like a zipped chapter, in which case it's not possible to directly
-     * get a path to the file and it has to be decompressed somewhere first. Only the last shared
-     * image will be kept so it won't be taking lots of internal disk space.
-     */
-    fun shareImage(copyToClipboard: Boolean, useExtraPage: Boolean) {
-        val page = selectedPage(useExtraPage)
-        if (page?.status != Page.State.Ready) return
-        val manga = model.manga ?: return
-
-        val context = Injekt.get<Application>()
-        val destDir = context.cacheImageDir
-
-        val filename = generateFilename(manga, page)
-
-        try {
-            model.viewModelScope.launchNonCancellable {
-                destDir.deleteRecursively()
-                val uri = imageSaver.save(
-                    image = Image.Page(
-                        inputStream = page.stream!!,
-                        name = filename,
-                        location = Location.Cache,
-                    ),
-                )
-                model.eventChannel.send(if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, page))
-            }
-        } catch (expected: Throwable) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected)
-        }
-    }
-
-    // SY -->
-    fun shareImages(copyToClipboard: Boolean) {
-        val (firstPage, secondPage) = model.state.value.dialog as? Dialog.PageActions ?: return
-        val viewer = model.state.value.viewer as? PagerViewer ?: return
-        if (firstPage.status != Page.State.Ready) return
-        if (secondPage?.status != Page.State.Ready) return
-        val manga = model.manga ?: return
-        val isLTR = (viewer !is R2LPagerViewer) xor viewer.config.invertDoublePages
-        val bg = viewer.config.pageCanvasColor
-
-        val context = Injekt.get<Application>()
-        val destDir = context.cacheImageDir
-
-        try {
-            model.viewModelScope.launchNonCancellable {
-                destDir.deleteRecursively()
-                val uri = saveImages(
-                    page1 = firstPage,
-                    page2 = secondPage,
-                    isLTR = isLTR,
-                    bg = bg,
-                    location = Location.Cache,
-                    manga = manga,
-                )
-                val event = if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, firstPage, secondPage)
-                model.eventChannel.send(event)
-            }
-        } catch (expected: Throwable) {
-            // Logged whatever the cause; the caller carries on.
-            logcat(LogPriority.ERROR, expected)
-        }
-    }
     // SY <--
-
-    /**
-     * Sets the image of the selected page as cover and notifies the UI of the result.
-     */
-    fun setAsCover(useExtraPage: Boolean) {
-        val page = selectedPage(useExtraPage)?.takeIf { it.status == Page.State.Ready } ?: return
-        val manga = model.manga ?: return
-        val stream = page.stream ?: return
-
-        model.viewModelScope.launchNonCancellable {
-            val result = try {
-                manga.editCover(Injekt.get(), stream())
-                if (manga.isLocal() || manga.favorite) {
-                    SetAsCoverResult.Success
-                } else {
-                    SetAsCoverResult.AddToLibraryFirst
-                }
-            } catch (_: Exception) {
-                // Any failure ends here and the fallback below applies.
-                SetAsCoverResult.Error
-            }
-            model.eventChannel.send(Event.SetCoverResult(result))
-        }
-    }
 }
