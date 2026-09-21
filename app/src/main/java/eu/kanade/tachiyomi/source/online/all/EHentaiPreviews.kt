@@ -2,6 +2,12 @@ package eu.kanade.tachiyomi.source.online.all
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import eu.kanade.tachiyomi.network.awaitSuccess
+import eu.kanade.tachiyomi.source.PagePreviewInfo
+import eu.kanade.tachiyomi.source.PagePreviewPage
+import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.util.asJsoup
 import exh.util.trimOrNull
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -118,4 +124,47 @@ internal fun Response.croppedTo(thumbnailPreview: EHentaiThumbnailPreview): Resp
         .toResponseBody("image/jpeg".toMediaType())
 
     return newBuilder().body(body).build()
+}
+
+internal suspend fun EHentai.pagePreviewList(manga: SManga, chapters: List<SChapter>, page: Int): PagePreviewPage {
+    val doc = client.newCall(
+        exGet(
+            (baseUrl + (chapters.lastOrNull()?.url ?: manga.url))
+                .toHttpUrl()
+                .newBuilder()
+                .removeAllQueryParameters("nw")
+                .addQueryParameter("p", (page - 1).toString())
+                .build()
+                .toString(),
+        ),
+    ).awaitSuccess().asJsoup()
+
+    val body = doc.body()
+    val previews = body
+        .select("#gdt > div > div")
+        .plus(body.select("#gdt > a"))
+        .map {
+            val preview = parseNormalPreview(it)
+            PagePreviewInfo(preview.index, imageUrl = preview.toUrl())
+        }
+        .ifEmpty {
+            body.select("#gdt div a img")
+                .map {
+                    PagePreviewInfo(
+                        it.attr("alt").toInt(),
+                        imageUrl = it.attr("src"),
+                    )
+                }
+        }
+
+    return PagePreviewPage(
+        page = page,
+        pagePreviews = previews,
+        hasNextPage = doc.select("table.ptt tbody tr td")
+            .last()!!
+            .hasClass("ptdd")
+            .not(),
+        pagePreviewPages = doc.select("table.ptt tbody tr td a").asReversed()
+            .firstNotNullOfOrNull { it.text().toIntOrNull() },
+    )
 }

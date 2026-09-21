@@ -181,3 +181,17 @@ internal class AdvancedGroup : UriGroup<Filter<*>>(
 internal class ReverseFilter : Filter.CheckBox("Reverse search results")
 
 internal class JumpSeekFilter : Filter.Text("Jump/Seek")
+
+internal fun EHentai.filterList(): FilterList {
+    return FilterList(
+        Filter.Header("Note: Will ignore other parameters!"),
+        ToplistOptions(),
+        Filter.Separator(),
+        AutoCompleteTags(),
+        Watched(isEnabled = exhPreferences.exhWatchedListDefaultState.get()),
+        GenreGroup(),
+        AdvancedGroup(),
+        ReverseFilter(),
+        JumpSeekFilter(),
+    )
+}

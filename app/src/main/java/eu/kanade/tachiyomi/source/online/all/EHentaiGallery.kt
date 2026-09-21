@@ -111,3 +111,19 @@ internal fun EHentai.getGalleryUrlFromPage(uri: Uri): String {
         obj["token"]!!.jsonPrimitive.content
     }/"
 }
+
+internal suspend fun EHentai.mangaUrlFromUri(uri: Uri): String? {
+    return when (uri.pathSegments.firstOrNull()) {
+        "g" -> {
+            // Is already gallery page, do nothing
+            uri.toString()
+        }
+        "s" -> {
+            // Is page, fetch gallery token and use that
+            getGalleryUrlFromPage(uri)
+        }
+        else -> {
+            null
+        }
+    }
+}
