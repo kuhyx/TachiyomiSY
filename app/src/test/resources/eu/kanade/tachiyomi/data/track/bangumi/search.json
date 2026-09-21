@@ -1,0 +1,40 @@
+{
+  "total": 3,
+  "limit": 20,
+  "offset": 0,
+  "data": [
+    {
+      "id": 1,
+      "name_cn": "灌篮高手",
+      "name": "Slam Dunk",
+      "summary": "  Basketball.  ",
+      "date": "1990-10-01",
+      "images": {"common": "https://img/1.jpg", "large": "https://img/1l.jpg"},
+      "volumes": 31,
+      "eps": 276,
+      "rating": {"score": 9.1, "total": 100},
+      "platform": "漫画",
+      "infobox": [{"key": "作者", "value": "井上雄彦"}]
+    },
+    {
+      "id": 2,
+      "name_cn": "",
+      "name": "No Platform",
+      "summary": null,
+      "date": null,
+      "images": null,
+      "rating": null,
+      "platform": null
+    },
+    {
+      "id": 3,
+      "name_cn": "小说",
+      "name": "Novel",
+      "summary": "n",
+      "date": null,
+      "images": {"common": null},
+      "rating": {"score": null},
+      "platform": "小说"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "data": {
+    "mangas": [
+      {
+        "id": "2",
+        "name": "Berserk",
+        "description": "Guts.",
+        "poster": {"originalUrl": "https://img/2o.jpg"},
+        "personRoles": [
+          {"person": {"name": "Kentarou Miura"}, "rolesEn": ["Story & Art"]},
+          {"person": {"name": "Only Writer"}, "rolesEn": ["Story"]},
+          {"person": {"name": "Only Artist"}, "rolesEn": ["Art"]},
+          {"person": {"name": "Nobody"}, "rolesEn": ["Editor"]}
+        ]
+      }
+    ]
+  }
+}

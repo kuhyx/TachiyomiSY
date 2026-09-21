@@ -1,0 +1,66 @@
+{
+  "data": {
+    "Page": {
+      "media": [
+        {
+          "id": 101,
+          "staff": {
+            "edges": [
+              {"role": "Story & Art", "id": 1, "node": {"name": {"full": "Full Name", "userPreferred": "Preferred Name", "native": "Native"}}},
+              {"role": "Story", "id": 2, "node": {"name": {"full": "Writer Full", "userPreferred": null, "native": null}}},
+              {"role": "Art", "id": 3, "node": {"name": {"full": null, "userPreferred": null, "native": "画家"}}},
+              {"role": "Translator", "id": 4, "node": {"name": {"full": null, "userPreferred": null, "native": null}}}
+            ]
+          },
+          "title": {"userPreferred": "Solo Leveling"},
+          "coverImage": {"large": "https://img/101.jpg"},
+          "format": "MANGA",
+          "countryOfOrigin": "KR",
+          "status": "FINISHED",
+          "chapters": 179,
+          "description": "Hunters &amp; gates<br>",
+          "startDate": {"year": 2018, "month": 3, "day": 4},
+          "averageScore": 85
+        },
+        {
+          "id": 102,
+          "staff": {"edges": []},
+          "title": {"userPreferred": "One Shot"},
+          "coverImage": {"large": "https://img/102.jpg"},
+          "format": "ONE_SHOT",
+          "status": null,
+          "chapters": null,
+          "description": null,
+          "startDate": {"year": null, "month": null, "day": null},
+          "averageScore": null
+        },
+        {
+          "id": 103,
+          "staff": {"edges": []},
+          "title": {"userPreferred": "Manhua"},
+          "coverImage": {"large": "https://img/103.jpg"},
+          "format": "MANGA",
+          "countryOfOrigin": "CN",
+          "status": "RELEASING",
+          "chapters": 0,
+          "description": "",
+          "startDate": {"year": 2020, "month": 13, "day": 1},
+          "averageScore": 70
+        },
+        {
+          "id": 104,
+          "staff": {"edges": []},
+          "title": {"userPreferred": "Manga"},
+          "coverImage": {"large": "https://img/104.jpg"},
+          "format": "MANGA",
+          "countryOfOrigin": "JP",
+          "status": "RELEASING",
+          "chapters": 10,
+          "description": "plain",
+          "startDate": {"year": 2021, "month": 1, "day": 1},
+          "averageScore": 70
+        }
+      ]
+    }
+  }
+}

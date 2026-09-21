@@ -1,0 +1,22 @@
+{
+  "data": {
+    "manga": {
+      "artist": "Artist",
+      "author": "Author",
+      "description": "A description",
+      "id": 42,
+      "status": "ONGOING",
+      "thumbnailUrl": "api/v1/manga/42/thumbnail",
+      "title": "Suwayomi Manga",
+      "url": "/manga/42",
+      "genre": ["action", "drama"],
+      "inLibraryAt": 1700000000,
+      "chapters": { "totalCount": 20 },
+      "latestUploadedChapter": { "uploadDate": 1700000100 },
+      "latestFetchedChapter": { "fetchedAt": 1700000200 },
+      "latestReadChapter": { "lastReadAt": 1700000300, "chapterNumber": 12.5 },
+      "unreadCount": 7,
+      "downloadCount": 3
+    }
+  }
+}

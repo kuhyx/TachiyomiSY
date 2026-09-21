@@ -1,0 +1,17 @@
+{
+  "data": {
+    "Media": {
+      "id": 105,
+      "staff": {"edges": []},
+      "title": {"userPreferred": "Taiwan Manhua"},
+      "coverImage": {"large": "https://img/105.jpg"},
+      "format": "MANGA",
+      "countryOfOrigin": "TW",
+      "status": "RELEASING",
+      "chapters": 3,
+      "description": "desc",
+      "startDate": {"year": 2022, "month": 2, "day": 2},
+      "averageScore": 60
+    }
+  }
+}

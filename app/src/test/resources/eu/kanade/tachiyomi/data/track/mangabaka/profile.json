@@ -1,0 +1,9 @@
+{
+  "status": 200,
+  "data": {
+    "id": "user-id-1",
+    "rating_steps": 5,
+    "nickname": "Nick",
+    "preferred_username": "preferred"
+  }
+}

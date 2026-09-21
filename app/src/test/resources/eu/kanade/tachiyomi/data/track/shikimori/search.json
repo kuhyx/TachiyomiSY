@@ -1,0 +1,49 @@
+{
+  "data": {
+    "mangas": [
+      {
+        "id": 2,
+        "name": "Berserk",
+        "chapters": 380,
+        "kind": "manga",
+        "poster": {"mainUrl": "https://img/2.jpg"},
+        "score": 9.4,
+        "url": "https://shikimori.io/mangas/2-berserk",
+        "status": "ongoing",
+        "airedOn": {"date": "1989-08-25"},
+        "description": "Guts.",
+        "personRoles": [
+          {"person": {"name": "Kentarou Miura"}, "rolesEn": ["Story & Art"]},
+          {"person": {"name": "Only Writer"}, "rolesEn": ["Story"]},
+          {"person": {"name": "Only Artist"}, "rolesEn": ["Art", "Design"]}
+        ]
+      },
+      {
+        "id": 3,
+        "name": "One Shot",
+        "chapters": 1,
+        "kind": "one_shot",
+        "poster": null,
+        "score": 0.0,
+        "url": "https://shikimori.io/mangas/3",
+        "status": null,
+        "airedOn": {"date": null},
+        "description": null,
+        "personRoles": null
+      },
+      {
+        "id": 4,
+        "name": "Bare",
+        "chapters": 0,
+        "kind": null,
+        "poster": null,
+        "score": null,
+        "url": "https://shikimori.io/mangas/4",
+        "status": null,
+        "airedOn": null,
+        "description": null,
+        "personRoles": []
+      }
+    ]
+  }
+}

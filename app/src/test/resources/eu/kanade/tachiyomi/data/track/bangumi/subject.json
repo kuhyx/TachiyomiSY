@@ -1,0 +1,18 @@
+{
+  "id": 1,
+  "name_cn": "灌篮高手",
+  "name": "Slam Dunk",
+  "summary": "Basketball.",
+  "date": "1990-10-01",
+  "images": {"common": "https://img/1.jpg"},
+  "volumes": 31,
+  "eps": 276,
+  "rating": {"score": 9.1},
+  "platform": "漫画",
+  "infobox": [
+    {"key": "作者", "value": "井上雄彦"},
+    {"key": "作者", "value": [{"v": "Alias"}, {"k": "en", "v": "Takehiko Inoue"}]},
+    {"key": "插图", "value": "Painter"},
+    {"key": "别名", "value": [{"v": "SD"}]}
+  ]
+}

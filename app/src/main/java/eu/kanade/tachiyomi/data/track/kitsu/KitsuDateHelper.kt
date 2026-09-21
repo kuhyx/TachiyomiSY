@@ -18,8 +18,6 @@ internal object KitsuDateHelper {
     fun parse(dateString: String?): Long {
         if (dateString == null) return 0L
 
-        val dateValue = formatter.parse(dateString)
-
-        return dateValue?.time ?: 0
+        return formatter.parse(dateString)!!.time
     }
 }

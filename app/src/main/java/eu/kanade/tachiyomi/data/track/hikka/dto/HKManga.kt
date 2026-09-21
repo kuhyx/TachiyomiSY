@@ -51,11 +51,7 @@ internal data class HKManga(
 
             this@HKManga.startDate?.takeIf { it != 0L }?.let {
                 val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-                startDate = try {
-                    outputDf.format(it * MILLIS_PER_SECOND)
-                } catch (_: Exception) {
-                    ""
-                }
+                startDate = outputDf.format(it * MILLIS_PER_SECOND)
             }
 
             val userProgress = read?.firstOrNull()

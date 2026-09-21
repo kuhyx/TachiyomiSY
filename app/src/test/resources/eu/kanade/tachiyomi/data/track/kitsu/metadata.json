@@ -1,0 +1,20 @@
+{
+  "data": {
+    "findLibraryEntryById": {
+      "media": {
+        "id": "42",
+        "titles": {"preferred": "One Piece"},
+        "posterImage": {"original": {"url": "https://img/op.jpg"}},
+        "description": {"en": "Pirates &amp; treasure"},
+        "staff": {
+          "nodes": [
+            {"role": "Story & Art", "person": {"name": "Eiichiro Oda"}},
+            {"role": "Story", "person": {"name": "Writer"}},
+            {"role": "Art", "person": {"name": "Artist"}},
+            {"role": "Editor", "person": {"name": "Nobody"}}
+          ]
+        }
+      }
+    }
+  }
+}

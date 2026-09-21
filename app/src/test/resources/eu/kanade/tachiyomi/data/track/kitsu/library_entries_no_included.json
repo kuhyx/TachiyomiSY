@@ -1,0 +1,6 @@
+{
+  "data": [
+    {"id": 501, "attributes": {"status": "current", "startedAt": null, "finishedAt": null, "ratingTwenty": null, "progress": 0, "private": false}}
+  ],
+  "included": []
+}

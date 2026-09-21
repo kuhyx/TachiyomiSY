@@ -1,0 +1,34 @@
+{
+  "data": [
+    {
+      "id": 501,
+      "type": "libraryEntries",
+      "attributes": {
+        "status": "completed",
+        "startedAt": "2020-01-02T03:04:05.000Z",
+        "finishedAt": null,
+        "ratingTwenty": 15,
+        "progress": 12,
+        "private": true,
+        "ignored": "extra"
+      }
+    }
+  ],
+  "included": [
+    {
+      "id": 42,
+      "type": "manga",
+      "attributes": {
+        "canonicalTitle": "One Piece",
+        "chapterCount": 1000,
+        "mangaType": "manga",
+        "posterImage": {
+          "original": "https://img/op.jpg"
+        },
+        "synopsis": "Pirates.",
+        "startDate": "1997-07-22",
+        "status": "current"
+      }
+    }
+  ]
+}

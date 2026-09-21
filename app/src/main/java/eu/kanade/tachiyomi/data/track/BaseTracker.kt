@@ -140,9 +140,8 @@ internal abstract class BaseTracker(
     private suspend fun updateRemote(track: Track) = withIOContext {
         try {
             update(track)
-            track.toDomainTrack(idRequired = false)?.let {
-                insertTrack.await(it)
-            }
+            // Never null: an absent id is substituted when it is not required.
+            insertTrack.await(track.toDomainTrack(idRequired = false)!!)
         } catch (expected: Exception) {
             // Logged whatever the cause; the caller carries on.
             logcat(LogPriority.ERROR, expected) { "Failed to update remote track data id=$id" }

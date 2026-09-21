@@ -40,12 +40,8 @@ internal data class ALManga(
     }
 }
 
-// An unformattable date is shown as none at all.
-internal fun formatStartDate(startDateFuzzy: Long): String = try {
+internal fun formatStartDate(startDateFuzzy: Long): String =
     SimpleDateFormat("yyyy-MM-dd", Locale.US).format(startDateFuzzy)
-} catch (_: IllegalArgumentException) {
-    ""
-}
 
 internal data class ALUserManga(
     val libraryId: Long,

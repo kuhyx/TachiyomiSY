@@ -114,12 +114,8 @@ internal class MyAnimeListApi(
                 .add("is_rereading", (track.status == MyAnimeList.REREADING).toString())
                 .add("score", track.score.toString())
                 .add("num_chapters_read", track.lastChapterRead.toInt().toString())
-            convertToIsoDate(track.startedReadingDate)?.let {
-                formBodyBuilder.add("start_date", it)
-            }
-            convertToIsoDate(track.finishedReadingDate)?.let {
-                formBodyBuilder.add("finish_date", it)
-            }
+                .add("start_date", convertToIsoDate(track.startedReadingDate))
+                .add("finish_date", convertToIsoDate(track.finishedReadingDate))
 
             val request = Request.Builder()
                 .url(mangaUrl(track.remoteId).toString())

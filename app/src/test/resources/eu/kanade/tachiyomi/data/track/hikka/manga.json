@@ -1,0 +1,32 @@
+{
+  "data_type": "manga",
+  "title_original": "Original Title",
+  "media_type": "one_shot",
+  "title_ua": "Назва",
+  "title_en": "English Title",
+  "chapters": 42,
+  "volumes": 5,
+  "translated_ua": true,
+  "status": "finished",
+  "image": "https://cdn.hikka.io/manga.jpg",
+  "year": 2015,
+  "scored_by": 100,
+  "score": 8.4,
+  "slug": "test-manga-abc123",
+  "start_date": 1420070400,
+  "read": [
+    {
+      "reference": "read-ref",
+      "note": "a note",
+      "updated": 1700000100,
+      "created": 1700000000,
+      "status": "on_hold",
+      "chapters": 7,
+      "volumes": 1,
+      "rereads": 2,
+      "score": 9,
+      "start_date": 1690000000,
+      "end_date": 1695000000
+    }
+  ]
+}

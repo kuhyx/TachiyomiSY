@@ -26,20 +26,16 @@ internal class AnilistInterceptor(val anilist: Anilist, private var token: Strin
         if (oauth == null) {
             oauth = anilist.loadOAuth()
         }
-        // Refresh access token if null or expired.
-        if (oauth!!.isExpired()) {
+        // Throw on null auth, log out on an expired token.
+        val auth = oauth ?: throw IOException("No authentication token")
+        if (auth.isExpired()) {
             anilist.logout()
             throw IOException("Token expired")
         }
 
-        // Throw on null auth.
-        if (oauth == null) {
-            throw IOException("No authentication token")
-        }
-
         // Add the authorization header to the original request.
         val authRequest = originalRequest.newBuilder()
-            .addHeader("Authorization", "Bearer ${oauth!!.accessToken}")
+            .addHeader("Authorization", "Bearer ${auth.accessToken}")
             .header("User-Agent", "TachiSY v${BuildConfig.VERSION_NAME} (${BuildConfig.APPLICATION_ID})")
             .build()
 

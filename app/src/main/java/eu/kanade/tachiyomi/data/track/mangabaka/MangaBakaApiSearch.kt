@@ -38,7 +38,7 @@ internal fun MangaBakaApi.parseSearchItem(item: MangaBakaItem): TrackSearch {
         remoteId = item.id
         title = item.chooseBestTitle()
         summary = item.description?.trim().orEmpty()
-        score = item.rating?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)?.toDouble() ?: -1.0
+        score = item.rating?.let { it.toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble() } ?: -1.0
         coverUrl = item.cover.x250.x1.orEmpty()
         trackingUrl = "$BASE_URL/${item.id}"
         startDate = item.published.startDate.orEmpty()

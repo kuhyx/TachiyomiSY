@@ -103,10 +103,11 @@ internal class KavitaApi(private val client: OkHttpClient, interceptor: KavitaIn
             var volumeNumber = 0L
             var maxChapterNumber = 0L
             for (volume in listVolumeDto) {
-                if (volume.chapters.maxOf { it.number!!.toFloat() } == 0f) {
+                val lastChapter = volume.chapters.maxOf { it.number!!.toFloat() }
+                if (lastChapter == 0f) {
                     volumeNumber++
-                } else if (maxChapterNumber < volume.chapters.maxOf { it.number!!.toFloat() }) {
-                    maxChapterNumber = volume.chapters.maxOf { it.number!!.toFloat().toLong() }
+                } else if (maxChapterNumber < lastChapter) {
+                    maxChapterNumber = lastChapter.toLong()
                 }
             }
 

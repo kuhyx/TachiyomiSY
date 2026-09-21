@@ -1,0 +1,22 @@
+{
+  "data": {
+    "manga": {
+      "artist": null,
+      "author": null,
+      "description": null,
+      "id": 43,
+      "status": "UNKNOWN",
+      "thumbnailUrl": null,
+      "title": "Untouched",
+      "url": "/manga/43",
+      "genre": [],
+      "inLibraryAt": 0,
+      "chapters": { "totalCount": 5 },
+      "latestUploadedChapter": null,
+      "latestFetchedChapter": null,
+      "latestReadChapter": null,
+      "unreadCount": 5,
+      "downloadCount": 0
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "data": {
+    "Media": {
+      "id": 101,
+      "title": {"userPreferred": "Solo Leveling"},
+      "coverImage": {"large": "https://img/101.jpg"},
+      "description": "Hunters &amp; gates",
+      "staff": {
+        "edges": [
+          {"role": "Story & Art", "id": 1, "node": {"name": {"userPreferred": "Both"}}},
+          {"role": "Story", "id": 2, "node": {"name": {"userPreferred": "Writer"}}},
+          {"role": "Art", "id": 3, "node": {"name": {"userPreferred": "Artist"}}},
+          {"role": "Editor", "id": 4, "node": {"name": {"userPreferred": "Nobody"}}}
+        ]
+      }
+    }
+  }
+}

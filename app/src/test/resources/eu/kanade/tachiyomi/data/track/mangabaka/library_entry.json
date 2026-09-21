@@ -1,0 +1,11 @@
+{
+  "status": 200,
+  "data": {
+    "state": "reading",
+    "start_date": "2024-01-02T03:04:05Z",
+    "finish_date": "2024-02-03T04:05:06Z",
+    "is_private": true,
+    "progress_chapter": 12.5,
+    "rating": 80
+  }
+}

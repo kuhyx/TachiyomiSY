@@ -1,0 +1,7 @@
+{
+  "data": [
+    {"node": {"id": 2, "title": "Berserk", "num_chapters": 380, "main_picture": {"medium": "m"}, "status": "currently_publishing", "media_type": "manga", "start_date": "1989-08-25"}},
+    {"node": {"id": 5, "title": "Other", "num_chapters": 1, "main_picture": {"medium": "m"}, "status": "finished", "media_type": "manga", "start_date": null}}
+  ],
+  "paging": {"next": "https://api.myanimelist.net/v2/users/@me/mangalist?offset=250"}
+}

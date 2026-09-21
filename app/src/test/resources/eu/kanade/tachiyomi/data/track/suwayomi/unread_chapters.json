@@ -1,0 +1,11 @@
+{
+  "data": {
+    "chapters": {
+      "nodes": [
+        { "id": 101, "chapterNumber": 11.0 },
+        { "id": 102, "chapterNumber": 12.5 },
+        { "id": 103, "chapterNumber": 13.0 }
+      ]
+    }
+  }
+}

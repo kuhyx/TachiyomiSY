@@ -1,0 +1,17 @@
+{
+  "id": 12,
+  "name": "Kavita Series",
+  "originalName": "Original",
+  "thumbnail_url": "https://kavita.local/thumb.jpg",
+  "localizedName": "Localized",
+  "sortName": "kavita series",
+  "pages": 300,
+  "coverImageLocked": false,
+  "pagesRead": 150,
+  "userRating": 4,
+  "userReview": "good",
+  "format": 1,
+  "created": "2024-01-01",
+  "libraryId": 3,
+  "libraryName": "Manga"
+}

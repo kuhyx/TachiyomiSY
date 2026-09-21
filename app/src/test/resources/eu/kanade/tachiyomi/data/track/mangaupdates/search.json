@@ -1,0 +1,62 @@
+{
+  "total_hits": 2,
+  "results": [
+    {
+      "record": {
+        "series_id": 87654321,
+        "title": "Berserk &amp; Co",
+        "url": "https://www.mangaupdates.com/series/abc123/berserk",
+        "description": "Guts &amp; Griffith",
+        "image": {
+          "url": {
+            "original": "https://img/o.jpg",
+            "thumb": "https://img/t.jpg"
+          },
+          "height": 10,
+          "width": 20
+        },
+        "type": "Manga",
+        "year": "1989",
+        "bayesian_rating": 9.2,
+        "rating_votes": 1000,
+        "latest_chapter": 380,
+        "authors": [
+          {
+            "type": "Author",
+            "name": "Kentarou Miura"
+          },
+          {
+            "type": "Artist",
+            "name": "Kentarou Miura"
+          },
+          {
+            "type": "Author",
+            "name": null
+          },
+          {
+            "type": "Artist",
+            "name": null
+          }
+        ]
+      },
+      "hit_title": "Berserk"
+    },
+    {
+      "record": {
+        "image": {
+          "url": null
+        }
+      }
+    },
+    {
+      "record": {
+        "image": {
+          "url": {
+            "original": null
+          }
+        },
+        "url": null
+      }
+    }
+  ]
+}

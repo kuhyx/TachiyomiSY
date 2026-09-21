@@ -87,16 +87,11 @@ internal fun MyAnimeListApi.parseSearchItem(searchItem: MALManga): TrackSearch {
 
 internal fun MyAnimeListApi.parseDate(
     isoDate: String,
-): Long = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(isoDate)?.time ?: 0L
+): Long = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(isoDate)!!.time
 
-internal fun MyAnimeListApi.convertToIsoDate(epochTime: Long): String? {
+internal fun MyAnimeListApi.convertToIsoDate(epochTime: Long): String {
     if (epochTime == 0L) {
         return ""
     }
-    return try {
-        val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        outputDf.format(epochTime)
-    } catch (_: Exception) {
-        null
-    }
+    return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(epochTime)
 }

@@ -1,0 +1,46 @@
+{
+  "data": [
+    {
+      "node": {
+        "id": 2,
+        "title": "Berserk",
+        "synopsis": "Guts.",
+        "num_chapters": 380,
+        "mean": 9.47,
+        "main_picture": {"large": "https://img/2l.jpg", "medium": "https://img/2m.jpg"},
+        "status": "currently_publishing",
+        "media_type": "manga",
+        "start_date": "1989-08-25",
+        "authors": [
+          {"node": {"id": 1868, "first_name": "Kentarou", "last_name": "Miura"}, "role": "Story & Art"},
+          {"node": {"id": 1, "first_name": "Only", "last_name": "Writer"}, "role": "Story"},
+          {"node": {"id": 3, "first_name": "Only", "last_name": "Artist"}, "role": "Art"},
+          {"node": {"id": 4, "first_name": "", "last_name": ""}, "role": "Art"}
+        ]
+      }
+    },
+    {
+      "node": {
+        "id": 3,
+        "title": "Some Novel",
+        "num_chapters": 0,
+        "main_picture": null,
+        "status": "finished",
+        "media_type": "light_novel",
+        "start_date": null
+      }
+    },
+    {
+      "node": {
+        "id": 4,
+        "title": "Bare Manga",
+        "num_chapters": 0,
+        "main_picture": null,
+        "status": "finished",
+        "media_type": "manhwa",
+        "start_date": null
+      }
+    }
+  ],
+  "paging": {"next": null}
+}

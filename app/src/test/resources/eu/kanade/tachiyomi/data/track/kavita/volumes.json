@@ -1,0 +1,21 @@
+[
+  {
+    "id": 1, "number": 1, "name": "Volume 1", "pages": 100, "pagesRead": 100,
+    "lastModified": "2024-01-01", "created": "2024-01-01", "seriesId": 12,
+    "chapters": [ { "id": 10, "number": "0", "range": "0", "pages": 100 } ]
+  },
+  {
+    "id": 2, "number": 2, "name": "Volume 2", "pages": 100, "pagesRead": 50,
+    "lastModified": "2024-01-01", "created": "2024-01-01", "seriesId": 12,
+    "chapters": [
+      { "id": 11, "number": "5", "range": "5", "pages": 20 },
+      { "id": 12, "number": "7.5", "range": "7.5", "pages": 20, "isSpecial": false, "title": "t", "pagesRead": 1, "coverImageLocked": true, "volumeId": 2, "created": "c" },
+      { "id": 14, "number": "6", "range": "6", "pages": 20 }
+    ]
+  },
+  {
+    "id": 3, "number": 3, "name": "Volume 3", "pages": 100, "pagesRead": 0,
+    "lastModified": "2024-01-01", "created": "2024-01-01", "seriesId": 12,
+    "chapters": [ { "id": 13, "number": "3" } ]
+  }
+]

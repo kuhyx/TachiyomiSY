@@ -1,0 +1,11 @@
+{
+  "status": 200,
+  "data": {
+    "state": "plan_to_read",
+    "start_date": null,
+    "finish_date": null,
+    "is_private": false,
+    "progress_chapter": null,
+    "rating": null
+  }
+}

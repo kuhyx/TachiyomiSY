@@ -1,0 +1,27 @@
+{
+  "reference": "read-ref",
+  "note": null,
+  "updated": 1700000100,
+  "created": 1700000000,
+  "status": "reading",
+  "chapters": 12,
+  "volumes": 2,
+  "rereads": 0,
+  "score": 8,
+  "start_date": 1690000000,
+  "end_date": null,
+  "content": {
+    "data_type": "manga",
+    "title_original": "Original Title",
+    "media_type": "manga",
+    "title_ua": null,
+    "title_en": "English Title",
+    "chapters": 42,
+    "translated_ua": true,
+    "status": "finished",
+    "image": "https://cdn.hikka.io/manga.jpg",
+    "scored_by": 100,
+    "score": 8.4,
+    "slug": "test-manga-abc123"
+  }
+}

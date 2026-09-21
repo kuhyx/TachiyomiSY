@@ -1,0 +1,16 @@
+{
+  "reference": "token-ref",
+  "created": 1700000000,
+  "client": {
+    "reference": "client-ref",
+    "name": "TachiyomiSY",
+    "description": "tracker",
+    "verified": true,
+    "user": { "reference": "owner-ref", "username": "owner" },
+    "created": 1600000000,
+    "updated": 1600000001
+  },
+  "scope": ["readlist", "read:user-details"],
+  "expiration": 4102444800,
+  "used": 1700000500
+}

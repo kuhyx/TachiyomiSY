@@ -1,0 +1,30 @@
+{
+  "data": {
+    "Page": {
+      "mediaList": [
+        {
+          "id": 5001,
+          "status": "CURRENT",
+          "scoreRaw": 80,
+          "progress": 12,
+          "private": true,
+          "startedAt": {"year": 2023, "month": 5, "day": 6},
+          "completedAt": {"year": null, "month": null, "day": null},
+          "media": {
+            "id": 101,
+            "staff": {"edges": []},
+            "title": {"userPreferred": "Solo Leveling"},
+            "coverImage": {"large": "https://img/101.jpg"},
+            "format": "MANGA",
+            "countryOfOrigin": "KR",
+            "status": "FINISHED",
+            "chapters": 179,
+            "description": "d",
+            "startDate": {"year": 2018, "month": 3, "day": 4},
+            "averageScore": 85
+          }
+        }
+      ]
+    }
+  }
+}

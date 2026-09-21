@@ -1,0 +1,36 @@
+{
+  "pagination": { "total": 2, "pages": 1, "page": 1 },
+  "list": [
+    {
+      "data_type": "manga",
+      "title_original": "First",
+      "media_type": "manga",
+      "title_ua": null,
+      "title_en": "First EN",
+      "chapters": 10,
+      "volumes": null,
+      "translated_ua": true,
+      "status": "ongoing",
+      "image": "https://cdn.hikka.io/1.jpg",
+      "year": 2020,
+      "scored_by": 5,
+      "score": 7.0,
+      "slug": "first-slug",
+      "start_date": 0,
+      "read": []
+    },
+    {
+      "data_type": "manga",
+      "title_original": "Second",
+      "media_type": "light_novel",
+      "translated_ua": false,
+      "status": "finished",
+      "image": "https://cdn.hikka.io/2.jpg",
+      "scored_by": 1,
+      "score": 6.5,
+      "slug": "second-slug",
+      "start_date": null,
+      "read": null
+    }
+  ]
+}

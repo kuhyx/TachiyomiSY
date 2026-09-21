@@ -1,0 +1,12 @@
+{
+  "id": 2,
+  "title": "Berserk",
+  "synopsis": "Guts.",
+  "main_picture": {"large": "", "medium": "https://img/2m.jpg"},
+  "authors": [
+    {"node": {"id": 1868, "first_name": "Kentarou", "last_name": "Miura"}, "role": "Story & Art"},
+    {"node": {"id": 1, "first_name": "Only", "last_name": "Writer"}, "role": "Story"},
+    {"node": {"id": 3, "first_name": "Only", "last_name": "Artist"}, "role": "Art"},
+    {"node": {"id": 4, "first_name": " ", "last_name": ""}, "role": "Story"}
+  ]
+}

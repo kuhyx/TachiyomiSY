@@ -1,0 +1,19 @@
+{
+  "status": 200,
+  "data": {
+    "id": 1234,
+    "cover": { "x250": { "x1": "https://cdn.mangabaka.org/1234/x250.jpg" } },
+    "authors": ["Author One"],
+    "artists": ["Artist One"],
+    "description": "  A story about testing.  ",
+    "published": { "start_date": "2019-04-01" },
+    "status": "releasing",
+    "type": "manga",
+    "rating": 8.456,
+    "titles": [
+      { "language": "ja", "traits": ["native"], "title": "テスト", "is_primary": false },
+      { "language": "en", "traits": ["official"], "title": "Testing Story", "is_primary": false },
+      { "language": "en", "traits": [], "title": "Test Story (alt)", "is_primary": false }
+    ]
+  }
+}

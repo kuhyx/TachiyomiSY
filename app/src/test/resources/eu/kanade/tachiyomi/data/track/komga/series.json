@@ -1,0 +1,41 @@
+{
+  "id": "series-1",
+  "libraryId": "lib-1",
+  "name": "Komga Series",
+  "created": "2024-01-01T00:00:00Z",
+  "lastModified": "2024-02-01T00:00:00Z",
+  "fileLastModified": "2024-02-01T00:00:00Z",
+  "booksCount": 10,
+  "booksReadCount": 4,
+  "booksUnreadCount": 5,
+  "booksInProgressCount": 1,
+  "metadata": {
+    "status": "ONGOING",
+    "created": "2024-01-01T00:00:00Z",
+    "lastModified": null,
+    "title": "Komga Title",
+    "titleSort": "komga title",
+    "summary": "A summary",
+    "summaryLock": false,
+    "readingDirection": "LEFT_TO_RIGHT",
+    "readingDirectionLock": false,
+    "publisher": "Pub",
+    "publisherLock": false,
+    "ageRating": 12,
+    "ageRatingLock": false,
+    "language": "en",
+    "languageLock": false,
+    "genres": ["action"],
+    "genresLock": false,
+    "tags": ["tag"],
+    "tagsLock": true
+  },
+  "booksMetadata": {
+    "authors": [ { "name": "Author", "role": "writer" } ],
+    "releaseDate": "2020-01-01",
+    "summary": "books summary",
+    "summaryNumber": "1",
+    "created": "2024-01-01T00:00:00Z",
+    "lastModified": "2024-02-01T00:00:00Z"
+  }
+}

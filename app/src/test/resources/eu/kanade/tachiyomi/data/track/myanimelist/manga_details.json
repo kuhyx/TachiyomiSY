@@ -1,0 +1,12 @@
+{
+  "id": 2,
+  "title": "Berserk",
+  "synopsis": "Guts.",
+  "num_chapters": 380,
+  "mean": 9.47,
+  "main_picture": {"large": "https://img/2l.jpg", "medium": "https://img/2m.jpg"},
+  "status": "currently_publishing",
+  "media_type": "manga",
+  "start_date": "1989-08-25",
+  "authors": [{"node": {"id": 1868, "first_name": "Kentarou", "last_name": "Miura"}, "role": "Story & Art"}]
+}

@@ -1,0 +1,13 @@
+{
+  "data": {
+    "mangas": [
+      {
+        "id": "2",
+        "url": "https://shikimori.io/mangas/2-berserk",
+        "name": "Berserk",
+        "chapters": 380,
+        "userRate": {"id": "9001", "chapters": 42, "status": "watching", "score": 8.0}
+      }
+    ]
+  }
+}

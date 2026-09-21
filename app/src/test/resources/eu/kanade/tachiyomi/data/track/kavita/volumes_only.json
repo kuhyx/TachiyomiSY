@@ -1,0 +1,6 @@
+[
+  { "id": 1, "number": 1, "name": "V1", "pages": 1, "pagesRead": 0, "lastModified": "", "created": "", "seriesId": 12,
+    "chapters": [ { "id": 1, "number": "0" } ] },
+  { "id": 2, "number": 2, "name": "V2", "pages": 1, "pagesRead": 0, "lastModified": "", "created": "", "seriesId": 12,
+    "chapters": [ { "id": 2, "number": "0" } ] }
+]
