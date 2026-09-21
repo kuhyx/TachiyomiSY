@@ -2,6 +2,7 @@ package exh.debug
 
 import android.app.Application
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.library.stop
 import eu.kanade.tachiyomi.data.sync.SyncDataJob
 import eu.kanade.tachiyomi.util.system.workManager
 import exh.util.jobScheduler

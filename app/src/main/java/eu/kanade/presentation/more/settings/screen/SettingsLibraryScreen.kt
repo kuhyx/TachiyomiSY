@@ -19,6 +19,7 @@ import eu.kanade.presentation.category.visualName
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.widget.TriStateListDialog
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.library.setupTask
 import eu.kanade.tachiyomi.ui.category.CategoryScreen
 import eu.kanade.tachiyomi.ui.category.genre.SortTagScreen
 import kotlinx.coroutines.launch

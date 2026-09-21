@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.download.clearQueue
 import eu.kanade.tachiyomi.data.download.pauseDownloads
 import eu.kanade.tachiyomi.data.download.startDownloads
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.library.stop
 import eu.kanade.tachiyomi.data.sync.SyncDataJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateDownloadJob
 import eu.kanade.tachiyomi.util.system.cancelNotification

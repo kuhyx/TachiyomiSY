@@ -23,6 +23,7 @@ import eu.kanade.presentation.more.settings.screen.advanced.ClearDatabaseScreen
 import eu.kanade.presentation.more.settings.screen.debug.DebugInfoScreen
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.library.startNow
 import eu.kanade.tachiyomi.network.NetworkPreferences
 import eu.kanade.tachiyomi.ui.more.OnboardingScreen
 import eu.kanade.tachiyomi.util.CrashLogUtil

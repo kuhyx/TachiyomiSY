@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.getQueuedDownloadOrNull
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.library.startNow
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.util.lang.toLocalDate
 import exh.source.EH_SOURCE_ID

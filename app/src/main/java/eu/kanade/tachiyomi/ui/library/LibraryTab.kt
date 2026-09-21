@@ -23,6 +23,7 @@ import eu.kanade.presentation.library.components.SyncFavoritesProgressDialog
 import eu.kanade.presentation.util.Tab
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.library.startNow
 import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
