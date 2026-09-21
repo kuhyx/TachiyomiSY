@@ -1,8 +1,5 @@
 package eu.kanade.presentation.manga.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material.icons.Icons
@@ -10,11 +7,9 @@ import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -22,30 +17,16 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
-import com.mikepenz.markdown.compose.LocalBulletListHandler
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.compose.components.markdownComponents
-import com.mikepenz.markdown.compose.elements.MarkdownBulletList
-import com.mikepenz.markdown.compose.elements.MarkdownDivider
-import com.mikepenz.markdown.compose.elements.MarkdownOrderedList
-import com.mikepenz.markdown.compose.elements.MarkdownTable
-import com.mikepenz.markdown.compose.elements.MarkdownTableHeader
-import com.mikepenz.markdown.compose.elements.MarkdownTableRow
-import com.mikepenz.markdown.compose.elements.MarkdownText
-import com.mikepenz.markdown.compose.elements.listDepth
 import com.mikepenz.markdown.model.DefaultMarkdownColors
 import com.mikepenz.markdown.model.DefaultMarkdownInlineContent
 import com.mikepenz.markdown.model.DefaultMarkdownTypography
-import com.mikepenz.markdown.model.MarkdownAlertPadding
 import com.mikepenz.markdown.model.MarkdownAnnotator
 import com.mikepenz.markdown.model.MarkdownColors
-import com.mikepenz.markdown.model.MarkdownPadding
 import com.mikepenz.markdown.model.MarkdownTypography
 import com.mikepenz.markdown.model.NoOpImageTransformerImpl
-import com.mikepenz.markdown.model.markdownAlertPadding
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.rememberMarkdownState
 import org.intellij.markdown.MarkdownTokenTypes.Companion.HTML_TAG
@@ -140,97 +121,6 @@ private fun getMarkdownTypography(): MarkdownTypography {
         table = MaterialTheme.typography.bodyMedium,
     )
 }
-
-private val markdownPadding = object : MarkdownPadding {
-    override val alert: MarkdownAlertPadding = markdownAlertPadding()
-    override val block: Dp = 2.dp
-    override val blockQuote: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
-    override val blockQuoteBar: PaddingValues.Absolute = PaddingValues.Absolute(
-        left = 4.dp,
-        top = 2.dp,
-        right = 4.dp,
-        bottom = 2.dp,
-    )
-    override val blockQuoteText: PaddingValues = PaddingValues(vertical = 4.dp)
-    override val codeBlock: PaddingValues = PaddingValues(8.dp)
-    override val list: Dp = 0.dp
-    override val listIndent: Dp = 8.dp
-    override val listItemBottom: Dp = 0.dp
-    override val listItemTop: Dp = 0.dp
-}
-
-private val markdownComponents = markdownComponents(
-    horizontalRule = {
-        MarkdownDivider(
-            modifier = Modifier
-                .padding(vertical = MaterialTheme.padding.extraSmall)
-                .fillMaxWidth(),
-        )
-    },
-    orderedList = { ol ->
-        Column(modifier = Modifier.padding(start = MaterialTheme.padding.small)) {
-            MarkdownOrderedList(
-                content = ol.content,
-                node = ol.node,
-                style = ol.typography.ordered,
-                depth = ol.listDepth,
-                markerModifier = { Modifier.alignBy(FirstBaseline) },
-                listModifier = { Modifier.alignBy(FirstBaseline) },
-            )
-        }
-    },
-    unorderedList = { ul ->
-        val markers = listOf("•", "◦", "▸", "▹")
-
-        CompositionLocalProvider(
-            LocalBulletListHandler provides { _, _, _, _, _ -> "${markers[ul.listDepth % markers.size]} " },
-        ) {
-            Column(modifier = Modifier.padding(start = MaterialTheme.padding.small)) {
-                MarkdownBulletList(
-                    content = ul.content,
-                    node = ul.node,
-                    style = ul.typography.bullet,
-                    markerModifier = { Modifier.alignBy(FirstBaseline) },
-                    listModifier = { Modifier.alignBy(FirstBaseline) },
-                )
-            }
-        }
-    },
-    table = { t ->
-        MarkdownTable(
-            content = t.content,
-            node = t.node,
-            style = t.typography.text,
-            headerBlock = { content, header, tableWidth, style ->
-                MarkdownTableHeader(
-                    content = content,
-                    header = header,
-                    tableWidth = tableWidth,
-                    style = style,
-                    maxLines = Int.MAX_VALUE,
-                )
-            },
-            rowBlock = { content, header, tableWidth, style ->
-                MarkdownTableRow(
-                    content = content,
-                    header = header,
-                    tableWidth = tableWidth,
-                    style = style,
-                    maxLines = Int.MAX_VALUE,
-                )
-            },
-        )
-    },
-    custom = { type, model ->
-        if (type in DISALLOWED_MARKDOWN_TYPES) {
-            MarkdownText(
-                content = model.content.substring(model.node.startOffset, model.node.endOffset),
-                node = model.node,
-                style = model.typography.text,
-            )
-        }
-    },
-)
 
 @Composable
 @ReadOnlyComposable
