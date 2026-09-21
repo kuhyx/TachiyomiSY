@@ -2,7 +2,6 @@
 import mihon.gradle.getBuildTime
 import mihon.gradle.getLatestCommitCount
 import mihon.gradle.getLatestCommitSha
-import mihon.gradle.tasks.ReplaceShortcutsPlaceholderTask
 
 plugins {
     alias(mihonx.plugins.android.application)
@@ -12,6 +11,8 @@ plugins {
     // SY fork (kuhy): the `kuhy` signing config and the `foss` drop-in build type
     // (`-PsyReplaceUpstream`, `-PsyBuildNumber`) live in gradle/build-logic.
     alias(mihonx.plugins.sy.release)
+    // Splits, packaging, build features, opt-ins and the shortcuts task (gradle/build-logic).
+    alias(mihonx.plugins.app.packaging)
 
     kotlin("plugin.parcelize")
 
@@ -76,83 +77,8 @@ android {
     }
 
     sourceSets {
-        getByName("release").java.directories.add("src/release/java")
-        getByName("debug").java.directories.add("src/debug/java")
         getByName("benchmark").java.directories.add("src/debug/java")
         getByName("benchmark").res.directories.add("src/debug/res")
-    }
-
-    splits {
-        abi {
-            isEnable = true
-            isUniversalApk = true
-            reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-        }
-    }
-
-    packaging {
-        jniLibs {
-            keepDebugSymbols += listOf(
-                "libandroidx.graphics.path",
-                "libarchive-jni",
-                "libconscrypt_jni",
-                "libimagedecoder",
-                "libquickjs",
-                "libsqlite3x",
-            )
-                .map { "**/$it.so" }
-        }
-        resources {
-            excludes += setOf(
-                "kotlin-tooling-metadata.json",
-                "LICENSE.txt",
-                "META-INF/**/*.properties",
-                "META-INF/**/LICENSE.txt",
-                "META-INF/*.properties",
-                "META-INF/*.version",
-                "META-INF/DEPENDENCIES",
-                "META-INF/INDEX.LIST",
-                "META-INF/LICENSE",
-                "META-INF/NOTICE",
-                "META-INF/README.md",
-            )
-        }
-    }
-
-    dependenciesInfo {
-        includeInApk = false
-    }
-
-    buildFeatures {
-        viewBinding = true
-        buildConfig = true
-        aidl = true
-    }
-
-    lint {
-        // The app is last in the rollout order, so it re-checks every library it depends on.
-        checkDependencies = true
-    }
-}
-
-kotlin {
-    compilerOptions {
-        freeCompilerArgs.addAll(
-            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
-            "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
-            "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-            "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
-            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
-            "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
-            "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
-            "-opt-in=coil3.annotation.ExperimentalCoilApi",
-            "-opt-in=com.mohamedrejeb.richeditor.annotation.ExperimentalRichTextApi",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-opt-in=kotlinx.coroutines.FlowPreview",
-            "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
-            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-        )
     }
 }
 
@@ -316,25 +242,4 @@ dependencies {
 
     // ZXing Android Embedded
     implementation(sylibs.zxing.android.embedded)
-}
-
-androidComponents {
-    onVariants { variant ->
-        val resSource = variant.sources.res ?: return@onVariants
-
-        val variantName = variant.name.replaceFirstChar { it.uppercase() }
-        val replaceShortcutsPlaceholderTask = tasks.register<ReplaceShortcutsPlaceholderTask>(
-            "replace${variantName}ShortcutPlaceholder",
-        ) {
-            applicationId.set(variant.applicationId)
-            shortcutsFile.set(projectDir.resolve("src/main/shortcuts.xml"))
-        }
-        resSource.addGeneratedSourceDirectory(replaceShortcutsPlaceholderTask) { it.outputDir }
-    }
-
-    onVariants(selector().withFlavor("default" to "standard")) {
-        // Only excluding in standard flavor because this breaks
-        // Layout Inspector's Compose tree
-        it.packaging.resources.excludes.add("META-INF/*.version")
-    }
 }

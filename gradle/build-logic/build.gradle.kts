@@ -109,6 +109,10 @@ samWithReceiver {
 
 gradlePlugin {
     plugins {
+        register("app-packaging") {
+            id = mihonx.plugins.app.packaging.get().pluginId
+            implementationClass = "mihon.gradle.plugins.PluginAppPackaging"
+        }
         register("android-application") {
             id = mihonx.plugins.android.application.get().pluginId
             implementationClass = "mihon.gradle.plugins.PluginAndroidApplication"
