@@ -107,7 +107,11 @@ internal data class MigrateMangaScreen(
 }
 
 @Composable
-private fun ContinueFab(screenModel: MigrateMangaScreenModel, state: MigrateMangaScreenModel.State, expanded: Boolean) {
+internal fun ContinueFab(
+    screenModel: MigrateMangaScreenModel,
+    state: MigrateMangaScreenModel.State,
+    expanded: Boolean,
+) {
     val navigator = LocalNavigator.currentOrThrow
     SmallExtendedFloatingActionButton(
         text = { Text(text = stringResource(MR.strings.migrationConfigScreen_continueButtonText)) },
@@ -128,7 +132,7 @@ private fun ContinueFab(screenModel: MigrateMangaScreenModel, state: MigrateMang
 }
 
 @Composable
-private fun MigrateMangaScreen.MigrateMangaContent(
+internal fun MigrateMangaScreen.MigrateMangaContent(
     lazyListState: LazyListState,
     contentPadding: PaddingValues,
     state: MigrateMangaScreenModel.State,

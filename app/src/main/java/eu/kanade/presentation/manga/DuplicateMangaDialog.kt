@@ -138,12 +138,12 @@ internal fun DuplicateMangaDialog(
 
 @Composable
 private fun DialogFooter(
-    horizontalPaddingModifier: Modifier,
+    modifier: Modifier,
     minHeight: Dp,
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    Column(modifier = horizontalPaddingModifier) {
+    Column(modifier = modifier) {
         HorizontalDivider()
         TextPreferenceWidget(
             title = stringResource(MR.strings.action_add_anyway),
@@ -158,7 +158,7 @@ private fun DialogFooter(
     OutlinedButton(
         onClick = onDismissRequest,
         modifier = Modifier
-            .then(horizontalPaddingModifier)
+            .then(modifier)
             .padding(bottom = MaterialTheme.padding.medium)
             .heightIn(min = minHeight)
             .fillMaxWidth(),

@@ -94,6 +94,6 @@ internal class MangaDexAuthInterceptor(
 }
 
 // Add the authorization header to the original request
-private fun Request.withBearer(accessToken: String): Request = newBuilder()
+internal fun Request.withBearer(accessToken: String): Request = newBuilder()
     .addHeader("Authorization", "Bearer $accessToken")
     .build()

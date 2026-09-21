@@ -122,7 +122,7 @@ private fun DownloadingIndicator(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        val arrowColor = ProgressRing(downloadState, downloadProgressProvider())
+        val arrowColor = progressRing(downloadState, downloadProgressProvider())
         DropdownMenu(expanded = isMenuExpanded, onDismissRequest = { isMenuExpanded = false }) {
             DropdownMenuItem(
                 text = { Text(text = stringResource(MR.strings.action_start_downloading_now)) },
@@ -151,7 +151,7 @@ private fun DownloadingIndicator(
 // The ring: indeterminate while queued or at 0%, otherwise filling; returns the arrow colour that stays legible over
 // it.
 @Composable
-private fun ProgressRing(downloadState: Download.State, downloadProgress: Int): Color {
+private fun progressRing(downloadState: Download.State, downloadProgress: Int): Color {
     val strokeColor = MaterialTheme.colorScheme.onSurfaceVariant
     val indeterminate = downloadState == Download.State.QUEUE ||
         (downloadState == Download.State.DOWNLOADING && downloadProgress == 0)

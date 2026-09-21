@@ -101,7 +101,7 @@ internal class ThumbnailPreviewInterceptor : Interceptor {
 }
 
 // The site serves one sprite per gallery page; the preview is its slice at the given offset.
-private fun Response.croppedTo(thumbnailPreview: EHentaiThumbnailPreview): Response {
+internal fun Response.croppedTo(thumbnailPreview: EHentaiThumbnailPreview): Response {
     val body = ByteArrayOutputStream()
         .use {
             val bitmap = BitmapFactory.decodeStream(body.byteStream())

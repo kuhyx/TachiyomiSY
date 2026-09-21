@@ -128,7 +128,7 @@ private fun FavoriteEntry.identities(): List<Pair<String, String>> = listOfNotNu
     otherGid?.let { g -> otherToken?.let { t -> g to t } },
 )
 
-private fun FavoriteEntry.urlEquals(other: FavoriteEntry): Boolean {
+internal fun FavoriteEntry.urlEquals(other: FavoriteEntry): Boolean {
     val theirs = other.identities()
     return identities().any { it in theirs }
 }

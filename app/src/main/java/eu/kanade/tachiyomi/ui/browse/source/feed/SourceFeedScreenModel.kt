@@ -210,7 +210,7 @@ internal data class SourceFeedState(
 }
 
 // The feed's first page from [source]; nothing when the request fails.
-private suspend fun SourceFeedUI.fetchFirstPage(
+internal suspend fun SourceFeedUI.fetchFirstPage(
     source: Source,
     filterList: (SavedSearch, Source) -> FilterList,
 ): List<SManga> = try {

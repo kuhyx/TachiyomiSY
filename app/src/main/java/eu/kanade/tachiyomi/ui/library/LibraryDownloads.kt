@@ -73,4 +73,4 @@ internal class LibraryDownloads(
             )
 }
 
-private fun List<Chapter>.limitTo(amount: Int?): List<Chapter> = if (amount != null) take(amount) else this
+internal fun List<Chapter>.limitTo(amount: Int?): List<Chapter> = if (amount != null) take(amount) else this

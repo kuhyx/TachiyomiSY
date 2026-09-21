@@ -36,4 +36,4 @@ internal object DebugSourceFunctions {
     }
 }
 
-private fun describe(source: Source) = "${source.id}: ${source.name} (${source.lang.uppercase()})"
+internal fun describe(source: Source) = "${source.id}: ${source.name} (${source.lang.uppercase()})"

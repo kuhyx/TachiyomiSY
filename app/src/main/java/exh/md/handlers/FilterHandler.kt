@@ -143,12 +143,12 @@ internal class FilterHandler {
 }
 
 // Adds [values] under [key] unless empty; MangaDex rejects empty array parameters.
-private fun MutableMap<String, Any>.putList(key: String, values: List<String>) {
+internal fun MutableMap<String, Any>.putList(key: String, values: List<String>) {
     if (values.isNotEmpty()) this[key] = values
 }
 
 // The lower-cased names of the checked boxes.
-private fun Filter.Group<out Filter.CheckBox>.checkedNames(): List<String> =
+internal fun Filter.Group<out Filter.CheckBox>.checkedNames(): List<String> =
     state.filter { it.state }.map { it.name.lowercase(Locale.US) }
 
 // MangaDex tag uuids and their display names, in the order the filter shows them.

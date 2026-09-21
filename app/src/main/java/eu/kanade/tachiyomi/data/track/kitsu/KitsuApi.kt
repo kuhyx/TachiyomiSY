@@ -341,7 +341,7 @@ internal class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInte
     }
 }
 
-private fun KitsuMangaMetadataMedia.toTrackMangaMetadata(): TrackMangaMetadata {
+internal fun KitsuMangaMetadataMedia.toTrackMangaMetadata(): TrackMangaMetadata {
     fun staffNamed(vararg roles: String): String? = staff.nodes
         .filter { it.role in roles }
         .map { it.person.name }

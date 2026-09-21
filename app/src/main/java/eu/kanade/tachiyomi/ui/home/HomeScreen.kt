@@ -326,7 +326,7 @@ internal object HomeScreen : Screen() {
 }
 
 // Switches to the requested tab, then pushes the screen the request points at inside it (if any).
-private fun openTab(request: HomeScreen.Tab, tabNavigator: TabNavigator, navigator: Navigator) {
+internal fun openTab(request: HomeScreen.Tab, tabNavigator: TabNavigator, navigator: Navigator) {
     tabNavigator.current = request.target()
     when {
         request is HomeScreen.Tab.Library && request.mangaIdToOpen != null -> {

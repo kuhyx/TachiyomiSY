@@ -326,14 +326,14 @@ internal data class TrackInfoDialogHomeScreen(
     }
 }
 
-private fun TrackInfoDialogHomeScreen.openTrackerInBrowser(context: Context, trackItem: TrackItem) {
+internal fun TrackInfoDialogHomeScreen.openTrackerInBrowser(context: Context, trackItem: TrackItem) {
     val url = trackItem.track?.remoteUrl ?: return
     if (url.isNotBlank()) {
         context.openInBrowser(url)
     }
 }
 
-private fun Context.copyTrackerLink(trackItem: TrackItem) {
+internal fun Context.copyTrackerLink(trackItem: TrackItem) {
     val url = trackItem.track?.remoteUrl ?: return
     if (url.isNotBlank()) {
         copyToClipboard(url, url)
@@ -503,7 +503,7 @@ private data class TrackScoreSelectorScreen(
     }
 }
 
-private data class TrackDateSelectorScreen(
+internal data class TrackDateSelectorScreen(
     private val track: Track,
     private val serviceId: Long,
     private val start: Boolean,
@@ -885,12 +885,12 @@ private data class TrackerRemoveScreen(
     }
 }
 
-private fun dateSelector(item: TrackItem, start: Boolean) =
+internal fun dateSelector(item: TrackItem, start: Boolean) =
     TrackDateSelectorScreen(track = item.track!!, serviceId = item.tracker.id, start = start)
 
 // SY -->
 @Composable
-private fun LoadingPlaceholder() {
+internal fun LoadingPlaceholder() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -908,7 +908,7 @@ private fun LoadingPlaceholder() {
 }
 
 @Composable
-private fun RemoveTrackText(
+internal fun RemoveTrackText(
     serviceName: String,
     isDeletable: Boolean,
     removeRemoteTrack: Boolean,
@@ -931,7 +931,7 @@ private fun RemoveTrackText(
 }
 
 @Composable
-private fun RemoveTrackButtons(onCancel: () -> Unit, onConfirm: () -> Unit) {
+internal fun RemoveTrackButtons(onCancel: () -> Unit, onConfirm: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small, Alignment.End),

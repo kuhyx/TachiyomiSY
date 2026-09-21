@@ -186,7 +186,7 @@ internal class EHentaiGalleryListParser {
 }
 
 // The next page's key: a page number on the toplist, otherwise the boundary gallery id.
-private fun nextPage(
+internal fun nextPage(
     doc: Document,
     parsedLocation: HttpUrl?,
     parsedMangas: List<EHentai.ParsedManga>,

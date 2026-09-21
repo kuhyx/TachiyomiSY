@@ -113,7 +113,7 @@ internal class LibrarySearch(
         }
     }
 
-    private fun filterManga(
+    internal fun filterManga(
         queries: List<QueryComponent>,
         libraryManga: LibraryManga,
         tracks: List<Track>?,
@@ -218,7 +218,7 @@ internal class LibrarySearch(
         }
     }
 
-    private fun filterTracks(constraint: String, tracks: List<Track>, context: Context): Boolean {
+    internal fun filterTracks(constraint: String, tracks: List<Track>, context: Context): Boolean {
         return tracks.fastAny { track ->
             val trackService = trackerManager.get(track.trackerId)
             if (trackService != null) {

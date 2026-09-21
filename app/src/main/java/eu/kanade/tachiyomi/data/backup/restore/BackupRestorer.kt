@@ -272,7 +272,7 @@ internal class BackupRestorer(
 }
 
 // One progress step per manga and per extension store, one per enabled settings group.
-private fun RestoreOptions.stepCount(backup: Backup): Int = listOf(
+internal fun RestoreOptions.stepCount(backup: Backup): Int = listOf(
     backup.backupManga.size.takeIf { libraryEntries },
     1.takeIf { categories },
     // SY -->

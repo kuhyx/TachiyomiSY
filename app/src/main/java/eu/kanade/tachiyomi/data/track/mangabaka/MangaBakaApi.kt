@@ -281,7 +281,7 @@ internal class MangaBakaApi(
         private var codeVerifier: String = ""
         private var oauthStateParam: String = ""
 
-        private fun libraryEntryUrl(remoteId: Long) = "$LIBRARY_API_URL/$remoteId"
+        internal fun libraryEntryUrl(remoteId: Long) = "$LIBRARY_API_URL/$remoteId"
 
         fun authUrl(): Uri = "$OAUTH_URL/authorize".toUri().buildUpon() //
             .appendQueryParameter(CLIENT_ID_KEY, CLIENT_ID)

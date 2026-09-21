@@ -112,7 +112,7 @@ internal class AppLanguageScreen : Screen() {
 }
 
 // The `name` attribute of every `<locale>` element, in document order.
-private fun XmlPullParser.localeTags(): List<String> {
+internal fun XmlPullParser.localeTags(): List<String> {
     val tags = mutableListOf<String>()
     var event = eventType
     while (event != XmlPullParser.END_DOCUMENT) {

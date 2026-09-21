@@ -47,7 +47,7 @@ internal data class SMManga(
 }
 
 // The names credited with a role containing [word], once per matching role like the site lists them.
-private fun List<SMPersonRole>?.creditedFor(word: String): List<String> =
+internal fun List<SMPersonRole>?.creditedFor(word: String): List<String> =
     orEmpty().flatMap { personRole -> personRole.roles.filter { word in it }.map { personRole.person.name } }
 
 @Serializable

@@ -25,7 +25,6 @@ import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import dev.icerock.moko.resources.StringResource
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.WarningBanner
 import eu.kanade.presentation.util.Screen
@@ -120,18 +119,18 @@ internal class RestoreBackupScreen(
 }
 
 @Composable
-private fun restoreErrorMessage(error: Any?): AnnotatedString = buildAnnotatedString {
+internal fun restoreErrorMessage(error: Any?): AnnotatedString = buildAnnotatedString {
     when (error) {
         is MissingRestoreComponents -> {
             appendLine(stringResource(MR.strings.backup_restore_content_full))
-            appendMissing(MR.strings.backup_restore_missing_sources, error.sources)
-            appendMissing(MR.strings.backup_restore_missing_trackers, error.trackers)
+            appendMissing(stringResource(MR.strings.backup_restore_missing_sources), error.sources)
+            appendMissing(stringResource(MR.strings.backup_restore_missing_trackers), error.trackers)
         }
         is InvalidRestore -> {
-            appendBoldLine(MR.strings.invalid_backup_file)
+            appendBoldLine(stringResource(MR.strings.invalid_backup_file))
             appendLine(error.uri.toString())
             appendLine()
-            appendBoldLine(MR.strings.invalid_backup_file_error)
+            appendBoldLine(stringResource(MR.strings.invalid_backup_file_error))
             appendLine(error.message)
         }
         else -> {
@@ -140,18 +139,16 @@ private fun restoreErrorMessage(error: Any?): AnnotatedString = buildAnnotatedSt
     }
 }
 
-@Composable
-private fun AnnotatedString.Builder.appendMissing(title: StringResource, names: List<String>) {
+private fun AnnotatedString.Builder.appendMissing(title: String, names: List<String>) {
     if (names.isEmpty()) return
     appendLine()
     appendBoldLine(title)
     names.joinTo(this, separator = "\n- ", prefix = "- ")
 }
 
-@Composable
-private fun AnnotatedString.Builder.appendBoldLine(text: StringResource) {
+private fun AnnotatedString.Builder.appendBoldLine(text: String) {
     withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-        appendLine(stringResource(text))
+        appendLine(text)
     }
 }
 

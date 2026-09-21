@@ -70,7 +70,7 @@ private val TRACK_PROGRESS_MUTATION = $$"""
 |}
 """.trimMargin()
 
-private fun graphQlPayload(query: String, variables: JsonObjectBuilder.() -> Unit): JsonObject = buildJsonObject {
+internal fun graphQlPayload(query: String, variables: JsonObjectBuilder.() -> Unit): JsonObject = buildJsonObject {
     put(QUERY, query)
     putJsonObject(VARIABLES, variables)
 }

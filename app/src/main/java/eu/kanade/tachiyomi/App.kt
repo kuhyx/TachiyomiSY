@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -97,7 +96,6 @@ internal class App : Application(), DefaultLifecycleObserver, SingletonImageLoad
 
     internal val disableIncognitoReceiver = DisableIncognitoReceiver()
 
-    @SuppressLint("LaunchActivityFromNotification")
     override fun onCreate() {
         super<Application>.onCreate()
         try {

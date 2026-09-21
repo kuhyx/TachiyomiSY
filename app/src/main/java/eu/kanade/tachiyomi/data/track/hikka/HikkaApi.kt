@@ -200,7 +200,7 @@ internal class HikkaApi(
             "61sZs8KECEWVXtMUDtq8QC4t9WX4DwWWYLXEVlgnlUXGT1fWCb-18c" +
             "Zd2m8Co-8HN6JQcjoP-B"
 
-        private fun readMangaUrl(slug: String) = "$BASE_API_URL/read/manga/$slug"
+        internal fun readMangaUrl(slug: String) = "$BASE_API_URL/read/manga/$slug"
 
         fun authUrl(): Uri = "$BASE_URL/oauth".toUri().buildUpon()
             .appendQueryParameter("reference", CLIENT_REFERENCE)

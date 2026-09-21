@@ -151,6 +151,6 @@ internal class MangaUpdatesApi(
 
         internal val CONTENT_TYPE = "application/json".toMediaType()
 
-        private fun ratingUrl(track: Track) = "$BASE_URL/v1/series/${track.remoteId}/rating"
+        internal fun ratingUrl(track: Track) = "$BASE_URL/v1/series/${track.remoteId}/rating"
     }
 }

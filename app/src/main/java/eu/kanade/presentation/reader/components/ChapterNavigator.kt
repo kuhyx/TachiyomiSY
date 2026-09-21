@@ -234,7 +234,7 @@ private fun VerticalChapterNavigator(
             spec = navigation.previousButton,
             colors = style.buttonColor,
             icon = Icons.Outlined.SkipPrevious,
-            iconModifier = Modifier.rotate(QUARTER_TURN_DEGREES),
+            modifier = Modifier.rotate(QUARTER_TURN_DEGREES),
         )
 
         if (totalPages > 1) {
@@ -270,7 +270,7 @@ private fun VerticalChapterNavigator(
             spec = navigation.nextButton,
             colors = style.buttonColor,
             icon = Icons.Outlined.SkipNext,
-            iconModifier = Modifier.rotate(QUARTER_TURN_DEGREES),
+            modifier = Modifier.rotate(QUARTER_TURN_DEGREES),
         )
     }
 }
@@ -289,7 +289,7 @@ private fun ChapterButton(
     spec: ChapterButtonSpec,
     colors: IconButtonColors,
     icon: ImageVector,
-    iconModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
 ) {
     FilledIconButton(
         enabled = spec.enabled,
@@ -299,7 +299,7 @@ private fun ChapterButton(
         Icon(
             imageVector = icon,
             contentDescription = stringResource(spec.description),
-            modifier = iconModifier,
+            modifier = modifier,
         )
     }
 }

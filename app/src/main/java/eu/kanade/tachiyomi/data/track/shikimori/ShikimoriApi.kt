@@ -305,7 +305,7 @@ internal class ShikimoriApi(
     }
 }
 
-private fun SMMetadataResult.toTrackMangaMetadata(): TrackMangaMetadata {
+internal fun SMMetadataResult.toTrackMangaMetadata(): TrackMangaMetadata {
     fun namedWithRole(vararg roles: String): String? = personRoles
         .filter { role -> roles.any { it in role.roles } }
         .map { it.person.name }

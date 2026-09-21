@@ -106,7 +106,7 @@ internal class SettingsSearchScreen : Screen() {
 }
 
 @Composable
-private fun SearchTopBar(textFieldState: TextFieldState, focusRequester: FocusRequester) {
+internal fun SearchTopBar(textFieldState: TextFieldState, focusRequester: FocusRequester) {
     val navigator = LocalNavigator.currentOrThrow
     val focusManager = LocalFocusManager.current
     Column {

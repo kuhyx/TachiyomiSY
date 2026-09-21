@@ -129,8 +129,8 @@ private fun RowScope.SlotButton(
     slot: Enum<*>,
     label: StringResource,
     icon: ImageVector,
-    content: (@Composable () -> Unit)? = null,
     onClick: () -> Unit,
+    content: (@Composable () -> Unit)? = null,
 ) {
     Button(
         title = stringResource(label),
@@ -260,12 +260,14 @@ internal fun LibraryBottomActionMenu(
                     Icons.AutoMirrored.Outlined.Label,
                     onClick = onChangeCategoryClicked,
                 )
-                if (onDownloadClicked != null) {
-                    LibraryDownloadButton(slots, onDownloadClicked)
-                }
-                SlotButton(slots, LibraryAction.DELETE, MR.strings.action_delete, Icons.Outlined.Delete) {
-                    onDeleteClicked()
-                }
+                onDownloadClicked?.let { LibraryDownloadButton(slots, it) }
+                SlotButton(
+                    slots,
+                    LibraryAction.DELETE,
+                    MR.strings.action_delete,
+                    Icons.Outlined.Delete,
+                    onClick = onDeleteClicked,
+                )
                 // SY -->
                 SlotButton(
                     slots,
@@ -315,16 +317,14 @@ private fun RowScope.LibraryDownloadButton(slots: ConfirmSlots, onDownloadClicke
         LibraryAction.DOWNLOAD,
         MR.strings.action_download,
         Icons.Outlined.Download,
-        content = {
-            DownloadDropdownMenu(
-                expanded = downloadExpanded,
-                onDismissRequest = { downloadExpanded = false },
-                onDownloadClicked = onDownloadClicked,
-                offset = BottomBarMenuDpOffset,
-            )
-        },
+        onClick = { downloadExpanded = !downloadExpanded },
     ) {
-        downloadExpanded = !downloadExpanded
+        DownloadDropdownMenu(
+            expanded = downloadExpanded,
+            onDismissRequest = { downloadExpanded = false },
+            onDownloadClicked = onDownloadClicked,
+            offset = BottomBarMenuDpOffset,
+        )
     }
 }
 

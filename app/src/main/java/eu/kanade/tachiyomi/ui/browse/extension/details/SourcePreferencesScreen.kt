@@ -180,7 +180,7 @@ internal class SourcePreferencesFragment : PreferenceFragmentCompat() {
 }
 
 // SY --> An enhanced source is configured through its wrapper only when that wrapper has settings of its own.
-private fun Source.configurableSide(): Source = when {
+internal fun Source.configurableSide(): Source = when {
     this !is EnhancedHttpSource -> this
     enhancedSource is ConfigurableSource -> source()
     else -> originalSource

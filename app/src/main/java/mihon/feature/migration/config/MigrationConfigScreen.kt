@@ -446,7 +446,7 @@ internal class MigrationConfigScreen(private val mangaIds: Collection<Long>) : S
     }
 }
 
-private fun LazyListScope.sourceHeader(selected: Boolean) {
+internal fun LazyListScope.sourceHeader(selected: Boolean) {
     val headerPrefix = if (selected) "selected" else "available"
     item("$headerPrefix-header") {
         Text(

@@ -731,7 +731,7 @@ internal class MangaScreenModel(
 
 // Applies the view filters to the list of chapters obtained from the database.
 // @return the chapters filtered and sorted.
-private fun List<ChapterList.Item>.applyFilters(manga: Manga): Sequence<ChapterList.Item> {
+internal fun List<ChapterList.Item>.applyFilters(manga: Manga): Sequence<ChapterList.Item> {
     val isLocalManga = manga.isLocal()
     val unreadFilter = manga.unreadFilter
     val downloadedFilter = manga.downloadedFilter

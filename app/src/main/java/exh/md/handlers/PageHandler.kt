@@ -174,5 +174,5 @@ internal class PageHandler(
 }
 
 // A member by name, made callable regardless of its visibility; null when the class has none.
-private fun KClass<*>.accessibleMember(name: String): KCallable<*>? =
+internal fun KClass<*>.accessibleMember(name: String): KCallable<*>? =
     members.find { it.name == name }?.also { it.isAccessible = true }

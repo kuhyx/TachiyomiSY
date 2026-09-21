@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import eu.kanade.domain.sync.SyncPreferences
@@ -21,6 +22,8 @@ import uy.kohesive.injekt.api.get
 // The process-lifetime preference observers [App.onCreate] installs.
 
 /** Show notification to disable Incognito Mode when it's enabled. */
+// The incognito notification's content intent is a broadcast, which lint reads as launching an activity.
+@SuppressLint("LaunchActivityFromNotification")
 internal fun App.observeIncognitoMode(scope: CoroutineScope) {
     basePreferences.incognitoMode.changes()
         .onEach { enabled ->

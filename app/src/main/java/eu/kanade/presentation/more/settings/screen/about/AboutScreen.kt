@@ -273,7 +273,7 @@ internal object AboutScreen : Screen() {
     }
 }
 
-private fun LazyListScope.linkItems(links: List<Pair<StringResource, () -> Unit>>) {
+internal fun LazyListScope.linkItems(links: List<Pair<StringResource, () -> Unit>>) {
     links.forEach { (title, onClick) ->
         item {
             TextPreferenceWidget(

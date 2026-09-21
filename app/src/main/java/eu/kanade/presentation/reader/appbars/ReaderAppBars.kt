@@ -128,7 +128,7 @@ internal fun ReaderAppBars(
             VerticalNavigatorRail(
                 visible = visible,
                 sliderOnLeft = chapterNavigatorType == ChapterNavigatorType.VERTICAL_LEFT,
-                navigator = navigator,
+                content = navigator,
             )
         } else {
             Spacer(Modifier.weight(1f))
@@ -137,11 +137,11 @@ internal fun ReaderAppBars(
         BottomBars(
             visible = visible,
             backgroundColor = backgroundColor,
-            navigator = navigator.takeIf { chapterNavigatorType.isHorizontal() },
             settings = settings,
             onClickSettings = onClickSettings,
             syBottomBar = syBottomBar,
             syBottomBarActions = syBottomBarActions,
+            content = navigator.takeIf { chapterNavigatorType.isHorizontal() },
         )
     }
 }
@@ -151,11 +151,11 @@ internal fun ReaderAppBars(
 private fun BottomBars(
     visible: Boolean,
     backgroundColor: Color,
-    navigator: (@Composable () -> Unit)?,
     settings: ReaderSettingButtons,
     onClickSettings: () -> Unit,
     syBottomBar: SyBottomBarState,
     syBottomBarActions: SyBottomBarActions,
+    content: (@Composable () -> Unit)?,
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -163,7 +163,7 @@ private fun BottomBars(
         exit = slideOutVertically(readerBarsSlideAnimationSpec) { it } + fadeOut(readerBarsFadeAnimationSpec),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small)) {
-            navigator?.invoke()
+            content?.invoke()
             ReaderBottomBar(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -186,7 +186,7 @@ private fun BottomBars(
 private fun ColumnScope.VerticalNavigatorRail(
     visible: Boolean,
     sliderOnLeft: Boolean,
-    navigator: @Composable () -> Unit,
+    content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
         LocalLayoutDirection provides if (sliderOnLeft) LayoutDirection.Ltr else LayoutDirection.Rtl,
@@ -205,7 +205,7 @@ private fun ColumnScope.VerticalNavigatorRail(
                         modifier = Modifier.fillMaxHeight(),
                         contentAlignment = Alignment.BottomCenter,
                     ) {
-                        navigator()
+                        content()
                     }
                 }
             }

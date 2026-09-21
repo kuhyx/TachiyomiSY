@@ -41,7 +41,7 @@ internal data class ALManga(
 }
 
 // An unformattable date is shown as none at all.
-private fun formatStartDate(startDateFuzzy: Long): String = try {
+internal fun formatStartDate(startDateFuzzy: Long): String = try {
     SimpleDateFormat("yyyy-MM-dd", Locale.US).format(startDateFuzzy)
 } catch (_: IllegalArgumentException) {
     ""

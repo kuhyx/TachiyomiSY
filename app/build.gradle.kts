@@ -8,6 +8,7 @@ plugins {
     alias(mihonx.plugins.android.application)
     alias(mihonx.plugins.compose)
     alias(mihonx.plugins.spotless)
+    alias(mihonx.plugins.lint)
     // SY fork (kuhy): the `kuhy` signing config and the `foss` drop-in build type
     // (`-PsyReplaceUpstream`, `-PsyBuildNumber`) live in gradle/build-logic.
     alias(mihonx.plugins.sy.release)
@@ -130,8 +131,8 @@ android {
     }
 
     lint {
-        abortOnError = false
-        checkReleaseBuilds = false
+        // The app is last in the rollout order, so it re-checks every library it depends on.
+        checkDependencies = true
     }
 }
 
@@ -336,11 +337,4 @@ androidComponents {
         // Layout Inspector's Compose tree
         it.packaging.resources.excludes.add("META-INF/*.version")
     }
-}
-
-// SY fork (kuhy): the full lint stack (build-logic PluginLint) goes on unconditionally in the
-// commit that makes this module clean; until then `-PsyAppLint` measures what is left without
-// turning every push red. Applied after `android {}` so its strict lint settings win.
-if (hasProperty("syAppLint")) {
-    pluginManager.apply(mihonx.plugins.lint.get().pluginId)
 }

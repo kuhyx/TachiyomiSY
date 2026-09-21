@@ -641,7 +641,7 @@ private val HorizontalElementsPadding = 8.dp
 private val SuggestionChipPadding = PaddingValues(horizontal = HorizontalElementsPadding)
 
 // Keeps the list of active interactions: a start adds itself, its matching end removes the start.
-private fun MutableList<Interaction>.apply(interaction: Interaction) {
+internal fun MutableList<Interaction>.apply(interaction: Interaction) {
     when (interaction) {
         is HoverInteraction.Enter -> add(interaction)
         is HoverInteraction.Exit -> remove(interaction.enter)

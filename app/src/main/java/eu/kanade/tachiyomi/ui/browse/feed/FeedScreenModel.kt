@@ -228,7 +228,7 @@ internal data class FeedScreenState(
 }
 
 // The feed's first page: latest updates, or the saved search; nothing when the source is gone or the request fails.
-private suspend fun FeedItemUI.fetchFirstPage(filterList: (SavedSearch, Source) -> FilterList): List<SManga> {
+internal suspend fun FeedItemUI.fetchFirstPage(filterList: (SavedSearch, Source) -> FilterList): List<SManga> {
     val source = source ?: return emptyList()
     return try {
         val page = if (savedSearch == null) {
