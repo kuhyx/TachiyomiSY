@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.library
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.util.fastAny
 import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.chapter.interactor.SetReadStatus
 import eu.kanade.domain.manga.interactor.UpdateManga
@@ -16,30 +15,15 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import exh.favorites.FavoritesSyncHelper
 import exh.recs.batch.RecommendationSearchHelper
-import exh.source.EH_SOURCE_ID
 import exh.source.ExhPreferences
-import exh.source.MERGED_SOURCE_ID
 import exh.source.isEhBasedManga
 import exh.source.mangaDexSourceIds
 import exh.source.nHentaiSourceIds
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.dropWhile
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
-import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.preference.CheckboxState
 import tachiyomi.core.common.preference.TriState
-import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.interactor.SetMangaCategories
 import tachiyomi.domain.category.model.Category
@@ -47,7 +31,6 @@ import tachiyomi.domain.chapter.interactor.GetChaptersByMangaId
 import tachiyomi.domain.chapter.interactor.GetMergedChaptersByMangaId
 import tachiyomi.domain.history.interactor.GetNextChapters
 import tachiyomi.domain.library.model.LibraryGroup
-import tachiyomi.domain.library.model.LibraryManga
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.manga.interactor.GetLibraryManga
 import tachiyomi.domain.manga.interactor.GetMergedMangaById
@@ -56,28 +39,25 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracksPerManga
 import tachiyomi.domain.track.model.Track
-import tachiyomi.i18n.MR
-import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlin.time.Duration.Companion.seconds
 
 internal class LibraryScreenModel(
-    private val getLibraryManga: GetLibraryManga = Injekt.get(),
+    internal val getLibraryManga: GetLibraryManga = Injekt.get(),
     internal val getCategories: GetCategories = Injekt.get(),
-    private val getTracksPerManga: GetTracksPerManga = Injekt.get(),
+    internal val getTracksPerManga: GetTracksPerManga = Injekt.get(),
     internal val getNextChapters: GetNextChapters = Injekt.get(),
     internal val getChaptersByMangaId: GetChaptersByMangaId = Injekt.get(),
     internal val setReadStatus: SetReadStatus = Injekt.get(),
     internal val updateManga: UpdateManga = Injekt.get(),
     internal val setMangaCategories: SetMangaCategories = Injekt.get(),
-    private val preferences: BasePreferences = Injekt.get(),
+    internal val preferences: BasePreferences = Injekt.get(),
     internal val libraryPreferences: LibraryPreferences = Injekt.get(),
     internal val coverCache: CoverCache = Injekt.get(),
     internal val sourceManager: SourceManager = Injekt.get(),
     internal val downloadManager: DownloadManager = Injekt.get(),
-    private val downloadCache: DownloadCache = Injekt.get(),
-    private val trackerManager: TrackerManager = Injekt.get(),
+    internal val downloadCache: DownloadCache = Injekt.get(),
+    internal val trackerManager: TrackerManager = Injekt.get(),
     // SY -->
     internal val exhPreferences: ExhPreferences = Injekt.get(),
     internal val sourcePreferences: SourcePreferences = Injekt.get(),
@@ -85,7 +65,7 @@ internal class LibraryScreenModel(
     internal val setCustomMangaInfo: SetCustomMangaInfo = Injekt.get(),
     internal val getMergedChaptersByMangaId: GetMergedChaptersByMangaId = Injekt.get(),
 
-    syncPreferences: SyncPreferences = Injekt.get(),
+    internal val syncPreferences: SyncPreferences = Injekt.get(),
     // SY <--
 ) : StateScreenModel<LibraryScreenModel.State>(State()) {
 
@@ -97,297 +77,28 @@ internal class LibraryScreenModel(
     // SY <--
 
     init {
-        mutableState.update { state ->
-            state.copy(activeCategoryIndex = libraryPreferences.lastUsedCategory.get())
-        }
-        screenModelScope.launchIO {
-            combine(
-                combine(
-                    state.map { it.searchQuery }.distinctUntilChanged().debounce(0.25.seconds),
-                    getCategories.subscribe(),
-                    getFavoritesFlow(),
-                    ::Triple,
-                ),
-                combine(
-                    getTracksPerManga.subscribe(),
-                    getTrackingFiltersFlow(),
-                    ::Pair,
-                ),
-                // SY -->
-                combine(
-                    state.map { it.groupType }.distinctUntilChanged(),
-                    libraryPreferences.sortingMode.changes(),
-                    ::Pair,
-                ),
-                // SY <--
-                getLibraryItemPreferencesFlow(),
-            ) {
-                    (searchQuery, categories, favorites),
-                    (tracksMap, trackingFilters),
-                    // SY -->
-                    (groupType, sortingMode),
-                    // SY <--
-                    itemPreferences,
-                ->
-                val showSystemCategory = favorites.any { it.libraryManga.categories.contains(0) }
-                val filteredFavorites = with(pipeline) {
-                    favorites.applyFilters(tracksMap, trackingFilters, itemPreferences)
-                }
-                    .let {
-                        if (searchQuery == null) {
-                            it
-                        } else {
-                            // SY -->
-                            // it.filter { m -> m.matches(searchQuery) } }
-                            search.filterLibrary(it, searchQuery, trackingFilters)
-                            // SY <--
-                        }
-                    }
-
-                LibraryData(
-                    isInitialized = true,
-                    showSystemCategory = showSystemCategory,
-                    categories = categories,
-                    favorites = filteredFavorites,
-                    tracksMap = tracksMap,
-                    loggedInTrackerIds = trackingFilters.keys,
-                )
-            }
-                .distinctUntilChanged()
-                .collectLatest { libraryData ->
-                    mutableState.update { state ->
-                        state.copy(libraryData = libraryData)
-                    }
-                }
-        }
-
-        screenModelScope.launchIO {
-            state
-                .dropWhile { !it.libraryData.isInitialized }
-                .map {
-                    Pair(
-                        it.libraryData,
-                        // SY -->
-                        it.groupType,
-                        // SY <--
-                    )
-                }
-                .distinctUntilChanged()
-                .map { (data, groupType) ->
-                    with(pipeline) {
-                        data.favorites
-                            .applyGrouping(
-                                data.categories,
-                                data.showSystemCategory,
-                                // SY -->
-                                groupType,
-                                // SY <--
-                            )
-                            .applySort(
-                                data.favoritesById,
-                                data.tracksMap,
-                                data.loggedInTrackerIds,
-                                // SY -->
-                                libraryPreferences.sortingMode.get().takeIf { groupType != LibraryGroup.BY_DEFAULT },
-                                // SY <--
-                            )
-                    }
-                        .let {
-                            it.ifEmpty {
-                                mapOf(
-                                    Category(
-                                        0,
-                                        preferences.context.stringResource(MR.strings.default_category),
-                                        0,
-                                        0,
-                                    ) to emptyList(),
-                                )
-                            }
-                        }
-                }
-                .collectLatest {
-                    mutableState.update { state ->
-                        state.copy(
-                            isLoading = false,
-                            groupedFavorites = it,
-                        )
-                    }
-                }
-        }
-
-        combine(
-            libraryPreferences.categoryTabs.changes(),
-            libraryPreferences.categoryNumberOfItems.changes(),
-            libraryPreferences.showContinueReadingButton.changes(),
-        ) { a, b, c -> arrayOf(a, b, c) }
-            .onEach { (showCategoryTabs, showMangaCount, showMangaContinueButton) ->
-                mutableState.update { state ->
-                    state.copy(
-                        showCategoryTabs = showCategoryTabs,
-                        showMangaCount = showMangaCount,
-                        showMangaContinueButton = showMangaContinueButton,
-                    )
-                }
-            }
-            .launchIn(screenModelScope)
-
-        combine(
-            getLibraryItemPreferencesFlow(),
-            getTrackingFiltersFlow(),
-        ) { prefs, trackFilters ->
-            val filters = listOf(
-                prefs.filterDownloaded,
-                prefs.filterUnread,
-                prefs.filterStarted,
-                prefs.filterBookmarked,
-                prefs.filterCompleted,
-                prefs.filterIntervalCustom,
-                // SY -->
-                prefs.filterLewd,
-                // SY <--
-            ) + trackFilters.values
-            filters.any { it != TriState.DISABLED }
-        }
-            .distinctUntilChanged()
-            .onEach {
-                mutableState.update { state ->
-                    state.copy(hasActiveFilters = it)
-                }
-            }
-            .launchIn(screenModelScope)
-
+        restoreActiveCategory()
+        observeLibraryData()
+        observeGroupedFavorites()
+        observeDisplayPreferences()
+        observeActiveFilters()
         // SY -->
-        combine(
-            exhPreferences.isHentaiEnabled.changes(),
-            sourcePreferences.disabledSources.changes(),
-            exhPreferences.enableExhentai.changes(),
-        ) { isHentaiEnabled, disabledSources, enableExhentai ->
-            isHentaiEnabled && (EH_SOURCE_ID.toString() !in disabledSources || enableExhentai)
-        }
-            .distinctUntilChanged()
-            .onEach {
-                mutableState.update { state ->
-                    state.copy(showSyncExh = it)
-                }
-            }
-            .launchIn(screenModelScope)
-
-        libraryPreferences.groupLibraryBy.changes()
-            .onEach {
-                mutableState.update { state ->
-                    state.copy(groupType = it)
-                }
-            }
-            .launchIn(screenModelScope)
-        syncPreferences.syncService
-            .changes()
-            .distinctUntilChanged()
-            .onEach { syncService ->
-                mutableState.update { it.copy(isSyncEnabled = syncService != 0) }
-            }
-            .launchIn(screenModelScope)
+        observeExhSync()
+        observeGroupType()
+        observeSyncService()
         // SY <--
     }
 
-    private val pipeline = LibraryItemPipeline(preferences, libraryPreferences)
-    private val search = LibrarySearch()
+    internal val pipeline = LibraryItemPipeline(preferences, libraryPreferences)
+    internal val search = LibrarySearch()
     internal val downloads = LibraryDownloads()
     internal val selection = LibrarySelection()
 
-    private fun getLibraryItemPreferencesFlow(): Flow<ItemPreferences> {
-        return combine(
-            libraryPreferences.downloadBadge.changes(),
-            libraryPreferences.unreadBadge.changes(),
-            libraryPreferences.localBadge.changes(),
-            libraryPreferences.languageBadge.changes(),
-            libraryPreferences.autoUpdateMangaRestrictions.changes(),
-
-            preferences.downloadedOnly.changes(),
-            libraryPreferences.filterDownloaded.changes(),
-            libraryPreferences.filterUnread.changes(),
-            libraryPreferences.filterStarted.changes(),
-            libraryPreferences.filterBookmarked.changes(),
-            libraryPreferences.filterCompleted.changes(),
-            libraryPreferences.filterIntervalCustom.changes(),
-            // SY -->
-            libraryPreferences.filterLewd.changes(),
-            // SY <--
-        ) {
-            ItemPreferences(
-                downloadBadge = it[0] as Boolean,
-                unreadBadge = it[1] as Boolean,
-                localBadge = it[2] as Boolean,
-                languageBadge = it[3] as Boolean,
-                skipOutsideReleasePeriod = LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in it[4] as Set<*>,
-                globalFilterDownloaded = it[5] as Boolean,
-                filterDownloaded = it[6] as TriState,
-                filterUnread = it[7] as TriState,
-                filterStarted = it[8] as TriState,
-                filterBookmarked = it[9] as TriState,
-                filterCompleted = it[10] as TriState,
-                filterIntervalCustom = it[11] as TriState,
-                // SY -->
-                filterLewd = it[12] as TriState,
-                // SY <--
-            )
+    private fun restoreActiveCategory() {
+        mutableState.update { state ->
+            state.copy(activeCategoryIndex = libraryPreferences.lastUsedCategory.get())
         }
     }
-
-    private fun getFavoritesFlow(): Flow<List<LibraryItem>> {
-        return combine(
-            getLibraryManga.subscribe(),
-            getLibraryItemPreferencesFlow(),
-            downloadCache.changes,
-        ) { libraryManga, preferences, _ ->
-            libraryManga.map { manga -> toLibraryItem(manga, preferences) }
-        }
-    }
-
-    private suspend fun toLibraryItem(manga: LibraryManga, preferences: ItemPreferences): LibraryItem {
-        // SY -->
-        val downloadCount = if (manga.manga.source == MERGED_SOURCE_ID) {
-            getMergedMangaById.await(manga.manga.id).sumOf { downloadManager.getDownloadCount(it) }
-        } else {
-            downloadManager.getDownloadCount(manga.manga)
-        }
-        // SY <--
-        return LibraryItem(
-            libraryManga = manga,
-            // SY -->
-            downloadCount = downloadCount,
-            // SY <--
-            unreadCount = manga.unreadCount,
-            isLocal = manga.manga.isLocal(),
-            badges = LibraryItem.Badges(
-                // Each badge shows its value only when the preference asks for it.
-                downloadCount = if (preferences.downloadBadge) /* SY --> */ downloadCount /* SY <-- */ else 0,
-                unreadCount = if (preferences.unreadBadge) manga.unreadCount else 0,
-                isLocal = preferences.localBadge && manga.manga.isLocal(),
-                sourceLanguage = if (preferences.languageBadge) {
-                    sourceManager.getOrStub(manga.manga.source).lang
-                } else {
-                    ""
-                },
-            ),
-        )
-    }
-
-    // Flow of tracking filter preferences.
-    // @return map of track id with the filter value
-    private fun getTrackingFiltersFlow(): Flow<Map<Long, TriState>> {
-        return trackerManager.loggedInTrackersFlow().flatMapLatest { loggedInTrackers ->
-            if (loggedInTrackers.isEmpty()) {
-                flowOf(emptyMap())
-            } else {
-                val filterFlows = loggedInTrackers.map { tracker ->
-                    libraryPreferences.filterTracking(tracker.id.toInt()).changes().map { tracker.id to it }
-                }
-                combine(filterFlows) { it.toMap() }
-            }
-        }
-    }
-
-// SY <--
 
     /** Applies [func] to the state; the extension files reach the protected flow through it. */
     internal fun updateState(func: (State) -> State) {
