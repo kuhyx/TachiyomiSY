@@ -14,6 +14,7 @@ import eu.kanade.presentation.browse.BrowseSourceContent
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreenModel
 import eu.kanade.tachiyomi.ui.browse.source.browse.SourceFilterDialog
+import eu.kanade.tachiyomi.ui.browse.source.browse.getColumnsPreference
 import eu.kanade.tachiyomi.ui.browse.source.browse.resetFilters
 import eu.kanade.tachiyomi.ui.browse.source.browse.search
 import eu.kanade.tachiyomi.ui.browse.source.browse.setFilters

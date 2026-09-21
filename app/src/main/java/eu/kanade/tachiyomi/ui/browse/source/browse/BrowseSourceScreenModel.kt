@@ -1,11 +1,8 @@
 package eu.kanade.tachiyomi.ui.browse.source.browse
 
-import android.content.res.Configuration
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.dp
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
@@ -35,14 +32,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
 import tachiyomi.core.common.preference.CheckboxState
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.interactor.SetMangaCategories
@@ -68,11 +60,11 @@ internal open class BrowseSourceScreenModel(
     internal val sourceId: Long,
     listingQuery: String?,
     // SY -->
-    private val filtersJson: String? = null,
-    private val savedSearch: Long? = null,
+    internal val filtersJson: String? = null,
+    internal val savedSearch: Long? = null,
     // SY <--
     private val sourceManager: SourceManager = Injekt.get(),
-    sourcePreferences: SourcePreferences = Injekt.get(),
+    internal val sourcePreferences: SourcePreferences = Injekt.get(),
     internal val libraryPreferences: LibraryPreferences = Injekt.get(),
     internal val coverCache: CoverCache = Injekt.get(),
     private val getRemoteManga: GetRemoteManga = Injekt.get(),
@@ -83,7 +75,7 @@ internal open class BrowseSourceScreenModel(
     private val getManga: GetManga = Injekt.get(),
     internal val updateManga: UpdateManga = Injekt.get(),
     internal val addTracks: AddTracks = Injekt.get(),
-    getIncognitoState: GetIncognitoState = Injekt.get(),
+    internal val getIncognitoState: GetIncognitoState = Injekt.get(),
 
     // SY -->
     exhPreferences: ExhPreferences = Injekt.get(),
@@ -91,7 +83,7 @@ internal open class BrowseSourceScreenModel(
     private val getFlatMetadataById: GetFlatMetadataById = Injekt.get(),
     internal val deleteSavedSearchById: DeleteSavedSearchById = Injekt.get(),
     internal val insertSavedSearch: InsertSavedSearch = Injekt.get(),
-    private val getExhSavedSearch: GetExhSavedSearch = Injekt.get(),
+    internal val getExhSavedSearch: GetExhSavedSearch = Injekt.get(),
     // SY <--
 ) : StateScreenModel<BrowseSourceScreenModel.State>(State(Listing.valueOf(listingQuery))) {
 
@@ -110,51 +102,15 @@ internal open class BrowseSourceScreenModel(
     // SY <--
 
     init {
-        mutableState.update {
-            var query: String? = null
-            var listing = it.listing
-
-            if (listing is Listing.Search) {
-                query = listing.query
-                listing = Listing.Search(query, source.getFilterList())
-            }
-
-            it.copy(
-                listing = listing,
-                filters = source.getFilterList(),
-                toolbarQuery = query,
-            )
-        }
-
-        if (!getIncognitoState.await(source.id)) {
-            sourcePreferences.lastUsedSource.set(source.id)
-        }
-
+        restoreListing()
+        rememberLastUsedSource()
         // SY -->
-        val savedSearchFilters = savedSearch
-        val jsonFilters = filtersJson
-        val filters = state.value.filters
-        if (savedSearchFilters != null) {
-            val savedSearch = runBlocking { getExhSavedSearch.awaitOne(savedSearchFilters) { filters } }
-            if (savedSearch != null) {
-                search(query = savedSearch.query, filters = savedSearch.filterList)
-            }
-        } else if (jsonFilters != null) {
-            runCatching {
-                val filtersJson = Json.decodeFromString<JsonArray>(jsonFilters)
-                filterSerializer.deserialize(filters, filtersJson)
-                search(filters = filters)
-            }
-        }
-
-        getExhSavedSearch.subscribe(source.id, source::getFilterList)
-            .map { it.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER, EXHSavedSearch::name)) }
-            .onEach { savedSearches ->
-                mutableState.update { it.copy(savedSearches = savedSearches) }
-            }
-            .launchIn(screenModelScope)
+        applyInitialSearch()
+        observeSavedSearches()
         // SY <--
     }
+
+    // SY <--
 
     // Flow of Pager flow tied to [State.listing].
     private val hideInLibraryItems = sourcePreferences.hideInLibraryItems.get()
@@ -179,16 +135,6 @@ internal open class BrowseSourceScreenModel(
                 .cachedIn(ioCoroutineScope)
         }
         .stateIn(ioCoroutineScope, SharingStarted.Lazily, emptyFlow())
-
-    fun getColumnsPreference(orientation: Int): GridCells {
-        val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
-        val columns = if (isLandscape) {
-            libraryPreferences.landscapeColumns
-        } else {
-            libraryPreferences.portraitColumns
-        }.get()
-        return if (columns == 0) GridCells.Adaptive(128.dp) else GridCells.Fixed(columns)
-    }
 
     // SY -->
     open fun Flow<Manga>.combineMetadata(metadata: RaisedSearchMetadata?): Flow<Pair<Manga, RaisedSearchMetadata?>> {

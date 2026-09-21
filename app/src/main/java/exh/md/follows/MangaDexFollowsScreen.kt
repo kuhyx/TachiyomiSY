@@ -22,6 +22,7 @@ import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreenModel
 import eu.kanade.tachiyomi.ui.browse.source.browse.addFavorite
 import eu.kanade.tachiyomi.ui.browse.source.browse.changeMangaFavorite
+import eu.kanade.tachiyomi.ui.browse.source.browse.getColumnsPreference
 import eu.kanade.tachiyomi.ui.browse.source.browse.moveMangaToCategories
 import eu.kanade.tachiyomi.ui.category.CategoryScreen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
