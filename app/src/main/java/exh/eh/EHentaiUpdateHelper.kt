@@ -2,12 +2,9 @@ package exh.eh
 
 import android.content.Context
 import eu.kanade.domain.manga.interactor.UpdateManga
-import exh.metadata.metadata.EHentaiSearchMetadata
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.serialization.json.JsonObject
-import mihon.core.common.extensions.EMPTY
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.interactor.SetMangaCategories
 import tachiyomi.domain.chapter.interactor.GetChapterByUrl
@@ -19,10 +16,8 @@ import tachiyomi.domain.history.interactor.GetHistory
 import tachiyomi.domain.history.interactor.RemoveHistory
 import tachiyomi.domain.history.interactor.UpsertHistory
 import tachiyomi.domain.history.model.History
-import tachiyomi.domain.history.model.HistoryUpdate
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.InsertFavoriteEntryAlternative
-import tachiyomi.domain.manga.model.FavoriteEntryAlternative
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaUpdate
 import uy.kohesive.injekt.injectLazy
@@ -37,14 +32,14 @@ internal class EHentaiUpdateHelper(context: Context) {
             GalleryEntry.Serializer(),
         )
     private val getChapterByUrl: GetChapterByUrl by injectLazy()
-    private val getChaptersByMangaId: GetChaptersByMangaId by injectLazy()
+    internal val getChaptersByMangaId: GetChaptersByMangaId by injectLazy()
     private val getManga: GetManga by injectLazy()
     private val updateManga: UpdateManga by injectLazy()
     private val setMangaCategories: SetMangaCategories by injectLazy()
     private val getCategories: GetCategories by injectLazy()
     private val chapterRepository: ChapterRepository by injectLazy()
-    private val upsertHistory: UpsertHistory by injectLazy()
-    private val removeHistory: RemoveHistory by injectLazy()
+    internal val upsertHistory: UpsertHistory by injectLazy()
+    internal val removeHistory: RemoveHistory by injectLazy()
     private val getHistoryByMangaId: GetHistory by injectLazy()
     private val insertFavoriteEntryAlternative: InsertFavoriteEntryAlternative by injectLazy()
 
@@ -124,115 +119,7 @@ internal class EHentaiUpdateHelper(context: Context) {
         )
     }
 
-    private suspend fun mergeHistoryInto(
-        accepted: ChapterChain,
-        chainsAsChapters: List<Chapter>,
-        chainsAsHistory: List<History>,
-    ) {
-        val (newHistory, deleteHistory) = getHistory(
-            getChaptersByMangaId.await(accepted.manga.id),
-            chainsAsChapters,
-            chainsAsHistory,
-        )
-        // Delete the duplicate history first
-        deleteHistory.forEach {
-            removeHistory.awaitById(it)
-        }
-        // Insert new history
-        newHistory.forEach {
-            upsertHistory.await(it)
-        }
-    }
-
-    private fun getFavoriteEntryAlternative(
-        accepted: ChapterChain,
-        toDiscard: List<ChapterChain>,
-    ): FavoriteEntryAlternative? {
-        val favorite = toDiscard.find { it.manga.favorite } ?: return null
-
-        val gid = EHentaiSearchMetadata.galleryId(accepted.manga.url)
-        val token = EHentaiSearchMetadata.galleryToken(accepted.manga.url)
-
-        return FavoriteEntryAlternative(
-            otherGid = gid,
-            otherToken = token,
-            gid = EHentaiSearchMetadata.galleryId(favorite.manga.url),
-            token = EHentaiSearchMetadata.galleryToken(favorite.manga.url),
-        )
-    }
-
-    private fun getHistory(
-        currentChapters: List<Chapter>,
-        chainsAsChapters: List<Chapter>,
-        chainsAsHistory: List<History>,
-    ): Pair<List<HistoryUpdate>, List<Long>> {
-        val history = chainsAsHistory.groupBy { history -> chainsAsChapters.find { it.id == history.chapterId }?.url }
-        val newHistory = currentChapters.mapNotNull { chapter ->
-            val newHistory = history[chapter.url]
-                ?.maxByOrNull {
-                    it.readAt?.time ?: 0
-                }
-                ?.takeIf { it.chapterId != chapter.id && it.readAt != null }
-            newHistory?.let { HistoryUpdate(chapter.id, it.readAt!!, it.readDuration) }
-        }
-        val currentChapterIds = currentChapters.map { it.id }
-        val historyToDelete = chainsAsHistory.filterNot { it.chapterId in currentChapterIds }
-            .map { it.id }
-        return newHistory to historyToDelete
-    }
-
-    private fun getChapterList(
-        accepted: ChapterChain,
-        toDiscard: List<ChapterChain>,
-        chainsAsChapters: List<Chapter>,
-    ): Triple<List<ChapterUpdate>, List<Chapter>, Boolean> {
-        var new = false
-        val newLastPageRead = chainsAsChapters.maxOfOrNull { it.lastPageRead }
-        val merged = toDiscard
-            .flatMap { chain -> chain.chapters }
-            .fold(accepted.chapters) { curChapters, chapter ->
-                if (curChapters.any { it.url == chapter.url }) {
-                    curChapters.map { if (it.url == chapter.url) it.mergedWith(chapter, newLastPageRead) else it }
-                } else {
-                    new = true
-                    curChapters + chapter.copyInto(accepted.manga.id, newLastPageRead)
-                }
-            }
-            .sortedBy { it.dateUpload }
-        val (updates, newChapters) = renumber(merged)
-        return Triple(updates, newChapters, new)
-    }
-
-    // Union of read/bookmark state; a chapter never opened inherits the furthest page read in the chain.
-    private fun Chapter.mergedWith(other: Chapter, newLastPageRead: Long?): Chapter {
-        var lastPageRead = lastPageRead.coerceAtLeast(other.lastPageRead)
-        if (newLastPageRead != null && lastPageRead <= 0) {
-            lastPageRead = newLastPageRead
-        }
-        return copy(read = read || other.read, lastPageRead = lastPageRead, bookmark = bookmark || other.bookmark)
-    }
-
-    // A copy of this chapter for [mangaId], unsaved (id -1) and unnumbered until [renumber].
-    private fun Chapter.copyInto(mangaId: Long, newLastPageRead: Long?): Chapter = Chapter(
-        id = -1,
-        mangaId = mangaId,
-        url = url,
-        name = name,
-        read = read,
-        bookmark = bookmark,
-        lastPageRead = if (newLastPageRead != null && lastPageRead <= 0) newLastPageRead else lastPageRead,
-        dateFetch = dateFetch,
-        dateUpload = dateUpload,
-        chapterNumber = -1.0,
-        scanlator = null,
-        sourceOrder = -1,
-        lastModifiedAt = 0,
-        version = 0,
-        memo = JsonObject.EMPTY,
-    )
-
-    // Names and numbers the chapters "v1..vN" by upload order; new ones are inserted, existing ones updated.
-    private fun renumber(chapters: List<Chapter>): Pair<List<ChapterUpdate>, List<Chapter>> {
+    internal fun renumber(chapters: List<Chapter>): Pair<List<ChapterUpdate>, List<Chapter>> {
         val updates = mutableListOf<ChapterUpdate>()
         val newChapters = mutableListOf<Chapter>()
         chapters.forEachIndexed { index, chapter ->
