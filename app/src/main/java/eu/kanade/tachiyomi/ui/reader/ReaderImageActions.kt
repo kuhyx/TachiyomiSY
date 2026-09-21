@@ -43,6 +43,13 @@ internal class ReaderImageActions(
     private val imageSaver: ImageSaver = Injekt.get(),
 ) {
     // Generate a filename for the given [manga] and [page].
+    // SY --> The page the open page-actions dialog is about, or the second page of its spread.
+    private fun selectedPage(useExtraPage: Boolean): ReaderPage? {
+        val dialog = model.state.value.dialog as? Dialog.PageActions
+        return if (useExtraPage) dialog?.extraPage else dialog?.page
+    }
+    // SY <--
+
     private fun generateFilename(
         manga: Manga,
         page: ReaderPage,
@@ -56,13 +63,7 @@ internal class ReaderImageActions(
     }
 
     fun saveImage(useExtraPage: Boolean) {
-        // SY -->
-        val page = if (useExtraPage) {
-            (model.state.value.dialog as? Dialog.PageActions)?.extraPage
-        } else {
-            (model.state.value.dialog as? Dialog.PageActions)?.page
-        }
-        // SY <--
+        val page = selectedPage(useExtraPage)
         if (page?.status != Page.State.Ready) return
         val manga = model.manga ?: return
 
@@ -107,13 +108,11 @@ internal class ReaderImageActions(
     fun saveImages() {
         val (firstPage, secondPage) = model.state.value.dialog as? Dialog.PageActions ?: return
         val viewer = model.state.value.viewer as? PagerViewer ?: return
-        val isLTR = (viewer !is R2LPagerViewer) xor viewer.config.invertDoublePages
-        val bg = viewer.config.pageCanvasColor
-
         if (firstPage.status != Page.State.Ready) return
         if (secondPage?.status != Page.State.Ready) return
-
         val manga = model.manga ?: return
+        val isLTR = (viewer !is R2LPagerViewer) xor viewer.config.invertDoublePages
+        val bg = viewer.config.pageCanvasColor
 
         val context = Injekt.get<Application>()
         val notifier = SaveImageNotifier(context)
@@ -180,13 +179,7 @@ internal class ReaderImageActions(
      * image will be kept so it won't be taking lots of internal disk space.
      */
     fun shareImage(copyToClipboard: Boolean, useExtraPage: Boolean) {
-        // SY -->
-        val page = if (useExtraPage) {
-            (model.state.value.dialog as? Dialog.PageActions)?.extraPage
-        } else {
-            (model.state.value.dialog as? Dialog.PageActions)?.page
-        }
-        // SY <--
+        val page = selectedPage(useExtraPage)
         if (page?.status != Page.State.Ready) return
         val manga = model.manga ?: return
 
@@ -217,12 +210,11 @@ internal class ReaderImageActions(
     fun shareImages(copyToClipboard: Boolean) {
         val (firstPage, secondPage) = model.state.value.dialog as? Dialog.PageActions ?: return
         val viewer = model.state.value.viewer as? PagerViewer ?: return
-        val isLTR = (viewer !is R2LPagerViewer) xor viewer.config.invertDoublePages
-        val bg = viewer.config.pageCanvasColor
-
         if (firstPage.status != Page.State.Ready) return
         if (secondPage?.status != Page.State.Ready) return
         val manga = model.manga ?: return
+        val isLTR = (viewer !is R2LPagerViewer) xor viewer.config.invertDoublePages
+        val bg = viewer.config.pageCanvasColor
 
         val context = Injekt.get<Application>()
         val destDir = context.cacheImageDir
@@ -252,14 +244,7 @@ internal class ReaderImageActions(
      * Sets the image of the selected page as cover and notifies the UI of the result.
      */
     fun setAsCover(useExtraPage: Boolean) {
-        // SY -->
-        val page = if (useExtraPage) {
-            (model.state.value.dialog as? Dialog.PageActions)?.extraPage
-        } else {
-            (model.state.value.dialog as? Dialog.PageActions)?.page
-        }
-        // SY <--
-        if (page?.status != Page.State.Ready) return
+        val page = selectedPage(useExtraPage)?.takeIf { it.status == Page.State.Ready } ?: return
         val manga = model.manga ?: return
         val stream = page.stream ?: return
 

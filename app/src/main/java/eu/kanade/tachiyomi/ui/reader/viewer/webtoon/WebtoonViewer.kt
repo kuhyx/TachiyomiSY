@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.ui.reader.showMenu
 import eu.kanade.tachiyomi.ui.reader.toggleMenu
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation.NavigationRegion
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.isVolumeKey
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import tachiyomi.core.common.util.system.logcat
@@ -306,22 +307,19 @@ internal class WebtoonViewer(
      */
     /* [EXH] private */
     fun scrollDown() {
-        // SY -->
-        if (!isContinuous && tapByPage) {
-            val currentPage = currentPage
-            if (currentPage is ReaderPage) {
-                val position = adapter.items.indexOf(currentPage)
-                val nextItem = adapter.items.getOrNull(position + 1)
-                if (nextItem is ReaderPage) {
-                    if (config.usePageTransitions) {
-                        recycler.smoothScrollToPosition(position + 1)
-                    } else {
-                        recycler.scrollToPosition(position + 1)
-                    }
-                    return
-                }
+        // SY --> Tapping by page (non-continuous mode) jumps to the next page when there is one.
+        val tapTarget = (currentPage as? ReaderPage)?.takeIf { !isContinuous && tapByPage }
+        val position = tapTarget?.let { adapter.items.indexOf(it) }
+        val nextItem = position?.let { adapter.items.getOrNull(it + 1) }
+        if (position != null && nextItem is ReaderPage) {
+            if (config.usePageTransitions) {
+                recycler.smoothScrollToPosition(position + 1)
+            } else {
+                recycler.scrollToPosition(position + 1)
             }
+            return
         }
+        // SY <--
         scrollDownBy()
     }
 
@@ -339,45 +337,25 @@ internal class WebtoonViewer(
      * if the event was handled, false otherwise.
      */
     override fun handleKeyEvent(event: KeyEvent): Boolean {
-        val isUp = event.action == KeyEvent.ACTION_UP
-
-        when (event.keyCode) {
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
-                    return false
-                } else if (isUp) {
-                    if (!config.volumeKeysInverted) scrollDown() else scrollUp()
-                }
-            }
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
-                    return false
-                } else if (isUp) {
-                    if (!config.volumeKeysInverted) scrollUp() else scrollDown()
-                }
-            }
-            KeyEvent.KEYCODE_MENU -> {
-                if (isUp) activity.toggleMenu()
-            }
-
-            KeyEvent.KEYCODE_DPAD_LEFT,
-            KeyEvent.KEYCODE_DPAD_UP,
-            KeyEvent.KEYCODE_PAGE_UP,
-            -> {
-                if (isUp) scrollUp()
-            }
-
-            KeyEvent.KEYCODE_DPAD_RIGHT,
-            KeyEvent.KEYCODE_DPAD_DOWN,
-            KeyEvent.KEYCODE_PAGE_DOWN,
-            -> {
-                if (isUp) scrollDown()
-            }
-            else -> {
-                return false
-            }
+        val action = keyAction(event.keyCode) ?: return false
+        if (event.isVolumeKey() && (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible)) {
+            return false
         }
+        // The key is claimed on the way down too; the scroll happens on release.
+        if (event.action == KeyEvent.ACTION_UP) action()
         return true
+    }
+
+    // What a key does, or null for a key the viewer does not handle.
+    private fun keyAction(keyCode: Int): (() -> Unit)? = when (keyCode) {
+        KeyEvent.KEYCODE_VOLUME_DOWN -> if (config.volumeKeysInverted) ::scrollUp else ::scrollDown
+        KeyEvent.KEYCODE_VOLUME_UP -> if (config.volumeKeysInverted) ::scrollDown else ::scrollUp
+        KeyEvent.KEYCODE_MENU -> {
+            { activity.toggleMenu() }
+        }
+        KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_PAGE_UP -> ::scrollUp
+        KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_PAGE_DOWN -> ::scrollDown
+        else -> null
     }
 
     /**

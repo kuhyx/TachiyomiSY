@@ -298,54 +298,30 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
      * if the event was handled, false otherwise.
      */
     override fun handleKeyEvent(event: KeyEvent): Boolean {
-        val isUp = event.action == KeyEvent.ACTION_UP
-        val ctrlPressed = event.metaState.and(KeyEvent.META_CTRL_ON) > 0
-
-        when (event.keyCode) {
-            KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
-                    return false
-                } else if (isUp) {
-                    if (!config.volumeKeysInverted) moveDown() else moveUp()
-                }
-            }
-            KeyEvent.KEYCODE_VOLUME_UP -> {
-                if (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible) {
-                    return false
-                } else if (isUp) {
-                    if (!config.volumeKeysInverted) moveUp() else moveDown()
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (isUp) {
-                    if (ctrlPressed) moveToNext() else moveRight()
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_LEFT -> {
-                if (isUp) {
-                    if (ctrlPressed) moveToPrevious() else moveLeft()
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_DOWN -> {
-                if (isUp) moveDown()
-            }
-            KeyEvent.KEYCODE_DPAD_UP -> {
-                if (isUp) moveUp()
-            }
-            KeyEvent.KEYCODE_PAGE_DOWN -> {
-                if (isUp) moveDown()
-            }
-            KeyEvent.KEYCODE_PAGE_UP -> {
-                if (isUp) moveUp()
-            }
-            KeyEvent.KEYCODE_MENU -> {
-                if (isUp) activity.toggleMenu()
-            }
-            else -> {
-                return false
-            }
+        val action = keyAction(event) ?: return false
+        if (event.isVolumeKey() && (!config.volumeKeysEnabled || activity.viewModel.state.value.menuVisible)) {
+            return false
         }
+        // The key is claimed on the way down too; the move happens on release.
+        if (event.action == KeyEvent.ACTION_UP) action()
         return true
+    }
+
+    // What a key does, or null for a key the viewer does not handle.
+    private fun keyAction(event: KeyEvent): (() -> Unit)? {
+        val ctrlPressed = event.metaState.and(KeyEvent.META_CTRL_ON) > 0
+        return when (event.keyCode) {
+            KeyEvent.KEYCODE_VOLUME_DOWN -> if (config.volumeKeysInverted) ::moveUp else ::moveDown
+            KeyEvent.KEYCODE_VOLUME_UP -> if (config.volumeKeysInverted) ::moveDown else ::moveUp
+            KeyEvent.KEYCODE_DPAD_RIGHT -> if (ctrlPressed) ::moveToNext else ::moveRight
+            KeyEvent.KEYCODE_DPAD_LEFT -> if (ctrlPressed) ::moveToPrevious else ::moveLeft
+            KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_PAGE_DOWN -> ::moveDown
+            KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_PAGE_UP -> ::moveUp
+            KeyEvent.KEYCODE_MENU -> {
+                { activity.toggleMenu() }
+            }
+            else -> null
+        }
     }
 
     /**
@@ -370,3 +346,6 @@ internal abstract class PagerViewer(val activity: ReaderActivity) : Viewer {
 
     // SY <--
 }
+
+internal fun KeyEvent.isVolumeKey(): Boolean =
+    keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP

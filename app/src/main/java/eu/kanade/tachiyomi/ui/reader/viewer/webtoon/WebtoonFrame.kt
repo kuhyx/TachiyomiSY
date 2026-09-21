@@ -48,19 +48,15 @@ internal class WebtoonFrame(context: Context) : FrameLayout(context) {
 
         // Get the bounding box of the recyclerview and translate any motion events to be within it.
         // Used to allow scrolling outside the recyclerview.
-        val recyclerRect = Rect()
-        recycler?.getHitRect(recyclerRect) ?: return super.dispatchTouchEvent(ev)
-        // Shrink the box to account for any rounding issues.
-        recyclerRect.inset(1, 1)
-
-        if (recyclerRect.right < recyclerRect.left || recyclerRect.bottom < recyclerRect.top) {
-            return super.dispatchTouchEvent(ev)
+        val recyclerRect = recycler?.let { Rect().apply(it::getHitRect) }
+        // Shrink the box to account for any rounding issues; a box inset into nothing is left alone.
+        recyclerRect?.inset(1, 1)
+        recyclerRect?.takeIf { it.right >= it.left && it.bottom >= it.top }?.let { rect ->
+            ev.setLocation(
+                ev.x.coerceIn(rect.left.toFloat(), rect.right.toFloat()),
+                ev.y.coerceIn(rect.top.toFloat(), rect.bottom.toFloat()),
+            )
         }
-
-        ev.setLocation(
-            ev.x.coerceIn(recyclerRect.left.toFloat(), recyclerRect.right.toFloat()),
-            ev.y.coerceIn(recyclerRect.top.toFloat(), recyclerRect.bottom.toFloat()),
-        )
         return super.dispatchTouchEvent(ev)
     }
 

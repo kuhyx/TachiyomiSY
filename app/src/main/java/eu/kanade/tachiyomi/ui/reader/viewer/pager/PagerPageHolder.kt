@@ -22,6 +22,7 @@ import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.lang.withUIContext
 import tachiyomi.core.common.util.system.ImageUtil
 import tachiyomi.core.common.util.system.logcat
+import java.io.InputStream
 
 // View of the ViewPager that contains a page of a chapter.
 // Progress-bar milestones while a page is prepared, and the double-page layout metrics.
@@ -159,26 +160,7 @@ internal class PagerPageHolder(
         val streamFn2 = extraPage?.stream
 
         try {
-            val (source, isAnimated, background) = withIOContext {
-                streamFn().buffered(STREAM_BUFFER_SIZE).use { source ->
-                    // SY -->
-                    extraPage?.let { streamFn2?.invoke()?.buffered(STREAM_BUFFER_SIZE) }.use { source2 ->
-                        val itemSource = if (viewer.config.dualPageSplit) {
-                            process(item.first, Buffer().readFrom(source))
-                        } else {
-                            mergePages(Buffer().readFrom(source), source2?.let { Buffer().readFrom(it) })
-                        }
-                        // SY <--
-                        val isAnimated = ImageUtil.isAnimatedAndSupported(itemSource)
-                        val background = if (!isAnimated && viewer.config.automaticBackground) {
-                            ImageUtil.chooseBackground(context, itemSource.peek())
-                        } else {
-                            null
-                        }
-                        Triple(itemSource, isAnimated, background)
-                    }
-                }
-            }
+            val (source, isAnimated, background) = decode(streamFn, streamFn2)
             withUIContext {
                 setImage(
                     source,
@@ -201,6 +183,29 @@ internal class PagerPageHolder(
             logcat(LogPriority.ERROR, expected)
             withUIContext {
                 setError(expected)
+            }
+        }
+    }
+
+    // The page image (split or merged with the extra page, per the settings), whether it animates, and the
+    // backdrop chosen for it.
+    private suspend fun decode(streamFn: () -> InputStream, streamFn2: (() -> InputStream)?) = withIOContext {
+        streamFn().buffered(STREAM_BUFFER_SIZE).use { source ->
+            // SY -->
+            extraPage?.let { streamFn2?.invoke()?.buffered(STREAM_BUFFER_SIZE) }.use { source2 ->
+                val itemSource = if (viewer.config.dualPageSplit) {
+                    process(item.first, Buffer().readFrom(source))
+                } else {
+                    mergePages(Buffer().readFrom(source), source2?.let { Buffer().readFrom(it) })
+                }
+                // SY <--
+                val isAnimated = ImageUtil.isAnimatedAndSupported(itemSource)
+                val background = if (!isAnimated && viewer.config.automaticBackground) {
+                    ImageUtil.chooseBackground(context, itemSource.peek())
+                } else {
+                    null
+                }
+                Triple(itemSource, isAnimated, background)
             }
         }
     }

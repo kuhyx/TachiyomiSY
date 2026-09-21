@@ -45,71 +45,6 @@ internal fun PagerPageHolder.rotateDualPage(imageSource: BufferedSource): Buffer
     }
 }
 
-internal fun PagerPageHolder.mergePages(imageSource: BufferedSource, imageSource2: BufferedSource?): BufferedSource {
-    // Handle adding a center margin to wide images if requested
-    if (imageSource2 == null) {
-        return handleWideImage(imageSource)
-    }
-
-    if (page.fullPage) return imageSource
-    if (ImageUtil.isAnimatedAndSupported(imageSource)) {
-        page.fullPage = true
-        splitDoublePages()
-        return imageSource
-    } else if (ImageUtil.isAnimatedAndSupported(imageSource2)) {
-        page.isolatedPage = true
-        extraPage?.fullPage = true
-        splitDoublePages()
-        return imageSource
-    }
-
-    val imageBitmap = decodeImage(imageSource)
-    if (imageBitmap == null) {
-        imageSource2.close()
-        page.fullPage = true
-        splitDoublePages()
-        logcat(LogPriority.ERROR) { "Cannot combine pages" }
-        return imageSource
-    }
-
-    scope.launch { progressIndicator?.setProgress(PROGRESS_SPLITTING) }
-    if (imageBitmap.height < imageBitmap.width) {
-        imageSource2.close()
-        page.fullPage = true
-        splitDoublePages()
-        return imageSource
-    }
-
-    val imageBitmap2 = decodeImage(imageSource2)
-    if (imageBitmap2 == null) {
-        imageSource2.close()
-        extraPage?.fullPage = true
-        page.isolatedPage = true
-        splitDoublePages()
-        logcat(LogPriority.ERROR) { "Cannot combine pages" }
-        return imageSource
-    }
-
-    scope.launch { progressIndicator?.setProgress(PROGRESS_MERGING) }
-    if (imageBitmap2.height < imageBitmap2.width) {
-        imageSource2.close()
-        extraPage?.fullPage = true
-        page.isolatedPage = true
-        splitDoublePages()
-        return imageSource
-    }
-
-    val isLTR = (viewer !is R2LPagerViewer) xor viewer.config.invertDoublePages
-    val centerMargin = calculateCenterMargin(imageBitmap.height, imageBitmap2.height)
-
-    imageSource.close()
-    imageSource2.close()
-
-    return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, centerMargin, viewer.config.pageCanvasColor) {
-        updateProgress(it)
-    }
-}
-
 internal fun PagerPageHolder.handleWideImage(imageSource: BufferedSource): BufferedSource {
     val wantsCenterMargin =
         viewer.config.centerMarginType and PagerConfig.CenterMarginType.WIDE_PAGE_CENTER_MARGIN > 0 &&
@@ -153,32 +88,24 @@ internal fun PagerPageHolder.splitDoublePages() {
 }
 
 internal fun PagerPageHolder.splitInHalf(imageSource: BufferedSource): BufferedSource {
-    var side = when {
-        viewer is L2RPagerViewer && page is InsertPage -> ImageUtil.Side.RIGHT
-        viewer !is L2RPagerViewer && page is InsertPage -> ImageUtil.Side.LEFT
-        viewer is L2RPagerViewer && page !is InsertPage -> ImageUtil.Side.LEFT
-        viewer !is L2RPagerViewer && page !is InsertPage -> ImageUtil.Side.RIGHT
-        else -> error("We should choose a side!")
-    }
+    // The inserted page shows the half the reading direction reaches second; the original the first.
+    val readsLeftToRight = viewer is L2RPagerViewer
+    val isInsertedHalf = page is InsertPage
+    val naturalSide = if (readsLeftToRight == isInsertedHalf) ImageUtil.Side.RIGHT else ImageUtil.Side.LEFT
+    val side = if (viewer.config.dualPageInvert) naturalSide.flipped() else naturalSide
 
-    if (viewer.config.dualPageInvert) {
-        side = when (side) {
-            ImageUtil.Side.RIGHT -> ImageUtil.Side.LEFT
-            ImageUtil.Side.LEFT -> ImageUtil.Side.RIGHT
-        }
-    }
-
-    val sideMargin = if (viewer.config.centerMarginType and PagerConfig.CenterMarginType.DOUBLE_PAGE_CENTER_MARGIN >
-        0 &&
-        viewer.config.doublePages &&
-        !viewer.config.imageCropBorders
-    ) {
-        HALF_CENTER_MARGIN_PX
-    } else {
-        0
-    }
+    val wantsCenterMargin =
+        viewer.config.centerMarginType and PagerConfig.CenterMarginType.DOUBLE_PAGE_CENTER_MARGIN > 0 &&
+            viewer.config.doublePages &&
+            !viewer.config.imageCropBorders
+    val sideMargin = if (wantsCenterMargin) HALF_CENTER_MARGIN_PX else 0
 
     return ImageUtil.splitInHalf(imageSource, side, sideMargin)
+}
+
+private fun ImageUtil.Side.flipped(): ImageUtil.Side = when (this) {
+    ImageUtil.Side.RIGHT -> ImageUtil.Side.LEFT
+    ImageUtil.Side.LEFT -> ImageUtil.Side.RIGHT
 }
 
 internal fun PagerPageHolder.onPageSplit(page: ReaderPage) {

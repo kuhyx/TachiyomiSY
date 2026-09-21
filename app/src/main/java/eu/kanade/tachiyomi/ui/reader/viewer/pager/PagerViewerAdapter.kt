@@ -77,18 +77,7 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
         val currPages = chapters.currChapter.pages
         if (currPages != null) {
             val pages = currPages.toMutableList()
-
-            val lastPage = pages.last()
-
-            // Insert preprocessed pages into current page list
-            preprocessed.keys.sortedDescending()
-                .forEach { key ->
-                    if (lastPage.index == key) {
-                        insertPageLastPage = preprocessed[key]
-                    }
-                    preprocessed[key]?.let { pages.add(key + 1, it) }
-                }
-
+            insertPageLastPage = insertPreprocessed(pages)
             newItems.addAll(pages)
         }
 
@@ -114,6 +103,30 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
         preprocessed = mutableMapOf()
         subItems = newItems.toMutableList()
 
+        setJoinedItems(updateDoublePageState())
+
+        // Will skip insert page otherwise
+        if (insertPageLastPage != null) {
+            viewer.moveToPage(insertPageLastPage)
+        }
+    }
+
+    // Insert preprocessed pages into current page list; the one after the last page needs a jump afterwards.
+    private fun insertPreprocessed(pages: MutableList<ReaderPage>): InsertPage? {
+        val lastPage = pages.last()
+        var insertPageLastPage: InsertPage? = null
+        preprocessed.keys.sortedDescending()
+            .forEach { key ->
+                if (lastPage.index == key) {
+                    insertPageLastPage = preprocessed[key]
+                }
+                preprocessed[key]?.let { pages.add(key + 1, it) }
+            }
+        return insertPageLastPage
+    }
+
+    // Re-reads the shift and double-page settings; true when the pairing should start from the second page.
+    private fun updateDoublePageState(): Boolean {
         var useSecondPage = false
         if (shifted != viewer.config.shiftDoublePage || (doubledUp != viewer.config.doublePages && doubledUp)) {
             if (shifted && doubledUp == viewer.config.doublePages) {
@@ -122,12 +135,7 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
             shifted = viewer.config.shiftDoublePage
         }
         doubledUp = viewer.config.doublePages
-        setJoinedItems(useSecondPage)
-
-        // Will skip insert page otherwise
-        if (insertPageLastPage != null) {
-            viewer.moveToPage(insertPageLastPage)
-        }
+        return useSecondPage
     }
 
     /**
@@ -182,14 +190,10 @@ internal class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAd
         }
 
         // It will enter a endless cycle of insert pages
-        if (viewer is R2LPagerViewer && placeAtIndex - 1 >= 0 && joinedItems[placeAtIndex - 1].first is InsertPage) {
-            return
-        }
-
-        // Same here it will enter a endless cycle of insert pages
-        if (joinedItems[placeAtIndex].first is InsertPage) {
-            return
-        }
+        val nextToInsertPage =
+            (viewer is R2LPagerViewer && placeAtIndex - 1 >= 0 && joinedItems[placeAtIndex - 1].first is InsertPage) ||
+                joinedItems[placeAtIndex].first is InsertPage
+        if (nextToInsertPage) return
 
         joinedItems.add(placeAtIndex, newPage to null)
 

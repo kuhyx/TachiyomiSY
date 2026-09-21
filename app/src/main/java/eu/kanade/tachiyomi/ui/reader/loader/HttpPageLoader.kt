@@ -188,8 +188,8 @@ internal class HttpPageLoader(
     // Preloads the given [amount] of pages after the [currentPage] with a lower priority.
     // @return a list of [PriorityPage] that were added to the [queue]
     private fun preloadNextPages(currentPage: ReaderPage, amount: Int): List<PriorityPage> {
-        val pageIndex = currentPage.index
         val pages = currentPage.chapter.pages ?: return emptyList()
+        val pageIndex = currentPage.index
         if (pageIndex == pages.lastIndex) return emptyList()
 
         return pages

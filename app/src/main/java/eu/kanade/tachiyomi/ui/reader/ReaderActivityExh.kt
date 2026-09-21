@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.mapLatest
 import tachiyomi.core.common.i18n.pluralStringResource
 import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.api.get
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 private const val AUTOSCROLL_IDLE_POLL_MS = 100L
@@ -36,33 +37,30 @@ internal fun ReaderActivity.enableExhAutoScroll() {
         }
         .mapLatest { (intervalFloat, enabled) ->
             if (enabled) {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    val interval = intervalFloat.seconds
-                    while (true) {
-                        if (!viewModel.state.value.menuVisible) {
-                            viewModel.state.value.viewer.let { v ->
-                                when (v) {
-                                    is PagerViewer -> {
-                                        v.moveToNext()
-                                    }
-                                    is WebtoonViewer -> {
-                                        if (readerPreferences.smoothAutoScroll.get()) {
-                                            v.linearScroll(interval)
-                                        } else {
-                                            v.scrollDown()
-                                        }
-                                    }
-                                }
-                            }
-                            delay(interval)
-                        } else {
-                            delay(AUTOSCROLL_IDLE_POLL_MS)
-                        }
-                    }
-                }
+                repeatOnLifecycle(Lifecycle.State.STARTED) { autoScrollLoop(intervalFloat.seconds) }
             }
         }
         .launchIn(lifecycleScope)
+}
+
+// Advances every [interval] while the menu is hidden; with the menu up it only polls for it to close.
+private suspend fun ReaderActivity.autoScrollLoop(interval: Duration) {
+    while (true) {
+        if (viewModel.state.value.menuVisible) {
+            delay(AUTOSCROLL_IDLE_POLL_MS)
+        } else {
+            autoScrollStep(interval)
+            delay(interval)
+        }
+    }
+}
+
+private fun ReaderActivity.autoScrollStep(interval: Duration) {
+    when (val v = viewModel.state.value.viewer) {
+        is PagerViewer -> v.moveToNext()
+        is WebtoonViewer -> if (readerPreferences.smoothAutoScroll.get()) v.linearScroll(interval) else v.scrollDown()
+        else -> {}
+    }
 }
 
 internal fun ReaderActivity.exhRetryAll() {

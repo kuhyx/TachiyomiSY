@@ -328,17 +328,25 @@ internal class WebtoonRecyclerView @JvmOverloads constructor(
             var dx = x - downX
             var dy = if (atFirstPosition || atLastPosition) y - downY else 0
             if (!isZoomDragging && currentScale > 1f) {
-                // Start dragging once either axis moves past the touch slop, and eat the slop.
-                val pastSlopX = abs(dx) > touchSlop
-                val pastSlopY = abs(dy) > touchSlop
-                if (pastSlopX) dx -= touchSlop * dx.sign
-                if (pastSlopY) dy -= touchSlop * dy.sign
-                if (pastSlopX || pastSlopY) isZoomDragging = true
+                val (eatenX, eatenY) = startDragPastSlop(dx, dy)
+                dx = eatenX
+                dy = eatenY
             }
             if (isZoomDragging) {
                 zoomScrollBy(dx, dy)
             }
             return null
+        }
+
+        // Start dragging once either axis moves past the touch slop, and eat the slop on that axis.
+        private fun startDragPastSlop(dx: Int, dy: Int): Pair<Int, Int> {
+            val pastSlopX = abs(dx) > touchSlop
+            val pastSlopY = abs(dy) > touchSlop
+            if (pastSlopX || pastSlopY) isZoomDragging = true
+            return Pair(
+                if (pastSlopX) dx - touchSlop * dx.sign else dx,
+                if (pastSlopY) dy - touchSlop * dy.sign else dy,
+            )
         }
     }
 }

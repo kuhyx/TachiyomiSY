@@ -102,19 +102,24 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
             config != null && config.landscapeZoom && config.minimumScaleType == SCALE_TYPE_CENTER_INSIDE
         if (zoomsLandscape && sWidth > sHeight && scale == minScale) {
             handler?.postDelayed(ZOOM_ANIMATION_MS) {
-                val point = when (config.zoomStartPosition) {
-                    ZoomStartPosition.LEFT -> if (forward) PointF(0F, 0F) else PointF(sWidth.toFloat(), 0F)
-                    ZoomStartPosition.RIGHT -> if (forward) PointF(sWidth.toFloat(), 0F) else PointF(0F, 0F)
-                    ZoomStartPosition.CENTER -> center
-                }
-
                 val targetScale = height.toFloat() / sHeight.toFloat()
-                animateScaleAndCenter(targetScale, point)
+                animateScaleAndCenter(targetScale, zoomStartPoint(config.zoomStartPosition, forward))
                     ?.withDuration(ZOOM_ANIMATION_MS)
                     ?.withEasing(EASE_IN_OUT_QUAD)
                     ?.withInterruptible(true)
                     ?.start()
             }
+        }
+    }
+
+    // The edge the zoom starts from; reading backwards starts from the opposite edge.
+    private fun SubsamplingScaleImageView.zoomStartPoint(position: ZoomStartPosition, forward: Boolean): PointF? {
+        val leftEdge = PointF(0F, 0F)
+        val rightEdge = PointF(sWidth.toFloat(), 0F)
+        return when (position) {
+            ZoomStartPosition.LEFT -> if (forward) leftEdge else rightEdge
+            ZoomStartPosition.RIGHT -> if (forward) rightEdge else leftEdge
+            ZoomStartPosition.CENTER -> center
         }
     }
 

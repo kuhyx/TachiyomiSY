@@ -169,15 +169,18 @@ internal class ReaderActivity : BaseActivity() {
         }
     }
 
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_N) {
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean = when (keyCode) {
+        KeyEvent.KEYCODE_N -> {
             loadNextChapter()
-            return true
-        } else if (keyCode == KeyEvent.KEYCODE_P) {
-            loadPreviousChapter()
-            return true
+            true
         }
-        return super.onKeyUp(keyCode, event)
+        KeyEvent.KEYCODE_P -> {
+            loadPreviousChapter()
+            true
+        }
+        else -> {
+            super.onKeyUp(keyCode, event)
+        }
     }
 
     /**
