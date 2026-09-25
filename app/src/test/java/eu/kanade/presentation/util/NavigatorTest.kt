@@ -1,7 +1,5 @@
 package eu.kanade.presentation.util
 
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.togetherWith
@@ -80,18 +78,19 @@ internal class NavigatorTest {
     @Test
     fun defaultTransitionPushesAndPops() {
         var navigator: Navigator? = null
-        var dispatcher: OnBackPressedDispatcher? = null
+        val back = TestBackOwner()
         compose.setContent {
-            dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-            Navigator(Page("first")) {
-                navigator = it
-                DefaultScreenTransition(navigator = it)
+            ProvideBack(back) {
+                Navigator(Page("first")) {
+                    navigator = it
+                    DefaultScreenTransition(navigator = it)
+                }
             }
         }
         compose.onNodeWithText("first").assertExists()
         compose.runOnIdle { navigator?.push(Page("second")) }
         compose.onNodeWithText("second").assertExists()
-        compose.runOnIdle { dispatcher?.onBackPressed() }
+        compose.runOnIdle { back.pressBack() }
         compose.onNodeWithText("first").assertExists()
         navigator?.canPop shouldBe false
     }

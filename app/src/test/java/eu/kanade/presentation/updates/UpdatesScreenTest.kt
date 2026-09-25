@@ -103,7 +103,7 @@ internal class UpdatesScreenTest {
     @Test
     fun backLeavesSelectionMode() {
         harness.show(twoDays.copy(items = twoDays.items.map { it.copy(selected = true) }))
-        compose.runOnIdle { harness.dispatcher?.onBackPressed() }
+        compose.runOnIdle { harness.back.pressBack() }
         harness.events shouldContainExactly listOf("selectAll false")
     }
 }
