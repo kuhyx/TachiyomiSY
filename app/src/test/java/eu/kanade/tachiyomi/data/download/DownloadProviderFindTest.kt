@@ -21,7 +21,7 @@ internal class DownloadProviderFindTest : ProviderTestBase() {
     }
 
     @Test
-    fun findChapterDirMatchesAnyValidName() {
+    fun findChapterDirAnyValidName() {
         chapterDir(mangaTitle = "Title", name = "Ch 1.cbz")
         val found = harness.provider.findChapterDir(
             chapterName = "Ch 1",
@@ -69,7 +69,7 @@ internal class DownloadProviderFindTest : ProviderTestBase() {
     }
 
     @Test
-    fun unmatchedDirsKeepTempAndStrangers() {
+    fun unmatchedKeepsTempAndStranger() {
         chapterDir(mangaTitle = "Title", name = "Ch 1")
         chapterDir(mangaTitle = "Title", name = "Ch 9${Downloader.TMP_DIR_SUFFIX}")
         chapterDir(mangaTitle = "Title", name = "stranger")
@@ -88,7 +88,7 @@ internal class DownloadProviderFindTest : ProviderTestBase() {
     }
 
     @Test
-    fun unmatchedDirsKeepUnknownChapters() {
+    fun unmatchedKeepsUnknown() {
         chapterDir(mangaTitle = "Title", name = "Ch 1")
         chapterDir(mangaTitle = "Title", name = "stranger")
         val unmatched = harness.provider.findUnmatchedChapterDirs(
@@ -96,6 +96,6 @@ internal class DownloadProviderFindTest : ProviderTestBase() {
             manga = testManga("Title"),
             source = source,
         )
-        unmatched.map { it.name }.sorted() shouldContainExactly listOf("Ch 1", "stranger")
+        unmatched.mapNotNull { it.name }.sorted() shouldContainExactly listOf("Ch 1", "stranger")
     }
 }

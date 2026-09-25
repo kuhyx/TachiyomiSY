@@ -16,7 +16,7 @@ internal class DownloadProviderNamesTest {
     private fun hashOf(url: String): String = "_" + Hash.md5(url).take(URL_HASH_CHARS)
 
     @Test
-    fun sourceAndMangaNamesAreSanitized() {
+    fun sourceAndMangaSanitized() {
         provider.getSourceDirName(namedSource("My: Source")) shouldBe "My_ Source"
         provider.getMangaDirName("Man/ga?") shouldBe "Man_ga_"
     }
@@ -42,7 +42,7 @@ internal class DownloadProviderNamesTest {
     }
 
     @Test
-    fun chapterDirNamePrefixesScanlator() {
+    fun chapterDirPrefixesScanlator() {
         harness.downloadPreferences.includeChapterUrlHash.set(false)
         provider.getChapterDirName(
             chapterName = "Ch 1",
