@@ -58,7 +58,12 @@ internal class LayoutsTest {
     fun noBannersWhenAllOff() {
         compose.setContent {
             MaterialTheme {
-                AppStateBanners(downloadedOnlyMode = false, incognitoMode = false, indexing = false, modifier = Modifier)
+                AppStateBanners(
+                    downloadedOnlyMode = false,
+                    incognitoMode = false,
+                    indexing = false,
+                    modifier = Modifier,
+                )
                 WarningBanner(textRes = MR.strings.empty_screen)
             }
         }

@@ -48,7 +48,7 @@ internal class TachiyomiThemeTest {
     }
 
     @Test
-    fun argumentsOverrideThePreferences() {
+    fun argumentsOverridePreferences() {
         preferences.appTheme.set(AppTheme.NORD)
         compose.setContent {
             TachiyomiTheme(appTheme = AppTheme.TAKO, amoled = true) { seen = MaterialTheme.colorScheme }

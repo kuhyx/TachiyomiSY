@@ -78,11 +78,11 @@ internal class SyncFavoritesTextTest {
             Processing.CalculatingLocalChanges,
             Processing.SyncingCategoryNames,
             Processing.RemovingRemoteGalleries(3),
-            Processing.AddingGalleryToRemote(1, 2, isThrottling = true, title = "R"),
-            Processing.AddingGalleryToRemote(1, 2, isThrottling = false, title = "R"),
-            Processing.RemovingGalleryFromLocal(1, 2),
-            Processing.AddingGalleryToLocal(1, 2, isThrottling = true, title = "L"),
-            Processing.AddingGalleryToLocal(1, 2, isThrottling = false, title = "L"),
+            Processing.AddingGalleryToRemote(index = 1, total = 2, isThrottling = true, title = "R"),
+            Processing.AddingGalleryToRemote(index = 1, total = 2, isThrottling = false, title = "R"),
+            Processing.RemovingGalleryFromLocal(index = 1, total = 2),
+            Processing.AddingGalleryToLocal(index = 1, total = 2, isThrottling = true, title = "L"),
+            Processing.AddingGalleryToLocal(index = 1, total = 2, isThrottling = false, title = "L"),
             Processing.CleaningUp,
         )
         steps.map { props(it).shouldNotBeNull().text }.toSet().size shouldBe steps.size
@@ -90,8 +90,10 @@ internal class SyncFavoritesTextTest {
 
     @Test
     fun onlyAddingStepsNameTheGallery() {
-        Processing.AddingGalleryToRemote(1, 2, false, "R").slowGalleryTitle() shouldBe "R"
-        Processing.AddingGalleryToLocal(1, 2, false, "L").slowGalleryTitle() shouldBe "L"
+        val remote = Processing.AddingGalleryToRemote(index = 1, total = 2, isThrottling = false, title = "R")
+        val local = Processing.AddingGalleryToLocal(index = 1, total = 2, isThrottling = false, title = "L")
+        remote.slowGalleryTitle() shouldBe "R"
+        local.slowGalleryTitle() shouldBe "L"
         Processing.CleaningUp.slowGalleryTitle().shouldBeNull()
     }
 }

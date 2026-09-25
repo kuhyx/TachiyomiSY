@@ -45,7 +45,7 @@ internal class UpdatesBottomBarTest {
     }
 
     @Test
-    fun freshChaptersOfferForwardActions() {
+    fun freshChaptersForwardActions() {
         show(listOf(updatesItem()))
         compose.onNodeWithContentDescription("Unbookmark chapter").assertDoesNotExist()
         compose.onNodeWithContentDescription("Mark as unread").assertDoesNotExist()
@@ -69,7 +69,7 @@ internal class UpdatesBottomBarTest {
     }
 
     @Test
-    fun startedChaptersCanBeMarkedUnread() {
+    fun startedChaptersMarkUnread() {
         show(listOf(updatesItem(lastPageRead = 3L)))
         compose.onNodeWithContentDescription("Mark as unread").assertExists()
     }

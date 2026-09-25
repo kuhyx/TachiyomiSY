@@ -72,11 +72,16 @@ internal class SyncFavoritesDialogsTest {
     }
 
     @Test
-    fun slowGalleriesAreNamedAfterADelay() {
+    fun slowGalleriesNamedLater() {
         compose.setContent {
             MaterialTheme {
                 SyncFavoritesProgressDialog(
-                    status = FavoritesSyncStatus.Processing.AddingGalleryToLocal(1, 2, false, "Slow one"),
+                    status = FavoritesSyncStatus.Processing.AddingGalleryToLocal(
+                        index = 1,
+                        total = 2,
+                        isThrottling = false,
+                        title = "Slow one",
+                    ),
                     setStatusIdle = {},
                     openManga = {},
                 )

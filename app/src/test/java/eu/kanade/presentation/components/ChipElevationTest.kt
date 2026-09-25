@@ -54,7 +54,7 @@ internal class ChipElevationTest {
     }
 
     @Test
-    fun everyInteractionHasItsElevation() {
+    fun interactionsSetElevation() {
         show()
         tonal shouldBe 1.dp
         val press = PressInteraction.Press(Offset.Zero)

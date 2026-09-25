@@ -40,7 +40,7 @@ internal class LibraryColumnsTest {
     }
 
     @Test
-    fun releaseBuildsHideTheIntervalFilter() {
+    fun releaseHidesIntervalFilter() {
         mockkStatic("eu.kanade.tachiyomi.util.system.BuildConfigKt")
         every { isDebugBuildType } returns false
         val harness = LibrarySettingsHarness(trackerCount = 0)

@@ -44,7 +44,7 @@ internal class ChangeCategoryDialogTest {
     }
 
     @Test
-    fun checkboxesToggleThroughTheirStates() {
+    fun checkboxesCycleStates() {
         show(
             listOf(
                 CheckboxState.State.None(category(1L)),
