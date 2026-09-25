@@ -98,10 +98,9 @@ internal suspend fun DownloadCache.renameManga(manga: Manga, mangaUniFile: UniFi
     rootDownloadsDirMutex.withLock {
         val sourceDir = rootDownloadsDir.sourceDirs[manga.source] ?: return
         val oldMangaDirName = provider.getMangaDirName(/* SY --> */ manga.ogTitle /* SY <-- */)
-        var oldChapterDirs: MutableSet<String>? = null
         // Save the old name's cached chapter dirs
-        if (sourceDir.mangaDirs.containsKey(oldMangaDirName)) {
-            oldChapterDirs = sourceDir.mangaDirs[oldMangaDirName]?.chapterDirs
+        val oldChapterDirs = sourceDir.mangaDirs[oldMangaDirName]?.chapterDirs
+        if (oldChapterDirs != null) {
             sourceDir.mangaDirs -= oldMangaDirName
         }
 

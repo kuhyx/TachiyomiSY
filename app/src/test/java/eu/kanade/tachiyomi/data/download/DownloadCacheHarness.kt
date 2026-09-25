@@ -105,3 +105,18 @@ internal abstract class DownloadCacheTestBase {
 
     internal fun sourceOf(id: Long): Source = if (id == 2L) beta else alpha
 }
+
+/** Replaces the cache's index with [sources] and marks it fresh, so no renewal rescans the tree. */
+internal fun DownloadCache.seed(root: java.io.File, vararg sources: Pair<Long, Map<String, Set<String>>>) {
+    DownloadCache::class.java.getDeclaredField("lastRenew").apply { isAccessible = true }
+        .setLong(this, System.currentTimeMillis())
+    rootDownloadsDir = RootDirectory(UniFile.fromFile(root))
+    rootDownloadsDir.sourceDirs = sources.associate { (id, mangas) ->
+        id to SourceDirectory(
+            dir = UniFile.fromFile(root),
+            mangaDirs = mangas.mapValues { (_, chapters) ->
+                MangaDirectory(UniFile.fromFile(root), chapters.toMutableSet())
+            },
+        )
+    }
+}
