@@ -6,6 +6,7 @@ import tachiyomi.domain.history.model.HistoryWithRelations
 import tachiyomi.domain.manga.model.MangaCover
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import kotlin.random.Random
@@ -78,7 +79,7 @@ internal class HistoryScreenModelStateProvider : PreviewParameterProvider<Histor
             HistoryUiModel.Header(LocalDate.now().plusDays(1))
 
         fun header(instantBuilder: (Instant) -> Instant = { it }) =
-            HistoryUiModel.Header(LocalDate.from(instantBuilder(Instant.now())))
+            HistoryUiModel.Header(LocalDate.ofInstant(instantBuilder(Instant.now()), ZoneId.systemDefault()))
 
         fun items() = sequence {
             var count = 1
