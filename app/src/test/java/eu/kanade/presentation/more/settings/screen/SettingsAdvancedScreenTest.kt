@@ -14,9 +14,7 @@ import eu.kanade.tachiyomi.util.CrashLogUtil
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.just
 import io.mockk.mockkConstructor
-import io.mockk.runs
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
