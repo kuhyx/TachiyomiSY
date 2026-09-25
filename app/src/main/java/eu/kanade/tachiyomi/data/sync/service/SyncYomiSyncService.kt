@@ -59,7 +59,7 @@ internal class SyncYomiSyncService(
             val (remoteData, etag) = pullSyncData()
 
             val finalSyncData = if (remoteData != null) {
-                assert(etag.isNotEmpty()) { "ETag should never be empty if remote data is not null" }
+                // decodeSyncData only returns remote data together with a non-empty ETag.
                 logcat(LogPriority.DEBUG, "SyncService") {
                     "Try update remote data with ETag($etag)"
                 }

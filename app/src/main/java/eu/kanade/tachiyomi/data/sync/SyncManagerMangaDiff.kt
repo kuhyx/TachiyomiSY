@@ -73,7 +73,7 @@ internal suspend fun SyncManager.filterFavoritesAndNonFavorites(
                     }
                 }
                 // Handle non-favorites
-                !remoteManga.favorite -> {
+                else -> {
                     logcat(LogPriority.DEBUG, logTag) { "Adding to non-favorites: ${remoteManga.title}" }
                     nonFavorites.add(remoteManga)
                 }
