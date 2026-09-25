@@ -20,8 +20,8 @@ internal fun SyncService.mergePreferencesLists(
             "Remote preferences: ${remotePreferences?.size}"
     }
 
-    // Merge both preferences maps
-    val mergedPreferences = (localPreferencesMap.keys + remotePreferencesMap.keys).distinct().mapNotNull { key ->
+    // Merge both preferences maps; every key is in at least one of them.
+    val mergedPreferences = (localPreferencesMap.keys + remotePreferencesMap.keys).distinct().map { key ->
         val localPreference = localPreferencesMap[key]
         val remotePreference = remotePreferencesMap[key]
 
@@ -31,13 +31,12 @@ internal fun SyncService.mergePreferencesLists(
         }
 
         when {
-            localPreference != null && remotePreference == null -> {
+            localPreference == null -> remotePreferencesMap.getValue(key).also {
+                logcat(LogPriority.DEBUG, logTag) { "Using remote preference: ${it.key}." }
+            }
+            remotePreference == null -> {
                 logcat(LogPriority.DEBUG, logTag) { "Using local preference: ${localPreference.key}." }
                 localPreference
-            }
-            remotePreference != null && localPreference == null -> {
-                logcat(LogPriority.DEBUG, logTag) { "Using remote preference: ${remotePreference.key}." }
-                remotePreference
             }
             else -> {
                 logcat(
@@ -71,9 +70,9 @@ internal fun SyncService.mergeSourcePreferencesLists(
             "Remote source preferences: ${remotePreferences?.size}"
     }
 
-    // Merge both source preferences maps
+    // Merge both source preferences maps; every key is in at least one of them.
     val mergedSourcePreferences = (localPreferencesMap.keys + remotePreferencesMap.keys).distinct()
-        .mapNotNull { sourceKey ->
+        .map { sourceKey ->
             val localSourcePreference = localPreferencesMap[sourceKey]
             val remoteSourcePreference = remotePreferencesMap[sourceKey]
 
@@ -84,26 +83,20 @@ internal fun SyncService.mergeSourcePreferencesLists(
             }
 
             when {
-                localSourcePreference != null && remoteSourcePreference == null -> {
+                localSourcePreference == null -> remotePreferencesMap.getValue(sourceKey).also {
+                    logcat(LogPriority.DEBUG, logTag) { "Using remote source preference: ${it.sourceKey}." }
+                }
+                remoteSourcePreference == null -> {
                     logcat(LogPriority.DEBUG, logTag) {
                         "Using local source preference: ${localSourcePreference.sourceKey}."
                     }
                     localSourcePreference
                 }
-                remoteSourcePreference != null && localSourcePreference == null -> {
-                    logcat(LogPriority.DEBUG, logTag) {
-                        "Using remote source preference: ${remoteSourcePreference.sourceKey}."
-                    }
-                    remoteSourcePreference
-                }
-                localSourcePreference != null && remoteSourcePreference != null -> {
+                else -> {
                     // Merge the individual preferences within the source preferences
                     val mergedPrefs =
                         mergeIndividualPreferences(localSourcePreference.prefs, remoteSourcePreference.prefs)
                     BackupSourcePreferences(sourceKey, mergedPrefs)
-                }
-                else -> {
-                    null
                 }
             }
         }

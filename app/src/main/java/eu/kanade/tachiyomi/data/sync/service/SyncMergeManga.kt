@@ -74,8 +74,15 @@ internal fun SyncService.mergeMangaLists(
         syncingChapters = syncPreferences.getSyncSettings().chapters,
         categories = CategoryOrderRemap(localCategories, remoteCategories, mergedCategories),
     )
+    // Every key is in at least one of the maps.
     val mergedList = (localMangaMap.keys + remoteMangaMap.keys).distinct().mapNotNull { compositeKey ->
-        mergeManga(localMangaMap[compositeKey], remoteMangaMap[compositeKey], context)
+        val local = localMangaMap[compositeKey]
+        val remote = remoteMangaMap[compositeKey]
+        when {
+            local == null -> remoteOnlyManga(remoteMangaMap.getValue(compositeKey), context)
+            remote == null -> localOnlyManga(local, context)
+            else -> newerManga(local, remote, context)
+        }
     }
 
     if (remoteMangaListSafe.isNotEmpty() &&
@@ -94,13 +101,6 @@ internal fun SyncService.mergeMangaLists(
             "Non-Favorites: ${nonFavorites.size}"
     }
     return mergedList
-}
-
-private fun mergeManga(local: BackupManga?, remote: BackupManga?, context: MangaMergeContext): BackupManga? = when {
-    local != null && remote == null -> localOnlyManga(local, context)
-    local == null && remote != null -> remoteOnlyManga(remote, context)
-    local != null && remote != null -> newerManga(local, remote, context)
-    else -> null // No manga found for key
 }
 
 private fun localOnlyManga(local: BackupManga, context: MangaMergeContext): BackupManga? {
@@ -167,23 +167,11 @@ internal fun mergeChapters(
             "Processing chapter key: $compositeKey. Local chapter: ${localChapter != null}, " +
                 "Remote chapter: ${remoteChapter != null}"
         }
+        // Every key is in at least one of the maps.
         when {
-            localChapter != null && remoteChapter == null -> {
-                localOnlyChapter(localChapter, lastSyncTime)
-            }
-            localChapter == null && remoteChapter != null -> {
-                remoteOnlyChapter(remoteChapter, lastSyncTime)
-            }
-            localChapter != null && remoteChapter != null -> {
-                newerChapter(localChapter, remoteChapter, takeRemoteOrder)
-            }
-            else -> {
-                logcat(
-                    CHAPTER_LOG_TAG,
-                    LogPriority.DEBUG,
-                ) { "No chapter found for composite key: $compositeKey. Skipping." }
-                null
-            }
+            localChapter == null -> remoteOnlyChapter(remoteChapterMap.getValue(compositeKey), lastSyncTime)
+            remoteChapter == null -> localOnlyChapter(localChapter, lastSyncTime)
+            else -> newerChapter(localChapter, remoteChapter, takeRemoteOrder)
         }
     }
     logcat(
