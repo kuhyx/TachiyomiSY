@@ -6,8 +6,11 @@ import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ViewRootForTest
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.junit4.v2.ComposeContentTestRule
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.navigationevent.DirectNavigationEventInput
 import androidx.navigationevent.NavigationEventDispatcher
 import androidx.navigationevent.NavigationEventDispatcherOwner
@@ -46,5 +49,12 @@ internal fun ComposeContentTestRule.tapOutsidePopup() {
         popupWindow.onTouchEvent(event)
         event.recycle()
     }
+    waitForIdle()
+}
+
+/** Drags the [index]th slider on screen to [value], as a user's drag ending there would. */
+internal fun ComposeContentTestRule.setSlider(index: Int, value: Float) {
+    onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsActions.SetProgress))[index]
+        .performSemanticsAction(SemanticsActions.SetProgress) { it(value) }
     waitForIdle()
 }
