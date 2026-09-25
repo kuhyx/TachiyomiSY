@@ -17,14 +17,14 @@ internal class CommonsTest {
     @get:Rule
     val compose = createComposeRule()
 
+    private val all = listOf(novels, defaultCategory, comics)
+
     private fun label(all: List<Category>, included: Set<String>, excluded: Set<String>): String {
         var text = ""
         compose.setContent { text = getCategoriesLabel(all, included, excluded) }
         compose.waitForIdle()
         return text
     }
-
-    private val all = listOf(novels, defaultCategory, comics)
 
     @Test
     fun someIncludedNoneExcluded() {

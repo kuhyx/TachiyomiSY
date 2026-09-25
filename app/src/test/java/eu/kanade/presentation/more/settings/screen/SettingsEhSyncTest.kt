@@ -89,7 +89,7 @@ internal class SettingsEhSyncTest {
     }
 
     @Test
-    fun requirementsSubtitleAndSchedule() {
+    fun requirementsAndSchedule() {
         koin.exh.exhAutoUpdateRequirements.set(emptySet())
         compose.waitForIdle()
         subtitle("Auto update restrictions") shouldBe "Restrictions: None"

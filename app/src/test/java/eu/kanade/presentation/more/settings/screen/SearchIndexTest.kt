@@ -5,9 +5,6 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 internal class SearchIndexTest {
-    private fun text(title: String, subtitle: String? = null, enabled: Boolean = true) =
-        Preference.PreferenceItem.TextPreference(title = title, subtitle = subtitle, enabled = enabled)
-
     private val contents = listOf(
         text("Loose item"),
         text("", subtitle = "blank title"),
@@ -20,8 +17,11 @@ internal class SearchIndexTest {
         Preference.PreferenceGroup(title = "Disabled group", enabled = false, preferenceItems = listOf(text("x"))),
     )
 
+    private fun text(title: String, subtitle: String? = null, enabled: Boolean = true) =
+        Preference.PreferenceItem.TextPreference(title = title, subtitle = subtitle, enabled = enabled)
+
     @Test
-    fun entriesSkipDisabledBlankAndInfo() {
+    fun entriesSkipHiddenAndInfo() {
         searchableEntries(contents).map { it.first to it.second.title }.toList() shouldBe listOf(
             null to "Loose item",
             "Group" to "Inner item",
