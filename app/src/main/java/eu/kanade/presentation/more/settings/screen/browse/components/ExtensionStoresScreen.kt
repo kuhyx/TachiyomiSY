@@ -28,7 +28,7 @@ internal fun ExtensionStoresScreen(
     onClickCreate: () -> Unit,
     onCopy: (ExtensionStore) -> Unit,
     onOpenWebsite: (ExtensionStore) -> Unit,
-    onOpenDiscord: (ExtensionStore) -> Unit,
+    onOpenDiscord: (String) -> Unit,
     onClickDelete: (ExtensionStore) -> Unit,
     onClickRefresh: () -> Unit,
     navigateUp: () -> Unit,

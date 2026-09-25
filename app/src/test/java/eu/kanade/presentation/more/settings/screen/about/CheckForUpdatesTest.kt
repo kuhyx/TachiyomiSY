@@ -37,7 +37,9 @@ internal class CheckForUpdatesTest {
     @Before
     fun setUp() {
         mockkConstructor(AppUpdateChecker::class)
-        coEvery { anyConstructed<AppUpdateChecker>().checkForUpdate(any(), forceCheck = true) } coAnswers { gate.await() }
+        coEvery {
+            anyConstructed<AppUpdateChecker>().checkForUpdate(any(), forceCheck = true)
+        } coAnswers { gate.await() }
         compose.setContent {
             CompositionLocalProvider(LocalNavigator provides navigator) {
                 MaterialTheme { CheckForUpdatesItem() }

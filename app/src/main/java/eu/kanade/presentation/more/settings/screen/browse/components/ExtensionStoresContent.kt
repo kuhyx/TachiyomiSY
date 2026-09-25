@@ -33,7 +33,7 @@ internal fun ExtensionStoresContent(
     paddingValues: PaddingValues,
     onCopy: (ExtensionStore) -> Unit,
     onOpenWebsite: (ExtensionStore) -> Unit,
-    onOpenDiscord: (ExtensionStore) -> Unit,
+    onOpenDiscord: (String) -> Unit,
     onClickDelete: (ExtensionStore) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -49,7 +49,7 @@ internal fun ExtensionStoresContent(
                     modifier = Modifier.animateItem(),
                     store = it,
                     onOpenWebsite = { onOpenWebsite(it) },
-                    onOpenDiscord = { onOpenDiscord(it) },
+                    onOpenDiscord = onOpenDiscord,
                     onCopy = { onCopy(it) },
                     onDelete = { onClickDelete(it) },
                 )
@@ -62,7 +62,7 @@ internal fun ExtensionStoresContent(
 private fun ExtensionStoresListItem(
     store: ExtensionStore,
     onOpenWebsite: () -> Unit,
-    onOpenDiscord: () -> Unit,
+    onOpenDiscord: (String) -> Unit,
     onCopy: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
@@ -99,11 +99,11 @@ private fun ExtensionStoresListItem(
                 )
             }
 
-            if (store.contact.discord != null) {
-                IconButton(onClick = onOpenDiscord) {
+            store.contact.discord?.let { discord ->
+                IconButton(onClick = { onOpenDiscord(discord) }) {
                     Icon(
                         imageVector = CustomIcons.Discord,
-                        contentDescription = null,
+                        contentDescription = "Discord",
                     )
                 }
             }
