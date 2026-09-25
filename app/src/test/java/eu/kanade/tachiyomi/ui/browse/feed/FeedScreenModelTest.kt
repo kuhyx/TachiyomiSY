@@ -104,9 +104,9 @@ internal class FeedScreenModelTest {
         harness.koin.sourcePreferences.enabledLanguages.set(setOf("en"))
         harness.koin.sourcePreferences.pinnedSources.set(setOf("3"))
         harness.koin.sourcePreferences.disabledSources.set(setOf("2", "x"))
-        harness.sources += harness.source(2L, "Two")
-        harness.sources += harness.source(3L, "Three")
-        harness.sources += harness.source(4L, "Four", sourceLang = "fr")
+        harness.catalogue += harness.source(2L, "Two")
+        harness.catalogue += harness.source(3L, "Three")
+        harness.catalogue += harness.source(4L, "Four", sourceLang = "fr")
         val model = FeedScreenModel()
         model.openAddDialog()
         eventually { model.state.value.dialog != null }

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.extension.getAppIconForSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.browse.BrowseKoin
 import eu.kanade.tachiyomi.ui.manga.merged.themedActivity
@@ -14,6 +15,8 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -23,14 +26,13 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 import tachiyomi.domain.source.service.SourceManager
 
+private const val REGISTRY = "eu.kanade.tachiyomi.extension.ExtensionManagerRegistryKt"
+
 @RunWith(RobolectricTestRunner::class)
 internal class MigrationSourceAdapterTest {
     private val koin = BrowseKoin()
     private val icon = ColorDrawable()
-    private val extensions = mockk<ExtensionManager> {
-        every { getAppIconForSource(1L) } returns icon
-        every { getAppIconForSource(2L) } returns null
-    }
+    private val extensions = mockk<ExtensionManager>()
     private val sourceManager = mockk<SourceManager>()
 
     private fun http(sourceId: Long, sourceName: String): HttpSource = mockk(relaxed = true) {
@@ -39,15 +41,23 @@ internal class MigrationSourceAdapterTest {
     }
 
     @Before
-    fun setUp() = koin.start(
-        module {
-            single { extensions }
-            single { sourceManager }
-        },
-    )
+    fun setUp() {
+        mockkStatic(REGISTRY)
+        every { extensions.getAppIconForSource(1L) } returns icon
+        every { extensions.getAppIconForSource(2L) } returns null
+        koin.start(
+            module {
+                single { extensions }
+                single { sourceManager }
+            },
+        )
+    }
 
     @After
-    fun tearDown() = koin.stop()
+    fun tearDown() {
+        koin.stop()
+        unmockkStatic(REGISTRY)
+    }
 
     private fun bind(vararg items: MigrationSourceItem): List<MigrationSourceHolder> {
         val context = themedActivity()

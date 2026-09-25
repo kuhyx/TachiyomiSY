@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.manga.track
 
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.tachiyomi.data.track.EnhancedTracker
-import eu.kanade.tachiyomi.data.track.Tracker
+import eu.kanade.tachiyomi.data.track.BaseTracker
 import eu.kanade.tachiyomi.data.track.domainTrack
 import eu.kanade.tachiyomi.ui.manga.eventually
 import eu.kanade.tachiyomi.ui.manga.manga
@@ -34,11 +34,11 @@ internal class TrackInfoDialogHomeModelTest {
 
     private fun model(sourceId: Long = 7L) = TrackInfoDialogHomeModel(mangaId = 1L, sourceId = sourceId)
 
-    private fun enhanced(accepts: Boolean): Tracker {
-        val tracker = mockk<EnhancedTracker>(relaxed = true, moreInterfaces = arrayOf(Tracker::class))
-        every { tracker.accept(any()) } returns accepts
-        every { (tracker as Tracker).id } returns 2L
-        return tracker as Tracker
+    private fun enhanced(accepts: Boolean): BaseTracker {
+        val tracker = mockk<BaseTracker>(relaxed = true, moreInterfaces = arrayOf(EnhancedTracker::class))
+        every { (tracker as EnhancedTracker).accept(any()) } returns accepts
+        every { tracker.id } returns 2L
+        return tracker
     }
 
     @Test

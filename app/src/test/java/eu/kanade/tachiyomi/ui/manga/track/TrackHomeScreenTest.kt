@@ -10,7 +10,7 @@ import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.EnhancedTracker
-import eu.kanade.tachiyomi.data.track.Tracker
+import eu.kanade.tachiyomi.data.track.BaseTracker
 import eu.kanade.tachiyomi.data.track.domainTrack
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -125,13 +125,13 @@ internal class TrackHomeScreenTest {
 
     @Test
     fun enhancedTrackersRegister() {
-        val enhanced = mockk<EnhancedTracker>(relaxed = true, moreInterfaces = arrayOf(Tracker::class))
-        every { (enhanced as Tracker).id } returns 2L
-        every { (enhanced as Tracker).name } returns "Enhanced"
-        every { (enhanced as Tracker).getLogo() } returns R.drawable.brand_anilist
-        every { enhanced.accept(any()) } returns true
+        val enhanced = mockk<BaseTracker>(relaxed = true, moreInterfaces = arrayOf(EnhancedTracker::class))
+        every { enhanced.id } returns 2L
+        every { enhanced.name } returns "Enhanced"
+        every { enhanced.getLogo() } returns R.drawable.brand_anilist
+        every { (enhanced as EnhancedTracker).accept(any()) } returns true
         coEvery { harness.getManga.await(1L) } returns null
-        every { harness.trackerManager.loggedInTrackers() } returns listOf(tracker, enhanced as Tracker)
+        every { harness.trackerManager.loggedInTrackers() } returns listOf(tracker, enhanced)
         show()
         compose.onNodeWithText("Add tracking").performClick()
         coVerify(timeout = 5_000) { harness.getManga.await(1L) }

@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import eu.kanade.tachiyomi.data.track.EnhancedTracker
-import eu.kanade.tachiyomi.data.track.Tracker
+import eu.kanade.tachiyomi.data.track.BaseTracker
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.data.track.dbTrack
 import eu.kanade.tachiyomi.data.track.domainTrack
@@ -31,7 +31,7 @@ internal class MangaTrackingTest {
     private val plain = tracker(1L)
     private val tracks = MutableStateFlow(listOf(domainTrack(trackerId = 1L)))
 
-    private fun tracker(trackerId: Long): Tracker = mockk { every { id } returns trackerId }
+    private fun tracker(trackerId: Long): BaseTracker = mockk { every { id } returns trackerId }
 
     @Before
     fun setUp() {
@@ -60,11 +60,10 @@ internal class MangaTrackingTest {
 
     @Test
     fun enhancedTrackersMustAccept() {
-        val enhanced = mockk<EnhancedTracker>(moreInterfaces = arrayOf(Tracker::class)) {
-            every { accept(any()) } returns false
-        }
-        every { (enhanced as Tracker).id } returns 1L
-        every { harness.trackerManager.loggedInTrackersFlow() } returns MutableStateFlow(listOf(enhanced as Tracker))
+        val enhanced = mockk<BaseTracker>(moreInterfaces = arrayOf(EnhancedTracker::class))
+        every { (enhanced as EnhancedTracker).accept(any()) } returns false
+        every { enhanced.id } returns 1L
+        every { harness.trackerManager.loggedInTrackersFlow() } returns MutableStateFlow(listOf(enhanced))
         val state = load(manga(favorite = true)).awaitSuccess()
         state.trackingCount shouldBe 0
         state.hasLoggedInTrackers shouldBe false
@@ -87,7 +86,7 @@ internal class MangaTrackingTest {
         every { harness.trackerManager.mdList.isLoggedIn } returns true
         every { harness.trackerManager.mdList.id } returns TrackerManager.MDLIST
         coEvery { harness.trackerManager.mdList.createInitialTracker(any(), any()) } returns
-            dbTrack(TrackerManager.MDLIST).also { it.manga_id = 1L }
+            dbTrack(TrackerManager.MDLIST).also { it.mangaId = 1L }
         coEvery { parts.getTracks.await(1L) } returns listOf(domainTrack(id = 7L, trackerId = TrackerManager.MDLIST))
         load(manga(source = MANGADEX, favorite = true)).awaitSuccess { it.hasLoggedInTrackers }
         coVerify(timeout = 5_000) { parts.insertTrack.await(any()) }
@@ -106,7 +105,7 @@ internal class MangaTrackingTest {
         every { harness.trackerManager.mdList.isLoggedIn } returns true
         every { harness.trackerManager.mdList.id } returns TrackerManager.MDLIST
         coEvery { harness.trackerManager.mdList.createInitialTracker(any(), any()) } returns
-            dbTrack(TrackerManager.MDLIST).also { it.manga_id = 1L }
+            dbTrack(TrackerManager.MDLIST).also { it.mangaId = 1L }
         coEvery { parts.getTracks.await(1L) } returns listOf(domainTrack(id = 7L, trackerId = TrackerManager.MDLIST))
         val member = manga().copy(id = 5L, source = MANGADEX)
         coEvery { harness.getMergedReferences.await(1L) } returns listOf(mockk(relaxed = true))

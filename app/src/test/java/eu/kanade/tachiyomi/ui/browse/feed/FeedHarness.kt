@@ -36,11 +36,10 @@ internal class FeedHarness {
     val koin: BrowseKoin = BrowseKoin()
     val initialized: MutableStateFlow<Boolean> = MutableStateFlow(true)
     val source: CatalogueSource = source(1L, "One", latest = true)
-    val sources: MutableList<CatalogueSource> = mutableListOf(source)
+    val catalogue: MutableList<CatalogueSource> = mutableListOf(source)
     val sourceManager: SourceManager = mockk {
         every { isInitialized } returns initialized
-        every { get(any()) } answers { sources.firstOrNull { it.id == firstArg<Long>() } }
-        every { getVisibleSources() } answers { sources.toList() }
+        every { getVisibleSources() } answers { catalogue.toList() }
     }
     val feeds: MutableStateFlow<List<FeedSavedSearch>> = MutableStateFlow(emptyList())
     val getFeeds: GetFeedSavedSearchGlobal = mockk { every { subscribe() } returns feeds }
@@ -50,8 +49,11 @@ internal class FeedHarness {
     val insert: InsertFeedSavedSearch = mockk(relaxed = true)
     val delete: DeleteFeedSavedSearchById = mockk(relaxed = true)
     val getManga: GetManga = mockk()
-    val networkToLocal: NetworkToLocalManga = mockk {
-        coEvery { invoke(any<List<Manga>>()) } answers { firstArg() }
+    val networkToLocal: NetworkToLocalManga = mockk()
+
+    init {
+        every { sourceManager.get(any()) } answers { catalogue.firstOrNull { it.id == firstArg<Long>() } }
+        coEvery { networkToLocal(any<List<Manga>>()) } answers { firstArg() }
     }
 
     fun source(sourceId: Long, sourceName: String, latest: Boolean = false, sourceLang: String = "en") =

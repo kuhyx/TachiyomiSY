@@ -42,7 +42,7 @@ internal fun items(count: Int): List<ChapterList.Item> = (1L..count).map { item(
 internal fun manga(flags: Long = 0L, source: Long = 7L, favorite: Boolean = false): Manga = Manga.create().copy(
     id = 1L,
     source = source,
-    title = "Needle",
+    ogTitle = "Needle",
     url = "/m/1",
     chapterFlags = flags,
     favorite = favorite,

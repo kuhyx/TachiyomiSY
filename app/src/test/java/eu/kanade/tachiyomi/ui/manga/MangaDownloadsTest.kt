@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import eu.kanade.tachiyomi.data.download.deleteManga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.all.MergedSource
@@ -8,6 +9,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
@@ -19,6 +22,9 @@ import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MergedMangaReference
+
+/** The file of the download manager's deletion extensions, spied on to see what the screen deleted. */
+internal const val DELETION: String = "eu.kanade.tachiyomi.data.download.DownloadManagerDeletionKt"
 
 /** A queued download of [chapter] in [state]. */
 internal fun download(chapter: Chapter, state: Download.State, manga: Manga = manga()): Download =
@@ -39,12 +45,16 @@ internal class MangaDownloadsTest {
 
     @Before
     fun setUp() {
+        mockkStatic(DELETION)
         harness.start()
         harness.mangaFlow.value = manga(favorite = true) to listOf(chapter(1L), chapter(2L))
     }
 
     @After
-    fun tearDown() = harness.stop()
+    fun tearDown() {
+        harness.stop()
+        unmockkStatic(DELETION)
+    }
 
     private fun emit(value: Download) = runBlocking { harness.statuses.emit(value) }
 
@@ -94,11 +104,11 @@ internal class MangaDownloadsTest {
         harness.loading().downloads.deleteDownloads()
         val model = harness.loaded()
         model.downloads.deleteDownloads()
-        verify(timeout = 5_000) { harness.downloadManager.cache.removeManga(manga(favorite = true)) }
+        verify { harness.downloadManager.deleteManga(manga(favorite = true), any(), any()) }
         val member = manga().copy(id = 5L, source = 8L)
         merged(model, member)
         model.downloads.deleteDownloads()
-        verify(timeout = 5_000) { harness.downloadManager.cache.removeManga(member) }
+        verify { harness.downloadManager.deleteManga(member, any(), any()) }
         model.updateSuccessState { it.copy(mergedData = null) }
         model.downloads.deleteDownloads()
         verify { harness.sourceManager.getOrStub(8L) }

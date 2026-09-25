@@ -53,11 +53,11 @@ internal class BrowseSourceHarness {
     val sourceManager: SourceManager = mockk { every { getOrStub(1L) } returns source }
     val coverCache: CoverCache = mockk(relaxed = true)
     val getRemoteManga: GetRemoteManga = mockk(relaxed = true)
-    val getDuplicates: GetDuplicateLibraryManga = mockk { coEvery { invoke(any()) } returns emptyList() }
+    val getDuplicates: GetDuplicateLibraryManga = mockk()
     val categories: MutableStateFlow<List<Category>> = MutableStateFlow(emptyList())
     val getCategories: GetCategories = mockk {
         every { subscribe() } returns categories
-        coEvery { await(any()) } returns emptyList()
+        coEvery { await(any<Long>()) } returns emptyList()
     }
     val setMangaCategories: SetMangaCategories = mockk(relaxed = true)
     val setDefaultFlags: SetMangaDefaultChapterFlags = mockk(relaxed = true)
@@ -72,6 +72,10 @@ internal class BrowseSourceHarness {
     val exhSavedSearch: GetExhSavedSearch = mockk {
         every { subscribe(1L, any()) } returns savedSearches
         coEvery { awaitOne(any(), any()) } returns null
+    }
+
+    init {
+        coEvery { getDuplicates(any()) } returns emptyList()
     }
 
     fun start() = koin.start(

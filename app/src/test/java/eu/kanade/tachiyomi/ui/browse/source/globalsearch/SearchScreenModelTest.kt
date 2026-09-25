@@ -60,7 +60,7 @@ internal class SearchScreenModelTest {
         model.setSourceFilter(SourceFilter.All)
         model.settled(2)
         model.state.value.items.values.last().shouldBeInstanceOf<SearchItemResult.Error>()
-        coVerify(exactly = 1) { harness.sources[0].getSearchManga(1, "q", any()) }
+        coVerify(exactly = 1) { harness.catalogue[0].getSearchManga(1, "q", any()) }
         model.setSourceFilter(SourceFilter.All)
         model.updateSearchQuery("other")
         model.search()
@@ -110,7 +110,7 @@ internal class SearchScreenModelTest {
         harness.koin.sourcePreferences.migrationSources.set(listOf(2L, 1L, 9L))
         harness.source(1L, titles = emptyList())
         harness.source(2L)
-        coEvery { harness.getManga.await(5L) } returns manga().copy(id = 5L, title = "Needle")
+        coEvery { harness.getManga.await(5L) } returns manga().copy(id = 5L, ogTitle = "Needle")
         val model = MigrateSearchScreenModel(5L)
         model.settled(2)
         model.state.value.searchQuery shouldBe "Needle"

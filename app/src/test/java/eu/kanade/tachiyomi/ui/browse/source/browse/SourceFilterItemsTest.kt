@@ -20,7 +20,7 @@ internal class SourceFilterItemsTest {
     val compose = createComposeRule()
 
     private var updates = 0
-    private val onUpdate = { updates++ }
+    private val onUpdate: () -> Unit = { updates++ }
 
     private class Check : Filter.CheckBox("Check")
     private class Tri : Filter.TriState("Tri")

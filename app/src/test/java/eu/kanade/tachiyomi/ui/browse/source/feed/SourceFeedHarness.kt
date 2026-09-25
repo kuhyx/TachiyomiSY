@@ -56,8 +56,10 @@ internal class SourceFeedHarness {
         coEvery { await(1L, any()) } returns listOf(search(2L, "b"), search(3L, "A"))
     }
     val getManga: GetManga = mockk()
-    val networkToLocal: NetworkToLocalManga = mockk {
-        coEvery { invoke(any<List<Manga>>()) } answers { firstArg() }
+    val networkToLocal: NetworkToLocalManga = mockk()
+
+    init {
+        coEvery { networkToLocal(any<List<Manga>>()) } answers { firstArg() }
     }
 
     fun search(searchId: Long, searchName: String, filters: FilterList? = FilterList(Flag(true))) =

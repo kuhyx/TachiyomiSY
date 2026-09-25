@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
+import coil3.annotation.DelicateCoilApi
 import coil3.asImage
 import coil3.decode.DataSource
 import coil3.fetch.Fetcher
@@ -24,6 +25,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -43,11 +45,12 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.source.local.image.LocalCoverManager
 import java.io.ByteArrayInputStream
 
+@OptIn(DelicateCoilApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class MangaCoverScreenModelTest {
     private val app: Application = ApplicationProvider.getApplicationContext()
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
-    private val manga = MutableStateFlow<Manga?>(manga(favorite = true))
+    private val manga = MutableStateFlow(manga(favorite = true))
     private val getManga = mockk<GetManga> { coEvery { subscribe(1L) } returns manga }
     private val imageSaver = mockk<ImageSaver>()
     private val coverCache = mockk<CoverCache>(relaxed = true)
@@ -133,7 +136,7 @@ internal class MangaCoverScreenModelTest {
 
     @Test
     fun missingEntryDoesNothing() {
-        manga.value = null
+        coEvery { getManga.subscribe(1L) } returns emptyFlow()
         val model = MangaCoverScreenModel(1L)
         model.shareCover(activity)
         model.saveCover(activity)

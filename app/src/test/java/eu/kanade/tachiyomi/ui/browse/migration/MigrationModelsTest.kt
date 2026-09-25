@@ -86,8 +86,8 @@ internal class MigrationModelsTest {
 
     @Test
     fun favouritesAreSortedAndSelectable() {
-        val b = manga().copy(id = 2L, title = "b")
-        val a = manga().copy(id = 3L, title = "A")
+        val b = manga().copy(id = 2L, ogTitle = "b")
+        val a = manga().copy(id = 3L, ogTitle = "A")
         every { favorites.subscribe(7L) } returns MutableStateFlow(listOf(b, a))
         val model = MigrateMangaScreenModel(7L)
         eventually { !model.state.value.isLoading }
