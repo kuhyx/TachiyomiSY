@@ -35,12 +35,12 @@ internal class SyncYomiSyncService(
 
     internal class SyncYomiException(message: String?) : Exception(message)
 
+    // No defaults: the one caller passes every field.
     @Serializable
     private data class SyncEvent(
         val event: SyncEventStatus,
-        @SerialName("device_name")
-        val deviceName: String? = null,
-        val message: String? = null,
+        @SerialName("device_name") val deviceName: String?,
+        val message: String?,
     )
 
     @Serializable

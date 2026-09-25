@@ -62,21 +62,18 @@ internal suspend fun SyncManager.filterFavoritesAndNonFavorites(
         backup.backupManga.forEach { remoteManga ->
             val compositeKey = Pair(remoteManga.source, remoteManga.url)
             val localManga = localMangaMap[compositeKey]
-            when {
-                // Checks if the manga is in favorites and needs updating or adding
-                remoteManga.favorite -> {
-                    if (localManga == null || isMangaDifferent(localManga, remoteManga)) {
-                        logcat(LogPriority.DEBUG, logTag) { "Adding to favorites: ${remoteManga.title}" }
-                        favorites.add(remoteManga)
-                    } else {
-                        logcat(LogPriority.DEBUG, logTag) { "Already up-to-date favorite: ${remoteManga.title}" }
-                    }
+            // Checks if the manga is in favorites and needs updating or adding
+            if (remoteManga.favorite) {
+                if (localManga == null || isMangaDifferent(localManga, remoteManga)) {
+                    logcat(LogPriority.DEBUG, logTag) { "Adding to favorites: ${remoteManga.title}" }
+                    favorites.add(remoteManga)
+                } else {
+                    logcat(LogPriority.DEBUG, logTag) { "Already up-to-date favorite: ${remoteManga.title}" }
                 }
+            } else {
                 // Handle non-favorites
-                else -> {
-                    logcat(LogPriority.DEBUG, logTag) { "Adding to non-favorites: ${remoteManga.title}" }
-                    nonFavorites.add(remoteManga)
-                }
+                logcat(LogPriority.DEBUG, logTag) { "Adding to non-favorites: ${remoteManga.title}" }
+                nonFavorites.add(remoteManga)
             }
         }
     }
