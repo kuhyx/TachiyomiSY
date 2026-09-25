@@ -42,13 +42,10 @@ internal fun MangaScreen.MangaScreenDialogs(
     val onDismissRequest = { screenModel.dismissDialog() }
     when (val dialog = successState.dialog) {
         null -> {}
-        is MangaScreenModel.Dialog.ChangeCategory,
-        is MangaScreenModel.Dialog.DuplicateManga,
-        is MangaScreenModel.Dialog.Migrate,
-        is MangaScreenModel.Dialog.SetFetchInterval,
-        -> {
-            LibraryDialogs(screenModel, dialog, onDismissRequest)
-        }
+        is MangaScreenModel.Dialog.ChangeCategory -> ChangeCategory(screenModel, dialog, onDismissRequest)
+        is MangaScreenModel.Dialog.DuplicateManga -> DuplicateManga(screenModel, dialog, onDismissRequest)
+        is MangaScreenModel.Dialog.Migrate -> Migrate(dialog, onDismissRequest)
+        is MangaScreenModel.Dialog.SetFetchInterval -> SetFetchInterval(screenModel, dialog, onDismissRequest)
         is MangaScreenModel.Dialog.DeleteChapters -> {
             DeleteChaptersDialog(
                 onDismissRequest = onDismissRequest,
@@ -76,11 +73,17 @@ internal fun MangaScreen.MangaScreenDialogs(
             FullCoverDialog(successState, onDismissRequest)
         }
         // SY -->
-        is MangaScreenModel.Dialog.EditMangaInfo,
-        is MangaScreenModel.Dialog.EditMergedSettings,
-        -> {
-            SyDialogs(screenModel, dialog)
-        }
+        is MangaScreenModel.Dialog.EditMangaInfo -> EditMangaDialog(
+            manga = dialog.manga,
+            onDismissRequest = screenModel::dismissDialog,
+            onPositiveClick = screenModel::updateMangaInfo,
+        )
+        is MangaScreenModel.Dialog.EditMergedSettings -> EditMergedSettingsDialog(
+            mergedData = dialog.mergedData,
+            onDismissRequest = screenModel::dismissDialog,
+            onDeleteClick = screenModel::deleteMerge,
+            onPositiveClick = screenModel::updateMergeSettings,
+        )
         // SY <--
     }
 
@@ -96,77 +99,64 @@ internal fun MangaScreen.MangaScreenDialogs(
 
 // Add-to-library flow (categories, duplicate check, migration) and the fetch-interval editor.
 @Composable
-private fun MangaScreen.LibraryDialogs(
+private fun ChangeCategory(
     screenModel: MangaScreenModel,
-    dialog: MangaScreenModel.Dialog,
+    dialog: MangaScreenModel.Dialog.ChangeCategory,
     onDismissRequest: () -> Unit,
 ) {
     val navigator = LocalNavigator.currentOrThrow
-    when (dialog) {
-        is MangaScreenModel.Dialog.ChangeCategory -> {
-            ChangeCategoryDialog(
-                initialSelection = dialog.initialSelection,
-                onDismissRequest = onDismissRequest,
-                onEditCategories = { navigator.push(CategoryScreen()) },
-                onConfirm = { include, _ ->
-                    screenModel.library.addToLibraryInCategories(dialog.manga, include)
-                },
-            )
-        }
-        is MangaScreenModel.Dialog.DuplicateManga -> {
-            DuplicateMangaDialog(
-                duplicates = dialog.duplicates,
-                onDismissRequest = onDismissRequest,
-                onConfirm = { screenModel.toggleFavorite(onRemoved = {}, checkDuplicate = false) },
-                onOpenManga = { navigator.push(MangaScreen(it.id)) },
-                onMigrate = { screenModel.showMigrateDialog(it) },
-            )
-        }
-        is MangaScreenModel.Dialog.Migrate -> {
-            MigrateMangaDialog(
-                current = dialog.current,
-                target = dialog.target,
-                // Initiated from the context of [dialog.target] so we show [dialog.current].
-                onClickTitle = { navigator.push(MangaScreen(dialog.current.id)) },
-                onDismissRequest = onDismissRequest,
-            )
-        }
-        is MangaScreenModel.Dialog.SetFetchInterval -> {
-            SetIntervalDialog(
-                interval = dialog.manga.fetchInterval,
-                nextUpdate = dialog.manga.expectedNextUpdate,
-                onDismissRequest = onDismissRequest,
-                onValueChanged = { interval: Int -> screenModel.library.setFetchInterval(dialog.manga, interval) }
-                    .takeIf { screenModel.isUpdateIntervalEnabled },
-            )
-        }
-        else -> {}
-    }
+    ChangeCategoryDialog(
+        initialSelection = dialog.initialSelection,
+        onDismissRequest = onDismissRequest,
+        onEditCategories = { navigator.push(CategoryScreen()) },
+        onConfirm = { include, _ ->
+            screenModel.library.addToLibraryInCategories(dialog.manga, include)
+        },
+    )
 }
 
-// SY --> The fork's metadata and merged-source editors.
 @Composable
-private fun SyDialogs(screenModel: MangaScreenModel, dialog: MangaScreenModel.Dialog) {
-    when (dialog) {
-        is MangaScreenModel.Dialog.EditMangaInfo -> {
-            EditMangaDialog(
-                manga = dialog.manga,
-                onDismissRequest = screenModel::dismissDialog,
-                onPositiveClick = screenModel::updateMangaInfo,
-            )
-        }
-        is MangaScreenModel.Dialog.EditMergedSettings -> {
-            EditMergedSettingsDialog(
-                mergedData = dialog.mergedData,
-                onDismissRequest = screenModel::dismissDialog,
-                onDeleteClick = screenModel::deleteMerge,
-                onPositiveClick = screenModel::updateMergeSettings,
-            )
-        }
-        else -> {}
-    }
+private fun DuplicateManga(
+    screenModel: MangaScreenModel,
+    dialog: MangaScreenModel.Dialog.DuplicateManga,
+    onDismissRequest: () -> Unit,
+) {
+    val navigator = LocalNavigator.currentOrThrow
+    DuplicateMangaDialog(
+        duplicates = dialog.duplicates,
+        onDismissRequest = onDismissRequest,
+        onConfirm = { screenModel.toggleFavorite(onRemoved = {}, checkDuplicate = false) },
+        onOpenManga = { navigator.push(MangaScreen(it.id)) },
+        onMigrate = { screenModel.showMigrateDialog(it) },
+    )
 }
-// SY <--
+
+@Composable
+private fun MangaScreen.Migrate(dialog: MangaScreenModel.Dialog.Migrate, onDismissRequest: () -> Unit) {
+    val navigator = LocalNavigator.currentOrThrow
+    MigrateMangaDialog(
+        current = dialog.current,
+        target = dialog.target,
+        // Initiated from the context of [dialog.target] so we show [dialog.current].
+        onClickTitle = { navigator.push(MangaScreen(dialog.current.id)) },
+        onDismissRequest = onDismissRequest,
+    )
+}
+
+@Composable
+private fun SetFetchInterval(
+    screenModel: MangaScreenModel,
+    dialog: MangaScreenModel.Dialog.SetFetchInterval,
+    onDismissRequest: () -> Unit,
+) {
+    SetIntervalDialog(
+        interval = dialog.manga.fetchInterval,
+        nextUpdate = dialog.manga.expectedNextUpdate,
+        onDismissRequest = onDismissRequest,
+        onValueChanged = { interval: Int -> screenModel.library.setFetchInterval(dialog.manga, interval) }
+            .takeIf { screenModel.isUpdateIntervalEnabled },
+    )
+}
 
 @Composable
 private fun ChapterSettingsSheet(

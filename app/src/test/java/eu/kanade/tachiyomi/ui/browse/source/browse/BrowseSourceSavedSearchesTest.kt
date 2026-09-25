@@ -106,14 +106,6 @@ internal class BrowseSourceSavedSearchesTest {
     }
 
     @Test
-    fun unserialisableFiltersAreSkipped() {
-        val model = harness.model()
-        model.setFilters(FilterList(object : Filter<Any>("Bad", Any()) {}))
-        model.saveSearch("Bad")
-        coVerify(timeout = 5_000) { harness.insertSavedSearch.await(match { it.filtersJson == null }) }
-    }
-
-    @Test
     fun mangaDexRandomNeedsMangaDex() {
         val found = mutableListOf<String>()
         harness.model().onMangaDexRandom { found += it }

@@ -6,7 +6,7 @@ import eu.kanade.domain.FlowPreferenceStore
 import eu.kanade.domain.track.interactor.RefreshTracks
 import eu.kanade.domain.track.service.TrackPreferences
 import eu.kanade.domain.ui.UiPreferences
-import eu.kanade.tachiyomi.data.track.Tracker
+import eu.kanade.tachiyomi.data.track.BaseTracker
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.source.online.MetadataSource
 import eu.kanade.tachiyomi.ui.manga.NoCustomInfo
@@ -37,7 +37,7 @@ internal class TrackHomeHarness {
     val trackPreferences: TrackPreferences = TrackPreferences(store)
     val tracks: MutableStateFlow<List<Track>> = MutableStateFlow(emptyList())
     val getTracks: GetTracks = mockk { coEvery { subscribe(any<Long>()) } returns tracks }
-    val tracker: Tracker = tracker(1L, "Plain")
+    val tracker: BaseTracker = tracker(1L, "Plain")
     val trackerManager: TrackerManager = mockk(relaxed = true) {
         every { loggedInTrackers() } returns listOf(tracker)
         every { get(1L) } returns tracker
@@ -54,7 +54,7 @@ internal class TrackHomeHarness {
     }
     val getFlatMetadata: GetFlatMetadataById = mockk()
 
-    fun tracker(trackerId: Long, trackerName: String): Tracker = mockk(relaxed = true) {
+    fun tracker(trackerId: Long, trackerName: String): BaseTracker = mockk(relaxed = true) {
         every { id } returns trackerId
         every { name } returns trackerName
     }

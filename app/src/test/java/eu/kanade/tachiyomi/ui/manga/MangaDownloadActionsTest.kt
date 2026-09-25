@@ -2,7 +2,9 @@ package eu.kanade.tachiyomi.ui.manga
 
 import eu.kanade.presentation.manga.DownloadAction
 import eu.kanade.presentation.manga.components.ChapterDownloadAction
+import eu.kanade.tachiyomi.data.download.deleteChapters
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.download.removeFromDownloadQueue
 import eu.kanade.tachiyomi.source.online.all.MergedSource
 import exh.source.EH_SOURCE_ID
 import io.kotest.matchers.shouldBe
@@ -10,6 +12,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.After
 import org.junit.Before
@@ -33,10 +37,14 @@ internal class MangaDownloadActionsTest {
             chapter(3L),
         )
         every { manager.downloader.isRunning } returns true
+        mockkStatic(DELETION)
     }
 
     @After
-    fun tearDown() = harness.stop()
+    fun tearDown() {
+        harness.stop()
+        unmockkStatic(DELETION)
+    }
 
     private fun downloaded(chapters: List<Chapter>) =
         verify(timeout = 5_000) { manager.downloadChapters(any(), chapters, any()) }
@@ -72,14 +80,14 @@ internal class MangaDownloadActionsTest {
         harness.queue.value = listOf(queued)
         model.downloads.runChapterDownloadActions(listOf(item(chapter(3L))), ChapterDownloadAction.CANCEL)
         queued.status shouldBe Download.State.NOT_DOWNLOADED
-        verify { manager.downloader.removeFromQueue(listOf(chapter(3L))) }
+        verify { manager.removeFromDownloadQueue(listOf(chapter(3L))) }
     }
 
     @Test
     fun deleteRemovesChapters() {
         val model = harness.loaded()
         model.downloads.runChapterDownloadActions(listOf(item(chapter(3L))), ChapterDownloadAction.DELETE)
-        verify(timeout = 5_000) { manager.cache.removeChapters(any(), any()) }
+        verify(timeout = 5_000) { manager.deleteChapters(listOf(chapter(3L)), any(), any()) }
         harness.loading().downloads.deleteChapters(listOf(chapter(3L)))
     }
 

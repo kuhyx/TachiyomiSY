@@ -7,9 +7,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
-import eu.kanade.domain.track.interactor.DeleteTrack
 import eu.kanade.tachiyomi.data.track.DeletableTracker
-import eu.kanade.tachiyomi.data.track.Tracker
+import eu.kanade.tachiyomi.data.track.BaseTracker
 import eu.kanade.tachiyomi.data.track.domainTrack
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import io.mockk.coEvery
@@ -24,6 +23,7 @@ import org.junit.runner.RunWith
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
+import tachiyomi.domain.track.interactor.DeleteTrack
 
 @RunWith(RobolectricTestRunner::class)
 internal class TrackerDialogsTest {
@@ -59,15 +59,15 @@ internal class TrackerDialogsTest {
 
     @Test
     fun removeAlsoDeletesRemotely() {
-        val deletable = mockk<DeletableTracker>(relaxed = true, moreInterfaces = arrayOf(Tracker::class))
-        every { (deletable as Tracker).name } returns "Del"
-        coEvery { deletable.delete(any()) } throws IllegalStateException("remote")
-        every { harness.trackerManager.get(5L) } returns deletable as Tracker
+        val deletable = mockk<BaseTracker>(relaxed = true, moreInterfaces = arrayOf(DeletableTracker::class))
+        every { deletable.name } returns "Del"
+        coEvery { (deletable as DeletableTracker).delete(any()) } throws IllegalStateException("remote")
+        every { harness.trackerManager.get(5L) } returns deletable
         show(TrackerRemoveScreen(1L, track, 5L))
         compose.onNodeWithText("Also remove from Del").performClick()
         compose.onNodeWithText("OK").performClick()
         compose.waitForIdle()
-        coVerify(timeout = 5_000) { deletable.delete(track) }
+        coVerify(timeout = 5_000) { (deletable as DeletableTracker).delete(track) }
     }
 
     @Test
@@ -82,7 +82,7 @@ internal class TrackerDialogsTest {
     fun searchRegistersTheSelection() {
         val hit = TrackSearch.create(1L).apply {
             title = "Hit"
-            tracking_url = "u"
+            trackingUrl = "u"
         }
         coEvery { harness.tracker.search("Needle") } returns listOf(hit)
         show(TrackerSearchScreen(1L, "Needle", "u", 1L))

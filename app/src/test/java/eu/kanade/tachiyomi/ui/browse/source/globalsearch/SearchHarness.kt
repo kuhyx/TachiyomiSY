@@ -20,16 +20,13 @@ import tachiyomi.domain.source.service.SourceManager
 /** Koin, sources and interactors for the global and migration search models. */
 internal class SearchHarness {
     val koin: BrowseKoin = BrowseKoin()
-    val sources: MutableList<CatalogueSource> = mutableListOf()
+    val catalogue: MutableList<CatalogueSource> = mutableListOf()
     val sourceManager: SourceManager = mockk {
-        every { getVisibleSources() } answers { sources.toList() }
-        every { get(any()) } answers { sources.firstOrNull { it.id == firstArg<Long>() } }
+        every { getVisibleSources() } answers { catalogue.toList() }
     }
     val installed: MutableStateFlow<List<Extension.Installed>> = MutableStateFlow(emptyList())
     val extensionManager: ExtensionManager = mockk { every { installedExtensionsFlow } returns installed }
-    val networkToLocalManga: NetworkToLocalManga = mockk {
-        coEvery { invoke(any<List<Manga>>()) } answers { firstArg() }
-    }
+    val networkToLocalManga: NetworkToLocalManga = mockk()
     val getManga: GetManga = mockk()
 
     /** A source with [id] whose search returns [titles], or throws when [titles] is null. */
@@ -57,7 +54,12 @@ internal class SearchHarness {
                     false,
                 )
             }
-        }.also { sources += it }
+        }.also { catalogue += it }
+
+    init {
+        every { sourceManager.get(any()) } answers { catalogue.firstOrNull { it.id == firstArg<Long>() } }
+        coEvery { networkToLocalManga(any<List<Manga>>()) } answers { firstArg() }
+    }
 
     fun start() {
         koin.sourcePreferences.enabledLanguages.set(setOf("en"))
