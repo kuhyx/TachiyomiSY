@@ -2,16 +2,16 @@ package eu.kanade.presentation.more.onboarding
 
 import android.content.ActivityNotFoundException
 import android.net.Uri
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.espresso.Espresso
 import eu.kanade.presentation.more.settings.screen.FakeResultRegistry
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
@@ -29,7 +29,7 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 internal class OnboardingScreenTest {
     @get:Rule
-    val compose = createComposeRule()
+    val compose = createAndroidComposeRule<ComponentActivity>()
 
     private val koin = OnboardingKoin()
     private val registry = FakeResultRegistry()
@@ -87,7 +87,7 @@ internal class OnboardingScreenTest {
         show()
         tap("Next")
         compose.onNodeWithText("Select a folder").assertExists()
-        Espresso.pressBack()
+        compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
         compose.waitForIdle()
         compose.onNodeWithText("Select a folder").assertDoesNotExist()
     }

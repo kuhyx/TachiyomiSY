@@ -5,7 +5,6 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.espresso.Espresso
 import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
@@ -61,7 +60,7 @@ internal class DialogWidgetsTest {
     @Test
     fun multiBackDismisses() {
         showMulti()
-        Espresso.pressBackUnconditionally()
+        pressDialogBack()
         compose.waitForIdle()
         count("Alpha") shouldBe 0
     }

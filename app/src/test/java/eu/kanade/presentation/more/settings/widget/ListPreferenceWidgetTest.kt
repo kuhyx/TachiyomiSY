@@ -12,7 +12,6 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
-import androidx.test.espresso.Espresso
 import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
@@ -79,7 +78,7 @@ internal class ListPreferenceWidgetTest {
     @Test
     fun backDismissesDialog() {
         show(mapOf("a" to "Alpha"))
-        Espresso.pressBackUnconditionally()
+        pressDialogBack()
         compose.waitForIdle()
         count("Alpha") shouldBe 0
     }
