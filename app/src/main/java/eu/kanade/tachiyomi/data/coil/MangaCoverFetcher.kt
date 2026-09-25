@@ -116,9 +116,9 @@ internal class MangaCoverFetcher(
         )
     }
 
-    private fun getResourceType(cover: String?): Type? {
+    private fun getResourceType(cover: String): Type? {
         return when {
-            cover.isNullOrEmpty() -> null
+            cover.isEmpty() -> null
             cover.startsWith("http", true) || cover.startsWith("Custom-", true) -> Type.URL
             cover.startsWith("/") || cover.startsWith("file://") -> Type.File
             cover.startsWith("content") -> Type.URI

@@ -33,7 +33,8 @@ internal fun MangaCoverFetcher.writeResponseToCoverCache(response: Response, cac
         response.peekBody(Long.MAX_VALUE).source().use { input ->
             writeSourceToCoverCache(input, cacheFile)
         }
-        cacheFile.takeIf { it.exists() }
+        // writeSourceToCoverCache either leaves the file written or throws.
+        cacheFile
     } catch (expected: Exception) {
         // Logged whatever the cause; the caller carries on.
         logcat(LogPriority.ERROR, expected) { "Failed to write response data to cover cache ${cacheFile.name}" }
