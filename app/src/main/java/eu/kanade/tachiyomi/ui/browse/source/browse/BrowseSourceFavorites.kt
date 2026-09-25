@@ -27,10 +27,7 @@ internal fun BrowseSourceScreenModel.changeMangaFavorite(manga: Manga) {
     screenModelScope.launch {
         var new = manga.copy(
             favorite = !manga.favorite,
-            dateAdded = when (manga.favorite) {
-                true -> 0
-                false -> Instant.now().toEpochMilli()
-            },
+            dateAdded = if (manga.favorite) 0 else Instant.now().toEpochMilli(),
         )
 
         if (!new.favorite) {

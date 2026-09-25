@@ -106,13 +106,11 @@ internal class EditMergedSettingsState(
             if (reference.id != adapterReference.id) {
                 pair
             } else {
-                mergedMangaAdapter?.allBoundViewHolders?.firstOrNull {
-                    it is EditMergedMangaHolder && it.reference?.id == reference.id
-                }?.let {
-                    if (it is EditMergedMangaHolder) {
-                        it.updateChapterUpdatesIcon(!reference.getChapterUpdates)
-                    }
-                } ?: context.toast(SYMR.strings.merged_chapter_updates_error)
+                mergedMangaAdapter?.allBoundViewHolders
+                    ?.filterIsInstance<EditMergedMangaHolder>()
+                    ?.firstOrNull { it.reference?.id == reference.id }
+                    ?.updateChapterUpdatesIcon(!reference.getChapterUpdates)
+                    ?: context.toast(SYMR.strings.merged_chapter_updates_error)
 
                 manga to reference.copy(getChapterUpdates = !reference.getChapterUpdates)
             }
@@ -138,13 +136,11 @@ internal class EditMergedSettingsState(
             if (reference.id != adapterReference.id) {
                 pair
             } else {
-                mergedMangaAdapter?.allBoundViewHolders?.firstOrNull {
-                    it is EditMergedMangaHolder && it.reference?.id == reference.id
-                }?.let {
-                    if (it is EditMergedMangaHolder) {
-                        it.updateDownloadChaptersIcon(!reference.downloadChapters)
-                    }
-                } ?: context.toast(SYMR.strings.merged_toggle_download_chapters_error)
+                mergedMangaAdapter?.allBoundViewHolders
+                    ?.filterIsInstance<EditMergedMangaHolder>()
+                    ?.firstOrNull { it.reference?.id == reference.id }
+                    ?.updateDownloadChaptersIcon(!reference.downloadChapters)
+                    ?: context.toast(SYMR.strings.merged_toggle_download_chapters_error)
 
                 manga to reference.copy(downloadChapters = !reference.downloadChapters)
             }
