@@ -49,22 +49,15 @@ internal class MangaDirectory(
     operator fun contains(chapterDirName: String): Boolean = chapterDirName in chapterDirs
 }
 
+// Null values never reach it: the serialization plugin handles the properties' nullability itself.
 private object UniFileAsStringSerializer : KSerializer<UniFile?> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UniFile", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: UniFile?) {
-        return if (value == null) {
-            encoder.encodeNull()
-        } else {
-            encoder.encodeString(value.uri.toString())
-        }
+        encoder.encodeString(value!!.uri.toString())
     }
 
-    override fun deserialize(decoder: Decoder): UniFile? {
-        return if (decoder.decodeNotNullMark()) {
-            UniFile.fromUri(Injekt.get<Application>(), decoder.decodeString().toUri())
-        } else {
-            decoder.decodeNull()
-        }
-    }
+    // Null when the saved uri no longer resolves to a file.
+    override fun deserialize(decoder: Decoder): UniFile? =
+        UniFile.fromUri(Injekt.get<Application>(), decoder.decodeString().toUri())
 }
