@@ -8,7 +8,6 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.content.pm.SigningInfo
-import android.os.Build
 import android.os.Bundle
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceFactory
@@ -22,6 +21,7 @@ import io.mockk.every
 import io.mockk.mockk
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.attribute.PosixFilePermission
 
 /** The metadata keys an extension package carries, as [ExtensionLoader] reads them. */
 internal fun extensionMetaData(
@@ -135,11 +135,9 @@ internal class FakePackages {
 
     init {
         every { packageManager.getInstalledPackages(any<Int>()) } answers { shared.values.toList() }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            every {
-                packageManager.getInstalledPackages(any<PackageManager.PackageInfoFlags>())
-            } answers { shared.values.toList() }
-        }
+        every {
+            packageManager.getInstalledPackages(any<PackageManager.PackageInfoFlags>())
+        } answers { shared.values.toList() }
         every { packageManager.getPackageInfo(any<String>(), any<Int>()) } answers {
             val name = firstArg<String>()
             shared[name] ?: throw PackageManager.NameNotFoundException(name)
@@ -172,3 +170,7 @@ internal class FakePackages {
         filesDir.deleteRecursively()
     }
 }
+
+/** Whether the owner-write bit is set; unlike [File.canWrite] this does not answer true for root. */
+internal fun File.isOwnerWritable(): Boolean =
+    PosixFilePermission.OWNER_WRITE in Files.getPosixFilePermissions(toPath())

@@ -69,7 +69,14 @@ internal class SmartSearchScreenModelTest {
 
     @Test
     fun aMatchIsFound() {
-        answer { listOf(SManga.create().apply { title = "Needle" }) }
+        answer {
+            listOf(
+                SManga.create().apply {
+                    title = "Needle"
+                    url = "/needle"
+                },
+            )
+        }
         val model = model()
         model.source shouldBe source
         val found = model.settled().shouldBeInstanceOf<SmartSearchScreenModel.SearchResults.Found>()

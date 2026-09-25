@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.extension.util
 
+import android.os.Build
 import eu.kanade.domain.extension.interactor.TrustExtension
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.source.Source
@@ -17,7 +18,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
+import org.robolectric.util.ReflectionHelpers
 import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
@@ -26,6 +27,8 @@ internal class ExtensionLoaderTest {
     private val context = packages.context
     private val logcat = CapturingLogcat()
     private val trustExtension = mockk<TrustExtension>()
+
+    private val sdk = Build.VERSION.SDK_INT
 
     @Before
     fun setUp() {
@@ -43,6 +46,7 @@ internal class ExtensionLoaderTest {
 
     @After
     fun tearDown() {
+        ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", sdk)
         packages.cleanUp()
         unmockkAll()
         logcat.uninstall()
@@ -84,8 +88,8 @@ internal class ExtensionLoaderTest {
     }
 
     @Test
-    @Config(sdk = [30])
     fun aSharedExtensionBeforeTiramisu() {
+        ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", Build.VERSION_CODES.S)
         packages.installShared(extensionPackage(pkgName = "pkg.shared"))
         loadedNames() shouldContainExactly listOf("pkg.shared")
     }
@@ -94,7 +98,7 @@ internal class ExtensionLoaderTest {
     fun aWritablePrivateIsLocked() {
         val file = privateExtension("pkg.private")
         loadedNames() shouldContainExactly listOf("pkg.private")
-        file.canWrite() shouldBe false
+        file.isOwnerWritable() shouldBe false
     }
 
     @Test

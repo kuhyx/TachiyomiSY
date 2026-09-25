@@ -22,7 +22,6 @@ import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.core.common.preference.InMemoryPreferenceStore
-import tachiyomi.domain.manga.model.Manga
 
 private const val WAIT_MS = 20_000L
 
@@ -65,7 +64,7 @@ internal class BatchAddScreenTest {
     @Test
     fun addingShowsProgressThenFinish() {
         val gate = CompletableDeferred<Unit>()
-        coEvery { harness.networkToLocalManga(any<Manga>()) } coAnswers {
+        coEvery { harness.getManga.await(any<String>(), any()) } coAnswers {
             gate.await()
             harness.manga
         }

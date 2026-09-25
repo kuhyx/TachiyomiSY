@@ -1,5 +1,7 @@
 package exh.ui.login
 
+import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.onAllNodesWithText
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.view.View
@@ -118,7 +120,7 @@ internal class EhLoginActivityTest {
     @Test
     fun theIgneousDialogCancels() {
         advanced("Custom igneous cookie")
-        compose.onNodeWithText("Cancel").performClick()
+        compose.onAllNodesWithText("Cancel").onLast().performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Custom igneous cookie").assertDoesNotExist()
     }

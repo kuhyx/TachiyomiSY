@@ -5,11 +5,11 @@ import android.widget.TextView
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.test.junit4.v2.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MangaScreenModel
 import exh.metadata.metadata.RaisedSearchMetadata
-import exh.pagepreview.PagePreviewState
+import eu.kanade.tachiyomi.ui.manga.PagePreviewState
 import io.mockk.mockk
 import tachiyomi.domain.manga.model.Manga
 

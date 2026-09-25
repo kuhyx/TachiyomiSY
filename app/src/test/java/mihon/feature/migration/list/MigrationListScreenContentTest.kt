@@ -57,9 +57,9 @@ internal class MigrationListScreenContentTest {
     fun rowsShowTheirState() {
         show(
             listOf(
-                migrating(1L),
-                migrating(2L, MigratingManga.SearchResult.NotFound, latestChapter = null),
                 migrating(3L, found(30L, latestChapter = null)),
+                migrating(2L, MigratingManga.SearchResult.NotFound, latestChapter = null),
+                migrating(1L, latestChapter = 5.0),
             ),
         )
         compose.onNodeWithText("Migration (1/3)").assertExists()

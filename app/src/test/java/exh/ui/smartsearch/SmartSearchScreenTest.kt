@@ -87,7 +87,14 @@ internal class SmartSearchScreenTest {
 
     @Test
     fun aMatchOpensTheManga() {
-        answer { listOf(SManga.create().apply { title = "Needle" }) }
+        answer {
+            listOf(
+                SManga.create().apply {
+                    title = "Needle"
+                    url = "/needle"
+                },
+            )
+        }
         showAndAwait() shouldBe "at MangaScreen"
     }
 

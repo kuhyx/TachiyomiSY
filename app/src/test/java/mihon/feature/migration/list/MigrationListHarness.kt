@@ -71,6 +71,17 @@ internal class MigrationListHarness {
                 throttleFunc = any(),
             )
         } answers { Result.success(RemoteMangaUpdate(firstArg(), emptyList())) }
+        coEvery {
+            updateMangaFromRemote(
+                source = any(),
+                manga = any(),
+                fetchDetails = any(),
+                fetchChapters = any(),
+                manualFetch = any(),
+                fetchWindow = any(),
+                throttleFunc = any(),
+            )
+        } answers { Result.success(RemoteMangaUpdate(secondArg(), emptyList())) }
     }
 
     fun stop() = stopKoin()

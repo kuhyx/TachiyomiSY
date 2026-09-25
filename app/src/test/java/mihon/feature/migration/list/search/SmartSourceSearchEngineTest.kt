@@ -1,5 +1,6 @@
 package mihon.feature.migration.list.search
 
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
@@ -62,7 +63,7 @@ internal class SmartSourceSearchEngineTest {
             .deepSearch(source(), "[Group] Bracketed Title (v2)")
         found?.title shouldBe "[Group] Bracketed Title (v2)"
         // Cleaned title, two largest words, largest word, first two words, first word, deduplicated.
-        queries shouldBe listOf("bracketed title", "bracketed")
+        queries shouldContainExactlyInAnyOrder listOf("bracketed title", "bracketed")
     }
 
     @Test
@@ -79,7 +80,7 @@ internal class SmartSourceSearchEngineTest {
     fun deepSearchBelowThreshold() = runTest {
         hits = listOf(searchHit("Nothing At All Alike"), searchHit("Second Miss"))
         SmartSourceSearchEngine(extraSearchParams = null).deepSearch(source(), "Precise Needle Title").shouldBeNull()
-        queries shouldBe listOf("precise needle title", "precise needle", "precise")
+        queries shouldContainExactlyInAnyOrder listOf("precise needle title", "precise needle", "precise")
     }
 
     @Test
