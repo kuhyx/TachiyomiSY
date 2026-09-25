@@ -93,8 +93,8 @@ internal fun SyncService.mergeSourcesLists(
         "Starting source merge. Local sources: ${localSources?.size}, Remote sources: ${remoteSources?.size}"
     }
 
-    // Merge both source maps
-    val mergedSources = (localSourceMap.keys + remoteSourceMap.keys).distinct().mapNotNull { sourceId ->
+    // Merge both source maps; every key is in at least one of them.
+    val mergedSources = (localSourceMap.keys + remoteSourceMap.keys).distinct().map { sourceId ->
         val localSource = localSourceMap[sourceId]
         val remoteSource = remoteSourceMap[sourceId]
 
@@ -104,13 +104,12 @@ internal fun SyncService.mergeSourcesLists(
         }
 
         when {
-            localSource != null && remoteSource == null -> {
+            localSource == null -> remoteSourceMap.getValue(sourceId).also {
+                logcat(LogPriority.DEBUG, logTag) { "Using remote source: ${it.name}." }
+            }
+            remoteSource == null -> {
                 logcat(LogPriority.DEBUG, logTag) { "Using local source: ${localSource.name}." }
                 localSource
-            }
-            remoteSource != null && localSource == null -> {
-                logcat(LogPriority.DEBUG, logTag) { "Using remote source: ${remoteSource.name}." }
-                remoteSource
             }
             else -> {
                 logcat(
@@ -146,8 +145,8 @@ internal fun SyncService.mergeSavedSearchesLists(
             "Remote saved searches: ${remoteSearches?.size}"
     }
 
-    // Merge both saved searches maps
-    val mergedSearches = (localSearchMap.keys + remoteSearchMap.keys).distinct().mapNotNull { compositeKey ->
+    // Merge both saved searches maps; every key is in at least one of them.
+    val mergedSearches = (localSearchMap.keys + remoteSearchMap.keys).distinct().map { compositeKey ->
         val localSearch = localSearchMap[compositeKey]
         val remoteSearch = remoteSearchMap[compositeKey]
 
@@ -157,13 +156,12 @@ internal fun SyncService.mergeSavedSearchesLists(
         }
 
         when {
-            localSearch != null && remoteSearch == null -> {
+            localSearch == null -> remoteSearchMap.getValue(compositeKey).also {
+                logcat(LogPriority.DEBUG, logTag) { "Using remote saved search: ${it.name}." }
+            }
+            remoteSearch == null -> {
                 logcat(LogPriority.DEBUG, logTag) { "Using local saved search: ${localSearch.name}." }
                 localSearch
-            }
-            remoteSearch != null && localSearch == null -> {
-                logcat(LogPriority.DEBUG, logTag) { "Using remote saved search: ${remoteSearch.name}." }
-                remoteSearch
             }
 
             else -> {
