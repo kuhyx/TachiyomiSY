@@ -12,11 +12,13 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.google.common.util.concurrent.Futures.immediateFuture
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.saver.plainFileUris
 import eu.kanade.tachiyomi.network.NetworkHelper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.unmockkAll
 import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.CancellationException
@@ -48,6 +50,7 @@ internal class AppUpdateDownloadJobTest {
     @Before
     fun setUp() {
         server.start()
+        plainFileUris()
         context.allowNotifications()
         every { network.client } returns OkHttpClient()
         startKoin { modules(module { single { network } }) }
@@ -57,6 +60,7 @@ internal class AppUpdateDownloadJobTest {
     fun tearDown() {
         stopKoin()
         server.close()
+        unmockkAll()
     }
 
     private fun job(url: String?, title: String? = null): AppUpdateDownloadJob {
