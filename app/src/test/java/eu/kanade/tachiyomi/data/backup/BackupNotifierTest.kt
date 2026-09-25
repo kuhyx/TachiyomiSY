@@ -4,14 +4,19 @@ import android.Manifest
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
+import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.test.core.app.ApplicationProvider
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.util.storage.getUriCompat
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -39,7 +44,10 @@ internal class BackupNotifierTest {
     }
 
     @After
-    fun tearDown() = stopKoin()
+    fun tearDown() {
+        unmockkAll()
+        stopKoin()
+    }
 
     private fun posted(id: Int): Notification? = shadowOf(manager).getNotification(id)
 
@@ -110,6 +118,10 @@ internal class BackupNotifierTest {
 
     @Test
     fun failedSyncLinksTheLog() {
+        // FileProvider caches its roots per authority for the whole sandbox; a real lookup here would
+        // pin them to this test's data dir and break later FileProvider tests.
+        mockkStatic("eu.kanade.tachiyomi.util.storage.FileExtensionsKt")
+        every { any<File>().getUriCompat(any()) } returns Uri.parse("content://logs/mihon_restore_error.txt")
         val log = File(context.cacheDir, "mihon_restore_error.txt").apply { writeText("e") }
         notifier.showRestoreComplete(time = 1_000, errorCount = 1, path = log.parent, file = log.name, sync = true)
         complete().text(NotificationCompat.EXTRA_TITLE) shouldBe "Library sync complete"
