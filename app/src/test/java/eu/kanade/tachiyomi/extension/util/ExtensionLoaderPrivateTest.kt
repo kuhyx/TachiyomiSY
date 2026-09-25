@@ -64,7 +64,7 @@ internal class ExtensionLoaderPrivateTest {
         val file = apk("ext.apk", info = extensionPackage())
         ExtensionLoader.installPrivateExtensionFile(context, file) shouldBe true
         installed().readText() shouldBe "apk"
-        installed().canWrite() shouldBe false
+        installed().isOwnerWritable() shouldBe false
     }
 
     @Test

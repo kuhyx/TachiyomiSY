@@ -2,6 +2,7 @@ package exh.ui.intercept
 
 import android.content.Intent
 import android.os.Build
+import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -22,7 +23,7 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.android.controller.ActivityController
-import org.robolectric.shadows.ShadowAlertDialog
+import org.robolectric.shadows.ShadowDialog
 import org.robolectric.shadows.ShadowLooper
 import org.robolectric.util.ReflectionHelpers
 import tachiyomi.core.common.Constants
@@ -83,9 +84,9 @@ internal class InterceptActivityTest {
     fun aFailureShowsADialog() {
         every { harness.source.matchesUri(any()) } returns false
         val activity = launch().get()
-        waitFor { ShadowAlertDialog.getLatestAlertDialog() != null }
+        waitFor { ShadowDialog.getLatestDialog() != null }
         activity.isFinishing shouldBe false
-        ShadowAlertDialog.getLatestAlertDialog().dismiss()
+        ShadowDialog.getLatestDialog().dismiss()
         ShadowLooper.idleMainLooper()
         activity.isFinishing shouldBe true
     }
@@ -95,9 +96,9 @@ internal class InterceptActivityTest {
         val second = importableSource(sourceId = 3L)
         every { harness.sourceManager.getVisibleSources() } returns listOf(harness.source, second)
         val activity = launch().get()
-        waitFor { ShadowAlertDialog.getLatestAlertDialog() != null }
-        val dialog = ShadowAlertDialog.getLatestAlertDialog()
-        shadowOf(dialog).clickOnItem(1)
+        waitFor { ShadowDialog.getLatestDialog() != null }
+        val list = (ShadowDialog.getLatestDialog() as AlertDialog).listView
+        list.performItemClick(null, 1, 1L)
         waitFor { activity.isFinishing }
     }
 
