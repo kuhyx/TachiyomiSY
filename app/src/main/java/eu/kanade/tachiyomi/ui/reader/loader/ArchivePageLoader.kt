@@ -19,6 +19,7 @@ import mihon.core.common.archive.ArchiveReader
 import tachiyomi.core.common.util.system.ImageUtil
 import uy.kohesive.injekt.injectLazy
 import java.io.File
+import java.io.InputStream
 
 /**
  * Loader used to load a chapter from an archive file.
@@ -76,25 +77,34 @@ internal class ArchivePageLoader(private val reader: ArchiveReader) : PageLoader
                     if (readerPreferences.archiveReaderMode.get() == ArchiveReaderMode.LOAD_INTO_MEMORY) {
                         CoroutineScope(Dispatchers.IO).async {
                             mutex.withLock {
-                                reader.getInputStream(entry.name)!!.buffered().use { stream ->
-                                    stream.readBytes()
-                                }
+                                // readBytes copies through its own buffer; buffered() would only add a branch.
+                                reader.getInputStream(entry.name)!!.use { stream -> stream.readBytes() }
                             }
                         }
                     } else {
                         null
                     }
-                val imageBytes by lazy { runBlocking { imageBytesDeferred?.await() } }
                 // SY <--
                 ReaderPage(i).apply {
                     // SY -->
-                    stream = { imageBytes?.copyOf()?.inputStream() ?: reader.getInputStream(entry.name)!! }
+                    stream = if (imageBytesDeferred != null) {
+                        memoryStream(imageBytesDeferred)
+                    } else {
+                        { reader.getInputStream(entry.name)!! }
+                    }
                     // SY <--
                     status = Page.State.Ready
                 }
             }
             .toList()
     }
+
+    // SY --> A stream over the bytes [deferred] loads, awaited once on first use.
+    private fun memoryStream(deferred: Deferred<ByteArray>): () -> InputStream {
+        val imageBytes by lazy { runBlocking { deferred.await() } }
+        return { imageBytes.copyOf().inputStream() }
+    }
+    // SY <--
 
     override suspend fun loadPage(page: ReaderPage) {
         check(!isRecycled)

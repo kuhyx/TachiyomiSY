@@ -20,8 +20,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.suspendCancellableCoroutine
 import tachiyomi.core.common.util.lang.launchIO
@@ -60,18 +58,13 @@ internal class HttpPageLoader(
         repeat(readerPreferences.readerThreads.get()) {
             // EXH <--
             scope.launchIO {
-                flow {
-                    while (true) {
-                        emit(runInterruptible { queue.take() })
+                // Never returns: the loop ends only when [recycle] cancels the scope.
+                while (true) {
+                    val next = runInterruptible { queue.take() }
+                    if (next.page.status == Page.State.Queue) {
+                        internalLoadPage(page = next.page, force = next.priority == PriorityPage.RETRY)
                     }
                 }
-                    .filter { it.page.status == Page.State.Queue }
-                    .collect {
-                        internalLoadPage(
-                            page = it.page,
-                            force = it.priority == PriorityPage.RETRY,
-                        )
-                    }
             }
             // EXH -->
         }
@@ -99,11 +92,8 @@ internal class HttpPageLoader(
             ReaderPage(index, page.url, page.imageUrl)
         }
         if (readerPreferences.aggressivePageLoading.get()) {
-            rp.forEach {
-                if (it.status == Page.State.Queue) {
-                    queue.offer(PriorityPage(it, 0))
-                }
-            }
+            // Freshly built pages are all still queued.
+            rp.forEach { queue.offer(PriorityPage(it, 0)) }
         }
         return rp
         // SY <--
