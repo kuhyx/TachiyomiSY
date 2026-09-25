@@ -14,7 +14,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import tachiyomi.core.common.preference.InMemoryPreferenceStore
+import eu.kanade.domain.FlowPreferenceStore
 import tachiyomi.core.common.preference.TriState
 import tachiyomi.domain.updates.service.UpdatesPreferences
 
@@ -40,7 +40,7 @@ internal class UpdatesDialogsTest {
 
     @Test
     fun filterDialogTogglesEachFilter() {
-        val preferences = UpdatesPreferences(InMemoryPreferenceStore())
+        val preferences = UpdatesPreferences(FlowPreferenceStore())
         compose.setContent {
             MaterialTheme {
                 UpdatesFilterDialog(
@@ -62,7 +62,7 @@ internal class UpdatesDialogsTest {
 
     @Test
     fun scanlatorSwitchAndRowToggle() {
-        val preferences = UpdatesPreferences(InMemoryPreferenceStore())
+        val preferences = UpdatesPreferences(FlowPreferenceStore())
         val initial = preferences.filterExcludedScanlators.get()
         compose.setContent {
             MaterialTheme {

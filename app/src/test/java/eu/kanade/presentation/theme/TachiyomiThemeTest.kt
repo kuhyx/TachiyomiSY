@@ -19,14 +19,14 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import tachiyomi.core.common.preference.InMemoryPreferenceStore
+import eu.kanade.domain.FlowPreferenceStore
 
 @RunWith(RobolectricTestRunner::class)
 internal class TachiyomiThemeTest {
     @get:Rule
     val compose = createComposeRule()
 
-    private val preferences = UiPreferences(InMemoryPreferenceStore())
+    private val preferences = UiPreferences(FlowPreferenceStore())
     private var seen: ColorScheme? = null
 
     @Before

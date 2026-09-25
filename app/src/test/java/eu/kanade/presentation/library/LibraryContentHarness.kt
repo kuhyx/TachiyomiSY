@@ -7,14 +7,14 @@ import androidx.compose.ui.test.junit4.v2.ComposeContentTestRule
 import eu.kanade.core.preference.PreferenceMutableState
 import eu.kanade.presentation.library.components.LibraryContent
 import eu.kanade.tachiyomi.ui.library.LibraryItem
-import tachiyomi.core.common.preference.InMemoryPreferenceStore
+import eu.kanade.domain.FlowPreferenceStore
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
 
 /** Composes [LibraryContent] over [items] per category id, recording callbacks in [events]. */
 internal class LibraryContentHarness(private val compose: ComposeContentTestRule) {
     val events: MutableList<String> = mutableListOf()
-    val store: InMemoryPreferenceStore = InMemoryPreferenceStore()
+    val store: FlowPreferenceStore = FlowPreferenceStore()
     var refreshStarts: Boolean = true
 
     fun show(categories: List<Category>, items: Map<Long, List<LibraryItem>>, options: LibraryShow = LibraryShow()) {
