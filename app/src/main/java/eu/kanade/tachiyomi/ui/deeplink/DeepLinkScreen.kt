@@ -48,7 +48,8 @@ internal class DeepLinkScreen(
                 is DeepLinkScreenModel.State.NoResults -> {
                     navigator.replace(GlobalSearchScreen(query))
                 }
-                is DeepLinkScreenModel.State.Result -> {
+                // The last state as `else`: a sealed `when` without one gets a dead "no match" group from Compose.
+                else -> {
                     val resultState = state as DeepLinkScreenModel.State.Result
                     if (resultState.chapterId == null) {
                         navigator.replace(
