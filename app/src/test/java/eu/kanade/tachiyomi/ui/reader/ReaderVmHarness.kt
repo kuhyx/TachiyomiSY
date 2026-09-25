@@ -83,6 +83,8 @@ internal class ReaderVmHarness(val context: Application = mockk(relaxed = true))
     val upsertHistory: UpsertHistory = mockk(relaxed = true)
     val trackChapter: TrackChapter = mockk(relaxed = true)
 
+    private var testMain = true
+
     val manga: Manga = Manga.create().copy(id = 10L, source = 1L, ogTitle = "Manga")
 
     private val graph: Module = module {
@@ -118,8 +120,10 @@ internal class ReaderVmHarness(val context: Application = mockk(relaxed = true))
         coEvery { getChaptersByMangaId.await(manga.id, any()) } returns chapters.toList()
     }
 
-    fun start(vararg extra: Module) {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
+    /** Starts Koin; [testMain] swaps Main for a test dispatcher (off for a real Robolectric activity). */
+    fun start(vararg extra: Module, testMain: Boolean = true) {
+        this.testMain = testMain
+        if (testMain) Dispatchers.setMain(UnconfinedTestDispatcher())
         mockkStatic(QUEUE_KT)
         every { downloadManager.getQueuedDownloadOrNull(any()) } returns null
         startKoin { modules(graph, *extra) }
@@ -128,7 +132,7 @@ internal class ReaderVmHarness(val context: Application = mockk(relaxed = true))
     fun stop() {
         unmockkAll()
         stopKoin()
-        Dispatchers.resetMain()
+        if (testMain) Dispatchers.resetMain()
     }
 
     fun viewModel(savedState: SavedStateHandle = SavedStateHandle()): ReaderViewModel = ReaderViewModel(
