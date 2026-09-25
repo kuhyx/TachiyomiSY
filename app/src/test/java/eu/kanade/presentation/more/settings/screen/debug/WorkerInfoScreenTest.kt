@@ -71,7 +71,8 @@ internal class WorkerInfoScreenTest {
         compose.setContent { MaterialTheme { Navigator(WorkerInfoScreen()) } }
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodes(hasText("Attempt #3", substring = true))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         compose.onNodeWithText("Worker info").assertExists()
         compose.onNodeWithContentDescription("Copy to clipboard").performClick()

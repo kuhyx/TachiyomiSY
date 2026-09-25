@@ -19,19 +19,19 @@ internal class PreferenceScreenTest {
     @get:Rule
     val compose = createComposeRule()
 
-    @After
-    fun tearDown() {
-        SearchableSettings.highlightKey = null
-    }
-
-    private fun text(title: String) = Preference.PreferenceItem.TextPreference(title = title)
-
     private val items = listOf(
         text("Loose"),
         Preference.PreferenceGroup(title = "Hidden group", enabled = false, preferenceItems = listOf(text("Nope"))),
         Preference.PreferenceGroup(title = "First group", preferenceItems = (1..30).map { text("Row $it") }),
         Preference.PreferenceGroup(title = "Last group", preferenceItems = listOf(text("Tail"))),
     )
+
+    @After
+    fun tearDown() {
+        SearchableSettings.highlightKey = null
+    }
+
+    private fun text(title: String) = Preference.PreferenceItem.TextPreference(title = title)
 
     private fun show(key: String?) {
         SearchableSettings.highlightKey = key
