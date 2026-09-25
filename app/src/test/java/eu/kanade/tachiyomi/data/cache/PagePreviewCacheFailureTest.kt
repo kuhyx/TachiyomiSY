@@ -32,7 +32,12 @@ internal class PagePreviewCacheFailureTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val disk: DiskLruCache = mockk(relaxed = true)
     private val dir: File = File(context.cacheDir, "stub_preview_cache").apply { mkdirs() }
-    private val page = PagePreviewPage(page = 1, pagePreviews = emptyList(), hasNextPage = false, pagePreviewPages = null)
+    private val page = PagePreviewPage(
+        page = 1,
+        pagePreviews = emptyList(),
+        hasNextPage = false,
+        pagePreviewPages = null,
+    )
     private lateinit var cache: PagePreviewCache
 
     @Before

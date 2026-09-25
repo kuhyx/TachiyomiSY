@@ -36,7 +36,8 @@ internal class ChapterCacheFailureTest {
         mockkStatic(DiskLruCache::class)
         every { DiskLruCache.open(any(), any(), any(), any()) } returns disk
         every { disk.directory } returns dir
-        cache = ChapterCache(context = context, json = Json, readerPreferences = ReaderPreferences(MapPreferenceStore()))
+        val preferences = ReaderPreferences(MapPreferenceStore())
+        cache = ChapterCache(context = context, json = Json, readerPreferences = preferences)
     }
 
     @After
