@@ -16,8 +16,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 /** A pointer-sourced scroll of [vscroll] (negative scrolls down). */
-internal fun scrollEvent(vscroll: Float, source: Int = InputDevice.SOURCE_MOUSE, action: Int = MotionEvent.ACTION_SCROLL):
-    MotionEvent {
+internal fun scrollEvent(
+    vscroll: Float,
+    source: Int = InputDevice.SOURCE_MOUSE,
+    action: Int = MotionEvent.ACTION_SCROLL,
+): MotionEvent {
     val properties = MotionEvent.PointerProperties().apply { id = 0 }
     val coords = MotionEvent.PointerCoords().apply { setAxisValue(MotionEvent.AXIS_VSCROLL, vscroll) }
     return MotionEvent.obtain(

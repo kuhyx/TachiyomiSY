@@ -19,10 +19,10 @@ import org.robolectric.shadows.ShadowLooper
 
 /**
  * Launches a real [ReaderActivity] in the Robolectric sandbox over [ReaderVmHarness]'s graph:
- * manga 10 with chapters 1..3 from an HTTP source, chapter loading replaced by [pageCount]
+ * manga 10 (read with [viewerFlags]) with chapters 1..3 from an HTTP source, chapter loading replaced by [pageCount]
  * queued pages per chapter so no image is ever decoded.
  */
-internal class ReaderActivityHarness(private val pageCount: Int = 4) {
+internal class ReaderActivityHarness(private val pageCount: Int = 4, private val viewerFlags: Long = 0L) {
     val app: Application = ApplicationProvider.getApplicationContext()
     val vm: ReaderVmHarness = ReaderVmHarness(app)
     val source: HttpSource = mockk(relaxed = true)
@@ -31,7 +31,7 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4) {
         vm.start(module { single { SecurityPreferences(vm.store) } }, testMain = false)
         every { vm.sourceManager.getOrStub(1L) } returns source
         every { vm.sourceManager.get(1L) } returns source
-        coEvery { vm.getManga.await(10L) } returns vm.manga
+        coEvery { vm.getManga.await(10L) } returns vm.manga.copy(viewerFlags = viewerFlags)
         vm.chapters(domainChapter(1L), domainChapter(2L), domainChapter(3L))
         mockkConstructor(ChapterLoader::class)
         coEvery { anyConstructed<ChapterLoader>().loadChapter(any(), any()) } answers {

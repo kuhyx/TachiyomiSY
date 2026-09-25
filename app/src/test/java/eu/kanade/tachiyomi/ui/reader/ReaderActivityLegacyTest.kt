@@ -43,7 +43,7 @@ internal class ReaderActivityLegacyTest {
     }
 
     @Test
-    fun recreatedActivityKeepsViewModel() {
+    fun recreatedKeepsViewModel() {
         val controller = harness.launch()
         controller.recreate()
         harness.settle()
