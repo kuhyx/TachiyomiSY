@@ -43,12 +43,12 @@ internal class AppUpdateChecker {
     }
 }
 
-internal val GITHUB_REPO: String by lazy {
-    // SY -->
-    if (isPreviewBuildType) {
-        "jobobby04/TachiyomiSYPreview"
-    } else {
-        "jobobby04/tachiyomiSY"
-    }
-    // SY <--
-}
+internal val GITHUB_REPO: String
+    get() =
+        // SY -->
+        if (isPreviewBuildType) {
+            "jobobby04/TachiyomiSYPreview"
+        } else {
+            "jobobby04/tachiyomiSY"
+        }
+// SY <--
