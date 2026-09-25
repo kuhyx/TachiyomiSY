@@ -42,7 +42,9 @@ internal class ChapterListDialogTest {
     private val downloadManager = mockk<DownloadManager> {
         every { queueState } returns MutableStateFlow(listOf(download))
         every { progressFlow() } returns flowOf(download)
-        every { isChapterDownloaded(any(), any(), any(), any(), any(), any()) } answers { firstArg<String>() == "Saved" }
+        every { isChapterDownloaded(any(), any(), any(), any(), any(), any()) } answers {
+            firstArg<String>() == "Saved"
+        }
     }
 
     @Before
