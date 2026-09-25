@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
 import com.hippo.unifile.UniFile
+import eu.kanade.tachiyomi.data.track.MapPreferenceStore
 import eu.kanade.tachiyomi.source.Source
 import io.mockk.every
 import io.mockk.mockk

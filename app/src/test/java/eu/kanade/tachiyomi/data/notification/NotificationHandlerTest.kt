@@ -20,14 +20,14 @@ internal class NotificationHandlerTest {
         Shadows.shadowOf(pendingIntent).savedIntent
 
     @Test
-    fun downloadManagerIntentTargetsMain() {
+    fun downloadIntentTargetsMain() {
         val intent = savedIntent(NotificationHandler.openDownloadManagerActivity(context))
         intent.action shouldBe Constants.SHORTCUT_DOWNLOADS
         intent.component!!.className shouldBe "eu.kanade.tachiyomi.ui.main.MainActivity"
     }
 
     @Test
-    fun downloadManagerIntentClearsTop() {
+    fun downloadIntentClearsTop() {
         val intent = savedIntent(NotificationHandler.openDownloadManagerActivity(context))
         val expected = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         intent.flags shouldBe expected
@@ -43,7 +43,7 @@ internal class NotificationHandlerTest {
     }
 
     @Test
-    fun imageIntentGrantsReadPermission() {
+    fun imageIntentGrantsRead() {
         val uri = "content://images/2".toUri()
         val intent = savedIntent(NotificationHandler.openImagePendingActivity(context = context, uri = uri))
         val expected = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
