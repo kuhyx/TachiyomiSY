@@ -2,13 +2,13 @@ package eu.kanade.presentation.more.settings
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.SemanticsMatcher
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
 import io.kotest.matchers.shouldBe
 import org.junit.Rule
