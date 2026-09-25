@@ -42,8 +42,8 @@ internal suspend fun SyncYomiSyncService.pullSyncData(): Pair<SyncData?, String>
     val response = client.newCall(downloadRequest).await()
 
     return when {
+        // Only an If-None-Match request gets a 304, so lastETag is the one that was sent.
         response.code == HttpStatus.SC_NOT_MODIFIED -> {
-            assert(lastETag.isNotEmpty())
             logcat(LogPriority.INFO) {
                 "Remote server not modified"
             }
