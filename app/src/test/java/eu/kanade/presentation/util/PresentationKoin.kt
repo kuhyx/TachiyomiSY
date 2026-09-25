@@ -1,11 +1,11 @@
 package eu.kanade.presentation.util
 
+import eu.kanade.domain.FlowPreferenceStore
 import eu.kanade.domain.ui.UiPreferences
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import eu.kanade.domain.FlowPreferenceStore
 import tachiyomi.domain.manga.interactor.GetCustomMangaInfo
 import tachiyomi.domain.manga.model.CustomMangaInfo
 import tachiyomi.domain.manga.repository.CustomMangaRepository

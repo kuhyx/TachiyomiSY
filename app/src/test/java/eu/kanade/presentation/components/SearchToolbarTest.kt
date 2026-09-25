@@ -1,6 +1,5 @@
 package eu.kanade.presentation.components
 
-import androidx.compose.ui.test.requestFocus
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +18,7 @@ import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.requestFocus
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import org.junit.Rule
@@ -38,13 +38,13 @@ internal class SearchToolbarTest {
         compose.setContent {
             MaterialTheme {
                 SearchToolbar(
-                        searchQuery = query,
-                        onChangeSearchQuery = {
-                            query = it
-                            events += "query $it"
-                        },
-                        titleContent = { Text("Title") },
-                        navigateUp = { events += "up" },
+                    searchQuery = query,
+                    onChangeSearchQuery = {
+                        query = it
+                        events += "query $it"
+                    },
+                    titleContent = { Text("Title") },
+                    navigateUp = { events += "up" },
                     onSearch = { events += "search $it" },
                 )
             }

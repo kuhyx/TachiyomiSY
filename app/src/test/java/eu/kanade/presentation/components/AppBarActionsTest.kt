@@ -28,18 +28,18 @@ internal class AppBarActionsTest {
         compose.setContent {
             MaterialTheme {
                 Row {
-                AppBarActions(
-                    listOf(
-                        AppBar.Action(title = "Star", icon = Icons.Outlined.Star, onClick = { events += "star" }),
-                        AppBar.Action(
-                            title = "Tinted",
-                            icon = Icons.Outlined.Star,
-                            iconTint = Color.Red,
-                            onClick = {},
-                            enabled = false,
+                    AppBarActions(
+                        listOf(
+                            AppBar.Action(title = "Star", icon = Icons.Outlined.Star, onClick = { events += "star" }),
+                            AppBar.Action(
+                                title = "Tinted",
+                                icon = Icons.Outlined.Star,
+                                iconTint = Color.Red,
+                                onClick = {},
+                                enabled = false,
+                            ),
                         ),
-                    ),
-                )
+                    )
                 }
             }
         }

@@ -34,12 +34,12 @@ internal class UpdatesScreenTest {
     private val day = 86_400_000L
     private val twoDays by lazy {
         UpdatesScreenModel.State(
-        isLoading = false,
-        items = listOf(
-            updatesItem(mangaId = 1L, dateFetch = 3 * day),
-            updatesItem(mangaId = 2L, dateFetch = 3 * day),
-            updatesItem(mangaId = 3L, dateFetch = day),
-        ),
+            isLoading = false,
+            items = listOf(
+                updatesItem(mangaId = 1L, dateFetch = 3 * day),
+                updatesItem(mangaId = 2L, dateFetch = 3 * day),
+                updatesItem(mangaId = 3L, dateFetch = day),
+            ),
         )
     }
 

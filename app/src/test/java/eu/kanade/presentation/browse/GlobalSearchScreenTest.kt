@@ -1,18 +1,18 @@
 package eu.kanade.presentation.browse
 
-import eu.kanade.presentation.util.invokeClick
-import androidx.compose.ui.test.performScrollToNode
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.test.hasScrollToNodeAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import eu.kanade.presentation.util.PresentationKoin
+import eu.kanade.presentation.util.invokeClick
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.SearchItemResult
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.SearchScreenModel

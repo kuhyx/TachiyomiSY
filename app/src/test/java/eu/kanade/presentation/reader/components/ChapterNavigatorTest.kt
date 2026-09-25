@@ -1,6 +1,5 @@
 package eu.kanade.presentation.reader.components
 
-import androidx.compose.ui.test.swipe
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -12,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import eu.kanade.presentation.util.setSlider
 import io.kotest.matchers.collections.shouldContain
 import org.junit.Rule

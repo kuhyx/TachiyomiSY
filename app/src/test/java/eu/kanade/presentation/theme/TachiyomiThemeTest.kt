@@ -3,6 +3,7 @@ package eu.kanade.presentation.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import eu.kanade.domain.FlowPreferenceStore
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.presentation.theme.colorscheme.NordColorScheme
@@ -19,7 +20,6 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import eu.kanade.domain.FlowPreferenceStore
 
 @RunWith(RobolectricTestRunner::class)
 internal class TachiyomiThemeTest {
