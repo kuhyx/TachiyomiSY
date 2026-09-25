@@ -1,5 +1,7 @@
 package eu.kanade.presentation.track
 
+import io.kotest.matchers.shouldBe
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -118,6 +120,6 @@ internal class TrackInfoDialogHomeTest {
         val previews = TrackInfoDialogHomePreviewProvider().values.toList()
         compose.setContent { previews.forEach { TrackInfoDialogHomePreviews(it) } }
         compose.onNodeWithText("Track privately").assertDoesNotExist()
-        compose.onNodeWithText("Example Tracker", substring = true).assertExists()
+        compose.onAllNodesWithContentDescription("Example Tracker 2").fetchSemanticsNodes().size shouldBe 2
     }
 }

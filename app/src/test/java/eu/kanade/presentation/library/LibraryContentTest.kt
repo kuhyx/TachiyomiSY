@@ -27,10 +27,12 @@ internal class LibraryContentTest {
     private val koin = PresentationKoin()
     private val harness = LibraryContentHarness(compose)
     private val categories = listOf(libraryCategory(1L), libraryCategory(2L))
-    private val items = mapOf(
-        1L to listOf(libraryItem(10L, unread = 3L, downloads = 2, badgeUnread = 3L, language = "en")),
-        2L to listOf(libraryItem(20L, local = true)),
-    )
+    private val items by lazy {
+        mapOf(
+            1L to listOf(libraryItem(10L, unread = 3L, downloads = 2, badgeUnread = 3L, language = "en")),
+            2L to listOf(libraryItem(20L, local = true)),
+        )
+    }
 
     @Before
     fun setUp() = koin.start()

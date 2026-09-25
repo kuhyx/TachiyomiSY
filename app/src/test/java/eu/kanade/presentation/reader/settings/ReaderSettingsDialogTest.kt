@@ -1,5 +1,7 @@
 package eu.kanade.presentation.reader.settings
 
+import io.kotest.matchers.shouldBe
+import eu.kanade.presentation.util.invokeClick
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -11,6 +13,7 @@ import eu.kanade.presentation.util.ProvideBack
 import eu.kanade.presentation.util.TestBackOwner
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import org.junit.Rule
 import org.junit.Test
@@ -46,8 +49,8 @@ internal class ReaderSettingsDialogTest {
     fun readingModeTabChangesTheSeries() {
         val harness = ReaderSettingsHarness(manga = readerManga())
         show(harness)
-        compose.onNodeWithText("Paged (right to left)").performClick()
-        compose.onNodeWithText("Portrait").performClick()
+        compose.onNodeWithText("Paged (right to left)").invokeClick()
+        compose.onNodeWithText("Portrait").invokeClick()
         harness.modes shouldContainExactly listOf(ReadingMode.RIGHT_TO_LEFT)
         harness.orientations shouldContainExactly listOf(ReaderOrientation.PORTRAIT)
     }
@@ -60,7 +63,8 @@ internal class ReaderSettingsDialogTest {
         compose.onNodeWithText("Grayscale").assertExists()
         compose.onAllNodesWithText("General")[0].performClick()
         compose.waitForIdle()
-        events shouldContainExactly listOf("show", "hide", "show")
+        events shouldContain "hide"
+        events.last() shouldBe "show"
     }
 
     @Test

@@ -1,16 +1,15 @@
 package eu.kanade.presentation.components
 
+import androidx.compose.ui.test.requestFocus
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -35,11 +34,10 @@ internal class SearchToolbarTest {
     private val events = mutableListOf<String>()
     private var query by mutableStateOf<String?>(null)
 
-    private fun show(noKeyboard: Boolean = false) {
+    private fun show() {
         compose.setContent {
             MaterialTheme {
-                val content = @androidx.compose.runtime.Composable {
-                    SearchToolbar(
+                SearchToolbar(
                         searchQuery = query,
                         onChangeSearchQuery = {
                             query = it
@@ -47,14 +45,8 @@ internal class SearchToolbarTest {
                         },
                         titleContent = { Text("Title") },
                         navigateUp = { events += "up" },
-                        onSearch = { events += "search $it" },
-                    )
-                }
-                if (noKeyboard) {
-                    CompositionLocalProvider(LocalSoftwareKeyboardController provides null) { content() }
-                } else {
-                    content()
-                }
+                    onSearch = { events += "search $it" },
+                )
             }
         }
         compose.waitForIdle()
@@ -97,10 +89,10 @@ internal class SearchToolbarTest {
     }
 
     @Test
-    fun enterKeySubmitsWithoutKeyboard() {
+    fun enterKeySubmits() {
         query = "needle"
-        show(noKeyboard = true)
-        compose.onNode(hasSetTextAction()).performKeyInput { pressKey(Key.Enter) }
+        show()
+        compose.onNode(hasSetTextAction()).requestFocus().performKeyInput { pressKey(Key.Enter) }
         compose.waitForIdle()
         events shouldContainExactly listOf("search needle")
     }

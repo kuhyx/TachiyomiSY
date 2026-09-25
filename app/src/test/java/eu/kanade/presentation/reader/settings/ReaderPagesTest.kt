@@ -83,7 +83,7 @@ internal class ReaderPagesTest {
     fun webtoonViewerShowsItsSettings() {
         val harness = ReaderSettingsHarness(viewer = mockk<WebtoonViewer>())
         readingModePage(harness)
-        compose.onNodeWithText("Long strip with gaps").assertExists()
+        compose.onAllNodesWithText("Long strip with gaps").fetchSemanticsNodes().size shouldBe 2
         compose.onNodeWithText("Side padding").assertExists()
         click("Split wide pages")
         click("Rotate wide pages to fit")

@@ -9,6 +9,7 @@ internal fun trackSearch(
     score: Double = 7.5,
     trackingUrl: String = "https://example.com/t",
 ): TrackSearch = TrackSearch().also {
+    it.remoteId = title.hashCode().toLong()
     it.title = title
     it.summary = summary
     it.score = score

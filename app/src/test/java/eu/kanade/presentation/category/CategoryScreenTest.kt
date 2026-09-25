@@ -46,7 +46,7 @@ internal class CategoryScreenTest {
     fun emptyInvitesToCreate() {
         show(CategoryScreenState.Success(emptyList()))
         compose.onNodeWithText("You have no categories", substring = true).assertExists()
-        compose.onNodeWithText("Add").performClick()
+        compose.onNodeWithText("Add", useUnmergedTree = true).performClick()
         compose.onNodeWithContentDescription("Navigate up").performClick()
         events shouldContainExactly listOf("create", "up")
     }

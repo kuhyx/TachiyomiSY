@@ -1,5 +1,6 @@
 package eu.kanade.presentation.library
 
+import eu.kanade.presentation.util.invokeClick
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -66,7 +67,7 @@ internal class LibrarySettingsDialogTest {
         val harness = LibrarySettingsHarness(trackerCount = 2)
         show(harness)
         compose.onNodeWithText("Customized update frequency").performClick()
-        compose.onNodeWithText("Tracker 2").performClick()
+        compose.onNodeWithText("Tracker 2").invokeClick()
         compose.waitForIdle()
         harness.libraryPreferences.filterTracking(2).get() shouldBe TriState.ENABLED_IS
     }
@@ -76,11 +77,10 @@ internal class LibrarySettingsDialogTest {
         val harness = LibrarySettingsHarness(trackerCount = 1)
         show(harness, category = Category(id = 1L, name = "c", order = 0L, flags = 0L))
         tab("Sort")
-        compose.onNodeWithText("Alphabetically").performClick()
-        compose.onNodeWithText("Tracker score").performClick()
-        compose.onNodeWithText("Random").performClick()
-        compose.waitForIdle()
-        harness.sorts.size shouldBe 3
+        compose.onNodeWithText("Alphabetically").invokeClick()
+        compose.onNodeWithText("Tracker score").invokeClick()
+        compose.onNodeWithText("Random").invokeClick()
+        compose.waitUntil(timeoutMillis = 5_000L) { harness.sorts.size == 3 }
     }
 
     @Test
@@ -90,10 +90,9 @@ internal class LibrarySettingsDialogTest {
         harness.libraryPreferences.sortTagsForLibrary.set(setOf("tag"))
         show(harness)
         tab("Sort")
-        compose.onNodeWithText("Tag sorting").performClick()
+        compose.onNodeWithText("Tag sorting").invokeClick()
         compose.onNodeWithText("Tracker score").assertDoesNotExist()
-        compose.waitForIdle()
-        harness.sorts.size shouldBe 1
+        compose.waitUntil(timeoutMillis = 5_000L) { harness.sorts.size == 1 }
     }
 
     @Test

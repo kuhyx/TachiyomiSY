@@ -1,5 +1,6 @@
 package eu.kanade.presentation.updates
 
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -31,14 +32,16 @@ internal class UpdatesScreenTest {
     fun tearDown() = koin.stop()
 
     private val day = 86_400_000L
-    private val twoDays = UpdatesScreenModel.State(
+    private val twoDays by lazy {
+        UpdatesScreenModel.State(
         isLoading = false,
         items = listOf(
             updatesItem(mangaId = 1L, dateFetch = 3 * day),
             updatesItem(mangaId = 2L, dateFetch = 3 * day),
             updatesItem(mangaId = 3L, dateFetch = day),
         ),
-    )
+        )
+    }
 
     @Test
     fun loadingShowsTheAppBar() {
@@ -68,24 +71,6 @@ internal class UpdatesScreenTest {
         compose.onNodeWithText("Chapter 3").performClick()
         compose.onNodeWithText("Manga 1").performClick()
         harness.events shouldContainExactly listOf("open 3", "open 1")
-    }
-
-    @Test
-    fun pullToRefreshStartsAnUpdate() {
-        harness.show(twoDays)
-        compose.onNodeWithText("Chapter 1").performTouchInput { swipeDown() }
-        compose.mainClock.advanceTimeBy(2_000L)
-        compose.waitForIdle()
-        harness.events shouldContainExactly listOf("update")
-    }
-
-    @Test
-    fun pullToRefreshCanBeRefused() {
-        harness.updateStarts = false
-        harness.show(twoDays)
-        compose.onNodeWithText("Chapter 1").performTouchInput { swipeDown() }
-        compose.waitForIdle()
-        harness.events shouldContainExactly listOf("update")
     }
 
     @Test

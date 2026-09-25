@@ -32,8 +32,8 @@ internal class BrowseSmallComponentsTest {
                 }
             }
         }
-        compose.onNodeWithText("Saved Searches").assertExists()
-        compose.onNodeWithText("Filter").performClick()
+        compose.onNodeWithText("Saved Searches", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Filter", useUnmergedTree = true).performClick()
         events shouldContainExactly listOf("fab")
     }
 

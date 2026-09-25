@@ -1,5 +1,6 @@
 package eu.kanade.presentation.components
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,7 @@ internal class AppBarActionsTest {
     fun iconsOnlyHaveNoOverflow() {
         compose.setContent {
             MaterialTheme {
+                Row {
                 AppBarActions(
                     listOf(
                         AppBar.Action(title = "Star", icon = Icons.Outlined.Star, onClick = { events += "star" }),
@@ -38,6 +40,7 @@ internal class AppBarActionsTest {
                         ),
                     ),
                 )
+                }
             }
         }
         compose.onNodeWithContentDescription("More options").assertDoesNotExist()

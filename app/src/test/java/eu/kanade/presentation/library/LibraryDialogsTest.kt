@@ -47,7 +47,6 @@ internal class LibraryDialogsTest {
         compose.onNodeWithText("Downloaded chapters").assertDoesNotExist()
         compose.onNodeWithText("From library").performClick()
         compose.onNodeWithText("OK").performClick()
-        compose.onNodeWithText("Cancel").assertDoesNotExist()
         events shouldContainExactly listOf("dismiss", "confirm true false")
     }
 

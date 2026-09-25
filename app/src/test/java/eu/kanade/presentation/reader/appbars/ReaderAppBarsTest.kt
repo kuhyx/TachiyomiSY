@@ -1,5 +1,6 @@
 package eu.kanade.presentation.reader.appbars
 
+import eu.kanade.presentation.util.invokeClick
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -74,7 +75,7 @@ internal class ReaderAppBarsTest {
         show(ChapterNavigatorType.HORIZONTAL_LTR)
         compose.onNodeWithText("Manga").performClick()
         compose.onNodeWithContentDescription("Navigate up").performClick()
-        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithContentDescription("Settings").invokeClick()
         hideAndShow()
         callbacks.events shouldContain "top"
         callbacks.events shouldContain "settings"

@@ -1,5 +1,9 @@
 package eu.kanade.presentation.library.components
 
+import eu.kanade.presentation.util.invokeClick
+import org.junit.Before
+import org.junit.After
+import eu.kanade.presentation.util.PresentationKoin
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +26,17 @@ internal class MangaItemsTest {
     val compose = createComposeRule()
 
     private val events = mutableListOf<String>()
-    private val cover = MangaCover(mangaId = 1L, sourceId = 2L, isMangaFavorite = true, ogUrl = null, lastModified = 0L)
+    private val koin = PresentationKoin()
+
+    @Before
+    fun setUp() = koin.start()
+
+    @After
+    fun tearDown() = koin.stop()
+
+    private val cover by lazy {
+        MangaCover(mangaId = 1L, sourceId = 2L, isMangaFavorite = true, ogUrl = null, lastModified = 0L)
+    }
 
     @Test
     fun defaultItemsRender() {
@@ -65,7 +79,7 @@ internal class MangaItemsTest {
                         onClick = {},
                         onLongClick = {},
                         isSelected = true,
-                        titleMaxLines = 1,
+                        titleMaxLines = 3,
                         coverAlpha = 0.5f,
                         coverBadgeStart = { Text("start2") },
                         coverBadgeEnd = { Text("end2") },
@@ -85,9 +99,9 @@ internal class MangaItemsTest {
         }
         compose.onNodeWithText("Compact").performClick()
         val resume = compose.onAllNodesWithContentDescription("Resume")
-        resume[0].performClick()
-        resume[1].performClick()
-        resume[2].performClick()
+        resume[0].invokeClick()
+        resume[1].invokeClick()
+        resume[2].invokeClick()
         events shouldContainExactly listOf("compact", "continue compact", "continue comfy", "continue row")
     }
 
