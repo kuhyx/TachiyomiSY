@@ -46,15 +46,8 @@ internal fun WebViewScreenContent(
     val session = rememberWebViewSession(url, headers, onUrlChange)
     val currentWindow = session.windowStack.lastItemOrNull!!
 
-    val popState = remember<() -> Unit> {
-        {
-            if (session.windowStack.size == 1) {
-                onNavigateUp()
-            } else {
-                session.windowStack.pop()
-            }
-        }
-    }
+    // Only reachable while a popup window is open: Back and "close tab" are both gated on it.
+    val popState = remember<() -> Unit> { { session.windowStack.pop() } }
 
     BackHandler(session.windowStack.size > 1, popState)
 
@@ -127,21 +120,14 @@ private fun webViewActions(
         AppBar.Action(
             title = stringResource(MR.strings.action_webview_back),
             icon = Icons.AutoMirrored.Outlined.ArrowBack,
-            onClick = {
-                if (navigator.canGoBack) {
-                    navigator.navigateBack()
-                }
-            },
+            // The button is disabled unless the navigator can go back.
+            onClick = { navigator.navigateBack() },
             enabled = navigator.canGoBack,
         ),
         AppBar.Action(
             title = stringResource(MR.strings.action_webview_forward),
             icon = Icons.AutoMirrored.Outlined.ArrowForward,
-            onClick = {
-                if (navigator.canGoForward) {
-                    navigator.navigateForward()
-                }
-            },
+            onClick = { navigator.navigateForward() },
             enabled = navigator.canGoForward,
         ),
         AppBar.OverflowAction(
