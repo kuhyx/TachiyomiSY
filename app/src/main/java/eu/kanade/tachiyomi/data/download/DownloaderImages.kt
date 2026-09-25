@@ -12,9 +12,9 @@ import exh.util.DataSaver
 import exh.util.DataSaver.Companion.getImage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.flow.single
 import logcat.LogPriority
 import okhttp3.Response
 import tachiyomi.core.common.i18n.stringResource
@@ -127,7 +127,8 @@ internal suspend fun Downloader.downloadImage(
                 false
             }
         }
-        .first()
+        // The flow emits exactly once; single() lets it complete instead of aborting inside emit.
+        .single()
 }
 
 // Copies the image from cache to file in tmpDir.
@@ -166,8 +167,8 @@ internal fun Downloader.splitTallImageIfNeeded(page: Page, tmpDir: UniFile) {
         val imageFile = tmpDir.listFiles()?.firstOrNull { it.name.orEmpty().startsWith(filenamePrefix) }
             ?: error(context.stringResource(MR.strings.download_notifier_split_page_not_found, page.number))
 
-        // If the original page was previously split, then skip
-        if (imageFile.name.orEmpty().startsWith("${filenamePrefix}__")) return
+        // If the original page was previously split, then skip (the file was picked by its name, so it has one)
+        if (imageFile.name!!.startsWith("${filenamePrefix}__")) return
 
         ImageUtil.splitTallImage(
             tmpDir,
