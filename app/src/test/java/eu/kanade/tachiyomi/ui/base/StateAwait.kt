@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -18,9 +19,11 @@ private const val AWAIT_MILLIS = 10_000L
 internal fun <T> Flow<T>.await(predicate: (T) -> Boolean): T =
     runBlocking { withTimeout(AWAIT_MILLIS) { first(predicate) } }
 
-/** Runs `screenModelScope` (Main) eagerly in the calling thread. */
-internal fun mainUnconfined() {
-    Dispatchers.setMain(UnconfinedTestDispatcher())
+/** Runs `screenModelScope` (Main) eagerly in the calling thread; its delays run on the returned virtual clock. */
+internal fun mainUnconfined(): TestCoroutineScheduler {
+    val dispatcher = UnconfinedTestDispatcher()
+    Dispatchers.setMain(dispatcher)
+    return dispatcher.scheduler
 }
 
 internal fun mainReset() {

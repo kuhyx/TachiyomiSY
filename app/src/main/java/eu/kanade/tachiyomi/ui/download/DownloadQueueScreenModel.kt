@@ -11,10 +11,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -79,19 +80,19 @@ internal class DownloadQueueScreenModel(
     }
 
     init {
-        screenModelScope.launch {
-            downloadManager.queueState
-                .map { downloads ->
-                    downloads
-                        .groupBy { it.source }
-                        .map { entry ->
-                            DownloadHeaderItem(entry.key.id, entry.key.name, entry.value.size).apply {
-                                addSubItems(0, entry.value.map { DownloadItem(it, this) })
-                            }
+        // launchIn rather than launch { collect }: the queue never completes, so nothing follows the collect.
+        downloadManager.queueState
+            .map { downloads ->
+                downloads
+                    .groupBy { it.source }
+                    .map { entry ->
+                        DownloadHeaderItem(entry.key.id, entry.key.name, entry.value.size).apply {
+                            addSubItems(0, entry.value.map { DownloadItem(it, this) })
                         }
-                }
-                .collect { newList -> _state.update { newList } }
-        }
+                    }
+            }
+            .onEach { newList -> _state.update { newList } }
+            .launchIn(screenModelScope)
     }
 
     val isDownloaderRunning = downloadManager.isDownloaderRunning

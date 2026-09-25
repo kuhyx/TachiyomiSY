@@ -4,11 +4,12 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.milliseconds
@@ -43,17 +44,20 @@ internal fun DownloadQueueScreenModel.onStatusChange(download: Download) {
 // @param download the download to observe its progress.
 internal fun DownloadQueueScreenModel.launchProgressJob(download: Download) {
     val job = screenModelScope.launch {
-        while (download.pages == null) {
+        var pages = download.pages
+        while (pages == null) {
             delay(50.milliseconds)
+            pages = download.pages
         }
 
-        val progressFlows = download.pages!!.map(Page::progressFlow)
+        val progressFlows = pages.map(Page::progressFlow)
+        // launchIn: the page progress never completes, so nothing would follow a collect; the child job still
+        // ends with this one.
         combine(progressFlows, Array<Int>::sum)
             .distinctUntilChanged()
             .debounce(50.milliseconds)
-            .collectLatest {
-                onUpdateProgress(download)
-            }
+            .onEach { onUpdateProgress(download) }
+            .launchIn(this)
     }
 
     // Avoid leaking jobs
