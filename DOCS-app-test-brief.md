@@ -122,6 +122,7 @@ a whole slice, read `app/src/test/java/eu/kanade/tachiyomi/data/track/` (Koin gr
 
 ## Report back (concise)
 1. The list of test files you wrote (paths) and roughly what each covers.
-2. Your final `app_test_loop.sh` summary line per file (lines x/y, branches x/y).
+2. The final coverage of each main file you own, from `scripts/kover_gaps.py`
+   (`lines x/y branches x/y`).
 3. Any line/branch you could not reach and why (file:line).
 4. Anything you had to assume about a dependency's behaviour.
