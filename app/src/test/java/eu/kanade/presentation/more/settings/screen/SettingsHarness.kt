@@ -1,6 +1,7 @@
 package eu.kanade.presentation.more.settings.screen
 
 import android.content.Context
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -25,6 +26,7 @@ import kotlinx.coroutines.runBlocking
  */
 internal class SettingsHarness(private val compose: ComposeContentTestRule) {
     val navigator: Navigator = mockk(relaxed = true)
+    val registry: FakeResultRegistry = FakeResultRegistry()
     var prefs: List<Preference> = emptyList()
         private set
 
@@ -33,6 +35,7 @@ internal class SettingsHarness(private val compose: ComposeContentTestRule) {
             CompositionLocalProvider(
                 LocalNavigator provides navigator,
                 LocalContext provides (context ?: LocalContext.current),
+                LocalActivityResultRegistryOwner provides registry.owner(),
             ) {
                 MaterialTheme {
                     val current = screen.getPreferences()
