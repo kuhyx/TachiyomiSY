@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew:*)",
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(scripts/ci_gates.sh:*)",
+      "Bash(bash scripts/:*)",
+      "Bash(python3 scripts/:*)",
+      "Bash(python3 -m pytest:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(diff:*)",
+      "Bash(echo:*)",
+      "Bash(sleep:*)",
+      "Bash(java:*)",
+      "Bash(unzip:*)"
+    ]
+  }
+}
