@@ -53,6 +53,27 @@ internal class DownloadProviderTest : ProviderTestBase() {
         harness.provider.getMangaDir(mangaTitle = "Title", source = source).isFailure shouldBe true
     }
 
+    /** A document provider may list a file without a name; it is neither temporary nor kept. */
+    @Test
+    fun namelessFileIsNotUnmatched() {
+        val nameless = mockk<UniFile>()
+        every { nameless.name } returns null
+        val mangaDir = mockk<UniFile>()
+        every { mangaDir.listFiles() } returns arrayOf(nameless)
+        every { mangaDir.findFile(any()) } returns nameless
+        val sourceDir = mockk<UniFile>()
+        every { sourceDir.findFile("Title") } returns mangaDir
+        val downloads = mockk<UniFile>()
+        every { downloads.findFile("Source") } returns sourceDir
+        every { harness.storageManager.getDownloadsDirectory() } returns downloads
+        val unmatched = harness.provider.findUnmatchedChapterDirs(
+            chapters = listOf(testChapter(name = "Ch 1")),
+            manga = testManga("Title"),
+            source = source,
+        )
+        unmatched.isEmpty() shouldBe true
+    }
+
     @Test
     fun defaultsComeFromInjekt() {
         startKoin {
