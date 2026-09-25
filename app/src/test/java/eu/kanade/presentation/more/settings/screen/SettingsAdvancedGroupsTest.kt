@@ -40,6 +40,7 @@ internal class SettingsAdvancedGroupsTest {
             "eu.kanade.tachiyomi.util.system.BuildConfigKt",
         )
         every { any<Context>().isShizukuInstalled } returns false
+        stubTextureLimits()
         koin.start(advanced.module())
     }
 
