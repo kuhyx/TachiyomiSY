@@ -53,11 +53,13 @@ private fun DownloadDropdownMenuItems(
 ) {
     // Entries run NEXT_1..NEXT_25, then the two actions without a chapter count.
     val options = DownloadAction.entries.map { action ->
-        action to when (val count = action.nextChapters) {
-            null -> stringResource(
-                if (action == DownloadAction.UNREAD_CHAPTERS) MR.strings.download_unread else MR.strings.download_bookmarked,
-            )
-            else -> pluralStringResource(MR.plurals.download_amount, count, count)
+        val count = action.nextChapters
+        action to if (count != null) {
+            pluralStringResource(MR.plurals.download_amount, count, count)
+        } else if (action == DownloadAction.UNREAD_CHAPTERS) {
+            stringResource(MR.strings.download_unread)
+        } else {
+            stringResource(MR.strings.download_bookmarked)
         }
     }
 

@@ -74,13 +74,13 @@ internal class EhLoginWebViewScreenTest {
             "Cancel",
         ).forEach {
             compose.onNodeWithText("Advanced").performClick()
-            clickLast(it)
+            clickDialogButton(it)
         }
         events shouldContainExactly listOf("recheck", "alternate", "skip", "igneous")
     }
 
-    /** The dialog's button is the last node with [text] (the screen behind has its own "Cancel"). */
-    private fun clickLast(text: String) {
+    private fun clickDialogButton(text: String) {
+        // The dialog's button is the last node with this text: the screen behind has its own "Cancel".
         val nodes = compose.onAllNodes(hasText(text) and hasClickAction())
         nodes[nodes.fetchSemanticsNodes().size - 1].performClick()
         compose.waitForIdle()

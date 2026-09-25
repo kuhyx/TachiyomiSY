@@ -28,15 +28,15 @@ internal class MangaItemsTest {
     private val events = mutableListOf<String>()
     private val koin = PresentationKoin()
 
+    private val cover by lazy {
+        MangaCover(mangaId = 1L, sourceId = 2L, isMangaFavorite = true, ogUrl = null, lastModified = 0L)
+    }
+
     @Before
     fun setUp() = koin.start()
 
     @After
     fun tearDown() = koin.stop()
-
-    private val cover by lazy {
-        MangaCover(mangaId = 1L, sourceId = 2L, isMangaFavorite = true, ogUrl = null, lastModified = 0L)
-    }
 
     @Test
     fun defaultItemsRender() {

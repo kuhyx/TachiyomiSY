@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import tachiyomi.presentation.core.i18n.stringResource
 import kotlin.time.Duration.Companion.seconds
@@ -78,7 +77,8 @@ internal fun rememberConfirmSlots(size: Int): ConfirmSlots {
             resetJob?.cancel()
             resetJob = scope.launch {
                 delay(1.seconds)
-                if (isActive) confirm[toConfirmIndex] = false
+                // A cancelled delay throws, so reaching here means this job was not replaced.
+                confirm[toConfirmIndex] = false
             }
         }
     }

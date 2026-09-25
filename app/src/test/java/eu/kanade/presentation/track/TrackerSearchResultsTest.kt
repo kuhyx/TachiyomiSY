@@ -95,7 +95,9 @@ internal class TrackerSearchResultsTest {
         compose.onNodeWithText("Open in browser").performClick()
         compose.tapOutsidePopup()
         shadowOf(ApplicationProvider.getApplicationContext<android.app.Application>())
-            .nextStartedActivity?.data?.toString() shouldBe "https://example.com/t"
+            .nextStartedActivity
+            ?.data
+            ?.toString() shouldBe "https://example.com/t"
     }
 
     @Test

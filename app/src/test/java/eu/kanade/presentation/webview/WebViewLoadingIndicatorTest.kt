@@ -23,10 +23,9 @@ internal class WebViewLoadingIndicatorTest {
             }
         }
         compose.waitForIdle()
-        return compose.onAllNodes(hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate))
-            .fetchSemanticsNodes().size +
-            compose.onAllNodes(hasProgressBarRangeInfo(ProgressBarRangeInfo(0.5f, 0f..1f)))
-                .fetchSemanticsNodes().size
+        val spinning = compose.onAllNodes(hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate))
+        val halfway = compose.onAllNodes(hasProgressBarRangeInfo(ProgressBarRangeInfo(0.5f, 0f..1f)))
+        return spinning.fetchSemanticsNodes().size + halfway.fetchSemanticsNodes().size
     }
 
     @Test

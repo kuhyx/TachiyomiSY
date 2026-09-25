@@ -14,9 +14,9 @@ internal class UpdatesScreenHarness(private val compose: ComposeContentTestRule)
     var updateStarts: Boolean = true
     val back: TestBackOwner = TestBackOwner()
 
-    private fun UpdatesItem.id(): Long = update.mangaId
+    private fun UpdatesItem.mangaId(): Long = update.mangaId
 
-    private fun List<UpdatesItem>.ids(): List<Long> = map { it.id() }
+    private fun List<UpdatesItem>.ids(): List<Long> = map { it.mangaId() }
 
     fun show(
         state: UpdatesScreenModel.State,
@@ -31,7 +31,7 @@ internal class UpdatesScreenHarness(private val compose: ComposeContentTestRule)
                         snackbarHostState = SnackbarHostState(),
                         lastUpdated = 0L,
                         preserveReadingPosition = preserveReadingPosition,
-                        onClickCover = { events += "cover ${it.id()}" },
+                        onClickCover = { events += "cover ${it.mangaId()}" },
                         onSelectAll = { events += "selectAll $it" },
                         onInvertSelection = { events += "invert" },
                         onCalendarClicked = { events += "calendar" },
@@ -43,8 +43,10 @@ internal class UpdatesScreenHarness(private val compose: ComposeContentTestRule)
                         onMultiBookmarkClicked = { items, bookmark -> events += "bookmark ${items.ids()} $bookmark" },
                         onMultiMarkAsReadClicked = { items, read -> events += "read ${items.ids()} $read" },
                         onMultiDeleteClicked = { events += "delete ${it.ids()}" },
-                        onUpdateSelected = { item, selected, long -> events += "select ${item.id()} $selected $long" },
-                        onOpenChapter = { events += "open ${it.id()}" },
+                        onUpdateSelected = { item, selected, long ->
+                            events += "select ${item.mangaId()} $selected $long"
+                        },
+                        onOpenChapter = { events += "open ${it.mangaId()}" },
                         onFilterClicked = { events += "filter" },
                         hasActiveFilters = hasActiveFilters,
                     )

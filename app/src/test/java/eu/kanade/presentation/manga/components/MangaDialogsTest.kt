@@ -57,7 +57,7 @@ internal class MangaDialogsTest {
     }
 
     @Test
-    fun customIntervalWithoutPrediction() {
+    fun customIntervalNoPrediction() {
         compose.setContent {
             MaterialTheme {
                 SetIntervalDialog(
@@ -78,7 +78,7 @@ internal class MangaDialogsTest {
     }
 
     @Test
-    fun negativePredictionIsTreatedAsUnknown() {
+    fun negativePredictionIsUnknown() {
         compose.setContent {
             MaterialTheme {
                 SetIntervalDialog(interval = -1, nextUpdate = Instant.now(), onDismissRequest = {})
