@@ -1,10 +1,10 @@
 package eu.kanade.presentation.reader.appbars
 
-import eu.kanade.presentation.util.invokeClick
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import eu.kanade.presentation.util.invokeClick
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import io.kotest.matchers.collections.shouldContainExactly
 import org.junit.Rule

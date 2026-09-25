@@ -5,6 +5,7 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.ui.platform.ViewRootForTest
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
@@ -63,3 +64,20 @@ internal fun ComposeContentTestRule.setSlider(index: Int, value: Float) {
 /** Clicks through the semantics action, for nodes another node overlaps or that sit off-screen. */
 internal fun SemanticsNodeInteraction.invokeClick(): SemanticsNodeInteraction =
     performSemanticsAction(SemanticsActions.OnClick)
+
+/**
+ * Recomposes with the same argument instances (bumping [tick]), then with each [swaps] applied in
+ * turn, so every lambda the Compose compiler memoizes takes both its unchanged and changed arm.
+ * The content must read [tick] next to the call under test, directly and through a host that
+ * takes the arguments as parameters.
+ */
+internal fun ComposeContentTestRule.recomposeAll(tick: MutableIntState, vararg swaps: () -> Unit) {
+    runOnIdle { tick.intValue++ }
+    waitForIdle()
+    swaps.forEach { swap ->
+        runOnIdle(swap)
+        waitForIdle()
+        runOnIdle { tick.intValue++ }
+        waitForIdle()
+    }
+}

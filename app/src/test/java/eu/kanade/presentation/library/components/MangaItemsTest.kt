@@ -1,9 +1,5 @@
 package eu.kanade.presentation.library.components
 
-import eu.kanade.presentation.util.invokeClick
-import org.junit.Before
-import org.junit.After
-import eu.kanade.presentation.util.PresentationKoin
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
@@ -12,8 +8,12 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import eu.kanade.presentation.util.PresentationKoin
+import eu.kanade.presentation.util.invokeClick
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

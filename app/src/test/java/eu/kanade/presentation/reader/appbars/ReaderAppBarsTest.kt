@@ -1,6 +1,5 @@
 package eu.kanade.presentation.reader.appbars
 
-import eu.kanade.presentation.util.invokeClick
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import eu.kanade.presentation.reader.components.ChapterNavigation
 import eu.kanade.presentation.reader.components.ChapterNavigatorType
+import eu.kanade.presentation.util.invokeClick
 import io.kotest.matchers.collections.shouldContain
 import org.junit.Rule
 import org.junit.Test

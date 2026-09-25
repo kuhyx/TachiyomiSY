@@ -1,7 +1,5 @@
 package eu.kanade.presentation.reader.settings
 
-import io.kotest.matchers.shouldBe
-import eu.kanade.presentation.util.invokeClick
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -11,10 +9,12 @@ import eu.kanade.presentation.reader.ReaderSettingsHarness
 import eu.kanade.presentation.reader.readerManga
 import eu.kanade.presentation.util.ProvideBack
 import eu.kanade.presentation.util.TestBackOwner
+import eu.kanade.presentation.util.invokeClick
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,14 +32,14 @@ internal class ReaderSettingsDialogTest {
     private fun show(harness: ReaderSettingsHarness) {
         compose.setContent {
             ProvideBack(back) {
-            MaterialTheme {
-                ReaderSettingsDialog(
-                    onDismissRequest = { events += "dismiss" },
-                    onShowMenus = { events += "show" },
-                    onHideMenus = { events += "hide" },
-                    screenModel = harness.model,
-                )
-            }
+                MaterialTheme {
+                    ReaderSettingsDialog(
+                        onDismissRequest = { events += "dismiss" },
+                        onShowMenus = { events += "show" },
+                        onHideMenus = { events += "hide" },
+                        screenModel = harness.model,
+                    )
+                }
             }
         }
         compose.waitForIdle()

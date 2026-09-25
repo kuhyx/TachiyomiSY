@@ -25,30 +25,30 @@ internal class UpdatesScreenHarness(private val compose: ComposeContentTestRule)
     ) {
         compose.setContent {
             ProvideBack(back) {
-            MaterialTheme {
-                UpdateScreen(
-                    state = state,
-                    snackbarHostState = SnackbarHostState(),
-                    lastUpdated = 0L,
-                    preserveReadingPosition = preserveReadingPosition,
-                    onClickCover = { events += "cover ${it.id()}" },
-                    onSelectAll = { events += "selectAll $it" },
-                    onInvertSelection = { events += "invert" },
-                    onCalendarClicked = { events += "calendar" },
-                    onUpdateLibrary = {
-                        events += "update"
-                        updateStarts
-                    },
-                    onDownloadChapter = { items, action -> events += "download ${items.ids()} $action" },
-                    onMultiBookmarkClicked = { items, bookmark -> events += "bookmark ${items.ids()} $bookmark" },
-                    onMultiMarkAsReadClicked = { items, read -> events += "read ${items.ids()} $read" },
-                    onMultiDeleteClicked = { events += "delete ${it.ids()}" },
-                    onUpdateSelected = { item, selected, long -> events += "select ${item.id()} $selected $long" },
-                    onOpenChapter = { events += "open ${it.id()}" },
-                    onFilterClicked = { events += "filter" },
-                    hasActiveFilters = hasActiveFilters,
-                )
-            }
+                MaterialTheme {
+                    UpdateScreen(
+                        state = state,
+                        snackbarHostState = SnackbarHostState(),
+                        lastUpdated = 0L,
+                        preserveReadingPosition = preserveReadingPosition,
+                        onClickCover = { events += "cover ${it.id()}" },
+                        onSelectAll = { events += "selectAll $it" },
+                        onInvertSelection = { events += "invert" },
+                        onCalendarClicked = { events += "calendar" },
+                        onUpdateLibrary = {
+                            events += "update"
+                            updateStarts
+                        },
+                        onDownloadChapter = { items, action -> events += "download ${items.ids()} $action" },
+                        onMultiBookmarkClicked = { items, bookmark -> events += "bookmark ${items.ids()} $bookmark" },
+                        onMultiMarkAsReadClicked = { items, read -> events += "read ${items.ids()} $read" },
+                        onMultiDeleteClicked = { events += "delete ${it.ids()}" },
+                        onUpdateSelected = { item, selected, long -> events += "select ${item.id()} $selected $long" },
+                        onOpenChapter = { events += "open ${it.id()}" },
+                        onFilterClicked = { events += "filter" },
+                        hasActiveFilters = hasActiveFilters,
+                    )
+                }
             }
         }
         compose.waitForIdle()

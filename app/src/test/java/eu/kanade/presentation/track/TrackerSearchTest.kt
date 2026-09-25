@@ -1,6 +1,5 @@
 package eu.kanade.presentation.track
 
-import androidx.compose.ui.test.requestFocus
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.input.key.Key
@@ -12,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.requestFocus
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe

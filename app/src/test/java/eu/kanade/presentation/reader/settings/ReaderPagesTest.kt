@@ -12,13 +12,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import eu.kanade.presentation.reader.ReaderSettingsHarness
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
-import eu.kanade.tachiyomi.ui.reader.setting.dualPageSplitPaged
 import eu.kanade.tachiyomi.ui.reader.setting.dualPageRotateToFitInvert
-import eu.kanade.tachiyomi.ui.reader.setting.navigationModePager
-import eu.kanade.tachiyomi.ui.reader.setting.pagerNavInverted
-import eu.kanade.tachiyomi.ui.reader.setting.pageLayout
+import eu.kanade.tachiyomi.ui.reader.setting.dualPageSplitPaged
 import eu.kanade.tachiyomi.ui.reader.setting.dualPageSplitWebtoon
+import eu.kanade.tachiyomi.ui.reader.setting.navigationModePager
 import eu.kanade.tachiyomi.ui.reader.setting.navigationModeWebtoon
+import eu.kanade.tachiyomi.ui.reader.setting.pageLayout
+import eu.kanade.tachiyomi.ui.reader.setting.pagerNavInverted
 import eu.kanade.tachiyomi.ui.reader.setting.webtoonNavInverted
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import io.kotest.matchers.shouldBe

@@ -5,9 +5,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import eu.kanade.core.preference.PreferenceMutableState
+import eu.kanade.domain.FlowPreferenceStore
 import eu.kanade.presentation.library.components.LibraryContent
 import eu.kanade.tachiyomi.ui.library.LibraryItem
-import eu.kanade.domain.FlowPreferenceStore
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.library.model.LibraryManga
