@@ -53,26 +53,36 @@ internal class SettingsHarness(private val compose: ComposeContentTestRule) {
         }
     }
 
-    fun item(title: String): Preference.PreferenceItem<*, *> = items().first { it.title == title }
+    /** The item titled [title], inside the group titled [group] when titles repeat across groups. */
+    fun item(title: String, group: String? = null): Preference.PreferenceItem<*, *> {
+        val groups = prefs.filterIsInstance<Preference.PreferenceGroup>()
+        val scope = group?.let { name -> groups.first { it.title == name } }
+        return items(scope?.let(::listOf) ?: prefs).first { it.title == title }
+    }
 
-    fun click(title: String) {
-        val text = item(title) as Preference.PreferenceItem.TextPreference
+    fun click(title: String, group: String? = null) {
+        val text = item(title, group) as Preference.PreferenceItem.TextPreference
         compose.runOnIdle { text.onClick!!.invoke() }
         compose.waitForIdle()
     }
 
-    fun switch(title: String, value: Boolean): Boolean {
-        val item = item(title) as Preference.PreferenceItem.SwitchPreference
+    fun switch(title: String, value: Boolean, group: String? = null): Boolean {
+        val item = item(title, group) as Preference.PreferenceItem.SwitchPreference
         return settle { item.onValueChanged(value) }
     }
 
-    fun list(title: String, value: Any): Boolean {
-        val item = item(title) as Preference.PreferenceItem.ListPreference<*>
+    fun list(title: String, value: Any, group: String? = null): Boolean {
+        val item = item(title, group) as Preference.PreferenceItem.ListPreference<*>
         return settle { item.internalOnValueChanged(value) }
     }
 
-    fun slide(title: String, value: Int) {
-        val item = item(title) as Preference.PreferenceItem.SliderPreference
+    fun multi(title: String, value: Set<Any?>): Boolean {
+        val item = item(title) as Preference.PreferenceItem.MultiSelectListPreference<*>
+        return settle { item.internalOnValueChanged(value) }
+    }
+
+    fun slide(title: String, value: Int, group: String? = null) {
+        val item = item(title, group) as Preference.PreferenceItem.SliderPreference
         settle { item.onValueChanged(value) }
     }
 
