@@ -76,7 +76,7 @@ internal class MangaScreenActionsTest {
         host.pushedBy { host.actions.header.onWebViewClicked!!() }.shouldBeInstanceOf<WebViewScreen>()
         host.actions.header.onWebViewLongClicked!!()
         host.actions.toolbar.onShareClicked!!()
-        shadowOf(host.context.baseContext as android.app.Activity).nextStartedActivity.shouldNotBeNull()
+        shadowOf(host.context).nextStartedActivity.shouldNotBeNull()
     }
 
     @Test

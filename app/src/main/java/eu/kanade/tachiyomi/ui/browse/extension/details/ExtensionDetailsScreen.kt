@@ -43,11 +43,8 @@ internal data class ExtensionDetailsScreen(
         )
 
         LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { event ->
-                if (event is ExtensionDetailsEvent.Uninstalled) {
-                    navigator.pop()
-                }
-            }
+            // The only event is the extension's uninstall, which leaves nothing to show.
+            screenModel.events.collectLatest { navigator.pop() }
         }
     }
 }

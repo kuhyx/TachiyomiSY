@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.browse.source
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -87,6 +88,7 @@ internal class SourcesTabTest {
 
     @Test
     fun clicksOpenTheSource() {
+        koin.uiPreferences.useNewSourceNavigation.set(false)
         val host = host()
         compose.onNodeWithText("Alpha").performClick()
         compose.waitForIdle()
@@ -129,7 +131,7 @@ internal class SourcesTabTest {
     @Test
     fun pinButtonTogglesThePin() {
         host()
-        compose.onNodeWithContentDescription("Pin").performClick()
+        compose.onAllNodesWithContentDescription("Pin")[0].performClick()
         verify { togglePin.await(source(1L, name = "Alpha")) }
     }
 
@@ -143,7 +145,7 @@ internal class SourcesTabTest {
         compose.onNodeWithText("Alpha").performTouchInput { longClick() }
         compose.waitForIdle()
         compose.onNodeWithText("Disable").performClick()
-        verify { toggleSource.await(any<Source>()) }
+        verify { toggleSource.await(any<Source>(), any()) }
     }
 
     @Test

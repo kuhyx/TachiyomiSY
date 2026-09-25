@@ -43,12 +43,10 @@ private suspend fun BrowseSourceScreenModel.doOnSavedSearch(search: EXHSavedSear
         return
     }
 
-    val allDefault = search.filterList != null && search.filterList == source.getFilterList()
     setDialog(null)
 
-    val filters = search.filterList
-        ?.takeUnless { allDefault }
-        ?: source.getFilterList()
+    // A saved search's FilterList never equals the source's (see FilterList.equals): it always applies.
+    val filters = search.filterList ?: source.getFilterList()
 
     updateState {
         it.copy(

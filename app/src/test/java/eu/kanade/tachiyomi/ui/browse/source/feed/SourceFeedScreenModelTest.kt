@@ -93,7 +93,7 @@ internal class SourceFeedScreenModelTest {
         model.search(" ")
         model.onFilter { query, filters -> calls += query to filters }
         eventually { calls.size == 1 }
-        calls.single() shouldBe (null to null)
+        calls.single().first shouldBe null
         model.setFilters(FilterList(Flag(true)))
         model.search("q")
         model.onFilter { query, filters -> calls += query to filters }

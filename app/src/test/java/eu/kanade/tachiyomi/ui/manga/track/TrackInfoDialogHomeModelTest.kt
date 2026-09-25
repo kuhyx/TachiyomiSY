@@ -120,7 +120,11 @@ internal class TrackInfoDialogHomeModelTest {
     }
 
     @Test
-    fun idsMapPerTracker() = runBlocking {
+    fun idsMapPerTracker() {
+        runBlocking { idsMapPerTrackerBody() }
+    }
+
+    private suspend fun idsMapPerTrackerBody() {
         every { harness.trackerManager.aniList.id } returns 1L
         every { harness.trackerManager.kitsu.id } returns 2L
         every { harness.trackerManager.myAnimeList.id } returns 3L
@@ -137,7 +141,11 @@ internal class TrackInfoDialogHomeModelTest {
     }
 
     @Test
-    fun registerByIdHandlesFailures() = runBlocking {
+    fun registerByIdHandlesFailures() {
+        runBlocking { registerByIdBody() }
+    }
+
+    private suspend fun registerByIdBody() {
         val model = model()
         model.registerTrackingById(99L, "x") shouldBe false
         coEvery { harness.tracker.searchById("x") } throws IllegalStateException()

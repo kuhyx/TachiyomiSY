@@ -117,7 +117,7 @@ internal class TrackHomeScreenTest {
     @Test
     fun menuTogglesPrivacyAndRemoves() {
         show()
-        menu("Make private")
+        menu("Track privately")
         coVerify(timeout = 5_000) { tracker.setRemotePrivate(any(), true) }
         menu("Remove")
         compose.onNodeWithText("Remove Plain tracking?").assertExists()

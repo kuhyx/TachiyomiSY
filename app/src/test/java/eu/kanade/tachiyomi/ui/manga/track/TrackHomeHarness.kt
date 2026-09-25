@@ -15,11 +15,7 @@ import exh.metadata.metadata.MangaDexSearchMetadata
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -60,7 +56,6 @@ internal class TrackHomeHarness {
     }
 
     fun start() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
         startKoin {
             modules(
                 module {
@@ -81,7 +76,6 @@ internal class TrackHomeHarness {
 
     fun stop() {
         stopKoin()
-        Dispatchers.resetMain()
         clearVoyagerScopes()
     }
 

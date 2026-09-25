@@ -1,16 +1,14 @@
 package eu.kanade.tachiyomi.ui.manga.merged
 
-import android.app.Activity
 import android.view.View
-import androidx.activity.ComponentActivity
-import androidx.appcompat.view.ContextThemeWrapper
+import androidx.appcompat.app.AppCompatActivity
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.EditMergedSettingsDialogBinding
 import exh.source.MERGED_SOURCE_ID
 import org.robolectric.Robolectric
 import tachiyomi.domain.manga.model.MergedMangaReference
 
-/** A reference [id] to a member of source [sourceId]; the merged entry's own one when [sourceId] is the merged source. */
+/** A reference [id] to a member of source [sourceId]; the merged source makes it the self reference. */
 internal fun reference(
     id: Long,
     sourceId: Long = 7L,
@@ -31,10 +29,11 @@ internal fun reference(
     mangaSourceId = sourceId,
 )
 
-/** A started activity themed like the app, for inflating the dialog's views. */
-internal fun themedActivity(): ContextThemeWrapper {
-    val activity: Activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
-    return ContextThemeWrapper(activity, R.style.Theme_Tachiyomi)
+/** A started AppCompat activity themed like the app, whose inflater understands `app:srcCompat`. */
+internal fun themedActivity(): AppCompatActivity {
+    val controller = Robolectric.buildActivity(AppCompatActivity::class.java)
+    controller.get().setTheme(R.style.Theme_Tachiyomi)
+    return controller.setup().get()
 }
 
 /** Lays [binding] out at a phone size so the recycler binds its rows. */
