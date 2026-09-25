@@ -9,6 +9,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.test.junit4.v2.ComposeContentTestRule
 import androidx.compose.ui.test.onAllNodesWithText
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -27,6 +29,7 @@ import kotlinx.coroutines.runBlocking
 internal class SettingsHarness(private val compose: ComposeContentTestRule) {
     val navigator: Navigator = mockk(relaxed = true)
     val registry: FakeResultRegistry = FakeResultRegistry()
+    val uriHandler: UriHandler = mockk(relaxed = true)
     var prefs: List<Preference> = emptyList()
         private set
 
@@ -36,6 +39,7 @@ internal class SettingsHarness(private val compose: ComposeContentTestRule) {
                 LocalNavigator provides navigator,
                 LocalContext provides (context ?: LocalContext.current),
                 LocalActivityResultRegistryOwner provides registry.owner(),
+                LocalUriHandler provides uriHandler,
             ) {
                 MaterialTheme {
                     val current = screen.getPreferences()
