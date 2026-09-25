@@ -76,7 +76,8 @@ internal fun ReaderViewModel.loadNewChapter(chapter: ReaderChapter) {
 
 internal fun ReaderViewModel.loadNewChapterFromDialog(chapter: Chapter) {
     viewModelScope.launchIO {
-        val newChapter = chapterList.firstOrNull { it.chapter.id == chapter.id }
+        // Reader chapters come from the database, so every id is set.
+        val newChapter = chapterList.firstOrNull { it.chapter.id!! == chapter.id }
         if (newChapter != null) {
             loadAdjacent(newChapter)
         }
@@ -129,10 +130,7 @@ internal suspend fun ReaderViewModel.preload(chapter: ReaderChapter) {
         }
     }
 
-    if (chapter.state != ReaderChapter.State.Wait && chapter.state !is ReaderChapter.State.Error) {
-        return
-    }
-
+    // Past the first check the chapter is waiting or failed, both of which (re)load.
     val loader = loader ?: return
     try {
         logcat { "Preloading ${chapter.chapter.url}" }

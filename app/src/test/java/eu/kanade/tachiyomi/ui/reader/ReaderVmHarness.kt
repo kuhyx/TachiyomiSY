@@ -11,12 +11,15 @@ import eu.kanade.domain.track.service.TrackPreferences
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
+import eu.kanade.tachiyomi.data.download.getQueuedDownloadOrNull
 import eu.kanade.tachiyomi.data.saver.ImageSaver
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -40,6 +43,9 @@ import tachiyomi.domain.manga.interactor.GetMergedMangaById
 import tachiyomi.domain.manga.interactor.GetMergedReferencesById
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
+
+/** The file of the download-queue extensions the view model calls. */
+internal const val QUEUE_KT: String = "eu.kanade.tachiyomi.data.download.DownloadManagerQueueKt"
 
 /**
  * Every collaborator of a [ReaderViewModel]: real preferences over one shared store, relaxed mocks
@@ -75,7 +81,7 @@ internal class ReaderVmHarness {
     val upsertHistory: UpsertHistory = mockk(relaxed = true)
     val trackChapter: TrackChapter = mockk(relaxed = true)
 
-    val manga: Manga = Manga.create().copy(id = 10L, source = 1L, title = "Manga", ogTitle = "Manga")
+    val manga: Manga = Manga.create().copy(id = 10L, source = 1L, ogTitle = "Manga")
 
     /** The chapters [GetChaptersByMangaId] serves for [manga]. */
     fun chapters(vararg chapters: Chapter) {
@@ -112,10 +118,13 @@ internal class ReaderVmHarness {
 
     fun start(vararg extra: Module) {
         Dispatchers.setMain(UnconfinedTestDispatcher())
+        mockkStatic(QUEUE_KT)
+        every { downloadManager.getQueuedDownloadOrNull(any()) } returns null
         startKoin { modules(graph, *extra) }
     }
 
     fun stop() {
+        unmockkAll()
         stopKoin()
         Dispatchers.resetMain()
     }
@@ -158,7 +167,7 @@ internal fun domainChapter(
     number: Double = id.toDouble(),
     read: Boolean = false,
     bookmark: Boolean = false,
-    sourceOrder: Long = id,
+    sourceOrder: Long = 100 - id,
 ): Chapter = Chapter.create().copy(
     id = id,
     mangaId = 10L,

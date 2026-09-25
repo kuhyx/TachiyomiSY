@@ -101,7 +101,8 @@ internal suspend fun ReaderViewModel.init(
                 loader = newLoader
                 loadChapter(
                     newLoader,
-                    chapterList.first { chapterId == it.chapter.id },
+                    // Reader chapters come from the database, so every id is set.
+                    chapterList.first { chapterId == it.chapter.id!! },
                     /* SY --> */ page /* SY <-- */,
                 )
                 Result.success(true)
