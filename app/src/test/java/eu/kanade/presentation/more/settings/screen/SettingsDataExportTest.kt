@@ -1,6 +1,8 @@
 package eu.kanade.presentation.more.settings.screen
 
 import android.net.Uri
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -65,7 +67,7 @@ internal class SettingsDataExportTest {
         harness.registry.answer = { Uri.parse("content://export/library.csv") }
         harness.show(SettingsDataScreen)
         harness.click("Library List")
-        val boxes = compose.onAllNodes(isToggleable())
+        val boxes = compose.onAllNodes(isToggleable() and hasAnyAncestor(isDialog()))
         boxes[1].performClick()
         boxes[0].performClick()
         compose.waitForIdle()

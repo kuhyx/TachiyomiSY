@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
+import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.isDynamicColorAvailable
@@ -18,11 +19,16 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import tachiyomi.core.common.preference.InMemoryPreferenceStore
 
 @RunWith(RobolectricTestRunner::class)
 internal class AppThemePreferenceWidgetTest {
@@ -31,9 +37,16 @@ internal class AppThemePreferenceWidgetTest {
 
     private val picked = mutableListOf<AppTheme>()
 
+    @Before
+    fun setUp() {
+        stopKoin()
+        startKoin { modules(module { single { UiPreferences(InMemoryPreferenceStore()) } }) }
+    }
+
     @After
     fun tearDown() {
         unmockkAll()
+        stopKoin()
     }
 
     private fun show(dynamic: Boolean, activity: Activity?) {

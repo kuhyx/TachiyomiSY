@@ -29,6 +29,7 @@ import org.robolectric.annotation.Config
 import tachiyomi.domain.source.service.SourceManager
 
 @RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "h2000dp")
 internal class SettingsMainScreenTest {
     @get:Rule
     val compose = createComposeRule()
@@ -73,7 +74,7 @@ internal class SettingsMainScreenTest {
         verify { harness.navigator.push(SettingsLibraryScreen) }
         compose.onNodeWithContentDescription("Search").performClick()
         verify { harness.navigator.push(any<SettingsSearchScreen>()) }
-        harness.count("E-Hentai") shouldBe 0
+        harness.count("E-Hentai") shouldBe 1
         harness.count("MangaDex") shouldBe 0
     }
 
@@ -93,7 +94,7 @@ internal class SettingsMainScreenTest {
     }
 
     @Test
-    @Config(qualifiers = "night")
+    @Config(qualifiers = "+night")
     fun twoPaneDarkSurface() {
         show(twoPane = true)
         compose.onNodeWithText("Library").assertExists()
@@ -101,11 +102,11 @@ internal class SettingsMainScreenTest {
 
     @Test
     fun optionalSectionsShown() {
-        koin.exh.isHentaiEnabled.set(true)
+        koin.exh.isHentaiEnabled.set(false)
         mockkStatic("exh.md.utils.MdSourcesKt")
         every { MdUtil.getEnabledMangaDexs(any(), any()) } returns listOf(mockk<MangaDex>())
         show(twoPane = false)
-        harness.count("E-Hentai") shouldBe 1
+        harness.count("E-Hentai") shouldBe 0
         harness.count("MangaDex") shouldBe 1
     }
 }

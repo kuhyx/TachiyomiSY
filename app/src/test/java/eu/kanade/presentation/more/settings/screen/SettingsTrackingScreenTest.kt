@@ -2,8 +2,8 @@ package eu.kanade.presentation.more.settings.screen
 
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import eu.kanade.presentation.more.settings.Preference
+import eu.kanade.tachiyomi.data.track.BaseTracker
 import eu.kanade.tachiyomi.data.track.EnhancedTracker
-import eu.kanade.tachiyomi.data.track.Tracker
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -33,7 +33,7 @@ internal class SettingsTrackingScreenTest {
         koin.stop()
     }
 
-    private fun show(enhanced: List<Tracker>) {
+    private fun show(enhanced: List<BaseTracker>) {
         val sourceManager = mockk<SourceManager> { every { getAll() } returns listOf(InstalledSource()) }
         koin.start(
             module {

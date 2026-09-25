@@ -44,7 +44,15 @@ internal class SettingsMangadexScreenTest {
         mockkStatic("exh.md.utils.MdSourcesKt", "eu.kanade.tachiyomi.data.library.LibraryUpdateSchedulingKt")
         every { MdUtil.getEnabledMangaDex(any(), any()) } returns mdex
         every { MdUtil.getEnabledMangaDexs(any(), any()) } returns listOf(mdex)
-        every { LibraryUpdateJob.startNow(any(), any(), any(), any(), any()) } returns true
+        every {
+            LibraryUpdateJob.startNow(
+                context = any(),
+                category = any(),
+                target = any(),
+                group = any(),
+                groupExtra = any(),
+            )
+        } returns true
         koin.start(module { single { mockk<SourceManager>() } })
     }
 

@@ -37,9 +37,9 @@ internal class SettingsEhScreenTest {
 
     @Test
     fun enabledFollowsPreference() {
-        SettingsEhScreen.isEnabled() shouldBe false
-        koin.exh.isHentaiEnabled.set(true)
         SettingsEhScreen.isEnabled() shouldBe true
+        koin.exh.isHentaiEnabled.set(false)
+        SettingsEhScreen.isEnabled() shouldBe false
     }
 
     @Test

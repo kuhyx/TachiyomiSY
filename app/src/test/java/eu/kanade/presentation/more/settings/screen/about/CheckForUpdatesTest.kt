@@ -68,7 +68,8 @@ internal class CheckForUpdatesTest {
 
     @Test
     fun newUpdateOpensScreen() {
-        check(GetApplicationRelease.Result.NewUpdate(Release("v2", "notes", "https://r", listOf("a.apk"))))
+        val release = Release(version = "v2", info = "notes", releaseLink = "https://r", assets = listOf("a.apk"))
+        check(GetApplicationRelease.Result.NewUpdate(release))
         verify(exactly = 1) { navigator.push(any<NewUpdateScreen>()) }
     }
 

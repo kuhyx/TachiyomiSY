@@ -3,6 +3,7 @@ package eu.kanade.presentation.more.settings.screen
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -58,8 +59,8 @@ internal class TrackingDialogsTest {
     fun failedLoginLogsOut() {
         coEvery { tracker.login(any(), any()) } throws IllegalStateException("bad credentials")
         login()
+        verify(timeout = 10_000) { tracker.logout() }
         compose.waitUntil(timeoutMillis = 10_000) { count("Login") == 1 }
-        verify { tracker.logout() }
         dismissed shouldBe 0
     }
 
@@ -77,9 +78,9 @@ internal class TrackingDialogsTest {
         compose.setContent {
             MaterialTheme { PasswordField(password = TextFieldState("x"), isError = true) }
         }
-        compose.onNode(hasClickAction()).performClick()
+        compose.onNode(hasClickAction() and hasAnyAncestor(hasSetTextAction())).performClick()
         compose.waitForIdle()
-        compose.onNode(hasClickAction()).performClick()
+        compose.onNode(hasClickAction() and hasAnyAncestor(hasSetTextAction())).performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Password").assertExists()
     }

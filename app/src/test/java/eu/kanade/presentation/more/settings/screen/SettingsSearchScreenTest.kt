@@ -15,6 +15,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextReplacement
 import cafe.adriel.voyager.navigator.LocalNavigator
+import eu.kanade.domain.installFakeAndroidKeyStore
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.unmockkAll
@@ -36,6 +37,7 @@ internal class SettingsSearchScreenTest {
 
     @Before
     fun setUp() {
+        installFakeAndroidKeyStore()
         stubTextureLimits()
         koin.start(*allScreensModules())
     }
