@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.loader
 
 import android.app.Application
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
+import eu.kanade.tachiyomi.ui.reader.stubImageSniffing
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences.ArchiveReaderMode
 import eu.kanade.tachiyomi.ui.reader.setting.archiveReaderMode
@@ -9,6 +10,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import mihon.core.common.archive.ArchiveEntry
@@ -38,13 +40,22 @@ internal class ArchivePageLoaderTest {
 
     @BeforeEach
     fun setUp() {
+        stubImageSniffing()
         val app = mockk<Application>()
         every { app.externalCacheDir } answers { cacheDir }
-        startKoin { modules(module { single { app } single { prefs } }) }
+        startKoin {
+            modules(
+                module {
+                    single { app }
+                    single { prefs }
+                },
+            )
+        }
     }
 
     @AfterEach
     fun tearDown() {
+        unmockkAll()
         stopKoin()
     }
 
