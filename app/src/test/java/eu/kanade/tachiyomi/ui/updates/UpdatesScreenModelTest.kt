@@ -12,6 +12,7 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -82,7 +83,11 @@ internal class UpdatesScreenModelTest {
         // The status arrives only once the item is listed; both observers run on the IO pool.
         harness.statuses = flow {
             loaded.await()
-            emit(download(1, Download.State.QUEUE))
+            // Re-sent a few times so a concurrent list refresh cannot hide it; then the flow fails.
+            repeat(RESENDS) {
+                emit(download(1, Download.State.QUEUE))
+                delay(RESEND_MILLIS)
+            }
             error("closed")
         }
         val model = harness.model()
@@ -132,3 +137,6 @@ internal class UpdatesScreenModelTest {
         model.events.await { true } shouldBe UpdatesScreenModel.Event.LibraryUpdateTriggered(started = true)
     }
 }
+
+private const val RESENDS = 20
+private const val RESEND_MILLIS = 50L
