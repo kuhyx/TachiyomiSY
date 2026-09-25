@@ -13,21 +13,14 @@ import tachiyomi.domain.source.model.EXHSavedSearch
 import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.api.get
 
+// FilterList never equals another one (see FilterList.equals), so the filters always travel along.
 internal fun SourceFeedScreenModel.onFilter(onBrowseClick: (query: String?, filters: String?) -> Unit) {
     screenModelScope.launchIO {
-        val allDefault = state.value.filters == source.getFilterList()
         dismissDialog()
-        if (allDefault) {
-            onBrowseClick(
-                state.value.searchQuery?.nullIfBlank(),
-                null,
-            )
-        } else {
-            onBrowseClick(
-                state.value.searchQuery?.nullIfBlank(),
-                Json.encodeToString(filterSerializer.serialize(state.value.filters)),
-            )
-        }
+        onBrowseClick(
+            state.value.searchQuery?.nullIfBlank(),
+            Json.encodeToString(filterSerializer.serialize(state.value.filters)),
+        )
     }
 }
 
@@ -53,15 +46,12 @@ private suspend fun SourceFeedScreenModel.doOnSavedSearch(
         return
     }
 
-    val allDefault = search.filterList != null && search.filterList == source.getFilterList()
+    // A saved search's FilterList never equals the source's (see FilterList.equals): it always applies.
     dismissDialog()
-
-    if (!allDefault) {
-        onBrowseClick(
-            state.value.searchQuery?.nullIfBlank(),
-            search.id,
-        )
-    }
+    onBrowseClick(
+        state.value.searchQuery?.nullIfBlank(),
+        search.id,
+    )
 }
 
 internal fun SourceFeedScreenModel.onSavedSearchAddToFeed(

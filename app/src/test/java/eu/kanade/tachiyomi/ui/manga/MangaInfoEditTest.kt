@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.PagePreviewSource
 import eu.kanade.tachiyomi.source.Source
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -82,7 +83,7 @@ internal class MangaInfoEditTest {
         val model = harness.loaded()
         val data = mergedData(manga().copy(id = 1L, source = 8L)).copy(sources = sources)
         val items = model.toChapterListItems(listOf(chapter(1L), chapter(2L).copy(mangaId = 4L)), manga(), data)
-        verify { sources[1].name }
+        items.first().sourceName shouldNotBe null
         items.size shouldBe 2
         model.toChapterListItems(listOf(chapter(1L)), manga(), data.copy(sources = sources.take(2)))
             .single().sourceName shouldBe null

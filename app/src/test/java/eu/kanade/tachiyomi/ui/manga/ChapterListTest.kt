@@ -1,14 +1,30 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import eu.kanade.domain.FlowPreferenceStore
+import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.manga.model.PagePreview
 import eu.kanade.tachiyomi.data.download.model.Download
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.source.local.LocalSource
 
 internal class ChapterListTest {
+    @BeforeEach
+    fun setUp() {
+        startKoin { modules(module { single { BasePreferences(mockk(relaxed = true), FlowPreferenceStore()) } }) }
+    }
+
+    @AfterEach
+    fun tearDown() = stopKoin()
+
     private val unread = item(chapter(1L))
     private val read = item(chapter(2L, read = true))
     private val bookmarked = item(chapter(3L, bookmark = true), state = Download.State.DOWNLOADED)

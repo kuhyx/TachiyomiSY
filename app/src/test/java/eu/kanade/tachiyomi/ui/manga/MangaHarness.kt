@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.test.core.app.ApplicationProvider
 import eu.kanade.domain.FlowPreferenceStore
+import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.chapter.interactor.GetAvailableScanlators
 import eu.kanade.domain.manga.interactor.GetExcludedScanlators
 import eu.kanade.domain.manga.interactor.GetPagePreviews
@@ -23,16 +24,9 @@ import exh.eh.EHentaiUpdateHelper
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.withTimeout
 import mihon.domain.source.interactor.UpdateMangaFromRemote
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -49,8 +43,6 @@ import tachiyomi.domain.manga.interactor.GetMergedMangaById
 import tachiyomi.domain.manga.interactor.GetMergedReferencesById
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
-
-private const val WAIT_MS = 20_000L
 
 /**
  * Builds a [MangaScreenModel] over mockk collaborators and real in-memory preferences. Every
@@ -123,7 +115,6 @@ internal class MangaHarness {
     val lifecycle: LifecycleRegistry = LifecycleRegistry.createUnsafe(mockk<LifecycleOwner>(relaxed = true))
 
     fun start(vararg extra: Module) {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
         lifecycle.currentState = Lifecycle.State.RESUMED
         stopKoin()
         startKoin {
@@ -134,6 +125,7 @@ internal class MangaHarness {
                     single { readerPreferences }
                     single { uiPreferences }
                     single { sourcePreferences }
+                    single { BasePreferences(app, store) }
                     single<PreferenceStore> { store }
                     single { downloadManager }
                     single { downloadCache }
@@ -160,7 +152,6 @@ internal class MangaHarness {
 
     fun stop() {
         stopKoin()
-        Dispatchers.resetMain()
         clearVoyagerScopes()
     }
 
@@ -190,17 +181,7 @@ internal class MangaHarness {
 /** Waits until the model is in a success state matching [predicate]. */
 internal fun MangaScreenModel.awaitSuccess(
     predicate: (MangaScreenModel.State.Success) -> Boolean = { true },
-): MangaScreenModel.State.Success = runBlocking {
-    withTimeout(WAIT_MS) {
-        state.first { it is MangaScreenModel.State.Success && predicate(it) } as MangaScreenModel.State.Success
-    }
-}
-
-/** Waits until [condition] holds, polling; for effects that do not show in the state. */
-internal fun eventually(condition: () -> Boolean) {
-    val deadline = System.currentTimeMillis() + WAIT_MS
-    while (!condition()) {
-        check(System.currentTimeMillis() < deadline) { "condition not met in time" }
-        Thread.sleep(10)
-    }
+): MangaScreenModel.State.Success {
+    eventually { (state.value as? MangaScreenModel.State.Success)?.let(predicate) == true }
+    return state.value as MangaScreenModel.State.Success
 }

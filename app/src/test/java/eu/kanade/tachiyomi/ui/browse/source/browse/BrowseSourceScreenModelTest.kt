@@ -11,6 +11,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.every
+import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -18,6 +19,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.source.interactor.GetRemoteManga
 import tachiyomi.domain.source.model.EXHSavedSearch
+import xyz.nulldev.ts.api.http.serializer.FilterSerializer
 
 @RunWith(RobolectricTestRunner::class)
 internal class BrowseSourceScreenModelTest {
@@ -71,7 +73,8 @@ internal class BrowseSourceScreenModelTest {
     @Test
     fun jsonFiltersAreApplied() {
         harness.filters = { FilterList(object : Filter.CheckBox("On") {}) }
-        val model = harness.model(filtersJson = """[{"_cbClass":"CheckBox","name":"On","state":true}]""")
+        val json = Json.encodeToString(FilterSerializer().serialize(FilterList(object : Filter.CheckBox("On", true) {})))
+        val model = harness.model(filtersJson = json)
         model.state.value.listing.shouldBeInstanceOf<Listing.Search>()
         harness.model(filtersJson = "not json").state.value.listing shouldBe Listing.Popular
     }

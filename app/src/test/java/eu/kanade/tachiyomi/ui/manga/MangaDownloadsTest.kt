@@ -92,16 +92,15 @@ internal class MangaDownloadsTest {
 
     @Test
     fun countsDownloads() {
-        harness.loading().downloads.hasDownloads() shouldBe false
         every { harness.downloadManager.getDownloadCount(any<Manga>()) } returnsMany listOf(0, 3)
         val model = harness.loaded()
         model.downloads.hasDownloads() shouldBe false
         model.downloads.hasDownloads() shouldBe true
+        harness.loading().downloads.hasDownloads() shouldBe false
     }
 
     @Test
     fun deletesAllDownloads() {
-        harness.loading().downloads.deleteDownloads()
         val model = harness.loaded()
         model.downloads.deleteDownloads()
         verify { harness.downloadManager.deleteManga(manga(favorite = true), any(), any()) }
@@ -112,6 +111,7 @@ internal class MangaDownloadsTest {
         model.updateSuccessState { it.copy(mergedData = null) }
         model.downloads.deleteDownloads()
         verify { harness.sourceManager.getOrStub(8L) }
+        harness.loading().downloads.deleteDownloads()
     }
 
     @Test

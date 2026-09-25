@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import android.app.Activity
 import android.app.Application
 import androidx.activity.ComponentActivity
-import androidx.appcompat.view.ContextThemeWrapper
+import androidx.appcompat.app.AlertDialog
 import androidx.test.core.app.ApplicationProvider
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.browse.source.SourcesScreen
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.manga.merged.themedActivity
 import eu.kanade.tachiyomi.ui.webview.WebViewScreen
 import exh.pagepreview.PagePreviewScreen
 import exh.recs.RecommendsScreen
@@ -32,7 +33,7 @@ import org.koin.dsl.module
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
-import org.robolectric.shadows.ShadowAlertDialog
+import org.robolectric.shadows.ShadowDialog
 import tachiyomi.domain.manga.interactor.GetCustomMangaInfo
 import tachiyomi.domain.source.service.SourceManager
 
@@ -103,11 +104,11 @@ internal class MangaNavigationTest {
 
     @Test
     fun mergedWebViewPicksAMember() {
-        val themed = ContextThemeWrapper(activity, com.google.android.material.R.style.Theme_MaterialComponents)
+        val themed = themedActivity()
         val member = manga().copy(id = 4L, source = 7L)
         val self = manga().copy(id = 5L, source = MERGED_SOURCE_ID)
         openMergedMangaWebview(themed, navigator, mergedData(member, self))
-        val dialog = ShadowAlertDialog.getLatestAlertDialog()
+        val dialog = ShadowDialog.getLatestDialog() as AlertDialog
         dialog.listView.adapter.count shouldBe 1
         dialog.listView.performItemClick(null, 0, 0L)
         pushed().shouldBeInstanceOf<WebViewScreen>()

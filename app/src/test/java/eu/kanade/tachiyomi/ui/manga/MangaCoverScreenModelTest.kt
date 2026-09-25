@@ -23,12 +23,8 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -60,7 +56,6 @@ internal class MangaCoverScreenModelTest {
 
     @Before
     fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
         startKoin {
             modules(
                 module {
@@ -88,7 +83,6 @@ internal class MangaCoverScreenModelTest {
     fun tearDown() {
         stopKoin()
         SingletonImageLoader.reset()
-        Dispatchers.resetMain()
         clearVoyagerScopes()
     }
 

@@ -72,8 +72,8 @@ internal class MangaDialogsTest {
 
     @Test
     fun nextUnreadNeedsState() {
-        harness.loading().getNextUnreadChapter().shouldBeNull()
         harness.loaded().getNextUnreadChapter() shouldBe chapter(1L)
+        harness.loading().getNextUnreadChapter().shouldBeNull()
     }
 
     @Test

@@ -5,6 +5,8 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import eu.kanade.domain.extension.interactor.GetExtensionsByType
@@ -49,6 +51,8 @@ internal class ExtensionsTabTest {
     private val steps = MutableSharedFlow<InstallStep>()
     private val manager = mockk<ExtensionManager>(relaxed = true) {
         every { installer.downloadAndInstall(any(), any()) } returns steps
+        every { availableExtensionMapFlow } returns MutableStateFlow(mapOf(stale.pkgName to far))
+        every { untrustedExtensionMapFlow } returns MutableStateFlow(emptyMap())
     }
 
     @Before
@@ -169,12 +173,15 @@ internal class ExtensionsTabTest {
     }
 
     @Test
-    fun emptyStoreOffersRetry() {
+    fun emptyStoreOffersStores() {
         extensions.value = Extensions(emptyList(), emptyList(), emptyList(), emptyList())
         koin.sourcePreferences.extensionUpdatesCount.set(3)
         val (host, model) = host()
         compose.waitUntil(timeoutMillis = 5_000) { host.content.badgeNumber == 3 }
-        compose.onNodeWithText("Retry").performClick()
+        compose.onNodeWithText("Extension stores").performClick()
+        compose.waitForIdle()
+        host.navigator.lastItem::class.simpleName shouldBe "ExtensionStoresScreen"
+        compose.onRoot().performTouchInput { swipeDown() }
         compose.waitUntil(timeoutMillis = 5_000) { model.state.value.isRefreshing }
     }
 }

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import eu.kanade.domain.manga.interactor.UpdateManga
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
@@ -12,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.category.model.Category
+import tachiyomi.domain.manga.interactor.FetchInterval
 import tachiyomi.domain.manga.model.MangaWithChapterCount
 
 @RunWith(RobolectricTestRunner::class)
@@ -115,6 +117,8 @@ internal class MangaLibraryTest {
 
     @Test
     fun fetchIntervalIsSaved() {
+        val field = UpdateManga::class.java.getDeclaredField("fetchInterval").apply { isAccessible = true }
+        field.set(harness.updateManga, mockk<FetchInterval>(relaxed = true))
         val model = harness.loaded()
         model.library.showSetFetchIntervalDialog()
         model.awaitSuccess().dialog.shouldBeInstanceOf<MangaScreenModel.Dialog.SetFetchInterval>()

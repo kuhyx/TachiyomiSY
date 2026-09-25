@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.browse.source.SourcesScreen
@@ -17,7 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.shadows.ShadowAlertDialog
+import org.robolectric.shadows.ShadowDialog
 import org.robolectric.shadows.ShadowLooper
 import org.robolectric.shadows.ShadowToast
 
@@ -77,7 +78,7 @@ internal class MangaSyActionsTest {
         model.updateSuccessState { it.copy(mergedData = mergedData(manga().copy(id = 4L))) }
         host.show(model)
         host.actions.header.onWebViewClicked!!()
-        ShadowAlertDialog.getLatestAlertDialog().listView.adapter.count shouldBe 1
+        (ShadowDialog.getLatestDialog() as AlertDialog).listView.adapter.count shouldBe 1
     }
 
     @Test

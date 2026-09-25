@@ -9,10 +9,6 @@ import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.tachiyomi.ui.manga.NoCustomInfo
 import eu.kanade.tachiyomi.ui.manga.clearVoyagerScopes
 import exh.source.ExhPreferences
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
@@ -35,7 +31,6 @@ internal class BrowseKoin {
     val exhPreferences: ExhPreferences = ExhPreferences(store)
 
     fun start(vararg extra: Module) {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
         stopKoin()
         startKoin {
             allowOverride(true)
@@ -57,7 +52,6 @@ internal class BrowseKoin {
 
     fun stop() {
         stopKoin()
-        Dispatchers.resetMain()
         clearVoyagerScopes()
     }
 }

@@ -99,6 +99,8 @@ internal class MangaChapterActionsTest {
         val model = harness.loaded()
         tracked(model, AutoTrackState.NEVER)
         model.chapterActions.markChaptersRead(listOf(chapter(2L)), read = true)
+        coVerify(timeout = 5_000) { parts.setReadStatus.await(read = true, chapters = anyVararg()) }
+        eventually { true }
         model.autoTrackState = AutoTrackState.ALWAYS
         model.chapterActions.markChaptersRead(listOf(chapter(2L)), read = false)
         coVerify(timeout = 5_000, exactly = 2) { parts.setReadStatus.await(read = any(), chapters = anyVararg()) }

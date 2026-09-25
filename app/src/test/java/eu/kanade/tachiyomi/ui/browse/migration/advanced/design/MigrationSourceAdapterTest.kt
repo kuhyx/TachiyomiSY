@@ -76,6 +76,7 @@ internal class MigrationSourceAdapterTest {
 
     @Test
     fun enabledSourcesAreBright() {
+        koin.sourcePreferences.enabledLanguages.set(setOf("en"))
         val holder = bind(MigrationSourceItem(http(1L, "one"), sourceEnabled = true)).single()
         holder.binding.title.text.toString() shouldBe "One"
         holder.binding.title.alpha shouldBe 1f

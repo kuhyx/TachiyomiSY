@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.browse.feed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
@@ -54,7 +55,7 @@ internal class FeedTabTest {
     fun headersOpenTheSource() {
         val host = host()
         host.content.titleRes shouldBe SYMR.strings.feed
-        compose.onNodeWithText("One").performClick()
+        compose.onAllNodesWithText("One")[0].performClick()
         compose.waitForIdle()
         host.navigator.lastItem.shouldBeInstanceOf<BrowseSourceScreen>()
         harness.koin.sourcePreferences.lastUsedSource.get() shouldBe 1L
@@ -79,7 +80,7 @@ internal class FeedTabTest {
     @Test
     fun longClickDeletesTheFeed() {
         host()
-        compose.onNodeWithText("One").performTouchInput { longClick() }
+        compose.onAllNodesWithText("One")[0].performTouchInput { longClick() }
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodes(hasText("Delete")).fetchSemanticsNodes().isNotEmpty()
         }
