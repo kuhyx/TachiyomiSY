@@ -34,9 +34,10 @@ internal class TachiyomiImageDecoder(private val resources: ImageSource, private
         val isCoverArchive =
             resources.sourceOrNull()?.peek()?.use { CbzCrypto.detectCoverImageArchive(it.inputStream()) } == true
         if (isCoverArchive && resources.source().peek().use { ImageUtil.findImageType(it.inputStream()) == null }) {
-            coverStream = UniFile.fromFile(resources.file().toFile())
-                ?.archiveReader(context = context)
-                ?.getCoverStream()
+            // fromFile only answers null for a null file.
+            coverStream = UniFile.fromFile(resources.file().toFile())!!
+                .archiveReader(context = context)
+                .getCoverStream()
         }
         val decoder = resources.sourceOrNull()?.use {
             coverStream.use { coverStream ->
@@ -91,7 +92,7 @@ internal class TachiyomiImageDecoder(private val resources: ImageSource, private
         }
 
         private fun isApplicable(source: BufferedSource): Boolean {
-            val type = source.peek().inputStream().buffered().use { stream ->
+            val type = source.peek().inputStream().use { stream ->
                 ImageUtil.findImageType(stream)
             }
             // SY -->
