@@ -13,7 +13,6 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
-import androidx.test.espresso.Espresso
 import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
@@ -87,7 +86,7 @@ internal class EditTextPreferenceWidgetTest {
         count("Cancel") shouldBe 0
         compose.onNodeWithText("Now old").performClick()
         compose.waitForIdle()
-        Espresso.pressBackUnconditionally()
+        pressDialogBack()
         compose.waitForIdle()
         count("Cancel") shouldBe 0
     }

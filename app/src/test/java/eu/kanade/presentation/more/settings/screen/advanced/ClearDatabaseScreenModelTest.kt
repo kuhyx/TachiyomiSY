@@ -1,6 +1,7 @@
 package eu.kanade.presentation.more.settings.screen.advanced
 
 import io.kotest.matchers.shouldBe
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -100,8 +101,8 @@ internal class ClearDatabaseScreenModelTest {
         ready(model).showConfirmation shouldBe false
         model.selectAll()
         model.removeMangaBySourceId(keepReadManga = false)
-        verify { database.mangasQueries.deleteNonLibraryManga(listOf(1L), 0L) }
-        verify { database.historyQueries.removeResettedHistory() }
+        coVerify { database.mangasQueries.deleteNonLibraryManga(listOf(1L), 0L) }
+        coVerify { database.historyQueries.removeResettedHistory() }
         sources.emit(listOf(a, b))
         val deadline = System.currentTimeMillis() + 5_000
         while (ready(model).items.size < 2 && System.currentTimeMillis() < deadline) {

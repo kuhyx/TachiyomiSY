@@ -12,10 +12,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.extension.getAppIconForSource
 import io.kotest.matchers.shouldBe
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Before
@@ -42,7 +45,9 @@ internal class ClearDatabaseScreenTest {
     @Before
     fun setUp() {
         val getSources = mockk<GetSourcesWithNonLibraryManga> { every { subscribe() } returns sources }
-        val extensions = mockk<ExtensionManager> { every { getAppIconForSource(any()) } returns null }
+        mockkStatic("eu.kanade.tachiyomi.extension.ExtensionManagerRegistryKt")
+        val extensions = mockk<ExtensionManager>()
+        every { extensions.getAppIconForSource(any()) } returns null
         stopKoin()
         startKoin {
             modules(
@@ -57,6 +62,7 @@ internal class ClearDatabaseScreenTest {
 
     @After
     fun tearDown() {
+        unmockkAll()
         stopKoin()
     }
 
@@ -93,7 +99,7 @@ internal class ClearDatabaseScreenTest {
         compose.onNodeWithText("will be lost", substring = true).assertExists()
         tap("OK")
         compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
-        verify { database.mangasQueries.deleteNonLibraryManga(listOf(1L, 2L), 0L) }
+        coVerify { database.mangasQueries.deleteNonLibraryManga(listOf(1L, 2L), 0L) }
     }
 
     @Test
