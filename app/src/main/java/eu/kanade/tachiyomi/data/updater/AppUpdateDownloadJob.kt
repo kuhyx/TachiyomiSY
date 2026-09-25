@@ -77,10 +77,10 @@ internal class AppUpdateDownloadJob(private val context: Context, workerParams: 
 
         val progressListener = object : ProgressListener {
             // Progress of the download
-            var savedProgress = 0
+            private var savedProgress = 0
 
             // Keep track of the last notification sent to avoid posting too many.
-            var lastTick = 0L
+            private var lastTick = 0L
 
             override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
                 val progress = (PERCENT * (bytesRead.toFloat() / contentLength)).toInt()
