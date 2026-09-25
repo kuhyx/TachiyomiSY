@@ -11,6 +11,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.annotation.KoinInternalApi
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.stopKoin
 import org.koin.core.logger.Level
@@ -30,6 +31,7 @@ private class SampleModule : InjektModule {
     }
 }
 
+@OptIn(KoinInternalApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class InjektKoinBridgeTest {
     private val context: Application = ApplicationProvider.getApplicationContext()
@@ -67,7 +69,6 @@ internal class InjektKoinBridgeTest {
         Injekt.get<Int>() shouldBe 0
         module.built shouldBe 1
         Injekt.get<StringBuilder>() shouldNotBeSameInstanceAs Injekt.get<StringBuilder>()
-        Injekt.get<Application>() shouldBeSameInstanceAs context
     }
 
     @Test

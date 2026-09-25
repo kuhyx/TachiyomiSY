@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.util.storage.CbzCrypto
 import exh.eh.EHentaiUpdateHelper
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
+import mihon.core.common.NativeBinding
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.core.XmlVersion
@@ -54,51 +55,31 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.lang.ref.WeakReference
 
 private const val SQLCIPHER_MIN_PASSWORD_LENGTH = 25
-
-private val lock = Any()
 
 internal class AppModule(val app: Application) : InjektModule {
     // SY -->
     private val securityPreferences: SecurityPreferences by injectLazy()
     // SY <--
 
-    private var sqlDriverRef: WeakReference<SqlDriver>? = null
-
-    // The shared driver: reused while alive, sqlcipher when the database is encrypted.
-    private fun sqlDriver(): SqlDriver = sqlDriverRef?.get() ?: newSqlDriver().also { sqlDriverRef = WeakReference(it) }
-
+    // One driver per process: Koin's singleton holds it, sqlcipher when the database is encrypted.
     private fun newSqlDriver(): SqlDriver {
         // SY -->
         if (securityPreferences.encryptDatabase.get()) {
-            System.loadLibrary("sqlcipher")
+            SqlCipher.loadLibrary()
 
             return AndroidSqliteDriver(
                 schema = Database.Schema.synchronous(),
                 context = app,
                 name = CbzCrypto.DATABASE_NAME,
                 factory = SupportOpenHelperFactory(
-                    CbzCrypto.getDecryptedPasswordSql(),
+                    SqlCipher.password(),
                     null,
                     false,
                     SQLCIPHER_MIN_PASSWORD_LENGTH,
                 ),
-                callback = object : AndroidSqliteDriver.Callback(Database.Schema.synchronous()) {
-                    override fun onOpen(db: SupportSQLiteDatabase) {
-                        super.onOpen(db)
-                        setPragma(db, "foreign_keys = ON")
-                        setPragma(db, "journal_mode = WAL")
-                        setPragma(db, "synchronous = NORMAL")
-                    }
-
-                    private fun setPragma(db: SupportSQLiteDatabase, pragma: String) {
-                        val cursor = db.query("PRAGMA $pragma")
-                        cursor.moveToFirst()
-                        cursor.close()
-                    }
-                },
+                callback = SqlCipherCallback(),
             )
         }
         // SY <--
@@ -126,7 +107,7 @@ internal class AppModule(val app: Application) : InjektModule {
     }
 
     private fun InjektRegistrar.registerSerialization() {
-        addSingletonFactory<SqlDriver> { synchronized(lock) { sqlDriver() } }
+        addSingletonFactory<SqlDriver> { newSqlDriver() }
         addSingletonFactory {
             Database(
                 driver = get(),
@@ -210,5 +191,33 @@ internal fun initExpensiveComponents(app: Application) {
         // SY -->
         Injekt.get<GetCustomMangaInfo>()
         // SY <--
+    }
+}
+
+/** The sqlcipher native library and the key it opens the database with. */
+internal object SqlCipher {
+    @NativeBinding
+    fun loadLibrary() {
+        System.loadLibrary("sqlcipher")
+    }
+
+    /** The database key, decrypted through the AndroidKeyStore (absent from any JVM). */
+    @NativeBinding
+    fun password(): ByteArray = CbzCrypto.getDecryptedPasswordSql()
+}
+
+/** The pragmas every encrypted connection opens with. */
+internal class SqlCipherCallback : AndroidSqliteDriver.Callback(Database.Schema.synchronous()) {
+    override fun onOpen(db: SupportSQLiteDatabase) {
+        super.onOpen(db)
+        setPragma(db, "foreign_keys = ON")
+        setPragma(db, "journal_mode = WAL")
+        setPragma(db, "synchronous = NORMAL")
+    }
+
+    private fun setPragma(db: SupportSQLiteDatabase, pragma: String) {
+        val cursor = db.query("PRAGMA $pragma")
+        cursor.moveToFirst()
+        cursor.close()
     }
 }
