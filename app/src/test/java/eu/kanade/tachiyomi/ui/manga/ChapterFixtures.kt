@@ -4,7 +4,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.model.Manga
 
-/** A chapter of manga 1 with [id], numbered [number] unless given. */
+/** A chapter of manga 1 with [id], numbered [number] unless given; later ids come first in source order. */
 internal fun chapter(
     id: Long,
     number: Double = id.toDouble(),
@@ -14,7 +14,7 @@ internal fun chapter(
     id = id,
     mangaId = 1L,
     chapterNumber = number,
-    sourceOrder = id,
+    sourceOrder = 100 - id,
     read = read,
     bookmark = bookmark,
     name = "Chapter $id",

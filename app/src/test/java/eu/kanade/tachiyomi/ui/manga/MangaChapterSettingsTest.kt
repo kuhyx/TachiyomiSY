@@ -25,7 +25,7 @@ internal class MangaChapterSettingsTest {
 
     @Test
     fun loadingStateChangesNothing() {
-        val settings = harness.model().also { it.updateState { MangaScreenModel.State.Loading } }.chapterSettings
+        val settings = harness.loading().chapterSettings
         settings.setUnreadFilter(TriState.ENABLED_IS)
         settings.setDownloadedFilter(TriState.ENABLED_IS)
         settings.setBookmarkedFilter(TriState.ENABLED_IS)

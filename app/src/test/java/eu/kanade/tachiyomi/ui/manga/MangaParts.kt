@@ -6,6 +6,7 @@ import eu.kanade.domain.manga.interactor.SetExcludedScanlators
 import eu.kanade.domain.track.interactor.AddTracks
 import eu.kanade.domain.track.interactor.RefreshTracks
 import eu.kanade.domain.track.interactor.TrackChapter
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.source.online.readMember
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -60,6 +61,7 @@ internal class MangaParts {
     val deleteMangaById: DeleteMangaById = mockk(relaxed = true)
     val deleteByMergeId: DeleteByMergeId = mockk(relaxed = true)
     val deleteMergeById: DeleteMergeById = mockk(relaxed = true)
+    val coverCache: CoverCache = mockk(relaxed = true)
 
     init {
         coEvery { getTracks.subscribe(any<Long>()) } returns flowOf(emptyList())
@@ -93,6 +95,7 @@ internal class MangaParts {
         single { deleteMangaById }
         single { deleteByMergeId }
         single { deleteMergeById }
+        single { coverCache }
     }
 }
 
