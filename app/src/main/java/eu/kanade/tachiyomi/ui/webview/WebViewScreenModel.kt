@@ -27,7 +27,7 @@ internal class WebViewScreenModel(
     init {
         sourceId?.let { sourceManager.get(it) as? HttpSource }?.let { source ->
             try {
-                headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
+                headers = source.headers.toMultimap().mapValues { it.value.first() }
             } catch (expected: Exception) {
                 // Logged whatever the cause; the caller carries on.
                 logcat(LogPriority.ERROR, expected) { "Failed to build headers" }
