@@ -54,13 +54,16 @@ internal class WebViewActivity : BaseActivity() {
             return
         }
 
-        val url = intent.extras?.getString(URL_KEY) ?: return
+        intent.extras?.let { extras -> extras.getString(URL_KEY)?.let { url -> showPage(extras, url) } }
+    }
+
+    private fun showPage(extras: Bundle, url: String) {
         assistUrl = url
 
         var headers = emptyMap<String, String>()
-        (sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource)?.let { source ->
+        (sourceManager.get(extras.getLong(SOURCE_KEY)) as? HttpSource)?.let { source ->
             try {
-                headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
+                headers = source.headers.toMultimap().mapValues { it.value.first() }
             } catch (expected: Exception) {
                 // Logged whatever the cause; the caller carries on.
                 logcat(LogPriority.ERROR, expected) { "Failed to build headers" }
@@ -70,7 +73,7 @@ internal class WebViewActivity : BaseActivity() {
         setComposeContent {
             WebViewScreenContent(
                 onNavigateUp = { finish() },
-                initialTitle = intent.extras?.getString(TITLE_KEY),
+                initialTitle = extras.getString(TITLE_KEY),
                 url = url,
                 headers = headers,
                 onUrlChange = { assistUrl = it },
