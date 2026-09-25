@@ -28,7 +28,7 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4) {
     val source: HttpSource = mockk(relaxed = true)
 
     fun start() {
-        vm.start(module { single { SecurityPreferences(vm.store) } })
+        vm.start(module { single { SecurityPreferences(vm.store) } }, testMain = false)
         every { vm.sourceManager.getOrStub(1L) } returns source
         every { vm.sourceManager.get(1L) } returns source
         coEvery { vm.getManga.await(10L) } returns vm.manga
