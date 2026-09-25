@@ -63,6 +63,16 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4) {
         }
     }
 
+    /** Idles the main looper (letting IO work land) until [condition] holds, for at most two seconds. */
+    fun settleUntil(condition: () -> Boolean) {
+        repeat(100) {
+            ShadowLooper.idleMainLooper()
+            if (condition()) return
+            Thread.sleep(20)
+        }
+        error("condition not reached")
+    }
+
     fun pagesReady(chapter: ReaderChapter) {
         chapter.pages?.forEach { it.status = Page.State.Ready }
     }
