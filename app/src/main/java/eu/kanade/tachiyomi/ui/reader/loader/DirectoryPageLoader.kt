@@ -16,7 +16,8 @@ internal class DirectoryPageLoader(val file: UniFile) : PageLoader() {
     override suspend fun getPages(): List<ReaderPage> {
         return file.listFiles()
             ?.filter { !it.isDirectory && ImageUtil.isImage(it.name) { it.openInputStream() } }
-            ?.sortedWith { f1, f2 -> f1.name.orEmpty().compareNaturalIgnoreCase(f2.name.orEmpty()) }
+            // A nameless file is never an image, so every file left has a name.
+            ?.sortedWith { f1, f2 -> f1.name!!.compareNaturalIgnoreCase(f2.name!!) }
             ?.mapIndexed { i, file ->
                 val streamFn = { file.openInputStream() }
                 ReaderPage(i).apply {

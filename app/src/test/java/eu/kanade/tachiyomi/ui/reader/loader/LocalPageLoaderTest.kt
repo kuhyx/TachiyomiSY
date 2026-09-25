@@ -57,8 +57,8 @@ internal class LocalPageLoaderTest {
         loader.file shouldBe dir
         loader.isLocal shouldBe true
         val pages = loader.getPages()
-        pages.map { it.index } shouldBe listOf(0, 1)
-        pages.map { it.stream!!().read() } shouldBe listOf(1, 10)
+        pages.map { it.index } shouldBe listOf(0, 1, 2)
+        pages.map { it.stream!!().read() } shouldBe listOf(1, 2, 10)
         pages.forEach { it.status shouldBe Page.State.Ready }
         loader.isLocal = false
         loader.isLocal shouldBe false

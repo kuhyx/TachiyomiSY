@@ -40,50 +40,56 @@ internal class HttpPageLoaderQueueTest {
     }
 
     @Test
-    fun resolvesUrlAndDownloads() = runBlocking {
-        val harness = HttpLoaderHarness()
-        harness.cacheServes(File(dir, "img"), byteArrayOf(9))
-        coEvery { harness.source.getImageUrl(any()) } returns "https://img/9"
-        coEvery { harness.source.getImage(any(), any()) } returns imageResponse()
-        every { harness.chapterCache.isImageInCache("https://img/9") } returns false
-        val loader = harness.loader()
-        val page = ReaderPage(0, imageUrl = "")
-        loader.internalLoadPage(page, force = false)
-        page.imageUrl shouldBe "https://img/9"
-        page.status shouldBe Page.State.Ready
-        page.stream!!().read() shouldBe 9
-        verify { harness.chapterCache.putImageToCache("https://img/9", any()) }
-        loader.recycle()
+    fun resolvesUrlAndDownloads() {
+        runBlocking {
+            val harness = HttpLoaderHarness()
+            harness.cacheServes(File(dir, "img"), byteArrayOf(9))
+            coEvery { harness.source.getImageUrl(any()) } returns "https://img/9"
+            coEvery { harness.source.getImage(any(), any()) } returns imageResponse()
+            every { harness.chapterCache.isImageInCache("https://img/9") } returns false
+            val loader = harness.loader()
+            val page = ReaderPage(0, imageUrl = "")
+            loader.internalLoadPage(page, force = false)
+            page.imageUrl shouldBe "https://img/9"
+            page.status shouldBe Page.State.Ready
+            page.stream!!().read() shouldBe 9
+            verify { harness.chapterCache.putImageToCache("https://img/9", any()) }
+            loader.recycle()
+        }
     }
 
     @Test
-    fun cachedImageSkipsDownload() = runBlocking {
-        val harness = HttpLoaderHarness()
-        harness.cacheServes(File(dir, "img"), byteArrayOf(4))
-        every { harness.chapterCache.isImageInCache("https://a") } returns true
-        val loader = harness.loader()
-        val page = ReaderPage(0, imageUrl = "https://a")
-        loader.internalLoadPage(page, force = false)
-        page.status shouldBe Page.State.Ready
-        coVerify(exactly = 0) { harness.source.getImage(any(), any()) }
-        coEvery { harness.source.getImage(any(), any()) } returns imageResponse()
-        loader.internalLoadPage(page, force = true)
-        coVerify(exactly = 1) { harness.source.getImage(any(), any()) }
-        loader.recycle()
+    fun cachedImageSkipsDownload() {
+        runBlocking {
+            val harness = HttpLoaderHarness()
+            harness.cacheServes(File(dir, "img"), byteArrayOf(4))
+            every { harness.chapterCache.isImageInCache("https://a") } returns true
+            val loader = harness.loader()
+            val page = ReaderPage(0, imageUrl = "https://a")
+            loader.internalLoadPage(page, force = false)
+            page.status shouldBe Page.State.Ready
+            coVerify(exactly = 0) { harness.source.getImage(any(), any()) }
+            coEvery { harness.source.getImage(any(), any()) } returns imageResponse()
+            loader.internalLoadPage(page, force = true)
+            coVerify(exactly = 1) { harness.source.getImage(any(), any()) }
+            loader.recycle()
+        }
     }
 
     @Test
-    fun failuresMarkThePage() = runBlocking {
-        val harness = HttpLoaderHarness()
-        coEvery { harness.source.getImageUrl(any()) } throws IllegalStateException("gone")
-        val loader = harness.loader()
-        val page = ReaderPage(0)
-        loader.internalLoadPage(page, force = false)
-        page.status.shouldBeInstanceOf<Page.State.Error>()
-        coEvery { harness.source.getImageUrl(any()) } throws CancellationException("stop")
-        shouldThrow<CancellationException> { loader.internalLoadPage(page, force = false) }
-        (page.status as Page.State.Error).error.shouldBeInstanceOf<CancellationException>()
-        loader.recycle()
+    fun failuresMarkThePage() {
+        runBlocking {
+            val harness = HttpLoaderHarness()
+            coEvery { harness.source.getImageUrl(any()) } throws IllegalStateException("gone")
+            val loader = harness.loader()
+            val page = ReaderPage(0)
+            loader.internalLoadPage(page, force = false)
+            page.status.shouldBeInstanceOf<Page.State.Error>()
+            coEvery { harness.source.getImageUrl(any()) } throws CancellationException("stop")
+            shouldThrow<CancellationException> { loader.internalLoadPage(page, force = false) }
+            (page.status as Page.State.Error).error.shouldBeInstanceOf<CancellationException>()
+            loader.recycle()
+        }
     }
 
     @Test

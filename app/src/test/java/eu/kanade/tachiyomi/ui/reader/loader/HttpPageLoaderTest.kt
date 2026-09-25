@@ -26,28 +26,32 @@ internal class HttpPageLoaderTest {
     private val harness = HttpLoaderHarness()
 
     @Test
-    fun pagesFromCacheReindexed() = runBlocking {
-        every { harness.chapterCache.getPageListFromCache(any()) } returns listOf(Page(5, "/a", "https://a"))
-        val loader = harness.loader()
-        loader.isLocal shouldBe false
-        val pages = loader.getPages()
-        pages.single().index shouldBe 0
-        pages.single().imageUrl shouldBe "https://a"
-        loader.queue.shouldBeEmpty()
-        loader.isLocal = true
-        loader.isLocal shouldBe true
-        loader.recycle()
+    fun pagesFromCacheReindexed() {
+        runBlocking {
+            every { harness.chapterCache.getPageListFromCache(any()) } returns listOf(Page(5, "/a", "https://a"))
+            val loader = harness.loader()
+            loader.isLocal shouldBe false
+            val pages = loader.getPages()
+            pages.single().index shouldBe 0
+            pages.single().imageUrl shouldBe "https://a"
+            loader.queue.shouldBeEmpty()
+            loader.isLocal = true
+            loader.isLocal shouldBe true
+            loader.recycle()
+        }
     }
 
     @Test
-    fun cacheMissGoesToNetwork() = runBlocking {
-        harness.readerPreferences.aggressivePageLoading.set(true)
-        every { harness.chapterCache.getPageListFromCache(any()) } throws IllegalStateException("miss")
-        coEvery { harness.source.getPageList(any()) } returns listOf(Page(0, "/a"), Page(1, "/b"))
-        val loader = harness.loader()
-        loader.getPages().map { it.url } shouldBe listOf("/a", "/b")
-        loader.queue.map { it.priority } shouldBe listOf(0, 0)
-        loader.recycle()
+    fun cacheMissGoesToNetwork() {
+        runBlocking {
+            harness.readerPreferences.aggressivePageLoading.set(true)
+            every { harness.chapterCache.getPageListFromCache(any()) } throws IllegalStateException("miss")
+            coEvery { harness.source.getPageList(any()) } returns listOf(Page(0, "/a"), Page(1, "/b"))
+            val loader = harness.loader()
+            loader.getPages().map { it.url } shouldBe listOf("/a", "/b")
+            loader.queue.map { it.priority } shouldBe listOf(0, 0)
+            loader.recycle()
+        }
     }
 
     @Test
@@ -59,51 +63,57 @@ internal class HttpPageLoaderTest {
     }
 
     @Test
-    fun loadPageQueuesAndUnqueues() = runBlocking {
-        val loader = harness.loader()
-        val pages = loadedPages(harness.chapter, count = 3)
-        every { harness.chapterCache.isImageInCache(any()) } returns false
-        pages[0].status = Page.State.Ready
-        pages[2].status = Page.State.Ready
-        val job = async { loader.loadPage(pages[0]) }
-        withTimeout(5_000) { while (loader.queue.size < 2) delay(5) }
-        loader.queue.map { it.page.index } shouldBe listOf(0, 1)
-        pages[1].status = Page.State.LoadPage
-        job.cancelAndJoin()
-        loader.queue.map { it.page.index } shouldBe listOf(1)
-        loader.recycle()
-    }
-
-    @Test
-    fun loadPageRequeuesErrors() = runBlocking {
-        val loader = harness.loader()
-        val pages = loadedPages(harness.chapter, count = 1)
-        pages[0].status = Page.State.Error(IllegalStateException("x"))
-        val job = async { loader.loadPage(pages[0]) }
-        withTimeout(5_000) { while (loader.queue.isEmpty()) delay(5) }
-        pages[0].status shouldBe Page.State.Queue
-        job.cancelAndJoin()
-        loader.queue.shouldBeEmpty()
-        loader.recycle()
-    }
-
-    @Test
-    fun loadPageKeepsReadyPages() = runBlocking {
-        val loader = harness.loader()
-        val cached = loadedPages(harness.chapter, count = 2)
-        every { harness.chapterCache.isImageInCache("https://img/0") } returns true
-        cached[0].status = Page.State.Ready
-        val noUrl = ReaderPage(1).also {
-            it.chapter = harness.chapter
-            it.status = Page.State.Ready
-        }
-        for (page in listOf(cached[0], noUrl)) {
-            val job = async { loader.loadPage(page) }
-            delay(50)
-            page.status shouldBe Page.State.Ready
+    fun loadPageQueuesAndUnqueues() {
+        runBlocking {
+            val loader = harness.loader()
+            val pages = loadedPages(harness.chapter, count = 3)
+            every { harness.chapterCache.isImageInCache(any()) } returns false
+            pages[0].status = Page.State.Ready
+            pages[2].status = Page.State.Ready
+            val job = async { loader.loadPage(pages[0]) }
+            withTimeout(5_000) { while (loader.queue.size < 2) delay(5) }
+            loader.queue.map { it.page.index } shouldBe listOf(0, 1)
+            pages[1].status = Page.State.LoadPage
             job.cancelAndJoin()
+            loader.queue.map { it.page.index } shouldBe listOf(1)
+            loader.recycle()
         }
-        loader.recycle()
+    }
+
+    @Test
+    fun loadPageRequeuesErrors() {
+        runBlocking {
+            val loader = harness.loader()
+            val pages = loadedPages(harness.chapter, count = 1)
+            pages[0].status = Page.State.Error(IllegalStateException("x"))
+            val job = async { loader.loadPage(pages[0]) }
+            withTimeout(5_000) { while (loader.queue.isEmpty()) delay(5) }
+            pages[0].status shouldBe Page.State.Queue
+            job.cancelAndJoin()
+            loader.queue.shouldBeEmpty()
+            loader.recycle()
+        }
+    }
+
+    @Test
+    fun loadPageKeepsReadyPages() {
+        runBlocking {
+            val loader = harness.loader()
+            val cached = loadedPages(harness.chapter, count = 2)
+            every { harness.chapterCache.isImageInCache("https://img/0") } returns true
+            cached[0].status = Page.State.Ready
+            val noUrl = ReaderPage(1).also {
+                it.chapter = harness.chapter
+                it.status = Page.State.Ready
+            }
+            for (page in listOf(cached[0], noUrl)) {
+                val job = async { loader.loadPage(page) }
+                delay(50)
+                page.status shouldBe Page.State.Ready
+                job.cancelAndJoin()
+            }
+            loader.recycle()
+        }
     }
 
     @Test
