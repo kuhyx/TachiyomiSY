@@ -20,6 +20,7 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.storage.service.StorageManager
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 internal class AppLoggingTest {
@@ -49,11 +50,19 @@ internal class AppLoggingTest {
         every { storage.getLogsDirectory() } returns UniFile.fromFile(folder.root)
         app.setupExhLogging()
         XLog.d("probe")
-        val files = folder.root.listFiles().orEmpty()
-        files.size shouldBe 1
-        files[0].name shouldEndWith "-${BuildConfig.BUILD_TYPE}.txt"
-        files[0].readText() shouldContain "D/"
-        files[0].readText() shouldContain "probe"
+        val file = writtenLog()
+        file.name shouldEndWith "-${BuildConfig.BUILD_TYPE}.txt"
+        file.readText() shouldContain "D/"
+    }
+
+    // EnhancedFilePrinter writes on its own worker thread.
+    private fun writtenLog(): File {
+        repeat(times = 200) {
+            val file = folder.root.listFiles().orEmpty().singleOrNull()
+            if (file != null && file.readText().contains("probe")) return file
+            Thread.sleep(25)
+        }
+        error("no log file with the probe in ${folder.root}")
     }
 
     @Test

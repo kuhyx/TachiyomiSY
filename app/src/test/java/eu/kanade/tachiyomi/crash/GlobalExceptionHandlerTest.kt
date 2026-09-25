@@ -52,6 +52,15 @@ internal class GlobalExceptionHandlerTest {
     }
 
     @Test
+    fun worksWithoutAPreviousHandler() {
+        Thread.setDefaultUncaughtExceptionHandler(null)
+        GlobalExceptionHandler.initialize(context, CrashActivity::class.java)
+        Thread.getDefaultUncaughtExceptionHandler().shouldNotBeNull()
+            .uncaughtException(Thread.currentThread(), IllegalStateException("alone"))
+        shadowOf(context).nextStartedActivity.shouldNotBeNull()
+    }
+
+    @Test
     fun missingExtraGivesNull() {
         GlobalExceptionHandler.getThrowableFromIntent(Intent()).shouldBeNull()
     }

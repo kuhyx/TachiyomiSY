@@ -20,12 +20,13 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 // EXH
-internal fun App.setupExhLogging() {
+// [debug] is BuildConfig.DEBUG, a per-variant constant: a parameter so both builds' paths run in tests.
+internal fun App.setupExhLogging(debug: Boolean = BuildConfig.DEBUG) {
     EHLogLevel.init(this)
 
     val logLevel = when {
         EHLogLevel.shouldLog(EHLogLevel.EXTREME) -> LogLevel.ALL
-        EHLogLevel.shouldLog(EHLogLevel.EXTRA) || BuildConfig.DEBUG -> LogLevel.DEBUG
+        EHLogLevel.shouldLog(EHLogLevel.EXTRA) || debug -> LogLevel.DEBUG
         else -> LogLevel.WARN
     }
 
@@ -60,7 +61,7 @@ internal fun App.setupExhLogging() {
     }
 
     // Install Crashlytics in prod
-    if (!BuildConfig.DEBUG) {
+    if (!debug) {
         printers += CrashlyticsPrinter(LogLevel.ERROR)
     }
 

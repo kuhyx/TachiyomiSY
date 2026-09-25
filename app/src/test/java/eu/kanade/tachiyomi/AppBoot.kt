@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi
 
+import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.di.InjektKoinBridge
@@ -8,6 +9,7 @@ import eu.kanade.tachiyomi.util.system.GLUtil
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.flow.flowOf
 import logcat.LogcatLogger
@@ -29,6 +31,9 @@ internal class AppBoot {
     val app: App = attachedApp()
     var migrationsFinished: Boolean = false
         private set
+
+    /** The process name [App.onCreate] sees; null keeps the sandbox's own. */
+    var processName: String? = null
     private val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
 
     private val overrides = module {
@@ -52,6 +57,10 @@ internal class AppBoot {
             migrationsFinished = true
         }
         every { GLUtil.DEVICE_TEXTURE_LIMIT } returns 4096
+        processName?.let { name ->
+            mockkStatic(Application::class)
+            every { Application.getProcessName() } returns name
+        }
         app.onCreate()
         return app
     }
