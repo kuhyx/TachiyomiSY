@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.FragmentActivity
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -12,9 +13,9 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import eu.kanade.presentation.category.BiometricTimesScreen
 import eu.kanade.presentation.category.components.CategoryDeleteDialog
 import eu.kanade.presentation.util.Screen
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
@@ -46,7 +47,8 @@ internal class BiometricTimesScreen : Screen() {
         )
 
         fun showTimePicker(startTime: Duration? = null) {
-            val activity = context as? MainActivity ?: return
+            // The picker is a DialogFragment: any fragment host will do, the app's being MainActivity.
+            val activity = context as? FragmentActivity ?: return
             val picker = MaterialTimePicker.Builder()
                 .setTitleText(
                     if (startTime ==
@@ -74,8 +76,8 @@ internal class BiometricTimesScreen : Screen() {
             picker.show(activity.supportFragmentManager, null)
         }
 
+        // No dialog is the `else`: a `when` without one gets a dead "no match" group from Compose.
         when (val dialog = successState.dialog) {
-            null -> {}
             BiometricTimesDialog.Create -> {
                 LaunchedEffect(Unit) {
                     showTimePicker()
@@ -90,14 +92,12 @@ internal class BiometricTimesScreen : Screen() {
                     stringResource(SYMR.strings.delete_time_range_confirmation, dialog.timeRange.formattedString),
                 )
             }
+            else -> {}
         }
 
+        // launchIn rather than collect: the event channel never completes, so nothing would follow a collect.
         LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { event ->
-                if (event is BiometricTimesEvent.LocalizedMessage) {
-                    context.toast(event.stringRes)
-                }
-            }
+            screenModel.events.onEach { event -> context.toast(event.stringRes) }.launchIn(this)
         }
     }
 }
