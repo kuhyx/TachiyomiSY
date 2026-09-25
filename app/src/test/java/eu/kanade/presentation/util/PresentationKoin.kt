@@ -5,7 +5,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import tachiyomi.core.common.preference.InMemoryPreferenceStore
+import eu.kanade.domain.FlowPreferenceStore
 import tachiyomi.domain.manga.interactor.GetCustomMangaInfo
 import tachiyomi.domain.manga.model.CustomMangaInfo
 import tachiyomi.domain.manga.repository.CustomMangaRepository
@@ -15,7 +15,7 @@ import tachiyomi.domain.manga.repository.CustomMangaRepository
  * lookup that knows no edits. Tests add their own collaborators through [start]'s modules.
  */
 internal class PresentationKoin {
-    val store: InMemoryPreferenceStore = InMemoryPreferenceStore()
+    val store: FlowPreferenceStore = FlowPreferenceStore()
     val uiPreferences: UiPreferences = UiPreferences(store)
 
     fun start(vararg extra: Module) {
