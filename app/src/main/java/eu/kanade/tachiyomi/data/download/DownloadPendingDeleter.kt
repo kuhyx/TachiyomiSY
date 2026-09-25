@@ -155,7 +155,8 @@ internal class DownloadPendingDeleter(
         val id: Long,
         val url: String,
         val name: String,
-        val scanlator: String? = null,
+        // Absent in old entries; the app's Json (explicitNulls = false) reads that as null.
+        val scanlator: String?,
     )
 
     /**
