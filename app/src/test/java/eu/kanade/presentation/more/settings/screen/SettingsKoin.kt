@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
 import eu.kanade.tachiyomi.network.NetworkPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
+import exh.pref.DelegateSourcePreferences
 import exh.source.ExhPreferences
 import io.mockk.mockk
 import org.koin.core.context.startKoin
@@ -48,6 +49,7 @@ internal class SettingsKoin {
     val backup: BackupPreferences = BackupPreferences(store)
     val folders: FolderProvider = mockk(relaxed = true)
     val storage: StoragePreferences = StoragePreferences(folders, store)
+    val delegate: DelegateSourcePreferences = DelegateSourcePreferences(store)
 
     fun start(vararg extra: Module) {
         stopKoin()
@@ -71,6 +73,7 @@ internal class SettingsKoin {
                     single { network }
                     single { backup }
                     single { storage }
+                    single { delegate }
                 },
                 *extra,
             )
