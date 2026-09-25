@@ -104,10 +104,7 @@ internal class ExtensionLoaderPkgNameTest {
     fun theNewerOfTheTwoPackages() {
         packages.installShared(extensionPackage(pkgName = PKG, versionCode = 1))
         privateFile(versionCode = 9)
-        ExtensionLoader.getExtensionPackageInfo(context, PKG)?.let {
-            @Suppress("DEPRECATION")
-            it.versionCode
-        } shouldBe 9
+        ExtensionLoader.getExtensionPackageInfo(context, PKG)?.longVersionCode shouldBe 9L
     }
 
     @Test
