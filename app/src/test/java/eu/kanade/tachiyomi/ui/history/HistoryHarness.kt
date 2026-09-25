@@ -36,7 +36,7 @@ internal class HistoryHarness {
     val removeHistory: RemoveHistory = mockk(relaxed = true)
     val setMangaCategories: SetMangaCategories = mockk(relaxed = true)
     val updateManga: UpdateManga = mockk()
-    val source: Source = mockk()
+    val source: Source = mockk(relaxed = true)
     val sourceManager: SourceManager = mockk { every { getOrStub(any()) } returns source }
 
     fun model(): HistoryScreenModel = HistoryScreenModel(

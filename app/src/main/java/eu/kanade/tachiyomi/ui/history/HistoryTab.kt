@@ -31,8 +31,10 @@ import eu.kanade.tachiyomi.ui.category.CategoryScreen
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import mihon.feature.migration.dialog.MigrateMangaDialog
 import tachiyomi.core.common.i18n.stringResource
@@ -99,23 +101,7 @@ internal data object HistoryTab : Tab {
             }
         }
 
-        LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { e ->
-                when (e) {
-                    HistoryScreenModel.Event.InternalError ->
-                        snackbarHostState.showSnackbar(context.stringResource(MR.strings.internal_error))
-                    HistoryScreenModel.Event.HistoryCleared ->
-                        snackbarHostState.showSnackbar(context.stringResource(MR.strings.clear_history_completed))
-                    is HistoryScreenModel.Event.OpenChapter -> openChapter(context, e.chapter)
-                }
-            }
-        }
-
-        LaunchedEffect(Unit) {
-            resumeLastChapterReadEvent.receiveAsFlow().collectLatest {
-                openChapter(context, screenModel.getNextChapter())
-            }
-        }
+        LaunchedEffect(Unit) { showEvents(screenModel, context) }
     }
 
     @Composable
@@ -169,8 +155,28 @@ internal data object HistoryTab : Tab {
                     onDismissRequest = onDismissRequest,
                 )
             }
-            null -> {}
+            // No dialog is the `else`: a `when` without one gets a dead "no match" group from Compose.
+            else -> {}
         }
+    }
+
+    // A plain function rather than a composable, so no Compose memoisation guards: mapLatest/launchIn because a
+    // newer event still cancels the one in flight and the never-ending channels leave nothing after a collect.
+    private fun CoroutineScope.showEvents(screenModel: HistoryScreenModel, context: Context) {
+        screenModel.events
+            .mapLatest { e ->
+                when (e) {
+                    HistoryScreenModel.Event.InternalError ->
+                        snackbarHostState.showSnackbar(context.stringResource(MR.strings.internal_error))
+                    HistoryScreenModel.Event.HistoryCleared ->
+                        snackbarHostState.showSnackbar(context.stringResource(MR.strings.clear_history_completed))
+                    is HistoryScreenModel.Event.OpenChapter -> openChapter(context, e.chapter)
+                }
+            }
+            .launchIn(this)
+        resumeLastChapterReadEvent.receiveAsFlow()
+            .mapLatest { openChapter(context, screenModel.getNextChapter()) }
+            .launchIn(this)
     }
 
     private suspend fun openChapter(context: Context, chapter: Chapter?) {
