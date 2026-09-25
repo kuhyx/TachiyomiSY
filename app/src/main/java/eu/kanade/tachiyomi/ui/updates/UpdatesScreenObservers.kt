@@ -6,12 +6,13 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import eu.kanade.tachiyomi.data.download.getQueuedDownloadOrNull
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.updates.UpdatesScreenModel.ItemPreferences
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -29,41 +30,42 @@ import java.time.ZonedDateTime
 private const val UPDATES_HISTORY_MONTHS = 3L
 
 internal fun UpdatesScreenModel.observeUpdates() {
-    screenModelScope.launchIO {
-        // Set date limit for recent chapters
-        val limit = ZonedDateTime.now().minusMonths(UPDATES_HISTORY_MONTHS).toInstant()
+    // Set date limit for recent chapters
+    val limit = ZonedDateTime.now().minusMonths(UPDATES_HISTORY_MONTHS).toInstant()
 
-        combine(
-            // needed for SQL filters (unread, started, bookmarked, etc)
-            getUpdatesItemPreferenceFlow()
-                .distinctUntilChanged()
-                .flatMapLatest {
-                    getUpdates.subscribe(
-                        limit,
-                        unread = it.filterUnread.toBooleanOrNull(),
-                        started = it.filterStarted.toBooleanOrNull(),
-                        bookmarked = it.filterBookmarked.toBooleanOrNull(),
-                        hideExcludedScanlators = it.filterExcludedScanlators,
-                    ).distinctUntilChanged()
-                },
-            downloadCache.changes,
-            downloadManager.queueState,
-            // needed for Kotlin filters (downloaded)
-            getUpdatesItemPreferenceFlow().distinctUntilChanged { old, new ->
-                old.filterDownloaded == new.filterDownloaded
+    // launchIn rather than launch { collect }: the download queue never completes, so nothing follows the collect.
+    combine(
+        // needed for SQL filters (unread, started, bookmarked, etc)
+        getUpdatesItemPreferenceFlow()
+            .distinctUntilChanged()
+            .flatMapLatest {
+                getUpdates.subscribe(
+                    limit,
+                    unread = it.filterUnread.toBooleanOrNull(),
+                    started = it.filterStarted.toBooleanOrNull(),
+                    bookmarked = it.filterBookmarked.toBooleanOrNull(),
+                    hideExcludedScanlators = it.filterExcludedScanlators,
+                ).distinctUntilChanged()
             },
-        ) { updates, _, _, itemPreferences ->
-            applyFilters(toUpdateItems(updates), itemPreferences)
-        }
-            .collectLatest { updateItems ->
-                updateState {
-                    it.copy(
-                        isLoading = false,
-                        items = updateItems,
-                    )
-                }
-            }
+        downloadCache.changes,
+        downloadManager.queueState,
+        // needed for Kotlin filters (downloaded)
+        getUpdatesItemPreferenceFlow().distinctUntilChanged { old, new ->
+            old.filterDownloaded == new.filterDownloaded
+        },
+    ) { updates, _, _, itemPreferences ->
+        applyFilters(toUpdateItems(updates), itemPreferences)
     }
+        .onEach { updateItems ->
+            updateState {
+                it.copy(
+                    isLoading = false,
+                    items = updateItems,
+                )
+            }
+        }
+        .flowOn(Dispatchers.IO)
+        .launchIn(screenModelScope)
 }
 
 internal fun UpdatesScreenModel.observeDownloadState() {
