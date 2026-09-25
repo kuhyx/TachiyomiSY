@@ -11,9 +11,7 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toShareIntent
 import eu.kanade.tachiyomi.util.system.toast
-import logcat.LogPriority
 import tachiyomi.core.common.Constants
-import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.api.get
 
 internal fun ReaderActivity.openMangaScreen() {
@@ -50,13 +48,10 @@ internal fun ReaderActivity.shareChapter() {
     }
 }
 
+// fromPreference maps any unknown value to DEFAULT, so there is nothing to catch here.
 internal fun ReaderActivity.showReadingModeToast(mode: Int) {
-    try {
-        readingModeToast?.cancel()
-        readingModeToast = toast(ReadingMode.fromPreference(mode).stringRes)
-    } catch (_: ArrayIndexOutOfBoundsException) {
-        logcat(LogPriority.ERROR) { "Unknown reading mode: $mode" }
-    }
+    readingModeToast?.cancel()
+    readingModeToast = toast(ReadingMode.fromPreference(mode).stringRes)
 }
 
 // Forces the user preferred [orientation] on the activity.

@@ -6,7 +6,6 @@ import android.net.Uri
 import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.core.content.getSystemService
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Success
@@ -57,7 +56,8 @@ internal fun ReaderActivity.onShareImageResult(
 }
 
 internal fun ReaderActivity.onCopyImageResult(uri: Uri) {
-    val clipboardManager = applicationContext.getSystemService<ClipboardManager>() ?: return
+    // Every Android build has a clipboard service.
+    val clipboardManager: ClipboardManager = applicationContext.getSystemService(ClipboardManager::class.java)
     val clipData = ClipData.newUri(applicationContext.contentResolver, "", uri)
     clipboardManager.setPrimaryClip(clipData)
 }
