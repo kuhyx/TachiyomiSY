@@ -172,10 +172,11 @@ internal fun DownloadQueueList(
         modifier = Modifier.fillMaxWidth(),
         factory = { context ->
             val binding = DownloadListBinding.inflate(LayoutInflater.from(context))
+            val adapter = DownloadAdapter(screenModel.listener)
             screenModel.controllerBinding = binding
-            screenModel.adapter = DownloadAdapter(screenModel.listener)
-            binding.root.adapter = screenModel.adapter
-            screenModel.adapter?.isHandleDragEnabled = true
+            screenModel.adapter = adapter
+            binding.root.adapter = adapter
+            adapter.isHandleDragEnabled = true
             binding.root.layoutManager = LinearLayoutManager(context)
             ViewCompat.setNestedScrollingEnabled(binding.root, true)
             scope.launchUI {
@@ -188,7 +189,8 @@ internal fun DownloadQueueList(
         },
         update = { view ->
             view.updatePadding(left = left, top = top, right = right, bottom = bottom)
-            screenModel.adapter?.updateDataSet(downloadList)
+            // The factory above gave the list this adapter; the model's reference may already be cleared.
+            (view.adapter as DownloadAdapter).updateDataSet(downloadList)
         },
     )
 }

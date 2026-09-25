@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.download
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,24 +40,7 @@ internal object DownloadQueueScreen : Screen() {
 
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
         var fabExpanded by remember { mutableStateOf(true) }
-        val nestedScrollConnection = remember {
-            // All this lines just for fab state :/
-            object : NestedScrollConnection {
-                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    fabExpanded = available.y >= 0
-                    return scrollBehavior.nestedScrollConnection.onPreScroll(available, source)
-                }
-
-                override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
-                    scrollBehavior.nestedScrollConnection.onPostScroll(consumed, available, source)
-
-                override suspend fun onPreFling(available: Velocity): Velocity =
-                    scrollBehavior.nestedScrollConnection.onPreFling(available)
-
-                override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity =
-                    scrollBehavior.nestedScrollConnection.onPostFling(consumed, available)
-            }
-        }
+        val nestedScrollConnection = remember { FabScrollConnection(scrollBehavior) { fabExpanded = it } }
 
         Scaffold(
             topBar = {
@@ -83,4 +67,24 @@ internal object DownloadQueueScreen : Screen() {
             }
         }
     }
+}
+
+/** Collapses the FAB while the list scrolls up (content moving up) and hands every scroll on to the app bar. */
+internal class FabScrollConnection(
+    private val scrollBehavior: TopAppBarScrollBehavior,
+    private val onFabExpandedChange: (Boolean) -> Unit,
+) : NestedScrollConnection {
+    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        onFabExpandedChange(available.y >= 0)
+        return scrollBehavior.nestedScrollConnection.onPreScroll(available, source)
+    }
+
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
+        scrollBehavior.nestedScrollConnection.onPostScroll(consumed, available, source)
+
+    override suspend fun onPreFling(available: Velocity): Velocity =
+        scrollBehavior.nestedScrollConnection.onPreFling(available)
+
+    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity =
+        scrollBehavior.nestedScrollConnection.onPostFling(consumed, available)
 }
