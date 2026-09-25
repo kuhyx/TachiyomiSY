@@ -1,6 +1,5 @@
 package eu.kanade.presentation.more.settings.screen.data
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
@@ -14,7 +13,6 @@ import eu.kanade.domain.sync.models.SyncSettings
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.data.backup.create.BackupOptions
-import eu.kanade.tachiyomi.data.sync.SyncDataJob
 import kotlinx.coroutines.flow.update
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
@@ -95,10 +93,6 @@ private class SyncSettingsSelectorModel(
             syncPreferences.setSyncSettings(backupOptionsToSyncOptions(updatedOptions))
             it.copy(options = updatedOptions)
         }
-    }
-
-    fun syncNow(context: Context) {
-        SyncDataJob.startNow(context)
     }
 
     @Immutable
