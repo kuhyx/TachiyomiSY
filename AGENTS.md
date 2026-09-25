@@ -89,6 +89,20 @@ sources/scrapers -> parser, request builder, models; settings screens -> one
 file per preference group. Public names stay identical so upstream diffs land
 on the same symbols.
 
+## Cloud sessions (claude.ai/code)
+
+A cloud session sees this repository and nothing else: kuhy's `~/.claude`
+(global rules, skills, plan files, the fast test-loop scripts) is not there.
+Everything a session needs is therefore in git: this file, the
+`DOCS-*.md` briefs, `scripts/`. Verify with Gradle, not with the local
+tooling the plan files mention.
+
+Cloud sessions cannot push to `master` (the local rule "work on master" is a
+local-hook rule): they branch and open a PR against `kuhyx/TachiyomiSY`.
+Keep one PR per package slice so a red gate never blocks the rest, run
+`scripts/ci_gates.sh` before opening it, and never open a PR against
+`jobobby04/TachiyomiSY`.
+
 ## Do not
 
 - Touch upstream's workflows (`build_check.yml`, `build_push*.yml`,
