@@ -154,10 +154,9 @@ internal class StatsScreenModel(
             .average()
     }
 
-    private fun get10PointScore(track: Track): Double {
-        val service = trackerManager.get(track.trackerId)!!
-        return service.get10PointScore(track)
-    }
+    // Only tracks of logged-in trackers reach here (see getMangaTrackMap), so the lookup always hits.
+    private fun get10PointScore(track: Track): Double =
+        loggedInTrackers.first { it.id == track.trackerId }.get10PointScore(track)
 
     fun toggleReadManga() {
         _allRead.value = !_allRead.value
