@@ -1,5 +1,6 @@
 package eu.kanade.presentation.track
 
+import androidx.compose.ui.test.requestFocus
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.input.key.Key
@@ -54,7 +55,7 @@ internal class TrackerSearchTest {
         show()
         compose.onNodeWithText("Search…").assertExists()
         compose.onNode(hasSetTextAction()).performImeAction()
-        compose.onNode(hasSetTextAction()).performKeyInput { pressKey(Key.Enter) }
+        compose.onNode(hasSetTextAction()).requestFocus().performKeyInput { pressKey(Key.Enter) }
         events shouldContainExactly listOf("query", "query")
     }
 
@@ -64,7 +65,8 @@ internal class TrackerSearchTest {
         show(state = state)
         compose.onNodeWithText("Search…").assertDoesNotExist()
         compose.onNodeWithText("naruto").assertExists()
-        compose.onAllNodes(androidx.compose.ui.test.hasClickAction())[1].performClick()
+        val clickable = compose.onAllNodes(androidx.compose.ui.test.hasClickAction())
+        clickable[clickable.fetchSemanticsNodes().size - 1].performClick()
         compose.waitForIdle()
         state.text.toString() shouldBe ""
         compose.onAllNodes(androidx.compose.ui.test.hasClickAction())[0].performClick()

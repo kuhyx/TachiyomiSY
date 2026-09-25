@@ -8,6 +8,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ViewRootForTest
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.performSemanticsAction
@@ -58,3 +59,7 @@ internal fun ComposeContentTestRule.setSlider(index: Int, value: Float) {
         .performSemanticsAction(SemanticsActions.SetProgress) { it(value) }
     waitForIdle()
 }
+
+/** Clicks through the semantics action, for nodes another node overlaps or that sit off-screen. */
+internal fun SemanticsNodeInteraction.invokeClick(): SemanticsNodeInteraction =
+    performSemanticsAction(SemanticsActions.OnClick)

@@ -1,7 +1,7 @@
 package eu.kanade.presentation.browse
 
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
+import androidx.compose.ui.test.onAllNodesWithText
+import android.graphics.drawable.ShapeDrawable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -42,7 +42,10 @@ internal class SourcesScreenTest {
     fun setUp() {
         mockkStatic("eu.kanade.tachiyomi.extension.ExtensionManagerRegistryKt")
         every { extensionManager.getAppIconForSource(any()) } answers {
-            ColorDrawable(Color.RED).takeIf { secondArg<Long>() == 3L }
+            ShapeDrawable().apply {
+                intrinsicWidth = 4
+                intrinsicHeight = 4
+            }.takeIf { secondArg<Long>() == 3L }
         }
         koin.start(module { single { extensionManager } })
     }
@@ -97,7 +100,7 @@ internal class SourcesScreenTest {
         compose.onNodeWithText("Favourites").assertExists()
         compose.onNodeWithText("Source 1").performClick()
         compose.onNodeWithText("Source 1").performTouchInput { longClick() }
-        compose.onNodeWithText("Latest").performClick()
+        compose.onAllNodesWithText("Latest")[0].performClick()
         compose.onNodeWithContentDescription("Unpin").performClick()
         events shouldContainExactly listOf("open 1 Popular", "long 1", "open 1 Latest", "pin 1")
     }

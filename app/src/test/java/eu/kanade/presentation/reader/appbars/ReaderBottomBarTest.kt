@@ -1,5 +1,6 @@
 package eu.kanade.presentation.reader.appbars
 
+import eu.kanade.presentation.util.invokeClick
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -30,7 +31,7 @@ internal class ReaderBottomBarTest {
         compose.waitForIdle()
     }
 
-    private fun click(description: String) = compose.onNodeWithContentDescription(description).performClick()
+    private fun click(description: String) = compose.onNodeWithContentDescription(description).invokeClick()
 
     @Test
     fun everyButtonForwards() {

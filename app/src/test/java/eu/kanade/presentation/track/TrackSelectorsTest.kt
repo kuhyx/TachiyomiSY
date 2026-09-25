@@ -1,5 +1,6 @@
 package eu.kanade.presentation.track
 
+import eu.kanade.presentation.util.invokeClick
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SelectableDates
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -128,9 +129,9 @@ internal class TrackSelectorsTest {
                 )
             }
         }
-        compose.onNodeWithText("Remove").performClick()
-        compose.onNodeWithText("Cancel").performClick()
-        compose.onNodeWithText("OK").performClick()
+        compose.onNodeWithText("Remove").invokeClick()
+        compose.onNodeWithText("Cancel").invokeClick()
+        compose.onNodeWithText("OK").invokeClick()
         events shouldContainExactly listOf("remove", "cancel", "date 86400000")
     }
 

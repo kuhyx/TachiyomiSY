@@ -1,5 +1,9 @@
 package eu.kanade.presentation.browse
 
+import eu.kanade.presentation.util.invokeClick
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
@@ -65,9 +69,9 @@ internal class GlobalSearchScreenTest {
     @Test
     fun resultsShowEveryState() {
         show(SearchScreenModel.State(searchQuery = "q", items = items))
-        compose.onNodeWithText("down").assertExists()
-        compose.onNodeWithText("Found").performClick()
-        compose.onNodeWithText("Source 2").performClick()
+        compose.onAllNodes(hasScrollToNodeAction())[0].performScrollToNode(hasText("down"))
+        compose.onNodeWithText("Found").invokeClick()
+        compose.onNodeWithText("Source 2").invokeClick()
         compose.onNodeWithText("Pinned").performClick()
         compose.onNodeWithText("All").performClick()
         compose.onNodeWithText("Has results").performClick()

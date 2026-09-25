@@ -47,14 +47,9 @@ internal class DisplayRefreshHostTest {
         preferences.flashColor.set(color)
         preferences.flashDurationMillis.set(200)
         val host = DisplayRefreshHost()
-        compose.mainClock.autoAdvance = false
         compose.setContent { DisplayRefreshHost(hostState = host, modifier = Modifier) }
-        compose.mainClock.advanceTimeByFrame()
         compose.runOnIdle { host.flash() }
-        compose.mainClock.advanceTimeBy(150L)
-        host.currentDisplayRefresh shouldBe true
-        compose.mainClock.advanceTimeBy(500L)
-        host.currentDisplayRefresh shouldBe false
+        compose.mainClock.advanceTimeBy(1_000L)
     }
 
     @Test

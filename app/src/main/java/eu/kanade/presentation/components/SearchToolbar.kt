@@ -28,7 +28,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -125,13 +124,12 @@ internal fun SearchField(
     focusRequester: FocusRequester,
     interactionSource: MutableInteractionSource,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val searchAndClearFocus: () -> Unit = {
         if (searchQuery.isNotBlank()) {
             onSearch(searchQuery)
+            // Clearing the text field's focus hides the soft keyboard with it.
             focusManager.clearFocus()
-            keyboardController?.hide()
             focusManager.moveFocus(FocusDirection.Next)
         }
     }

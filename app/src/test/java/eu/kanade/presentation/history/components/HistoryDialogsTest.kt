@@ -1,5 +1,7 @@
 package eu.kanade.presentation.history.components
 
+import io.kotest.matchers.shouldBe
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -28,7 +30,7 @@ internal class HistoryDialogsTest {
     @Test
     fun deleteKeepsOtherChapters() {
         showDelete()
-        compose.onNodeWithText("Remove", substring = false).assertExists()
+        compose.onAllNodesWithText("Remove").fetchSemanticsNodes().size shouldBe 2
         compose.onNodeWithText("Cancel").performClick()
         events shouldContainExactly listOf("dismiss")
     }
@@ -37,7 +39,7 @@ internal class HistoryDialogsTest {
     fun deleteCanResetEverything() {
         showDelete()
         compose.onNodeWithText("Reset all chapters for this entry").performClick()
-        compose.onNodeWithText("Remove", substring = false).performClick()
+        compose.onAllNodesWithText("Remove")[1].performClick()
         events shouldContainExactly listOf("delete true", "dismiss")
     }
 

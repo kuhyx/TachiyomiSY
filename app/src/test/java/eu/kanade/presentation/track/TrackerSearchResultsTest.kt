@@ -66,9 +66,9 @@ internal class TrackerSearchResultsTest {
         val picked = trackSearch("Picked")
         show(Result.success(listOf(picked, trackSearch("Other", summary = " ", score = -1.0))), selected = picked)
         compose.onNodeWithText("A summary.").assertExists()
-        compose.onNodeWithText("Author, Artist").assertExists()
-        compose.onNodeWithText("Manga").assertExists()
-        compose.onNodeWithText("Finished").assertExists()
+        compose.onAllNodesWithText("Author, Artist").fetchSemanticsNodes().size shouldBe 2
+        compose.onAllNodesWithText("Manga").fetchSemanticsNodes().size shouldBe 2
+        compose.onAllNodesWithText("Finished").fetchSemanticsNodes().size shouldBe 2
         compose.onNodeWithText("7.5").assertExists()
         compose.onNodeWithText("Other").performClick()
         events shouldContainExactly listOf("select Other")
