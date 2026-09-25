@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test
 
 internal class MissingChaptersTest {
 
-    private fun numbered(id: Long, number: Float) = ReaderChapter(dbChapter(id = id).also { it.chapter_number = number })
+    private fun numbered(id: Long, number: Float) =
+        ReaderChapter(dbChapter(id = id).also { it.chapter_number = number })
 
     @Test
     fun gapBetweenNumbers() {

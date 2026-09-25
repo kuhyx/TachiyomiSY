@@ -21,6 +21,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -51,9 +52,8 @@ internal const val QUEUE_KT: String = "eu.kanade.tachiyomi.data.download.Downloa
  * Every collaborator of a [ReaderViewModel]: real preferences over one shared store, relaxed mocks
  * for the interactors, and the Koin graph for what the composed helpers pull from Injekt.
  */
-internal class ReaderVmHarness {
+internal class ReaderVmHarness(val context: Application = mockk(relaxed = true)) {
     val store: MapPreferenceStore = MapPreferenceStore()
-    val context: Application = mockk(relaxed = true)
     val readerPreferences: ReaderPreferences = ReaderPreferences(store)
     val basePreferences: BasePreferences = BasePreferences(context, store)
     val downloadPreferences: DownloadPreferences = DownloadPreferences(store)
@@ -61,7 +61,9 @@ internal class ReaderVmHarness {
     val libraryPreferences: LibraryPreferences = LibraryPreferences(store)
     val syncPreferences: SyncPreferences = SyncPreferences(store)
     val uiPreferences: UiPreferences = UiPreferences(store)
-    val sourceManager: SourceManager = mockk(relaxed = true)
+    val sourceManager: SourceManager = mockk<SourceManager>(relaxed = true).also {
+        every { it.isInitialized } returns MutableStateFlow(true)
+    }
     val downloadManager: DownloadManager = mockk(relaxed = true)
     val downloadProvider: DownloadProvider = mockk(relaxed = true)
     val tempFileManager: UniFileTempFileManager = mockk(relaxed = true)
@@ -82,11 +84,6 @@ internal class ReaderVmHarness {
     val trackChapter: TrackChapter = mockk(relaxed = true)
 
     val manga: Manga = Manga.create().copy(id = 10L, source = 1L, ogTitle = "Manga")
-
-    /** The chapters [GetChaptersByMangaId] serves for [manga]. */
-    fun chapters(vararg chapters: Chapter) {
-        coEvery { getChaptersByMangaId.await(manga.id, any()) } returns chapters.toList()
-    }
 
     private val graph: Module = module {
         single { context }
@@ -114,6 +111,11 @@ internal class ReaderVmHarness {
         single { getMergedMangaById }
         single { getMergedReferencesById }
         single { getMergedChaptersByMangaId }
+    }
+
+    /** The chapters [GetChaptersByMangaId] serves for [manga]. */
+    fun chapters(vararg chapters: Chapter) {
+        coEvery { getChaptersByMangaId.await(manga.id, any()) } returns chapters.toList()
     }
 
     fun start(vararg extra: Module) {

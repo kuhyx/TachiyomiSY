@@ -16,50 +16,50 @@ import tachiyomi.i18n.MR
 @RunWith(RobolectricTestRunner::class)
 internal class NavigationTest {
 
-    private fun ViewerNavigation.at(x: Float, y: Float): NavigationRegion = getAction(PointF(x, y))
+    private fun ViewerNavigation.tapAt(x: Float, y: Float): NavigationRegion = getAction(PointF(x, y))
 
     @Test
     fun lShapedZones() {
         val nav = LNavigation()
-        nav.at(0.1f, 0.5f) shouldBe NavigationRegion.PREV
-        nav.at(0.5f, 0.1f) shouldBe NavigationRegion.PREV
-        nav.at(0.9f, 0.5f) shouldBe NavigationRegion.NEXT
-        nav.at(0.5f, 0.9f) shouldBe NavigationRegion.NEXT
-        nav.at(0.5f, 0.5f) shouldBe NavigationRegion.MENU
+        nav.tapAt(0.1f, 0.5f) shouldBe NavigationRegion.PREV
+        nav.tapAt(0.5f, 0.1f) shouldBe NavigationRegion.PREV
+        nav.tapAt(0.9f, 0.5f) shouldBe NavigationRegion.NEXT
+        nav.tapAt(0.5f, 0.9f) shouldBe NavigationRegion.NEXT
+        nav.tapAt(0.5f, 0.5f) shouldBe NavigationRegion.MENU
         nav.getRegions().size shouldBe 4
     }
 
     @Test
     fun kindlishZones() {
         val nav = KindlishNavigation()
-        nav.at(0.5f, 0.02f) shouldBe NavigationRegion.MENU
-        nav.at(0.5f, 0.2f) shouldBe NavigationRegion.MENU
-        nav.at(0.1f, 0.5f) shouldBe NavigationRegion.PREV
-        nav.at(0.6f, 0.6f) shouldBe NavigationRegion.NEXT
+        nav.tapAt(0.5f, 0.02f) shouldBe NavigationRegion.MENU
+        nav.tapAt(0.5f, 0.2f) shouldBe NavigationRegion.MENU
+        nav.tapAt(0.1f, 0.5f) shouldBe NavigationRegion.PREV
+        nav.tapAt(0.6f, 0.6f) shouldBe NavigationRegion.NEXT
     }
 
     @Test
     fun edgeZones() {
         val nav = EdgeNavigation()
-        nav.at(0.1f, 0.1f) shouldBe NavigationRegion.NEXT
-        nav.at(0.9f, 0.1f) shouldBe NavigationRegion.NEXT
-        nav.at(0.5f, 0.9f) shouldBe NavigationRegion.PREV
-        nav.at(0.5f, 0.5f) shouldBe NavigationRegion.MENU
+        nav.tapAt(0.1f, 0.1f) shouldBe NavigationRegion.NEXT
+        nav.tapAt(0.9f, 0.1f) shouldBe NavigationRegion.NEXT
+        nav.tapAt(0.5f, 0.9f) shouldBe NavigationRegion.PREV
+        nav.tapAt(0.5f, 0.5f) shouldBe NavigationRegion.MENU
     }
 
     @Test
     fun rightAndLeftZones() {
         val nav = RightAndLeftNavigation()
-        nav.at(0.1f, 0.5f) shouldBe NavigationRegion.LEFT
-        nav.at(0.9f, 0.5f) shouldBe NavigationRegion.RIGHT
-        nav.at(0.5f, 0.5f) shouldBe NavigationRegion.MENU
+        nav.tapAt(0.1f, 0.5f) shouldBe NavigationRegion.LEFT
+        nav.tapAt(0.9f, 0.5f) shouldBe NavigationRegion.RIGHT
+        nav.tapAt(0.5f, 0.5f) shouldBe NavigationRegion.MENU
     }
 
     @Test
     fun disabledIsAllMenu() {
         val nav = DisabledNavigation()
         nav.getRegions() shouldBe emptyList()
-        nav.at(0.1f, 0.9f) shouldBe NavigationRegion.MENU
+        nav.tapAt(0.1f, 0.9f) shouldBe NavigationRegion.MENU
     }
 
     @Test
@@ -67,12 +67,12 @@ internal class NavigationTest {
         val nav = RightAndLeftNavigation()
         nav.invertMode shouldBe TappingInvertMode.NONE
         nav.invertMode = TappingInvertMode.HORIZONTAL
-        nav.at(0.1f, 0.5f) shouldBe NavigationRegion.RIGHT
+        nav.tapAt(0.1f, 0.5f) shouldBe NavigationRegion.RIGHT
         val l = LNavigation()
         l.invertMode = TappingInvertMode.VERTICAL
-        l.at(0.5f, 0.1f) shouldBe NavigationRegion.NEXT
+        l.tapAt(0.5f, 0.1f) shouldBe NavigationRegion.NEXT
         l.invertMode = TappingInvertMode.BOTH
-        l.at(0.1f, 0.5f) shouldBe NavigationRegion.NEXT
+        l.tapAt(0.1f, 0.5f) shouldBe NavigationRegion.NEXT
     }
 
     @Test

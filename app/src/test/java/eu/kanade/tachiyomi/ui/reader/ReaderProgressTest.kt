@@ -147,7 +147,9 @@ internal class ReaderProgressTest {
         loadedPages(chapter, count = 1)
         update(vm, chapter, index = 0)
         coVerify {
-            harness.updateChapter.awaitAll(listOf(ChapterUpdate(id = 1L, read = true), ChapterUpdate(id = 3L, read = true)))
+            harness.updateChapter.awaitAll(
+                listOf(ChapterUpdate(id = 1L, read = true), ChapterUpdate(id = 3L, read = true)),
+            )
         }
         chapter.chapter.chapter_number = -1f
         update(vm, chapter, index = 0)
