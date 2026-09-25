@@ -2,6 +2,7 @@ package exh.recs.components
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -61,7 +62,7 @@ internal class RecommendsScreenComposeTest {
                     onClickSource = { clickedSources += it.name },
                     onClickItem = { clickedItems += it },
                     onLongClickItem = { longClickedItems += it },
-                    getManga = { mutableStateOf(it) },
+                    getManga = { manga -> remember(manga) { mutableStateOf(manga) } },
                 )
             }
         }
