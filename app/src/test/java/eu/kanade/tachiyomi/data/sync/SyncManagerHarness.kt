@@ -10,6 +10,7 @@ import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.releaseLogcat
 import eu.kanade.domain.sync.SyncPreferences
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
+import eu.kanade.tachiyomi.data.backup.BackupKoin
 import eu.kanade.tachiyomi.data.backup.fakeQuery
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.backup.models.BackupSavedSearch
@@ -70,32 +71,19 @@ internal class SyncManagerHarness {
     val context: Application = ApplicationProvider.getApplicationContext()
     val store = FlowPreferenceStore()
     val preferences = SyncPreferences(store)
-    val mangas: MangasQueries = mockk(relaxed = true)
-    val chapters: ChaptersQueries = mockk(relaxed = true)
-    val categories: CategoriesQueries = mockk(relaxed = true)
-    val database: Database = mockk(relaxed = true)
-    val getCategories: GetCategories = mockk()
+    val graph = BackupKoin(store)
+    val mangas: MangasQueries get() = graph.mangas
+    val chapters: ChaptersQueries get() = graph.chapters
+    val categories: CategoriesQueries get() = graph.categories
+    val database: Database get() = graph.database
+    val getCategories: GetCategories get() = graph.getCategories
     var remote: (SyncData) -> Backup? = { it.backup }
     var logged = mutableListOf<String>()
 
     fun start() {
         logged = captureLogcat()
         shadowOf(context).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
-        every { database.mangasQueries } returns mangas
-        every { database.chaptersQueries } returns chapters
-        every { database.categoriesQueries } returns categories
-        every { database.saved_searchQueries } returns mockk<Saved_searchQueries> {
-            every { selectAll<BackupSavedSearch>(any()) } returns fakeQuery(emptyList())
-        }
-        coEvery { database.transaction(any(), any()) } coAnswers {
-            secondArg<suspend SuspendingTransactionWithoutReturn.() -> Unit>().invoke(mockk())
-        }
-        coEvery { getCategories.await() } returns emptyList()
-        coEvery { getCategories.await(any()) } returns emptyList()
-        every { mangas.getMangasWithFavoriteTimestamp() } returns fakeQuery(emptyList())
-        every { mangas.getAllManga() } returns fakeQuery(emptyList())
-        every { chapters.getChaptersByMangaId(any(), any()) } returns fakeQuery(emptyList())
-        startKoin { modules(module()) }
+        startKoin { modules(graph.module(), module { single { preferences } }) }
         mockkObject(BackupRestoreJob)
         every { BackupRestoreJob.start(any(), any(), any(), any()) } just runs
         mockkConstructor(SyncYomiSyncService::class)
@@ -138,39 +126,6 @@ internal class SyncManagerHarness {
         stopKoin()
         releaseLogcat()
     }
-
-    private fun module() = module {
-        single { database }
-        single { preferences }
-        single { getCategories }
-        single<ProtoBuf> { ProtoBuf }
-        single<PreferenceStore> { store }
-        single { SecurityPreferences(InMemoryPreferenceStore()) }
-        single<SourceManager> { mockk { every { getAll() } returns emptyList() } }
-        single<FetchInterval> { mockk { every { getWindow(any()) } returns (0L to 0L) } }
-        single<GetExtensionStores> { mockk { coEvery { get() } returns emptyList() } }
-        single<GetFavorites> { mockk() }
-        single<BackupPreferences> { mockk() }
-        single<MangaRepository> { mockk() }
-        single<GetMergedManga> { mockk() }
-        single<GetHistory> { mockk() }
-        single { GetCustomMangaInfo(NoCustomInfo) }
-        single<GetFlatMetadataById> { mockk() }
-        single<GetMangaByUrlAndSourceId> { mockk() }
-        single<GetChaptersByMangaId> { mockk() }
-        single<UpdateManga> { mockk() }
-        single<GetTracks> { mockk() }
-        single<InsertTrack> { mockk() }
-        single<SetCustomMangaInfo> { mockk() }
-        single<InsertFlatMetadata> { mockk() }
-    }
-}
-
-/** No entry has custom info; a real [GetCustomMangaInfo] over it serves `Manga`'s companion lookup. */
-internal object NoCustomInfo : CustomMangaRepository {
-    override fun get(mangaId: Long): CustomMangaInfo? = null
-
-    override fun set(mangaInfo: CustomMangaInfo) = Unit
 }
 
 internal fun mangasRow(id: Long, url: String, favorite: Boolean = true, version: Long = 0): Mangas = Mangas(
