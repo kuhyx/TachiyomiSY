@@ -12,7 +12,6 @@ import eu.kanade.domain.manga.model.PagePreview
 import eu.kanade.tachiyomi.data.cache.PagePreviewCache
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.PagePreviewSource
-import eu.kanade.tachiyomi.source.online.HttpSource
 import exh.source.getMainSource
 import okhttp3.CacheControl
 import okhttp3.Call
@@ -150,20 +149,11 @@ internal class PagePreviewFetcher(
         }
     }
 
-    private fun newRequest(): Request {
-        val request = Request.Builder().apply {
-            url(page.imageUrl)
-
-            val sourceHeaders = (sourceLazy.value as? HttpSource)?.headers
-            if (sourceHeaders != null) {
-                headers(sourceHeaders)
-            }
-        }
-
-        request.cacheControl(getCacheControl())
-
-        return request.build()
-    }
+    // Only used without a preview source (a source serves its own previews), so there are no source headers.
+    private fun newRequest(): Request = Request.Builder()
+        .url(page.imageUrl)
+        .cacheControl(getCacheControl())
+        .build()
 
     private fun DiskCache.Snapshot.toImageSource(): ImageSource {
         return ImageSource(
