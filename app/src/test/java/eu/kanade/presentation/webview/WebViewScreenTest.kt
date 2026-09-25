@@ -121,7 +121,7 @@ internal class WebViewScreenTest {
         compose.runOnIdle {
             val client = client()
             val view = webView()
-            client.shouldOverrideUrlLoading(null, null) shouldBe false
+            client.shouldOverrideUrlLoading(null, null as WebResourceRequest?) shouldBe false
             client.shouldOverrideUrlLoading(view, request(null)) shouldBe false
             client.shouldOverrideUrlLoading(view, request("intent://x")) shouldBe true
             client.shouldOverrideUrlLoading(view, request("ftp://x")) shouldBe false
@@ -154,7 +154,7 @@ internal class WebViewScreenTest {
 
     private fun request(url: String?): WebResourceRequest {
         val request = mockk<WebResourceRequest>()
-        every { request.url } returns url?.let(Uri::parse)
+        every { request.url } returns url?.let { Uri.parse(it) }
         return request
     }
 

@@ -2,7 +2,7 @@ package eu.kanade.presentation.updates
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.ui.test.junit4.v2.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import eu.kanade.presentation.util.ProvideBack
 import eu.kanade.presentation.util.TestBackOwner
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem

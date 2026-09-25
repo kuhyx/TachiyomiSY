@@ -12,10 +12,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import eu.kanade.presentation.util.PresentationKoin
 import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.extension.getAppIconForSource
 import eu.kanade.tachiyomi.ui.browse.source.SourcesScreenModel
 import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -33,15 +36,22 @@ internal class SourcesScreenTest {
 
     private val koin = PresentationKoin()
     private val events = mutableListOf<String>()
-    private val extensionManager = mockk<ExtensionManager> {
-        every { getAppIconForSource(any()) } answers { ColorDrawable(Color.RED).takeIf { firstArg<Long>() == 3L } }
-    }
+    private val extensionManager = mockk<ExtensionManager>()
 
     @Before
-    fun setUp() = koin.start(module { single { extensionManager } })
+    fun setUp() {
+        mockkStatic("eu.kanade.tachiyomi.extension.ExtensionManagerRegistryKt")
+        every { extensionManager.getAppIconForSource(any()) } answers {
+            ColorDrawable(Color.RED).takeIf { secondArg<Long>() == 3L }
+        }
+        koin.start(module { single { extensionManager } })
+    }
 
     @After
-    fun tearDown() = koin.stop()
+    fun tearDown() {
+        koin.stop()
+        unmockkAll()
+    }
 
     private fun source(id: Long, latest: Boolean = true, stub: Boolean = false, pins: Pins = Pins.unpinned) =
         Source(id = id, lang = "en", name = "Source $id", supportsLatest = latest, isStub = stub, pin = pins)
