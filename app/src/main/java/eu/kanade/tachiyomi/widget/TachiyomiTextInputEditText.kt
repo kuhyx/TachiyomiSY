@@ -29,18 +29,17 @@ internal class TachiyomiTextInputEditText @JvmOverloads constructor(
     defStyleAttr: Int = R.attr.editTextStyle,
 ) : TextInputEditText(context, attrs, defStyleAttr) {
 
-    private var scope: CoroutineScope? = null
+    // Replaced on every attach; a view is only ever detached after it was attached.
+    private var scope: CoroutineScope = CoroutineScope(SupervisorJob())
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-        setIncognito(scope!!)
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main).also { setIncognito(it) }
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        scope?.cancel()
-        scope = null
+        scope.cancel()
     }
 
     companion object {

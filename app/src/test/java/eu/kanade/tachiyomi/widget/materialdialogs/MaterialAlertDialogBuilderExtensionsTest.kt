@@ -12,6 +12,7 @@ import eu.kanade.domain.base.BasePreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.After
 import org.junit.Before
@@ -49,7 +50,7 @@ internal class MaterialAlertDialogBuilderExtensionsTest {
         val dialog = builder.create()
         dialog.show()
         shadowOf(Looper.getMainLooper()).idle()
-        return dialog.findViewById(R.id.text_field)!!
+        return dialog.findViewById<TextInputLayout>(R.id.text_field).shouldNotBeNull()
     }
 
     @Test
@@ -57,7 +58,7 @@ internal class MaterialAlertDialogBuilderExtensionsTest {
         val typed = mutableListOf<String>()
         val field = fieldOf(MaterialAlertDialogBuilder(context).setTextInput { typed += it })
         field.hint.shouldBeNull()
-        val edit: EditText = field.editText!!
+        val edit: EditText = field.editText.shouldNotBeNull()
         edit.text.toString() shouldBe ""
         edit.setText("abc")
         typed shouldBe listOf("abc")
@@ -69,6 +70,6 @@ internal class MaterialAlertDialogBuilderExtensionsTest {
             MaterialAlertDialogBuilder(NoImeContext(context)).setTextInput(hint = "Tag", prefill = "a") { },
         )
         field.hint shouldBe "Tag"
-        field.editText!!.text.toString() shouldBe "a"
+        field.editText.shouldNotBeNull().text.toString() shouldBe "a"
     }
 }

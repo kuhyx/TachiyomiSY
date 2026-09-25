@@ -15,11 +15,10 @@ internal fun MaterialAlertDialogBuilder.setTextInput(
 ): MaterialAlertDialogBuilder {
     val binding = DialogStubTextinputBinding.inflate(LayoutInflater.from(context))
     binding.textField.hint = hint
-    binding.textField.editText?.apply {
+    binding.textInput.apply {
         setText(prefill, TextView.BufferType.EDITABLE)
-        doAfterTextChanged {
-            onTextChanged(it?.toString() ?: "")
-        }
+        // The field's own text: afterTextChanged hands over that same, never-null Editable.
+        doAfterTextChanged { onTextChanged(text.toString()) }
         post {
             requestFocusFromTouch()
             context.getSystemService<InputMethodManager>()?.showSoftInput(this, 0)
