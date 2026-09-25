@@ -30,7 +30,7 @@ internal class ColorFilterPageTest {
     }
 
     @Test
-    fun brightnessAndChannelsWriteThePreferences() {
+    fun brightnessAndChannelsPersist() {
         compose.setContent {
             MaterialTheme {
                 Column(Modifier.verticalScroll(rememberScrollState())) { ColorFilterPage(harness.model) }

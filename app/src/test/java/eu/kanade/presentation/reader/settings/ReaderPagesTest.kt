@@ -48,7 +48,7 @@ internal class ReaderPagesTest {
     }
 
     @Test
-    fun pagerSettingsWriteThePreferences() {
+    fun pagerSettingsPersist() {
         val harness = ReaderSettingsHarness()
         readingModePage(harness)
         compose.onNodeWithText("Paged").assertExists()

@@ -65,7 +65,12 @@ internal class MangaListPartsTest {
         compose.setContent {
             MaterialTheme {
                 Column {
-                    ChapterHeader(enabled = true, chapterCount = null, missingChapterCount = 0, onClick = { events += "h" })
+                    ChapterHeader(
+                        enabled = true,
+                        chapterCount = null,
+                        missingChapterCount = 0,
+                        onClick = { events += "h" },
+                    )
                     ChapterHeader(
                         enabled = false,
                         chapterCount = 3,

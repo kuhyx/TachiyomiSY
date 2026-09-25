@@ -27,7 +27,7 @@ internal fun CallWithUnstableBits(owner: Class<*>, name: String, args: List<Any?
     val changed = IntArray(changedInts)
     args.indices.forEach { slot ->
         changed[slot / SLOTS_PER_INT] = changed[slot / SLOTS_PER_INT] or
-            (UNSTABLE_BIT shl (slot % SLOTS_PER_INT * BITS_PER_SLOT + 1))
+            (UNSTABLE_BIT shl slot % SLOTS_PER_INT * BITS_PER_SLOT + 1)
     }
     val trailing = changed.toList() + List(method.parameterCount - args.size - 1 - changedInts) { 0 }
     val receiver = if (Modifier.isStatic(method.modifiers)) null else owner.getField("INSTANCE").get(null)

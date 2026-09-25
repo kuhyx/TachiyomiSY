@@ -1,12 +1,9 @@
 package eu.kanade.presentation.updates
 
-import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeDown
 import eu.kanade.presentation.util.PresentationKoin
 import eu.kanade.tachiyomi.ui.updates.UpdatesScreenModel
 import io.kotest.matchers.collections.shouldContainExactly
@@ -25,12 +22,6 @@ internal class UpdatesScreenTest {
     private val koin = PresentationKoin()
     private val harness = UpdatesScreenHarness(compose)
 
-    @Before
-    fun setUp() = koin.start()
-
-    @After
-    fun tearDown() = koin.stop()
-
     private val day = 86_400_000L
     private val twoDays by lazy {
         UpdatesScreenModel.State(
@@ -42,6 +33,12 @@ internal class UpdatesScreenTest {
             ),
         )
     }
+
+    @Before
+    fun setUp() = koin.start()
+
+    @After
+    fun tearDown() = koin.stop()
 
     @Test
     fun loadingShowsTheAppBar() {

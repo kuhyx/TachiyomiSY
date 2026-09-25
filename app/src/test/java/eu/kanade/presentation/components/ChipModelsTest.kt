@@ -15,6 +15,15 @@ import org.junit.jupiter.api.Test
 
 internal class ChipModelsTest {
 
+    private val state = ChipStateColors(
+        container = Color.Red,
+        label = Color.Red,
+        leadingIconContent = Color.Red,
+        trailingIconContent = Color.Red,
+    )
+    private val other = state.copy(label = Color.Blue)
+    private val absent: Any? = null
+
     private fun elevation(default: Int = 1, pressed: Int = 2, focused: Int = 3, hovered: Int = 4, disabled: Int = 6) =
         ChipElevation(
             defaultElevation = default.dp,
@@ -25,20 +34,12 @@ internal class ChipModelsTest {
             disabledElevation = disabled.dp,
         )
 
-    private val state = ChipStateColors(
-        container = Color.Red,
-        label = Color.Red,
-        leadingIconContent = Color.Red,
-        trailingIconContent = Color.Red,
-    )
-    private val other = state.copy(label = Color.Blue)
-
     @Test
     fun elevationEqualityFields() {
         val base = elevation()
         (base == base) shouldBe true
         (base == elevation()) shouldBe true
-        base.equals(null) shouldBe false
+        base.equals(absent) shouldBe false
         base.equals("x") shouldBe false
         (base == elevation(default = 9)) shouldBe false
         (base == elevation(pressed = 9)) shouldBe false
@@ -65,7 +66,7 @@ internal class ChipModelsTest {
         val base = ChipBorder(Color.Red, Color.Blue, 1.dp)
         (base == base) shouldBe true
         (base == ChipBorder(Color.Red, Color.Blue, 1.dp)) shouldBe true
-        base.equals(null) shouldBe false
+        base.equals(absent) shouldBe false
         base.equals("x") shouldBe false
         (base == ChipBorder(Color.Green, Color.Blue, 1.dp)) shouldBe false
         (base == ChipBorder(Color.Red, Color.Green, 1.dp)) shouldBe false

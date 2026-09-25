@@ -36,7 +36,7 @@ internal class ExhUtilsTest {
     }
 
     @Test
-    fun visibleUtilitiesForwardEveryAction() {
+    fun visibleUtilitiesForward() {
         val callbacks = ReaderBarCallbacks()
         show(callbacks, visible = true)
         compose.onNodeWithText("Autoscroll").performClick()

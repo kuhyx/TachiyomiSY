@@ -187,17 +187,17 @@ internal fun AnnotatedString.Builder.annotateImageAsLink(
     child: ASTNode,
     linkStyle: SpanStyle,
 ): Boolean {
-    val inlineLink = child.findChildOfType(MarkdownElementTypes.INLINE_LINK)
+    val inlineLink = child.findChildOfType(MarkdownElementTypes.INLINE_LINK) ?: return false
 
-    val url = inlineLink?.findChildOfType(MarkdownElementTypes.LINK_DESTINATION)
+    val url = inlineLink.findChildOfType(MarkdownElementTypes.LINK_DESTINATION)
         ?.getUnescapedTextInNode(content)
-        ?: inlineLink?.findChildOfType(MarkdownElementTypes.AUTOLINK)
+        ?: inlineLink.findChildOfType(MarkdownElementTypes.AUTOLINK)
             ?.findChildOfType(MarkdownTokenTypes.AUTOLINK)
             ?.getUnescapedTextInNode(content)
         ?: return false
 
-    val textNode = inlineLink?.findChildOfType(MarkdownElementTypes.LINK_TITLE)
-        ?: inlineLink?.findChildOfType(MarkdownElementTypes.LINK_TEXT)
+    val textNode = inlineLink.findChildOfType(MarkdownElementTypes.LINK_TITLE)
+        ?: inlineLink.findChildOfType(MarkdownElementTypes.LINK_TEXT)
     val altText = textNode?.findChildOfType(MarkdownTokenTypes.TEXT)
         ?.getUnescapedTextInNode(content)
         .orEmpty()

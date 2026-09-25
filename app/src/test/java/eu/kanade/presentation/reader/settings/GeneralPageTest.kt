@@ -82,7 +82,7 @@ internal class GeneralPageTest {
     }
 
     @Test
-    fun cutoutOptionNeedsACutoutAndFullscreen() {
+    fun cutoutNeedsCutoutAndFullscreen() {
         mockkStatic("eu.kanade.tachiyomi.util.system.DisplayExtensionsKt")
         every { any<android.app.Activity>().hasDisplayCutout() } returns true
         harness.preferences.fullscreen.set(true)
