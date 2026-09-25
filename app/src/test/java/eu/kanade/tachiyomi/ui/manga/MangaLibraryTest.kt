@@ -97,7 +97,7 @@ internal class MangaLibraryTest {
     }
 
     @Test
-    fun removingWithoutDownloadsIsQuiet() {
+    fun removingWithoutDownloads() {
         harness.mangaFlow.value = manga(favorite = true) to listOf(chapter(1L))
         every { harness.downloadManager.getDownloadCount(any()) } returns 0
         every { parts.coverCache.deleteFromCache(any(), any()) } returns 0
@@ -137,7 +137,7 @@ internal class MangaLibraryTest {
     }
 
     @Test
-    fun loadingStateIgnoresLibraryCalls() {
+    fun loadingIgnoresLibraryCalls() {
         val model = harness.loading()
         model.toggleFavorite()
         model.library.showChangeCategoryDialog()

@@ -52,7 +52,7 @@ internal class FeedScreenModelTest {
     }
 
     @Test
-    fun missingSourceSavedSearchUsesTheId() {
+    fun missingSourceSearchUsesId() {
         coEvery { harness.getSavedSearches.await() } returns listOf(savedSearch(5L))
         harness.feeds.value = listOf(feed(3L, source = 9L, savedSearch = 5L))
         FeedScreenModel().loaded().single().subtitle shouldBe "9"

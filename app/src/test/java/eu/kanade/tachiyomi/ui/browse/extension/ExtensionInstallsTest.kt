@@ -86,7 +86,7 @@ internal class ExtensionInstallsTest {
     }
 
     @Test
-    fun uninstallAndTrustReachTheManager() {
+    fun uninstallAndTrustReachManager() {
         val model = model()
         model.uninstallExtension(stale)
         verify { manager.installer.uninstallApk(stale.pkgName) }

@@ -117,7 +117,7 @@ internal class MangaDownloadActionsTest {
     }
 
     @Test
-    fun skipFilteredUsesTheFilteredList() {
+    fun skipFilteredUsesFiltered() {
         harness.readerPreferences.skipFiltered.set(true)
         harness.mangaFlow.value = manga(flags = Manga.CHAPTER_SHOW_BOOKMARKED, favorite = true) to
             listOf(chapter(2L, bookmark = true), chapter(3L))
