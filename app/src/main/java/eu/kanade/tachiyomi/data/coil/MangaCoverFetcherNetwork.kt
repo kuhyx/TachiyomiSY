@@ -58,7 +58,7 @@ internal fun MangaCoverFetcher.fromSnapshot(snapshot: DiskCache.Snapshot, librar
 // Fetch from network; whatever was opened is closed again on failure.
 internal suspend fun MangaCoverFetcher.fromNetwork(libraryCoverCacheFile: File?): FetchResult {
     val response = executeNetworkRequest()
-    val responseBody = checkNotNull(response.body) { "Null response source" }
+    val responseBody = response.body
     var snapshot: DiskCache.Snapshot? = null
     try {
         // Read from cover cache after library manga cover updated

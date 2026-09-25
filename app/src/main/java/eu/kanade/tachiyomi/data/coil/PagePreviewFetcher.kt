@@ -97,7 +97,7 @@ internal class PagePreviewFetcher(
     // Fetch from network; whatever was opened is closed again on failure.
     private suspend fun fromNetwork(): FetchResult {
         val response = executeNetworkRequest()
-        val responseBody = checkNotNull(response.body) { "Null response source" }
+        val responseBody = response.body
         var snapshot: DiskCache.Snapshot? = null
         try {
             // Read from page preview cache after page preview updated
