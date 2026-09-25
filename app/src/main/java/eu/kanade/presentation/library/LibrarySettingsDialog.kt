@@ -15,9 +15,6 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 
-// The SY-only fourth tab of the library settings sheet.
-private const val GROUP_PAGE = 3
-
 @Composable
 internal fun LibrarySettingsDialog(
     onDismissRequest: () -> Unit,
@@ -55,7 +52,8 @@ internal fun LibrarySettingsDialog(
                     screenModel = screenModel,
                 )
                 // SY -->
-                GROUP_PAGE -> GroupPage(
+                // The pager only has the four tabs above, so the last page is the group page.
+                else -> GroupPage(
                     screenModel = screenModel,
                     hasCategories = hasCategories,
                 )
