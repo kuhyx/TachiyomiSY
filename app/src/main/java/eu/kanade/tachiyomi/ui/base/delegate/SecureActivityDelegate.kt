@@ -73,17 +73,9 @@ internal interface SecureActivityDelegate {
             }
 
             val lockedDays = preferences.authenticatorDays.get()
-            val canLockToday = lockedDays == LOCK_ALL_DAYS ||
-                when (today.get(Calendar.DAY_OF_WEEK)) {
-                    Calendar.SUNDAY -> lockedDays and LOCK_SUNDAY == LOCK_SUNDAY
-                    Calendar.MONDAY -> lockedDays and LOCK_MONDAY == LOCK_MONDAY
-                    Calendar.TUESDAY -> lockedDays and LOCK_TUESDAY == LOCK_TUESDAY
-                    Calendar.WEDNESDAY -> lockedDays and LOCK_WEDNESDAY == LOCK_WEDNESDAY
-                    Calendar.THURSDAY -> lockedDays and LOCK_THURSDAY == LOCK_THURSDAY
-                    Calendar.FRIDAY -> lockedDays and LOCK_FRIDAY == LOCK_FRIDAY
-                    Calendar.SATURDAY -> lockedDays and LOCK_SATURDAY == LOCK_SATURDAY
-                    else -> false
-                }
+            // LOCK_SUNDAY (Calendar.SUNDAY = 1) is the highest bit, LOCK_SATURDAY (7) the lowest.
+            val todayMask = 1 shl Calendar.SATURDAY - today.get(Calendar.DAY_OF_WEEK)
+            val canLockToday = lockedDays == LOCK_ALL_DAYS || lockedDays and todayMask == todayMask
 
             return canLockNow && canLockToday
         }
@@ -120,28 +112,23 @@ internal interface SecureActivityDelegate {
 
 private const val MILLIS_PER_MINUTE = 60_000L
 
-internal class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObserver {
-
-    private var activity: AppCompatActivity? = null
+internal class SecureActivityDelegateImpl : SecureActivityDelegate {
 
     private val preferences: BasePreferences by injectLazy()
     private val securityPreferences: SecurityPreferences by injectLazy()
 
+    // The observer captures the activity it watches, so the callbacks never see a missing one.
     override fun registerSecureActivity(activity: AppCompatActivity) {
-        this.activity = activity
-        activity.lifecycle.addObserver(this)
+        activity.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onCreate(owner: LifecycleOwner) = setSecureScreen(activity)
+
+                override fun onResume(owner: LifecycleOwner) = setAppLock(activity)
+            },
+        )
     }
 
-    override fun onCreate(owner: LifecycleOwner) {
-        setSecureScreen()
-    }
-
-    override fun onResume(owner: LifecycleOwner) {
-        setAppLock()
-    }
-
-    private fun setSecureScreen() {
-        val activity = activity ?: return
+    private fun setSecureScreen(activity: AppCompatActivity) {
         val secureScreenFlow = securityPreferences.secureScreen.changes()
         val incognitoModeFlow = preferences.incognitoMode.changes()
         combine(secureScreenFlow, incognitoModeFlow) { secureScreen, incognitoMode ->
@@ -152,9 +139,8 @@ internal class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifec
             .launchIn(activity.lifecycleScope)
     }
 
-    private fun setAppLock() {
+    private fun setAppLock(activity: AppCompatActivity) {
         if (!securityPreferences.useAuthenticator.get()) return
-        val activity = activity ?: return
         if (activity.isAuthenticationSupported()) {
             if (!SecureActivityDelegate.requireUnlock) return
             activity.startActivity(Intent(activity, UnlockActivity::class.java))
