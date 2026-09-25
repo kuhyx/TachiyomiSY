@@ -34,13 +34,6 @@ import tachiyomi.domain.manga.model.expectedNextUpdate
 // The manga screen's presentation call, with every callback wired to the screen model or a navigation helper.
 @Composable
 internal fun MangaScreen.MangaScreenBody(screenModel: MangaScreenModel, successState: MangaScreenModel.State.Success) {
-    val navigator = LocalNavigator.currentOrThrow
-    val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
-    val scope = rememberCoroutineScope()
-    val isHttpSource = remember { successState.source is HttpSource }
-    val isFavorite = successState.manga.favorite
-    val hasDownloads = !successState.source.isLocalOrStub()
     MangaScreen(
         state = successState,
         snackbarHostState = screenModel.snackbarHostState,
@@ -48,41 +41,57 @@ internal fun MangaScreen.MangaScreenBody(screenModel: MangaScreenModel, successS
         isTabletUi = isTabletUi(),
         chapterSwipeStartAction = screenModel.chapterSwipeStartAction,
         chapterSwipeEndAction = screenModel.chapterSwipeEndAction,
-        actions = MangaScreenActions(
-            toolbar = toolbarActions(screenModel, successState),
-            header = MangaHeaderActions(
-                onAddToLibraryClicked = {
-                    screenModel.toggleFavorite()
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                },
-                // SY -->
-                onWebViewClicked =
-                { openWebView(context, navigator, screenModel, successState) }.takeIf { isHttpSource },
-                // SY <--
-                onWebViewLongClicked = { copyMangaUrl(context, screenModel.manga, screenModel.source) }
-                    .takeIf { isHttpSource },
-                onTrackingClicked = { openTracking(navigator, screenModel, successState) },
-                onEditFetchIntervalClicked = screenModel.library::showSetFetchIntervalDialog.takeIf { isFavorite },
-                onEditCategoryClicked = screenModel.library::showChangeCategoryDialog.takeIf { isFavorite },
-            ),
-            info = MangaInfoActions(
-                onCoverClicked = screenModel::showCoverDialog,
-                onSearch = { query, global -> scope.launch { performSearch(navigator, query, global) } },
-                onTagSearch = { scope.launch { performGenreSearch(navigator, it, screenModel.source!!) } },
-                onEditNotesClicked = { navigator.push(MangaNotesScreen(manga = successState.manga)) },
-                onContinueReading = { continueReading(context, screenModel.getNextUnreadChapter()) },
-            ),
-            chapters = ChapterRowActions(
-                onChapterClicked = { openChapter(context, it) },
-                onDownloadChapter = screenModel.downloads::runChapterDownloadActions.takeIf { hasDownloads },
-                onChapterSelected = screenModel::toggleSelection,
-                onChapterSwipe = screenModel.chapterActions::chapterSwipe,
-            ),
-            selection = selectionActions(screenModel),
+        actions = mangaScreenActions(screenModel, successState),
+    )
+}
+
+// Every callback of the manga screen, wired to the screen model or a navigation helper.
+@Composable
+internal fun MangaScreen.mangaScreenActions(
+    screenModel: MangaScreenModel,
+    successState: MangaScreenModel.State.Success,
+): MangaScreenActions {
+    val navigator = LocalNavigator.currentOrThrow
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
+    val isHttpSource = remember { successState.source is HttpSource }
+    val isFavorite = successState.manga.favorite
+    val hasDownloads = !successState.source.isLocalOrStub()
+    return MangaScreenActions(
+        toolbar = toolbarActions(screenModel, successState),
+        header = MangaHeaderActions(
+            onAddToLibraryClicked = {
+                screenModel.toggleFavorite()
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            },
             // SY -->
-            sy = syActions(screenModel, successState),
+            onWebViewClicked =
+            { openWebView(context, navigator, screenModel, successState) }.takeIf { isHttpSource },
             // SY <--
+            onWebViewLongClicked = { copyMangaUrl(context, screenModel.manga, screenModel.source) }
+                .takeIf { isHttpSource },
+            onTrackingClicked = { openTracking(navigator, screenModel, successState) },
+            onEditFetchIntervalClicked = screenModel.library::showSetFetchIntervalDialog.takeIf { isFavorite },
+            onEditCategoryClicked = screenModel.library::showChangeCategoryDialog.takeIf { isFavorite },
         ),
+        info = MangaInfoActions(
+            onCoverClicked = screenModel::showCoverDialog,
+            onSearch = { query, global -> scope.launch { performSearch(navigator, query, global) } },
+            onTagSearch = { scope.launch { performGenreSearch(navigator, it, screenModel.source!!) } },
+            onEditNotesClicked = { navigator.push(MangaNotesScreen(manga = successState.manga)) },
+            onContinueReading = { continueReading(context, screenModel.getNextUnreadChapter()) },
+        ),
+        chapters = ChapterRowActions(
+            onChapterClicked = { openChapter(context, it) },
+            onDownloadChapter = screenModel.downloads::runChapterDownloadActions.takeIf { hasDownloads },
+            onChapterSelected = screenModel::toggleSelection,
+            onChapterSwipe = screenModel.chapterActions::chapterSwipe,
+        ),
+        selection = selectionActions(screenModel),
+        // SY -->
+        sy = syActions(screenModel, successState),
+        // SY <--
     )
 }
 
