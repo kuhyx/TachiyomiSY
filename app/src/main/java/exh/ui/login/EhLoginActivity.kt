@@ -3,17 +3,13 @@ package exh.ui.login
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.webkit.CookieManager
-import android.webkit.WebView
 import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.core.net.toUri
 import eu.kanade.presentation.webview.EhLoginWebViewScreen
 import eu.kanade.presentation.webview.components.IgneousDialog
 import eu.kanade.tachiyomi.R
@@ -21,16 +17,16 @@ import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.setComposeContent
-import exh.log.xLogD
-import exh.source.ExhPreferences
 import tachiyomi.i18n.MR
-import uy.kohesive.injekt.injectLazy
 
 /**
  * LoginController.
  */
 internal class EhLoginActivity : BaseActivity() {
-    private val exhPreferences: ExhPreferences by injectLazy()
+    private val pageHandler = EhLoginPageHandler {
+        setResult(RESULT_OK)
+        finish()
+    }
 
     init {
         registerSecureActivity(this)
@@ -65,7 +61,7 @@ internal class EhLoginActivity : BaseActivity() {
 
             EhLoginWebViewScreen(
                 onUp = { finish() },
-                onPageFinished = { view, url -> onPageFinished(view, url, igneous) },
+                onPageFinished = { view, url -> pageHandler.onPageFinished(view, url, igneous) },
                 onClickRecheckLoginStatus = ::recheckLoginStatus,
                 onClickAlternateLoginPage = ::alternateLoginPage,
                 onClickSkipPageRestyling = ::skipPageRestyling,
@@ -91,63 +87,6 @@ internal class EhLoginActivity : BaseActivity() {
 
     private fun skipPageRestyling(loadUrl: (String) -> Unit) {
         loadUrl("https://forums.e-hentai.org/index.php?act=Login&$PARAM_SKIP_INJECT=true")
-    }
-
-    private fun onPageFinished(view: WebView, url: String, customIgneous: String?) {
-        xLogD(url)
-        val parsedUrl = url.toUri()
-        when {
-            parsedUrl.host.equals("forums.e-hentai.org", ignoreCase = true) -> {
-                onForumsPageFinished(view, url, parsedUrl)
-            }
-            // At ExHentai, check that everything worked out...
-            parsedUrl.host.equals("exhentai.org", ignoreCase = true) && applyExHentaiCookies(url, customIgneous) -> {
-                exhPreferences.enableExhentai.set(true)
-                setResult(RESULT_OK)
-                finish()
-            }
-        }
-    }
-
-    private fun onForumsPageFinished(view: WebView, url: String, parsedUrl: Uri) {
-        view.evaluateJavascript(
-            """
-                (function() {
-                    let html = document.documentElement.innerHTML;
-                    return html.includes("/cdn-cgi/");
-                })();
-            """.trimIndent(),
-        ) { result ->
-            if (result == "true") {
-                xLogD("Cloudflare block detected — skipping logic")
-            } else {
-                // Hide distracting content
-                if (!parsedUrl.queryParameterNames.contains(PARAM_SKIP_INJECT)) {
-                    view.evaluateJavascript(HIDE_JS, null)
-                }
-                // Check login result
-                if (parsedUrl.getQueryParameter("code")?.toInt() != 0 && cookiesFor(url)?.hasForumLogin() == true) {
-                    view.loadUrl("https://exhentai.org/")
-                }
-            }
-        }
-    }
-
-    // Parse cookies at ExHentai.
-    private fun applyExHentaiCookies(url: String, customIgneous: String?): Boolean {
-        val parsed = cookiesFor(url) ?: return false
-        if (customIgneous != null) {
-            CookieManager.getInstance().setCookie(url, "$IGNEOUS_COOKIE=$customIgneous")
-        }
-        val login = parsed.toExhLogin(customIgneous)
-        // Missing a cookie
-        if (login == null) return false
-
-        // Update prefs
-        exhPreferences.memberIdVal.set(login.memberId)
-        exhPreferences.passHashVal.set(login.passHash)
-        exhPreferences.igneousVal.set(login.igneous)
-        return true
     }
 
     override fun finish() {
