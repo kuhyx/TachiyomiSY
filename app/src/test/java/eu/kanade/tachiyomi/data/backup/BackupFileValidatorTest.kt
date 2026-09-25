@@ -67,12 +67,12 @@ internal class BackupFileValidatorTest {
     @Test
     fun unreadableFileIsAnError() {
         val uri = Uri.fromFile(folder.newFile().apply { writeBytes(byteArrayOf(0x7b, 0x7d)) })
-        shouldThrow<IllegalStateException> { BackupFileValidator(context).validate(uri) }
-            .cause.shouldBeInstanceOf<IOException>()
+        val error = shouldThrow<IllegalStateException> { BackupFileValidator(context).validate(uri) }
+        error.cause.shouldBeInstanceOf<IOException>()
     }
 
     @Test
-    fun missingSourcesAndTrackersAreListed() {
+    fun missingSourcesAreListed() {
         every { sourceManager.get(1L) } returns mockk()
         every { sourceManager.get(2L) } returns null
         every { sourceManager.get(3L) } returns null

@@ -46,6 +46,7 @@ internal class CategoriesRestorerTest {
     fun newCategoriesAreAppended() = runTest {
         coEvery { graph.getCategories.await() } returns listOf(
             Category(id = 1L, name = "Local", order = 4L, flags = 0L),
+            Category(id = 2L, name = "Earlier", order = 1L, flags = 0L),
         )
         restorer(listOf(BackupCategory(name = "B", order = 2, flags = 8), BackupCategory(name = "A", order = 1)))
         verify { graph.categories.insert("A", 5L, 0L, 0L, 0L, 0L) }

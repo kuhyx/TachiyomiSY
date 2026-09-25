@@ -90,7 +90,7 @@ internal class BackupCreateJobTest {
     }
 
     @Test
-    fun autoBackupUsesTheBackupDirectory() = runTest {
+    fun autoBackupUsesItsDirectory() = runTest {
         val dir = UniFile.fromFile(folder.newFolder("auto"))
         every { graph.storageManager.getAutomaticBackupsDirectory() } returns dir
         job().doWork() shouldBe Result.success()

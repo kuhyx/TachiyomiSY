@@ -132,11 +132,7 @@ internal class BackupRestorer(
         return try {
             val file = context.createFileInCacheDir("mihon_restore_error.txt")
             val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
-            file.bufferedWriter().use { out ->
-                errors.forEach { (date, message) ->
-                    out.write("[${sdf.format(date)}] $message\n")
-                }
-            }
+            file.writeText(errors.joinToString("") { (date, message) -> "[${sdf.format(date)}] $message\n" })
             file
         } catch (_: Exception) {
             File("")
