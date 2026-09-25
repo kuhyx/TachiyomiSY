@@ -47,9 +47,9 @@ internal class FakeQuery<T : Any>(private val feed: RowFeed<T>) : Query<T>(feed)
         return mapper(feed)
     }
 
-    override fun addListener(listener: Listener): Unit = Unit
+    override fun addListener(listener: Listener) = Unit
 
-    override fun removeListener(listener: Listener): Unit = Unit
+    override fun removeListener(listener: Listener) = Unit
 }
 
 /** A [Query] whose `awaitAsList`/`awaitAsOne` yield [rows]. */

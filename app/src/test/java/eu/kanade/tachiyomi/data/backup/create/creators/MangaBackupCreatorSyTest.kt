@@ -58,6 +58,13 @@ internal class MangaBackupCreatorSyTest {
     private val getCategories = mockk<GetCategories>()
     private val getHistory = mockk<GetHistory>()
 
+    private val options = BackupOptions(
+        chapters = false,
+        categories = false,
+        tracking = false,
+        history = false,
+    )
+
     @BeforeEach
     fun setUp() {
         coEvery { getCategories.await(any()) } returns emptyList()
@@ -93,15 +100,8 @@ internal class MangaBackupCreatorSyTest {
         getFlatMetadataById = getFlatMetadataById,
     )
 
-    private val options = BackupOptions(
-        chapters = false,
-        categories = false,
-        tracking = false,
-        history = false,
-    )
-
     @Test
-    fun mergedReferencesForMergedSource() = runTest {
+    fun mergedRefsForMergedSource() = runTest {
         db.withMergedReferences(listOf(mergedReference))
         val manga = libraryManga(source = MERGED_SOURCE_ID)
         val backup = creator()(listOf(manga), options).single()
@@ -109,7 +109,7 @@ internal class MangaBackupCreatorSyTest {
     }
 
     @Test
-    fun noMergedReferencesForOtherSources() = runTest {
+    fun noMergedRefsElsewhere() = runTest {
         creator()(listOf(libraryManga()), options).single().mergedMangaReferences shouldBe emptyList()
     }
 
@@ -122,7 +122,7 @@ internal class MangaBackupCreatorSyTest {
     }
 
     @Test
-    fun noFlatMetadataWhenSourceHasNone() = runTest {
+    fun noFlatMetadataWithoutAny() = runTest {
         every { sourceManager.get(any()) } returns mockk<MetadataSource<*, *>>()
         creator()(listOf(libraryManga()), options).single().flatMetadata shouldBe null
     }
@@ -178,7 +178,7 @@ internal class MangaBackupCreatorSyTest {
         backup.genre shouldBe listOf("g")
         backup.status shouldBe 3
         backup.thumbnailUrl shouldBe "http://t"
-        backup.viewer shouldBe (ReadingMode.MASK + 1) and ReadingMode.MASK
+        backup.viewer shouldBe (ReadingMode.MASK + 1 and ReadingMode.MASK)
         backup.customTitle shouldBe null
     }
 
