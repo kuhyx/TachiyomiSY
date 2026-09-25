@@ -101,7 +101,10 @@ internal class BiometricTimesScreenModel(
 }
 
 internal sealed class BiometricTimesEvent {
-    sealed class LocalizedMessage(val stringRes: StringResource) : BiometricTimesEvent()
+    // On the root so a collector toasts every event without an always-true `is` check.
+    abstract val stringRes: StringResource
+
+    sealed class LocalizedMessage(override val stringRes: StringResource) : BiometricTimesEvent()
     data object TimeConflicts : LocalizedMessage(SYMR.strings.biometric_lock_time_conflicts)
     data object InternalError : LocalizedMessage(MR.strings.internal_error)
 }
