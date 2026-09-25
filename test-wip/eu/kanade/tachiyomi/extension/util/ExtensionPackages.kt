@@ -54,8 +54,7 @@ internal fun extensionPackage(
 ): PackageInfo = PackageInfo().apply {
     packageName = pkgName
     this.versionName = versionName
-    @Suppress("DEPRECATION")
-    this.versionCode = versionCode
+    longVersionCode = versionCode.toLong()
     applicationInfo = ApplicationInfo().apply {
         packageName = pkgName
         this.metaData = metaData
