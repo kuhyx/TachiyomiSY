@@ -128,7 +128,8 @@ internal class SecureActivityDelegateImpl : SecureActivityDelegate {
         )
     }
 
-    private fun setSecureScreen(activity: AppCompatActivity) {
+    // Not private: the observer object calls these, and private members would need synthetic accessors.
+    internal fun setSecureScreen(activity: AppCompatActivity) {
         val secureScreenFlow = securityPreferences.secureScreen.changes()
         val incognitoModeFlow = preferences.incognitoMode.changes()
         combine(secureScreenFlow, incognitoModeFlow) { secureScreen, incognitoMode ->
@@ -139,7 +140,7 @@ internal class SecureActivityDelegateImpl : SecureActivityDelegate {
             .launchIn(activity.lifecycleScope)
     }
 
-    private fun setAppLock(activity: AppCompatActivity) {
+    internal fun setAppLock(activity: AppCompatActivity) {
         if (!securityPreferences.useAuthenticator.get()) return
         if (activity.isAuthenticationSupported()) {
             if (!SecureActivityDelegate.requireUnlock) return
