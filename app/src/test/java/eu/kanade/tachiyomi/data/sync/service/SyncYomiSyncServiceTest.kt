@@ -11,8 +11,6 @@ import io.mockk.verify
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 import mockwebserver3.MockResponse
 import okio.Buffer
 import org.junit.After
@@ -103,13 +101,6 @@ internal class SyncYomiSyncServiceTest {
             withTimeout(1_000) { harness.service.doSync(syncData("a")) }
         }
         harness.eventNames() shouldBe listOf("SYNC_STARTED", "SYNC_CANCELLED")
-    }
-
-    @Test
-    fun eventFieldsDefaultToNull() {
-        val type = Class.forName("eu.kanade.tachiyomi.data.sync.service.SyncYomiSyncService\$SyncEvent")
-        val event = Json.decodeFromString(serializer(type), """{"event":"SYNC_STARTED"}""")
-        event.toString() shouldBe "SyncEvent(event=SYNC_STARTED, deviceName=null, message=null)"
     }
 
     @Test

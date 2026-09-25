@@ -104,8 +104,10 @@ internal fun SyncService.mergeSourcesLists(
         }
 
         when {
-            localSource == null -> remoteSourceMap.getValue(sourceId).also {
-                logcat(LogPriority.DEBUG, logTag) { "Using remote source: ${it.name}." }
+            localSource == null -> {
+                val remote = remoteSourceMap.getValue(sourceId)
+                logcat(LogPriority.DEBUG, logTag) { "Using remote source: ${remote.name}." }
+                remote
             }
             remoteSource == null -> {
                 logcat(LogPriority.DEBUG, logTag) { "Using local source: ${localSource.name}." }
@@ -156,8 +158,10 @@ internal fun SyncService.mergeSavedSearchesLists(
         }
 
         when {
-            localSearch == null -> remoteSearchMap.getValue(compositeKey).also {
-                logcat(LogPriority.DEBUG, logTag) { "Using remote saved search: ${it.name}." }
+            localSearch == null -> {
+                val remote = remoteSearchMap.getValue(compositeKey)
+                logcat(LogPriority.DEBUG, logTag) { "Using remote saved search: ${remote.name}." }
+                remote
             }
             remoteSearch == null -> {
                 logcat(LogPriority.DEBUG, logTag) { "Using local saved search: ${localSearch.name}." }

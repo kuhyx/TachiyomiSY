@@ -96,7 +96,9 @@ internal class SyncServiceTest {
             backupManga = listOf(manga("b", categories = listOf(2L))),
             backupCategories = listOf(category("Remote", order = 2)),
         )
-        val merged = checkNotNull(service.merge(SyncData(backup = local), SyncData(deviceId = "x", backup = remote)).backup)
+        val merged = service.merge(SyncData(backup = local), SyncData(deviceId = "x", backup = remote))
+            .backup
+            .let(::checkNotNull)
         merged.backupManga.map { it.url } shouldBe listOf("a", "b")
         merged.backupManga.map { it.categories } shouldBe listOf(listOf(1L), listOf(2L))
         merged.backupCategories.map { it.name } shouldBe listOf("Local", "Remote")

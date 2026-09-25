@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.sync
 import eu.kanade.domain.captureLogcat
 import eu.kanade.domain.releaseLogcat
 import eu.kanade.domain.sync.models.SyncSettings
+import eu.kanade.tachiyomi.data.backup.chapterRow
 import eu.kanade.tachiyomi.data.backup.create.BackupCreator
 import eu.kanade.tachiyomi.data.backup.create.BackupOptions
 import eu.kanade.tachiyomi.data.backup.create.creators.CategoriesBackupCreator
@@ -12,7 +13,6 @@ import eu.kanade.tachiyomi.data.backup.create.creators.PreferenceBackupCreator
 import eu.kanade.tachiyomi.data.backup.create.creators.SavedSearchBackupCreator
 import eu.kanade.tachiyomi.data.backup.create.creators.SourcesBackupCreator
 import eu.kanade.tachiyomi.data.backup.libraryManga
-import eu.kanade.tachiyomi.data.backup.chapterRow
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.backup.models.BackupPreference
 import eu.kanade.tachiyomi.data.backup.models.BackupSavedSearch
@@ -130,7 +130,7 @@ internal class SyncBackupMappingTest {
     }
 
     @Test
-    fun chapterListsCompareByUrlAndVersion() {
+    fun chaptersCompareUrlAndVersion() {
         val local = listOf(chapterRow(url = "a", version = 1), chapterRow(url = "b", version = 2))
         areChaptersDifferent(local, listOf(chapter("a", version = 1))) shouldBe true
         areChaptersDifferent(local, listOf(chapter("a", version = 1), chapter("c", version = 2))) shouldBe true
@@ -141,7 +141,7 @@ internal class SyncBackupMappingTest {
     @Test
     fun syncBackupHasEverySection() = runTest {
         val options = BackupOptions()
-        val mangas = listOf(libraryManga(id = 1L))
+        val mangas = listOf(libraryManga(id = 1L, favorite = false))
         val categories = mockk<CategoriesBackupCreator>()
         val library = mockk<MangaBackupCreator>()
         val preferences = mockk<PreferenceBackupCreator>()

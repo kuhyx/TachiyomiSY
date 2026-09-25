@@ -31,8 +31,10 @@ internal fun SyncService.mergePreferencesLists(
         }
 
         when {
-            localPreference == null -> remotePreferencesMap.getValue(key).also {
-                logcat(LogPriority.DEBUG, logTag) { "Using remote preference: ${it.key}." }
+            localPreference == null -> {
+                val remote = remotePreferencesMap.getValue(key)
+                logcat(LogPriority.DEBUG, logTag) { "Using remote preference: ${remote.key}." }
+                remote
             }
             remotePreference == null -> {
                 logcat(LogPriority.DEBUG, logTag) { "Using local preference: ${localPreference.key}." }
@@ -83,8 +85,10 @@ internal fun SyncService.mergeSourcePreferencesLists(
             }
 
             when {
-                localSourcePreference == null -> remotePreferencesMap.getValue(sourceKey).also {
-                    logcat(LogPriority.DEBUG, logTag) { "Using remote source preference: ${it.sourceKey}." }
+                localSourcePreference == null -> {
+                    val remote = remotePreferencesMap.getValue(sourceKey)
+                    logcat(LogPriority.DEBUG, logTag) { "Using remote source preference: ${remote.sourceKey}." }
+                    remote
                 }
                 remoteSourcePreference == null -> {
                     logcat(LogPriority.DEBUG, logTag) {
