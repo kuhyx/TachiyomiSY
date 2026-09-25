@@ -1,27 +1,24 @@
 package eu.kanade.tachiyomi.ui.reader
 
-import android.app.Application
 import android.content.Intent
-import androidx.test.core.app.ApplicationProvider
-import eu.kanade.tachiyomi.core.security.SecurityPreferences
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.koin.dsl.module
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class ReaderActivityTest {
 
-    private val app = ApplicationProvider.getApplicationContext<Application>()
-    private val harness = ReaderVmHarness(app)
+    private val harness = ReaderActivityHarness()
 
     @Before
     fun setUp() {
-        harness.start(module { single { SecurityPreferences(harness.store) } })
+        harness.start()
     }
 
     @After
@@ -31,8 +28,18 @@ internal class ReaderActivityTest {
 
     @Test
     fun missingExtrasFinish() {
-        val controller = Robolectric.buildActivity(ReaderActivity::class.java, Intent(app, ReaderActivity::class.java))
-        val activity = controller.setup().get()
+        val intent = Intent(harness.app, ReaderActivity::class.java)
+        val activity = Robolectric.buildActivity(ReaderActivity::class.java, intent).setup().get()
         activity.isFinishing shouldBe true
+    }
+
+    @Test
+    fun launchLoadsChapter() {
+        val controller = harness.launch()
+        val activity = controller.get()
+        activity.isFinishing shouldBe false
+        activity.viewModel.state.value.currentChapter!!.chapter.id shouldBe 2L
+        activity.viewModel.state.value.viewer.shouldBeInstanceOf<R2LPagerViewer>()
+        controller.pause().stop().destroy()
     }
 }
