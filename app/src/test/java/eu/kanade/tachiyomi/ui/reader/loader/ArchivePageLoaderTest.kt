@@ -2,10 +2,10 @@ package eu.kanade.tachiyomi.ui.reader.loader
 
 import android.app.Application
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
-import eu.kanade.tachiyomi.ui.reader.stubImageSniffing
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences.ArchiveReaderMode
 import eu.kanade.tachiyomi.ui.reader.setting.archiveReaderMode
+import eu.kanade.tachiyomi.ui.reader.stubImageSniffing
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every

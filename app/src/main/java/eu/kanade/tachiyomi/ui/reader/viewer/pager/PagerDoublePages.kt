@@ -20,19 +20,18 @@ internal fun joinDoublePages(
     val subJoinedItems = mutableListOf<Pair<ReaderItem, ReaderItem?>>()
 
     // Step 2: run through each set of pages
-    pagedItems.forEach { items ->
-        items.forEach { it?.shiftedPage = false }
+    pagedItems.forEach { pages ->
+        pages.forEach { it.shiftedPage = false }
         // Step 3: If pages have been shifted,
         if (shiftDoublePage) {
-            applyShift(items, pageToShift)
+            applyShift(pages, pageToShift)
         }
         // Step 4: Add blanks for chunking
+        val items = pages.toMutableList<ReaderPage?>()
         insertIsolationBlanks(items)
-        // Step 5: chunk em
-        if (items.isNotEmpty()) {
-            subJoinedItems.addAll(items.chunked(2).map { Pair(it.first()!!, it.getOrNull(1)) })
-        }
-        otherItems.getOrNull(pagedItems.indexOf(items))?.let {
+        // Step 5: chunk em (a blank never starts a pair)
+        subJoinedItems.addAll(items.chunked(2).map { Pair(it.first()!!, it.getOrNull(1)) })
+        otherItems.getOrNull(pagedItems.indexOf(pages))?.let {
             subJoinedItems.add(Pair(it, null))
         }
     }
@@ -40,15 +39,15 @@ internal fun joinDoublePages(
 }
 
 // Splits the flat item list into per-chapter page runs, with the transitions that separate them.
-private fun segmentByChapter(subItems: List<ReaderItem>): Pair<List<MutableList<ReaderPage?>>, List<ReaderItem>> {
-    val pagedItems = mutableListOf<MutableList<ReaderPage?>>()
+private fun segmentByChapter(subItems: List<ReaderItem>): Pair<List<MutableList<ReaderPage>>, List<ReaderItem>> {
+    val pagedItems = mutableListOf<MutableList<ReaderPage>>()
     val otherItems = mutableListOf<ReaderItem>()
     pagedItems.add(mutableListOf())
     subItems.forEach { readerItem ->
         when (readerItem) {
             is ReaderPage -> {
                 if (pagedItems.last().isNotEmpty() &&
-                    pagedItems.last().last()?.chapter?.chapter?.id != readerItem.chapter.chapter.id
+                    pagedItems.last().last().chapter.chapter.id != readerItem.chapter.chapter.id
                 ) {
                     pagedItems.add(mutableListOf())
                 }
@@ -63,41 +62,37 @@ private fun segmentByChapter(subItems: List<ReaderItem>): Pair<List<MutableList<
     return pagedItems to otherItems
 }
 
-private fun applyShift(items: MutableList<ReaderPage?>, pageToShift: ReaderPage?) {
+private fun applyShift(items: List<ReaderPage>, pageToShift: ReaderPage?) {
     val index = items.indexOf(pageToShift)
     // Go from the current page and work your way back to the first page,
     // or the first page that's a full page.
     // This is done in case user tries to shift a page after a full page
     val fullPageBeforeIndex = if (index > -1) {
-        items.take(index).indexOfLast { it?.fullPage == true }
+        items.take(index).indexOfLast { it.fullPage }
     } else {
         -1
     }.coerceAtLeast(0)
     // Add a shifted page to the first place there isnt a full page
-    for (i in fullPageBeforeIndex until items.size) {
-        if (items[i]?.fullPage == false) {
-            items[i]?.shiftedPage = true
-            break
-        }
-    }
+    items.drop(fullPageBeforeIndex).firstOrNull { !it.fullPage }?.shiftedPage = true
 }
 
 // Adds a 'blank' page after each full page. It will be used when chunked to solo a page.
 private fun insertIsolationBlanks(items: MutableList<ReaderPage?>) {
     var itemIndex = 0
     while (itemIndex < items.size) {
-        val currentItem = items[itemIndex]
-        currentItem?.isolatedPage = false
-        if (currentItem?.fullPage == true || currentItem?.shiftedPage == true) {
+        // The loop steps over every blank it adds, so it only ever lands on a page.
+        val currentItem = items[itemIndex]!!
+        currentItem.isolatedPage = false
+        if (currentItem.fullPage || currentItem.shiftedPage) {
             items.add(itemIndex + 1, null)
-            val previousIsEvenPage = itemIndex > 0 && items[itemIndex - 1] != null && (itemIndex - 1) % 2 == 0
-            if (currentItem.fullPage && previousIsEvenPage) {
+            val previous = items.getOrNull(itemIndex - 1)
+            if (currentItem.fullPage && previous != null && (itemIndex - 1) % 2 == 0) {
                 // If a page is a full page, check if the previous page needs to be isolated
                 // we should check if it's an even or odd page, since even pages need shifting
                 // For example if Page 1 is full, Page 0 needs to be isolated
                 // No need to take account shifted pages, because null additions should
                 // always have an odd index in the list
-                items[itemIndex - 1]?.isolatedPage = true
+                previous.isolatedPage = true
                 items.add(itemIndex, null)
                 itemIndex++
             }

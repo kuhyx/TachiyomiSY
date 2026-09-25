@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
-import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
 import eu.kanade.tachiyomi.ui.reader.loadedPages
+import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
 import eu.kanade.tachiyomi.ui.reader.readerChapter
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -92,7 +92,7 @@ internal class ReaderChapterTest {
     }
 
     @Test
-    fun viewerChaptersWithoutNeighbours() {
+    fun viewerChaptersWithoutPeers() {
         val curr = readerChapter(id = 1L)
         curr.state = ReaderChapter.State.Loading
         val chapters = ViewerChapters(curr, prevChapter = null, nextChapter = null)

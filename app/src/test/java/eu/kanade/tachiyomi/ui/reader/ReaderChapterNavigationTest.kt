@@ -37,14 +37,14 @@ internal class ReaderChapterNavigationTest {
         harness.stop()
     }
 
-    private fun vm(withLoader: Boolean = true): ReaderViewModel = harness.loadedViewModel(chapterId = 2L).also {
+    private fun readerVm(withLoader: Boolean = true): ReaderViewModel = harness.loadedViewModel(chapterId = 2L).also {
         if (withLoader) it.loader = loader
     }
 
     @Test
     fun loadChapterSetsNeighbours() {
         runBlocking {
-            val vm = vm()
+            val vm = readerVm()
             val first = vm.chapterList[0]
             vm.loadChapter(loader, first).prevChapter.shouldBeNull()
             vm.state.value.viewerChapters!!.nextChapter shouldBe vm.chapterList[1]
@@ -58,17 +58,17 @@ internal class ReaderChapterNavigationTest {
 
     @Test
     fun newChapterNeedsLoader() {
-        val vm = vm(withLoader = false)
+        val vm = readerVm(withLoader = false)
         vm.loadNewChapter(vm.chapterList[0])
         vm.state.value.viewerChapters.shouldBeNull()
-        val loaded = vm()
+        val loaded = readerVm()
         loaded.loadNewChapter(loaded.chapterList[0])
         awaitUntil { loaded.state.value.currentChapter == loaded.chapterList[0] }
     }
 
     @Test
     fun newChapterSwallowsErrors() {
-        val vm = vm()
+        val vm = readerVm()
         coEvery { loader.loadChapter(any(), any()) } throws IllegalStateException("bad")
         vm.loadNewChapter(vm.chapterList[0])
         coVerify(timeout = 5_000) { loader.loadChapter(vm.chapterList[0], null) }
@@ -80,7 +80,7 @@ internal class ReaderChapterNavigationTest {
 
     @Test
     fun dialogPicksListedChapter() {
-        val vm = vm()
+        val vm = readerVm()
         vm.loadNewChapterFromDialog(domainChapter(9L))
         vm.loadNewChapterFromDialog(domainChapter(3L))
         awaitUntil { vm.state.value.currentChapter == vm.chapterList[2] }
@@ -89,8 +89,8 @@ internal class ReaderChapterNavigationTest {
     @Test
     fun adjacentLoadsAndRecovers() {
         runBlocking {
-            vm(withLoader = false).loadAdjacent(readerChapter())
-            val vm = vm()
+            readerVm(withLoader = false).loadAdjacent(readerChapter())
+            val vm = readerVm()
             vm.loadNextChapter()
             vm.loadPreviousChapter()
             vm.loadAdjacent(vm.chapterList[1])
@@ -109,12 +109,12 @@ internal class ReaderChapterNavigationTest {
     @Test
     fun preloadSkipsLoadedChapters() {
         runBlocking {
-            val vm = vm()
+            val vm = readerVm()
             val loaded = readerChapter().also { it.state = ReaderChapter.State.Loaded(emptyList()) }
             val loading = readerChapter().also { it.state = ReaderChapter.State.Loading }
             vm.preload(loaded)
             vm.preload(loading)
-            vm(withLoader = false).preload(readerChapter())
+            readerVm(withLoader = false).preload(readerChapter())
             coVerify(exactly = 0) { loader.loadChapter(any(), any()) }
         }
     }
@@ -140,10 +140,10 @@ internal class ReaderChapterNavigationTest {
                     skipCache = true,
                 )
             } returns true
-            vm().preload(chapter)
+            readerVm().preload(chapter)
             chapter.state shouldBe ReaderChapter.State.Wait
             every { online.isLocal } returns true
-            vm().preload(chapter)
+            readerVm().preload(chapter)
             coVerify(exactly = 2) { loader.loadChapter(chapter, null) }
         }
     }
@@ -151,7 +151,7 @@ internal class ReaderChapterNavigationTest {
     @Test
     fun preloadAnnouncesReload() {
         runBlocking {
-            val vm = vm()
+            val vm = readerVm()
             val event = async(start = CoroutineStart.UNDISPATCHED) { vm.eventFlow.first() }
             val online = mockk<PageLoader>()
             every { online.isLocal } returns false
@@ -167,7 +167,7 @@ internal class ReaderChapterNavigationTest {
     @Test
     fun adjacentOnIoDoesNotSuspend() {
         runBlocking(Dispatchers.IO) {
-            val vm = vm()
+            val vm = readerVm()
             vm.loadAdjacent(vm.chapterList[1])
             vm.loadNextChapter()
             vm.loadPreviousChapter()
@@ -178,8 +178,8 @@ internal class ReaderChapterNavigationTest {
     @Test
     fun loadReplacesOldChapters() {
         runBlocking {
-            val vm = vm()
-            val old = readerChapter(id = 7L).also { it.ref() }
+            val vm = readerVm()
+            val old = readerChapter(id = 7L).apply { ref() }
             vm.updateState { it.copy(viewerChapters = ViewerChapters(old, null, null)) }
             vm.loadChapter(loader, vm.chapterList[0])
             old.state shouldBe ReaderChapter.State.Wait
