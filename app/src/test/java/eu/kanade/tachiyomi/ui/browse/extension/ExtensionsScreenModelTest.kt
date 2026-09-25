@@ -70,7 +70,7 @@ internal class ExtensionsScreenModelTest {
     }
 
     @Test
-    fun onlyUntrustedStillShowsInstalled() {
+    fun untrustedShowsAsInstalled() {
         extensions.value = Extensions(emptyList(), emptyList(), emptyList(), listOf(untrusted("Odd")))
         val model = model()
         eventually { model.state.value.items.size == 1 }
@@ -95,7 +95,7 @@ internal class ExtensionsScreenModelTest {
     }
 
     @Test
-    fun predicateMatchesInstalledSources() {
+    fun predicateMatchesInstalled() {
         val http = mockk<HttpSource> {
             every { name } returns "Site"
             every { id } returns 9L
@@ -114,7 +114,7 @@ internal class ExtensionsScreenModelTest {
     }
 
     @Test
-    fun predicateMatchesAvailableSources() {
+    fun predicateMatchesAvailable() {
         val ext = available("Ext", listOf(5L to "en"))
         val model = model()
         model.searchQueryPredicate("ext en")(ext) shouldBe true

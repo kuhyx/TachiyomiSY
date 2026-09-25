@@ -49,7 +49,7 @@ internal class BrowseSourceScreenModelTest {
     }
 
     @Test
-    fun remembersTheSourceUnlessIncognito() {
+    fun remembersSourceUnlessIncognito() {
         harness.model()
         harness.koin.sourcePreferences.lastUsedSource.get() shouldBe 1L
         harness.koin.sourcePreferences.lastUsedSource.set(-1L)

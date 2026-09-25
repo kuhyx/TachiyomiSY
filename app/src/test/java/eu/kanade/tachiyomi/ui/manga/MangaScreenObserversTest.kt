@@ -96,7 +96,7 @@ internal class MangaScreenObserversTest {
     }
 
     @Test
-    fun metadataIsRaisedForMetadataSources() {
+    fun metadataNeedsAMetadataSource() {
         harness.mangaFlow.value = manga(favorite = true) to listOf(chapter(1L))
         val model = harness.loaded()
         model.raiseMetadata(null, harness.source) shouldBe null

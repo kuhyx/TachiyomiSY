@@ -85,7 +85,7 @@ internal class MigrationModelsTest {
     }
 
     @Test
-    fun favouritesAreSortedAndSelectable() {
+    fun favouritesSortAndSelect() {
         val b = manga().copy(id = 2L, ogTitle = "b")
         val a = manga().copy(id = 3L, ogTitle = "A")
         every { favorites.subscribe(7L) } returns MutableStateFlow(listOf(b, a))

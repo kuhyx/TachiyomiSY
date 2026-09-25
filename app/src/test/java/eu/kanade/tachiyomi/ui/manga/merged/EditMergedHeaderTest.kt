@@ -70,7 +70,7 @@ internal class EditMergedHeaderTest {
     }
 
     @Test
-    fun missingSelfReferenceDisablesDedupe() {
+    fun noSelfReferenceNoDedupe() {
         open(null, reference(1L), reference(2L))
         find<MaterialSwitch>(R.id.dedupe_switch).isChecked shouldBe false
         state.mergedMangaHeaderAdapter?.canMove() shouldBe false

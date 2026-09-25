@@ -125,7 +125,7 @@ internal class SourcesScreenModelTest {
     }
 
     @Test
-    fun dataSaverFlagFollowsThePreference() {
+    fun dataSaverFollowsPreference() {
         val model = model()
         model.useNewSourceNavigation shouldBe koin.uiPreferences.useNewSourceNavigation.get()
         koin.sourcePreferences.dataSaver.set(SourcePreferences.DataSaver.BANDWIDTH_HERO)
