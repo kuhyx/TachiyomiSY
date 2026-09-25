@@ -72,14 +72,9 @@ internal fun ChangeCategoryDialog(
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
             ) {
-                selection.forEach { checkbox ->
+                selection.forEachIndexed { index, checkbox ->
                     CategoryCheckboxRow(checkbox) { changed ->
-                        val index = selection.indexOf(changed)
-                        if (index != -1) {
-                            val mutableList = selection.toMutableList()
-                            mutableList[index] = changed.next()
-                            selection = mutableList.toList()
-                        }
+                        selection = selection.toMutableList().also { it[index] = changed.next() }
                     }
                 }
             }
