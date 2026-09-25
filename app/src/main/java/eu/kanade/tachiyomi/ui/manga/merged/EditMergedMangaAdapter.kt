@@ -27,10 +27,8 @@ internal class EditMergedMangaAdapter(listener: EditMergedSettingsState, var isP
     override fun onSetPrioritySort(isPriorityOrder: Boolean) {
         isHandleDragEnabled = isPriorityOrder
         this.isPriorityOrder = isPriorityOrder
-        allBoundViewHolders.onEach { editMergedMangaHolder ->
-            if (editMergedMangaHolder is EditMergedMangaHolder) {
-                editMergedMangaHolder.setHandelAlpha(isPriorityOrder)
-            }
+        allBoundViewHolders.filterIsInstance<EditMergedMangaHolder>().forEach { editMergedMangaHolder ->
+            editMergedMangaHolder.setHandelAlpha(isPriorityOrder)
         }
     }
 }

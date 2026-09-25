@@ -149,14 +149,12 @@ internal class EditMergedSettingsHeaderAdapter(
             } ?: false
             binding.dedupeSwitch.setOnCheckedChangeListener { _, isChecked ->
                 binding.dedupeModeSpinner.isEnabled = isChecked
-                binding.dedupeModeSpinner.alpha = when (isChecked) {
-                    true -> 1F
-                    false -> DISABLED_ALPHA
-                }
+                binding.dedupeModeSpinner.alpha = if (isChecked) 1F else DISABLED_ALPHA
                 state.mergeReference = state.mergeReference?.copy(
-                    chapterSortMode = when (isChecked) {
-                        true -> MergedMangaReference.CHAPTER_SORT_NO_DEDUPE
-                        false -> MergedMangaReference.CHAPTER_SORT_NONE
+                    chapterSortMode = if (isChecked) {
+                        MergedMangaReference.CHAPTER_SORT_NO_DEDUPE
+                    } else {
+                        MergedMangaReference.CHAPTER_SORT_NONE
                     },
                 )
 
@@ -164,10 +162,7 @@ internal class EditMergedSettingsHeaderAdapter(
             }
 
             binding.dedupeModeSpinner.isEnabled = binding.dedupeSwitch.isChecked
-            binding.dedupeModeSpinner.alpha = when (binding.dedupeSwitch.isChecked) {
-                true -> 1F
-                false -> DISABLED_ALPHA
-            }
+            binding.dedupeModeSpinner.alpha = if (binding.dedupeSwitch.isChecked) 1F else DISABLED_ALPHA
         }
     }
 

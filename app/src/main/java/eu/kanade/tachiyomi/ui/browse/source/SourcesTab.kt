@@ -38,10 +38,7 @@ internal fun Screen.sourcesTab(
 
     return TabContent(
         // SY -->
-        titleRes = when (smartSearchConfig == null) {
-            true -> MR.strings.label_sources
-            false -> SYMR.strings.find_in_another_source
-        },
+        titleRes = if (smartSearchConfig == null) MR.strings.label_sources else SYMR.strings.find_in_another_source,
         actions = listOf(
             AppBar.Action(
                 title = stringResource(MR.strings.action_global_search),

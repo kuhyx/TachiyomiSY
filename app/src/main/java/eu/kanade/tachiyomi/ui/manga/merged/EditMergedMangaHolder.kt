@@ -61,10 +61,7 @@ internal class EditMergedMangaHolder(
     }
 
     fun setHandelAlpha(isPriorityOrder: Boolean) {
-        binding.reorder.alpha = when (isPriorityOrder) {
-            true -> 1F
-            false -> DISABLED_ALPHA
-        }
+        binding.reorder.alpha = if (isPriorityOrder) 1F else DISABLED_ALPHA
     }
 
     fun updateDownloadChaptersIcon(setTint: Boolean) {
