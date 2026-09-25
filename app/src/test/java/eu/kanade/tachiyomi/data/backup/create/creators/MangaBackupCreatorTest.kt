@@ -34,6 +34,14 @@ internal class MangaBackupCreatorTest {
     private val getCustomMangaInfo = mockk<GetCustomMangaInfo>()
     private val getFlatMetadataById = mockk<GetFlatMetadataById>()
 
+    private val allOff = BackupOptions(
+        chapters = false,
+        categories = false,
+        tracking = false,
+        history = false,
+        customInfo = false,
+    )
+
     @BeforeEach
     fun setUp() {
         coEvery { getCategories.await(any()) } returns emptyList()
@@ -67,14 +75,6 @@ internal class MangaBackupCreatorTest {
         sourceManager = sourceManager,
         getCustomMangaInfo = getCustomMangaInfo,
         getFlatMetadataById = getFlatMetadataById,
-    )
-
-    private val allOff = BackupOptions(
-        chapters = false,
-        categories = false,
-        tracking = false,
-        history = false,
-        customInfo = false,
     )
 
     @Test
