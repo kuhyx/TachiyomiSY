@@ -41,6 +41,7 @@ internal class SettingsAdvancedScreenTest {
     fun setUp() {
         mockkConstructor(CrashLogUtil::class)
         coEvery { anyConstructed<CrashLogUtil>().dumpLogs(any()) } just runs
+        stubTextureLimits()
         koin.start(advanced.module())
     }
 

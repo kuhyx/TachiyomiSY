@@ -10,6 +10,7 @@ import exh.source.EXH_SOURCE_ID
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
+import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
 import org.junit.Before
@@ -29,12 +30,14 @@ internal class DeveloperToolsTest {
 
     @Before
     fun setUp() {
+        stubTextureLimits()
         koin.start(advanced.module())
         harness.show(SettingsAdvancedScreen)
     }
 
     @After
     fun tearDown() {
+        unmockkAll()
         koin.stop()
     }
 
