@@ -84,7 +84,7 @@ internal suspend fun MangaRestorer.restoreHistory(manga: Manga, backupHistory: L
             item.copy(
                 id = dbHistory._id,
                 chapterId = dbHistory.chapter_id,
-                readAt = max(item.readAt?.time ?: 0L, dbHistory.last_read?.time ?: 0L)
+                readAt = max(history.lastRead, dbHistory.last_read?.time ?: 0L)
                     .takeIf { it > 0L }
                     ?.let { Date(it) },
                 readDuration = max(item.readDuration, dbHistory.time_read) - dbHistory.time_read,

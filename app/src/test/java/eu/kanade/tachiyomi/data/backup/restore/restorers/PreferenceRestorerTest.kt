@@ -134,7 +134,7 @@ internal class PreferenceRestorerTest {
     }
 
     @Test
-    fun sourcePreferencesGoToTheSourceFile() = runTest {
+    fun sourcePrefsGoToTheirFile() = runTest {
         restorer.restoreSource(listOf(BackupSourcePreferences("source_7", listOf(pref("lang", "en")))))
         AndroidPreferenceStore(app, app.getSharedPreferences("source_7", Context.MODE_PRIVATE))
             .getString("lang", "")

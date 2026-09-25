@@ -78,7 +78,7 @@ internal class BackupRestorerTest {
     }
 
     @Test
-    fun uncategorisedMangaStillRestores() = runTest {
+    fun uncategorisedMangaRestores() = runTest {
         harness.restorer().restore(harness.write(full), RestoreOptions(categories = false))
         coVerify { harness.mangaRestorer.restore(match { it.url == "/a" }, emptyList()) }
         coVerify { harness.preferenceRestorer.restoreApp(emptyList(), null) }
