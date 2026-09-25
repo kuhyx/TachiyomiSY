@@ -84,7 +84,7 @@ internal class LibrarySettingsDialogTest {
     }
 
     @Test
-    fun sortPageUsesTheGlobalSortWhenGrouped() {
+    fun sortPageGlobalWhenGrouped() {
         val harness = LibrarySettingsHarness(trackerCount = 0)
         harness.libraryPreferences.groupLibraryBy.set(LibraryGroup.BY_SOURCE)
         harness.libraryPreferences.sortTagsForLibrary.set(setOf("tag"))
@@ -119,11 +119,12 @@ internal class LibrarySettingsDialogTest {
         compose.onNodeWithText("Sources").performClick()
         compose.mainClock.advanceTimeBy(500L)
         compose.waitForIdle()
-        listOf(LibraryGroup.UNGROUPED, LibraryGroup.BY_SOURCE) shouldContain harness.libraryPreferences.groupLibraryBy.get()
+        val grouping = harness.libraryPreferences.groupLibraryBy.get()
+        listOf(LibraryGroup.UNGROUPED, LibraryGroup.BY_SOURCE) shouldContain grouping
     }
 
     @Test
-    fun groupPageWithoutCategoriesOrTrackers() {
+    fun groupPageWithoutExtras() {
         val harness = LibrarySettingsHarness(trackerCount = 0)
         show(harness, hasCategories = false)
         tab("Group")

@@ -54,7 +54,7 @@ internal class ChipTest {
     }
 
     @Test
-    fun clickableChipForwardsBothClicks() {
+    fun clickableChipForwardsClicks() {
         compose.setContent {
             MaterialTheme {
                 SuggestionChip(
@@ -70,7 +70,7 @@ internal class ChipTest {
     }
 
     @Test
-    fun clickableChipWithoutDecorations() {
+    fun clickableChipUndecorated() {
         compose.setContent {
             MaterialTheme {
                 SuggestionChip(

@@ -34,7 +34,13 @@ internal class HistoryItemTest {
     private fun show(history: HistoryWithRelations) {
         compose.setContent {
             MaterialTheme {
-                HistoryItem(history = history, onClickCover = {}, onClickResume = {}, onClickDelete = {}, onClickFavorite = {})
+                HistoryItem(
+                    history = history,
+                    onClickCover = {},
+                    onClickResume = {},
+                    onClickDelete = {},
+                    onClickFavorite = {},
+                )
             }
         }
     }

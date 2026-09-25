@@ -77,7 +77,7 @@ internal class LibraryEmptyPagesTest {
     }
 
     @Test
-    fun comfortableGridSearchAndAutoColumns() {
+    fun comfortableGridSearchAuto() {
         val items = mapOf(5L to listOf(libraryItem(1L)))
         harness.show(
             listOf(libraryCategory(5L)),

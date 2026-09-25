@@ -49,7 +49,7 @@ internal class LibraryContentTest {
     }
 
     @Test
-    fun selectionTogglesInsteadOfOpening() {
+    fun selectionToggles() {
         harness.show(categories, items, LibraryShow(selection = setOf(10L)))
         compose.onNodeWithText("Manga 10").performClick()
         harness.events shouldContain "toggle 1 10"

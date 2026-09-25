@@ -81,7 +81,7 @@ internal class TrackSelectorsTest {
     }
 
     @Test
-    fun scoreSelectorStartsMidwayWhenUnknown() {
+    fun scoreStartsMidwayIfUnknown() {
         compose.setContent {
             MaterialTheme {
                 TrackScoreSelector(
@@ -99,7 +99,7 @@ internal class TrackSelectorsTest {
     }
 
     @Test
-    fun scoreSelectorStartsAtTheSelection() {
+    fun scoreStartsAtSelection() {
         compose.setContent {
             MaterialTheme {
                 TrackScoreSelector(

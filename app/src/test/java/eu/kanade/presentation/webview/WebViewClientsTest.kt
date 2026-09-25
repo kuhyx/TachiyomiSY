@@ -60,7 +60,9 @@ internal class WebViewClientsTest {
         var shown by mutableStateOf(true)
         var session: WebViewSession? = null
         compose.setContent {
-            if (shown) session = rememberWebViewSession(url = "https://example.com/", headers = emptyMap(), onUrlChange = {})
+            if (shown) {
+                session = rememberWebViewSession(url = "https://example.com/", headers = emptyMap(), onUrlChange = {})
+            }
         }
         compose.waitForIdle()
         session?.isActive shouldBe true

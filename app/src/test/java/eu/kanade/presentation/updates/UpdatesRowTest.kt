@@ -86,7 +86,7 @@ internal class UpdatesRowTest {
     }
 
     @Test
-    fun selectionDisablesCoverAndDownload() {
+    fun selectionDisablesButtons() {
         showOne(updatesItem(selected = true, state = eu.kanade.tachiyomi.data.download.model.Download.State.QUEUE))
         compose.onNodeWithText("Chapter 1").performClick()
         harness.events shouldContainExactly listOf("select 1 false false")

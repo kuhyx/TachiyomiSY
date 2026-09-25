@@ -71,7 +71,7 @@ internal class WebViewScreenTest {
     private fun chrome() = shadowOf(webView()).webChromeClient as AccompanistWebChromeClient
 
     @Test
-    fun overflowActionsUseTheCurrentUrl() {
+    fun overflowUsesCurrentUrl() {
         show()
         compose.onNodeWithText("Initial").assertExists()
         listOf("Refresh", "Share", "Open in browser", "Clear cookies").forEach {
@@ -102,7 +102,7 @@ internal class WebViewScreenTest {
     }
 
     @Test
-    fun cloudflarePagesShowTheHelpBanner() {
+    fun cloudflareShowsHelpBanner() {
         show()
         compose.runOnIdle { client().onPageFinished(webView(), "https://example.com/") }
         compose.runOnIdle { shadowOf(webView()).lastEvaluatedJavascriptCallback.onReceiveValue("<p>plain</p>") }

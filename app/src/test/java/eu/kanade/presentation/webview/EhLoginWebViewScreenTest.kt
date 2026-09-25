@@ -62,7 +62,7 @@ internal class EhLoginWebViewScreenTest {
     }
 
     @Test
-    fun advancedOptionsEachCloseTheDialog() {
+    fun advancedOptionsCloseDialog() {
         val info = ApplicationProvider.getApplicationContext<Context>().applicationInfo
         info.flags = info.flags or ApplicationInfo.FLAG_DEBUGGABLE
         show()

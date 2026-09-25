@@ -116,7 +116,7 @@ internal class SearchToolbarTest {
     }
 
     @Test
-    fun disabledSearchAndExplicitArguments() {
+    fun disabledSearchExplicitArgs() {
         compose.setContent {
             MaterialTheme {
                 SearchToolbar(

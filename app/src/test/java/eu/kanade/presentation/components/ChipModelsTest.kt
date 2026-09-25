@@ -25,11 +25,16 @@ internal class ChipModelsTest {
             disabledElevation = disabled.dp,
         )
 
-    private val state = ChipStateColors(Color.Red, Color.Red, Color.Red, Color.Red)
+    private val state = ChipStateColors(
+        container = Color.Red,
+        label = Color.Red,
+        leadingIconContent = Color.Red,
+        trailingIconContent = Color.Red,
+    )
     private val other = state.copy(label = Color.Blue)
 
     @Test
-    fun elevationEqualityChecksEveryField() {
+    fun elevationEqualityFields() {
         val base = elevation()
         (base == base) shouldBe true
         (base == elevation()) shouldBe true
