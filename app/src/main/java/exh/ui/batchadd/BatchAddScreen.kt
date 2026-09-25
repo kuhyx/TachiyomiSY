@@ -180,18 +180,13 @@ internal class BatchAddScreen : Screen() {
             Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val progressFloat = progress.toFloat()
-            if (progressTotal > 0 && !progressFloat.isNaN()) {
-                val realProgress = progressFloat / progressTotal
-                if (!realProgress.isNaN()) {
-                    LinearProgressIndicator(
-                        progress = { realProgress },
-                        modifier = Modifier
-                            .padding(top = 2.dp)
-                            .weight(1f),
-                    )
-                }
-            }
+            // The progress state always holds at least one gallery; the floor only guards the division.
+            LinearProgressIndicator(
+                progress = { progress.toFloat() / progressTotal.coerceAtLeast(1) },
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .weight(1f),
+            )
             Text(
                 text = "$progress/$progressTotal",
                 modifier = Modifier.weight(PROGRESS_WEIGHT),
