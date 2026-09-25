@@ -18,8 +18,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-private const val QUEUE_KT = "eu.kanade.tachiyomi.data.download.DownloadManagerQueueKt"
-
 internal class ReaderViewModelTest {
 
     private val harness = ReaderVmHarness()
@@ -53,7 +51,7 @@ internal class ReaderViewModelTest {
 
     @Test
     fun savedStateRestoresPosition() {
-        val saved = SavedStateHandle(mapOf("chapter_id" to 4L, "page_index" to 3))
+        val saved = SavedStateHandle(mapOf<String, Any>("chapter_id" to 4L, "page_index" to 3))
         val vm = harness.viewModel(saved)
         vm.chapterId shouldBe 4L
         vm.chapterPageIndex shouldBe 3

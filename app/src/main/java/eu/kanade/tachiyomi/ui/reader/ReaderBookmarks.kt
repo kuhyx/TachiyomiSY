@@ -50,7 +50,8 @@ internal fun ReaderViewModel.toggleChapterBookmark() {
 
 // SY -->
 internal fun ReaderViewModel.toggleBookmark(chapterId: Long, bookmarked: Boolean) {
-    val chapter = chapterList.find { it.chapter.id == chapterId }?.chapter ?: return
+    // Reader chapters come from the database, so every id is set.
+    val chapter = chapterList.find { it.chapter.id!! == chapterId }?.chapter ?: return
     chapter.bookmark = bookmarked
     viewModelScope.launchNonCancellable {
         updateChapter.await(

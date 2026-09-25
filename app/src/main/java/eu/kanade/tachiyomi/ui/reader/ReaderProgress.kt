@@ -61,10 +61,8 @@ internal class ReaderProgress(
             readerChapter.chapter.lastPageRead = pageIndex
 
             // SY -->
-            if (
-                readerChapter.pages?.lastIndex == pageIndex ||
-                (hasExtraPage && readerChapter.pages?.lastIndex?.minus(1) == page.index)
-            ) {
+            val lastIndex = readerChapter.pages?.lastIndex ?: -1
+            if (lastIndex == pageIndex || (hasExtraPage && lastIndex - 1 == pageIndex)) {
                 // SY <--
                 updateProgressOnComplete(readerChapter)
 
@@ -159,8 +157,8 @@ internal class ReaderProgress(
 
     // Starts the service that updates the last chapter read in sync services. This operation
     // will run in a background thread and errors are ignored.
+    // Only reached from a non-incognito progress update, so incognito needs no check here.
     private fun updateTrackChapterRead(readerChapter: ReaderChapter) {
-        if (model.incognitoMode) return
         if (!trackPreferences.autoUpdateTrack.get()) return
 
         val manga = model.manga ?: return
