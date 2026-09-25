@@ -119,7 +119,14 @@ internal class PreferenceItemTest {
 
     @Test
     fun basicListNullSubtitle() {
-        show(Preference.PreferenceItem.BasicListPreference("a", mapOf("a" to "Alpha"), "Basic", subtitle = null))
+        show(
+            Preference.PreferenceItem.BasicListPreference(
+                value = "a",
+                entries = mapOf("a" to "Alpha"),
+                title = "Basic",
+                subtitle = null,
+            ),
+        )
         click("Basic")
         click("Cancel")
     }

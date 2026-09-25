@@ -42,7 +42,15 @@ internal class SettingsAdvancedNetworkTest {
         every { GLUtil.CUSTOM_TEXTURE_LIMIT_OPTIONS } returns listOf(4096, 3072, 2048)
         every { ImageUtil.HARDWARE_BITMAP_UNSUPPORTED } returns false
         mockkStatic("eu.kanade.tachiyomi.data.library.LibraryUpdateSchedulingKt")
-        every { LibraryUpdateJob.startNow(any(), any(), any(), any(), any()) } returns true
+        every {
+            LibraryUpdateJob.startNow(
+                context = any(),
+                category = any(),
+                target = any(),
+                group = any(),
+                groupExtra = any(),
+            )
+        } returns true
         koin.start(advanced.module())
     }
 

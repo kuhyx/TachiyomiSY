@@ -29,13 +29,14 @@ internal class ExtensionStoresScreen(
         val screenModel = rememberScreenModel { ExtensionStoresScreenModel() }
         val state by screenModel.state.collectAsState()
 
-        LaunchedEffect(url) {
-            url?.let { screenModel.addFromDeeplink(url) }
-        }
-
         if (state is ExtensionStoreScreenState.Loading) {
             LoadingScreen()
             return
+        }
+
+        // Only once the stores are loaded: while loading, the model has no dialog state to open.
+        LaunchedEffect(url) {
+            url?.let { screenModel.addFromDeeplink(url) }
         }
 
         val successState = state as ExtensionStoreScreenState.Success

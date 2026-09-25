@@ -1,6 +1,7 @@
 package eu.kanade.presentation.more.settings.screen
 
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
@@ -13,6 +14,7 @@ import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
+import eu.kanade.domain.installFakeAndroidKeyStore
 import eu.kanade.tachiyomi.util.storage.CbzCrypto
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -38,6 +40,7 @@ internal class SecurityDialogsTest {
 
     @Before
     fun setUp() {
+        installFakeAndroidKeyStore()
         mockkObject(CbzCrypto)
         every { CbzCrypto.isPasswordSetState(any()) } returns MutableStateFlow(true)
         every { CbzCrypto.deleteKeyCbz() } just runs
@@ -55,6 +58,7 @@ internal class SecurityDialogsTest {
 
     private fun field() = compose.onNode(hasSetTextAction())
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
     fun passwordConfirmStoresIt() {
         harness.click("Set CBZ archive password")

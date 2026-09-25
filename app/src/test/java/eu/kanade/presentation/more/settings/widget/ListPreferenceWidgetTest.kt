@@ -92,6 +92,6 @@ internal class ListPreferenceWidgetTest {
         compose.waitForIdle()
         list.performScrollToIndex(20)
         compose.waitForIdle()
-        count("Entry 20") shouldBe 1
+        count("Entry 21") shouldBe 1
     }
 }

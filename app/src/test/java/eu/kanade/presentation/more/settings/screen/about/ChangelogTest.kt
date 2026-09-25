@@ -6,6 +6,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.Test
 
+private const val BULLET_PREFIX = "\u2022" + "\t\t"
+
 internal class ChangelogTest {
     private fun changelog(bulleted: Boolean, vararg lines: String) = Changelog(
         bulletedList = bulleted,
@@ -26,7 +28,7 @@ internal class ChangelogTest {
     @Test
     fun bulletedListPrefixes() {
         val line = changelog(bulleted = true, "a]b[i[]").toDisplayChangelog().single().changelog.single()
-        line.text shouldBe "\u2022\t\ta]bi["
+        line.text shouldBe BULLET_PREFIX + "a]bi["
     }
 
     @Test

@@ -20,7 +20,7 @@ internal class TriStateListDialogTest {
     val compose = createComposeRule()
 
     private var result: Pair<List<String>, List<String>>? = null
-    private var dismissed = false
+    private var isDismissed = false
 
     private fun show(items: List<String>, message: String?) {
         compose.setContent {
@@ -31,7 +31,7 @@ internal class TriStateListDialogTest {
                     items = items,
                     initialChecked = listOf("a"),
                     initialInversed = listOf("b"),
-                    onDismissRequest = { dismissed = true },
+                    onDismissRequest = { isDismissed = true },
                     onValueChanged = { included, excluded -> result = included to excluded },
                     itemLabel = { it.uppercase() },
                 )
@@ -61,7 +61,7 @@ internal class TriStateListDialogTest {
     fun cancelDismisses() {
         show(items = listOf("a"), message = null)
         compose.onNodeWithText("Cancel").performClick()
-        dismissed shouldBe true
+        isDismissed shouldBe true
     }
 
     @Test

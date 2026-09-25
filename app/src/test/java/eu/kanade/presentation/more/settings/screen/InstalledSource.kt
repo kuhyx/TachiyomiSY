@@ -1,6 +1,7 @@
 package eu.kanade.presentation.more.settings.screen
 
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.track.BaseTracker
 import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.StubSource
 import eu.kanade.tachiyomi.data.track.Tracker
@@ -27,8 +28,8 @@ internal inline fun <reified T : Tracker> stubTracker(trackerName: String, logge
 }
 
 /** An enhanced tracker accepting [accepted] source classes. */
-internal fun enhancedTracker(trackerName: String, accepted: List<String>): Tracker {
-    val tracker = mockk<Tracker>(moreInterfaces = arrayOf(EnhancedTracker::class))
+internal fun enhancedTracker(trackerName: String, accepted: List<String>): BaseTracker {
+    val tracker = mockk<BaseTracker>(moreInterfaces = arrayOf(EnhancedTracker::class))
     val enhanced = tracker as EnhancedTracker
     every { tracker.name } returns trackerName
     every { tracker.getLogo() } returns R.drawable.ic_tachi
@@ -41,7 +42,7 @@ internal fun enhancedTracker(trackerName: String, accepted: List<String>): Track
     return tracker
 }
 
-internal fun stubTrackerManager(enhanced: List<Tracker>): TrackerManager = mockk {
+internal fun stubTrackerManager(enhanced: List<BaseTracker>): TrackerManager = mockk {
     every { mangaBaka } returns stubTracker("MangaBaka")
     every { myAnimeList } returns stubTracker("MyAnimeList")
     every { aniList } returns stubTracker("AniList")
@@ -50,5 +51,5 @@ internal fun stubTrackerManager(enhanced: List<Tracker>): TrackerManager = mockk
     every { shikimori } returns stubTracker("Shikimori")
     every { bangumi } returns stubTracker("Bangumi")
     every { hikka } returns stubTracker("Hikka")
-    every { trackers } returns enhanced + listOf(stubTracker<Tracker>("Plain"))
+    every { trackers } returns enhanced + listOf(stubTracker<BaseTracker>("Plain"))
 }

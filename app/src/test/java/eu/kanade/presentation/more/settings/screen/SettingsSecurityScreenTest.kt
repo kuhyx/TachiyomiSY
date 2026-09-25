@@ -3,6 +3,7 @@ package eu.kanade.presentation.more.settings.screen
 import android.content.Context
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.fragment.app.FragmentActivity
+import eu.kanade.domain.installFakeAndroidKeyStore
 import eu.kanade.tachiyomi.ui.category.biometric.BiometricTimesScreen
 import eu.kanade.tachiyomi.util.storage.CbzCrypto
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
@@ -34,6 +35,7 @@ internal class SettingsSecurityScreenTest {
 
     @Before
     fun setUp() {
+        installFakeAndroidKeyStore()
         mockkObject(CbzCrypto)
         every { CbzCrypto.isPasswordSetState(any()) } returns passwordSet
         every { CbzCrypto.deleteKeyCbz() } just runs
