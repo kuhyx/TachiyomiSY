@@ -65,6 +65,20 @@ internal class ClearBrokenPagePreviewCacheMigrationTest {
         entry.exists() shouldBe false
     }
 
+    // A non-empty directory cannot be deleted, whoever runs the test.
+    @Test
+    fun keepsWhatCannotBeDeleted() = runTest {
+        val dir = File(cacheDir, PagePreviewCache.PARAMETER_CACHE_DIRECTORY).apply { mkdirs() }
+        val stuck = File(dir, "stuck").apply { mkdirs() }
+        File(stuck, "inner").writeText("x")
+        startMigrationKoin {
+            single { app() }
+            single { cache }
+        }
+        migration(migrationContext()) shouldBe true
+        stuck.exists() shouldBe true
+    }
+
     private fun app(): Application {
         val app = mockk<Application>()
         every { app.cacheDir } returns cacheDir
