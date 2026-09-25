@@ -49,7 +49,14 @@ internal class DownloadPageLoaderTest {
     fun setUp() {
         every { app.contentResolver } returns resolver
         every { app.externalCacheDir } returns null
-        startKoin { modules(module { single { app } single { ReaderPreferences(MapPreferenceStore()) } }) }
+        startKoin {
+            modules(
+                module {
+                    single { app }
+                    single { ReaderPreferences(MapPreferenceStore()) }
+                },
+            )
+        }
     }
 
     @After
@@ -71,53 +78,59 @@ internal class DownloadPageLoaderTest {
     }
 
     @Test
-    fun directoryPagesOpenUris() = runBlocking {
-        val uri = Uri.parse("file:///p0")
-        every { resolver.openInputStream(uri) } answers { byteArrayOf(5).inputStream() }
-        every { resolver.openInputStream(Uri.EMPTY) } answers { byteArrayOf(6).inputStream() }
-        every { downloadManager.buildPageList(source, manga, any()) } returns listOf(
-            Page(0, "/0", "https://0", uri),
-            Page(1, "/1", "https://1"),
-        )
-        chapterDir(null)
-        val loader = loader()
-        loader.isLocal shouldBe true
-        val pages = loader.getPages()
-        pages.map { it.stream!!().read() } shouldBe listOf(5, 6)
-        pages[1].imageUrl shouldBe "https://1"
-        pages.forEach { it.status shouldBe Page.State.Ready }
-        loader.loadPage(pages[0])
-        loader.recycle()
-        loader.isRecycled shouldBe true
-        loader.isLocal = false
-        loader.isLocal shouldBe false
+    fun directoryPagesOpenUris() {
+        runBlocking {
+            val uri = Uri.parse("file:///p0")
+            every { resolver.openInputStream(uri) } answers { byteArrayOf(5).inputStream() }
+            every { resolver.openInputStream(Uri.EMPTY) } answers { byteArrayOf(6).inputStream() }
+            every { downloadManager.buildPageList(source, manga, any()) } returns listOf(
+                Page(0, "/0", "https://0", uri),
+                Page(1, "/1", "https://1"),
+            )
+            chapterDir(null)
+            val loader = loader()
+            loader.isLocal shouldBe true
+            val pages = loader.getPages()
+            pages.map { it.stream!!().read() } shouldBe listOf(5, 6)
+            pages[1].imageUrl shouldBe "https://1"
+            pages.forEach { it.status shouldBe Page.State.Ready }
+            loader.loadPage(pages[0])
+            loader.recycle()
+            loader.isRecycled shouldBe true
+            loader.isLocal = false
+            loader.isLocal shouldBe false
+        }
     }
 
     @Test
-    fun folderIsNotAnArchive() = runBlocking {
-        val dir = mockk<UniFile>()
-        every { dir.isFile } returns false
-        chapterDir(dir)
-        every { downloadManager.buildPageList(source, manga, any()) } returns emptyList()
-        loader().getPages() shouldBe emptyList()
+    fun folderIsNotAnArchive() {
+        runBlocking {
+            val dir = mockk<UniFile>()
+            every { dir.isFile } returns false
+            chapterDir(dir)
+            every { downloadManager.buildPageList(source, manga, any()) } returns emptyList()
+            loader().getPages() shouldBe emptyList()
+        }
     }
 
     @Test
-    fun archiveDelegates() = runBlocking {
-        val file = mockk<UniFile>()
-        every { file.isFile } returns true
-        chapterDir(file)
-        val reader = mockk<ArchiveReader>(relaxed = true)
-        mockkStatic("mihon.core.common.archive.ArchiveReaderKt")
-        every { file.archiveReader(app) } returns reader
-        mockkConstructor(ArchivePageLoader::class)
-        coEvery { anyConstructed<ArchivePageLoader>().getPages() } returns emptyList()
-        val loader = loader()
-        loader.getPages() shouldBe emptyList()
-        val page = ReaderPage(0)
-        loader.loadPage(page)
-        coVerify { anyConstructed<ArchivePageLoader>().loadPage(page) }
-        loader.recycle()
-        verify { reader.close() }
+    fun archiveDelegates() {
+        runBlocking {
+            val file = mockk<UniFile>()
+            every { file.isFile } returns true
+            chapterDir(file)
+            val reader = mockk<ArchiveReader>(relaxed = true)
+            mockkStatic("mihon.core.common.archive.ArchiveReaderKt")
+            every { file.archiveReader(app) } returns reader
+            mockkConstructor(ArchivePageLoader::class)
+            coEvery { anyConstructed<ArchivePageLoader>().getPages() } returns emptyList()
+            val loader = loader()
+            loader.getPages() shouldBe emptyList()
+            val page = ReaderPage(0)
+            loader.loadPage(page)
+            coVerify { anyConstructed<ArchivePageLoader>().loadPage(page) }
+            loader.recycle()
+            verify { reader.close() }
+        }
     }
 }
