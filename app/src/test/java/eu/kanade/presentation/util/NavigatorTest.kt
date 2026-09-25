@@ -8,13 +8,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.ScreenModelStore
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -66,13 +68,32 @@ internal class NavigatorTest {
         Page("a").key shouldNotBe Page("a").key
     }
 
+    private class ModelScreen(private val onScope: (CoroutineScope) -> Unit) : Screen() {
+        @Composable
+        override fun Content() {
+            val model = rememberScreenModel { object : ScreenModel {} }
+            val scope = model.ioCoroutineScope
+            model.ioCoroutineScope shouldBe scope
+            onScope(scope)
+            Text("model")
+        }
+    }
+
     @Test
-    fun ioScopeIsCachedPerModel() {
-        val model = object : ScreenModel {}
-        val scope = model.ioCoroutineScope
-        model.ioCoroutineScope shouldBe scope
-        ScreenModelStore.remove(model)
-        scope.isActive shouldBe false
+    fun ioScopeEndsWithTheScreen() {
+        var scope: CoroutineScope? = null
+        var navigator: Navigator? = null
+        compose.setContent {
+            Navigator(ModelScreen { scope = it }) {
+                navigator = it
+                CurrentScreen()
+            }
+        }
+        compose.onNodeWithText("model").assertExists()
+        scope?.isActive shouldBe true
+        compose.runOnIdle { navigator?.replaceAll(Page("other")) }
+        compose.waitForIdle()
+        scope?.isActive shouldBe false
     }
 
     @Test

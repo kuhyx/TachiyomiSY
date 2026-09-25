@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.compose.ui.platform.ViewRootForTest
 import androidx.compose.ui.test.isRoot
-import androidx.compose.ui.test.junit4.v2.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 
 /** Every [WebView] under [root], depth first. */
 internal fun webViewsUnder(root: View): List<WebView> = when (root) {

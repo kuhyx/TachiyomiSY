@@ -3,13 +3,14 @@ package eu.kanade.presentation.library
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.test.junit4.v2.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import eu.kanade.core.preference.PreferenceMutableState
 import eu.kanade.presentation.library.components.LibraryContent
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import eu.kanade.domain.FlowPreferenceStore
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
+import tachiyomi.domain.library.model.LibraryManga
 
 /** Composes [LibraryContent] over [items] per category id, recording callbacks in [events]. */
 internal class LibraryContentHarness(private val compose: ComposeContentTestRule) {
@@ -26,6 +27,7 @@ internal class LibraryContentHarness(private val compose: ComposeContentTestRule
             deserializer = { LibraryDisplayMode.deserialize(it) },
         )
         val columnsPref = store.getInt("columns", options.columns)
+        val continueReading: (LibraryManga) -> Unit = { events += "continue ${it.id}" }
         compose.setContent {
             val scope = rememberCoroutineScope()
             MaterialTheme {
@@ -39,7 +41,7 @@ internal class LibraryContentHarness(private val compose: ComposeContentTestRule
                     showPageTabs = options.showPageTabs,
                     onChangeCurrentPage = { events += "page $it" },
                     onClickManga = { events += "open $it" },
-                    onContinueReadingClicked = { events += "continue ${it.id}" }.takeIf { options.continueReading },
+                    onContinueReadingClicked = continueReading.takeIf { options.continueReading },
                     onToggleSelection = { category, manga -> events += "toggle ${category.id} ${manga.id}" },
                     onToggleRangeSelection = { category, manga -> events += "range ${category.id} ${manga.id}" },
                     onRefresh = {
