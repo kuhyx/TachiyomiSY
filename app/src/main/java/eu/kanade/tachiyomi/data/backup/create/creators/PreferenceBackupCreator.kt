@@ -40,7 +40,6 @@ internal class PreferenceBackupCreator(
             .filter { it.prefs.isNotEmpty() }
     }
 
-    @Suppress("UNCHECKED_CAST")
     private fun Map<String, *>.toBackupPreferences(): List<BackupPreference> {
         return this
             .filterKeys { !Preference.isAppState(it) }
@@ -51,9 +50,10 @@ internal class PreferenceBackupCreator(
                     is Float -> BackupPreference(key, FloatPreferenceValue(value))
                     is String -> BackupPreference(key, StringPreferenceValue(value))
                     is Boolean -> BackupPreference(key, BooleanPreferenceValue(value))
-                    is Set<*> -> (value as? Set<String>)?.let {
-                        BackupPreference(key, StringSetPreferenceValue(it))
-                    }
+                    is Set<*> -> BackupPreference(
+                        key,
+                        StringSetPreferenceValue(value.filterIsInstance<String>().toSet()),
+                    )
                     else -> null
                 }
             }

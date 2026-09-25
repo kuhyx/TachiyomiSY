@@ -125,7 +125,7 @@ internal class BackupCreator(
         file.openOutputStream()
             .also {
                 // Force overwrite old file
-                (it as? FileOutputStream)?.channel?.truncate(0)
+                if (it is FileOutputStream) it.channel.truncate(0)
             }
             .sink()
             .gzip()
