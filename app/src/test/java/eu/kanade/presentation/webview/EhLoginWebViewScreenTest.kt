@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.webkit.WebView
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -72,14 +74,15 @@ internal class EhLoginWebViewScreenTest {
             "Cancel",
         ).forEach {
             compose.onNodeWithText("Advanced").performClick()
-            compose.onAllNodesWithTextInDialog(it)
+            clickLast(it)
         }
         events shouldContainExactly listOf("recheck", "alternate", "skip", "igneous")
     }
 
-    private fun androidx.compose.ui.test.junit4.v2.ComposeContentTestRule.onAllNodesWithTextInDialog(text: String) {
-        val nodes = onAllNodes(androidx.compose.ui.test.hasText(text) and androidx.compose.ui.test.hasClickAction())
+    /** The dialog's button is the last node with [text] (the screen behind has its own "Cancel"). */
+    private fun clickLast(text: String) {
+        val nodes = compose.onAllNodes(hasText(text) and hasClickAction())
         nodes[nodes.fetchSemanticsNodes().size - 1].performClick()
-        waitForIdle()
+        compose.waitForIdle()
     }
 }
