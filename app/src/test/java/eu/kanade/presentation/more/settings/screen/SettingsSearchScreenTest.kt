@@ -12,8 +12,8 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextReplacement
 import cafe.adriel.voyager.navigator.LocalNavigator
 import io.kotest.matchers.shouldBe
 import io.mockk.every

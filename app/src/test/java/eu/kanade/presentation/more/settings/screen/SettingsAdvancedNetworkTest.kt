@@ -3,13 +3,13 @@ package eu.kanade.presentation.more.settings.screen
 import android.content.Context
 import android.net.Uri
 import android.webkit.WebView
-import androidx.test.core.app.ApplicationProvider
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import eu.kanade.tachiyomi.util.system.setDefaultSettings
+import androidx.test.core.app.ApplicationProvider
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.library.startNow
 import eu.kanade.tachiyomi.util.system.GLUtil
+import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
