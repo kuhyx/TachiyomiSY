@@ -1,10 +1,10 @@
 package eu.kanade.presentation.updates
 
-import androidx.activity.OnBackPressedDispatcher
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.test.junit4.v2.ComposeContentTestRule
+import eu.kanade.presentation.util.ProvideBack
+import eu.kanade.presentation.util.TestBackOwner
 import eu.kanade.tachiyomi.ui.updates.UpdatesItem
 import eu.kanade.tachiyomi.ui.updates.UpdatesScreenModel
 
@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.ui.updates.UpdatesScreenModel
 internal class UpdatesScreenHarness(private val compose: ComposeContentTestRule) {
     val events: MutableList<String> = mutableListOf()
     var updateStarts: Boolean = true
-    var dispatcher: OnBackPressedDispatcher? = null
+    val back: TestBackOwner = TestBackOwner()
 
     private fun UpdatesItem.id(): Long = update.mangaId
 
@@ -24,7 +24,7 @@ internal class UpdatesScreenHarness(private val compose: ComposeContentTestRule)
         hasActiveFilters: Boolean = false,
     ) {
         compose.setContent {
-            dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+            ProvideBack(back) {
             MaterialTheme {
                 UpdateScreen(
                     state = state,
@@ -48,6 +48,7 @@ internal class UpdatesScreenHarness(private val compose: ComposeContentTestRule)
                     onFilterClicked = { events += "filter" },
                     hasActiveFilters = hasActiveFilters,
                 )
+            }
             }
         }
         compose.waitForIdle()
