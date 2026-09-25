@@ -112,8 +112,8 @@ internal fun webViewClient(
         // Ignore intents urls
         if (url.startsWith("intent://")) return true
 
-        // Only open valid web urls
-        if ((url.startsWith("http") || url.startsWith("https")) && url != view?.url) {
+        // Only open valid web urls ("http" also covers "https")
+        if (url.startsWith("http") && url != view?.url) {
             view?.loadUrl(url, headers)
             return true
         }
