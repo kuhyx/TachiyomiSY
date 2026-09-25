@@ -63,8 +63,7 @@ internal class MangaScreenModelTest {
     @Test
     fun loadingModelHasNoEntry() {
         harness.mangaFlow.value = manga() to listOf(chapter(1L))
-        val model = harness.model()
-        model.updateState { MangaScreenModel.State.Loading }
+        val model = harness.loading()
         model.manga.shouldBeNull()
         model.source.shouldBeNull()
         model.isFavorited shouldBe false

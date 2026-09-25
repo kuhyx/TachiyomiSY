@@ -24,6 +24,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -172,6 +173,12 @@ internal class MangaHarness {
             isFromSource = fromSource,
             smartSearched = smartSearched,
         )
+
+    /** A model whose initial load never finishes, so it stays [MangaScreenModel.State.Loading]. */
+    fun loading(): MangaScreenModel {
+        coEvery { getMangaAndChapters.awaitManga(any()) } coAnswers { awaitCancellation() }
+        return model()
+    }
 
     /** A model whose initial load has finished. */
     fun loaded(mangaId: Long = 1L, smartSearched: Boolean = false): MangaScreenModel =
