@@ -43,10 +43,9 @@ internal object MigrateUtils {
                         preferenceStore.getBoolean(key).delete()
                     }
                     is Set<*> -> {
-                        (value as? Set<String>)?.let {
-                            preferenceStore.getStringSet(newKey(key)).set(value)
-                            preferenceStore.getStringSet(key).delete()
-                        }
+                        // Erasure makes a `as? Set<String>` cast unfailable; keep only the strings.
+                        preferenceStore.getStringSet(newKey(key)).set(value.filterIsInstance<String>().toSet())
+                        preferenceStore.getStringSet(key).delete()
                     }
                 }
             }

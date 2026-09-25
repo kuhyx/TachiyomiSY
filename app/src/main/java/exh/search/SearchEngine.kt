@@ -73,7 +73,8 @@ internal class SearchEngine {
                 whereParams += component.tag!!.rawTextEscapedForLike()
             } else {
                 val bucket = if (component.excluded) exclude else include
-                subQueryFor(component)?.let(bucket::add)
+                // Non-null for every component `queryToSql` can produce; see subQueryFor.
+                bucket.add(subQueryFor(component)!!)
             }
         }
 

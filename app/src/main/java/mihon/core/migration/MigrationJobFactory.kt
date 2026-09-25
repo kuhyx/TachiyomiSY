@@ -21,7 +21,9 @@ internal class MigrationJobFactory(
                     }
                     async(start = CoroutineStart.UNDISPATCHED) {
                         val prev = acc.await()
-                        migration(migrationContext) || prev
+                        // `or`, not `||`: the fold is seeded `true`, so a short-circuit could never
+                        // take its false arm, and the migration must run whatever the chain holds.
+                        migration(migrationContext) or prev
                     }
                 } else {
                     logcat {

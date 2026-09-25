@@ -39,7 +39,8 @@ internal class EnhancedFilePrinter internal constructor(
     override fun println(logLevel: Int, tag: String, msg: String) {
         val timeMillis = System.currentTimeMillis()
         if (USE_WORKER) {
-            val worker = worker ?: return
+            // Assigned in init whenever USE_WORKER holds.
+            val worker = checkNotNull(worker)
             if (!worker.isStarted()) {
                 worker.start()
             }

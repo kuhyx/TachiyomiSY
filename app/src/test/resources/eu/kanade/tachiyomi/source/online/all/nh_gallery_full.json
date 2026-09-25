@@ -1,0 +1,23 @@
+{
+  "id": 177013,
+  "media_id": "987286",
+  "title": {"english": "English Title", "japanese": "日本語", "pretty": "Pretty"},
+  "images": {
+    "pages": [{"t": "j", "w": 1280, "h": 1808}],
+    "cover": {"t": "j", "w": 350, "h": 500},
+    "thumbnail": {"t": "j", "w": 250, "h": 353}
+  },
+  "cover": {"path": "galleries/987286/cover.jpg", "width": 350, "height": 500},
+  "thumbnail": {"path": "galleries/987286/thumb.jpg"},
+  "pages": [{"path": "galleries/987286/1.jpg", "thumbnail": "galleries/987286/1t.jpg"}, {"path": "x"}],
+  "scanlator": " Scan ",
+  "upload_date": 1471743100,
+  "tags": [
+    {"id": 1, "type": "tag", "name": "solo", "url": "/tag/solo/", "count": 5},
+    {"id": 2, "type": "category", "name": "doujinshi"},
+    {"id": 3, "type": null, "name": "broken"},
+    {"id": 4, "type": "artist", "name": null}
+  ],
+  "num_pages": 2,
+  "num_favorites": 42
+}

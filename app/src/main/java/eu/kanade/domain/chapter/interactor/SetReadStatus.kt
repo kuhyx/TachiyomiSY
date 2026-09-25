@@ -70,22 +70,12 @@ internal class SetReadStatus(
     }
 
     suspend fun await(mangaId: Long, read: Boolean): Result = withNonCancellableContext {
-        await(
-            read = read,
-            chapters = chapterRepository
-                .getChapterByMangaId(mangaId)
-                .toTypedArray(),
-        )
+        markRead(read, chapterRepository.getChapterByMangaId(mangaId))
     }
 
     // SY -->
     private suspend fun awaitMerged(mangaId: Long, read: Boolean) = withNonCancellableContext {
-        await(
-            read = read,
-            chapters = getMergedChaptersByMangaId
-                .await(mangaId, dedupe = false)
-                .toTypedArray(),
-        )
+        markRead(read, getMergedChaptersByMangaId.await(mangaId, dedupe = false))
     }
 
     suspend fun await(manga: Manga, read: Boolean) = if (manga.source == MERGED_SOURCE_ID) {

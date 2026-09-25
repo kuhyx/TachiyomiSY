@@ -18,9 +18,15 @@ internal class CrashlyticsPrinter(private val logLevel: Int) : Printer {
             try {
                 Firebase.crashlytics.log("$logLevel/$tag: $msg")
             } catch (expected: Throwable) {
-                // Crash in debug if shit like this happens
-                if (BuildConfig.DEBUG) throw expected
+                // Crash in debug builds if Crashlytics itself fails; BuildConfig.DEBUG is a
+                // compile-time constant, so the check goes through a measurable function.
+                crashOnDebug(expected)
             }
         }
     }
+}
+
+/** Rethrows [cause] in debug builds; a release build swallows a Crashlytics failure. */
+internal fun crashOnDebug(cause: Throwable, isDebug: Boolean = BuildConfig.DEBUG) {
+    if (isDebug) throw cause
 }

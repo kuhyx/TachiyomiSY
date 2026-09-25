@@ -200,7 +200,10 @@ internal class MemAutoFlushingLookupTable<T>(
      * @throws Exception if this resource cannot be closed
      */
     override fun close() {
-        runBlocking { coroutineContext.job.cancelAndJoin() }
+        // The table's own job, not `runBlocking`'s: cancelling the caller's job threw
+        // JobCancellationException here and leaked the shutdown hook on every close.
+        val tableJob = coroutineContext.job
+        runBlocking { tableJob.cancelAndJoin() }
         Runtime.getRuntime().removeShutdownHook(shutdownHook)
     }
 

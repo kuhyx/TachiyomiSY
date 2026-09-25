@@ -10,4 +10,4 @@ package mihon.core.common
  */
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.FUNCTION)
-internal annotation class InlinedOnly
+public annotation class InlinedOnly

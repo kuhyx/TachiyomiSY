@@ -80,7 +80,8 @@ internal class EHentaiUpdateHelper(context: Context) {
         mergeHistoryInto(accepted, chainsAsChapters, chains.flatMap { it.history })
 
         // Update favorites entry database
-        getFavoriteEntryAlternative(accepted, toDiscard)?.let { insertFavoriteEntryAlternative.await(it) }
+        // Non-null: toDiscard is filtered on manga.favorite, so it always has a favourites entry.
+        insertFavoriteEntryAlternative.await(getFavoriteEntryAlternative(accepted, toDiscard)!!)
 
         // Copy categories from all chains to accepted manga
         val rootsToMutate = toDiscard + newAccepted

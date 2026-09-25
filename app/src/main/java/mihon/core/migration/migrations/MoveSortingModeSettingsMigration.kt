@@ -11,6 +11,13 @@ import tachiyomi.data.awaitList
 import tachiyomi.data.category.CategoryMapper
 import tachiyomi.domain.library.service.LibraryPreferences
 
+private val RENAMED_SORTING_MODES = mapOf(
+    "LAST_CHECKED" to "LAST_MANGA_UPDATE",
+    "UNREAD" to "UNREAD_COUNT",
+    "DATE_FETCHED" to "CHAPTER_FETCH_DATE",
+    "DRAG_AND_DROP" to "ALPHABETICAL",
+)
+
 private const val VERSION = 38f
 
 // Bits 2-5 of a category's flags held its sort mode; 0b1000 in that field meant "date added".
@@ -31,16 +38,10 @@ internal class MoveSortingModeSettingsMigration : Migration {
 
     private suspend fun migrate(context: Application, libraryPreferences: LibraryPreferences, database: Database) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        // Handle renamed enum values
-        val newSortingMode = when (
-            val oldSortingMode = prefs.getString(libraryPreferences.sortingMode.key(), "ALPHABETICAL")
-        ) {
-            "LAST_CHECKED" -> "LAST_MANGA_UPDATE"
-            "UNREAD" -> "UNREAD_COUNT"
-            "DATE_FETCHED" -> "CHAPTER_FETCH_DATE"
-            "DRAG_AND_DROP" -> "ALPHABETICAL"
-            else -> oldSortingMode
-        }
+        // Handle renamed enum values. A lookup, not a `when`: a string `when` compiles to a
+        // hashCode switch whose collision fall-throughs are unreachable by construction.
+        val oldSortingMode = prefs.getString(libraryPreferences.sortingMode.key(), "ALPHABETICAL")
+        val newSortingMode = RENAMED_SORTING_MODES[oldSortingMode] ?: oldSortingMode
         prefs.edit {
             putString(libraryPreferences.sortingMode.key(), newSortingMode)
         }

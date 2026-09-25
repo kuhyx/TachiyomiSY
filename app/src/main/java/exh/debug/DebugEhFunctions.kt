@@ -67,11 +67,9 @@ internal object DebugEhFunctions {
 
     fun getEHMangaListWithAgedFlagInfo(): String {
         return runBlocking {
-            getExhFavoriteMangaWithMetadata.await().map { manga ->
+            getExhFavoriteMangaWithMetadata.await().mapNotNull { manga ->
                 val meta = getFlatMetadataById.await(manga.id)?.raise(EHentaiSearchMetadata::class)
-                if (meta != null) {
-                    "Aged: ${meta.aged}\t Title: ${manga.title}"
-                }
+                meta?.let { "Aged: ${it.aged}\t Title: ${manga.title}" }
             }
         }.joinToString(",\n")
     }

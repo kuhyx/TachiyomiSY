@@ -52,10 +52,9 @@ internal fun SyncChaptersWithSource.carryOverRemovedState(
                 read = chapter.chapterNumber in deletedReadChapterNumbers,
                 bookmark = chapter.chapterNumber in deletedBookmarkedChapterNumbers,
             )
-            // Try to to use the fetch date of the original entry to not pollute 'Updates' tab
-            deletedChapterNumberDateFetchMap[chapter.chapterNumber]?.let {
-                chapter = chapter.copy(dateFetch = it)
-            }
+            // Use the fetch date of the original entry to not pollute the 'Updates' tab. The map is
+            // keyed by the same removed-chapter numbers that select this branch, so the key is present.
+            chapter = chapter.copy(dateFetch = deletedChapterNumberDateFetchMap.getValue(chapter.chapterNumber))
             changedOrDuplicateReadUrls.add(chapter.url)
             chapter
         }

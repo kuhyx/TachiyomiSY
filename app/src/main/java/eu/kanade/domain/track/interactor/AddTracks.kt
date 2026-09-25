@@ -36,8 +36,8 @@ internal class AddTracks(
             val hasReadChapters = allChapters.any { it.read }
             tracker.bind(item, hasReadChapters)
 
-            item.toDomainTrack(idRequired = false)
-                ?.let { bindTrack(tracker, it, mangaId, allChapters, hasReadChapters) }
+            // Never null: an absent id is substituted when it is not required.
+            bindTrack(tracker, item.toDomainTrack(idRequired = false)!!, mangaId, allChapters, hasReadChapters)
         }
     }
 

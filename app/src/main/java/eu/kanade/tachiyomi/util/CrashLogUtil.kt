@@ -15,13 +15,19 @@ import tachiyomi.core.common.util.lang.withNonCancellableContext
 import tachiyomi.core.common.util.lang.withUIContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
 import java.time.OffsetDateTime
 import java.time.ZoneId
+
+/** The `logcat` invocation that appends the error log to [file]; overridden in tests. */
+internal fun logcatDumpCommand(file: File): Array<String> =
+    arrayOf("logcat", "*:E", "-d", "-v", "year", "-v", "zone", "-f", file.absolutePath)
 
 internal class CrashLogUtil(
     private val context: Context,
     private val extensionManager: ExtensionManager = Injekt.get(),
     private val preferences: BasePreferences = Injekt.get(),
+    private val logcatCommand: (File) -> Array<String> = ::logcatDumpCommand,
 ) {
 
     suspend fun dumpLogs(exception: Throwable? = null) = withNonCancellableContext {
@@ -32,7 +38,7 @@ internal class CrashLogUtil(
             getExtensionsInfo()?.let { file.appendText("$it\n\n") }
             exception?.let { file.appendText("$it\n\n") }
 
-            Runtime.getRuntime().exec("logcat *:E -d -v year -v zone -f ${file.absolutePath}").waitFor()
+            Runtime.getRuntime().exec(logcatCommand(file)).waitFor()
 
             val uri = file.getUriCompat(context)
             context.startActivity(uri.toShareIntent(context, "text/plain"))

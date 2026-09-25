@@ -33,10 +33,7 @@ internal class UpdateManga(
         mangaRepository.update(MangaUpdate(id = mangaId, coverLastModified = Instant.now().toEpochMilli()))
 
     suspend fun awaitUpdateFavorite(mangaId: Long, favorite: Boolean): Boolean {
-        val dateAdded = when (favorite) {
-            true -> Instant.now().toEpochMilli()
-            false -> 0
-        }
+        val dateAdded = if (favorite) Instant.now().toEpochMilli() else 0
         return mangaRepository.update(
             MangaUpdate(id = mangaId, favorite = favorite, dateAdded = dateAdded),
         )

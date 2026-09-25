@@ -49,8 +49,10 @@ internal class LogWorker(private val printer: EnhancedFilePrinter) : Runnable {
 
     override fun run() {
         try {
-            var log: LogItem
-            while (logs.take().also { log = it } != null) {
+            // take() blocks until an item is available and never returns null: the loop ends
+            // when the thread is interrupted.
+            while (true) {
+                val log = logs.take()
                 printer.doPrintln(log.timeMillis, log.level, log.tag, log.msg)
             }
         } catch (interrupted: InterruptedException) {

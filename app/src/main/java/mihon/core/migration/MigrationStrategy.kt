@@ -22,7 +22,10 @@ internal class DefaultMigrationStrategy(
             val chain = migrationJobFactory.create(migrations)
 
             launch {
-                if (chain.await()) migrationCompletedListener()
+                // The chain always completes `true` (see MigrationJobFactory): the new version is
+                // recorded even when every migration no-ops, or they would be retried every launch.
+                chain.await()
+                migrationCompletedListener()
             }.start()
 
             chain

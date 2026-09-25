@@ -27,12 +27,8 @@ internal class ClearBrokenPagePreviewCacheMigration : Migration {
         File(context.cacheDir, PagePreviewCache.PARAMETER_CACHE_DIRECTORY).listFiles()
             ?.filterNot { it.name == "journal" || it.name.startsWith("journal.") }
             ?.forEach {
-                try {
-                    it.delete()
-                } catch (expected: Exception) {
-                    // Logged whatever the cause; the caller carries on.
-                    logcat(LogPriority.WARN, expected) { "Failed to remove file from cache" }
-                }
+                // delete() reports failure by returning false rather than throwing.
+                if (!it.delete()) logcat(LogPriority.WARN) { "Failed to remove ${it.name} from the cache" }
             }
     }
 }
