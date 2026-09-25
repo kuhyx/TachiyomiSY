@@ -16,7 +16,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -62,21 +64,21 @@ internal class HistoryScreenModel(
     val events: Flow<Event> = _events.receiveAsFlow()
 
     init {
-        screenModelScope.launch {
-            state.map { it.searchQuery }
-                .distinctUntilChanged()
-                .flatMapLatest { query ->
-                    getHistory.subscribe(query ?: "")
-                        .distinctUntilChanged()
-                        .catch { error ->
-                            logcat(LogPriority.ERROR, error)
-                            _events.send(Event.InternalError)
-                        }
-                        .map { it.toHistoryUiModels() }
-                        .flowOn(Dispatchers.IO)
-                }
-                .collect { newList -> mutableState.update { it.copy(list = newList) } }
-        }
+        // launchIn rather than launch { collect }: the state flow never completes, so nothing follows the collect.
+        state.map { it.searchQuery }
+            .distinctUntilChanged()
+            .flatMapLatest { query ->
+                getHistory.subscribe(query ?: "")
+                    .distinctUntilChanged()
+                    .catch { error ->
+                        logcat(LogPriority.ERROR, error)
+                        _events.send(Event.InternalError)
+                    }
+                    .map { it.toHistoryUiModels() }
+                    .flowOn(Dispatchers.IO)
+            }
+            .onEach { newList -> mutableState.update { it.copy(list = newList) } }
+            .launchIn(screenModelScope)
     }
 
     /** Emits [event] to the tab; the extension files reach the private channel through it. */
