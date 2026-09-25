@@ -106,7 +106,8 @@ internal fun SetIntervalDialog(
 
 @Composable
 private fun ExpectedUpdateText(nextUpdateDays: Int?, interval: Int) {
-    if (nextUpdateDays != null && nextUpdateDays >= 0 && interval >= 0) {
+    // nextUpdateDays is already coerced to >= 0.
+    if (nextUpdateDays != null && interval >= 0) {
         Text(
             stringResource(
                 MR.strings.manga_interval_expected_update,
