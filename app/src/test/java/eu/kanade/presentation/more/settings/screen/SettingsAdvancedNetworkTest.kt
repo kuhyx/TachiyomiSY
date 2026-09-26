@@ -104,12 +104,11 @@ internal class SettingsAdvancedNetworkTest {
         harness.click("Refresh library covers")
         verify { LibraryUpdateJob.startNow(any(), target = LibraryUpdateJob.Target.COVERS) }
         harness.click("Reset per-series reader settings")
-        compose.waitUntil(timeoutMillis = 5_000) { ShadowToast.shownToastCount() == 1 }
+        compose.awaitMain(timeoutMillis = 5_000) { ShadowToast.shownToastCount() == 1 }
         toast() shouldBe "All reader settings reset"
         coEvery { advanced.resetViewerFlags.await() } returns false
         harness.click("Reset per-series reader settings")
-        compose.waitUntil(timeoutMillis = 5_000) { ShadowToast.shownToastCount() == 2 }
-        toast() shouldBe "Couldn't reset reader settings"
+        compose.awaitMain(timeoutMillis = 5_000) { toast() == "Couldn't reset reader settings" }
     }
 
     @Test

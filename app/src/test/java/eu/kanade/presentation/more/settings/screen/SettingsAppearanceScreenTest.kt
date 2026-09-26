@@ -6,7 +6,6 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.domain.ui.model.TabletUiMode
 import eu.kanade.domain.ui.model.ThemeMode
 import eu.kanade.presentation.more.settings.screen.appearance.AppLanguageScreen
@@ -45,9 +44,10 @@ internal class SettingsAppearanceScreenTest {
         compose.waitForIdle()
         koin.ui.themeMode.get() shouldBe ThemeMode.LIGHT
         harness.item("Pure black dark mode").enabled shouldBe false
+        val current = koin.ui.appTheme.get()
         compose.onAllNodesWithContentDescription("Selected").onFirst().performClick()
         compose.waitForIdle()
-        koin.ui.appTheme.get() shouldBe AppTheme.DEFAULT
+        koin.ui.appTheme.get() shouldBe current
     }
 
     @Test

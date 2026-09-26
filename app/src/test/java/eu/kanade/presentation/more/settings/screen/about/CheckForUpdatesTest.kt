@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
+import eu.kanade.presentation.more.settings.screen.awaitMain
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.ui.more.NewUpdateScreen
 import io.kotest.matchers.shouldBe
@@ -62,7 +63,7 @@ internal class CheckForUpdatesTest {
         } else {
             gate.complete(result)
         }
-        compose.waitUntil(timeoutMillis = 10_000) { gate.isCompleted }
+        compose.awaitMain(timeoutMillis = 10_000) { gate.isCompleted }
         compose.waitForIdle()
     }
 
@@ -76,21 +77,21 @@ internal class CheckForUpdatesTest {
     @Test
     fun noUpdateToasts() {
         check(GetApplicationRelease.Result.NoNewUpdate)
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
         ShadowToast.getTextOfLatestToast().toString() shouldBe "No new updates available"
     }
 
     @Test
     fun oldOsToasts() {
         check(GetApplicationRelease.Result.OsTooOld)
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
         ShadowToast.getTextOfLatestToast().toString() shouldBe "This Android version is no longer supported"
     }
 
     @Test
     fun failureToastsMessage() {
         check(result = null)
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
         ShadowToast.getTextOfLatestToast().toString() shouldBe "offline"
     }
 }

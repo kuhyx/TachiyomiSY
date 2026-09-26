@@ -71,7 +71,7 @@ internal class SettingsSearchScreenTest {
         show(canPop = true)
         count("Search settings") shouldBe 1
         type("Pure black")
-        compose.waitUntil(timeoutMillis = 10_000) { count("Pure black dark mode") == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { count("Pure black dark mode") == 1 }
         compose.onNodeWithText("Pure black dark mode").performClick()
         SearchableSettings.highlightKey shouldBe "Pure black dark mode"
         verify { harness.navigator.replace(SettingsAppearanceScreen) }
@@ -81,7 +81,7 @@ internal class SettingsSearchScreenTest {
     fun noResultsAndClear() {
         show(canPop = false)
         type("zzzzqqq")
-        compose.waitUntil(timeoutMillis = 10_000) { count("No results found") == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { count("No results found") == 1 }
         compose.onNode(hasSetTextAction()).performImeAction()
         type("")
         count("Search settings") shouldBe 1

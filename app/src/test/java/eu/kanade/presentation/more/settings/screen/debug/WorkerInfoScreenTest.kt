@@ -13,6 +13,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.domain.ui.UiPreferences
+import eu.kanade.presentation.more.settings.screen.awaitMain
 import eu.kanade.tachiyomi.util.system.workManager
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
@@ -69,7 +70,7 @@ internal class WorkerInfoScreenTest {
     @Test
     fun listsWorkAndCopies() {
         compose.setContent { MaterialTheme { Navigator(WorkerInfoScreen()) } }
-        compose.waitUntil(timeoutMillis = 10_000) {
+        compose.awaitMain(timeoutMillis = 10_000) {
             compose.onAllNodes(hasText("Attempt #3", substring = true))
                 .fetchSemanticsNodes()
                 .isNotEmpty()

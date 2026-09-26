@@ -62,7 +62,7 @@ internal class SettingsEhSyncTest {
         coEvery { eh.deleteFavorites.await() } just runs
         harness.click("Force sync state reset")
         tap("OK")
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
         ShadowToast.getTextOfLatestToast().toString() shouldBe "Sync state reset"
     }
 

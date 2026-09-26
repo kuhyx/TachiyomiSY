@@ -58,18 +58,26 @@ internal class SecurityDialogsTest {
 
     private fun field() = compose.onNode(hasSetTextAction())
 
-    @OptIn(ExperimentalTestApi::class)
     @Test
     fun passwordConfirmStoresIt() {
         harness.click("Set CBZ archive password")
         field().performTextReplacement("pw")
         compose.onNode(hasClickAction() and hasAnyAncestor(hasSetTextAction())).performClick()
         compose.onNode(hasClickAction() and hasAnyAncestor(hasSetTextAction())).performClick()
-        field().performKeyInput { pressKey(Key.Enter) }
         compose.onNodeWithText("OK").performClick()
         compose.waitForIdle()
         koin.security.cbzPassword.get() shouldBe "enc:pw"
         harness.count("CBZ archive password") shouldBe 0
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun passwordEnterKeyStoresIt() {
+        harness.click("Set CBZ archive password")
+        field().performTextReplacement("key")
+        field().performKeyInput { pressKey(Key.Enter) }
+        compose.waitForIdle()
+        koin.security.cbzPassword.get() shouldBe "enc:key"
     }
 
     @Test

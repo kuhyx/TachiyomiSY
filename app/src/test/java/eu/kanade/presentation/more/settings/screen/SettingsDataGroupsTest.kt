@@ -110,7 +110,7 @@ internal class SettingsDataGroupsTest {
         every { data.chapterCache.clear() } returns 4
         harness.show(SettingsDataScreen)
         harness.click("Clear chapter cache")
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
         toast() shouldBe "Cache cleared, 4 files deleted"
     }
 
@@ -119,7 +119,7 @@ internal class SettingsDataGroupsTest {
         every { data.previewCache.clear() } throws IllegalStateException("disk")
         harness.show(SettingsDataScreen)
         harness.click("Clear page preview cache")
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
         toast() shouldBe "Error occurred while clearing"
     }
 }

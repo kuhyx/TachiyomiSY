@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import eu.kanade.presentation.more.settings.screen.FakeResultRegistry
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import org.junit.After
 import org.junit.Before
@@ -68,8 +69,12 @@ internal class PermissionStepTest {
         grants()[2].performClick()
         compose.waitForIdle()
         registry.launched.size shouldBe 1
-        shadowOf(context as Application).nextStartedActivity.action shouldBe
-            "android.settings.MANAGE_UNKNOWN_APP_SOURCES"
+        val shadow = shadowOf(context as Application)
+        val started = generateSequence { shadow.nextStartedActivity }.map { it.action }.toList()
+        started shouldContainExactlyInAnyOrder listOf(
+            "android.settings.MANAGE_UNKNOWN_APP_SOURCES",
+            "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+        )
     }
 
     @Test

@@ -74,7 +74,7 @@ internal class SettingsDataExportTest {
         boxes[0].performClick()
         boxes[2].performClick()
         tap("Save")
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
         options shouldBe ExportOptions(includeTitle = true, includeAuthor = false, includeArtist = true)
         ShadowToast.getTextOfLatestToast().toString() shouldBe "Library Exported"
     }

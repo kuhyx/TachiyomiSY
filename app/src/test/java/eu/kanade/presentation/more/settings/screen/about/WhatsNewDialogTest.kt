@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import eu.kanade.presentation.more.settings.screen.awaitMain
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
@@ -45,7 +46,7 @@ internal class WhatsNewDialogTest {
 
     private fun show() {
         compose.setContent { MaterialTheme { WhatsNewDialog { dismissed++ } } }
-        compose.waitUntil(timeoutMillis = 10_000) {
+        compose.awaitMain(timeoutMillis = 10_000) {
             compose.onAllNodesWithText("Version", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
     }

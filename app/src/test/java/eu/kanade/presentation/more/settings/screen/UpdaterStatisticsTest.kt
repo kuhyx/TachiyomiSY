@@ -60,7 +60,7 @@ internal class UpdaterStatisticsTest {
     private fun open(): String {
         harness.show(SettingsEhScreen)
         harness.click("Show updater statistics")
-        compose.waitUntil(timeoutMillis = 10_000) { harness.count("Gallery updater statistics") == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { harness.count("Gallery updater statistics") == 1 }
         return compose.onAllNodes(hasText("", substring = true), useUnmergedTree = true)
             .fetchSemanticsNodes()
             .flatMap { it.config.getOrNull(SemanticsProperties.Text).orEmpty() }
@@ -116,6 +116,6 @@ internal class UpdaterStatisticsTest {
         harness.click("Show updater statistics")
         harness.count("Collecting statistics…") shouldBe 1
         gate.complete(emptyList())
-        compose.waitUntil(timeoutMillis = 10_000) { harness.count("Gallery updater statistics") == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { harness.count("Gallery updater statistics") == 1 }
     }
 }

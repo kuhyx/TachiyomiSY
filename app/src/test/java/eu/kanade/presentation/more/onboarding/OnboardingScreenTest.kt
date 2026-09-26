@@ -23,10 +23,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowToast
 import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "h2000dp")
 internal class OnboardingScreenTest {
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()

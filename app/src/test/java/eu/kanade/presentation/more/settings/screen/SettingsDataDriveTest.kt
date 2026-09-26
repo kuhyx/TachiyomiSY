@@ -50,7 +50,7 @@ internal class SettingsDataDriveTest {
         harness.click("Clear Sync Data from Google Drive")
         compose.onNodeWithText("OK").performClick()
         compose.waitForIdle()
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.getTextOfLatestToast() != null }
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.getTextOfLatestToast() != null }
         val text = ShadowToast.getTextOfLatestToast().toString()
         ShadowToast.reset()
         return text

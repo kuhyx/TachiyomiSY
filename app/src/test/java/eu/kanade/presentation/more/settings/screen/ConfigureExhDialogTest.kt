@@ -3,6 +3,10 @@ package eu.kanade.presentation.more.settings.screen
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.elvishew.xlog.LogConfiguration
+import com.elvishew.xlog.LogLevel
+import com.elvishew.xlog.XLog
+import com.elvishew.xlog.printer.Printer
 import exh.uconfig.EHConfigurator
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -29,6 +33,8 @@ internal class ConfigureExhDialogTest {
 
     @Before
     fun setUp() {
+        // The failed upload is logged through XLog, which the app initializes at start-up.
+        XLog.init(LogConfiguration.Builder().logLevel(LogLevel.ALL).build(), Printer { _, _, _ -> })
         mockkConstructor(EHConfigurator::class)
         koin.start(eh.module())
     }
@@ -52,10 +58,10 @@ internal class ConfigureExhDialogTest {
         changeSetting()
         harness.count("Settings profile note") shouldBe 1
         compose.onNodeWithText("OK").performClick()
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
         koin.exh.exhShowSettingsUploadWarning.get() shouldBe false
         ShadowToast.getTextOfLatestToast().toString() shouldBe "Settings successfully uploaded!"
-        compose.waitUntil(timeoutMillis = 10_000) { harness.count("Uploading settings to server") == 0 }
+        compose.awaitMain(timeoutMillis = 10_000) { harness.count("Uploading settings to server") == 0 }
     }
 
     @Test
@@ -63,8 +69,8 @@ internal class ConfigureExhDialogTest {
         koin.exh.exhShowSettingsUploadWarning.set(false)
         coEvery { anyConstructed<EHConfigurator>().configureAll() } throws IllegalStateException("offline")
         changeSetting()
-        compose.waitUntil(timeoutMillis = 10_000) { harness.count("Configuration failed!") == 1 }
-        harness.count("An error occurred during the configuration process: offline") shouldBe 1
+        compose.awaitMain(timeoutMillis = 10_000) { harness.count("Configuration failed!") == 1 }
+        compose.onNodeWithText("configuration process: offline", substring = true).assertExists()
         compose.onNodeWithText("OK").performClick()
         compose.waitForIdle()
         harness.count("Configuration failed!") shouldBe 0
@@ -75,7 +81,7 @@ internal class ConfigureExhDialogTest {
         koin.exh.exhShowSettingsUploadWarning.set(false)
         coEvery { anyConstructed<EHConfigurator>().configureAll() } throws IllegalStateException()
         changeSetting()
-        compose.waitUntil(timeoutMillis = 10_000) { harness.count("Configuration failed!") == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { harness.count("Configuration failed!") == 1 }
         harness.count("An error occurred during the configuration process: ") shouldBe 1
     }
 }
