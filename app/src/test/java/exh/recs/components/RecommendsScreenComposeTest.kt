@@ -1,8 +1,14 @@
 package exh.recs.components
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -10,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import eu.kanade.tachiyomi.source.online.SourceTestHarness
 import exh.recs.RecommendationItemResult
 import exh.recs.RecommendsScreenModel
+import exh.recs.sources.RecommendationPagingSource
 import exh.recs.sources.StaticResultPagingSource
 import exh.recs.sources.rankedResults
 import io.kotest.matchers.collections.shouldContainExactly
@@ -106,5 +113,94 @@ internal class RecommendsScreenComposeTest {
     fun contentWithoutItems() {
         show(RecommendsScreenModel.State())
         compose.onNodeWithText("Recommendations").assertIsDisplayed()
+    }
+
+    @Test
+    fun forwardedContentRecomposes() {
+        val source = StaticResultPagingSource(rankedResults(1))
+        var handlers by mutableStateOf(Handlers({ clickedSources += it.name }, { clickedItems += it }))
+        var items by mutableStateOf<Map<RecommendationPagingSource, RecommendationItemResult>>(
+            mapOf(source to RecommendationItemResult.Loading),
+        )
+        var tick by mutableIntStateOf(0)
+        compose.setContent { MaterialTheme { Forwarding(items, handlers, tick) } }
+        compose.waitForIdle()
+        // Same arguments, then every argument new: the content sees them as same, then different.
+        tick++
+        compose.waitForIdle()
+        // New handlers with the same map, then a new map.
+        handlers = Handlers({ clickedSources += "other" }, { longClickedItems += it })
+        compose.waitForIdle()
+        items = mapOf(source to RecommendationItemResult.Success(listOf(manga)))
+        compose.waitForIdle()
+        compose.onNodeWithText("Recommended").performClick()
+        compose.waitForIdle()
+        longClickedItems.map { it.id } shouldContainExactly listOf(3L)
+    }
+
+    @Test
+    fun unstableItemsRecompose() {
+        val source = StaticResultPagingSource(rankedResults(1))
+        // A concrete LinkedHashMap is known unstable, so the host passes it on marked for an instance check.
+        var items by mutableStateOf(linkedMapOf<RecommendationPagingSource, RecommendationItemResult>())
+        var shown by mutableStateOf(false)
+        var getManga by mutableStateOf<@Composable (Manga) -> State<Manga>>({ manga -> mutableStateOf(manga) })
+        compose.setContent { MaterialTheme { UnstableHost(items, shown, getManga) } }
+        compose.waitForIdle()
+        // Shown later with the same map: its first composition is told "same, unstable".
+        shown = true
+        compose.waitForIdle()
+        // A new getManga with the same map, then a new map.
+        getManga = { manga -> remember(manga) { mutableStateOf(manga.copy(ogTitle = "Swapped")) } }
+        compose.waitForIdle()
+        items = linkedMapOf(source to RecommendationItemResult.Success(listOf(manga)))
+        compose.waitForIdle()
+        compose.onNodeWithText("Swapped").assertIsDisplayed()
+    }
+}
+
+private data class Handlers(val onSource: (RecommendationPagingSource) -> Unit, val onItem: (Manga) -> Unit)
+
+@Composable
+private fun Forwarding(
+    items: Map<RecommendationPagingSource, RecommendationItemResult>,
+    handlers: Handlers,
+    tick: Int,
+) {
+    tick.hashCode()
+    ForwardingLambdas(items, handlers.onSource, handlers.onItem)
+}
+
+@Composable
+private fun ForwardingLambdas(
+    items: Map<RecommendationPagingSource, RecommendationItemResult>,
+    onSource: (RecommendationPagingSource) -> Unit,
+    onItem: (Manga) -> Unit,
+) {
+    RecommendsContent(
+        items = items,
+        contentPadding = PaddingValues(),
+        onClickSource = onSource,
+        onClickItem = onItem,
+        onLongClickItem = onItem,
+        getManga = { manga -> remember(manga) { mutableStateOf(manga) } },
+    )
+}
+
+@Composable
+private fun UnstableHost(
+    items: LinkedHashMap<RecommendationPagingSource, RecommendationItemResult>,
+    shown: Boolean,
+    getManga: @Composable (Manga) -> State<Manga>,
+) {
+    if (shown) {
+        RecommendsContent(
+            items = items,
+            contentPadding = PaddingValues(),
+            onClickSource = {},
+            onClickItem = {},
+            onLongClickItem = {},
+            getManga = getManga,
+        )
     }
 }

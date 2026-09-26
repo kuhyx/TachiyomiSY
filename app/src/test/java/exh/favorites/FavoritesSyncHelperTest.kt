@@ -156,7 +156,7 @@ internal class FavoritesSyncHelperTest {
     }
 
     @Test
-    fun staleLocksAreReleasedFirst() {
+    fun staleLocksFreedFirst() {
         val helper = harness.helper()
         // A lock whose release threw in a previous run's finally stays in its field; the next run releases it.
         val wake = harness.context.createPartialWakeLock("stale").apply { acquire() }

@@ -59,21 +59,18 @@ private fun progressProperties(
     is SearchStatus.Initializing -> RecommendationSearchProgressProperties(
         title = context.stringResource(SYMR.strings.rec_collecting),
         text = context.stringResource(SYMR.strings.rec_initializing),
-        negativeButtonText = context.stringResource(MR.strings.action_cancel),
-        negativeButton = setStatusCancelling,
+        negativeButton = ProgressDialogButton(context.stringResource(MR.strings.action_cancel), setStatusCancelling),
     )
     is SearchStatus.Error -> RecommendationSearchProgressProperties(
         title = context.stringResource(SYMR.strings.rec_error_title),
         text = context.stringResource(SYMR.strings.rec_error_string, status.message),
-        positiveButtonText = context.stringResource(MR.strings.action_ok),
-        positiveButton = setStatusIdle,
+        positiveButton = ProgressDialogButton(context.stringResource(MR.strings.action_ok), setStatusIdle),
     )
     is SearchStatus.Processing -> RecommendationSearchProgressProperties(
         title = context.stringResource(SYMR.strings.rec_collecting),
         text = context.stringResource(SYMR.strings.rec_processing_state, status.current, status.total) +
             "\n\n" + status.manga.title,
-        negativeButtonText = context.stringResource(MR.strings.action_cancel),
-        negativeButton = setStatusCancelling,
+        negativeButton = ProgressDialogButton(context.stringResource(MR.strings.action_cancel), setStatusCancelling),
     )
     else -> null
 }
@@ -83,16 +80,16 @@ private fun ProgressDialog(dialog: RecommendationSearchProgressProperties, statu
     AlertDialog(
         onDismissRequest = {},
         confirmButton = {
-            if (dialog.positiveButton != null && dialog.positiveButtonText != null) {
-                TextButton(onClick = dialog.positiveButton) {
-                    Text(text = dialog.positiveButtonText)
+            dialog.positiveButton?.let { button ->
+                TextButton(onClick = button.onClick) {
+                    Text(text = button.text)
                 }
             }
         },
         dismissButton = {
-            if (dialog.negativeButton != null && dialog.negativeButtonText != null) {
-                TextButton(onClick = dialog.negativeButton) {
-                    Text(text = dialog.negativeButtonText)
+            dialog.negativeButton?.let { button ->
+                TextButton(onClick = button.onClick) {
+                    Text(text = button.text)
                 }
             }
         },

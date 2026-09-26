@@ -1,7 +1,11 @@
 package exh.recs.batch
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -88,4 +92,44 @@ internal class RecSearchProgressDialogTest {
         compose.waitForIdle()
         compose.onNodeWithText("Collecting recommendations").assertIsDisplayed()
     }
+
+    @Test
+    fun forwardedStatusRecomposes() {
+        var status by mutableStateOf<SearchStatus>(SearchStatus.Initializing)
+        var tick by mutableIntStateOf(0)
+        compose.setContent { MaterialTheme { Forwarding(status, tick, { idle++ }, { cancelling++ }) } }
+        compose.waitForIdle()
+        // The same arguments again, then a new status: the dialog sees each as same, then different.
+        tick++
+        compose.waitForIdle()
+        status = SearchStatus.Error("late")
+        compose.waitForIdle()
+        compose.onNodeWithText("Search failed").assertIsDisplayed()
+        val button = ProgressDialogButton("OK") { idle++ }
+        button.copy(text = "Other").text shouldBe "Other"
+        (button == button.copy()) shouldBe true
+    }
+
+    @Test
+    fun unstableStatusRecomposes() {
+        // Typed as Processing (it holds an SManga), the call marks the argument unstable for the dialog.
+        var status by mutableStateOf(SearchStatus.Processing(SManga(url = "/u", title = "First"), 1, 2))
+        var tick by mutableIntStateOf(0)
+        compose.setContent {
+            tick.hashCode()
+            MaterialTheme { RecSearchProgressDialog(status, setStatusIdle = { idle++ }, setStatusCancelling = {}) }
+        }
+        compose.waitForIdle()
+        tick++
+        compose.waitForIdle()
+        status = SearchStatus.Processing(SManga(url = "/u", title = "Second"), 2, 2)
+        compose.waitForIdle()
+        compose.onNodeWithText("Second", substring = true).assertIsDisplayed()
+    }
+}
+
+@Composable
+private fun Forwarding(status: SearchStatus, tick: Int, onIdle: () -> Unit, onCancel: () -> Unit) {
+    tick.hashCode()
+    RecSearchProgressDialog(status = status, setStatusIdle = onIdle, setStatusCancelling = onCancel)
 }
