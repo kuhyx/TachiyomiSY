@@ -35,7 +35,6 @@ private const val STAR_SPRITE_WIDTH_PX = 16
 private const val HALF_STAR_SPRITE_OFFSET_PX = 21
 private const val HALF_STAR = 0.5
 
-private val PAGE_COUNT_REGEX = "[0-9]*".toRegex()
 private val RATING_REGEX = "([0-9]*)px".toRegex()
 private val FAVORITES_BORDER_HEX_COLORS = listOf(
     "000",
@@ -158,14 +157,15 @@ internal class EHentaiGalleryListParser {
     private fun getDateTag(element: Element?): Long? {
         val text = element?.text()?.nullIfBlank()
         return text?.let {
-            ZonedDateTime.parse(it, MetadataUtil.EX_DATE_FORMAT.withZone(ZoneOffset.UTC))?.toInstant()?.toEpochMilli()
+            ZonedDateTime.parse(it, MetadataUtil.EX_DATE_FORMAT.withZone(ZoneOffset.UTC)).toInstant().toEpochMilli()
         }
     }
 
     private fun getRating(element: Element?): Double? {
         val ratingStyle = element?.attr(STYLE)?.nullIfBlank()
         val matches = ratingStyle?.let { style ->
-            RATING_REGEX.findAll(style).mapNotNull { it.groupValues.getOrNull(1)?.toIntOrNull() }.toList()
+            // Group 1 always takes part in a match (possibly empty), so only the number can be missing.
+            RATING_REGEX.findAll(style).mapNotNull { it.groupValues[1].toIntOrNull() }.toList()
         }
         if (matches == null || matches.size != 2) return null
         var rate = MAX_RATING - matches[0] / STAR_SPRITE_WIDTH_PX
@@ -181,7 +181,8 @@ internal class EHentaiGalleryListParser {
 
     private fun getPageCount(element: Element?): Int? {
         val pageCount = element?.text()?.trimOrNull()
-        return pageCount?.let { PAGE_COUNT_REGEX.find(it)?.value?.toIntOrNull() }
+        // The leading ASCII digits, if any: what "[0-9]*" matched at the start of the text.
+        return pageCount?.let { text -> text.takeWhile { it in '0'..'9' }.toIntOrNull() }
     }
 }
 

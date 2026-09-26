@@ -207,9 +207,9 @@ internal class MergedSourceTest {
         val reference = reference(mangaId = null, mangaUrl = "/new")
         val loaded = runBlocking { with(source) { reference.load() } }
         loaded.source shouldBe partSource
-        loaded.manga?.title shouldBe "Fetched"
+        loaded.manga.title shouldBe "Fetched"
         loaded.reference shouldBe reference
-        loaded.copy(manga = null).manga shouldBe null
+        loaded.copy(manga = part).manga shouldBe part
         val existing = runBlocking { with(source) { reference().load() } }
         existing.manga shouldBe part
     }

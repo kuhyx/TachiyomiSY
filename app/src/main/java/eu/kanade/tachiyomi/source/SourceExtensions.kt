@@ -25,8 +25,8 @@ internal fun Source.getNameForMangaInfo(
         // SY <--
         // For edge cases where user disables a source they got manga of in their library.
         hasOneActiveLanguages && !isInEnabledLanguages -> toString()
-        // Hide the language tag when only one language is used.
-        hasOneActiveLanguages && isInEnabledLanguages -> name
+        // Hide the language tag when only one language is used (the source's is enabled: see above).
+        hasOneActiveLanguages -> name
         else -> toString()
     }
 }

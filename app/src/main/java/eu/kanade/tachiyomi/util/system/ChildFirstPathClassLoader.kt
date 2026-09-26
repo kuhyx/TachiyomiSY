@@ -18,12 +18,14 @@ internal class ChildFirstPathClassLoader(
     parent: ClassLoader,
 ) : PathClassLoader(dexPath, librarySearchPath, parent) {
 
-    private val systemClassLoader: ClassLoader? = getSystemClassLoader()
+    // Neither is ever null: the platform always has a system loader, and the parent is a parameter.
+    private val systemClassLoader: ClassLoader = getSystemClassLoader()
+    private val parentLoader: ClassLoader = parent
 
     override fun loadClass(name: String?, resolve: Boolean): Class<*> {
         var c = findLoadedClass(name)
 
-        if (c == null && systemClassLoader != null) {
+        if (c == null) {
             try {
                 c = systemClassLoader.loadClass(name)
             } catch (_: ClassNotFoundException) {}
@@ -45,28 +47,15 @@ internal class ChildFirstPathClassLoader(
     }
 
     override fun getResource(name: String?): URL? {
-        return systemClassLoader?.getResource(name)
+        return systemClassLoader.getResource(name)
             ?: findResource(name)
             ?: super.getResource(name)
     }
 
     override fun getResources(name: String?): Enumeration<URL> {
-        val systemUrls = systemClassLoader?.getResources(name)
-        val localUrls = findResources(name)
-        val parentUrls = parent?.getResources(name)
-        val urls = buildList {
-            while (systemUrls?.hasMoreElements() == true) {
-                add(systemUrls.nextElement())
-            }
-
-            while (localUrls?.hasMoreElements() == true) {
-                add(localUrls.nextElement())
-            }
-
-            while (parentUrls?.hasMoreElements() == true) {
-                add(parentUrls.nextElement())
-            }
-        }
+        val urls = systemClassLoader.getResources(name).toList() +
+            findResources(name).toList() +
+            parentLoader.getResources(name).toList()
 
         return object : Enumeration<URL> {
             val iterator = urls.iterator()

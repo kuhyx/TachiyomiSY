@@ -70,4 +70,15 @@ internal class FileExtensionsTest {
         val stubborn = folder.newFolder("stubborn").also { File(it, "child").writeText("c") }
         shouldThrow<FileAlreadyExistsException> { source.copyAndSetReadOnlyTo(stubborn, overwrite = true) }
     }
+
+    // Independent of who runs the test: an existing target, then one that cannot be deleted.
+    @Test
+    fun existingTargetsAreGuarded() {
+        val source = folder.newFile("guarded.txt").apply { writeText("g") }
+        val existing = folder.newFile("existing.txt")
+        shouldThrow<FileAlreadyExistsException> { source.copyAndSetReadOnlyTo(existing) }
+        val busy = folder.newFolder("busy").also { File(it, "inside.txt").writeText("x") }
+        val failure = shouldThrow<FileAlreadyExistsException> { source.copyAndSetReadOnlyTo(busy, overwrite = true) }
+        failure.reason shouldBe "Tried to overwrite the destination, but failed to delete it."
+    }
 }

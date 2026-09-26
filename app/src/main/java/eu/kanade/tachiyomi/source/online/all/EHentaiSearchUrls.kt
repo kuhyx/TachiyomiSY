@@ -21,7 +21,8 @@ internal fun Uri.Builder.appendJumpOrSeek(value: String) {
 }
 
 private fun String.isSeekYear(): Boolean =
-    MATCH_YEAR_REGEX.matches(this) && toIntOrNull()?.let { it in FIRST_GALLERY_YEAR..LAST_SEEK_YEAR } == true
+    // Four ASCII digits always parse, so no null check is needed after the match.
+    MATCH_YEAR_REGEX.matches(this) && toInt() in FIRST_GALLERY_YEAR..LAST_SEEK_YEAR
 
 internal fun toplistUrl(toplist: ToplistOption, page: Int): String = "https://e-hentai.org".toUri().buildUpon()
     .appendPath("toplist.php")

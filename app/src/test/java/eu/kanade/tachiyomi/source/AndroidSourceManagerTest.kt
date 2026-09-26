@@ -25,8 +25,11 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
@@ -196,5 +199,20 @@ internal class AndroidSourceManagerTest {
         dex.factory shouldBe true
         val explicit = AndroidSourceManager.Companion.DelegatedSource("n", 1L, "q", NHentai::class, false)
         explicit.newSourceClass shouldBe NHentai::class
+    }
+
+    // A repository flow that ends: the stub observer runs to its end, not just its first emission.
+    @Test
+    fun finiteStubFlowEnds() {
+        every { repository.subscribeAll() } returns flowOf(listOf(StubSource(id = 31L, lang = "en", name = "S")))
+        val manager = manager().awaitInitialized()
+        val job = manager.scope.coroutineContext.job
+        runBlocking {
+            withTimeout(WAIT_MS) {
+                // What stays is the extension observer, whose StateFlow never ends.
+                while (job.children.count() > 1) delay(10)
+            }
+        }
+        job.children.count() shouldBe 1
     }
 }

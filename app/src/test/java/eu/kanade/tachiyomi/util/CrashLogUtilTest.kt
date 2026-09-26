@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.util
 
+import android.app.Application
 import android.content.Context
+import android.content.Intent
+import androidx.core.content.FileProvider
 import androidx.test.core.app.ApplicationProvider
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.tachiyomi.extension.ExtensionManager
@@ -26,6 +29,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowToast
 import tachiyomi.core.common.preference.InMemoryPreferenceStore
 import java.io.File
@@ -140,5 +144,27 @@ internal class CrashLogUtilTest {
         every { broken.externalCacheDir } throws IllegalStateException("no cache")
         CrashLogUtil(broken, extensionManager, preferences).dumpLogs()
         ShadowToast.getTextOfLatestToast() shouldBe "Failed to get logs"
+    }
+
+    // A logcat stand-in that exists on any host, so the dump reaches the share sheet.
+    @Test
+    fun sharesTheDump() = runTest(dispatcher) {
+        every { extensionManager.installedExtensionsFlow } returns MutableStateFlow(emptyList())
+        every { extensionManager.availableExtensionsFlow } returns MutableStateFlow(emptyList())
+        clearFileProviderCache()
+        try {
+            CrashLogUtil(context, extensionManager, preferences, logcatCommand = { arrayOf("true") }).dumpLogs()
+            val started = shadowOf(context as Application).nextStartedActivity
+            started.action shouldBe Intent.ACTION_CHOOSER
+        } finally {
+            clearFileProviderCache()
+        }
+    }
+
+    // FileProvider caches each authority's roots statically, and every Robolectric test gets a new cache
+    // dir: without this, whichever test shares a file second resolves it against a stale root.
+    private fun clearFileProviderCache() {
+        val cache = FileProvider::class.java.getDeclaredField("sCache").apply { isAccessible = true }
+        (cache.get(null) as MutableMap<*, *>).clear()
     }
 }

@@ -73,6 +73,8 @@ internal class ContextExtensionsTest {
         context.getUriSize("content://missing/1".toUri()).shouldBeNull()
         val empty = context.createFileInCacheDir("empty.txt")
         context.getUriSize(empty.toUri()) shouldBe 0L
+        // A scheme UniFile cannot open at all.
+        context.getUriSize("https://example.test/a".toUri()).shouldBeNull()
     }
 
     @Test

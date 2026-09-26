@@ -92,8 +92,9 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
             summary = archive.summary
 
             tags.clear()
-            archive.tags?.split(',')
-                ?.mapTo(tags) {
+            // One null check: a `?.` chain leaves the second link's null arm unreachable.
+            archive.tags?.let { raw ->
+                raw.split(',').mapTo(tags) {
                     val tag = it.trim()
                     if (
                         tag.startsWith(LanraragiSearchMetadata.LANRARAGI_NAMESPACE_DATE_ADDED) ||
@@ -123,6 +124,7 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
                         )
                     }
                 }
+            }
 
             pageCount = archive.pagecount
 
