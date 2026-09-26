@@ -1,10 +1,13 @@
 package eu.kanade.tachiyomi.data.download
 
 import com.hippo.unifile.UniFile
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.verify
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.loadKoinModules
@@ -52,6 +55,11 @@ internal class DownloadCacheRenewalTest : DownloadCacheTestBase() {
         logged.none { it.contains("failed to create cache") } shouldBe true
     }
 
+    /**
+     * Current behaviour: the failure is logged by the completion handler and still escapes the cache's
+     * scope as an uncaught exception. It is collected here, inside `runTest`, after joining the renewal,
+     * so it cannot surface at a later test's `runTest` as `UncaughtExceptionsBeforeTest`.
+     */
     @Test
     fun failedRenewalIsLogged() {
         val downloads = UniFile.fromFile(root)
@@ -60,8 +68,15 @@ internal class DownloadCacheRenewalTest : DownloadCacheTestBase() {
             if (calls++ == 0) downloads else throw IOException("unmounted")
         }
         val cache = newCache()
-        cache.renewCache()
-        waitUntil { logged.any { it.contains("failed to create cache") } }
+        val renewal = DownloadCache::class.java.getDeclaredField("renewalJob").apply { isAccessible = true }
+        val escaped = shouldThrow<IOException> {
+            runTest {
+                cache.renewCache()
+                (renewal.get(cache) as Job).join()
+            }
+        }
+        escaped.message shouldBe "unmounted"
+        logged.any { it.contains("failed to create cache") } shouldBe true
     }
 
     @Test

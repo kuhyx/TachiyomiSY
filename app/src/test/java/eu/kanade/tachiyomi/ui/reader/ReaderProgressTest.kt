@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader
 
+import eu.kanade.tachiyomi.data.download.enqueueChaptersToDelete
 import eu.kanade.tachiyomi.data.sync.SyncDataJob
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -7,9 +8,11 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import exh.source.EH_SOURCE_ID
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
@@ -141,6 +144,8 @@ internal class ReaderProgressTest {
             domainChapter(3L, number = 1.0),
             domainChapter(4L, number = -1.0),
         )
+        mockkStatic(DELETION_KT)
+        coEvery { harness.downloadManager.enqueueChaptersToDelete(any(), any()) } returns Unit
         val vm = harness.loadedViewModel()
         val chapter = vm.chapterList[0]
         chapter.chapter.chapter_number = 1f
@@ -154,6 +159,7 @@ internal class ReaderProgressTest {
         chapter.chapter.chapter_number = -1f
         update(vm, chapter, index = 0)
         coVerify { harness.updateChapter.awaitAll(emptyList()) }
+        coVerify(timeout = 5_000) { harness.downloadManager.enqueueChaptersToDelete(any(), harness.manga) }
     }
 
     @Test

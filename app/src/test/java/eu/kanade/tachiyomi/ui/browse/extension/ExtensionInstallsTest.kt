@@ -10,10 +10,12 @@ import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.ui.browse.BrowseKoin
 import eu.kanade.tachiyomi.ui.manga.eventually
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
@@ -36,6 +38,9 @@ internal class ExtensionInstallsTest {
     private val manager = mockk<ExtensionManager>(relaxed = true) {
         every { installer.downloadAndInstall(any(), any()) } returns steps
         every { availableExtensionMapFlow } returns MutableStateFlow(mapOf(stale.pkgName to fresh))
+        // The model refreshes the store on creation and replaces the available map with the result; keeping
+        // that refresh in flight leaves the map the store published before, which holds the update.
+        coEvery { api.findExtensions() } coAnswers { awaitCancellation() }
     }
 
     @Before

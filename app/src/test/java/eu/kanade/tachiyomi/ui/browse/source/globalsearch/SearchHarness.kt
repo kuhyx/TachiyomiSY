@@ -10,12 +10,14 @@ import eu.kanade.tachiyomi.ui.browse.BrowseKoin
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.dsl.module
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
+import java.util.concurrent.ConcurrentHashMap
 
 /** Koin, sources and interactors for the global and migration search models. */
 internal class SearchHarness {
@@ -28,6 +30,13 @@ internal class SearchHarness {
     val extensionManager: ExtensionManager = mockk { every { installedExtensionsFlow } returns installed }
     val networkToLocalManga: NetworkToLocalManga = mockk()
     val getManga: GetManga = mockk()
+
+    /**
+     * Holds a source's search until its latch completes. Two results landing together can drop one
+     * (SearchScreenModel.updateItem reads the state outside the atomic update), so tests let them in
+     * one at a time.
+     */
+    val gates: MutableMap<Long, CompletableDeferred<Unit>> = ConcurrentHashMap()
 
     init {
         every { sourceManager.get(any()) } answers { catalogue.firstOrNull { it.id == firstArg<Long>() } }
@@ -46,11 +55,10 @@ internal class SearchHarness {
             every { name } returns sourceName
             every { lang } returns sourceLang
             every { getFilterList() } returns FilterList()
-            if (titles == null) {
-                coEvery { getSearchManga(1, any(), any()) } throws IllegalStateException("down")
-            } else {
-                coEvery { getSearchManga(1, any(), any()) } returns MangasPage(
-                    titles.map { title ->
+            coEvery { getSearchManga(1, any(), any()) } coAnswers {
+                gates[sourceId]?.await()
+                MangasPage(
+                    checkNotNull(titles) { "down" }.map { title ->
                         SManga.create().apply {
                             url = "/$title"
                             this.title = title

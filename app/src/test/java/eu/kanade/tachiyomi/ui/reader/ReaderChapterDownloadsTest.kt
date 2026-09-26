@@ -19,8 +19,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-private const val DELETION_KT = "eu.kanade.tachiyomi.data.download.DownloadManagerDeletionKt"
-
 internal class ReaderChapterDownloadsTest {
 
     private val harness = ReaderVmHarness()

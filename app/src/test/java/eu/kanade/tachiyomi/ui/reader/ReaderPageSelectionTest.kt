@@ -92,6 +92,7 @@ internal class ReaderPageSelectionTest {
         val pages = loadedPages(vm.chapterList[0], count = 4)
         vm.onPageSelected(pages[2], currentPageText = "3", hasExtraPage = true)
         verify { vm.chapterDownloads.downloadNextChapters() }
+        verify(timeout = 5_000) { vm.chapterDownloads.deleteChapterIfNeeded(vm.chapterList[0]) }
     }
 
     @Test

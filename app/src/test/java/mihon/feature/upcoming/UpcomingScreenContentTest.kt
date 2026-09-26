@@ -2,6 +2,8 @@ package mihon.feature.upcoming
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -22,6 +24,7 @@ import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
 import tachiyomi.core.common.preference.InMemoryPreferenceStore
 import tachiyomi.domain.manga.model.Manga
 import java.time.LocalDate
@@ -93,7 +96,10 @@ internal class UpcomingScreenContentTest {
         shadowOf(RuntimeEnvironment.getApplication()).nextStartedActivity?.data?.host shouldBe "mihon.app"
     }
 
+    // On a phone the calendar is the list's first item; the default 470dp-high window leaves the
+    // entry below the fold, where the lazy list never composes it.
     @Test
+    @Config(qualifiers = "h2000dp")
     fun onAPhone() {
         show()
         exercise()
@@ -116,7 +122,10 @@ internal class UpcomingScreenContentTest {
     @Test
     fun anEmptyDayScrollsNowhere() {
         show()
-        compose.onNodeWithText(LocalDate.of(2030, 3, 1).dayOfMonth.toString()).performClick()
+        // The day heading's count badge also reads "1"; only the calendar day is clickable.
+        compose.onNode(hasText(LocalDate.of(2030, 3, 1).dayOfMonth.toString()) and hasClickAction()).performClick()
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("Previous Month").assertExists()
         opened shouldBe emptyList()
     }
 }

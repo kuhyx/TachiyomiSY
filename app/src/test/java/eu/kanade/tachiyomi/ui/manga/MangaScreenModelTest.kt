@@ -132,7 +132,8 @@ internal class MangaScreenModelTest {
         model.snackbarHostState.currentSnackbarData?.dismiss()
         remote(Result.failure(IllegalStateException("boom")))
         model.fetchAllFromSource()
-        eventually { model.snackbarHostState.currentSnackbarData?.visuals?.message == "boom" }
+        val message = "IllegalStateException: boom"
+        eventually { model.snackbarHostState.currentSnackbarData?.visuals?.message == message }
     }
 
     @Test

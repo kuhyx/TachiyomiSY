@@ -150,9 +150,10 @@ internal class MangaHarness {
         }
     }
 
+    /** Scopes first: a model's in-flight IO work still resolves through Koin until it has finished. */
     fun stop() {
-        stopKoin()
         clearVoyagerScopes()
+        stopKoin()
     }
 
     /** A model built with every default resolved through Koin. */

@@ -113,11 +113,14 @@ internal class CategoryScreenModelTest {
     @Test
     fun loadingIgnoresDialogs() {
         // A dispatcher nobody advances keeps the model's first load from running.
-        Dispatchers.setMain(StandardTestDispatcher())
+        val main = StandardTestDispatcher()
+        Dispatchers.setMain(main)
         val model = model()
         model.showDialog(CategoryDialog.Create)
         model.dismissDialog()
         model.state.value shouldBe CategoryScreenState.Loading
+        main.scheduler.advanceUntilIdle()
+        model.success().dialog shouldBe null
     }
 
     @Test

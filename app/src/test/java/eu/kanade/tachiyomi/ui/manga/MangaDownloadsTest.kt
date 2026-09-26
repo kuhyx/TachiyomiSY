@@ -8,8 +8,10 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.flow.flow
@@ -46,6 +48,8 @@ internal class MangaDownloadsTest {
     @Before
     fun setUp() {
         mockkStatic(DELETION)
+        // The real deletion runs on Dispatchers.IO against the relaxed manager and would leak into later tests.
+        every { harness.downloadManager.deleteManga(any(), any(), any()) } just runs
         harness.start()
         harness.mangaFlow.value = manga(favorite = true) to listOf(chapter(1L), chapter(2L))
     }
@@ -117,6 +121,8 @@ internal class MangaDownloadsTest {
 
     @Test
     fun startNowNeedsOneChapter() {
+        // A stopped downloader would make startDownloads reach WorkManager, which tests never initialise.
+        every { harness.downloadManager.downloader.isRunning } returns true
         val model = harness.loaded()
         harness.queue.value = listOf(download(chapter(2L), Download.State.QUEUE))
         model.downloads.startDownload(listOf(chapter(1L), chapter(2L)), startNow = true)

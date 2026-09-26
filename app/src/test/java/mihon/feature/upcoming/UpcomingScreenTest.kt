@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
+import eu.kanade.domain.ui.UiPreferences
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
@@ -21,6 +22,8 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import tachiyomi.core.common.preference.InMemoryPreferenceStore
 import tachiyomi.domain.manga.model.Manga
 import java.time.LocalDate
 import java.time.ZoneId
@@ -40,13 +43,24 @@ internal class UpcomingScreenTest {
         val getUpcomingManga = mockk<GetUpcomingManga>()
         coEvery { getUpcomingManga.subscribe() } returns flowOf(listOf(manga))
         stopKoin()
-        startKoin { modules(module { single { getUpcomingManga } }) }
+        startKoin {
+            modules(
+                module {
+                    single { getUpcomingManga }
+                    // The day heading's relative date text reads the date format from here.
+                    single { UiPreferences(InMemoryPreferenceStore()) }
+                },
+            )
+        }
     }
 
     @After
     fun tearDown() = stopKoin()
 
+    // On a phone the calendar is the list's first item; the default 470dp-high window leaves the
+    // entry below the fold, where the lazy list never composes it.
     @Test
+    @Config(qualifiers = "h2000dp")
     fun anEntryOpensItsManga() {
         compose.setContent {
             MaterialTheme {

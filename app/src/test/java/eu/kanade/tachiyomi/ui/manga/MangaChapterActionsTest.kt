@@ -67,8 +67,9 @@ internal class MangaChapterActionsTest {
             failing to IllegalStateException(),
         )
         model.chapterActions.markChaptersRead(listOf(chapter(2L), chapter(3L)), read = true)
-        coVerify(timeout = 5_000) { parts.trackChapter.await(any(), 1L, 3.0) }
+        // The refresh-error toasts hop to the main looper, so idle it (eventually) before verifying.
         eventually { ShadowToast.shownToastCount() == 3 }
+        coVerify { parts.trackChapter.await(any(), 1L, 3.0) }
     }
 
     @Test

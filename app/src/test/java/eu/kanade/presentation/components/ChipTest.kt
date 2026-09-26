@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -42,7 +43,7 @@ internal class ChipTest {
                     modifier = Modifier,
                     enabled = false,
                     icon = { Text("icon") },
-                    interactionSource = MutableInteractionSource(),
+                    interactionSource = remember { MutableInteractionSource() },
                     elevation = null,
                     shape = RectangleShape,
                     border = null,
@@ -80,7 +81,7 @@ internal class ChipTest {
                     modifier = Modifier,
                     enabled = false,
                     icon = { Text("lead") },
-                    interactionSource = MutableInteractionSource(),
+                    interactionSource = remember { MutableInteractionSource() },
                     elevation = null,
                     shape = RectangleShape,
                     border = null,

@@ -51,7 +51,7 @@ internal class BrowseKoin {
     }
 
     fun stop() {
-        stopKoin()
         clearVoyagerScopes()
+        stopKoin()
     }
 }

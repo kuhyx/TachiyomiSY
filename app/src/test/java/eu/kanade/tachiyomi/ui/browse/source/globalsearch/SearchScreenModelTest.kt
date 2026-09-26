@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
+import kotlinx.coroutines.CompletableDeferred
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -62,9 +63,13 @@ internal class SearchScreenModelTest {
         model.state.value.items.values.last().shouldBeInstanceOf<SearchItemResult.Error>()
         coVerify(exactly = 1) { harness.catalogue[0].getSearchManga(1, "q", any()) }
         model.setSourceFilter(SourceFilter.All)
+        harness.gates[2L] = CompletableDeferred()
         model.updateSearchQuery("other")
         model.search()
+        eventually { model.state.value.progress == 1 }
+        harness.gates.getValue(2L).complete(Unit)
         model.settled(2)
+        coVerify(exactly = 1) { harness.catalogue[0].getSearchManga(1, "other", any()) }
     }
 
     @Test
@@ -110,8 +115,11 @@ internal class SearchScreenModelTest {
         harness.koin.sourcePreferences.migrationSources.set(listOf(2L, 1L, 9L))
         harness.source(1L, titles = emptyList())
         harness.source(2L)
+        harness.gates[1L] = CompletableDeferred()
         coEvery { harness.getManga.await(5L) } returns manga().copy(id = 5L, ogTitle = "Needle")
         val model = MigrateSearchScreenModel(5L)
+        eventually { model.state.value.progress == 1 }
+        harness.gates.getValue(1L).complete(Unit)
         model.settled(2)
         model.state.value.searchQuery shouldBe "Needle"
         model.state.value.from?.id shouldBe 5L

@@ -22,8 +22,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.loadKoinModules
+import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import tachiyomi.domain.track.interactor.DeleteTrack
 import tachiyomi.i18n.MR
 
 @RunWith(RobolectricTestRunner::class)
@@ -33,12 +36,14 @@ internal class TrackHomeScreenTest {
 
     private val harness = TrackHomeHarness()
     private val tracker get() = harness.tracker
+    private val deleteTrack = mockk<DeleteTrack>(relaxed = true)
     private val track = domainTrack(trackerId = 1L, score = 5.0, remoteUrl = "https://t.example/1")
         .copy(status = 1L, lastChapterRead = 3.0, totalChapters = 5L, startDate = 1L, finishDate = 1L)
 
     @Before
     fun setUp() {
         harness.start()
+        loadKoinModules(module { single { deleteTrack } })
         every { tracker.getLogo() } returns R.drawable.brand_anilist
         every { tracker.getStatus(any()) } returns MR.strings.reading
         every { tracker.getStatusList() } returns listOf(1L)
@@ -93,10 +98,15 @@ internal class TrackHomeScreenTest {
 
     @Test
     fun titleStartsANewSearch() {
+        coEvery { tracker.search(any()) } returns emptyList()
         show()
         compose.onNodeWithText("Title").performClick()
-        compose.waitForIdle()
-        coVerify(timeout = 5_000) { tracker.search("Title") }
+        // The new search is pushed from an IO coroutine, after the click's idle wait has returned,
+        // so wait for the search screen itself to compose and show the (empty) result.
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodes(hasText("No results found")).fetchSemanticsNodes().isNotEmpty()
+        }
+        coVerify { tracker.search("Title") }
     }
 
     @Test
@@ -121,6 +131,8 @@ internal class TrackHomeScreenTest {
         coVerify(timeout = 5_000) { tracker.setRemotePrivate(any(), true) }
         menu("Remove")
         compose.onNodeWithText("Remove Plain tracking?").assertExists()
+        compose.onNodeWithText("OK").performClick()
+        coVerify(timeout = 5_000) { deleteTrack.await(1L, 1L) }
     }
 
     @Test

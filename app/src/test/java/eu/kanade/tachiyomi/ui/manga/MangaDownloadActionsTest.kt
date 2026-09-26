@@ -5,14 +5,18 @@ import eu.kanade.presentation.manga.components.ChapterDownloadAction
 import eu.kanade.tachiyomi.data.download.deleteChapters
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.removeFromDownloadQueue
+import eu.kanade.tachiyomi.data.download.reorderQueue
 import eu.kanade.tachiyomi.source.online.all.MergedSource
+import eu.kanade.tachiyomi.ui.reader.QUEUE_KT
 import exh.source.EH_SOURCE_ID
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import org.junit.After
@@ -37,13 +41,18 @@ internal class MangaDownloadActionsTest {
             chapter(3L),
         )
         every { manager.downloader.isRunning } returns true
-        mockkStatic(DELETION)
+        mockkStatic(DELETION, QUEUE_KT)
+        // The real deletion reads the relaxed manager's preferences on Dispatchers.IO and leaks a failure.
+        every { manager.deleteChapters(any(), any(), any()) } just runs
+        // The downloader is a mock, so the reordered queue is published here instead. reorderQueue is an
+        // extension: the static call's first argument is the manager, the list is the second.
+        every { manager.reorderQueue(any()) } answers { harness.queue.value = secondArg() }
     }
 
     @After
     fun tearDown() {
         harness.stop()
-        unmockkStatic(DELETION)
+        unmockkStatic(DELETION, QUEUE_KT)
     }
 
     private fun downloaded(chapters: List<Chapter>) =
@@ -71,6 +80,7 @@ internal class MangaDownloadActionsTest {
         )
         downloads.runChapterDownloadActions(listOf(item(chapter(3L))), ChapterDownloadAction.START_NOW)
         eventually { harness.queue.value.first().chapter.id == 3L }
+        verify(exactly = 1) { manager.reorderQueue(any()) }
     }
 
     @Test
@@ -96,6 +106,8 @@ internal class MangaDownloadActionsTest {
 
     @Test
     fun unreadAndBookmarkedActions() {
+        // Unfiltered: the source-order list, not the sorted one skipFilteredUsesFiltered covers.
+        harness.readerPreferences.skipFiltered.set(false)
         val downloads = harness.loaded().downloads
         downloads.runDownloadAction(DownloadAction.UNREAD_CHAPTERS)
         downloaded(listOf(chapter(2L, bookmark = true), chapter(3L)))
@@ -116,7 +128,8 @@ internal class MangaDownloadActionsTest {
         harness.mangaFlow.value = manga(favorite = true) to listOf(chapter(1L, read = true))
         model.awaitSuccess { it.chapters.size == 1 }
         model.downloads.runDownloadAction(DownloadAction.NEXT_10_CHAPTERS)
-        verify(exactly = 3) { manager.downloadChapters(any(), any(), any()) }
+        // Every chapter is read by now, so the third action downloads nothing.
+        verify(exactly = 2) { manager.downloadChapters(any(), any(), any()) }
     }
 
     @Test

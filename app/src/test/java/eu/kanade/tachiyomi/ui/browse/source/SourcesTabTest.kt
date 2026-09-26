@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.browse.source
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
@@ -19,6 +20,7 @@ import eu.kanade.tachiyomi.extension.getAppIconForSource
 import eu.kanade.tachiyomi.ui.browse.BrowseKoin
 import eu.kanade.tachiyomi.ui.browse.TabHost
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
+import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreenModel.Listing
 import eu.kanade.tachiyomi.ui.browse.source.feed.SourceFeedScreen
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
 import exh.ui.smartsearch.SmartSearchScreen
@@ -91,8 +93,11 @@ internal class SourcesTabTest {
         val host = host()
         compose.onNodeWithText("Alpha").performClick()
         compose.waitForIdle()
-        host.navigator.lastItem.shouldBeInstanceOf<BrowseSourceScreen>()
-        compose.onNodeWithText("Latest", useUnmergedTree = true).assertExists()
+        host.navigator.lastItem shouldBe BrowseSourceScreen(1L, Listing.Popular.query)
+        // Both rows support latest, so there is one "Latest" button per row; rows keep list order.
+        compose.onAllNodesWithText("Latest")[0].performClick()
+        compose.waitForIdle()
+        host.navigator.lastItem shouldBe BrowseSourceScreen(1L, Listing.Latest.query)
     }
 
     @Test

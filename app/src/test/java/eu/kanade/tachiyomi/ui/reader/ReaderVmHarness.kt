@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.manga.interactor.SetMangaViewerFlags
 import eu.kanade.domain.source.interactor.GetIncognitoState
@@ -21,10 +22,14 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.job
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
@@ -47,6 +52,11 @@ import tachiyomi.domain.source.service.SourceManager
 
 /** The file of the download-queue extensions the view model calls. */
 internal const val QUEUE_KT: String = "eu.kanade.tachiyomi.data.download.DownloadManagerQueueKt"
+
+/** The file of the deletion extensions (`enqueueChaptersToDelete`) the view model calls. */
+internal const val DELETION_KT: String = "eu.kanade.tachiyomi.data.download.DownloadManagerDeletionKt"
+
+private const val DRAIN_MILLIS = 5_000L
 
 /**
  * Every collaborator of a [ReaderViewModel]: real preferences over one shared store, relaxed mocks
@@ -84,6 +94,7 @@ internal class ReaderVmHarness(val context: Application = mockk(relaxed = true))
     val trackChapter: TrackChapter = mockk(relaxed = true)
 
     private var testMain = true
+    private val createdModels = mutableListOf<ReaderViewModel>()
 
     val manga: Manga = Manga.create().copy(id = 10L, source = 1L, ogTitle = "Manga")
 
@@ -129,10 +140,24 @@ internal class ReaderVmHarness(val context: Application = mockk(relaxed = true))
         startKoin { modules(graph, *extra) }
     }
 
+    /**
+     * Cancels every view model's scope and waits for it before unmocking: `onPageSelected` and the
+     * progress/deletion helpers run `launchNonCancellable` work on IO that would otherwise outlive the
+     * test, hit an unmocked stub or a stopped Koin, and fail a later suite's `runTest`.
+     */
     fun stop() {
-        unmockkAll()
-        stopKoin()
-        if (testMain) Dispatchers.resetMain()
+        try {
+            runBlocking {
+                withTimeout(DRAIN_MILLIS) {
+                    createdModels.forEach { it.viewModelScope.coroutineContext.job.cancelAndJoin() }
+                }
+            }
+        } finally {
+            createdModels.clear()
+            unmockkAll()
+            stopKoin()
+            if (testMain) Dispatchers.resetMain()
+        }
     }
 
     fun viewModel(savedState: SavedStateHandle = SavedStateHandle()): ReaderViewModel = ReaderViewModel(
@@ -158,7 +183,7 @@ internal class ReaderVmHarness(val context: Application = mockk(relaxed = true))
         getMergedMangaById = getMergedMangaById,
         getMergedReferencesById = getMergedReferencesById,
         getMergedChaptersByMangaId = getMergedChaptersByMangaId,
-    )
+    ).also { createdModels += it }
 
     /** A view model whose state already holds [manga] and whose chapter id is [chapterId]. */
     fun loadedViewModel(chapterId: Long = 1L): ReaderViewModel = viewModel().also { vm ->

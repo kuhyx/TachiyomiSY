@@ -75,8 +75,8 @@ internal class TrackHomeHarness {
     }
 
     fun stop() {
-        stopKoin()
         clearVoyagerScopes()
+        stopKoin()
     }
 
     /** Metadata for manga 1 carrying the given tracker ids. */

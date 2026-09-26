@@ -23,10 +23,12 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.android.controller.ActivityController
+import org.robolectric.shadows.ShadowChoreographer
 import org.robolectric.shadows.ShadowDialog
 import org.robolectric.shadows.ShadowLooper
 import org.robolectric.util.ReflectionHelpers
 import tachiyomi.core.common.Constants
+import java.util.concurrent.TimeUnit
 
 private const val WAIT_MS = 20_000L
 
@@ -37,6 +39,9 @@ internal class InterceptActivityTest {
 
     @Before
     fun setUp() {
+        // While a gallery loads the activity shows a spinner whose infinite animation, fed frames by
+        // an unpaused Choreographer, keeps every looper idle (setup() included) from ever returning.
+        ShadowChoreographer.setPaused(true)
         harness.start()
         loadKoinModules(baseActivityModule(harness.context))
         every { harness.sourceManager.isInitialized } returns MutableStateFlow(true)
@@ -44,6 +49,7 @@ internal class InterceptActivityTest {
 
     @After
     fun tearDown() {
+        ShadowChoreographer.setPaused(false)
         ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", sdk)
         harness.stop()
     }
@@ -87,7 +93,8 @@ internal class InterceptActivityTest {
         waitFor { ShadowDialog.getLatestDialog() != null }
         activity.isFinishing shouldBe false
         ShadowDialog.getLatestDialog().dismiss()
-        ShadowLooper.idleMainLooper()
+        // With the Choreographer paused, the dismissal only completes once frame time passes.
+        ShadowLooper.idleMainLooper(1, TimeUnit.SECONDS)
         activity.isFinishing shouldBe true
     }
 

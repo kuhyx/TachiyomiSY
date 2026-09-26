@@ -11,21 +11,28 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.manga.model.Manga
+import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 internal class MangaScreenObserversTest {
     private val harness = MangaHarness()
+
+    // Calls to acceptRootAndDiscardOthers; waiting on it idles the main looper the observer chain runs on.
+    private val accepted = AtomicInteger()
 
     @Before
     fun setUp() = harness.start()
@@ -35,6 +42,7 @@ internal class MangaScreenObserversTest {
 
     private fun accept(root: Manga) {
         coEvery { harness.updateHelper.acceptRootAndDiscardOthers(any(), any()) } coAnswers {
+            accepted.incrementAndGet()
             delay(300L)
             Triple(ChapterChain(root, emptyList(), emptyList()), emptyList(), emptyList())
         }
@@ -45,8 +53,11 @@ internal class MangaScreenObserversTest {
         harness.mangaFlow.value = manga(source = EH_SOURCE_ID, favorite = true) to listOf(chapter(1L))
         accept(manga(favorite = true).copy(id = 4L))
         val model = harness.model()
-        val redirect = runBlocking { withTimeout(10_000L) { model.redirectFlow.first() } }
-        redirect shouldBe MangaScreenModel.EXHRedirect(4L)
+        // The chain runs through the main looper, so wait with eventually instead of blocking it.
+        val redirect = CoroutineScope(Dispatchers.Default)
+            .async(start = CoroutineStart.UNDISPATCHED) { model.redirectFlow.first() }
+        eventually { redirect.isCompleted }
+        runBlocking { redirect.await() } shouldBe MangaScreenModel.EXHRedirect(4L)
     }
 
     @Test
@@ -54,20 +65,29 @@ internal class MangaScreenObserversTest {
         harness.mangaFlow.value = manga(source = EH_SOURCE_ID, favorite = true) to listOf(chapter(1L))
         accept(manga(favorite = true))
         harness.loaded()
-        coVerify(timeout = 5_000) { harness.updateHelper.acceptRootAndDiscardOthers(EH_SOURCE_ID, any()) }
-        harness.mangaFlow.value = manga(source = EH_SOURCE_ID, favorite = true) to listOf(chapter(2L))
+        eventually { accepted.get() == 1 }
+        coVerify { harness.updateHelper.acceptRootAndDiscardOthers(EH_SOURCE_ID, any()) }
         accept(manga().copy(id = 4L))
-        coVerify(timeout = 5_000, exactly = 2) { harness.updateHelper.acceptRootAndDiscardOthers(any(), any()) }
+        harness.mangaFlow.value = manga(source = EH_SOURCE_ID, favorite = true) to listOf(chapter(2L))
+        eventually { accepted.get() == 2 }
+        coVerify(exactly = 2) { harness.updateHelper.acceptRootAndDiscardOthers(any(), any()) }
     }
 
     @Test
     fun redirectErrorsAreLogged() {
         harness.mangaFlow.value = manga(source = EH_SOURCE_ID, favorite = true) to listOf(chapter(1L))
-        coEvery { harness.updateHelper.acceptRootAndDiscardOthers(any(), any()) } throws IllegalStateException()
-        harness.loaded().awaitSuccess().chapters.size shouldBe 1
+        coEvery { harness.updateHelper.acceptRootAndDiscardOthers(any(), any()) } answers {
+            accepted.incrementAndGet()
+            error("no chain")
+        }
+        val model = harness.loaded()
+        model.awaitSuccess().chapters.size shouldBe 1
+        eventually { accepted.get() == 1 }
         harness.mangaFlow.value = manga(source = EH_SOURCE_ID, favorite = true) to emptyList()
+        model.awaitSuccess { it.chapters.isEmpty() }
         harness.mangaFlow.value = manga(favorite = true) to listOf(chapter(1L))
-        coVerify(timeout = 5_000, exactly = 1) { harness.updateHelper.acceptRootAndDiscardOthers(any(), any()) }
+        model.awaitSuccess { it.manga.source == 7L && it.chapters.size == 1 }
+        coVerify(exactly = 1) { harness.updateHelper.acceptRootAndDiscardOthers(any(), any()) }
     }
 
     @Test

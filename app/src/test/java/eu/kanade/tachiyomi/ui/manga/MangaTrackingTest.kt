@@ -20,6 +20,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.manga.model.Manga
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val MANGADEX = 2_499_283_573_021_220_255L
 
@@ -104,14 +105,19 @@ internal class MangaTrackingTest {
     fun mergedMangaDexMemberCounts() {
         every { harness.trackerManager.mdList.isLoggedIn } returns true
         every { harness.trackerManager.mdList.id } returns TrackerManager.MDLIST
-        coEvery { harness.trackerManager.mdList.createInitialTracker(any(), any()) } returns
+        val created = AtomicBoolean()
+        coEvery { harness.trackerManager.mdList.createInitialTracker(any(), any()) } answers {
+            created.set(true)
             dbTrack(TrackerManager.MDLIST).also { it.mangaId = 1L }
+        }
         coEvery { parts.getTracks.await(1L) } returns listOf(domainTrack(id = 7L, trackerId = TrackerManager.MDLIST))
         val member = manga().copy(id = 5L, source = MANGADEX)
         coEvery { harness.getMergedReferences.await(1L) } returns listOf(mockk(relaxed = true))
         coEvery { harness.getMergedManga.await(1L) } returns listOf(member, manga().copy(id = 6L))
         load(manga(favorite = true)).awaitSuccess { it.hasLoggedInTrackers }
-        coVerify(timeout = 5_000) { harness.trackerManager.mdList.createInitialTracker(any(), member) }
+        // coVerify(timeout) would block the main looper the tracker work resumes on; idle it instead.
+        eventually { created.get() }
+        coVerify { harness.trackerManager.mdList.createInitialTracker(any(), member) }
     }
 
     @Test

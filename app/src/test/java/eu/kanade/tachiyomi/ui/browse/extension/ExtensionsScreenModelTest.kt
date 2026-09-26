@@ -136,9 +136,10 @@ internal class ExtensionsScreenModelTest {
     fun preferencesReachTheState() {
         val model = model()
         koin.sourcePreferences.extensionUpdatesCount.set(4)
-        koin.basePreferences.extensionInstaller.set(BasePreferences.ExtensionInstaller.SHIZUKU)
+        // SHIZUKU would fall back to the default here: Shizuku is not installed under Robolectric.
+        koin.basePreferences.extensionInstaller.set(BasePreferences.ExtensionInstaller.PRIVATE)
         eventually { model.state.value.updates == 4 }
-        eventually { model.state.value.installer == BasePreferences.ExtensionInstaller.SHIZUKU }
+        eventually { model.state.value.installer == BasePreferences.ExtensionInstaller.PRIVATE }
         ExtensionUiModel.Header.Text("en").copy().text shouldBe "en"
         ExtensionUiModel.Item(installed("a"), InstallStep.Idle).copy().installStep shouldBe InstallStep.Idle
     }

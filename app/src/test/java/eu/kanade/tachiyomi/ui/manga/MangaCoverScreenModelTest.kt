@@ -81,9 +81,9 @@ internal class MangaCoverScreenModelTest {
 
     @After
     fun tearDown() {
+        clearVoyagerScopes()
         stopKoin()
         SingletonImageLoader.reset()
-        clearVoyagerScopes()
     }
 
     private fun model(): MangaCoverScreenModel = MangaCoverScreenModel(1L).also { model ->

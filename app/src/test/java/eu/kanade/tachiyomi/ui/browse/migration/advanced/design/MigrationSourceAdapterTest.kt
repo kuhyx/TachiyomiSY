@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.browse.migration.advanced.design
 
 import android.graphics.Paint
 import android.graphics.drawable.ColorDrawable
-import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.R
@@ -66,7 +65,8 @@ internal class MigrationSourceAdapterTest {
             layoutManager = LinearLayoutManager(context)
             this.adapter = adapter
         }
-        FrameLayout(context).addView(recycler)
+        // The holder loads the icon through View.post, which only runs once the row is attached to a window.
+        context.setContentView(recycler)
         adapter.updateDataSet(items.toList())
         recycler.measure(1080, 1920)
         recycler.layout(0, 0, 1080, 1920)

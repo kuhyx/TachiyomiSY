@@ -1,12 +1,17 @@
 package eu.kanade.tachiyomi.data.notification
 
 import android.app.Application
+import eu.kanade.tachiyomi.data.download.deleteChapters
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.ui.manga.DELETION
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.runs
 import io.mockk.verify
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -87,8 +92,11 @@ internal class NotificationReceiverChapterTest : ReceiverTestBase() {
         coVerify(exactly = 0) { getManga.await(any<Long>()) }
     }
 
+    /** The deletion is an extension, which the relaxed manager mock does not intercept: stub it statically. */
     @Test
     fun markAsReadDeletesDownloads() {
+        mockkStatic(DELETION)
+        every { downloadManager.deleteChapters(any(), any(), any()) } just runs
         downloadPreferences.removeAfterMarkedAsRead.set(true)
         val source = mockk<Source>()
         coEvery { getChapter.await("/c", 3L) } returns chapter
@@ -97,6 +105,7 @@ internal class NotificationReceiverChapterTest : ReceiverTestBase() {
         every { sourceManager.get(8L) } returns source
         chapterAction(NotificationReceiver.ACTION_MARK_AS_READ)
         coVerify(timeout = 5_000) { updateChapter.awaitAll(any()) }
+        verify { downloadManager.deleteChapters(listOf(chapter), manga, source) }
     }
 
     @Test

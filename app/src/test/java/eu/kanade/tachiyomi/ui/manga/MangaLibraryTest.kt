@@ -1,12 +1,18 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import eu.kanade.domain.manga.interactor.UpdateManga
+import eu.kanade.tachiyomi.data.download.deleteManga
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.runs
+import io.mockk.unmockkStatic
+import io.mockk.verify
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -33,10 +39,16 @@ internal class MangaLibraryTest {
         harness.mangaFlow.value = manga() to listOf(chapter(1L))
         coEvery { parts.getDuplicateLibraryManga(any()) } returns emptyList()
         coEvery { harness.updateManga.awaitUpdateFavorite(any(), any()) } returns true
+        // The real deletion runs on Dispatchers.IO against the relaxed manager and would leak into later tests.
+        mockkStatic(DELETION)
+        every { harness.downloadManager.deleteManga(any(), any(), any()) } just runs
     }
 
     @After
-    fun tearDown() = harness.stop()
+    fun tearDown() {
+        harness.stop()
+        unmockkStatic(DELETION)
+    }
 
     @Test
     fun duplicatesStopAtADialog() {
@@ -96,6 +108,8 @@ internal class MangaLibraryTest {
         eventually { model.snackbarHostState.currentSnackbarData != null }
         model.snackbarHostState.currentSnackbarData?.performAction()
         coVerify(timeout = 5_000) { harness.updateManga.awaitUpdateCoverLastModified(1L) }
+        eventually { model.snackbarHostState.currentSnackbarData == null }
+        verify { harness.downloadManager.deleteManga(any(), harness.source, any()) }
     }
 
     @Test
@@ -122,7 +136,8 @@ internal class MangaLibraryTest {
         val model = harness.loaded()
         model.library.showSetFetchIntervalDialog()
         model.awaitSuccess().dialog.shouldBeInstanceOf<MangaScreenModel.Dialog.SetFetchInterval>()
-        coEvery { harness.updateManga.awaitUpdateFetchInterval(any()) } returnsMany listOf(false, true)
+        // dateTime defaults to now(), so a one-argument stub would never match the call.
+        coEvery { harness.updateManga.awaitUpdateFetchInterval(any(), any(), any()) } returnsMany listOf(false, true)
         coEvery { parts.mangaRepository.getMangaById(1L) } returns manga().copy(fetchInterval = -3)
         model.library.setFetchInterval(manga(), 3)
         model.library.setFetchInterval(manga(), 3)

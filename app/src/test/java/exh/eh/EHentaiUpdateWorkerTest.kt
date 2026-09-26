@@ -16,6 +16,9 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.junit.After
@@ -37,7 +40,7 @@ internal class EHentaiUpdateWorkerTest {
     @After
     fun tearDown() {
         ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", sdk)
-        DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY.enabled = true
+        unmockkObject(DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY)
         harness.stop()
     }
 
@@ -69,6 +72,11 @@ internal class EHentaiUpdateWorkerTest {
 
     @Test
     fun agedRecentAndUnknownAreSkipped() = runBlocking<Unit> {
+        // DebugToggles caches its store in a static lazy, captured by whichever test in this JVM read a
+        // toggle first (often an in-memory store that drops writes), so the toggle is pinned here instead.
+        val restrict = DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY
+        mockkObject(restrict)
+        every { restrict.enabled } returns true
         val aged = ehManga(1)
         val recent = ehManga(2)
         val unknown = ehManga(3)
@@ -80,7 +88,7 @@ internal class EHentaiUpdateWorkerTest {
         Json.decodeFromString<EHentaiUpdaterStats>(harness.exhPreferences.exhAutoUpdateStats.get())
             .possibleUpdates shouldBe 0
         // Without the frequency restriction the recently checked gallery is due again.
-        DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY.enabled = false
+        every { restrict.enabled } returns false
         coEvery { harness.updateHelper.acceptRootAndDiscardOthers(any(), any()) } returns
             Triple(ChapterChain(recent, emptyList(), emptyList()), emptyList(), emptyList())
         coEvery { harness.getChaptersByMangaId.await(2L) } returns listOf(ehChapter(21, 2, "/s/a"))

@@ -16,7 +16,9 @@ internal class BiometricTimesLoadingTest {
     private val range = TimeRange(1.hours, 2.hours)
 
     @BeforeEach
-    fun setUp() = mainUnconfined()
+    fun setUp() {
+        mainUnconfined()
+    }
 
     @AfterEach
     fun tearDown() = mainReset()

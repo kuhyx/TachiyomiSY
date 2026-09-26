@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.ui.browse.BrowseKoin
 import eu.kanade.tachiyomi.ui.browse.TabHost
 import eu.kanade.tachiyomi.ui.browse.migration.manga.MigrateMangaScreen
 import eu.kanade.tachiyomi.ui.browse.source.source
+import eu.kanade.tachiyomi.ui.manga.eventually
 import eu.kanade.tachiyomi.ui.manga.manga
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -88,7 +89,8 @@ internal class MigrateSourceTabTest {
     fun allMigratesEveryEntry() {
         val host = host()
         compose.onNodeWithText("All").performClick()
-        compose.waitUntil(timeoutMillis = 10_000) { host.navigator.lastItem is MigrationConfigScreen }
+        // The push arrives through withUIContext, a post to the paused main looper that eventually idles.
+        eventually { host.navigator.lastItem is MigrationConfigScreen }
     }
 
     @Test

@@ -66,6 +66,8 @@ internal class DownloadCacheTest : DownloadCacheTestBase() {
     @Test
     fun storageChangesRenewTheIndex() {
         val cache = newCache()
+        // A replay-less flow drops an emit that lands before the cache's IO collector subscribes.
+        waitUntil { storageChanges.subscriptionCount.value > 0 }
         waitUntil { cache.rootDownloadsDir.sourceDirs.isEmpty() && cache.getTotalDownloadCount() == 0 }
         entry(source = "Alpha", manga = "Title", name = "Ch 1")
         runBlocking { storageChanges.emit(Unit) }

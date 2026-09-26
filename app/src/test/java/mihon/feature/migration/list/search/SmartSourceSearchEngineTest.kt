@@ -11,6 +11,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
+import java.util.concurrent.CopyOnWriteArrayList
 
 /** A manga the source answers with. */
 internal fun searchHit(title: String): SManga = SManga.create().apply {
@@ -19,7 +20,8 @@ internal fun searchHit(title: String): SManga = SManga.create().apply {
 }
 
 internal class SmartSourceSearchEngineTest {
-    private val queries = mutableListOf<String>()
+    // deepSearch runs its queries concurrently on Dispatchers.Default.
+    private val queries = CopyOnWriteArrayList<String>()
     private var hits: List<SManga> = emptyList()
 
     private fun source(): Source = mockk<Source> {

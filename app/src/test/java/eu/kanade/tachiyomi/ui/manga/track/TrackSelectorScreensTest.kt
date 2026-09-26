@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
+import eu.kanade.presentation.util.invokeClick
 import eu.kanade.tachiyomi.data.track.domainTrack
 import io.mockk.coVerify
 import io.mockk.every
@@ -56,8 +57,10 @@ internal class TrackSelectorScreensTest {
         compose.waitForIdle()
     }
 
+    // The date picker is taller than Robolectric's default 470dp window, which pushes its button
+    // row off-screen where a touch never lands; the semantics click reaches it regardless.
     private fun confirmAndClose() {
-        compose.onNodeWithText("OK").performClick()
+        compose.onNodeWithText("OK").invokeClick()
         compose.waitForIdle()
         compose.onNodeWithText("Blank").assertExists()
     }
@@ -114,7 +117,7 @@ internal class TrackSelectorScreensTest {
     @Test
     fun startDateCanBeRemoved() {
         show(TrackDateSelectorScreen(track.copy(startDate = 86_400_000L), 1L, start = true))
-        compose.onNodeWithText("Remove").performClick()
+        compose.onNodeWithText("Remove").invokeClick()
         compose.waitForIdle()
         compose.onNodeWithText("Remove date?").assertExists()
         compose.onNodeWithText("Remove").performClick()

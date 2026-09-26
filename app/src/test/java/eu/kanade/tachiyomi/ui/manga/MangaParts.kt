@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.os.Looper
 import cafe.adriel.voyager.core.model.ScreenModelStore
 import eu.kanade.domain.chapter.interactor.SetReadStatus
 import eu.kanade.domain.manga.interactor.SetExcludedScanlators
@@ -13,9 +14,11 @@ import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.job
 import mihon.domain.chapter.interactor.FilterChaptersForDownload
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import org.robolectric.Shadows.shadowOf
 import tachiyomi.domain.category.interactor.GetCategories
 import tachiyomi.domain.category.interactor.SetMangaCategories
 import tachiyomi.domain.chapter.interactor.SetMangaDefaultChapterFlags
@@ -108,13 +111,34 @@ internal object NoCustomInfo : CustomMangaRepository {
 
 /**
  * Cancels and forgets every coroutine scope Voyager cached for screen models built outside a
- * Navigator, so one test's model never keeps running into the next.
+ * Navigator, so one test's model never keeps running into the next. Call it before `stopKoin()`:
+ * cancelling does not stop a block already running on Dispatchers.IO, which would otherwise reach
+ * Injekt after Koin is gone and fail a later test's `runTest`, so it lets the scopes finish first.
+ * The entries are removed only afterwards: a draining block that reads `screenModelScope` would
+ * otherwise get a fresh, uncancelled scope. The wait idles the main looper the scopes dispatch on
+ * (`runBlocking { join() }` there would deadlock) and is bounded rather than asserted: a
+ * non-cancellable block parked in `showSnackbar` has no SnackbarHost to resume it.
  */
 internal fun clearVoyagerScopes() {
     val dependencies = checkNotNull(ScreenModelStore.readMember(ScreenModelStore::class, "dependencies"))
     val remove = dependencies::class.java.methods.first { it.name == "remove" && it.parameterCount == 1 }
-    (dependencies as Map<*, *>).entries.toList().forEach { (key, value) ->
-        ((value as? Pair<*, *>)?.first as? CoroutineScope)?.cancel()
-        remove.invoke(dependencies, key)
+    val entries = (dependencies as Map<*, *>).entries.toList()
+    val scopes = entries.mapNotNull { (_, value) -> (value as? Pair<*, *>)?.first as? CoroutineScope }
+    try {
+        scopes.forEach { it.cancel() }
+        idleMainUntilOrTimeout { scopes.all { it.coroutineContext.job.isCompleted } }
+    } finally {
+        entries.forEach { (key, _) -> remove.invoke(dependencies, key) }
     }
 }
+
+private fun idleMainUntilOrTimeout(done: () -> Boolean) {
+    val deadline = System.currentTimeMillis() + SCOPE_DRAIN_TIMEOUT_MS
+    val onMain = Looper.myLooper() == Looper.getMainLooper()
+    while (!done() && System.currentTimeMillis() < deadline) {
+        if (onMain) shadowOf(Looper.getMainLooper()).idle()
+        Thread.sleep(10)
+    }
+}
+
+private const val SCOPE_DRAIN_TIMEOUT_MS = 5_000L

@@ -3,6 +3,9 @@ package eu.kanade.tachiyomi.ui.manga.merged
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Spinner
+import com.elvishew.xlog.LogConfiguration
+import com.elvishew.xlog.XLog
+import com.elvishew.xlog.printer.Printer
 import com.google.android.material.materialswitch.MaterialSwitch
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.EditMergedSettingsDialogBinding
@@ -28,6 +31,8 @@ internal class EditMergedHeaderTest {
 
     @Before
     fun setUp() {
+        // The dedupe toggles log through XLog, which a fresh test JVM has not initialised.
+        XLog.init(LogConfiguration.Builder().build(), Printer { _, _, _ -> })
         koin.start()
         every { koin.sourceManager.getOrStub(any()) } returns mockk(relaxed = true)
     }
@@ -102,8 +107,9 @@ internal class EditMergedHeaderTest {
     @Test
     fun holdersBindAndClick() {
         open(selfReference(), reference(1L), reference(2L))
-        val holder = state.mergedMangaAdapter!!.allBoundViewHolders.filterIsInstance<EditMergedMangaHolder>().first()
-        holder.reference?.id shouldBe 1L
+        // Bound holders come back in no fixed order; take reference 1's (its absence fails the test).
+        val holder = state.mergedMangaAdapter!!.allBoundViewHolders.filterIsInstance<EditMergedMangaHolder>()
+            .first { it.reference?.id == 1L }
         holder.binding.remove.performClick()
         holder.binding.getChapterUpdates.performClick()
         holder.binding.download.performClick()

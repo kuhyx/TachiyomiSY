@@ -114,10 +114,13 @@ internal class SourceFeedScreenModelTest {
         eventually { toasts == listOf(SYMR.strings.save_search_invalid) }
         model.onSavedSearch(harness.search(3L, "A"), { _, id -> browsed += id }, { toasts += it })
         eventually { browsed == listOf(3L) }
+        // A saved filter list never equals the source's (FilterList.equals is false), so it always browses.
         model.onSavedSearch(harness.search(4L, "D", FilterList(Flag())), { _, id -> browsed += id }, { toasts += it })
+        eventually { browsed == listOf(3L, 4L) }
         model.setFilters(FilterList())
         model.onSavedSearch(harness.search(5L, "E", filters = null), { _, id -> browsed += id }, { toasts += it })
-        eventually { browsed == listOf(3L, 5L) }
+        eventually { browsed == listOf(3L, 4L, 5L) }
+        toasts shouldBe listOf(SYMR.strings.save_search_invalid)
     }
 
     @Test
