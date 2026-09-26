@@ -11,6 +11,7 @@ import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.releaseLogcat
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.startDownloads
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
@@ -18,6 +19,7 @@ import eu.kanade.tachiyomi.data.updater.allowNotifications
 import eu.kanade.tachiyomi.source.online.installSilentXLog
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import mihon.domain.chapter.interactor.FilterChaptersForDownload
 import mihon.domain.source.interactor.UpdateMangaFromRemote
@@ -73,6 +75,9 @@ internal abstract class LibraryUpdateTestBase {
         installSilentXLog()
         logged = captureLogcat()
         every { trackerManager.mdList } returns mdList
+        // Starting downloads enqueues the downloader worker; WorkManager is not initialised here.
+        mockkStatic("eu.kanade.tachiyomi.data.download.DownloadManagerQueueKt")
+        every { downloadManager.startDownloads() } returns Unit
         every { fetchInterval.getWindow(any()) } returns (0L to Long.MAX_VALUE)
         val customInfo = mockk<GetCustomMangaInfo>().also { every { it.get(any()) } returns null }
         startKoin {
