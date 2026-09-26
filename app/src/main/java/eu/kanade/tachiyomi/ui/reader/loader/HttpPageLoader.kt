@@ -92,8 +92,11 @@ internal class HttpPageLoader(
             ReaderPage(index, page.url, page.imageUrl)
         }
         if (readerPreferences.aggressivePageLoading.get()) {
-            // Freshly built pages are all still queued.
-            rp.forEach { queue.offer(PriorityPage(it, 0)) }
+            rp.forEach {
+                if (it.status == Page.State.Queue) {
+                    queue.offer(PriorityPage(it, 0))
+                }
+            }
         }
         return rp
         // SY <--

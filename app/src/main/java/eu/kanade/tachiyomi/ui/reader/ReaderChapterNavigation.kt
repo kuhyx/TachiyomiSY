@@ -130,7 +130,10 @@ internal suspend fun ReaderViewModel.preload(chapter: ReaderChapter) {
         }
     }
 
-    // Past the first check the chapter is waiting or failed, both of which (re)load.
+    if (chapter.state != ReaderChapter.State.Wait && chapter.state !is ReaderChapter.State.Error) {
+        return
+    }
+
     val loader = loader ?: return
     try {
         logcat { "Preloading ${chapter.chapter.url}" }
