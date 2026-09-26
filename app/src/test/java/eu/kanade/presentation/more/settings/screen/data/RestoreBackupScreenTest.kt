@@ -1,6 +1,7 @@
 package eu.kanade.presentation.more.settings.screen.data
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -81,6 +82,18 @@ internal class RestoreBackupScreenTest {
         compose.waitForIdle()
         verify { BackupRestoreJob.start(any(), any(), any()) }
         count("Below") shouldBe 1
+    }
+
+    @Test
+    fun nothingChosenCannotRestore() {
+        every { DeviceUtil.isMiuiOptimizationDisabled() } returns false
+        valid(sources = emptyList(), trackers = emptyList())
+        compose.showAbove(RestoreBackupScreen(URI))
+        count("Backup/restore may not function properly if MIUI Optimization is disabled.") shouldBe 0
+        listOf("Library", "Categories", "App settings", "Extension stores", "Source settings", "Saved Searches")
+            .forEach { compose.onNodeWithText(it).performClick() }
+        compose.waitForIdle()
+        compose.onNodeWithText("Restore").assertIsNotEnabled()
     }
 
     @Test

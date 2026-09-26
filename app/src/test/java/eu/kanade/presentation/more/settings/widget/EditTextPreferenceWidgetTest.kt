@@ -26,12 +26,12 @@ internal class EditTextPreferenceWidgetTest {
 
     private val confirmed = mutableListOf<String>()
 
-    private fun show(accept: Boolean) {
+    private fun show(accept: Boolean, subtitle: String? = "Now %s") {
         compose.setContent {
             MaterialTheme {
                 EditTextPreferenceWidget(
                     title = "Name",
-                    subtitle = "Now %s",
+                    subtitle = subtitle,
                     icon = null,
                     value = "old",
                     onConfirm = {
@@ -42,11 +42,18 @@ internal class EditTextPreferenceWidgetTest {
                 )
             }
         }
-        compose.onNodeWithText("Now old").performClick()
+        compose.onNodeWithText("Name").performClick()
         compose.waitForIdle()
     }
 
     private fun count(text: String): Int = compose.onAllNodesWithText(text).fetchSemanticsNodes().size
+
+    @Test
+    fun noSubtitleStillOpens() {
+        show(accept = true, subtitle = null)
+        count("Now old") shouldBe 0
+        compose.onNode(hasSetTextAction()).assertExists()
+    }
 
     @Test
     fun acceptedValueClosesDialog() {

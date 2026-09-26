@@ -16,8 +16,10 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "h2000dp")
 internal class SyncScreensTest {
     @get:Rule
     val compose = createComposeRule()

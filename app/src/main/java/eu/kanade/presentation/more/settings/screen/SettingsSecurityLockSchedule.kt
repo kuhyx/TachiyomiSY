@@ -107,11 +107,9 @@ internal fun DayList(selected: SnapshotStateList<SettingsSecurityScreen.DayOptio
         SettingsSecurityScreen.DayOption.entries.forEach { day ->
             item {
                 val isSelected = selected.contains(day)
+                // An if, not a when (Boolean): that keeps a default arm JaCoCo counts as missed.
                 val onSelectionChanged = {
-                    when (!isSelected) {
-                        true -> selected.add(day)
-                        false -> selected.remove(day)
-                    }
+                    if (isSelected) selected.remove(day) else selected.add(day)
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

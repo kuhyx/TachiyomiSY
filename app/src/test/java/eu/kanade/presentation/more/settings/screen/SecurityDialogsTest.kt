@@ -102,7 +102,8 @@ internal class SecurityDialogsTest {
         koin.security.authenticatorDays.set(0)
         compose.waitForIdle()
         harness.click("Biometric lock days")
-        compose.onNodeWithText("Monday").performClick()
+        // On, off, on again through the row.
+        repeat(3) { compose.onNodeWithText("Monday").performClick() }
         compose.onAllNodes(isToggleable()).onFirst().performClick()
         compose.onAllNodes(isToggleable()).onFirst().performClick()
         compose.onNodeWithText("OK").performClick()

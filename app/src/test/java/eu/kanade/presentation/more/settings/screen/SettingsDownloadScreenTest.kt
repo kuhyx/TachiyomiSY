@@ -59,6 +59,9 @@ internal class SettingsDownloadScreenTest {
     @Test
     fun categoriesDialogStoresChoice() {
         koin.download.downloadNewChapters.set(true)
+        // Ids of deleted categories are dropped when the dialog opens.
+        koin.download.downloadNewChapterCategories.set(setOf("99"))
+        koin.download.downloadNewChapterCategoriesExclude.set(setOf("98"))
         harness.show(SettingsDownloadScreen)
         harness.click("Categories")
         compose.onNodeWithText("Comics").performClick()

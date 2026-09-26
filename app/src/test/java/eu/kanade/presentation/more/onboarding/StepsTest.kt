@@ -6,13 +6,18 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import eu.kanade.domain.ui.model.ThemeMode
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
+import tachiyomi.core.common.preference.InMemoryPreferenceStore
+import tachiyomi.domain.storage.service.StoragePreferences
 
 @RunWith(RobolectricTestRunner::class)
 internal class StepsTest {
@@ -46,5 +51,18 @@ internal class StepsTest {
         compose.setContent { GuidesStepPreview() }
         compose.onNodeWithText("Getting started guide").assertExists()
         GuidesStep(onRestoreBackup = {}).isComplete shouldBe true
+    }
+
+    @Test
+    fun storageStepOutlivesItsChanges() {
+        // InMemoryPreferenceStore's changes() completes at once, so the step's collector runs to its end.
+        stopKoin()
+        startKoin {
+            modules(module { single { StoragePreferences(mockk(relaxed = true), InMemoryPreferenceStore()) } })
+        }
+        val step = StorageStep()
+        compose.setContent { MaterialTheme { step.Content() } }
+        compose.waitForIdle()
+        step.isComplete shouldBe false
     }
 }

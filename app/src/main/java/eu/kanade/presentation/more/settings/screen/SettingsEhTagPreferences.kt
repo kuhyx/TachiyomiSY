@@ -65,7 +65,8 @@ internal fun TagThresholdDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
             TextButton(
-                onClick = { value.toIntOrNull()?.let(onValueChange) },
+                // Enabled only while the value parses and is in range.
+                onClick = { onValueChange(value.toInt()) },
                 enabled = isValid,
             ) {
                 Text(text = stringResource(MR.strings.action_ok))

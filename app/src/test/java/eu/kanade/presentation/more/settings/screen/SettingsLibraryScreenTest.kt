@@ -94,6 +94,9 @@ internal class SettingsLibraryScreenTest {
 
     @Test
     fun categoriesDialogStoresChoice() {
+        // Ids of deleted categories are dropped when the dialog opens.
+        koin.library.updateCategories.set(setOf("99"))
+        koin.library.updateCategoriesExclude.set(setOf("98"))
         harness.show(SettingsLibraryScreen)
         harness.click("Categories")
         compose.onNodeWithText("Comics").performClick()

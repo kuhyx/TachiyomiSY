@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -109,5 +110,20 @@ internal class ClearDatabaseScreenModelTest {
             Thread.sleep(10)
         }
         ready(model).items shouldBe listOf(a, b)
+    }
+
+    @Test
+    fun finishedSourceKeepsItems() {
+        stopKoin()
+        val finite = mockk<GetSourcesWithNonLibraryManga> { every { subscribe() } returns flowOf(listOf(b, a)) }
+        startKoin {
+            modules(
+                module {
+                    single { finite }
+                    single { database }
+                },
+            )
+        }
+        ready(ClearDatabaseScreenModel()).items shouldBe listOf(a, b)
     }
 }

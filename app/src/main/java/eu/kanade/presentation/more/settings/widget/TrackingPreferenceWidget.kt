@@ -36,7 +36,8 @@ internal fun TrackingPreferenceWidget(
     Box(modifier = Modifier.highlightBackground(highlighted)) {
         Row(
             modifier = modifier
-                .clickable(enabled = onClick != null, onClick = { onClick?.invoke() })
+                // Enabled only with a callback, so the click never sees a null one.
+                .clickable(enabled = onClick != null, onClick = { onClick!!() })
                 .fillMaxWidth()
                 .padding(horizontal = PrefsHorizontalPadding, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
