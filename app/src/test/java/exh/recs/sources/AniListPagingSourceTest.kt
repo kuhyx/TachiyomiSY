@@ -87,6 +87,9 @@ internal class AniListPagingSourceTest {
         val blankSynonym = media("""{"english":null,"romaji":null,"native":"Native"}""", synonyms = """[""]""")
         server.body = page(withRecs(media("""{"english":"Self"}"""), blankSynonym))
         runBlocking { source.getRecsById("1") }.single().title shouldBe "Native"
+        val foreignBlank = media("""{"english":null,"romaji":" ","native":"Native"}""", country = "KR")
+        server.body = page(withRecs(media("""{"english":"Self"}"""), foreignBlank))
+        runBlocking { source.getRecsById("1") }.single().title shouldBe "Native"
     }
 
     @Test
