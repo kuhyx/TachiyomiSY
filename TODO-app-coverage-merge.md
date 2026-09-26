@@ -39,7 +39,11 @@ README explains them. It must be empty and deleted before the campaign ends.
    a string `when` becomes a map lookup (its hashCode switch has unreachable
    collision arms); a `catch` around something that cannot throw is deleted;
    Android-only code gets an injectable seam (`CrashLogUtil` takes its
-   `logcat` argv) rather than an exclusion. A claim you cannot fix that way
+   `logcat` argv) rather than an exclusion. The ONE exception class: an
+   exhaustive `when` over a sealed type/enum keeps its synthetic no-match arm
+   and gets a line in `app/coverage-exceptions.txt` (class, count, reason);
+   PR #31 converted six such `when`s to `else` and they were reverted
+   (decided 2026-09-26) -- reject that conversion wherever it reappears. A claim you cannot fix that way
    is worth a question to kuhy, not a silent exception.
 3. **Expect cross-PR conflicts** on shared main-code files. Each PR body has a
    "shared main-code edits" heading listing them. Merge the smallest first,

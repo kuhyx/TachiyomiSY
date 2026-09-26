@@ -115,6 +115,12 @@ a whole slice, read `app/src/test/java/eu/kanade/tachiyomi/data/track/` (Koin gr
   decode `@Serializable` classes with full and minimal JSON.
 - **Tag tables** (`exh/eh/tags/*.kt`, `TagList` objects with `getTags1()...`): one test per
   object calling every `getTagsN()` and asserting size/first/last; ~30k trivial lines.
+- **Exhaustive `when` stays exhaustive.** A `when` over a sealed type or enum keeps a
+  synthetic "no subtype matched" arm no test can reach. Do NOT turn the last branch into `else`
+  (or cast in it) to cover it -- that trades a compile error for a silent bug (decided
+  2026-09-26). Instead add one line to `app/coverage-exceptions.txt`:
+  `<fully.qualified.ClassKt> <missed-branches> <reason>`. The gate fails on any class that
+  misses a branch without an entry, misses more than its entry allows, or has a stale entry.
 - Traps from the other modules (all real): a mockk field initialised before `@BeforeEach` runs
   the mocked class's `<clinit>`; coroutine stack-trace recovery copies exceptions (compare the
   cause chain); `when(Boolean)` keeps a default arm JaCoCo counts; a `by lazy` is a branch

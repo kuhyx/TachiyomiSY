@@ -30,11 +30,9 @@ internal class ExtensionStoresScreenModel(
             getExtensionStores.subscribe()
                 .collectLatest { stores ->
                     mutableState.update {
-                        // Loading is the only other state; a sealed `when` would add a dead "no match" arm.
-                        if (it is ExtensionStoreScreenState.Success) {
-                            it.copy(stores = stores)
-                        } else {
-                            ExtensionStoreScreenState.Success(stores = stores)
+                        when (it) {
+                            ExtensionStoreScreenState.Loading -> ExtensionStoreScreenState.Success(stores = stores)
+                            is ExtensionStoreScreenState.Success -> it.copy(stores = stores)
                         }
                     }
                 }

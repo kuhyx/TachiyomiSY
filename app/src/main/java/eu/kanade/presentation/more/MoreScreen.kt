@@ -156,8 +156,10 @@ private fun LazyListScope.linkItems(links: List<Triple<StringResource, ImageVect
 }
 
 @Composable
-// Stopped is the `else`: an exhaustive sealed `when` keeps a dead "no match" arm.
 private fun downloadQueueSubtitle(state: DownloadQueueState): String? = when (state) {
+    DownloadQueueState.Stopped -> {
+        null
+    }
     is DownloadQueueState.Paused -> {
         val pending = state.pending
         if (pending == 0) {
@@ -171,8 +173,5 @@ private fun downloadQueueSubtitle(state: DownloadQueueState): String? = when (st
     is DownloadQueueState.Downloading -> {
         val pending = state.pending
         pluralStringResource(MR.plurals.download_queue_summary, count = pending, pending)
-    }
-    else -> {
-        null
     }
 }

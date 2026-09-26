@@ -29,8 +29,10 @@ internal class ClearDatabaseScreenModel : StateScreenModel<ClearDatabaseScreenMo
                 .collectLatest { list ->
                     mutableState.update { old ->
                         val items = list.sortedBy { it.name }
-                        // Loading is the only other state; a sealed `when` would add a dead "no match" arm.
-                        if (old is State.Ready) old.copy(items = items) else State.Ready(items)
+                        when (old) {
+                            State.Loading -> State.Ready(items)
+                            is State.Ready -> old.copy(items = items)
+                        }
                     }
                 }
         }

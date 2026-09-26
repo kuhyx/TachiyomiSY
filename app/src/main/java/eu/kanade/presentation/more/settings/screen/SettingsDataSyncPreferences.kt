@@ -94,8 +94,7 @@ internal fun getBasePreferences(
     val preferences = when (syncServiceType) {
         SyncManager.SyncService.NONE -> emptyList()
         SyncManager.SyncService.SYNCYOMI -> getSelfHostPreferences(syncPreferences)
-        // GOOGLE_DRIVE: an exhaustive enum `when` keeps a dead "no match" arm.
-        else -> getGoogleDrivePreferences()
+        SyncManager.SyncService.GOOGLE_DRIVE -> getGoogleDrivePreferences()
     }
 
     return if (syncServiceType != SyncManager.SyncService.NONE) {
