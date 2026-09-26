@@ -225,8 +225,7 @@ internal class LibrarySearch(
                 val status = trackService.getStatus(track.status)?.let {
                     context.stringResource(it)
                 }
-                val name = trackerManager.get(track.trackerId)?.name
-                status?.contains(constraint, true) == true || name?.contains(constraint, true) == true
+                status?.contains(constraint, true) == true || trackService.name.contains(constraint, true)
             } else {
                 false
             }

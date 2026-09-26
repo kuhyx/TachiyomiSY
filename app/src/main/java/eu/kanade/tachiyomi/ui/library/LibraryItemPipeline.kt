@@ -177,15 +177,14 @@ internal class LibraryItemPipeline(
 
     private fun List<LibraryItem>.groupByTrackStatus(context: Context): Map<Category, List<LibraryItem>> {
         val tracks = runBlocking { getTracks.await() }.groupBy { it.mangaId }
+        // Grouped by the status itself, so each group's key already is the status its category names.
         return groupBy { item ->
-            val status = tracks[item.libraryManga.manga.id]?.firstNotNullOfOrNull { track ->
+            tracks[item.libraryManga.manga.id]?.firstNotNullOfOrNull { track ->
                 TrackStatus.parseTrackerStatus(trackerManager, track.trackerId, track.status)
             } ?: TrackStatus.OTHER
-            status.int
-        }.mapKeys { (id) ->
-            val status = TrackStatus.entries.find { it.int == id } ?: TrackStatus.OTHER
+        }.mapKeys { (status) ->
             Category(
-                id = id.toLong(),
+                id = status.int.toLong(),
                 name = context.stringResource(status.res),
                 order = TrackStatus.entries.indexOf(status).toLong(),
                 flags = 0,
@@ -208,7 +207,8 @@ internal class LibraryItemPipeline(
                     val source = sourceManager.getOrStub(it.key)
                     source.name.ifBlank { source.id.toString() }
                 },
-                order = sources.indexOf(it.key).takeUnless { it == -1 }?.toLong() ?: Long.MAX_VALUE,
+                // Every key is one of the sorted sources, so it always has an index.
+                order = sources.indexOf(it.key).toLong(),
                 flags = 0,
             )
         }

@@ -58,7 +58,8 @@ internal fun LibraryPreferences.sortTagList(): List<String> = sortTagsForLibrary
     .asSequence()
     .mapNotNull {
         val list = it.split("|")
-        val order = list.getOrNull(0)?.toIntOrNull()
+        // split always yields at least one part.
+        val order = list.first().toIntOrNull()
         val tag = list.getOrNull(1)
         if (order != null && tag != null) order to tag else null
     }
