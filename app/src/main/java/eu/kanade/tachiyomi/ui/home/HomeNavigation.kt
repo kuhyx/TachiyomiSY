@@ -27,8 +27,9 @@ import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.ui.browse.BrowseTab
 import eu.kanade.tachiyomi.ui.updates.UpdatesTab
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import tachiyomi.domain.library.service.LibraryPreferences
@@ -54,8 +55,9 @@ internal fun HomeNavigationRail(alwaysShowLabel: Boolean) {
 
 @Composable
 internal fun HomeNavigationBar(alwaysShowLabel: Boolean) {
+    // onEach/launchIn rather than a collect: the channel never closes, so nothing would follow the collect.
     val bottomNavVisible by produceState(initialValue = true) {
-        HomeScreen.showBottomNavEvent.receiveAsFlow().collectLatest { value = it }
+        HomeScreen.showBottomNavEvent.receiveAsFlow().onEach { value = it }.launchIn(this)
     }
     AnimatedVisibility(
         visible = bottomNavVisible,
@@ -148,7 +150,8 @@ internal fun NavigationIconItem(tab: eu.kanade.presentation.util.Tab) {
                             pref.newShowUpdatesCount.changes(),
                             pref.newUpdatesCount.changes(),
                         ) { show, count -> if (show) count else 0 }
-                            .collectLatest { value = it }
+                            .onEach { value = it }
+                            .launchIn(this)
                     }
                     if (count > 0) {
                         Badge {
@@ -168,7 +171,8 @@ internal fun NavigationIconItem(tab: eu.kanade.presentation.util.Tab) {
                 BrowseTab::class.isInstance(tab) -> {
                     val count by produceState(initialValue = 0) {
                         Injekt.get<SourcePreferences>().extensionUpdatesCount.changes()
-                            .collectLatest { value = it }
+                            .onEach { value = it }
+                            .launchIn(this)
                     }
                     if (count > 0) {
                         Badge {

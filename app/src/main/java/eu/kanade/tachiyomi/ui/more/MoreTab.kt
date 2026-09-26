@@ -29,12 +29,14 @@ import eu.kanade.tachiyomi.ui.setting.SettingsScreen
 import eu.kanade.tachiyomi.ui.stats.StatsScreen
 import eu.kanade.tachiyomi.ui.updates.UpdatesTab
 import exh.ui.batchadd.BatchAddScreen
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import tachiyomi.core.common.util.lang.launchIO
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
@@ -108,21 +110,21 @@ private class MoreScreenModel(
     val downloadQueueState: StateFlow<DownloadQueueState> = _downloadQueueState.asStateFlow()
 
     init {
-        // Handle running/paused status change and queue progress updating
-        screenModelScope.launchIO {
-            combine(
-                downloadManager.isDownloaderRunning,
-                downloadManager.queueState,
-            ) { isRunning, downloadQueue -> Pair(isRunning, downloadQueue.size) }
-                .collectLatest { (isDownloading, downloadQueueSize) ->
-                    val pendingDownloadExists = downloadQueueSize != 0
-                    _downloadQueueState.value = when {
-                        !pendingDownloadExists -> DownloadQueueState.Stopped
-                        !isDownloading -> DownloadQueueState.Paused(downloadQueueSize)
-                        else -> DownloadQueueState.Downloading(downloadQueueSize)
-                    }
+        // Handle running/paused status change and queue progress updating; launchIn because the flows never
+        // complete, so nothing would follow a collect.
+        combine(
+            downloadManager.isDownloaderRunning,
+            downloadManager.queueState,
+        ) { isRunning, downloadQueue -> Pair(isRunning, downloadQueue.size) }
+            .onEach { (isDownloading, downloadQueueSize) ->
+                val pendingDownloadExists = downloadQueueSize != 0
+                _downloadQueueState.value = when {
+                    !pendingDownloadExists -> DownloadQueueState.Stopped
+                    !isDownloading -> DownloadQueueState.Paused(downloadQueueSize)
+                    else -> DownloadQueueState.Downloading(downloadQueueSize)
                 }
-        }
+            }
+            .launchIn(screenModelScope + Dispatchers.IO)
     }
 }
 

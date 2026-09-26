@@ -30,9 +30,9 @@ import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.more.MoreTab
 import eu.kanade.tachiyomi.ui.updates.UpdatesTab
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 import soup.compose.material.motion.animation.materialFadeThroughIn
 import soup.compose.material.motion.animation.materialFadeThroughOut
 import tachiyomi.presentation.core.components.material.Scaffold
@@ -106,24 +106,25 @@ internal object HomeScreen : Screen() {
 
             BackHandler(enabled = tabNavigator.current != LibraryTab, onBack = goToLibraryTab)
 
-            TabRequestEffects(tabNavigator, goToLibraryTab)
+            TabRequestEffects(tabNavigator, navigator, goToLibraryTab)
         }
     }
 
-    // Tab switches requested from outside the home screen (search, deep links, notifications).
+    // Tab switches requested from outside the home screen (search, deep links, notifications). [navigator] is the
+    // outer one: inside the TabNavigator, LocalNavigator is the tab navigator, which cannot hold a pushed screen.
     @Composable
-    private fun TabRequestEffects(tabNavigator: TabNavigator, goToLibraryTab: () -> Unit) {
-        val navigator = LocalNavigator.currentOrThrow
+    private fun TabRequestEffects(tabNavigator: TabNavigator, navigator: Navigator, goToLibraryTab: () -> Unit) {
+        // mapLatest/launchIn as collectLatest does: the event channels never close, so nothing follows a collect.
         LaunchedEffect(Unit) {
-            launch {
-                librarySearchEvent.receiveAsFlow().collectLatest {
+            librarySearchEvent.receiveAsFlow()
+                .mapLatest {
                     goToLibraryTab()
                     LibraryTab.search(it)
                 }
-            }
-            launch {
-                openTabEvent.receiveAsFlow().collectLatest { openTab(it, tabNavigator, navigator) }
-            }
+                .launchIn(this)
+            openTabEvent.receiveAsFlow()
+                .mapLatest { openTab(it, tabNavigator, navigator) }
+                .launchIn(this)
         }
     }
 
