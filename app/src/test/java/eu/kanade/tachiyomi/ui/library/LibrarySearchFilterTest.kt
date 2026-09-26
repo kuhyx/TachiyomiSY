@@ -83,7 +83,7 @@ internal class LibrarySearchFilterTest {
     }
 
     @Test
-    fun trackMatchingNeedsAKnownTracker() {
+    fun trackMatchNeedsATracker() {
         val context = harness.application
         val tracks = listOf(domainTrack(trackerId = 7L), domainTrack(trackerId = 8L))
         val known = mockk<BaseTracker> {

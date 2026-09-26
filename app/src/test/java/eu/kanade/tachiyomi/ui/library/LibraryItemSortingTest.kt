@@ -90,7 +90,7 @@ internal class LibraryItemSortingTest {
     }
 
     @Test
-    fun meanScoresAverageLoggedInTrackers() {
+    fun meanScoresOfLoggedIn() {
         val tracker = mockk<BaseTracker> {
             every { id } returns 10L
             every { get10PointScore(any()) } answers { firstArg<Track>().score }

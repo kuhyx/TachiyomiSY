@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import eu.kanade.tachiyomi.data.track.BaseTracker
 import eu.kanade.tachiyomi.data.track.domainTrack
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -14,7 +15,6 @@ import org.koin.core.context.stopKoin
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import tachiyomi.core.common.preference.TriState
-import eu.kanade.tachiyomi.data.track.BaseTracker
 import tachiyomi.i18n.MR
 
 @RunWith(RobolectricTestRunner::class)

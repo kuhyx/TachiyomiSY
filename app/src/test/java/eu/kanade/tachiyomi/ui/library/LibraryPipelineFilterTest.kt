@@ -11,7 +11,6 @@ import org.koin.core.context.stopKoin
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.core.common.preference.TriState
 
-
 @RunWith(RobolectricTestRunner::class)
 internal class LibraryPipelineFilterTest {
     private val harness = LibraryHarness()
@@ -58,7 +57,7 @@ internal class LibraryPipelineFilterTest {
     }
 
     @Test
-    fun downloadedMeansLocalOrDownloaded() {
+    fun downloadedOrLocal() {
         filtered(itemPreferences(filterDownloaded = TriState.ENABLED_IS)) shouldBe listOf(1L, 2L)
         filtered(itemPreferences(filterDownloaded = TriState.ENABLED_NOT)) shouldBe listOf(3L)
         filtered(itemPreferences(globalFilterDownloaded = true)) shouldBe listOf(1L, 2L)
@@ -135,4 +134,3 @@ internal fun itemPreferences(
     filterIntervalCustom = filterIntervalCustom,
     filterLewd = filterLewd,
 )
-

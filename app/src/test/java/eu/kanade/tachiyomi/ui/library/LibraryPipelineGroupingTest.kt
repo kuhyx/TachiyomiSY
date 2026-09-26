@@ -129,7 +129,8 @@ internal class LibraryPipelineGroupingTest {
             mapOf(random to listOf(1L, 2L, 3L)).applySort(byId, none, emptySet())[random]!!.sorted() shouldBe
                 listOf(1L, 2L, 3L)
             val grouped = mapOf(ascending to listOf(1L, 2L))
-            val bySort = grouped.applySort(byId, none, emptySet(), sort(LibrarySort.Type.Alphabetical, ascending = false))
+            val descending = sort(LibrarySort.Type.Alphabetical, ascending = false)
+            val bySort = grouped.applySort(byId, none, emptySet(), descending)
             bySort[ascending] shouldBe listOf(1L, 2L)
         }
     }

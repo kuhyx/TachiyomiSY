@@ -23,7 +23,8 @@ internal class LibraryItemTest {
         every { name } returns "MangaSite"
         every { lang } returns "en"
     }
-    private val sourcePreferences = SourcePreferences(MapPreferenceStore()).also { it.enabledLanguages.set(setOf("en")) }
+    private val sourcePreferences =
+        SourcePreferences(MapPreferenceStore()).also { it.enabledLanguages.set(setOf("en")) }
     private val sourceManager = mockk<SourceManager> { every { getOrStub(any()) } returns source }
     private val full = manga(1, "One Piece").copy(
         ogAuthor = "Oda",

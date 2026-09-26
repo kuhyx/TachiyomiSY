@@ -3,140 +3,144 @@ package eu.kanade.tachiyomi.ui.library
 import cafe.adriel.voyager.core.model.screenModelScope
 import eu.kanade.tachiyomi.ui.library.LibraryScreenModel.LibraryData
 import exh.source.EH_SOURCE_ID
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.plus
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.preference.TriState
-import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryGroup
 import tachiyomi.i18n.MR
 import uy.kohesive.injekt.api.get
 import kotlin.time.Duration.Companion.seconds
 
+// Both library observers launch as collectLatest does, mapLatest(action).buffer(0), so the never-ending
+// flows leave nothing unreachable after them.
 internal fun LibraryScreenModel.observeLibraryData() {
-    screenModelScope.launchIO {
+    combine(
         combine(
-            combine(
-                state.map { it.searchQuery }.distinctUntilChanged().debounce(0.25.seconds),
-                getCategories.subscribe(),
-                getFavoritesFlow(),
-                ::Triple,
-            ),
-            combine(
-                getTracksPerManga.subscribe(),
-                getTrackingFiltersFlow(),
-                ::Pair,
-            ),
+            state.map { it.searchQuery }.distinctUntilChanged().debounce(0.25.seconds),
+            getCategories.subscribe(),
+            getFavoritesFlow(),
+            ::Triple,
+        ),
+        combine(
+            getTracksPerManga.subscribe(),
+            getTrackingFiltersFlow(),
+            ::Pair,
+        ),
+        // SY -->
+        combine(
+            state.map { it.groupType }.distinctUntilChanged(),
+            libraryPreferences.sortingMode.changes(),
+            ::Pair,
+        ),
+        // SY <--
+        getLibraryItemPreferencesFlow(),
+    ) {
+            (searchQuery, categories, favorites),
+            (tracksMap, trackingFilters),
             // SY -->
-            combine(
-                state.map { it.groupType }.distinctUntilChanged(),
-                libraryPreferences.sortingMode.changes(),
-                ::Pair,
-            ),
+            (groupType, sortingMode),
             // SY <--
-            getLibraryItemPreferencesFlow(),
-        ) {
-                (searchQuery, categories, favorites),
-                (tracksMap, trackingFilters),
-                // SY -->
-                (groupType, sortingMode),
-                // SY <--
-                itemPreferences,
-            ->
-            val showSystemCategory = favorites.any { it.libraryManga.categories.contains(0) }
-            val filteredFavorites = with(pipeline) {
-                favorites.applyFilters(tracksMap, trackingFilters, itemPreferences)
-            }
-                .let {
-                    if (searchQuery == null) {
-                        it
-                    } else {
-                        // SY -->
-                        // it.filter { m -> m.matches(searchQuery) } }
-                        search.filterLibrary(it, searchQuery, trackingFilters)
-                        // SY <--
-                    }
-                }
-
-            LibraryData(
-                isInitialized = true,
-                showSystemCategory = showSystemCategory,
-                categories = categories,
-                favorites = filteredFavorites,
-                tracksMap = tracksMap,
-                loggedInTrackerIds = trackingFilters.keys,
-            )
+            itemPreferences,
+        ->
+        val showSystemCategory = favorites.any { it.libraryManga.categories.contains(0) }
+        val filteredFavorites = with(pipeline) {
+            favorites.applyFilters(tracksMap, trackingFilters, itemPreferences)
         }
-            .distinctUntilChanged()
-            .collectLatest { libraryData ->
-                updateState { state ->
-                    state.copy(libraryData = libraryData)
+            .let {
+                if (searchQuery == null) {
+                    it
+                } else {
+                    // SY -->
+                    // it.filter { m -> m.matches(searchQuery) } }
+                    search.filterLibrary(it, searchQuery, trackingFilters)
+                    // SY <--
                 }
             }
+
+        LibraryData(
+            isInitialized = true,
+            showSystemCategory = showSystemCategory,
+            categories = categories,
+            favorites = filteredFavorites,
+            tracksMap = tracksMap,
+            loggedInTrackerIds = trackingFilters.keys,
+        )
     }
+        .distinctUntilChanged()
+        .mapLatest { libraryData ->
+            updateState { state ->
+                state.copy(libraryData = libraryData)
+            }
+        }
+        .buffer(0)
+        .launchIn(screenModelScope + Dispatchers.IO)
 }
 
 internal fun LibraryScreenModel.observeGroupedFavorites() {
-    screenModelScope.launchIO {
-        state
-            .dropWhile { !it.libraryData.isInitialized }
-            .map {
-                Pair(
-                    it.libraryData,
-                    // SY -->
-                    it.groupType,
-                    // SY <--
+    state
+        .dropWhile { !it.libraryData.isInitialized }
+        .map {
+            Pair(
+                it.libraryData,
+                // SY -->
+                it.groupType,
+                // SY <--
+            )
+        }
+        .distinctUntilChanged()
+        .map { (data, groupType) ->
+            with(pipeline) {
+                data.favorites
+                    .applyGrouping(
+                        data.categories,
+                        data.showSystemCategory,
+                        // SY -->
+                        groupType,
+                        // SY <--
+                    )
+                    .applySort(
+                        data.favoritesById,
+                        data.tracksMap,
+                        data.loggedInTrackerIds,
+                        // SY -->
+                        libraryPreferences.sortingMode.get().takeIf { groupType != LibraryGroup.BY_DEFAULT },
+                        // SY <--
+                    )
+            }
+                .let {
+                    it.ifEmpty {
+                        mapOf(
+                            Category(
+                                0,
+                                preferences.context.stringResource(MR.strings.default_category),
+                                0,
+                                0,
+                            ) to emptyList(),
+                        )
+                    }
+                }
+        }
+        .mapLatest {
+            updateState { state ->
+                state.copy(
+                    isLoading = false,
+                    groupedFavorites = it,
                 )
             }
-            .distinctUntilChanged()
-            .map { (data, groupType) ->
-                with(pipeline) {
-                    data.favorites
-                        .applyGrouping(
-                            data.categories,
-                            data.showSystemCategory,
-                            // SY -->
-                            groupType,
-                            // SY <--
-                        )
-                        .applySort(
-                            data.favoritesById,
-                            data.tracksMap,
-                            data.loggedInTrackerIds,
-                            // SY -->
-                            libraryPreferences.sortingMode.get().takeIf { groupType != LibraryGroup.BY_DEFAULT },
-                            // SY <--
-                        )
-                }
-                    .let {
-                        it.ifEmpty {
-                            mapOf(
-                                Category(
-                                    0,
-                                    preferences.context.stringResource(MR.strings.default_category),
-                                    0,
-                                    0,
-                                ) to emptyList(),
-                            )
-                        }
-                    }
-            }
-            .collectLatest {
-                updateState { state ->
-                    state.copy(
-                        isLoading = false,
-                        groupedFavorites = it,
-                    )
-                }
-            }
-    }
+        }
+        .buffer(0)
+        .launchIn(screenModelScope + Dispatchers.IO)
 }
 
 internal fun LibraryScreenModel.observeDisplayPreferences() {

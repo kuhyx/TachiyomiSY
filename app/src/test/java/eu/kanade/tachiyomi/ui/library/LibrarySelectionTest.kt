@@ -32,48 +32,48 @@ internal class LibrarySelectionTest {
     @AfterEach
     fun tearDown() = stopKoin()
 
-    private fun lm(id: Long) = items[id.toInt() - 1].libraryManga
+    private fun entry(id: Long) = items[id.toInt() - 1].libraryManga
 
     @Test
     fun toggleAddsAndRemoves() {
-        val once = selection.toggle(state, first, lm(1))
+        val once = selection.toggle(state, first, entry(1))
         once.selection shouldBe setOf(1L)
-        selection.toggle(once, first, lm(1)).selection shouldBe emptySet()
+        selection.toggle(once, first, entry(1)).selection shouldBe emptySet()
         // With the selection emptied, a range press starts over with just the pressed entry.
-        selection.toggleRange(once.copy(selection = setOf()), first, lm(4)).selection shouldBe setOf(4L)
+        selection.toggleRange(once.copy(selection = setOf()), first, entry(4)).selection shouldBe setOf(4L)
     }
 
     @Test
     fun rangeSelectsForward() {
-        val start = selection.toggle(state, first, lm(1))
-        selection.toggleRange(start, first, lm(3)).selection shouldBe setOf(1L, 2L, 3L)
+        val start = selection.toggle(state, first, entry(1))
+        selection.toggleRange(start, first, entry(3)).selection shouldBe setOf(1L, 2L, 3L)
     }
 
     @Test
     fun rangeSelectsBackward() {
-        val start = selection.toggle(state, first, lm(4))
-        selection.toggleRange(start, first, lm(2)).selection shouldBe setOf(2L, 3L, 4L)
+        val start = selection.toggle(state, first, entry(4))
+        selection.toggleRange(start, first, entry(2)).selection shouldBe setOf(2L, 3L, 4L)
     }
 
     @Test
     fun rangeOnTheSameEntry() {
-        val start = selection.toggle(state, first, lm(2))
-        selection.toggleRange(start, first, lm(2)).selection shouldBe setOf(2L)
+        val start = selection.toggle(state, first, entry(2))
+        selection.toggleRange(start, first, entry(2)).selection shouldBe setOf(2L)
     }
 
     @Test
     fun rangeInAnotherCategory() {
-        val start = selection.toggle(state, first, lm(1))
-        selection.toggleRange(start, second, lm(6)).selection shouldBe setOf(1L, 6L)
+        val start = selection.toggle(state, first, entry(1))
+        selection.toggleRange(start, second, entry(6)).selection shouldBe setOf(1L, 6L)
     }
 
     @Test
     fun rangeFromAForeignLastEntry() {
         // Pins the crash reported in the issue linked from the PR: the last selected entry is in another category.
-        val a = selection.toggle(state, first, lm(1))
-        val b = selection.toggle(a, second, lm(5))
-        val back = selection.toggle(b, second, lm(5))
-        shouldThrow<IndexOutOfBoundsException> { selection.toggleRange(back, second, lm(6)) }
+        val a = selection.toggle(state, first, entry(1))
+        val b = selection.toggle(a, second, entry(5))
+        val back = selection.toggle(b, second, entry(5))
+        shouldThrow<IndexOutOfBoundsException> { selection.toggleRange(back, second, entry(6)) }
     }
 
     @Test
@@ -83,7 +83,7 @@ internal class LibrarySelectionTest {
         selection.invert(state.copy(selection = setOf(1L, 5L))).selection shouldBe setOf(5L, 2L, 3L, 4L)
         selection.clear(all).selection shouldBe emptySet()
         // Every bulk operation forgets the last press, so the next range press selects one entry.
-        selection.toggleRange(state, first, lm(3)).selection shouldBe setOf(3L)
+        selection.toggleRange(state, first, entry(3)).selection shouldBe setOf(3L)
     }
 
     @Test

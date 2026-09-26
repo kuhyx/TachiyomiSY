@@ -10,10 +10,12 @@ import eu.kanade.domain.sync.SyncPreferences
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.track.MapPreferenceStore
 import eu.kanade.tachiyomi.data.track.BaseTracker
+import eu.kanade.tachiyomi.data.track.MapPreferenceStore
 import eu.kanade.tachiyomi.data.track.TrackerManager
+import eu.kanade.tachiyomi.ui.base.await
 import eu.kanade.tachiyomi.ui.base.customInfoModule
+import eu.kanade.tachiyomi.ui.library.LibraryScreenModel.LibraryData
 import exh.search.SearchEngine
 import exh.source.ExhPreferences
 import io.mockk.every
@@ -36,6 +38,7 @@ import tachiyomi.domain.manga.interactor.GetMergedMangaById
 import tachiyomi.domain.manga.interactor.GetSearchTags
 import tachiyomi.domain.manga.interactor.GetSearchTitles
 import tachiyomi.domain.manga.interactor.SetCustomMangaInfo
+import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.interactor.GetTracksPerManga
@@ -82,6 +85,23 @@ internal class LibraryHarness {
     val getSearchTags: GetSearchTags = mockk()
     val getSearchTitles: GetSearchTitles = mockk()
     val getBookmarked: GetBookmarkedChaptersByMangaId = mockk()
+
+    /** A model over this harness; call after Koin is started with [koinModules]. */
+    fun model(): LibraryScreenModel = LibraryScreenModel()
+
+    /** A loaded model whose favourites are [mangas], all of them selected. */
+    fun selectedModel(vararg mangas: Manga): LibraryScreenModel {
+        val model = model()
+        model.state.await { !it.isLoading }
+        val items = mangas.map { libraryItem(it) }
+        model.updateState {
+            it.copy(
+                libraryData = LibraryData(isInitialized = true, favorites = items),
+                selection = items.map(LibraryItem::id).toSet(),
+            )
+        }
+        return model
+    }
 
     fun koinModules(): List<Module> = listOf(
         customInfoModule(),

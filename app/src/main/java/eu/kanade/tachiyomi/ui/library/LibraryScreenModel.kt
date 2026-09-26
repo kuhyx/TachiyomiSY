@@ -216,8 +216,9 @@ internal class LibraryScreenModel(
 }
 
 internal fun LibraryScreenModel.State.getItemsForCategoryId(categoryId: Long?): List<LibraryItem> {
-    if (categoryId == null) return emptyList()
-    val category = displayedCategories.find { it.id == categoryId } ?: return emptyList()
+    // Unwrapped once, so the lookup compares plain longs rather than null-checking the id per category.
+    val id = categoryId ?: return emptyList()
+    val category = displayedCategories.find { it.id == id } ?: return emptyList()
     return getItemsForCategory(category)
 }
 
