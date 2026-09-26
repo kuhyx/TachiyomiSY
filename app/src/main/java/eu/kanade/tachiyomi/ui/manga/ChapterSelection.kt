@@ -39,6 +39,15 @@ internal class ChapterSelection {
         return newChapters
     }
 
+    /**
+     * [chapters] with each `selected` flag matching the current selection. A list built before a
+     * concurrent toggle carries stale flags; applying this inside the state update keeps the toggle.
+     */
+    fun reapply(chapters: List<ChapterList.Item>): List<ChapterList.Item> = chapters.map {
+        val selected = it.id in selectedChapterIds
+        if (it.selected == selected) it else it.copy(selected = selected)
+    }
+
     fun invert(chapters: List<ChapterList.Item>): List<ChapterList.Item> {
         val newChapters = chapters.map {
             selectedChapterIds.addOrRemove(it.id, !it.selected)

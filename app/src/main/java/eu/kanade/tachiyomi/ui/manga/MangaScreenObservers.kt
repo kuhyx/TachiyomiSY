@@ -43,10 +43,12 @@ internal fun MangaScreenModel.observeMangaAndChapters() {
                 val manga = combined.manga
                 val mergedData = combined.mergedData
                 val chapterItems = toChapterListItems(combined.chapters, manga /* SY --> */, mergedData /* SY <-- */)
+                // The items were built outside the atomic update (download checks do disk IO), so a
+                // selection toggled meanwhile is re-applied here instead of being overwritten.
                 updateSuccessState {
                     it.copy(
                         manga = manga,
-                        chapters = chapterItems,
+                        chapters = selection.reapply(chapterItems),
                         // SY -->
                         meta = raiseMetadata(combined.flatMetadata, it.source),
                         mergedData = mergedData,

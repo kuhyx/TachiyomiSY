@@ -25,6 +25,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.manga.model.Manga
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
@@ -88,6 +89,31 @@ internal class MangaScreenObserversTest {
         harness.mangaFlow.value = manga(favorite = true) to listOf(chapter(1L))
         model.awaitSuccess { it.manga.source == 7L && it.chapters.size == 1 }
         coVerify(exactly = 1) { harness.updateHelper.acceptRootAndDiscardOthers(any(), any()) }
+    }
+
+    @Test
+    fun toggleSurvivesARebuild() {
+        val chapters = listOf(chapter(1L), chapter(2L))
+        harness.mangaFlow.value = manga(favorite = true) to chapters
+        val model = harness.loaded()
+        val rows = model.awaitSuccess { it.chapters.size == 2 }.processedChapters
+        // Hold the observer's rebuild after chapter 1's item is built (the second download check).
+        val calls = AtomicInteger()
+        val building = CountDownLatch(1)
+        val release = CountDownLatch(1)
+        every { harness.downloadManager.isChapterDownloaded(any(), any(), any(), any(), any()) } answers {
+            if (calls.incrementAndGet() == 2) {
+                building.countDown()
+                release.await()
+            }
+            false
+        }
+        harness.mangaFlow.value = manga(favorite = true).copy(version = 2L) to chapters
+        eventually { building.count == 0L }
+        model.toggleSelection(rows.first { it.id == 1L }, selected = true)
+        release.countDown()
+        val state = model.awaitSuccess { it.manga.version == 2L }
+        state.chapters.filter { it.selected }.map { it.id } shouldBe listOf(1L)
     }
 
     @Test
