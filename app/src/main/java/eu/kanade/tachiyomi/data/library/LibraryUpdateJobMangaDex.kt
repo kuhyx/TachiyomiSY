@@ -95,9 +95,9 @@ internal suspend fun LibraryUpdateJob.pushFavorites() = coroutineScope {
 
             // find the mdlist entry if its unfollowed the follow it
             var tracker = dbTracks.firstOrNull { it.trackerId == TrackerManager.MDLIST }
-                ?: mdList.createInitialTracker(manga).toDomainTrack(idRequired = false)
+                ?: mdList.createInitialTracker(manga).toDomainTrack(idRequired = false)!!
 
-            if (tracker?.status == FollowStatus.UNFOLLOWED.long) {
+            if (tracker.status == FollowStatus.UNFOLLOWED.long) {
                 tracker = tracker.copy(
                     status = FollowStatus.READING.long,
                 )
