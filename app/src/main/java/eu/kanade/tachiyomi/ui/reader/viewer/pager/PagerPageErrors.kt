@@ -15,19 +15,19 @@ internal fun PagerPageHolder.setError(error: Throwable?) {
 }
 
 internal fun PagerPageHolder.showErrorLayout(error: Throwable?): ReaderErrorBinding {
-    if (errorLayout == null) {
-        errorLayout = ReaderErrorBinding.inflate(LayoutInflater.from(context), this, true)
-        errorLayout?.actionRetry?.viewer = viewer
-        errorLayout?.actionRetry?.setOnClickListener {
+    val layout = errorLayout ?: ReaderErrorBinding.inflate(LayoutInflater.from(context), this, true).also {
+        errorLayout = it
+        it.actionRetry.viewer = viewer
+        it.actionRetry.setOnClickListener {
             page.chapter.pageLoader?.retryPage(page)
         }
     }
 
     val imageUrl = page.imageUrl
-    errorLayout?.actionOpenInWebView?.isVisible = imageUrl != null
+    layout.actionOpenInWebView.isVisible = imageUrl != null
     if (imageUrl != null && imageUrl.startsWith("http", true)) {
-        errorLayout?.actionOpenInWebView?.viewer = viewer
-        errorLayout?.actionOpenInWebView?.setOnClickListener {
+        layout.actionOpenInWebView.viewer = viewer
+        layout.actionOpenInWebView.setOnClickListener {
             val sourceId = viewer.activity.viewModel.manga?.source
 
             val intent = WebViewActivity.newIntent(context, imageUrl, sourceId)
@@ -35,15 +35,15 @@ internal fun PagerPageHolder.showErrorLayout(error: Throwable?): ReaderErrorBind
         }
     }
 
-    errorLayout?.errorMessage?.text = with(context) { error?.formattedMessage }
+    layout.errorMessage.text = with(context) { error?.formattedMessage }
         ?: context.stringResource(MR.strings.decode_image_error)
 
-    errorLayout?.root?.isVisible = true
-    return errorLayout!!
+    layout.root.isVisible = true
+    return layout
 }
 
 // Removes the decode error layout from the holder, if found.
 internal fun PagerPageHolder.removeErrorLayout() {
-    errorLayout?.root?.isVisible = false
+    errorLayout?.let { it.root.isVisible = false }
     errorLayout = null
 }

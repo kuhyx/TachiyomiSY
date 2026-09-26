@@ -81,11 +81,15 @@ internal class PagerPageHolder(
         extraLoadJob = null
     }
 
-    private fun initProgressIndicator() {
-        if (progressIndicator == null) {
-            progressIndicator = ReaderProgressIndicator(context)
-            addView(progressIndicator)
+    // Shows the progress indicator, creating it on first use, and clears any error.
+    private fun showProgress(): ReaderProgressIndicator {
+        val indicator = progressIndicator ?: ReaderProgressIndicator(context).also {
+            progressIndicator = it
+            addView(it)
         }
+        indicator.show()
+        removeErrorLayout()
+        return indicator
     }
 
     // Loads the page and processes changes to the page's status.
@@ -104,16 +108,13 @@ internal class PagerPageHolder(
             }
             page.statusFlow.collectLatest { state ->
                 when (state) {
-                    Page.State.Queue -> {
-                        setQueued()
-                    }
-                    Page.State.LoadPage -> {
-                        setLoading()
+                    Page.State.Queue, Page.State.LoadPage -> {
+                        showProgress()
                     }
                     Page.State.DownloadImage -> {
-                        setDownloading()
+                        val indicator = showProgress()
                         page.progressFlow.collectLatest { value ->
-                            progressIndicator?.setProgress(value)
+                            indicator.setProgress(value)
                         }
                     }
                     Page.State.Ready -> {
@@ -125,27 +126,6 @@ internal class PagerPageHolder(
                 }
             }
         }
-    }
-
-    // Called when the page is queued.
-    private fun setQueued() {
-        initProgressIndicator()
-        progressIndicator?.show()
-        removeErrorLayout()
-    }
-
-    // Called when the page is loading.
-    private fun setLoading() {
-        initProgressIndicator()
-        progressIndicator?.show()
-        removeErrorLayout()
-    }
-
-    // Called when the page is downloading.
-    private fun setDownloading() {
-        initProgressIndicator()
-        progressIndicator?.show()
-        removeErrorLayout()
     }
 
     // Called when the page is ready.
@@ -192,7 +172,8 @@ internal class PagerPageHolder(
     private suspend fun decode(streamFn: () -> InputStream, streamFn2: (() -> InputStream)?) = withIOContext {
         streamFn().buffered(STREAM_BUFFER_SIZE).use { source ->
             // SY -->
-            extraPage?.let { streamFn2?.invoke()?.buffered(STREAM_BUFFER_SIZE) }.use { source2 ->
+            // streamFn2 is the extra page's stream, so it is null whenever there is no extra page.
+            streamFn2?.let { it().buffered(STREAM_BUFFER_SIZE) }.use { source2 ->
                 val itemSource = if (viewer.config.dualPageSplit) {
                     process(item.first, Buffer().readFrom(source))
                 } else {

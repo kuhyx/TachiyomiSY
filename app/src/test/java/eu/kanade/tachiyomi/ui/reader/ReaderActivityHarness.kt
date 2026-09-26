@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
+import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import io.mockk.coEvery
@@ -26,6 +27,19 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4, private val
     val app: Application = ApplicationProvider.getApplicationContext()
     val vm: ReaderVmHarness = ReaderVmHarness(app)
     val source: HttpSource = mockk(relaxed = true)
+    val pageLoader: TestPageLoader = TestPageLoader()
+
+    /**
+     * Whether loaded chapters get [pageLoader]. Without one the page holders stay idle; with one
+     * they show an endlessly animating spinner, so such tests need a Compose test clock.
+     */
+    var withLoader: Boolean = false
+
+    /** The status every page starts with. */
+    var initialStatus: Page.State = Page.State.Queue
+
+    /** The bytes every page streams; tests that decode set a real image (see [pngBytes]). */
+    var image: () -> ByteArray = { ByteArray(0) }
 
     fun start() {
         vm.start(module { single { SecurityPreferences(vm.store) } }, testMain = false)
@@ -38,7 +52,12 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4, private val
             val chapter = firstArg<ReaderChapter>()
             if (chapter.state !is ReaderChapter.State.Loaded) {
                 val pages = List(pageCount) { ReaderPage(it, url = "/p/$it") }
-                pages.forEach { it.chapter = chapter }
+                pages.forEach {
+                    it.chapter = chapter
+                    it.stream = { image().inputStream() }
+                    it.status = initialStatus
+                }
+                chapter.pageLoader = pageLoader.takeIf { withLoader }
                 chapter.state = ReaderChapter.State.Loaded(pages)
             }
         }
@@ -75,5 +94,17 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4, private val
 
     fun pagesReady(chapter: ReaderChapter) {
         chapter.pages?.forEach { it.status = Page.State.Ready }
+    }
+}
+
+/** A page loader that loads nothing: pages keep whatever status the test gives them. */
+internal class TestPageLoader : PageLoader() {
+    override var isLocal: Boolean = true
+    val retried: MutableList<ReaderPage> = mutableListOf()
+
+    override suspend fun getPages(): List<ReaderPage> = emptyList()
+
+    override fun retryPage(page: ReaderPage) {
+        retried += page
     }
 }
