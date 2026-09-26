@@ -50,8 +50,8 @@ internal class TrackingDialogsTest {
     fun successfulLoginDismisses() {
         coEvery { tracker.login("me", "secret") } coAnswers { delay(500) }
         login()
-        compose.waitUntil(timeoutMillis = 10_000) { count("Logging in…") == 1 }
-        compose.waitUntil(timeoutMillis = 10_000) { dismissed == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { count("Logging in…") == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { dismissed == 1 }
         dismissed shouldBe 1
     }
 
@@ -60,7 +60,7 @@ internal class TrackingDialogsTest {
         coEvery { tracker.login(any(), any()) } throws IllegalStateException("bad credentials")
         login()
         verify(timeout = 10_000) { tracker.logout() }
-        compose.waitUntil(timeoutMillis = 10_000) { count("Login") == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { count("Login") == 1 }
         dismissed shouldBe 0
     }
 

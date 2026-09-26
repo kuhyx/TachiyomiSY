@@ -1,8 +1,8 @@
 package eu.kanade.presentation.more.settings.screen
 
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
@@ -59,8 +59,8 @@ internal class MangadexLoginTest {
         harness.show(SettingsMangadexScreen)
         compose.onNodeWithText("MangaDex Login").performClick()
         compose.waitForIdle()
-        compose.onAllNodesWithText("Log out").onLast().performClick()
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
+        compose.onNode(hasText("Log out") and hasClickAction()).performClick()
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
         return ShadowToast.getTextOfLatestToast().toString()
     }
 

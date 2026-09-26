@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.navigator.Navigator
+import eu.kanade.presentation.more.settings.screen.awaitMain
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.getAppIconForSource
 import io.kotest.matchers.shouldBe
@@ -68,7 +69,7 @@ internal class ClearDatabaseScreenTest {
 
     private fun show() {
         compose.setContent { MaterialTheme { Navigator(ClearDatabaseScreen()) } }
-        compose.waitUntil(timeoutMillis = 10_000) {
+        compose.awaitMain(timeoutMillis = 10_000) {
             compose.onAllNodesWithText("Clear database").fetchSemanticsNodes().isNotEmpty()
         }
     }
@@ -98,7 +99,7 @@ internal class ClearDatabaseScreenTest {
         compose.waitForIdle()
         compose.onNodeWithText("will be lost", substring = true).assertExists()
         tap("OK")
-        compose.waitUntil(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() == 1 }
         coVerify { database.mangasQueries.deleteNonLibraryManga(listOf(1L, 2L), 0L) }
     }
 

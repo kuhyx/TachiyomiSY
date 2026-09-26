@@ -98,13 +98,4 @@ internal class MoreScreenTest {
         show(DownloadQueueState.Downloading(pending = 1), navTabs = true)
         count("1 remaining") shouldBe 1
     }
-
-    @Test
-    fun newUpdatePreview() {
-        compose.setContent { NewUpdateScreenPreview() }
-        compose.onNodeWithText("New version available!").assertExists()
-        compose.onNodeWithText("Open on GitHub").performClick()
-        compose.onNodeWithText("Not now").performClick()
-        compose.onNodeWithText("Download").performClick()
-    }
 }

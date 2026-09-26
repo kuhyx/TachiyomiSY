@@ -11,6 +11,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import com.google.common.util.concurrent.Futures
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.ui.UiPreferences
+import eu.kanade.presentation.more.settings.screen.awaitMain
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
 import io.mockk.every
 import io.mockk.mockk
@@ -61,7 +62,7 @@ internal class ProfileStatusTest(private val code: Int, private val label: Strin
                 MaterialTheme { DebugInfoScreen().Content() }
             }
         }
-        compose.waitUntil(timeoutMillis = 10_000) {
+        compose.awaitMain(timeoutMillis = 10_000) {
             compose.onAllNodesWithText(label).fetchSemanticsNodes().isNotEmpty()
         }
     }

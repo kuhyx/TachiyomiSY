@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.navigator.Navigator
+import eu.kanade.presentation.more.settings.screen.awaitMain
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -77,7 +78,7 @@ internal class ExtensionStoresScreenTest {
         show()
         count("Extension stores") shouldBe 0
         stores.tryEmit(emptyList())
-        compose.waitUntil(timeoutMillis = 5_000) { count("You haven't added an extension store yet") == 1 }
+        compose.awaitMain(timeoutMillis = 5_000) { count("You haven't added an extension store yet") == 1 }
         compose.onNodeWithContentDescription("Refresh").performClick()
         coVerify(timeout = 5_000) { update() }
     }
@@ -86,7 +87,7 @@ internal class ExtensionStoresScreenTest {
     fun storeActions() {
         stores.tryEmit(listOf(store("a", discord = "https://discord.example")))
         show()
-        compose.waitUntil(timeoutMillis = 5_000) { count("Store a") == 1 }
+        compose.awaitMain(timeoutMillis = 5_000) { count("Store a") == 1 }
         compose.onNodeWithContentDescription("Open in browser").performClick()
         compose.onNodeWithContentDescription("Copy to clipboard").performClick()
         compose.onNodeWithContentDescription("Discord").performClick()
@@ -100,7 +101,7 @@ internal class ExtensionStoresScreenTest {
     fun createDialogOpens() {
         stores.tryEmit(listOf(store("a")))
         show()
-        compose.waitUntil(timeoutMillis = 5_000) { count("Store a") == 1 }
+        compose.awaitMain(timeoutMillis = 5_000) { count("Store a") == 1 }
         compose.onNodeWithText("Add").performClick()
         compose.waitForIdle()
         count("Add extension store") shouldBe 1
@@ -113,7 +114,7 @@ internal class ExtensionStoresScreenTest {
     fun deeplinkAsksToConfirm() {
         stores.tryEmit(emptyList())
         show(url = "https://deep.example")
-        compose.waitUntil(timeoutMillis = 5_000) { count("Do you wish to add the extension store below?") == 1 }
+        compose.awaitMain(timeoutMillis = 5_000) { count("Do you wish to add the extension store below?") == 1 }
         compose.onAllNodesWithText("Add").fetchSemanticsNodes().size shouldBe 2
     }
 }

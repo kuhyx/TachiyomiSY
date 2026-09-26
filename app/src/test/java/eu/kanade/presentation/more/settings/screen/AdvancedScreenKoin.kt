@@ -2,6 +2,7 @@ package eu.kanade.presentation.more.settings.screen
 
 import eu.kanade.domain.extension.interactor.TrustExtension
 import eu.kanade.tachiyomi.data.download.DownloadCache
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.GLUtil
 import io.mockk.every
@@ -17,12 +18,14 @@ internal class AdvancedScreenKoin {
     val downloadCache: DownloadCache = mockk(relaxed = true)
     val trust: TrustExtension = mockk(relaxed = true)
     val resetViewerFlags: ResetViewerFlags = mockk()
+    val extensions: ExtensionManager = mockk(relaxed = true)
 
     fun module(): Module = module {
         single { network }
         single { downloadCache }
         single { trust }
         single { resetViewerFlags }
+        single { extensions }
     }
 }
 
