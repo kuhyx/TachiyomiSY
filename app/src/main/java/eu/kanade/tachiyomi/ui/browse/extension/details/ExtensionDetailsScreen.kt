@@ -43,8 +43,12 @@ internal data class ExtensionDetailsScreen(
         )
 
         LaunchedEffect(Unit) {
-            // The only event is the extension's uninstall, which leaves nothing to show.
-            screenModel.events.collectLatest { navigator.pop() }
+            screenModel.events.collectLatest { event ->
+                // Exhaustive, so a new event type is a compile error rather than a silent pop.
+                when (event) {
+                    ExtensionDetailsEvent.Uninstalled -> navigator.pop()
+                }
+            }
         }
     }
 }
