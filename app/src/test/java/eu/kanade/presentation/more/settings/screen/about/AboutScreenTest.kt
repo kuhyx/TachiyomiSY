@@ -11,10 +11,13 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
+import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.util.LocalBackPress
 import eu.kanade.tachiyomi.BuildConfig
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldStartWith
@@ -42,13 +45,24 @@ internal class AboutScreenTest {
     val compose = createComposeRule()
 
     private val uriHandler = mockk<UriHandler>(relaxed = true)
+    private val navigator = mockk<Navigator>(relaxed = true)
 
     @Before
     fun setUp() {
         mockkConstructor(CrashLogUtil::class)
         every { anyConstructed<CrashLogUtil>().getDebugInfo() } returns "debug info"
         stopKoin()
-        startKoin { modules(module { single { UiPreferences(InMemoryPreferenceStore()) } }) }
+        val store = InMemoryPreferenceStore()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        startKoin {
+            modules(
+                module {
+                    single { UiPreferences(store) }
+                    single { BasePreferences(context, store) }
+                    single { mockk<ExtensionManager>(relaxed = true) }
+                },
+            )
+        }
     }
 
     @After
@@ -59,8 +73,12 @@ internal class AboutScreenTest {
 
     private fun show(back: (() -> Unit)?) {
         compose.setContent {
-            CompositionLocalProvider(LocalUriHandler provides uriHandler, LocalBackPress provides back) {
-                MaterialTheme { Navigator(AboutScreen) }
+            CompositionLocalProvider(
+                LocalUriHandler provides uriHandler,
+                LocalBackPress provides back,
+                LocalNavigator provides navigator,
+            ) {
+                MaterialTheme { AboutScreen.Content() }
             }
         }
         compose.waitForIdle()
@@ -83,7 +101,7 @@ internal class AboutScreenTest {
         compose.onNodeWithContentDescription("GitHub").performClick()
         verify { uriHandler.openUri("https://github.com/jobobby04/tachiyomisy") }
         compose.onNodeWithText("Open source licenses").performClick()
-        compose.waitForIdle()
+        verify { navigator.push(any<OpenSourceLicensesScreen>()) }
     }
 
     @Test

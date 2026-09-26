@@ -26,8 +26,10 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.robolectric.ParameterizedRobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(ParameterizedRobolectricTestRunner::class)
+@Config(qualifiers = "h2000dp")
 internal class ProfileStatusTest(private val code: Int, private val label: String) {
     @get:Rule
     val compose = createComposeRule()

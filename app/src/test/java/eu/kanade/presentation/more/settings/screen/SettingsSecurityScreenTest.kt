@@ -53,6 +53,8 @@ internal class SettingsSecurityScreenTest {
 
     @Test
     fun unsupportedAuthDisablesLock() {
+        mockkObject(AuthenticatorUtil)
+        every { with(AuthenticatorUtil) { any<Context>().isAuthenticationSupported() } } returns false
         harness.show(SettingsSecurityScreen, context = activity())
         harness.item("Require unlock").enabled shouldBe false
         harness.item("Lock when idle").enabled shouldBe false
