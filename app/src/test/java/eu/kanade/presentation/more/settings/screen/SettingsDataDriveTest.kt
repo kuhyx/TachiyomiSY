@@ -64,7 +64,8 @@ internal class SettingsDataDriveTest {
     }
 
     private fun drive(found: List<File>, deleteFails: Boolean = false): Drive = mockk(relaxed = true) {
-        every { files().list().setSpaces(any()).setQ(any()).setFields(any()).execute().files } returns found.toMutableList()
+        every { files().list().setSpaces(any()).setQ(any()).setFields(any()).execute().files } returns
+            found.toMutableList()
         if (deleteFails) every { files().delete(any()).execute() } throws IllegalStateException("offline")
     }
 
