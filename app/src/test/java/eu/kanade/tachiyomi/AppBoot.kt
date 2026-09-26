@@ -61,6 +61,11 @@ internal class AppBoot {
             mockkStatic(Application::class)
             every { Application.getProcessName() } returns name
         }
+        // Android's RuntimeInit always installs a default handler before
+        // Application.onCreate; a bare test JVM has none.
+        if (Thread.getDefaultUncaughtExceptionHandler() == null) {
+            Thread.setDefaultUncaughtExceptionHandler { _, _ -> }
+        }
         app.onCreate()
         return app
     }
