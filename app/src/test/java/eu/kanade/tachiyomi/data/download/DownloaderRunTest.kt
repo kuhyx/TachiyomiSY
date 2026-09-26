@@ -106,4 +106,15 @@ internal class DownloaderRunTest : DownloaderTestBase() {
         downloader.downloaderJob shouldBe job
         downloader.stop()
     }
+
+    @Test
+    fun finishedQueueStartsNothing() {
+        val done = download(1L)
+        downloader.addAllToQueue(listOf(done))
+        done.transition(Download.State.DOWNLOADED)
+        downloader.launchDownloaderJob()
+        Thread.sleep(300)
+        coVerify(exactly = 0) { source.getPageList(any()) }
+        downloader.stop()
+    }
 }
