@@ -39,9 +39,11 @@ the sync job execute. Add a gate there, never in a workflow alone.
   `scripts/gradle_gate.sh`): first with `-Pmihon.gate.phase=static`, which
   skips every test and Kover task but builds what they depend on, then
   plainly, when only tests and coverage are left to execute. Serial, one
-  test JVM, ~5 GiB -- it fits next to other jobs in the shared
-  `capped.slice`, where the old single parallel run (6.5 GiB) was
-  OOM-killed. CI runs one `check` with `-Pmihon.test.forks=3`.
+  test JVM: phase 1 peaks at ~3.7 GiB, phase 2 at ~2.8 GiB, and a push
+  passed next to a 2.8 GiB job in the shared `capped.slice`, where the old
+  single parallel run (6.5 GiB) was OOM-killed. CI runs one `check` with
+  `-Pmihon.test.forks=3`. `BUILD_TIME` is a commit time on purpose: a clock
+  value would recompile all of `:app` in phase 2.
 - One module: `./gradlew :domain:check`; the convention plugins themselves:
   `./gradlew -p gradle/build-logic check` (root `check` depends on it)
 - Lint stack per module: apply `mihonx.plugins.lint` (detekt every rule from

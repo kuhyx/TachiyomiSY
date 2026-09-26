@@ -4,6 +4,8 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Test
+import java.net.URL
+import java.net.URLClassLoader
 
 internal class LibraryDisplayModeTest {
 
@@ -54,6 +56,20 @@ internal class LibraryDisplayModeTest {
         LibraryDisplayMode.default shouldBe LibraryDisplayMode.CompactGrid
     }
 
+    // A fresh class loader that meets CompactGrid before the interface: the order that left
+    // `default` null (67 Robolectric tests failed once the suite ran in two forks).
+    @Test
+    fun defaultSurvivesAnyLoadOrder() {
+        val urls = arrayOf(locationOf(LibraryDisplayMode::class.java), locationOf(Unit::class.java))
+        URLClassLoader(urls, null).use { loader ->
+            Class.forName("${LibraryDisplayMode::class.java.name}\$CompactGrid", true, loader)
+            val companion = Class.forName(LibraryDisplayMode::class.java.name, true, loader)
+                .getField("Companion")
+                .get(null)
+            companion.javaClass.getMethod("getDefault").invoke(companion) shouldNotBe null
+        }
+    }
+
     @Test
     fun modesAreDistinctDataObjects() {
         LibraryDisplayMode.values.map { it.toString() }.toSet().size shouldBe 4
@@ -62,3 +78,5 @@ internal class LibraryDisplayModeTest {
         LibraryDisplayMode.List shouldNotBe LibraryDisplayMode.CompactGrid
     }
 }
+
+private fun locationOf(type: Class<*>): URL = checkNotNull(type.protectionDomain?.codeSource?.location)

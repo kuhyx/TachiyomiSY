@@ -37,8 +37,12 @@ public sealed interface LibraryDisplayMode {
         /** Every mode, in menu order. */
         public val values: Set<LibraryDisplayMode> by lazy { setOf(CompactGrid, ComfortableGrid, List, CoverOnlyGrid) }
 
-        /** [CompactGrid]. */
-        public val default: LibraryDisplayMode = CompactGrid
+        /**
+         * [CompactGrid]. A getter, not a stored field: loading [CompactGrid] first initializes this
+         * interface (it has a default method) while `CompactGrid.INSTANCE` is still unset, and a
+         * stored field captured that null for the life of the class loader.
+         */
+        public val default: LibraryDisplayMode get() = CompactGrid
 
         /** Parses the [serialize] form; an unknown name yields [default]. */
         public fun deserialize(serialized: String): LibraryDisplayMode {
