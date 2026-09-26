@@ -53,8 +53,9 @@ internal class AndroidPluginsTest {
         val test = project.tasks.register("unitTest", Test::class.java).get()
         val launcher = test.javaLauncher.get()
         launcher.metadata.languageVersion.asInt() shouldBe 21
-        test.maxHeapSize shouldBe "1536m"
-        test.forkEvery shouldBe 200L
+        test.maxHeapSize shouldBe "1g"
+        test.forkEvery shouldBe 100L
+        test.jvmArgs shouldContain "-XX:+UseSerialGC"
     }
 
     @JupiterTest

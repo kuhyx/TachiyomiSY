@@ -24,11 +24,11 @@ internal fun Project.android(block: CommonExtension.() -> Unit) {
     extensions.configure(block)
 }
 
-private const val TEST_HEAP: String = "1536m"
-private const val TEST_CLASSES_PER_FORK: Long = 200
+private const val TEST_HEAP: String = "1g"
+private const val TEST_CLASSES_PER_FORK: Long = 100
 
 /**
- * Test JVMs per test task, default 1. Each Robolectric JVM holds ~2.5 GiB, so the local gate stays
+ * Test JVMs per test task, default 1. Each Robolectric JVM holds up to ~2 GiB, so the local gate stays
  * serial inside its shared memory cap and CI, alone on its runner, passes a larger count.
  */
 public const val TEST_FORKS_PROPERTY: String = "mihon.test.forks"
@@ -64,8 +64,13 @@ public fun Project.configureTest() {
         javaLauncher.set(testLauncher)
         // Robolectric keeps per-test state alive, so one JVM running every `app` test outgrew Gradle's
         // 512 MiB default (OutOfMemoryError from ~2800 tests, 2026-09-26). A fresh JVM every
-        // TEST_CLASSES_PER_FORK classes bounds that growth however large the suite gets.
+        // TEST_CLASSES_PER_FORK classes bounds that growth however large the suite gets. Measured
+        // with NMT the same day: at 1536m and G1 a test JVM reached 2.4 GiB RSS, 1.5 GiB of it heap
+        // G1 had grown to the maximum while at most 0.7 GiB was live after a full GC. The serial
+        // collector (no per-region bookkeeping, one test thread anyway) and a smaller cap keep
+        // the heap near the live set.
         maxHeapSize = TEST_HEAP
+        jvmArgs("-XX:+UseSerialGC")
         forkEvery = TEST_CLASSES_PER_FORK
         maxParallelForks = testForks
         onlyIf("the gate runs this module's tests") { isTestRun }
