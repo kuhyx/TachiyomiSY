@@ -8,8 +8,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MangaScreenModel
-import exh.metadata.metadata.RaisedSearchMetadata
 import eu.kanade.tachiyomi.ui.manga.PagePreviewState
+import exh.metadata.metadata.RaisedSearchMetadata
 import io.mockk.mockk
 import tachiyomi.domain.manga.model.Manga
 

@@ -9,7 +9,6 @@ import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.tachiyomi.data.track.domainTrack
-import eu.kanade.presentation.util.Screen as AppScreen
 import io.mockk.coVerify
 import io.mockk.every
 import org.junit.After
@@ -20,6 +19,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.track.model.Track
 import tachiyomi.i18n.MR
+import eu.kanade.presentation.util.Screen as AppScreen
 
 /** The screen a dialog pops back to. */
 internal class BlankScreen : AppScreen() {

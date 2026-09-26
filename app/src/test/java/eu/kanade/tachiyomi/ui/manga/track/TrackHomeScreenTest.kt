@@ -9,8 +9,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.BaseTracker
+import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.domainTrack
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery

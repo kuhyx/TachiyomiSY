@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.ui.manga.track
 
 import cafe.adriel.voyager.navigator.Navigator
-import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.BaseTracker
+import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.domainTrack
 import eu.kanade.tachiyomi.ui.manga.eventually
 import eu.kanade.tachiyomi.ui.manga.manga

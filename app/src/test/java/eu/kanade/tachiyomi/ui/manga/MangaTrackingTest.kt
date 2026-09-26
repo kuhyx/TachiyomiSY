@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.BaseTracker
+import eu.kanade.tachiyomi.data.track.EnhancedTracker
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.data.track.dbTrack
 import eu.kanade.tachiyomi.data.track.domainTrack
