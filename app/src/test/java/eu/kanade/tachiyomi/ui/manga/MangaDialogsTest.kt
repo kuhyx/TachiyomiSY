@@ -63,11 +63,12 @@ internal class MangaDialogsTest {
         val rows = model.awaitSuccess().processedChapters
         model.toggleSelection(rows[0], selected = true)
         model.toggleSelection(rows[2], selected = true, fromLongPress = true)
-        model.awaitSuccess().chapters.count { it.selected } shouldBe 3
+        // Selection updates land on the model's scope; wait for each state rather than read it once.
+        model.awaitSuccess { state -> state.chapters.count { it.selected } == 3 }
         model.invertSelection()
-        model.awaitSuccess().isAnySelected shouldBe false
+        model.awaitSuccess { !it.isAnySelected }
         model.toggleAllSelection(true)
-        model.awaitSuccess().chapters.all { it.selected } shouldBe true
+        model.awaitSuccess { state -> state.chapters.all { it.selected } }
     }
 
     @Test

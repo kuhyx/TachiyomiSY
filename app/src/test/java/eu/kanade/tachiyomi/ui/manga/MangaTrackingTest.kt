@@ -20,6 +20,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.model.MergedMangaReference
 import java.util.concurrent.atomic.AtomicBoolean
 
 private const val MANGADEX = 2_499_283_573_021_220_255L
@@ -112,8 +113,13 @@ internal class MangaTrackingTest {
         }
         coEvery { parts.getTracks.await(1L) } returns listOf(domainTrack(id = 7L, trackerId = TrackerManager.MDLIST))
         val member = manga().copy(id = 5L, source = MANGADEX)
-        coEvery { harness.getMergedReferences.await(1L) } returns listOf(mockk(relaxed = true))
-        coEvery { harness.getMergedManga.await(1L) } returns listOf(member, manga().copy(id = 6L))
+        val references = listOf(mockk<MergedMangaReference>(relaxed = true))
+        val members = listOf(member, manga().copy(id = 6L))
+        // The load reads the merge tables once and the observer keeps reading them: both must agree.
+        coEvery { harness.getMergedReferences.await(1L) } returns references
+        coEvery { harness.getMergedReferences.subscribe(1L) } returns MutableStateFlow(references)
+        coEvery { harness.getMergedManga.await(1L) } returns members
+        coEvery { harness.getMergedManga.subscribe(1L) } returns MutableStateFlow(members)
         load(manga(favorite = true)).awaitSuccess { it.hasLoggedInTrackers }
         // coVerify(timeout) would block the main looper the tracker work resumes on; idle it instead.
         eventually { created.get() }

@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.online.installSilentXLog
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import exh.eh.EHentaiUpdateHelper
 import io.mockk.coEvery
@@ -114,7 +115,9 @@ internal class MangaHarness {
     val parts: MangaParts = MangaParts()
     val lifecycle: LifecycleRegistry = LifecycleRegistry.createUnsafe(mockk<LifecycleOwner>(relaxed = true))
 
+    /** Also silences XLog: main code's `xLogD` throws in a fresh test JVM, which the model's try blocks swallow. */
     fun start(vararg extra: Module) {
+        installSilentXLog()
         lifecycle.currentState = Lifecycle.State.RESUMED
         stopKoin()
         startKoin {

@@ -10,8 +10,10 @@ import exh.recs.RecommendsScreen
 import exh.ui.metadata.MetadataViewScreen
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -74,8 +76,10 @@ internal class MangaSyActionsTest {
     fun mergedWebViewOffersMembers() {
         val http = mockk<HttpSource>(relaxed = true) { every { id } returns 7L }
         every { harness.sourceManager.getOrStub(any()) } returns http
+        // Through the merge table the observer reads: a state edit would be overwritten by its next emission.
+        coEvery { harness.getMergedManga.subscribe(1L) } returns MutableStateFlow(listOf(manga().copy(id = 4L)))
         val model = harness.loaded()
-        model.updateSuccessState { it.copy(mergedData = mergedData(manga().copy(id = 4L))) }
+        model.awaitSuccess { it.mergedData != null }
         host.show(model)
         host.actions.header.onWebViewClicked!!()
         (ShadowDialog.getLatestDialog() as AlertDialog).listView.adapter.count shouldBe 1
