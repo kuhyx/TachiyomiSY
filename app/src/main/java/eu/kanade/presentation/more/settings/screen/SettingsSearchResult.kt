@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,8 +31,9 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 internal fun SearchResult(
     searchKey: String,
     modifier: Modifier = Modifier,
-    listState: LazyListState = rememberLazyListState(),
-    contentPadding: PaddingValues = PaddingValues(),
+    // The one caller passes both, so neither has a default.
+    listState: LazyListState,
+    contentPadding: PaddingValues,
     onItemClick: (SearchResultItem) -> Unit,
 ) {
     if (searchKey.isEmpty()) return

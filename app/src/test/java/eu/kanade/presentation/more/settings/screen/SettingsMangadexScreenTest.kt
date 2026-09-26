@@ -3,6 +3,7 @@ package eu.kanade.presentation.more.settings.screen
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.library.startNow
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
@@ -24,6 +25,7 @@ import org.junit.runner.RunWith
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.source.service.SourceManager
+import tachiyomi.i18n.sy.SYMR
 
 @RunWith(RobolectricTestRunner::class)
 internal class SettingsMangadexScreenTest {
@@ -106,5 +108,13 @@ internal class SettingsMangadexScreenTest {
         harness.click("Sync MangaDex entries to your library")
         tap("Cancel")
         harness.count("Completed") shouldBe 0
+    }
+
+    @Test
+    fun titleIsMangaDex() {
+        var title: StringResource? = null
+        compose.setContent { title = SettingsMangadexScreen.getTitleRes() }
+        compose.waitForIdle()
+        title shouldBe SYMR.strings.pref_category_mangadex
     }
 }

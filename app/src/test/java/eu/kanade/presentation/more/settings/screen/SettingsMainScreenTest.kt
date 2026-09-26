@@ -2,6 +2,9 @@ package eu.kanade.presentation.more.settings.screen
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -36,6 +39,7 @@ internal class SettingsMainScreenTest {
 
     private val koin = SettingsKoin()
     private val harness = SettingsHarness(compose)
+    private var tick by mutableIntStateOf(0)
     private val sourceManager = mockk<SourceManager> { every { getVisibleOnlineSources() } returns emptyList() }
 
     @Before
@@ -49,16 +53,22 @@ internal class SettingsMainScreenTest {
         koin.stop()
     }
 
-    private fun show(twoPane: Boolean, open: Screen = SettingsLibraryScreen) {
+    // A null twoPane composes the screen's own Content(); the tick recomposes it once with nothing changed.
+    private fun show(twoPane: Boolean?, open: Screen = SettingsLibraryScreen) {
         every { harness.navigator.items } returns listOf(open)
         compose.setContent {
             CompositionLocalProvider(
                 LocalNavigator provides harness.navigator,
                 LocalBackPress provides {},
             ) {
-                MaterialTheme { SettingsMainScreen.Content(twoPane = twoPane) }
+                MaterialTheme {
+                    check(tick >= 0)
+                    if (twoPane == null) SettingsMainScreen.Content() else SettingsMainScreen.Content(twoPane = twoPane)
+                }
             }
         }
+        compose.waitForIdle()
+        tick++
         compose.waitForIdle()
     }
 
@@ -69,7 +79,7 @@ internal class SettingsMainScreenTest {
 
     @Test
     fun singlePanePushes() {
-        show(twoPane = false)
+        show(twoPane = null)
         tap("Library")
         verify { harness.navigator.push(SettingsLibraryScreen) }
         compose.onNodeWithContentDescription("Search").performClick()

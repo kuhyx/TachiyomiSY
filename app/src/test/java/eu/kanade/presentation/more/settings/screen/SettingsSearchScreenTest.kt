@@ -4,8 +4,10 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -14,6 +16,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
+import androidx.compose.ui.unit.LayoutDirection
 import cafe.adriel.voyager.navigator.LocalNavigator
 import eu.kanade.domain.installFakeAndroidKeyStore
 import io.kotest.matchers.shouldBe
@@ -49,10 +54,13 @@ internal class SettingsSearchScreenTest {
         koin.stop()
     }
 
-    private fun show(canPop: Boolean) {
+    private fun show(canPop: Boolean, direction: LayoutDirection = LayoutDirection.Ltr) {
         every { harness.navigator.canPop } returns canPop
         compose.setContent {
-            CompositionLocalProvider(LocalNavigator provides harness.navigator) {
+            CompositionLocalProvider(
+                LocalNavigator provides harness.navigator,
+                LocalLayoutDirection provides direction,
+            ) {
                 MaterialTheme { SettingsSearchScreen().Content() }
             }
         }
@@ -75,6 +83,16 @@ internal class SettingsSearchScreenTest {
         compose.onNodeWithText("Pure black dark mode").performClick()
         SearchableSettings.highlightKey shouldBe "Pure black dark mode"
         verify { harness.navigator.replace(SettingsAppearanceScreen) }
+    }
+
+    @Test
+    fun scrollingResultsKeepsThem() {
+        show(canPop = true, direction = LayoutDirection.Rtl)
+        type("e")
+        compose.awaitMain(timeoutMillis = 10_000) { count("Pure black dark mode") == 1 }
+        compose.onNode(hasScrollToIndexAction()).performTouchInput { swipeUp() }
+        compose.waitForIdle()
+        compose.onNode(hasSetTextAction()).assertExists()
     }
 
     @Test

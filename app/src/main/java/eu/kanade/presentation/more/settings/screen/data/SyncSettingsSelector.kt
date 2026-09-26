@@ -97,7 +97,7 @@ private class SyncSettingsSelectorModel(
 
     @Immutable
     data class State(
-        val options: BackupOptions = BackupOptions(),
+        val options: BackupOptions,
     ) companion object {
         internal fun syncOptionsToBackupOptions(syncSettings: SyncSettings): BackupOptions {
             return BackupOptions(

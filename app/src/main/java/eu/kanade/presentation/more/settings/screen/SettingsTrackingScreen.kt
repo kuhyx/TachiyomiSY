@@ -60,20 +60,18 @@ internal object SettingsTrackingScreen : SearchableSettings {
 
         var dialog by remember { mutableStateOf<Any?>(null) }
         dialog?.run {
-            when (this) {
-                is LoginDialog -> {
-                    TrackingLoginDialog(
-                        tracker = tracker,
-                        uNameStringRes = uNameStringRes,
-                        onDismissRequest = { dialog = null },
-                    )
-                }
-                is LogoutDialog -> {
-                    TrackingLogoutDialog(
-                        tracker = tracker,
-                        onDismissRequest = { dialog = null },
-                    )
-                }
+            // Logout is the only other dialog: an `is` check for it would leave a dead "no match" group.
+            if (this is LoginDialog) {
+                TrackingLoginDialog(
+                    tracker = tracker,
+                    uNameStringRes = uNameStringRes,
+                    onDismissRequest = { dialog = null },
+                )
+            } else {
+                TrackingLogoutDialog(
+                    tracker = (this as LogoutDialog).tracker,
+                    onDismissRequest = { dialog = null },
+                )
             }
         }
 

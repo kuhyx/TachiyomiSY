@@ -45,14 +45,11 @@ internal fun searchableEntries(contents: List<Preference>): Sequence<Pair<String
         // Flatten items contained inside *enabled* PreferenceGroup
         .flatMap { p ->
             when (p) {
+                // The filter above already dropped disabled groups.
                 is Preference.PreferenceGroup -> {
-                    if (p.enabled) {
-                        p.preferenceItems.asSequence()
-                            .filter { it.enabled && it.title.isNotBlank() }
-                            .map { p.title to it }
-                    } else {
-                        emptySequence()
-                    }
+                    p.preferenceItems.asSequence()
+                        .filter { it.enabled && it.title.isNotBlank() }
+                        .map { p.title to it }
                 }
                 is Preference.PreferenceItem<*, *> -> {
                     sequenceOf(null to p)

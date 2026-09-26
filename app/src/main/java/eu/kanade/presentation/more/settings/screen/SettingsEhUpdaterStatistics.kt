@@ -206,14 +206,12 @@ internal fun updaterStatistics(
                 }
             }
         }
-        if (updateInfo == null) {
-            UpdaterStatisticsLoadingDialog()
-        } else {
+        updateInfo?.let { info ->
             UpdaterStatisticsDialog(
                 onDismissRequest = { dialogOpen = false },
-                updateInfo = updateInfo.orEmpty(),
+                updateInfo = info,
             )
-        }
+        } ?: UpdaterStatisticsLoadingDialog()
     }
     return Preference.PreferenceItem.TextPreference(
         title = stringResource(SYMR.strings.show_updater_statistics),

@@ -52,8 +52,8 @@ internal class ExtensionStoresScreen(
             navigateUp = navigator::pop,
         )
 
+        // No dialog is the `else`: a `when` without one gets a dead "no match" group from Compose.
         when (val dialog = successState.dialog) {
-            null -> {}
             is ExtensionStoreDialog.Create -> {
                 ExtensionStoreCreateDialog(
                     onDismissRequest = screenModel::dismissDialog,
@@ -81,6 +81,7 @@ internal class ExtensionStoresScreen(
                     errorMessage = dialog.errorMessage,
                 )
             }
+            else -> {}
         }
     }
 }

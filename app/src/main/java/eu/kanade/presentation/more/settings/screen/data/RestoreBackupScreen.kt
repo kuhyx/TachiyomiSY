@@ -224,6 +224,6 @@ private data class MissingRestoreComponents(
 )
 
 private data class InvalidRestore(
-    val uri: Uri? = null,
+    val uri: Uri,
     val message: String,
 )
