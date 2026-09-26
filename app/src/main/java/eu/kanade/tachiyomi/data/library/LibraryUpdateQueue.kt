@@ -78,7 +78,7 @@ private suspend fun LibraryUpdateJob.selectByGroup(
             .distinct()
             .sorted()
             .getOrNull(sourceExtra ?: -1)
-        if (source != null) libraryManga.filter { it.manga.source == source } else emptyList()
+        libraryManga.filter { it.manga.source == source }
     }
     LibraryGroup.BY_STATUS -> {
         val statusExtra = groupExtra?.toLongOrNull() ?: -1
