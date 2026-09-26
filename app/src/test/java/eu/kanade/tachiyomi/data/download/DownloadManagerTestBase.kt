@@ -2,11 +2,13 @@ package eu.kanade.tachiyomi.data.download
 
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkStatic
 import nl.adaptivity.xmlutil.serialization.XML
 import org.junit.Before
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
+import tachiyomi.domain.manga.interactor.GetCustomMangaInfo
 
 /**
  * A [DownloadManager] over the [DownloaderTestBase] fixtures: its own [Downloader], store and pending
@@ -26,6 +28,7 @@ internal abstract class DownloadManagerTestBase : DownloaderTestBase() {
                 single { getCategories }
                 single { getTracks }
                 single { sourcePreferences }
+                single { mockk<GetCustomMangaInfo>().also { info -> every { info.get(any()) } returns null } }
             },
         )
         mockkStatic("eu.kanade.tachiyomi.data.download.DownloadCacheRemovalsKt")
