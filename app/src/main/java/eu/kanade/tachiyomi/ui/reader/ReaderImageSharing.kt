@@ -12,9 +12,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.util.editCover
 import eu.kanade.tachiyomi.util.storage.cacheImageDir
-import logcat.LogPriority
 import tachiyomi.core.common.util.lang.launchNonCancellable
-import tachiyomi.core.common.util.system.logcat
 import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -27,30 +25,26 @@ import uy.kohesive.injekt.api.get
  * image will be kept so it won't be taking lots of internal disk space.
  */
 internal fun ReaderImageActions.shareImage(copyToClipboard: Boolean, useExtraPage: Boolean) {
-    val page = selectedPage(useExtraPage)
-    if (page?.status != Page.State.Ready) return
+    val page = selectedPage(useExtraPage)?.takeIf { it.status == Page.State.Ready } ?: return
     val manga = model.manga ?: return
+    val stream = page.stream ?: return
 
     val context = Injekt.get<Application>()
     val destDir = context.cacheImageDir
 
     val filename = generateFilename(manga, page)
 
-    try {
-        model.viewModelScope.launchNonCancellable {
-            destDir.deleteRecursively()
-            val uri = imageSaver.save(
-                image = Image.Page(
-                    inputStream = page.stream!!,
-                    name = filename,
-                    location = Location.Cache,
-                ),
-            )
-            model.eventChannel.send(if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, page))
-        }
-    } catch (expected: Throwable) {
-        // Logged whatever the cause; the caller carries on.
-        logcat(LogPriority.ERROR, expected)
+    // Failures inside the launch go to the scope's handler: a launch itself never throws.
+    model.viewModelScope.launchNonCancellable {
+        destDir.deleteRecursively()
+        val uri = imageSaver.save(
+            image = Image.Page(
+                inputStream = stream,
+                name = filename,
+                location = Location.Cache,
+            ),
+        )
+        model.eventChannel.send(if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, page))
     }
 }
 
@@ -67,23 +61,18 @@ internal fun ReaderImageActions.shareImages(copyToClipboard: Boolean) {
     val context = Injekt.get<Application>()
     val destDir = context.cacheImageDir
 
-    try {
-        model.viewModelScope.launchNonCancellable {
-            destDir.deleteRecursively()
-            val uri = saveImages(
-                page1 = firstPage,
-                page2 = secondPage,
-                isLTR = isLTR,
-                bg = bg,
-                location = Location.Cache,
-                manga = manga,
-            )
-            val event = if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, firstPage, secondPage)
-            model.eventChannel.send(event)
-        }
-    } catch (expected: Throwable) {
-        // Logged whatever the cause; the caller carries on.
-        logcat(LogPriority.ERROR, expected)
+    model.viewModelScope.launchNonCancellable {
+        destDir.deleteRecursively()
+        val uri = saveImages(
+            page1 = firstPage,
+            page2 = secondPage,
+            isLTR = isLTR,
+            bg = bg,
+            location = Location.Cache,
+            manga = manga,
+        )
+        val event = if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, firstPage, secondPage)
+        model.eventChannel.send(event)
     }
 }
 
