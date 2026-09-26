@@ -14,7 +14,7 @@ import tachiyomi.core.common.util.system.logcat
 
 internal class GlobalExceptionHandler private constructor(
     private val applicationContext: Context,
-    private val defaultHandler: Thread.UncaughtExceptionHandler?,
+    private val defaultHandler: Thread.UncaughtExceptionHandler,
     private val activityToBeLaunched: Class<*>,
 ) : Thread.UncaughtExceptionHandler {
 
@@ -32,8 +32,7 @@ internal class GlobalExceptionHandler private constructor(
     override fun uncaughtException(thread: Thread, exception: Throwable) {
         logcat(priority = LogPriority.ERROR, throwable = exception)
         launchActivity(applicationContext, activityToBeLaunched, exception)
-        // Android always installs one; a bare JVM (or a test sandbox) may not.
-        defaultHandler?.uncaughtException(thread, exception)
+        defaultHandler.uncaughtException(thread, exception)
     }
 
     private fun launchActivity(
@@ -58,7 +57,7 @@ internal class GlobalExceptionHandler private constructor(
         ) {
             val handler = GlobalExceptionHandler(
                 applicationContext,
-                Thread.getDefaultUncaughtExceptionHandler(),
+                Thread.getDefaultUncaughtExceptionHandler() as Thread.UncaughtExceptionHandler,
                 activityToBeLaunched,
             )
             Thread.setDefaultUncaughtExceptionHandler(handler)

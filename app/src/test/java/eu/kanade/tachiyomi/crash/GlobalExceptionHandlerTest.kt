@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.crash
 import android.app.Application
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -52,12 +53,10 @@ internal class GlobalExceptionHandlerTest {
     }
 
     @Test
-    fun worksWithoutAPreviousHandler() {
+    fun requiresAPreviousHandler() {
+        // Android always installs a default handler; without one the chain has nowhere to end.
         Thread.setDefaultUncaughtExceptionHandler(null)
-        GlobalExceptionHandler.initialize(context, CrashActivity::class.java)
-        Thread.getDefaultUncaughtExceptionHandler().shouldNotBeNull()
-            .uncaughtException(Thread.currentThread(), IllegalStateException("alone"))
-        shadowOf(context).nextStartedActivity.shouldNotBeNull()
+        shouldThrow<NullPointerException> { GlobalExceptionHandler.initialize(context, CrashActivity::class.java) }
     }
 
     @Test
