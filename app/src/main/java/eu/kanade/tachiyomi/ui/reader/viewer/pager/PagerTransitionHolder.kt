@@ -84,7 +84,7 @@ internal class PagerTransitionHolder(
                     pagesContainer.removeAllViews()
                     when (state) {
                         is ReaderChapter.State.Loading -> setLoading()
-                        is ReaderChapter.State.Error -> setError(state.error)
+                        is ReaderChapter.State.Error -> setError(state.error, chapter)
                         is ReaderChapter.State.Wait, is ReaderChapter.State.Loaded -> {
                             // No additional view is added
                         }
@@ -108,7 +108,7 @@ internal class PagerTransitionHolder(
     }
 
     // Sets the error state on the pages container.
-    private fun setError(error: Throwable) {
+    private fun setError(error: Throwable, chapter: ReaderChapter) {
         val textView = AppCompatTextView(context).apply {
             wrapContent()
             text = context.stringResource(MR.strings.transition_pages_error, error.message ?: "")
@@ -119,10 +119,7 @@ internal class PagerTransitionHolder(
             wrapContent()
             text = context.stringResource(MR.strings.action_retry)
             setOnClickListener {
-                val toChapter = transition.to
-                if (toChapter != null) {
-                    this@PagerTransitionHolder.viewer.activity.requestPreloadChapter(toChapter)
-                }
+                this@PagerTransitionHolder.viewer.activity.requestPreloadChapter(chapter)
             }
         }
 

@@ -51,7 +51,7 @@ internal class ReaderNavigationOverlayView(context: Context, attributeSet: Attri
             return
         }
 
-        viewPropertyAnimator = animate()
+        val animator = animate()
             .alpha(1f)
             .setDuration(FADE_DURATION)
             .withStartAction {
@@ -60,13 +60,14 @@ internal class ReaderNavigationOverlayView(context: Context, attributeSet: Attri
             .withEndAction {
                 viewPropertyAnimator = null
             }
-        viewPropertyAnimator?.start()
+        viewPropertyAnimator = animator
+        animator.start()
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (navigation == null) return
+        val navigation = navigation ?: return
 
-        navigation?.getRegions()?.forEach { region ->
+        navigation.getRegions().forEach { region ->
             val rect = region.rectF
 
             // Scale rect from 1f,1f to screen width and height
@@ -94,14 +95,15 @@ internal class ReaderNavigationOverlayView(context: Context, attributeSet: Attri
         super.performClick()
 
         if (viewPropertyAnimator == null && isVisible) {
-            viewPropertyAnimator = animate()
+            val animator = animate()
                 .alpha(0f)
                 .setDuration(FADE_DURATION)
                 .withEndAction {
                     isVisible = false
                     viewPropertyAnimator = null
                 }
-            viewPropertyAnimator?.start()
+            viewPropertyAnimator = animator
+            animator.start()
         }
 
         return true

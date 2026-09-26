@@ -33,7 +33,8 @@ internal class ReaderTransitionView @JvmOverloads constructor(context: Context, 
                 transition = transition,
                 currChapterDownloaded = transition.from.pageLoader?.isLocal == true,
                 goingToChapterDownloaded = current.isLocal() ||
-                    transition.to?.chapter?.let { goingToChapter ->
+                    transition.to?.let { goingTo ->
+                        val goingToChapter = goingTo.chapter
                         downloadManager.isChapterDownloaded(
                             chapterName = goingToChapter.name,
                             chapterScanlator = goingToChapter.scanlator,
