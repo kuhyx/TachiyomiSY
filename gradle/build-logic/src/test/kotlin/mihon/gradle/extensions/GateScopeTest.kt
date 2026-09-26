@@ -40,6 +40,27 @@ internal class GateScopeTest {
         scoped.configureTest()
         scoped.unitTest().let { it.onlyIf.isSatisfiedBy(it) } shouldBe true
     }
+
+    @JUnitTest
+    fun theStaticPhaseRunsNoTests() {
+        val project = catalogProject()
+        project.extensions.extraProperties[GATE_PHASE_PROPERTY] = STATIC_PHASE
+        project.gateRunsTests() shouldBe false
+        project.configureTest()
+        project.unitTest().let { it.onlyIf.isSatisfiedBy(it) } shouldBe false
+        catalogProject().gateRunsTests() shouldBe true
+    }
+
+    @JUnitTest
+    fun testForksComeFromTheProperty() {
+        val serial = catalogProject()
+        serial.configureTest()
+        (serial.unitTest() as Test).maxParallelForks shouldBe 1
+        val forked = catalogProject()
+        forked.extensions.extraProperties[TEST_FORKS_PROPERTY] = "3"
+        forked.configureTest()
+        (forked.unitTest() as Test).maxParallelForks shouldBe 3
+    }
 }
 
 private fun Project.unitTest(): TaskInternal = tasks.register("unitTest", Test::class.java).get()

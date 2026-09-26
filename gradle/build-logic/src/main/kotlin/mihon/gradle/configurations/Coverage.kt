@@ -3,7 +3,7 @@ package mihon.gradle.configurations
 import kotlinx.kover.gradle.plugin.dsl.AggregationType
 import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
-import mihon.gradle.extensions.isInGateScope
+import mihon.gradle.extensions.gateRunsTests
 import mihon.gradle.extensions.libs
 import mihon.gradle.tasks.VerifyCoverageExceptionsTask
 import mihon.gradle.tasks.readExceptions
@@ -41,14 +41,15 @@ private const val EXCEPTIONS_FILE: String = "coverage-exceptions.txt"
  * file the branch bound stays at 100%.
  */
 public fun Project.configureCoverage() {
-    val isInScope = isInGateScope()
+    val isTestRun = gateRunsTests()
     val isApplication = plugins.hasPlugin(ANDROID_APPLICATION_PLUGIN)
     val verifyTask = if (isApplication) "koverVerifyDebug" else "koverVerify"
     val exceptionsFile = layout.projectDirectory.file(EXCEPTIONS_FILE).asFile
     val allowedMisses = exceptionsFile.takeIf { it.exists() }?.let { readExceptions(it).values.sum() }
     tasks.matching { it.name == "check" }.configureEach { dependsOn(verifyTask) }
-    tasks.matching { it.name == verifyTask }.configureEach {
-        onlyIf("the module is in the gate's scope") { isInScope }
+    // Every Kover task, not just the verify: in the static phase no test has written coverage yet.
+    tasks.matching { it.name.startsWith("kover") }.configureEach {
+        onlyIf("the gate runs this module's tests") { isTestRun }
     }
     extensions.configure<KoverProjectExtension> {
         useJacoco(libs.versions.jacoco.get())
@@ -75,17 +76,17 @@ public fun Project.configureCoverage() {
             }
         }
     }
-    if (exceptionsFile.exists()) registerExceptionsCheck(exceptionsFile, isApplication, isInScope)
+    if (exceptionsFile.exists()) registerExceptionsCheck(exceptionsFile, isApplication, isTestRun)
 }
 
 // The per-class half of `coverage-exceptions.txt`: Kover rules cannot be scoped to one class.
-private fun Project.registerExceptionsCheck(exceptionsFile: File, isApplication: Boolean, isInScope: Boolean) {
+private fun Project.registerExceptionsCheck(exceptionsFile: File, isApplication: Boolean, isTestRun: Boolean) {
     val variant = if (isApplication) "Debug" else ""
     val check = tasks.register("verifyCoverageExceptions", VerifyCoverageExceptionsTask::class.java) {
         dependsOn("koverXmlReport$variant")
         report.set(layout.buildDirectory.file("reports/kover/report$variant.xml"))
         exceptions.set(exceptionsFile)
-        onlyIf("the module is in the gate's scope") { isInScope }
+        onlyIf("the gate runs this module's tests") { isTestRun }
     }
     tasks.matching { it.name == "check" }.configureEach { dependsOn(check) }
 }

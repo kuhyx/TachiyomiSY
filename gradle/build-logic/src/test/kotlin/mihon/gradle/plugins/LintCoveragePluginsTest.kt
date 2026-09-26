@@ -11,6 +11,8 @@ import io.mockk.mockk
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import mihon.gradle.catalogProject
 import mihon.gradle.extensions.GATE_MODULES_PROPERTY
+import mihon.gradle.extensions.GATE_PHASE_PROPERTY
+import mihon.gradle.extensions.STATIC_PHASE
 import org.gradle.api.Project
 import org.gradle.api.internal.TaskInternal
 import org.gradle.api.plugins.ExtensionAware
@@ -114,5 +116,17 @@ internal class LintCoveragePluginsTest {
         project.plugins.apply("base")
         val verify: TaskInternal = project.tasks.withType(TaskInternal::class.java).getByName("koverVerify")
         verify.onlyIf.isSatisfiedBy(verify) shouldBe false
+    }
+
+    @Test
+    fun coverageSkippedInStaticPhase() {
+        val project = catalogProject()
+        project.extensions.extraProperties[GATE_PHASE_PROPERTY] = STATIC_PHASE
+        project.plugins.apply(PluginCoverage::class.java)
+        project.plugins.apply("base")
+        val tasks = project.tasks.withType(TaskInternal::class.java)
+        listOf("koverVerify", "koverXmlReport").forEach { name ->
+            tasks.getByName(name).let { it.onlyIf.isSatisfiedBy(it) } shouldBe false
+        }
     }
 }

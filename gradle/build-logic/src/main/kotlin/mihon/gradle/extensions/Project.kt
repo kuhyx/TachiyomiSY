@@ -28,8 +28,14 @@ private const val TEST_HEAP: String = "1536m"
 private const val TEST_CLASSES_PER_FORK: Long = 200
 
 /**
+ * Test JVMs per test task, default 1. Each Robolectric JVM holds ~2.5 GiB, so the local gate stays
+ * serial inside its shared memory cap and CI, alone on its runner, passes a larger count.
+ */
+public const val TEST_FORKS_PROPERTY: String = "mihon.test.forks"
+
+/**
  * JUnit Platform for every test task, logging each outcome; skipped outside the gate's scope
- * ([GATE_MODULES_PROPERTY]).
+ * ([GATE_MODULES_PROPERTY]) and in its static phase ([GATE_PHASE_PROPERTY]).
  *
  * Only `*Test` classes are offered to the engines: the platform gets every class in the
  * test output otherwise, and the vintage engine reflects over each one. A Robolectric
@@ -48,7 +54,8 @@ private const val TEST_CLASSES_PER_FORK: Long = 200
  * handles it; only the host JVM needed the newer runtime (decided 2026-09-26).
  */
 public fun Project.configureTest() {
-    val isInScope = isInGateScope()
+    val isTestRun = gateRunsTests()
+    val testForks = findProperty(TEST_FORKS_PROPERTY)?.run { toString().toInt() } ?: 1
     pluginManager.apply(JavaBasePlugin::class.java)
     val testLauncher = extensions.getByType(JavaToolchainService::class.java).launcherFor {
         languageVersion.set(JavaLanguageVersion.of(mihonx.versions.test.jdk.get()))
@@ -60,7 +67,8 @@ public fun Project.configureTest() {
         // TEST_CLASSES_PER_FORK classes bounds that growth however large the suite gets.
         maxHeapSize = TEST_HEAP
         forkEvery = TEST_CLASSES_PER_FORK
-        onlyIf("the module is in the gate's scope") { isInScope }
+        maxParallelForks = testForks
+        onlyIf("the gate runs this module's tests") { isTestRun }
         useJUnitPlatform()
         include("**/*Test.class")
         systemProperty("java.io.tmpdir", temporaryDir.absolutePath)

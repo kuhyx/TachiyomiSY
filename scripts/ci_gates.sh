@@ -35,11 +35,15 @@ readonly REPO_ROOT
 source "$REPO_ROOT/scripts/capped_modules.sh"
 # shellcheck source=scripts/gate_modules.sh
 source "$REPO_ROOT/scripts/gate_modules.sh"
+# shellcheck source=scripts/gradle_gate.sh
+source "$REPO_ROOT/scripts/gradle_gate.sh"
 RUN_GRADLE=1
 CHANGED_ONLY=0
 GRADLE_TASKS="${GRADLE_TASKS:-check}"
 #: Paths whose change makes the Gradle gate necessary.
-readonly BUILD_INPUTS=('*.kt' '*.kts' '*.java' '*.toml' '*.xml' '*.properties' '*.pro' 'gradlew')
+#: The gate's own Gradle half counts: a change to how it runs must run it.
+readonly BUILD_INPUTS=('*.kt' '*.kts' '*.java' '*.toml' '*.xml' '*.properties' '*.pro' 'gradlew'
+    'scripts/ci_gates.sh' 'scripts/gradle_gate.sh')
 readonly GATE_MODULES_PROPERTY="mihon.gate.modules"
 
 resolve_utils_root() {
@@ -125,83 +129,6 @@ jitpack_preflight() {
     # says "Could not find", which reads like a catalog typo. Ask first.
     banner "jitpack artifacts are served"
     python3 "$REPO_ROOT/scripts/jitpack_preflight.py"
-}
-
-gradle_gate() {
-    banner "gradle $GRADLE_TASKS"
-    local ci_jdk="/usr/lib/jvm/java-17-openjdk"
-    if [[ -z "${JAVA_HOME:-}" && -d "$ci_jdk" ]]; then
-        export JAVA_HOME="$ci_jdk"
-    fi
-    local capped="$HOME/.claude/scripts/capped.sh"
-    local -a tasks
-    read -ra tasks <<< "$GRADLE_TASKS"
-    # Locally the build runs under the shared resource cap; on a runner there
-    # is nothing else to protect and the cap script does not exist.
-    local scope=()
-    if [[ "$CHANGED_ONLY" -eq 1 ]]; then
-        local modules
-        modules="$(gate_modules)"
-        if [[ -n "$modules" ]]; then
-            echo "  tests and coverage scoped to: $modules (CI runs every module)"
-            scope=("-P$GATE_MODULES_PROPERTY=$modules")
-        fi
-    fi
-    if [[ -z "${CI:-}" && -x "$capped" ]]; then
-        # The cap is whatever ceiling capped.sh currently allows, read from
-        # the script so a raised ceiling speeds the gate up without a second
-        # edit here and a lowered one cannot make it refuse to run.
-        # Android Lint runs here too since 2026-09-21: at the 8 GiB cap
-        # :app:lintAnalyzeDebug fits (2m46s, serial, not heap-bound -- the
-        # same at 4 and 6 GiB), and the first push after the app joined the
-        # lint stack went red on two debug-only findings the local gate had
-        # skipped with `-x lint`. Gradle's up-to-date check makes a repeat on
-        # the same tree cost seconds, so run this script `--changed-only`
-        # detached after every commit and the pre-push hook finds every task
-        # up to date; only the < 8 GiB branch still cannot hold lint.
-        local mem_g cpu_pct workers
-        mem_g="$(sed -n 's/^readonly HARD_MEM_G=\([0-9]*\)$/\1/p' "$capped")"
-        cpu_pct="$(sed -n 's/^readonly HARD_CPU_PCT=\([0-9]*\)$/\1/p' "$capped")"
-        : "${mem_g:=4}" "${cpu_pct:=20}"
-        workers=$(( $(nproc) * cpu_pct / 100 ))
-        (( workers < 2 )) && workers=2
-        # Every worker may be a Robolectric test JVM (~1 GiB each next to the
-        # daemon), so with six such modules 12 workers overran the 8 GiB cap
-        # (SIGTERM 143 on 2026-09-19 once source-local's suite joined); four
-        # keeps the peak under it.
-        (( workers > 4 )) && workers=4
-        if (( mem_g >= 8 )); then
-            # 8 GiB and up: parallel project execution, one worker per capped
-            # core, a quarter of the cap for the daemon heap. Measured
-            # 2026-09-20 on the whole tree (every test task executing): four
-            # Robolectric test JVMs peak at ~1.8 GiB RSS each next to the
-            # daemon, and a 3 GiB daemon heap left ~0.8 GiB of headroom at
-            # 8 GiB; 2 GiB is what the < 8 GiB branch below already compiles
-            # the app with.
-            CAP_MEM="${mem_g}G" CAP_CPU_PCT="$cpu_pct" "$capped" \
-                "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" "${scope[@]}" \
-                --max-workers="$workers" \
-                -Dorg.gradle.parallel=true \
-                -Dorg.gradle.jvmargs="-Xmx$((mem_g / 4))g -Dfile.encoding=UTF-8" \
-                -Dkotlin.daemon.jvm.options=-Xmx1024m
-        else
-            # Measured 2026-09-12: with the project's default -Xmx4g and
-            # parallel workers a full check exceeds a 4 GiB cap and is
-            # SIGTERMed; with these limits it peaks at 1.9 GiB. Slower, but
-            # it finishes.
-            CAP_MEM="${mem_g}G" CAP_CPU_PCT="$cpu_pct" "$capped" \
-                "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" -x lint "${scope[@]}" \
-                --max-workers=2 \
-                -Dorg.gradle.parallel=false \
-                -Dorg.gradle.jvmargs="-Xmx2048m -Dfile.encoding=UTF-8" \
-                -Dkotlin.daemon.jvm.options=-Xmx768m
-        fi
-    else
-        # A GitHub runner has 4 cores and 16 GiB and runs one build: give
-        # the daemon (R8 runs inside it) half the machine.
-        "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" \
-            -Dorg.gradle.jvmargs="-Xmx8g -Dfile.encoding=UTF-8"
-    fi
 }
 
 main() {

@@ -35,6 +35,13 @@ the sync job execute. Add a gate there, never in a workflow alone.
   serial, and re-runs whenever any app file changes; the first app-lint push
   went red on findings a `-x lint` local gate had skipped). CI's `check`
   lints the debug variant -- `lintFoss` is not what CI runs.
+  Locally the gate runs that `check` twice (since 2026-09-26, see
+  `scripts/gradle_gate.sh`): first with `-Pmihon.gate.phase=static`, which
+  skips every test and Kover task but builds what they depend on, then
+  plainly, when only tests and coverage are left to execute. Serial, one
+  test JVM, ~5 GiB -- it fits next to other jobs in the shared
+  `capped.slice`, where the old single parallel run (6.5 GiB) was
+  OOM-killed. CI runs one `check` with `-Pmihon.test.forks=3`.
 - One module: `./gradlew :domain:check`; the convention plugins themselves:
   `./gradlew -p gradle/build-logic check` (root `check` depends on it)
 - Lint stack per module: apply `mihonx.plugins.lint` (detekt every rule from
