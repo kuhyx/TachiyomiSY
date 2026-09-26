@@ -171,7 +171,12 @@ internal abstract class SearchScreenModel(
     }
 
     private fun updateItem(source: Source, result: SearchItemResult) {
-        updateItems(state.value.items + (source to result))
+        // Sources finish on IO threads at once: merge inside the atomic update, or one result
+        // overwrites the other and that source spins forever.
+        mutableState.update {
+            val items = it.items + (source to result)
+            it.copy(items = items.toSortedMap(sortComparator(items)))
+        }
     }
 
     @Immutable

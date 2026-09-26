@@ -121,10 +121,11 @@ internal open class RecommendsScreenModel(
     }
 
     private fun updateItem(source: RecommendationPagingSource, result: RecommendationItemResult) {
-        synchronized(state.value.items) {
-            val map = state.value.items.toMutableMap()
-            map[source] = result
-            updateItems(map.toMap())
+        // Locking state.value.items locked a different map after every update; merging inside the
+        // atomic update is what keeps two finishing sources from overwriting each other.
+        mutableState.update {
+            val items = it.items + (source to result)
+            it.copy(items = items.toSortedMap(sortComparator(items)))
         }
     }
 
