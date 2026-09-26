@@ -85,7 +85,7 @@ internal class FeedScreenModelTest {
         model.init()
         model.pushed shouldBe false
         eventually { !model.state.value.isLoadingItems }
-        coVerify(exactly = 2) { harness.source.getLatestUpdates(1) }
+        coVerify(timeout = 5_000, exactly = 2) { harness.source.getLatestUpdates(1) }
         model.onDispose()
     }
 

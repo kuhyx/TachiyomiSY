@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import eu.kanade.presentation.more.settings.widget.pressDialogBack
+import eu.kanade.tachiyomi.source.online.installSilentXLog
 import exh.uconfig.EHConfigurator
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -33,6 +34,8 @@ internal class SettingsEhDialogsTest {
 
     @Before
     fun setUp() {
+        // The dialogs log through XLog, which the app initializes at start-up; a test JVM must too.
+        installSilentXLog()
         mockkConstructor(EHConfigurator::class)
         coEvery { anyConstructed<EHConfigurator>().configureAll() } just runs
         koin.exh.exhShowSettingsUploadWarning.set(false)
