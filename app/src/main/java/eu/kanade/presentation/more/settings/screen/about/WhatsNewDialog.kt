@@ -66,12 +66,12 @@ internal fun WhatsNewDialog(onDismissRequest: () -> Unit) {
                         ).toDisplayChangelog()
                     }
                 }
-                if (changelog != null) {
+                changelog?.let { versions ->
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.medium),
                         modifier = Modifier.fillMaxSize(),
                     ) {
-                        items(changelog.orEmpty()) { changelog ->
+                        items(versions) { changelog ->
                             Column(Modifier.fillMaxWidth()) {
                                 Text(
                                     text = stringResource(SYMR.strings.changelog_version, changelog.version),

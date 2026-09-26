@@ -14,8 +14,10 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,10 +31,19 @@ internal class AppLanguageScreenTest {
     @get:Rule
     val compose = createComposeRule()
 
+    // Robolectric does not persist application locales, so AppCompatDelegate is backed by a field.
+    private var locales = LocaleListCompat.getEmptyLocaleList()
+
+    @Before
+    fun setUp() {
+        mockkStatic(AppCompatDelegate::class)
+        every { AppCompatDelegate.getApplicationLocales() } answers { locales }
+        every { AppCompatDelegate.setApplicationLocales(any()) } answers { locales = firstArg() }
+    }
+
     @After
     fun tearDown() {
         unmockkAll()
-        AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
     }
 
     private fun show() {
@@ -57,7 +68,7 @@ internal class AppLanguageScreenTest {
 
     @Test
     fun startsFromChosenLocale() {
-        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
+        locales = LocaleListCompat.forLanguageTags("en")
         show()
         locale() shouldBe "en"
     }
