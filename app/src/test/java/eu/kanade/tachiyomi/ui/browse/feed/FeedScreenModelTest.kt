@@ -123,7 +123,8 @@ internal class FeedScreenModelTest {
         val model = FeedScreenModel()
         model.openAddSearchDialog(harness.source)
         eventually { model.state.value.dialog is FeedScreenModel.Dialog.AddFeedSearch }
-        (model.state.value.dialog as FeedScreenModel.Dialog.AddFeedSearch).options shouldBe listOf(null, savedSearch(5L))
+        (model.state.value.dialog as FeedScreenModel.Dialog.AddFeedSearch).options shouldBe
+            listOf(null, savedSearch(5L))
         model.openAddSearchDialog(harness.source(2L, "Two"))
         eventually { (model.state.value.dialog as? FeedScreenModel.Dialog.AddFeedSearch)?.options?.size == 0 }
         model.openDeleteDialog(feed(1L))

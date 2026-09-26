@@ -78,7 +78,8 @@ internal class ExtensionsScreenModelTest {
 
     @Test
     fun searchFiltersTheList() {
-        extensions.value = Extensions(emptyList(), listOf(installed("Mine"), installed("Other")), emptyList(), emptyList())
+        extensions.value =
+            Extensions(emptyList(), listOf(installed("Mine"), installed("Other")), emptyList(), emptyList())
         val model = model()
         model.search("mine")
         eventually { model.state.value.items.values.flatten().size == 1 }

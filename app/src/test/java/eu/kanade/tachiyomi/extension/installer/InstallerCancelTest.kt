@@ -49,7 +49,7 @@ internal class InstallerCancelTest {
     }
 
     @Test
-    fun aRefusedCancellationKeepsTheEntry() {
+    fun refusedCancellationKeepsEntry() {
         val installer = installer()
         installer.allowCancel = false
         queued(installer, 1L)
@@ -66,7 +66,7 @@ internal class InstallerCancelTest {
     }
 
     @Test
-    fun theCancelBroadcastReachesTheQueue() {
+    fun cancelBroadcastReachesQueue() {
         val installer = installer()
         queued(installer, 1L, 2L)
         Installer.cancelInstallQueue(harness.application, 2L)

@@ -65,7 +65,10 @@ internal class MangaDownloadActionsTest {
         val downloads = harness.loaded().downloads
         val many = listOf(item(chapter(2L)), item(chapter(3L)))
         downloads.runChapterDownloadActions(many, ChapterDownloadAction.START_NOW)
-        harness.queue.value = listOf(download(chapter(1L), Download.State.QUEUE), download(chapter(3L), Download.State.QUEUE))
+        harness.queue.value = listOf(
+            download(chapter(1L), Download.State.QUEUE),
+            download(chapter(3L), Download.State.QUEUE),
+        )
         downloads.runChapterDownloadActions(listOf(item(chapter(3L))), ChapterDownloadAction.START_NOW)
         eventually { harness.queue.value.first().chapter.id == 3L }
     }

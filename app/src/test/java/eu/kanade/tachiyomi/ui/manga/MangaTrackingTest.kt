@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.manga.model.Manga
 
-private const val MANGADEX = 2499283573021220255L
+private const val MANGADEX = 2_499_283_573_021_220_255L
 
 @RunWith(RobolectricTestRunner::class)
 internal class MangaTrackingTest {

@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.browse.source
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
@@ -84,7 +83,7 @@ internal class SourcesTabTest {
     }
 
     private fun host(config: SourcesScreen.SmartSearchConfig? = null) =
-        TabHost { sourcesTab(config) }.also { it.show(compose) }
+        TabHost { sourcesTab(config) }.apply { show(compose) }
 
     @Test
     fun clicksOpenTheSource() {

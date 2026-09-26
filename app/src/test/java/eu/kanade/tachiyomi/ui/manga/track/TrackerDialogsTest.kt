@@ -100,7 +100,8 @@ internal class TrackerDialogsTest {
         show(TrackerSearchScreen(1L, "Needle", null, 1L))
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodes(hasText("offline", substring = true))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
     }
 

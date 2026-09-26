@@ -22,6 +22,8 @@ internal class PackageInstallerHarness(private val harness: InstallerHarness) {
     val resolver: ContentResolver = mockk(relaxed = true)
     val written = ByteArrayOutputStream()
 
+    private var registered: BroadcastReceiver? = null
+
     fun install() {
         val packageManager = mockk<PackageManager>()
         every { packageManager.packageInstaller } returns packageInstaller
@@ -37,8 +39,6 @@ internal class PackageInstallerHarness(private val harness: InstallerHarness) {
     fun apk(dir: File, name: String): Uri = Uri.fromFile(File(dir, name).apply { writeText("payload") })
 
     fun installer(): PackageInstallerInstaller = PackageInstallerInstaller(harness.service)
-
-    private var registered: BroadcastReceiver? = null
 
     /** The receiver the installer registered for the platform installer's status broadcasts. */
     fun receiver(): BroadcastReceiver {

@@ -50,8 +50,11 @@ internal class SourceFeedScreenModelTest {
         coEvery { harness.getSearches.await(1L) } returns listOf(savedSearch(5L, "[]"), savedSearch(6L, "bad"))
         harness.feeds.value = listOf(feed(1L, savedSearch = 5L), feed(2L, savedSearch = 6L))
         val items = model().state.value.items
-        items.map { it::class } shouldBe
-            listOf(SourceFeedUI.Browse::class, SourceFeedUI.SourceSavedSearch::class, SourceFeedUI.SourceSavedSearch::class)
+        items.map { it::class } shouldBe listOf(
+            SourceFeedUI.Browse::class,
+            SourceFeedUI.SourceSavedSearch::class,
+            SourceFeedUI.SourceSavedSearch::class,
+        )
         items[1].results?.single()?.title shouldBe "Found"
     }
 

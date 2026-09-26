@@ -56,7 +56,7 @@ internal class TrackSelectorScreensTest {
         compose.waitForIdle()
     }
 
-    private fun ok() {
+    private fun confirmAndClose() {
         compose.onNodeWithText("OK").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Blank").assertExists()
@@ -67,7 +67,7 @@ internal class TrackSelectorScreensTest {
         show(TrackStatusSelectorScreen(track, 1L))
         compose.onNodeWithText("Status").assertExists()
         compose.onNodeWithText("Reading").performClick()
-        ok()
+        confirmAndClose()
         coVerify(timeout = 5_000) { tracker.setRemoteStatus(any(), 1L) }
     }
 
@@ -75,7 +75,7 @@ internal class TrackSelectorScreensTest {
     fun chapterIsSaved() {
         show(TrackChapterSelectorScreen(track, 1L))
         compose.onNodeWithText("Chapters").assertExists()
-        ok()
+        confirmAndClose()
         coVerify(timeout = 5_000) { tracker.setRemoteLastChapterRead(any(), 3) }
     }
 
@@ -91,7 +91,7 @@ internal class TrackSelectorScreensTest {
     fun scoreIsSaved() {
         show(TrackScoreSelectorScreen(track, 1L))
         compose.onNodeWithText("Score").assertExists()
-        ok()
+        confirmAndClose()
         coVerify(timeout = 5_000) { tracker.setRemoteScore(any(), "5") }
     }
 
@@ -99,7 +99,7 @@ internal class TrackSelectorScreensTest {
     fun startDateIsSaved() {
         show(TrackDateSelectorScreen(track, 1L, start = true))
         compose.onNodeWithText("Start date").assertExists()
-        ok()
+        confirmAndClose()
         coVerify(timeout = 5_000) { tracker.setRemoteStartDate(any(), any()) }
     }
 
@@ -107,7 +107,7 @@ internal class TrackSelectorScreensTest {
     fun finishDateIsSaved() {
         show(TrackDateSelectorScreen(track.copy(finishDate = 86_400_000L), 1L, start = false))
         compose.onNodeWithText("Finish date").assertExists()
-        ok()
+        confirmAndClose()
         coVerify(timeout = 5_000) { tracker.setRemoteFinishDate(any(), any()) }
     }
 

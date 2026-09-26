@@ -49,7 +49,9 @@ internal class MangaScreenSharingTest {
     @Test
     fun shareFailureIsToasted() {
         val refusing = object : ContextWrapper(activity) {
-            override fun startActivity(intent: Intent?): Unit = throw IllegalStateException("no")
+            override fun startActivity(intent: Intent?) {
+                error("no")
+            }
         }
         shareManga(refusing, manga(), http)
         ShadowToast.getTextOfLatestToast() shouldBe "no"

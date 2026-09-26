@@ -121,7 +121,9 @@ internal class MangaCoverScreenModelTest {
     fun shareFailureIsReported() {
         every { imageSaver.save(any()) } returns saved
         val refusing = object : ContextWrapper(activity) {
-            override fun startActivity(intent: Intent?): Unit = throw IllegalStateException("no")
+            override fun startActivity(intent: Intent?) {
+                error("no")
+            }
         }
         val model = model()
         model.shareCover(refusing)

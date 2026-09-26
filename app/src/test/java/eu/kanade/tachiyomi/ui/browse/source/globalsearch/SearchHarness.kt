@@ -29,6 +29,11 @@ internal class SearchHarness {
     val networkToLocalManga: NetworkToLocalManga = mockk()
     val getManga: GetManga = mockk()
 
+    init {
+        every { sourceManager.get(any()) } answers { catalogue.firstOrNull { it.id == firstArg<Long>() } }
+        coEvery { networkToLocalManga(any<List<Manga>>()) } answers { firstArg() }
+    }
+
     /** A source with [id] whose search returns [titles], or throws when [titles] is null. */
     fun source(
         sourceId: Long,
@@ -55,11 +60,6 @@ internal class SearchHarness {
                 )
             }
         }.also { catalogue += it }
-
-    init {
-        every { sourceManager.get(any()) } answers { catalogue.firstOrNull { it.id == firstArg<Long>() } }
-        coEvery { networkToLocalManga(any<List<Manga>>()) } answers { firstArg() }
-    }
 
     fun start() {
         koin.sourcePreferences.enabledLanguages.set(setOf("en"))

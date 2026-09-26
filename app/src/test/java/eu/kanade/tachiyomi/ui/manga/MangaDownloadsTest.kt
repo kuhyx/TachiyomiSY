@@ -28,8 +28,8 @@ internal const val DELETION: String = "eu.kanade.tachiyomi.data.download.Downloa
 
 /** A queued download of [chapter] in [state]. */
 internal fun download(chapter: Chapter, state: Download.State, manga: Manga = manga()): Download =
-    Download(source = mockk<HttpSource>(relaxed = true), manga = manga, chapter = chapter).also {
-        it.transition(state)
+    Download(source = mockk<HttpSource>(relaxed = true), manga = manga, chapter = chapter).apply {
+        transition(state)
     }
 
 /** Merged data holding [members] from the merged source. */
@@ -70,7 +70,8 @@ internal class MangaDownloadsTest {
         emit(download(chapter(2L), Download.State.QUEUE, manga().copy(id = 5L)))
         emit(download(chapter(1L), Download.State.DOWNLOADING))
         model.awaitSuccess { state -> state.chapters.any { it.downloadState == Download.State.DOWNLOADING } }
-            .chapters.map { it.downloadState } shouldBe listOf(Download.State.DOWNLOADING, Download.State.NOT_DOWNLOADED)
+            .chapters
+            .map { it.downloadState } shouldBe listOf(Download.State.DOWNLOADING, Download.State.NOT_DOWNLOADED)
     }
 
     @Test

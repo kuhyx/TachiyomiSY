@@ -112,7 +112,7 @@ internal class PackageInstallerInstallerTest {
     }
 
     @Test
-    fun destroyingUnregistersTheReceiver() {
+    fun destroyingUnregistersReceiver() {
         platform.installer().onDestroy()
         verify { harness.service.unregisterReceiver(any()) }
     }

@@ -29,7 +29,9 @@ internal class ExtensionInstallsTest {
     private val koin = BrowseKoin()
     private val stale = installed("Old", hasUpdate = true)
     private val fresh = available("Old", listOf(1L to "en"), pkgName = stale.pkgName)
-    private val extensions = MutableStateFlow(Extensions(listOf(stale), listOf(installed("Mine")), emptyList(), emptyList()))
+    private val extensions = MutableStateFlow(
+        Extensions(listOf(stale), listOf(installed("Mine")), emptyList(), emptyList()),
+    )
     private val steps = MutableSharedFlow<InstallStep>()
     private val manager = mockk<ExtensionManager>(relaxed = true) {
         every { installer.downloadAndInstall(any(), any()) } returns steps

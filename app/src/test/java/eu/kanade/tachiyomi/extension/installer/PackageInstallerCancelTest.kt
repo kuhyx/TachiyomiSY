@@ -19,6 +19,7 @@ internal class PackageInstallerCancelTest {
     private val harness = InstallerHarness()
     private val platform = PackageInstallerHarness(harness)
     private val sdk = Build.VERSION.SDK_INT
+    private val apk by lazy { platform.apk(harness.application.cacheDir, "one.apk") }
 
     @Before
     fun setUp() {
@@ -31,8 +32,6 @@ internal class PackageInstallerCancelTest {
         ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", sdk)
         harness.uninstall()
     }
-
-    private val apk by lazy { platform.apk(harness.application.cacheDir, "one.apk") }
 
     private fun queueOne(): PackageInstallerInstaller {
         val installer = platform.installer()
@@ -57,14 +56,14 @@ internal class PackageInstallerCancelTest {
     }
 
     @Test
-    fun aFinishedSessionCannotBeAbandoned() {
+    fun finishedSessionIsNotAbandoned() {
         val installer = queueOne()
         every { platform.packageInstaller.abandonSession(any()) } throws SecurityException("done")
         installer.cancelEntry(Installer.Entry(downloadId = 1L, uri = apk)) shouldBe true
     }
 
     @Test
-    fun olderAndroidNeedsNoUserActionFlag() {
+    fun olderSdkNeedsNoUserActionFlag() {
         ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", Build.VERSION_CODES.R)
         queueOne()
         verify { platform.session.commit(any()) }

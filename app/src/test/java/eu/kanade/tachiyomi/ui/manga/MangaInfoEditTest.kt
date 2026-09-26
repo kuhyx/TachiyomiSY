@@ -54,7 +54,9 @@ internal class MangaInfoEditTest {
         val model = harness.loaded()
         model.updateMangaInfo(" Title ", "au", "ar", "th", "de", listOf("g"), 1L)
         verify { local.updateMangaInfo(any()) }
-        coVerify(timeout = 5_000) { harness.updateManga.await(match { it.title == "Title" && it.genre == listOf("g") }) }
+        coVerify(timeout = 5_000) {
+            harness.updateManga.await(match { it.title == "Title" && it.genre == listOf("g") })
+        }
         model.updateMangaInfo(" ", null, null, null, null, emptyList(), null)
         coVerify(timeout = 5_000) { harness.updateManga.await(match { it.title == "/m/1" && it.status == null }) }
         model.updateMangaInfo(null, null, null, null, null, null, null)
@@ -86,7 +88,8 @@ internal class MangaInfoEditTest {
         items.first().sourceName shouldNotBe null
         items.size shouldBe 2
         model.toChapterListItems(listOf(chapter(1L)), manga(), data.copy(sources = sources.take(2)))
-            .single().sourceName shouldBe null
+            .single()
+            .sourceName shouldBe null
     }
 
     @Test

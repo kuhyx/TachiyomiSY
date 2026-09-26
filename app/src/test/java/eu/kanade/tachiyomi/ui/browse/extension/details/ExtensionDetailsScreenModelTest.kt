@@ -33,7 +33,9 @@ internal class ExtensionDetailsScreenModelTest {
     private val koin = BrowseKoin()
     private val network = mockk<NetworkHelper>(relaxed = true)
     private val installedFlow = MutableStateFlow<List<Extension.Installed>>(emptyList())
-    private val manager = mockk<ExtensionManager>(relaxed = true) { every { installedExtensionsFlow } returns installedFlow }
+    private val manager = mockk<ExtensionManager>(relaxed = true) {
+        every { installedExtensionsFlow } returns installedFlow
+    }
     private val getSources = mockk<GetExtensionSources>()
     private val toggleSource = mockk<ToggleSource>(relaxed = true)
     private val toggleIncognito = mockk<ToggleIncognito>(relaxed = true)

@@ -66,7 +66,9 @@ internal class MigrationListDialogsTest {
 
     @Test
     fun progressCanBeCancelled() {
-        compose.setContent { MaterialTheme { MigrationProgressDialog(progress = 0.5F, exitMigration = { confirmed++ }) } }
+        compose.setContent {
+            MaterialTheme { MigrationProgressDialog(progress = 0.5F, exitMigration = { confirmed++ }) }
+        }
         compose.onNodeWithText("Cancel").performClick()
         confirmed shouldBe 1
     }

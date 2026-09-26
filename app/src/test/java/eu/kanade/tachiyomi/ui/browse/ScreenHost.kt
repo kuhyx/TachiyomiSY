@@ -13,6 +13,9 @@ import eu.kanade.tachiyomi.ui.manga.track.BlankScreen
 internal class ScreenHost(private val screen: Screen) {
     lateinit var navigator: Navigator
 
+    /** What the navigator shows on top now. */
+    val top: Screen get() = navigator.lastItem
+
     fun show(compose: ComposeContentTestRule) {
         compose.setContent {
             MaterialTheme {
@@ -24,7 +27,4 @@ internal class ScreenHost(private val screen: Screen) {
         }
         compose.waitForIdle()
     }
-
-    /** What the navigator shows on top now. */
-    val top: Screen get() = navigator.lastItem
 }

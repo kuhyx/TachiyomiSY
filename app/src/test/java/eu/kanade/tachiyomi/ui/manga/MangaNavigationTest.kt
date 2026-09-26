@@ -1,17 +1,15 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.app.Activity
-import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AlertDialog
-import androidx.test.core.app.ApplicationProvider
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.browse.source.SourcesScreen
-import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.manga.merged.themedActivity
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.webview.WebViewScreen
 import exh.pagepreview.PagePreviewScreen
 import exh.recs.RecommendsScreen
@@ -39,7 +37,6 @@ import tachiyomi.domain.source.service.SourceManager
 
 @RunWith(RobolectricTestRunner::class)
 internal class MangaNavigationTest {
-    private val app: Application = ApplicationProvider.getApplicationContext()
     private val activity: Activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
     private val navigator = mockk<Navigator>(relaxed = true)
     private val http = mockk<HttpSource> {

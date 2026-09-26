@@ -113,7 +113,7 @@ internal class MigrationListScreenModelTest {
     }
 
     @Test
-    fun missingChapterNumbersCountAsZero() {
+    fun missingChapterNumbersAreZero() {
         harness.preferences.migrationHideWithoutUpdates.set(true)
         harness.hits[10L] = { listOf(hit("Entry 1", id = 51L)) }
         val model = harness.model(listOf(1L))

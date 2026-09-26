@@ -41,37 +41,30 @@ internal fun MangaScreen.MangaScreenDialogs(
     var showScanlatorsDialog by remember { mutableStateOf(false) }
     val onDismissRequest = { screenModel.dismissDialog() }
     when (val dialog = successState.dialog) {
-        null -> {}
+        null -> Unit
         is MangaScreenModel.Dialog.ChangeCategory -> ChangeCategory(screenModel, dialog, onDismissRequest)
         is MangaScreenModel.Dialog.DuplicateManga -> DuplicateManga(screenModel, dialog, onDismissRequest)
         is MangaScreenModel.Dialog.Migrate -> Migrate(dialog, onDismissRequest)
         is MangaScreenModel.Dialog.SetFetchInterval -> SetFetchInterval(screenModel, dialog, onDismissRequest)
-        is MangaScreenModel.Dialog.DeleteChapters -> {
-            DeleteChaptersDialog(
-                onDismissRequest = onDismissRequest,
-                onConfirm = {
-                    screenModel.toggleAllSelection(false)
-                    screenModel.downloads.deleteChapters(dialog.chapters)
-                },
-            )
-        }
-        MangaScreenModel.Dialog.SettingsSheet -> {
+        is MangaScreenModel.Dialog.DeleteChapters -> DeleteChaptersDialog(
+            onDismissRequest = onDismissRequest,
+            onConfirm = {
+                screenModel.toggleAllSelection(false)
+                screenModel.downloads.deleteChapters(dialog.chapters)
+            },
+        )
+        MangaScreenModel.Dialog.SettingsSheet ->
             ChapterSettingsSheet(screenModel, successState, onDismissRequest) { showScanlatorsDialog = true }
-        }
-        MangaScreenModel.Dialog.TrackSheet -> {
-            NavigatorAdaptiveSheet(
-                screen = TrackInfoDialogHomeScreen(
-                    mangaId = successState.manga.id,
-                    mangaTitle = successState.manga.title,
-                    sourceId = successState.source.id,
-                ),
-                enableSwipeDismiss = { it.lastItem is TrackInfoDialogHomeScreen },
-                onDismissRequest = onDismissRequest,
-            )
-        }
-        MangaScreenModel.Dialog.FullCover -> {
-            FullCoverDialog(successState, onDismissRequest)
-        }
+        MangaScreenModel.Dialog.TrackSheet -> NavigatorAdaptiveSheet(
+            screen = TrackInfoDialogHomeScreen(
+                mangaId = successState.manga.id,
+                mangaTitle = successState.manga.title,
+                sourceId = successState.source.id,
+            ),
+            enableSwipeDismiss = { it.lastItem is TrackInfoDialogHomeScreen },
+            onDismissRequest = onDismissRequest,
+        )
+        MangaScreenModel.Dialog.FullCover -> FullCoverDialog(successState, onDismissRequest)
         // SY -->
         is MangaScreenModel.Dialog.EditMangaInfo -> EditMangaDialog(
             manga = dialog.manga,

@@ -133,7 +133,7 @@ internal class ExtensionsTabTest {
     }
 
     @Test
-    fun privateExtensionsConfirmRemoval() {
+    fun privateExtensionsAskToRemove() {
         host()
         compose.onNodeWithText("Stale").performTouchInput { longClick() }
         compose.onNodeWithText("Remove Extension?").assertExists()

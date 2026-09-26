@@ -65,7 +65,7 @@ internal class MigrationSearchTest {
     }
 
     @Test
-    fun aMatchWithoutCoverFetchesDetails() {
+    fun coverlessMatchFetchesDetails() {
         harness.hits[10L] = { listOf(hit("Entry 1", id = 51L, thumbnail = null)) }
         val state = harness.model(listOf(1L)).awaitState { it.finishedCount == 1 }
         state.items.single().searchResult.value.shouldBeInstanceOf<SearchResult.Success>()

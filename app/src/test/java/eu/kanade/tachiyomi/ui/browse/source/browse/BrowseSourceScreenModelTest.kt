@@ -73,7 +73,8 @@ internal class BrowseSourceScreenModelTest {
     @Test
     fun jsonFiltersAreApplied() {
         harness.filters = { FilterList(object : Filter.CheckBox("On") {}) }
-        val json = Json.encodeToString(FilterSerializer().serialize(FilterList(object : Filter.CheckBox("On", true) {})))
+        val checked = FilterList(object : Filter.CheckBox("On", true) {})
+        val json = Json.encodeToString(FilterSerializer().serialize(checked))
         val model = harness.model(filtersJson = json)
         model.state.value.listing.shouldBeInstanceOf<Listing.Search>()
         harness.model(filtersJson = "not json").state.value.listing shouldBe Listing.Popular

@@ -49,7 +49,9 @@ internal class BrowseSourceSmallItemsTest {
         var random = 0
         var follows = 0
         compose.setContent {
-            MaterialTheme { MangaDexFilterHeader(openMangaDexRandom = { random++ }, openMangaDexFollows = { follows++ }) }
+            MaterialTheme {
+                MangaDexFilterHeader(openMangaDexRandom = { random++ }, openMangaDexFollows = { follows++ })
+            }
         }
         compose.onNodeWithText("Random").performClick()
         compose.onNodeWithText("MangaDex follows").performClick()

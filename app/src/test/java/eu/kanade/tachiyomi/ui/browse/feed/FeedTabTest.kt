@@ -62,7 +62,7 @@ internal class FeedTabTest {
     }
 
     @Test
-    fun savedSearchHeaderOpensTheSearch() {
+    fun savedSearchHeaderOpensSearch() {
         val host = host()
         compose.onNodeWithText("Search 5").performClick()
         compose.waitForIdle()

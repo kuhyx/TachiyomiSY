@@ -70,7 +70,13 @@ internal class BatchAddScreenModelTest {
         done.events.size shouldBe 3
         done.events[0].startsWith("[OK] ") shouldBe true
         done.events[1].startsWith("[ERROR] ") shouldBe true
-        done.events[2] shouldBe "\nSummary:\nAdded: 1 gallerie(s)\nFailed: 1 gallerie(s)"
+        done.events[2] shouldBe
+            """
+
+                Summary:
+                Added: 1 gallerie(s)
+                Failed: 1 gallerie(s)
+            """.trimIndent()
         uris.first() shouldBe "https://gallery.test/g/1/abc"
     }
 
