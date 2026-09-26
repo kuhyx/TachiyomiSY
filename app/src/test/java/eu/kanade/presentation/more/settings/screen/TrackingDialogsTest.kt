@@ -87,8 +87,9 @@ internal class TrackingDialogsTest {
 
     @Test
     fun passwordVisibilityToggles() {
+        val password = TextFieldState("x")
         compose.setContent {
-            MaterialTheme { PasswordField(password = TextFieldState("x"), isError = true) }
+            MaterialTheme { PasswordField(password = password, isError = true) }
         }
         compose.onNode(hasClickAction() and hasAnyAncestor(hasSetTextAction())).performClick()
         compose.waitForIdle()
