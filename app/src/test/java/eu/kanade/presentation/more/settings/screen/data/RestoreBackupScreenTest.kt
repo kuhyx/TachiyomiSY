@@ -28,11 +28,13 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import tachiyomi.domain.source.service.SourceManager
 
 private const val URI = "content://backups/old.tachibk"
 
 @RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "h2000dp")
 internal class RestoreBackupScreenTest {
     @get:Rule
     val compose = createComposeRule()

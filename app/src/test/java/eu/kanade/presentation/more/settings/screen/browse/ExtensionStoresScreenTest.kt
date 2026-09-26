@@ -1,6 +1,9 @@
 package eu.kanade.presentation.more.settings.screen.browse
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -102,7 +105,7 @@ internal class ExtensionStoresScreenTest {
         stores.tryEmit(listOf(store("a")))
         show()
         compose.awaitMain(timeoutMillis = 5_000) { count("Store a") == 1 }
-        compose.onNodeWithText("Add").performClick()
+        compose.onNodeWithText("Add", useUnmergedTree = true).performClick()
         compose.waitForIdle()
         count("Add extension store") shouldBe 1
         compose.onNodeWithText("Cancel").performClick()
@@ -115,6 +118,6 @@ internal class ExtensionStoresScreenTest {
         stores.tryEmit(emptyList())
         show(url = "https://deep.example")
         compose.awaitMain(timeoutMillis = 5_000) { count("Do you wish to add the extension store below?") == 1 }
-        compose.onAllNodesWithText("Add").fetchSemanticsNodes().size shouldBe 2
+        compose.onNode(hasText("Add") and hasAnyAncestor(isDialog())).assertExists()
     }
 }

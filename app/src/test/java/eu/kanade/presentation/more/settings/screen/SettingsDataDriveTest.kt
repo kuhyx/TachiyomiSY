@@ -47,13 +47,12 @@ internal class SettingsDataDriveTest {
 
     private fun purge(status: DeleteSyncDataStatus): String {
         coEvery { anyConstructed<GoogleDriveSyncService>().deleteSyncDataFromGoogleDrive() } returns status
+        val shown = ShadowToast.shownToastCount()
         harness.click("Clear Sync Data from Google Drive")
         compose.onNodeWithText("OK").performClick()
         compose.waitForIdle()
-        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.getTextOfLatestToast() != null }
-        val text = ShadowToast.getTextOfLatestToast().toString()
-        ShadowToast.reset()
-        return text
+        compose.awaitMain(timeoutMillis = 10_000) { ShadowToast.shownToastCount() > shown }
+        return ShadowToast.getTextOfLatestToast().toString()
     }
 
     @Test
