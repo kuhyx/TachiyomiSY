@@ -100,11 +100,9 @@ internal data object LibraryTab : Tab {
         RecommendationResultEffect(screenModel)
         // SY <--
 
+        // Enabled only while one of the two applies, so leaving the selection is the one alternative to the search.
         BackHandler(enabled = state.selectionMode || state.searchQuery != null) {
-            when {
-                state.selectionMode -> screenModel.clearSelection()
-                state.searchQuery != null -> screenModel.search(null)
-            }
+            if (state.selectionMode) screenModel.clearSelection() else screenModel.search(null)
         }
         LaunchedEffect(state.selectionMode, state.dialog) {
             HomeScreen.showBottomNav(!state.selectionMode)

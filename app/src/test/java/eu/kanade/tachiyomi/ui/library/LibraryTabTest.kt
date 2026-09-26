@@ -8,11 +8,11 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.library.startNow
 import eu.kanade.tachiyomi.data.sync.SyncDataJob
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import io.mockk.every
-import io.mockk.verify
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -64,8 +64,12 @@ internal class LibraryTabTest {
 
     @Test
     fun updatingTheLibrary() {
-        every { LibraryUpdateJob.startNow(any<Context>(), null, any(), any(), any()) } returns false
         rig.show()
+        overflow("Update library")
+        rig.waitFor("Updating library")
+        // The snackbar times out on its own.
+        rig.waitUntilGone("Updating library", SNACKBAR_WAIT)
+        every { LibraryUpdateJob.startNow(any<Context>(), null, any(), any(), any()) } returns false
         overflow("Update library")
         rig.waitFor("An update is already running")
     }
@@ -76,6 +80,9 @@ internal class LibraryTabTest {
         listOf(LibraryGroup.BY_SOURCE, LibraryGroup.BY_TRACK_STATUS, LibraryGroup.BY_STATUS).forEach { group ->
             rig.harness.libraryPreferences.groupLibraryBy.set(group)
             rig.updateUntil { LibraryUpdateJob.startNow(any<Context>(), null, any(), group, any<String>()) }
+            // A global update names no group entry.
+            overflow("Update library")
+            verify { LibraryUpdateJob.startNow(any<Context>(), null, any(), group, null) }
         }
         rig.harness.libraryPreferences.groupLibraryBy.set(LibraryGroup.UNGROUPED)
         rig.updateUntil { LibraryUpdateJob.startNow(any<Context>(), null, any(), LibraryGroup.UNGROUPED, null) }
@@ -116,5 +123,9 @@ internal class LibraryTabTest {
         compose.waitUntil(LIBRARY_WAIT) {
             compose.onAllNodes(hasText("zzz"), useUnmergedTree = true).fetchSemanticsNodes().isEmpty()
         }
+    }
+
+    private companion object {
+        const val SNACKBAR_WAIT = 15_000L
     }
 }

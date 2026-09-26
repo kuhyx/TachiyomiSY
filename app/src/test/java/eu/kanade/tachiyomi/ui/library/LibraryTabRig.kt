@@ -7,26 +7,32 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import cafe.adriel.voyager.core.model.ScreenModelStore
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.library.startNow
 import eu.kanade.tachiyomi.data.sync.SyncDataJob
+import eu.kanade.tachiyomi.source.online.readMember
 import eu.kanade.tachiyomi.ui.base.TabHost
 import eu.kanade.tachiyomi.ui.base.libraryManga
+import io.mockk.MockKVerificationScope
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mockk.MockKVerificationScope
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.module.Module
 import org.koin.dsl.module
 import tachiyomi.domain.category.interactor.SetDisplayMode
 import tachiyomi.domain.category.interactor.SetSortModeForCategory
@@ -41,14 +47,15 @@ internal class LibraryTabRig(private val compose: LibraryCompose) {
     val setDisplayMode = mockk<SetDisplayMode>(relaxed = true)
     val setSortMode = mockk<SetSortModeForCategory>(relaxed = true)
 
-    fun start() {
+    /** Starts Koin with the harness and [extra] modules, the later ones overriding. */
+    fun start(vararg extra: Module) {
         startKoin {
             modules(
                 harness.koinModules() + module {
                     single { UiPreferences(harness.store) }
                     single { setDisplayMode }
                     single { setSortMode }
-                },
+                } + extra,
             )
         }
         mockkStatic("eu.kanade.tachiyomi.data.library.LibraryUpdateSchedulingKt")
@@ -72,6 +79,12 @@ internal class LibraryTabRig(private val compose: LibraryCompose) {
         waitFor(wait)
     }
 
+    /** The tab's live screen model, read from Voyager's store as the recommendations tests do. */
+    fun model(): LibraryScreenModel =
+        (ScreenModelStore.readMember(ScreenModelStore::class, "screenModels") as Map<*, *>).values
+            .filterIsInstance<LibraryScreenModel>()
+            .single()
+
     fun node(label: String) = compose.onNode(hasText(label) or hasContentDescription(label), useUnmergedTree = true)
 
     /** Clicks [label] through its clickable's semantics action; when several match, the last. */
@@ -85,6 +98,20 @@ internal class LibraryTabRig(private val compose: LibraryCompose) {
                 .performClick()
         }
         compose.waitForIdle()
+    }
+
+    /** Long-presses the entry titled [title], which starts or extends the selection. */
+    fun select(title: String) {
+        compose.onAllNodes(hasText(title), useUnmergedTree = true).onFirst().performTouchInput { longClick() }
+        compose.waitForIdle()
+    }
+
+    fun waitUntilGone(text: String, timeout: Long = LIBRARY_WAIT) {
+        compose.waitUntil(timeout) {
+            compose.onAllNodes(hasText(text) or hasContentDescription(text), useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isEmpty()
+        }
     }
 
     fun overflow(item: String) {
