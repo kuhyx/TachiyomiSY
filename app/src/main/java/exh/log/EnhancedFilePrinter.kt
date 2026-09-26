@@ -22,32 +22,19 @@ internal class EnhancedFilePrinter internal constructor(
     private val flattener: Flattener,
 ) : Printer {
     // Log writer.
-    private val writer: LogFileWriter
+    private val writer: LogFileWriter = LogFileWriter()
 
-    @Volatile
-    private var worker: LogWorker? = null
+    // Logs are always written asynchronously, on this worker's thread.
+    private val worker: LogWorker = LogWorker(this)
 
     private val maxTimeMillis = 7.days.inWholeMilliseconds
 
-    init {
-        writer = LogFileWriter()
-        if (USE_WORKER) {
-            worker = LogWorker(this)
-        }
-    }
-
     override fun println(logLevel: Int, tag: String, msg: String) {
         val timeMillis = System.currentTimeMillis()
-        if (USE_WORKER) {
-            // Assigned in init whenever USE_WORKER holds.
-            val worker = checkNotNull(worker)
-            if (!worker.isStarted()) {
-                worker.start()
-            }
-            worker.enqueue(LogItem(timeMillis, logLevel, tag, msg))
-        } else {
-            doPrintln(timeMillis, logLevel, tag, msg)
+        if (!worker.isStarted()) {
+            worker.start()
         }
+        worker.enqueue(LogItem(timeMillis, logLevel, tag, msg))
     }
 
     // Do the real job of writing log to file.
@@ -168,9 +155,4 @@ internal class EnhancedFilePrinter internal constructor(
         val tag: String,
         val msg: String,
     )
-
-    companion object {
-        // Use worker, write logs asynchronously.
-        private const val USE_WORKER = true
-    }
 }

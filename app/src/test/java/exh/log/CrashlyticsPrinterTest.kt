@@ -4,6 +4,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.crashlytics
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -35,5 +36,24 @@ internal class CrashlyticsPrinterTest {
     fun rethrowsFailuresInDebug() {
         val printer = CrashlyticsPrinter(LogLevel.Warn.int)
         shouldThrow<RuntimeException> { printer.println(LogLevel.Error.int, "t", "m") }
+    }
+
+    @Test
+    fun crashlyticsFailureIsRethrown() {
+        val crashlytics = mockk<FirebaseCrashlytics>()
+        mockkStatic("com.google.firebase.crashlytics.FirebaseCrashlyticsKt")
+        every { Firebase.crashlytics } returns crashlytics
+        every { crashlytics.log(any()) } throws IllegalStateException("down")
+        val failure = shouldThrow<IllegalStateException> {
+            CrashlyticsPrinter(LogLevel.Warn.int).println(LogLevel.Error.int, "t", "m")
+        }
+        failure.message shouldBe "down"
+        CrashlyticsPrinter(LogLevel.Warn.int, isDebug = false).println(LogLevel.Error.int, "t", "m")
+    }
+
+    @Test
+    fun releaseSwallowsTheFailure() {
+        crashOnDebug(IllegalStateException("quiet"), isDebug = false)
+        shouldThrow<IllegalStateException> { crashOnDebug(IllegalStateException("loud"), isDebug = true) }
     }
 }

@@ -70,10 +70,7 @@ internal class FollowsHandler(
      */
     suspend fun updateFollowStatus(mangaId: String, followStatus: FollowStatus): Boolean {
         return withIOContext {
-            val status = when (followStatus == FollowStatus.UNFOLLOWED) {
-                true -> null
-                false -> followStatus.toDex()
-            }
+            val status = if (followStatus == FollowStatus.UNFOLLOWED) null else followStatus.toDex()
             val readingStatusDto = ReadingStatusDto(status)
 
             if (followStatus == FollowStatus.UNFOLLOWED) {
