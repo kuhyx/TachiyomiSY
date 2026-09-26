@@ -59,6 +59,11 @@ internal class LibrarySearchFilterTest {
     }
 
     @Test
+    fun injectedDefaults() {
+        runBlocking { LibrarySearch().filterLibrary(items, "gam", emptyMap()) }.map { it.id } shouldBe listOf(3L)
+    }
+
+    @Test
     fun idQueriesPickOne() {
         filter("id:3") shouldBe listOf(3L)
         filter("id:x") shouldBe emptyList()

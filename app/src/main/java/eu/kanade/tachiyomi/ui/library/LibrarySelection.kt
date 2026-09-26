@@ -52,7 +52,7 @@ internal class LibrarySelection {
             // We shouldn't reach this point
             else -> IntRange.EMPTY
         }
-        return selectionRange.mapNotNull { items[it] }
+        return selectionRange.map { items[it] }
     }
 
     fun selectAll(state: State): State {

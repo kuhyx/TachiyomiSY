@@ -91,14 +91,17 @@ internal class LibrarySearch(
             // one without metadata yet falls back to the title like any other.
             val hasMeta = isMetadataSource(sourceId) && mangaWithMetaIds.binarySearch(mangaId) >= 0
             return if (hasMeta) {
+                // Looked up first, so no argument of the call below is held across a suspension.
+                val searchTags = getSearchTags.await(mangaId)
+                val searchTitles = getSearchTitles.await(mangaId)
                 filterManga(
                     queries = parsedQuery,
                     libraryManga = item.libraryManga,
                     tracks = tracks[mangaId],
                     source = sources[sourceId],
                     checkGenre = false,
-                    searchTags = getSearchTags.await(mangaId),
-                    searchTitles = getSearchTitles.await(mangaId),
+                    searchTags = searchTags,
+                    searchTitles = searchTitles,
                     loggedInTrackServices = loggedInTrackServices,
                 )
             } else {
@@ -162,7 +165,7 @@ internal class LibrarySearch(
                 manga.author?.contains(query, true) == true ||
                 manga.artist?.contains(query, true) == true ||
                 manga.description?.contains(query, true) == true ||
-                source?.name?.contains(query, true) == true ||
+                (source != null && source.name.contains(query, true)) ||
                 (sourceIdString != null && sourceIdString == query) ||
                 (tracks != null && filterTracks(query, tracks, context)) ||
                 genre.fastAny { it.contains(query, true) } ||
@@ -178,7 +181,7 @@ internal class LibrarySearch(
                         manga.author?.contains(query, true) != true &&
                         manga.artist?.contains(query, true) != true &&
                         manga.description?.contains(query, true) != true &&
-                        source?.name?.contains(query, true) != true &&
+                        (source == null || !source.name.contains(query, true)) &&
                         sourceIdString != null && sourceIdString != query &&
                         (tracks == null || !filterTracks(query, tracks, context)) &&
                         !genre.fastAny { it.contains(query, true) } &&
@@ -200,19 +203,18 @@ internal class LibrarySearch(
         }
 
         fun excludes(component: Namespace): Boolean {
-            val searchedTag = component.tag?.asQuery()
+            val searchedTag = component.tag?.asQuery().orEmpty()
+            val namespace = component.namespace
             return searchTags == null ||
-                (component.namespace.isBlank() && searchedTag.isNullOrBlank()) ||
+                (namespace.isBlank() && searchedTag.isBlank()) ||
                 searchTags.fastAll { mangaTag ->
                     when {
-                        component.namespace.isBlank() && !searchedTag.isNullOrBlank() ->
-                            !mangaTag.name.contains(searchedTag, true)
-                        searchedTag.isNullOrBlank() ->
-                            mangaTag.namespace == null || !mangaTag.namespace.equals(component.namespace, true)
+                        namespace.isBlank() -> !mangaTag.name.contains(searchedTag, true)
+                        searchedTag.isBlank() -> !mangaTag.namespace.equals(namespace, true)
                         mangaTag.namespace.isNullOrBlank() -> true
                         else ->
                             !mangaTag.name.contains(searchedTag, true) ||
-                                !mangaTag.namespace.equals(component.namespace, true)
+                                !mangaTag.namespace.equals(namespace, true)
                     }
                 }
         }

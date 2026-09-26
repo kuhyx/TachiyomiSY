@@ -87,6 +87,7 @@ internal class LibrarySearchTextTest {
     fun exclusionChecksSourceAndExtras() {
         fun excluded(query: String, extras: SearchExtras) = rig.matches(rig.text(query, excluded = true), full, extras)
         excluded("site", SearchExtras(source = rig.source("Site"))).shouldBeFalse()
+        excluded("zzz", SearchExtras(source = rig.source("Site"))).shouldBeTrue()
         excluded("5", SearchExtras()).shouldBeFalse()
         excluded("reading", SearchExtras(tracks = tracks, loggedIn = loggedIn)).shouldBeFalse()
         excluded("zzz", SearchExtras(tracks = tracks, loggedIn = loggedIn)).shouldBeTrue()

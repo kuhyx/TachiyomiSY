@@ -15,7 +15,7 @@ internal class LibrarySearchNamespaceTest {
     private val harness = LibraryHarness()
     private val rig = LibrarySearchRig(harness)
     private val manga by lazy { manga(1, "Title") }
-    private val tags by lazy { SearchExtras(tags = listOf(tag("big", "female"), tag("plain"))) }
+    private val tags by lazy { SearchExtras(tags = listOf(tag("big", "female"), tag("plain"), tag("bare", ""))) }
 
     @Before
     fun setUp() {
@@ -51,6 +51,13 @@ internal class LibrarySearchNamespaceTest {
         lacks("female", "big").shouldBeFalse()
         lacks("female", "small").shouldBeTrue()
         lacks("male", "big").shouldBeTrue()
+    }
+
+    @Test
+    fun blankPartsOfTheExclusion() {
+        lacks("").shouldBeTrue()
+        lacks("female", " ").shouldBeFalse()
+        lacks("", "bare").shouldBeFalse()
     }
 
     @Test
