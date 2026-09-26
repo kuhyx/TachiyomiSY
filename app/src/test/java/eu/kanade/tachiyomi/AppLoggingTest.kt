@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi
 import androidx.preference.PreferenceManager
 import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
+import eu.kanade.tachiyomi.source.online.installSilentXLog
 import exh.log.EHLogLevel
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -37,6 +38,7 @@ internal class AppLoggingTest {
 
     @After
     fun tearDown() {
+        installSilentXLog()
         stopKoin()
     }
 

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi
 
 import android.os.Build
-import androidx.work.WorkManager
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.tachiyomi.data.notification.Notifications
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -39,7 +38,14 @@ internal class AppTest {
         boot.migrationsFinished shouldBe true
         val lastVersion = Injekt.get<PreferenceStore>().getInt(Preference.appStateKey("eh_last_version_code"), 0)
         lastVersion.get() shouldBe BuildConfig.VERSION_CODE
-        WorkManager.isInitialized() shouldBe true
+        boot.workManagerReady shouldBe true
+    }
+
+    @Test
+    fun readyWorkManagerIsKept() {
+        boot.workManagerReady = true
+        boot.create()
+        boot.migrationsFinished shouldBe true
     }
 
     @Test

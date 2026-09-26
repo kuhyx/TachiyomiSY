@@ -19,16 +19,21 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import exh.eh.EHentaiUpdateHelper
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import nl.adaptivity.xmlutil.serialization.XML
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.core.common.storage.AndroidStorageFolderProvider
 import tachiyomi.core.common.storage.UniFileTempFileManager
 import tachiyomi.data.Database
+import tachiyomi.domain.source.repository.StubSourceRepository
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.storage.service.StorageManager
 import tachiyomi.source.local.image.LocalCoverManager
@@ -70,9 +75,12 @@ internal class AppModuleTest {
         Injekt.get<StorageManager>()
     }
 
+    // The stub-source repository is the only definition here that starts a database query on its
+    // own; the bundled SQLite driver has no JVM native library, so it is served empty.
     @Test
     fun sourcesAndDownloadsResolve() {
-        startAppGraph(app)
+        val stubs = mockk<StubSourceRepository> { every { subscribeAll() } returns emptyFlow() }
+        startAppGraph(app, module { single { stubs } })
         Injekt.get<NetworkHelper>()
         Injekt.get<JavaScriptEngine>()
         Injekt.get<SourceManager>()

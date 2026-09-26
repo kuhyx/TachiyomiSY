@@ -1,10 +1,15 @@
 package eu.kanade.tachiyomi
 
 import android.app.Application
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.work.WorkManager
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.di.InjektKoinBridge
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.source.online.installSilentXLog
 import eu.kanade.tachiyomi.util.system.GLUtil
 import io.mockk.every
 import io.mockk.mockk
@@ -34,6 +39,17 @@ internal class AppBoot {
 
     /** The process name [App.onCreate] sees; null keeps the sandbox's own. */
     var processName: String? = null
+
+    /** What WorkManager.isInitialized reports; the real singleton outlives the test otherwise. */
+    var workManagerReady: Boolean = false
+
+    /**
+     * Stands in for ProcessLifecycleOwner, whose scope lives as long as the sandbox: destroying it in
+     * [close] cancels every observer [App.onCreate] launched.
+     */
+    val process: LifecycleOwner = object : LifecycleOwner {
+        override val lifecycle: LifecycleRegistry = LifecycleRegistry.createUnsafe(this)
+    }
     private val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
 
     private val overrides = module {
@@ -47,7 +63,11 @@ internal class AppBoot {
     }
 
     fun create(): App {
-        mockkObject(InjektKoinBridge, Migrator, GLUtil)
+        mockkObject(InjektKoinBridge, Migrator, GLUtil, ProcessLifecycleOwner.Companion, WorkManager.Companion)
+        every { ProcessLifecycleOwner.get() } returns process
+        (process.lifecycle as LifecycleRegistry).currentState = Lifecycle.State.CREATED
+        every { WorkManager.isInitialized() } answers { workManagerReady }
+        every { WorkManager.initialize(any(), any()) } answers { workManagerReady = true }
         every { InjektKoinBridge.startKoin(any()) } answers {
             callOriginal()
             loadKoinModules(overrides)
@@ -71,12 +91,13 @@ internal class AppBoot {
     }
 
     fun close() {
-        ProcessLifecycleOwner.get().lifecycle.removeObserver(app)
+        (process.lifecycle as LifecycleRegistry).currentState = Lifecycle.State.DESTROYED
         app.disableIncognitoReceiver.unregister()
         stopKoin()
         unmockkAll()
         LogcatLogger.loggers.clear()
         LogcatLogger.uninstall()
         Thread.setDefaultUncaughtExceptionHandler(previousHandler)
+        installSilentXLog()
     }
 }
