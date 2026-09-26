@@ -103,13 +103,21 @@ push_range() {
 build_inputs_changed() {
     local range changed
     range="$(push_range)"
-    changed="$(git -C "$REPO_ROOT" diff --name-only "$range" -- "${BUILD_INPUTS[@]}" 2>/dev/null || true)"
+    # Fail closed: a diff that errors must run the gate, never skip it.
+    if ! changed="$(git -C "$REPO_ROOT" diff --name-only "$range" -- "${BUILD_INPUTS[@]}")"; then
+        echo "cannot diff $range; running the gradle gate"
+        return 0
+    fi
     if [[ -z "$changed" ]]; then
         echo "no build inputs changed in $range; skipping the gradle gate"
         return 1
     fi
     echo "build inputs changed in $range:"
-    echo "$changed" | sed 's/^/  /' | head -20
+    # No `| head` here: under pipefail its early exit SIGPIPEs sed, the
+    # function returned 141, and the caller read that as "skip gradle" --
+    # a 454-file push went through unchecked on 2026-09-26.
+    printf '%s\n' "$changed" | sed -n '1,20s/^/  /p'
+    return 0
 }
 
 jitpack_preflight() {

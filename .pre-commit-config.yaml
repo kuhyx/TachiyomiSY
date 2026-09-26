@@ -82,4 +82,7 @@ repos:
         pass_filenames: false
         always_run: true
         require_serial: true
+        # Print the gate's decisions even on success, so a push log shows
+        # whether Gradle ran and over which range.
+        verbose: true
         stages: [pre-push]
