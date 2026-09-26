@@ -24,6 +24,9 @@ internal fun Project.android(block: CommonExtension.() -> Unit) {
     extensions.configure(block)
 }
 
+private const val TEST_HEAP: String = "1536m"
+private const val TEST_CLASSES_PER_FORK: Long = 200
+
 /**
  * JUnit Platform for every test task, logging each outcome; skipped outside the gate's scope
  * ([GATE_MODULES_PROPERTY]).
@@ -52,6 +55,11 @@ public fun Project.configureTest() {
     }
     tasks.withType(Test::class.java).configureEach {
         javaLauncher.set(testLauncher)
+        // Robolectric keeps per-test state alive, so one JVM running every `app` test outgrew Gradle's
+        // 512 MiB default (OutOfMemoryError from ~2800 tests, 2026-09-26). A fresh JVM every
+        // TEST_CLASSES_PER_FORK classes bounds that growth however large the suite gets.
+        maxHeapSize = TEST_HEAP
+        forkEvery = TEST_CLASSES_PER_FORK
         onlyIf("the module is in the gate's scope") { isInScope }
         useJUnitPlatform()
         include("**/*Test.class")
