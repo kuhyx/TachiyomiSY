@@ -72,4 +72,5 @@ private fun mockMihonx(project: Project): LibrariesForMihonx = mockk {
     every { versions.android.sdk.compile } returns project.provider { "37.1" }
     every { versions.android.ndk } returns project.provider { "29.0.14206865" }
     every { versions.java } returns project.provider { "17" }
+    every { versions.test.jdk } returns project.provider { "21" }
 }

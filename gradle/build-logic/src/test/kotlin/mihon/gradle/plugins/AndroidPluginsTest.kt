@@ -47,6 +47,15 @@ internal class AndroidPluginsTest {
     }
 
     @JupiterTest
+    fun testsRunOnTheTestJdk() {
+        val project = catalogProject()
+        project.plugins.apply(PluginAndroidLibrary::class.java)
+        val test = project.tasks.register("unitTest", Test::class.java).get()
+        val launcher = test.javaLauncher.get()
+        launcher.metadata.languageVersion.asInt() shouldBe 21
+    }
+
+    @JupiterTest
     fun testTmpdirIsTheTaskTempDir() {
         val project = catalogProject()
         project.plugins.apply(PluginAndroidLibrary::class.java)

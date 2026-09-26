@@ -4,9 +4,12 @@ import com.android.build.api.dsl.CommonExtension
 import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.accessors.dm.LibrariesForMihonx
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.PluginManager
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.the
 
@@ -35,10 +38,20 @@ internal fun Project.android(block: CommonExtension.() -> Unit) {
  * sandbox and only deletes it at JVM exit. On `/tmp` (tmpfs) a whole-tree run held 3.1 GiB
  * of that as unswappable shared memory inside the 8 GiB local cap and was OOM-killed
  * (2026-09-20); on disk it is page cache the kernel can drop.
+ *
+ * Tests run on the `test-jdk` toolchain (21) while the code still compiles to `java` (17):
+ * `multiplatform-markdown-renderer` ships Java 21 bytecode, which a JDK 17 test JVM cannot load
+ * (`UnsupportedClassVersionError` in every test that composes `Markdown`). On a device D8
+ * handles it; only the host JVM needed the newer runtime (decided 2026-09-26).
  */
 public fun Project.configureTest() {
     val isInScope = isInGateScope()
+    pluginManager.apply(JavaBasePlugin::class.java)
+    val testLauncher = extensions.getByType(JavaToolchainService::class.java).launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(mihonx.versions.test.jdk.get()))
+    }
     tasks.withType(Test::class.java).configureEach {
+        javaLauncher.set(testLauncher)
         onlyIf("the module is in the gate's scope") { isInScope }
         useJUnitPlatform()
         include("**/*Test.class")

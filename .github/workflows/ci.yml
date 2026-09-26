@@ -41,7 +41,11 @@ jobs:
 
       - uses: actions/setup-java@v5
         with:
-          java-version: 17
+          # 21 is the unit-test toolchain (mihon.versions.toml test-jdk); the last one listed,
+          # 17, stays JAVA_HOME for Gradle itself and the bytecode target.
+          java-version: |
+            21
+            17
           distribution: temurin
 
       - uses: gradle/actions/setup-gradle@v5
