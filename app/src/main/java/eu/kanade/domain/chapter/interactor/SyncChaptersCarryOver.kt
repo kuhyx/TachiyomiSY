@@ -68,9 +68,10 @@ internal fun SyncChaptersWithSource.carryOverEhProgress(
     toAdd: List<Chapter>,
     changedOrDuplicateReadUrls: Set<String>,
 ): List<Chapter> {
+    if (!manga.isEhBasedManga()) return toAdd
     val max = dbChapters.maxOfOrNull { it.lastPageRead } ?: 0
-    val applies = manga.isEhBasedManga() && max > 0 && toAdd.any { it.url !in changedOrDuplicateReadUrls }
-    if (!applies) return toAdd
+    if (max <= 0) return toAdd
+    // Chapters already accounted for keep their state; when that is all of them the list is unchanged.
     return toAdd.map { if (it.url !in changedOrDuplicateReadUrls) it.copy(lastPageRead = max) else it }
 }
 

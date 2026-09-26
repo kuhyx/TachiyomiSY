@@ -10,7 +10,8 @@ internal fun <T : R, R : Any> List<T>.insertSeparators(
 ): List<R> {
     if (isEmpty()) return emptyList()
     val newList = mutableListOf<R>()
-    for (i in -1..lastIndex) {
+    // `until`, not `-1..lastIndex`: a closed range adds an entry guard that can never fail here.
+    for (i in -1 until size) {
         val before = getOrNull(i)
         before?.let(newList::add)
         val after = getOrNull(i + 1)

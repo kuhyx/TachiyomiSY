@@ -98,4 +98,16 @@ internal class SetReadStatusTest {
         SetReadStatus.Result.Success.toString() shouldBe "Success"
         SetReadStatus.Result.NoChapters.toString() shouldBe "NoChapters"
     }
+
+    // The non-cancellable blocks carry `read` across the lookup's suspension point; both values.
+    @Test
+    fun byIdMarksUnreadToo() = runTest {
+        coEvery { chapterRepository.getChapterByMangaId(4) } returns listOf(read)
+        coEvery { getMergedChaptersByMangaId.await(4, dedupe = false) } returns listOf(read)
+        coEvery { chapterRepository.updateAll(any()) } returns Unit
+        interactor.await(4, false) shouldBe SetReadStatus.Result.Success
+        val merged = Manga.create().copy(id = 4, source = MERGED_SOURCE_ID)
+        interactor.await(merged, false) shouldBe SetReadStatus.Result.Success
+        coVerify(exactly = 2) { chapterRepository.updateAll(any()) }
+    }
 }

@@ -93,6 +93,8 @@ internal class SyncChaptersCarryOverTest {
         interactor.carryOverEhProgress(eh, progressed, emptyList(), emptySet()) shouldBe emptyList()
         val result = interactor.carryOverEhProgress(eh, progressed, toAdd, setOf("/seen"))
         result.map { it.lastPageRead } shouldBe listOf(12L, 0L)
+        val several = listOf(3L, 12L, 7L).map { dbChapter("/p$it").copy(lastPageRead = it) }
+        interactor.carryOverEhProgress(eh, several, toAdd, emptySet()).map { it.lastPageRead } shouldBe listOf(12L, 12L)
         val exh = libraryManga(source = EXH_SOURCE_ID)
         interactor.carryOverEhProgress(exh, progressed, toAdd, emptySet()).all { it.lastPageRead == 12L } shouldBe true
     }
