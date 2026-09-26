@@ -63,7 +63,16 @@ internal class WhatsNewDialogTest {
     fun previewChangelogShown() {
         mockkStatic("eu.kanade.tachiyomi.util.system.BuildConfigKt")
         every { isPreviewBuildType } returns true
-        show()
-        compose.onAllNodesWithText("Version", substring = true).fetchSemanticsNodes().size shouldBeGreaterThan 0
+        mockkStatic("eu.kanade.presentation.more.settings.screen.about.WhatsNewDialogKt")
+        var decoded: Changelog? = null
+        every { any<Changelog>().toDisplayChangelog() } answers {
+            decoded = firstArg()
+            callOriginal()
+        }
+        compose.setContent { MaterialTheme { WhatsNewDialog { dismissed++ } } }
+        compose.awaitMain(timeoutMillis = 10_000) { decoded != null }
+        // The debug changelog ships with every entry commented out.
+        checkNotNull(decoded).changelogs shouldBe emptyList()
+        compose.onAllNodesWithText("Version", substring = true).fetchSemanticsNodes().size shouldBe 0
     }
 }

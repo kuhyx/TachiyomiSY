@@ -1,12 +1,15 @@
 package eu.kanade.presentation.more.settings.screen
 
+import android.app.Application
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import com.elvishew.xlog.LogConfiguration
 import com.elvishew.xlog.LogLevel
 import com.elvishew.xlog.XLog
 import com.elvishew.xlog.printer.Printer
+import exh.log.EHLogLevel
 import exh.uconfig.EHConfigurator
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -35,6 +38,8 @@ internal class ConfigureExhDialogTest {
     fun setUp() {
         // The failed upload is logged through XLog, which the app initializes at start-up.
         XLog.init(LogConfiguration.Builder().logLevel(LogLevel.ALL).build(), Printer { _, _, _ -> })
+        // The configurator's constructor builds its client through the EH logger, which reads the level.
+        EHLogLevel.init(ApplicationProvider.getApplicationContext<Application>())
         mockkConstructor(EHConfigurator::class)
         koin.start(eh.module())
     }
