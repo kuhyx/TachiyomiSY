@@ -108,10 +108,11 @@ internal class SettingsSearchScreenTest {
     @Test
     fun topBarClearsAndPops() {
         val state = TextFieldState("abc")
+        val focus = FocusRequester()
         every { harness.navigator.canPop } returns true
         compose.setContent {
             CompositionLocalProvider(LocalNavigator provides harness.navigator) {
-                MaterialTheme { SearchTopBar(state, FocusRequester()) }
+                MaterialTheme { SearchTopBar(state, focus) }
             }
         }
         compose.onNodeWithContentDescription("Navigate up").performClick()
