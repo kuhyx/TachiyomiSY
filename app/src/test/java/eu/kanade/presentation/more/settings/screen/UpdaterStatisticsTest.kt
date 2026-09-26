@@ -70,6 +70,11 @@ internal class UpdaterStatisticsTest {
     }
 
     @Test
+    fun relativeTimeDefaultsToNothing() {
+        RelativeTime() shouldBe RelativeTime(years = null, months = null, weeks = null, days = null)
+    }
+
+    @Test
     fun notRanYet() {
         open() shouldStartWith "The updater has not ran yet."
         compose.onNodeWithText("OK").performClick()

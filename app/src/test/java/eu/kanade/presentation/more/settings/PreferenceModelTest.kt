@@ -13,6 +13,7 @@ internal class PreferenceModelTest {
         Preference.PreferenceItem.InfoPreference(title = "i").onValueChanged("x") shouldBe Unit
         Preference.PreferenceItem.CustomPreference(title = "c") {}.onValueChanged(Unit) shouldBe Unit
         Preference.PreferenceItem.SliderPreference(value = 0, title = "s").onValueChanged(1) shouldBe Unit
+        Preference.PreferenceItem.SliderPreference(value = 0, title = "s").icon shouldBe null
         Preference.PreferenceItem.BasicListPreference("a", emptyMap(), "b").onValueChanged("a") shouldBe Unit
         val tracker = Preference.PreferenceItem.TrackerPreference(mockk<Tracker>(), login = {}, logout = {})
         tracker.onValueChanged("x") shouldBe Unit

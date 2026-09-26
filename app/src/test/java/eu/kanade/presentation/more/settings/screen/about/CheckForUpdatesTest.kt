@@ -71,6 +71,10 @@ internal class CheckForUpdatesTest {
     fun newUpdateOpensScreen() {
         val release = Release(version = "v2", info = "notes", releaseLink = "https://r", assets = listOf("a.apk"))
         check(GetApplicationRelease.Result.NewUpdate(release))
+        // The result resumes the check on the main looper, after the fake has completed.
+        compose.awaitMain(timeoutMillis = 10_000) {
+            runCatching { verify { navigator.push(any<NewUpdateScreen>()) } }.isSuccess
+        }
         verify(exactly = 1) { navigator.push(any<NewUpdateScreen>()) }
     }
 

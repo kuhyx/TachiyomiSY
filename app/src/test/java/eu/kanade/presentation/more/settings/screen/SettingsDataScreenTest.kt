@@ -5,13 +5,20 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.Uri
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldEndWith
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -97,5 +104,30 @@ internal class SettingsDataScreenTest {
         harness.show(SettingsDataScreen)
         harness.click("Storage location")
         ShadowToast.getTextOfLatestToast().toString() shouldBe "No file picker app found"
+    }
+
+    @Test
+    fun pickerSkipsUnopenableUri() {
+        val resolver = mockk<ContentResolver>(relaxed = true)
+        val app = ApplicationProvider.getApplicationContext<Context>()
+        val context = object : ContextWrapper(app) {
+            override fun getContentResolver(): ContentResolver = resolver
+        }
+        harness.registry.answer = { Uri.parse("zzz:nowhere") }
+        harness.show(SettingsDataScreen, context = context)
+        val before = koin.storage.baseStorageDirectory.get()
+        harness.click("Storage location")
+        koin.storage.baseStorageDirectory.get() shouldBe before
+    }
+
+    @Test
+    fun helpActionOpensGuide() {
+        compose.setContent {
+            CompositionLocalProvider(LocalUriHandler provides harness.uriHandler) {
+                MaterialTheme { Row { with(SettingsDataScreen) { AppBarAction() } } }
+            }
+        }
+        compose.onNodeWithContentDescription("Tracking guide").performClick()
+        verify { harness.uriHandler.openUri(SettingsDataScreen.HELP_URL) }
     }
 }

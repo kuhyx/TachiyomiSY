@@ -41,6 +41,10 @@ import java.time.ZoneId
 
 internal object AboutScreen : Screen() {
 
+    // A getter rather than BuildConfig.DEBUG inline, so a test can stand in for a release build.
+    internal val isDebug: Boolean
+        get() = BuildConfig.DEBUG
+
     @Composable
     override fun Content() {
         val context = LocalContext.current
@@ -88,7 +92,7 @@ internal object AboutScreen : Screen() {
                 linkItems(
                     listOfNotNull(
                         // SY -->
-                        (MR.strings.whats_new to { showWhatsNewDialog = true }).takeIf { !BuildConfig.DEBUG },
+                        (MR.strings.whats_new to { showWhatsNewDialog = true }).takeUnless { isDebug },
                         // SY <--
                         MR.strings.licenses to { navigator.push(OpenSourceLicensesScreen()) },
                         MR.strings.privacy_policy to { uriHandler.openUri("https://mihon.app/privacy/") },
@@ -138,7 +142,7 @@ internal object AboutScreen : Screen() {
 
     fun getVersionName(withBuildDate: Boolean): String {
         return when {
-            BuildConfig.DEBUG -> {
+            isDebug -> {
                 "Debug ${BuildConfig.COMMIT_SHA}".let {
                     if (withBuildDate) {
                         "$it (${getFormattedBuildTime()})"

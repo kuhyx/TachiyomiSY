@@ -96,6 +96,6 @@ private class SyncOptionsScreenModel(
 
     @Immutable
     data class State(
-        val options: SyncTriggerOptions = SyncTriggerOptions(),
+        val options: SyncTriggerOptions,
     )
 }
