@@ -54,6 +54,14 @@ internal class EHentaiUpdateHistoryTest {
         toDelete shouldContainExactly listOf(1L, 2L, 4L, 5L)
     }
 
+    // Several entries for one chapter, one never read: that one counts as oldest.
+    @Test
+    fun unreadRankBelowRead() {
+        val history = listOf(ehHistory(6, 21, readAt = null), ehHistory(7, 21, readAt = 50))
+        val (newHistory, _) = helper.getHistory(current, chainChapters, history)
+        newHistory shouldContainExactly listOf(HistoryUpdate(11, Date(50), 7))
+    }
+
     @Test
     fun unreadHistoryIsDropped() {
         val (newHistory, toDelete) = helper.getHistory(current, chainChapters, listOf(ehHistory(5, 22, null)))

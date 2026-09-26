@@ -45,26 +45,22 @@ internal class MangaDexLoginHelper(
             mangaDexAuthInterceptor.setAuth(data)
         }.exceptionOrNull()
 
-        return when (error == null) {
-            true -> {
-                true
-            }
-            false -> {
-                logcat(LogPriority.ERROR, error) { "Error logging in" }
-                mdList.logout()
-                false
-            }
+        if (error != null) {
+            logcat(LogPriority.ERROR, error) { "Error logging in" }
+            mdList.logout()
         }
+        return error == null
     }
 
     suspend fun logout(): Boolean {
+        // Both tokens are non-null once stored: only the whole record can be missing.
         val oauth = MdUtil.loadOAuth(preferences, mdList)
-        val sessionToken = oauth?.accessToken
-        val refreshToken = oauth?.refreshToken
-        if (refreshToken.isNullOrEmpty() || sessionToken.isNullOrEmpty()) {
+        if (oauth == null || oauth.refreshToken.isEmpty() || oauth.accessToken.isEmpty()) {
             mdList.logout()
             return true
         }
+        val sessionToken = oauth.accessToken
+        val refreshToken = oauth.refreshToken
 
         val formBody = FormBody.Builder()
             .add("client_id", MdConstants.Login.clientId)
@@ -84,15 +80,11 @@ internal class MangaDexLoginHelper(
             mdList.logout()
         }.exceptionOrNull()
 
-        return when (error == null) {
-            true -> {
-                mangaDexAuthInterceptor.setAuth(null)
-                true
-            }
-            false -> {
-                logcat(LogPriority.ERROR, error) { "Error logging out" }
-                false
-            }
+        if (error == null) {
+            mangaDexAuthInterceptor.setAuth(null)
+        } else {
+            logcat(LogPriority.ERROR, error) { "Error logging out" }
         }
+        return error == null
     }
 }

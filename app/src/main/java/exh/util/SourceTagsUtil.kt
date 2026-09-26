@@ -23,7 +23,8 @@ internal object SourceTagsUtil {
         tag: String? = null,
         fullTag: String? = null,
     ): String? {
-        if (!supportsWrappedTags(sourceId)) return null
+        // Null is ruled out here so the constant arms below compare a plain Long.
+        if (sourceId == null || !supportsWrappedTags(sourceId)) return null
         val parsed = toRaisedTag(namespace, tag, fullTag) ?: return null
         val parsedNamespace = parsed.namespace ?: return null
         val name = parsed.name.substringBefore('|').trim()
@@ -37,7 +38,7 @@ internal object SourceTagsUtil {
     }
 
     // The delegated-source id lists are filled at runtime, so this cannot be a constant set.
-    private fun supportsWrappedTags(sourceId: Long?): Boolean =
+    private fun supportsWrappedTags(sourceId: Long): Boolean =
         sourceId in FIXED_TAG_SOURCE_IDS ||
             sourceId in nHentaiSourceIds ||
             sourceId in mangaDexSourceIds ||

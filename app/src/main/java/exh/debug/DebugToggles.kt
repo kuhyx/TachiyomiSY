@@ -3,7 +3,8 @@ package exh.debug
 import eu.kanade.core.preference.PreferenceMutableState
 import kotlinx.coroutines.CoroutineScope
 import tachiyomi.core.common.preference.PreferenceStore
-import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.util.Locale
 
 internal enum class DebugToggles(val default: Boolean) {
@@ -35,6 +36,9 @@ internal enum class DebugToggles(val default: Boolean) {
     fun asPref(scope: CoroutineScope) = PreferenceMutableState(preferenceStore.getBoolean(prefKey, default), scope)
 
     companion object {
-        internal val preferenceStore: PreferenceStore by injectLazy()
+        // Resolved on each use rather than cached: the store is a singleton in the app, and a cached
+        // copy would pin the enum to whichever graph first touched it.
+        internal val preferenceStore: PreferenceStore
+            get() = Injekt.get()
     }
 }

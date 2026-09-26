@@ -1,10 +1,12 @@
 package exh.eh
 
+import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.work.ListenableWorker
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.source.online.all.EHentai
+import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import exh.debug.DebugToggles
 import exh.metadata.metadata.EHentaiSearchMetadata
 import exh.metadata.metadata.RaisedSearchMetadata
@@ -16,6 +18,9 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.junit.After
@@ -25,6 +30,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.util.ReflectionHelpers
 import tachiyomi.domain.library.service.LibraryPreferences.Companion.DEVICE_ONLY_ON_WIFI
+
+private const val NETWORK_EXTENSIONS = "eu.kanade.tachiyomi.util.system.NetworkExtensionsKt"
 
 @RunWith(RobolectricTestRunner::class)
 internal class EHentaiUpdateWorkerTest {
@@ -38,6 +45,7 @@ internal class EHentaiUpdateWorkerTest {
     fun tearDown() {
         ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", sdk)
         DebugToggles.RESTRICT_EXH_GALLERY_UPDATE_CHECK_FREQUENCY.enabled = true
+        unmockkStatic(NETWORK_EXTENSIONS)
         harness.stop()
     }
 
@@ -50,6 +58,16 @@ internal class EHentaiUpdateWorkerTest {
         coVerify(exactly = 0) { harness.getExhFavoriteMangaWithMetadata.await() }
         harness.exhPreferences.exhAutoUpdateRequirements.set(emptySet())
         worker.requiresWifiConnection(harness.exhPreferences).shouldBeFalse()
+    }
+
+    // Wi-Fi required and connected: the run goes ahead.
+    @Test
+    fun wifiPresentRunsTheUpdate() = runBlocking<Unit> {
+        harness.exhPreferences.exhAutoUpdateRequirements.set(setOf(DEVICE_ONLY_ON_WIFI))
+        mockkStatic(NETWORK_EXTENSIONS)
+        every { any<Context>().isConnectedToWifi() } returns true
+        harness.worker().doWork().shouldBeInstanceOf<ListenableWorker.Result.Success>()
+        coVerify(exactly = 1) { harness.getExhFavoriteMangaWithMetadata.await() }
     }
 
     @Test

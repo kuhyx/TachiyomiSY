@@ -8,6 +8,8 @@ import android.os.PowerManager
 import androidx.work.Operation
 import eu.kanade.tachiyomi.source.online.all.fetchFavorites
 import exh.eh.EHentaiUpdateWorker
+import exh.util.createPartialWakeLock
+import exh.util.createWifiLock
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
@@ -154,6 +156,19 @@ internal class FavoritesSyncHelperTest {
     }
 
     @Test
+    fun staleLocksAreReleasedFirst() {
+        val helper = harness.helper()
+        // A lock whose release threw in a previous run's finally stays in its field; the next run releases it.
+        val wake = harness.context.createPartialWakeLock("stale").apply { acquire() }
+        val wifi = harness.context.createWifiLock("stale").apply { acquire() }
+        helper.plant("wakeLock", wake)
+        helper.plant("wifiLock", wifi)
+        sync(helper) shouldBe FavoritesSyncStatus.Idle
+        wake.isHeld shouldBe false
+        wifi.isHeld shouldBe false
+    }
+
+    @Test
     fun missingLockServicesTolerated() {
         val context = object : ContextWrapper(harness.context) {
             override fun getApplicationContext(): Context = this
@@ -170,4 +185,7 @@ internal class FavoritesSyncHelperTest {
 
     private fun FavoritesSyncHelper.lock(name: String): Any? =
         FavoritesSyncHelper::class.java.getDeclaredField(name).also { it.isAccessible = true }.get(this)
+
+    private fun FavoritesSyncHelper.plant(name: String, lock: Any) =
+        FavoritesSyncHelper::class.java.getDeclaredField(name).also { it.isAccessible = true }.set(this, lock)
 }
