@@ -6,6 +6,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.WorkManager
 import com.google.common.util.concurrent.Futures.immediateFuture
+import eu.kanade.domain.installFakeAndroidKeyStore
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.data.cache.ChapterCache
@@ -82,6 +83,7 @@ internal abstract class DownloaderTestBase {
     @Before
     fun setUpDownloader() {
         Shadows.shadowOf(context as Application).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
+        installFakeAndroidKeyStore()
         root = tmp.newFolder("downloads")
         ShadowStatFs.registerStats(root, 1_000_000, 1_000_000, 1_000_000)
         provider = DownloadProviderHarness(root = root, context = context)
