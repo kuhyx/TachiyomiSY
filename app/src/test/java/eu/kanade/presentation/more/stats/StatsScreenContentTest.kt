@@ -9,8 +9,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "h2000dp")
 internal class StatsScreenContentTest {
     @get:Rule
     val compose = createComposeRule()

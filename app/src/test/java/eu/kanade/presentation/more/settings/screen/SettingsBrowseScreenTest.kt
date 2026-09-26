@@ -4,9 +4,14 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.fragment.app.FragmentActivity
 import eu.kanade.presentation.more.settings.screen.browse.ExtensionStoresScreen
 import eu.kanade.tachiyomi.ui.category.sources.SourceCategoryScreen
+import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
+import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.authenticate
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import mihon.domain.extension.interactor.GetExtensionStoreCountAsFlow
@@ -35,6 +40,7 @@ internal class SettingsBrowseScreenTest {
 
     @After
     fun tearDown() {
+        unmockkAll()
         koin.stop()
     }
 
@@ -60,6 +66,8 @@ internal class SettingsBrowseScreenTest {
 
     @Test
     fun nsfwToggleAuthenticates() {
+        mockkObject(AuthenticatorUtil)
+        coEvery { with(AuthenticatorUtil) { any<FragmentActivity>().authenticate(any(), any()) } } returns true
         val activity = Robolectric.buildActivity(FragmentActivity::class.java).setup().get()
         harness.show(SettingsBrowseScreen, context = activity)
         harness.switch("Show in sources and extensions lists", value = false) shouldBe true

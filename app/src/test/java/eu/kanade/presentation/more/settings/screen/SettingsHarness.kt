@@ -19,7 +19,8 @@ import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.PreferenceItem
 import eu.kanade.presentation.more.settings.internalOnValueChanged
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 /**
  * Composes one settings screen's [SearchableSettings.getPreferences] with a relaxed [Navigator], renders
@@ -30,6 +31,7 @@ internal class SettingsHarness(private val compose: ComposeContentTestRule) {
     val navigator: Navigator = mockk(relaxed = true)
     val registry: FakeResultRegistry = FakeResultRegistry()
     val uriHandler: UriHandler = mockk(relaxed = true)
+    private val scope = MainScope()
     var prefs: List<Preference> = emptyList()
         private set
 
@@ -100,9 +102,12 @@ internal class SettingsHarness(private val compose: ComposeContentTestRule) {
 
     fun count(text: String): Int = compose.onAllNodesWithText(text).fetchSemanticsNodes().size
 
+    // Runs the callback on the main dispatcher without blocking it: a callback that needs the main thread
+    // (a prompt, a toast) would deadlock under runBlocking, so a stuck one fails the wait instead.
     private fun <R> settle(block: suspend () -> R): R {
-        val result = compose.runOnIdle { runBlocking { block() } }
-        compose.waitForIdle()
-        return result
+        var result: Result<R>? = null
+        scope.launch { result = runCatching { block() } }
+        compose.awaitMain { result != null }
+        return checkNotNull(result).getOrThrow()
     }
 }
