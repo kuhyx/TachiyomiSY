@@ -118,9 +118,11 @@ internal fun Downloader.queueChapters(manga: Manga, chapters: List<Chapter>, aut
         if (autoStart && wasEmpty) {
             val queuedDownloads = queueState.value.count { it.source !is UnmeteredSource }
             val maxDownloadsFromSource = queueState.value
-                .groupBy { it.source }
-                .filterKeys { it !is UnmeteredSource }
-                .maxOfOrNull { it.value.size }
+                .filter { it.source !is UnmeteredSource }
+                .groupingBy { it.source }
+                .eachCount()
+                .values
+                .maxOrNull()
                 ?: 0
             if (
                 queuedDownloads > DOWNLOADS_QUEUED_WARNING_THRESHOLD ||

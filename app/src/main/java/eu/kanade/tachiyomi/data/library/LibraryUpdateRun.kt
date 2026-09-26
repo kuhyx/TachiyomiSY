@@ -13,6 +13,7 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.model.SourceNotInstalledException
 import tachiyomi.i18n.MR
 import java.io.File
+import java.io.StringWriter
 import java.io.Writer
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.concurrent.atomics.AtomicBoolean
@@ -97,11 +98,11 @@ internal fun LibraryUpdateJob.writeErrorFile(errors: List<Pair<Manga, String?>>)
     if (errors.isEmpty()) return File("")
     return try {
         val file = applicationContext.createFileInCacheDir("mihon_update_errors.txt")
-        file.bufferedWriter().use { out ->
-            val helpUrl = LibraryUpdateJob.ERROR_LOG_HELP_URL
-            out.write(applicationContext.stringResource(MR.strings.library_errors_help, helpUrl) + "\n\n")
-            writeErrorReport(out, errors)
-        }
+        val out = StringWriter()
+        val helpUrl = LibraryUpdateJob.ERROR_LOG_HELP_URL
+        out.write(applicationContext.stringResource(MR.strings.library_errors_help, helpUrl) + "\n\n")
+        writeErrorReport(out, errors)
+        file.writeText(out.toString())
         file
     } catch (_: Exception) {
         File("")

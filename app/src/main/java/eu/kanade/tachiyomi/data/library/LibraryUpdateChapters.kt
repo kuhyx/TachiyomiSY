@@ -43,8 +43,8 @@ internal suspend fun LibraryUpdateJob.updateChapterList() {
                 async {
                     semaphore.withPermit {
                         // SY -->
-                        val isMangaDex = mangaInSource.firstOrNull()?.manga?.source?.let { it in mangaDexSourceIds }
-                        if (mdlistLogged && isMangaDex == true) {
+                        val isMangaDex = mangaInSource.first().manga.source in mangaDexSourceIds
+                        if (mdlistLogged && isMangaDex) {
                             launch { addInitialMdListTracks(mangaInSource) }
                         }
                         // SY <--
