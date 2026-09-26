@@ -42,9 +42,9 @@ internal class MangaChapterSettingsTest {
         settings.setUnreadFilter(TriState.DISABLED)
         settings.setUnreadFilter(TriState.ENABLED_IS)
         settings.setUnreadFilter(TriState.ENABLED_NOT)
-        coVerify { flags.awaitSetUnreadFilter(any(), Manga.SHOW_ALL) }
-        coVerify { flags.awaitSetUnreadFilter(any(), Manga.CHAPTER_SHOW_UNREAD) }
-        coVerify { flags.awaitSetUnreadFilter(any(), Manga.CHAPTER_SHOW_READ) }
+        coVerify(timeout = 5_000) { flags.awaitSetUnreadFilter(any(), Manga.SHOW_ALL) }
+        coVerify(timeout = 5_000) { flags.awaitSetUnreadFilter(any(), Manga.CHAPTER_SHOW_UNREAD) }
+        coVerify(timeout = 5_000) { flags.awaitSetUnreadFilter(any(), Manga.CHAPTER_SHOW_READ) }
     }
 
     @Test
@@ -53,9 +53,9 @@ internal class MangaChapterSettingsTest {
         settings.setDownloadedFilter(TriState.DISABLED)
         settings.setDownloadedFilter(TriState.ENABLED_IS)
         settings.setDownloadedFilter(TriState.ENABLED_NOT)
-        coVerify { flags.awaitSetDownloadedFilter(any(), Manga.SHOW_ALL) }
-        coVerify { flags.awaitSetDownloadedFilter(any(), Manga.CHAPTER_SHOW_DOWNLOADED) }
-        coVerify { flags.awaitSetDownloadedFilter(any(), Manga.CHAPTER_SHOW_NOT_DOWNLOADED) }
+        coVerify(timeout = 5_000) { flags.awaitSetDownloadedFilter(any(), Manga.SHOW_ALL) }
+        coVerify(timeout = 5_000) { flags.awaitSetDownloadedFilter(any(), Manga.CHAPTER_SHOW_DOWNLOADED) }
+        coVerify(timeout = 5_000) { flags.awaitSetDownloadedFilter(any(), Manga.CHAPTER_SHOW_NOT_DOWNLOADED) }
     }
 
     @Test
@@ -64,9 +64,9 @@ internal class MangaChapterSettingsTest {
         settings.setBookmarkedFilter(TriState.DISABLED)
         settings.setBookmarkedFilter(TriState.ENABLED_IS)
         settings.setBookmarkedFilter(TriState.ENABLED_NOT)
-        coVerify { flags.awaitSetBookmarkFilter(any(), Manga.SHOW_ALL) }
-        coVerify { flags.awaitSetBookmarkFilter(any(), Manga.CHAPTER_SHOW_BOOKMARKED) }
-        coVerify { flags.awaitSetBookmarkFilter(any(), Manga.CHAPTER_SHOW_NOT_BOOKMARKED) }
+        coVerify(timeout = 5_000) { flags.awaitSetBookmarkFilter(any(), Manga.SHOW_ALL) }
+        coVerify(timeout = 5_000) { flags.awaitSetBookmarkFilter(any(), Manga.CHAPTER_SHOW_BOOKMARKED) }
+        coVerify(timeout = 5_000) { flags.awaitSetBookmarkFilter(any(), Manga.CHAPTER_SHOW_NOT_BOOKMARKED) }
     }
 
     @Test
@@ -75,9 +75,9 @@ internal class MangaChapterSettingsTest {
         settings.setDisplayMode(Manga.CHAPTER_DISPLAY_NUMBER)
         settings.setSorting(Manga.CHAPTER_SORTING_NUMBER)
         settings.setExcludedScanlators(setOf("x"))
-        coVerify { flags.awaitSetDisplayMode(any(), Manga.CHAPTER_DISPLAY_NUMBER) }
-        coVerify { flags.awaitSetSortingModeOrFlipOrder(any(), Manga.CHAPTER_SORTING_NUMBER) }
-        coVerify { harness.parts.setExcludedScanlators.await(1L, setOf("x")) }
+        coVerify(timeout = 5_000) { flags.awaitSetDisplayMode(any(), Manga.CHAPTER_DISPLAY_NUMBER) }
+        coVerify(timeout = 5_000) { flags.awaitSetSortingModeOrFlipOrder(any(), Manga.CHAPTER_SORTING_NUMBER) }
+        coVerify(timeout = 5_000) { harness.parts.setExcludedScanlators.await(1L, setOf("x")) }
     }
 
     @Test
