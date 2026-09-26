@@ -79,7 +79,7 @@ internal class WebtoonPageHolder(
     fun bind(page: ReaderPage) {
         this.page = page
         loadJob?.cancel()
-        loadJob = scope.launch { loadPageAndProcessStatus() }
+        loadJob = scope.launch { loadPageAndProcessStatus(page) }
         refreshLayoutParams()
     }
 
@@ -109,11 +109,10 @@ internal class WebtoonPageHolder(
     }
 
     // Loads the page and processes changes to the page's status.
-    // Returns immediately if there is no page or the page has no PageLoader.
+    // Returns immediately if the page has no PageLoader.
     // Otherwise, this function does not return. It will continue to process status changes until
     // the Job is cancelled.
-    private suspend fun loadPageAndProcessStatus() {
-        val page = page ?: return
+    private suspend fun loadPageAndProcessStatus(page: ReaderPage) {
         val loader = page.chapter.pageLoader ?: return
         supervisorScope {
             launchIO {
@@ -134,7 +133,7 @@ internal class WebtoonPageHolder(
                         }
                     }
                     Page.State.Ready -> {
-                        setImage()
+                        setImage(page)
                     }
                     is Page.State.Error -> {
                         setError(state.error)
@@ -166,10 +165,10 @@ internal class WebtoonPageHolder(
     }
 
     // Called when the page is ready.
-    private suspend fun setImage() {
+    private suspend fun setImage(page: ReaderPage) {
         progressIndicator.setProgress(0)
 
-        val streamFn = page?.stream ?: return
+        val streamFn = page.stream ?: return
 
         try {
             val (source, isAnimated) = withIOContext {

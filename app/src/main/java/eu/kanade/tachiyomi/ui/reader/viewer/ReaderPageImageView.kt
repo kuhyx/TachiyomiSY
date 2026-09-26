@@ -88,7 +88,8 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
                         }
 
                         override fun onImageLoadError(e: Exception) {
-                            onImageLoadError(e)
+                            // Qualified: unqualified, this resolved to the listener itself and recursed.
+                            this@ReaderPageImageView.onImageLoadError(e)
                         }
                     },
                 )
@@ -103,11 +104,10 @@ internal open class ReaderPageImageView @JvmOverloads constructor(
         if (zoomsLandscape && sWidth > sHeight && scale == minScale) {
             handler?.postDelayed(ZOOM_ANIMATION_MS) {
                 val targetScale = height.toFloat() / sHeight.toFloat()
-                animateScaleAndCenter(targetScale, zoomStartPoint(config.zoomStartPosition, forward))
-                    ?.withDuration(ZOOM_ANIMATION_MS)
-                    ?.withEasing(EASE_IN_OUT_QUAD)
-                    ?.withInterruptible(true)
-                    ?.start()
+                // Null only when the view lost its image since the zoom was posted.
+                animateScaleAndCenter(targetScale, zoomStartPoint(config.zoomStartPosition, forward))?.run {
+                    withDuration(ZOOM_ANIMATION_MS).withEasing(EASE_IN_OUT_QUAD).withInterruptible(true).start()
+                }
             }
         }
     }

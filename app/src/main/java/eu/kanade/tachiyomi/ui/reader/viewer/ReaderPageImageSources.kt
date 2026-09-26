@@ -32,10 +32,8 @@ internal fun ReaderPageImageView.setImage(source: BufferedSource, isAnimated: Bo
     }
 }
 
+// The page view is always one of the two the prepare functions create.
 internal fun ReaderPageImageView.recycle() = pageView?.let {
-    when (it) {
-        is SubsamplingScaleImageView -> it.recycle()
-        is AppCompatImageView -> it.dispose()
-    }
+    if (it is SubsamplingScaleImageView) it.recycle() else (it as AppCompatImageView).dispose()
     it.isVisible = false
 }

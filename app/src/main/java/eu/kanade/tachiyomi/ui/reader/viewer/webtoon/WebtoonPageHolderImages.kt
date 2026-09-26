@@ -58,21 +58,22 @@ internal fun WebtoonPageHolder.createProgressIndicator(): ReaderProgressIndicato
     return progress
 }
 
-// Initializes a button to retry pages.
+// Initializes a button to retry pages. Errors only come from a bound page, so [page] is set.
 internal fun WebtoonPageHolder.initErrorLayout(error: Throwable?): ReaderErrorBinding {
-    if (errorLayout == null) {
-        errorLayout = ReaderErrorBinding.inflate(LayoutInflater.from(context), frame, true)
-        errorLayout?.root?.layoutParams =
-            FrameLayout.LayoutParams(MATCH_PARENT, (parentHeight * ERROR_LAYOUT_HEIGHT).toInt())
-        errorLayout?.actionRetry?.setOnClickListener {
-            page?.let { it.chapter.pageLoader?.retryPage(it) }
+    val boundPage = page!!
+    val layout = errorLayout ?: ReaderErrorBinding.inflate(LayoutInflater.from(context), frame, true).also {
+        errorLayout = it
+        it.root.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, (parentHeight * ERROR_LAYOUT_HEIGHT).toInt())
+        it.actionRetry.setOnClickListener {
+            val current = page!!
+            current.chapter.pageLoader?.retryPage(current)
         }
     }
 
-    val imageUrl = page?.imageUrl
-    errorLayout?.actionOpenInWebView?.isVisible = imageUrl != null
+    val imageUrl = boundPage.imageUrl
+    layout.actionOpenInWebView.isVisible = imageUrl != null
     if (imageUrl != null && imageUrl.startsWith("http", true)) {
-        errorLayout?.actionOpenInWebView?.setOnClickListener {
+        layout.actionOpenInWebView.setOnClickListener {
             val sourceId = viewer.activity.viewModel.manga?.source
 
             val intent = WebViewActivity.newIntent(context, imageUrl, sourceId)
@@ -80,10 +81,10 @@ internal fun WebtoonPageHolder.initErrorLayout(error: Throwable?): ReaderErrorBi
         }
     }
 
-    errorLayout?.errorMessage?.text = with(context) { error?.formattedMessage }
+    layout.errorMessage.text = with(context) { error?.formattedMessage }
         ?: context.stringResource(MR.strings.decode_image_error)
 
-    return errorLayout!!
+    return layout
 }
 
 // Removes the decode error layout from the holder, if found.

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.view.KeyEvent
 import android.view.MotionEvent
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivityHarness
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel
@@ -16,6 +17,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -24,12 +26,17 @@ import kotlin.time.Duration.Companion.seconds
 @RunWith(RobolectricTestRunner::class)
 internal class WebtoonViewerTest {
 
+    // Compose runs on a test clock: an animating page spinner never lets an auto-advancing clock idle.
+    @get:Rule
+    val compose = createEmptyComposeRule()
+
     private val harness = ReaderActivityHarness(pageCount = 6, viewerFlags = ReadingMode.WEBTOON.flagValue.toLong())
     private lateinit var activity: ReaderActivity
     private lateinit var viewer: WebtoonViewer
 
     @Before
     fun setUp() {
+        compose.mainClock.autoAdvance = false
         harness.start()
         activity = harness.launch().get()
         viewer = activity.viewModel.state.value.viewer as WebtoonViewer

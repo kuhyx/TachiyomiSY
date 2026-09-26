@@ -27,8 +27,9 @@ internal class ReaderShadowDecoder {
 
     @Implementation
     fun decode(region: Rect?, sampleSize: Int): Bitmap? {
-        require(region == null && sampleSize == 1) { "the shadow only decodes whole images at full size" }
-        return bitmap
+        require(sampleSize == 1) { "the shadow only decodes at full size" }
+        val source = bitmap ?: return null
+        return region?.let { Bitmap.createBitmap(source, it.left, it.top, it.width(), it.height()) } ?: source
     }
 
     @Implementation
