@@ -63,7 +63,9 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4, private val
         }
     }
 
+    /** Drains the main looper first: work left in it would otherwise run after Koin is gone. */
     fun stop() {
+        settle()
         vm.stop()
     }
 

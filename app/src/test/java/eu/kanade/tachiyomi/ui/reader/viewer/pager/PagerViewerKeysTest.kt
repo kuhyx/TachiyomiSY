@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivityHarness
 import eu.kanade.tachiyomi.ui.reader.setting.readWithVolumeKeys
@@ -11,6 +12,7 @@ import eu.kanade.tachiyomi.ui.reader.showMenu
 import io.kotest.matchers.shouldBe
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -44,12 +46,17 @@ internal fun scrollEvent(
 @RunWith(RobolectricTestRunner::class)
 internal class PagerViewerKeysTest {
 
+    // Compose runs on a test clock: an animating page spinner never lets an auto-advancing clock idle.
+    @get:Rule
+    val compose = createEmptyComposeRule()
+
     private val harness = ReaderActivityHarness(pageCount = 6)
     private lateinit var activity: ReaderActivity
     private lateinit var viewer: PagerViewer
 
     @Before
     fun setUp() {
+        compose.mainClock.autoAdvance = false
         harness.start()
         activity = harness.launch().get()
         viewer = activity.viewModel.state.value.viewer as PagerViewer

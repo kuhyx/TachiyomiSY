@@ -4,6 +4,7 @@ import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.Event
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SaveImageResult
@@ -17,6 +18,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -25,10 +27,15 @@ import org.robolectric.Shadows.shadowOf
 @RunWith(RobolectricTestRunner::class)
 internal class ReaderActivityFlowTest {
 
+    // Compose runs on a test clock: an animating page spinner never lets an auto-advancing clock idle.
+    @get:Rule
+    val compose = createEmptyComposeRule()
+
     private val harness = ReaderActivityHarness()
 
     @Before
     fun setUp() {
+        compose.mainClock.autoAdvance = false
         harness.start()
     }
 

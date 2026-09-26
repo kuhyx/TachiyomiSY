@@ -2,9 +2,11 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.net.Uri
 import android.view.KeyEvent
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import io.kotest.matchers.shouldBe
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,10 +18,15 @@ import java.util.Locale
 @Config(sdk = [28])
 internal class ReaderActivityLegacyTest {
 
+    // Compose runs on a test clock: an animating page spinner never lets an auto-advancing clock idle.
+    @get:Rule
+    val compose = createEmptyComposeRule()
+
     private val harness = ReaderActivityHarness()
 
     @Before
     fun setUp() {
+        compose.mainClock.autoAdvance = false
         harness.start()
     }
 
