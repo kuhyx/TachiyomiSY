@@ -8,9 +8,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import tachiyomi.domain.chapter.interactor.GetChapter
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.interactor.GetManga
@@ -45,20 +44,18 @@ internal class Download(
     val status: State
         get() = _statusFlow.value
 
-    // 0 until the page list is known, then the average of the pages' progress.
     @Transient
     val progressFlow = flow {
         if (pages == null) {
-            emit(null)
+            emit(0)
             while (pages == null) {
                 delay(50.milliseconds)
             }
         }
-        emit(pages!!)
+
+        val progressFlows = pages!!.map(Page::progressFlow)
+        emitAll(combine(progressFlows) { it.average().toInt() })
     }
-        .flatMapLatest { pages ->
-            if (pages == null) flowOf(0) else combine(pages.map(Page::progressFlow)) { it.average().toInt() }
-        }
         .distinctUntilChanged()
         .debounce(50.milliseconds)
 
