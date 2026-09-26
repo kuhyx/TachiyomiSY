@@ -61,7 +61,7 @@ internal fun WhatsNewDialog(onDismissRequest: () -> Unit) {
                             AndroidXmlReader(
                                 resources.openRawResource(
                                     if (isPreviewBuildType) R.raw.changelog_debug else R.raw.changelog_release,
-                                ).bufferedReader(),
+                                ).reader(),
                             ),
                         ).toDisplayChangelog()
                     }

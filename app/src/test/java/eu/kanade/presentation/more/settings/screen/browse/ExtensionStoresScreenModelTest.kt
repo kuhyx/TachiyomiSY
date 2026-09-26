@@ -12,7 +12,9 @@ import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -45,8 +47,8 @@ internal class ExtensionStoresScreenModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun model() = ExtensionStoresScreenModel(
-        getExtensionStores = mockk<GetExtensionStores> { every { subscribe() } returns stores },
+    private fun model(source: Flow<List<ExtensionStore>> = stores) = ExtensionStoresScreenModel(
+        getExtensionStores = mockk<GetExtensionStores> { every { subscribe() } returns source },
         addExtensionStore = add,
         removeExtensionStore = remove,
         updateExtensionStores = update,
@@ -116,6 +118,27 @@ internal class ExtensionStoresScreenModelTest {
         success(model).dialog shouldBe ExtensionStoreDialog.Confirm(url = "a", alreadyExists = true)
         model.createRepo("a")
         eventually { success(model).dialog == ExtensionStoreDialog.Confirm("a", true, errorMessage = "unknown error") }
+    }
+
+    @Test
+    fun failureMessagesSwapped() {
+        coEvery { add(any()) } returns Result.failure(IllegalStateException()) andThen
+            Result.failure(IllegalStateException("bad"))
+        val model = model()
+        stores.tryEmit(listOf(store("a")))
+        success(model)
+        model.showDialog(ExtensionStoreDialog.Create())
+        model.createRepo("x")
+        eventually { success(model).dialog == ExtensionStoreDialog.Create(errorMessage = "unknown error") }
+        model.addFromDeeplink("a")
+        model.createRepo("a")
+        eventually { success(model).dialog == ExtensionStoreDialog.Confirm("a", true, errorMessage = "bad") }
+    }
+
+    @Test
+    fun finishedSourceKeepsStores() {
+        val model = model(source = flowOf(listOf(store("a"))))
+        success(model).stores.size shouldBe 1
     }
 
     @Test

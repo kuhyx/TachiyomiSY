@@ -65,6 +65,18 @@ internal class TrackingDialogsTest {
     }
 
     @Test
+    fun retryAfterFailureHidesError() {
+        coEvery { tracker.login(any(), any()) } throws IllegalStateException("bad credentials") coAndThen {
+            delay(500)
+        }
+        login()
+        compose.awaitMain(timeoutMillis = 10_000) { count("Login") == 1 }
+        compose.onNodeWithText("Login").performClick()
+        compose.awaitMain(timeoutMillis = 10_000) { count("Logging in…") == 1 }
+        compose.awaitMain(timeoutMillis = 10_000) { dismissed == 1 }
+    }
+
+    @Test
     fun closeIconDismisses() {
         compose.setContent {
             MaterialTheme { TrackingLoginDialog(tracker, MR.strings.email) { dismissed++ } }

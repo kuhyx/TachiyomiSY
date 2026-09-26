@@ -16,6 +16,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import kotlinx.coroutines.yield
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -74,7 +75,11 @@ internal class MangadexLoginTest {
 
     @Test
     fun logoutSucceeds() {
-        coEvery { mdex.logout() } returns true
+        // A real suspension, so the logout resumes through its continuation.
+        coEvery { mdex.logout() } coAnswers {
+            yield()
+            true
+        }
         logOut() shouldBe "You are now logged out"
     }
 

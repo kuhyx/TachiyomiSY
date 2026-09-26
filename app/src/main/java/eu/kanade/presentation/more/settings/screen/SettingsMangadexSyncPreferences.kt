@@ -65,14 +65,12 @@ internal fun SyncMangaDexDialog(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                val checked = selection.getOrNull(index) ?: false
-                                selection[index] = !checked
-                            },
+                            // One selection entry per item, so the index is always in range.
+                            .clickable { selection[index] = !selection[index] },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Checkbox(
-                            checked = selection.getOrNull(index) ?: false,
+                            checked = selection[index],
                             onCheckedChange = null,
                         )
 

@@ -46,6 +46,6 @@ internal class CommonsTest {
 
     @Test
     fun nothingChosen() {
-        label(all, included = emptySet(), excluded = setOf("1")) shouldBe "Include: All\nExclude: Comics"
+        label(all, included = emptySet(), excluded = setOf("1", "9")) shouldBe "Include: All\nExclude: Comics"
     }
 }

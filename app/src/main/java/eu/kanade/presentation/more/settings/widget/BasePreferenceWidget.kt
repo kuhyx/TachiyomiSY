@@ -51,7 +51,8 @@ internal fun BasePreferenceWidget(
         modifier = modifier
             .highlightBackground(highlighted)
             .sizeIn(minHeight = minHeight)
-            .clickable(enabled = onClick != null, onClick = { onClick?.invoke() })
+            // Enabled only with a callback, so the click never sees a null one.
+            .clickable(enabled = onClick != null, onClick = { onClick!!() })
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -95,9 +95,8 @@ internal fun Context.clearWebViewData() {
             clearSslPreferences()
         }
         WebStorage.getInstance().deleteAllData()
-        applicationInfo?.dataDir?.let {
-            File("$it/app_webview/").deleteRecursively()
-        }
+        // Android always gives an installed app its info and data directory.
+        File("${applicationInfo.dataDir}/app_webview/").deleteRecursively()
         toast(MR.strings.webview_data_deleted)
     } catch (expected: Throwable) {
         // Logged whatever the cause; the caller carries on.

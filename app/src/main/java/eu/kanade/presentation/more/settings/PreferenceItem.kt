@@ -99,8 +99,9 @@ internal fun PreferenceItem(
             is Preference.PreferenceItem.InfoPreference -> {
                 InfoWidget(text = item.title)
             }
-            is Preference.PreferenceItem.CustomPreference -> {
-                item.content()
+            // CustomPreference, the last subtype: an `is` arm would leave a dead "no match" group from Compose.
+            else -> {
+                (item as Preference.PreferenceItem.CustomPreference).content()
             }
         }
     }
