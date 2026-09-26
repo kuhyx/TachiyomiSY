@@ -99,10 +99,7 @@ internal class SourceCategoryScreenModel(
 }
 
 internal sealed class SourceCategoryEvent {
-    // On the root so a collector toasts every event without an always-true `is` check.
-    abstract val stringRes: StringResource
-
-    sealed class LocalizedMessage(override val stringRes: StringResource) : SourceCategoryEvent()
+    sealed class LocalizedMessage(val stringRes: StringResource) : SourceCategoryEvent()
     data object InvalidName : LocalizedMessage(SYMR.strings.invalid_category_name)
     data object InternalError : LocalizedMessage(MR.strings.internal_error)
 }

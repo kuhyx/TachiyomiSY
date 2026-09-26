@@ -102,10 +102,7 @@ internal sealed interface CategoryDialog {
 }
 
 internal sealed interface CategoryEvent {
-    // On the root so a collector toasts every event without an always-true `is` check.
-    val stringRes: StringResource
-
-    sealed class LocalizedMessage(override val stringRes: StringResource) : CategoryEvent
+    sealed class LocalizedMessage(val stringRes: StringResource) : CategoryEvent
     data object InternalError : LocalizedMessage(MR.strings.internal_error)
 }
 

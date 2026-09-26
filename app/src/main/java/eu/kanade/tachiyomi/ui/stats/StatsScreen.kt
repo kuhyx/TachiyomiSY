@@ -52,12 +52,9 @@ internal class StatsScreen : Screen() {
                 )
             },
         ) { paddingValues ->
-            // An if/else rather than a sealed `when`: Compose gives a `when` without `else` a dead "no match" group.
-            val current = state
-            if (current is StatsScreenState.Success) {
-                StatsScreenContent(state = current, paddingValues = paddingValues)
-            } else {
-                LoadingScreen()
+            when (val current = state) {
+                is StatsScreenState.Loading -> LoadingScreen()
+                is StatsScreenState.Success -> StatsScreenContent(state = current, paddingValues = paddingValues)
             }
         }
     }

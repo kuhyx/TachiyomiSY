@@ -91,10 +91,7 @@ internal class SortTagScreenModel(
 }
 
 internal sealed class SortTagEvent {
-    // On the root so a collector toasts every event without an always-true `is` check.
-    abstract val stringRes: StringResource
-
-    sealed class LocalizedMessage(override val stringRes: StringResource) : SortTagEvent()
+    sealed class LocalizedMessage(val stringRes: StringResource) : SortTagEvent()
     data object TagExists : LocalizedMessage(SYMR.strings.error_tag_exists)
     data object InternalError : LocalizedMessage(MR.strings.internal_error)
 }

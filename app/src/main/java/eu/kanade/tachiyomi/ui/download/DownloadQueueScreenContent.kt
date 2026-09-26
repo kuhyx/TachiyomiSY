@@ -189,8 +189,7 @@ internal fun DownloadQueueList(
         },
         update = { view ->
             view.updatePadding(left = left, top = top, right = right, bottom = bottom)
-            // The factory above gave the list this adapter; the model's reference may already be cleared.
-            (view.adapter as DownloadAdapter).updateDataSet(downloadList)
+            screenModel.adapter?.updateDataSet(downloadList)
         },
     )
 }

@@ -6,7 +6,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import dev.icerock.moko.resources.StringResource
 import eu.kanade.core.preference.asState
 import eu.kanade.domain.chapter.interactor.SetReadStatus
 import eu.kanade.tachiyomi.data.download.DownloadCache
@@ -28,7 +27,6 @@ import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.domain.updates.interactor.GetUpdates
 import tachiyomi.domain.updates.service.UpdatesPreferences
-import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -118,17 +116,8 @@ internal class UpdatesScreenModel(
         data object FilterSheet : Dialog
     }
 
-    // Each event carries its snackbar text, so the tab shows any of them without a `when`.
     sealed interface Event {
-        val message: StringResource
-
-        data object InternalError : Event {
-            override val message: StringResource = MR.strings.internal_error
-        }
-
-        data class LibraryUpdateTriggered(val started: Boolean) : Event {
-            override val message: StringResource =
-                if (started) MR.strings.updating_library else MR.strings.update_already_running
-        }
+        data object InternalError : Event
+        data class LibraryUpdateTriggered(val started: Boolean) : Event
     }
 }

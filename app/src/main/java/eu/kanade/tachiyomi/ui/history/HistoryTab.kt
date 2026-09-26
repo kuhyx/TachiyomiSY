@@ -155,8 +155,7 @@ internal data object HistoryTab : Tab {
                     onDismissRequest = onDismissRequest,
                 )
             }
-            // No dialog is the `else`: a `when` without one gets a dead "no match" group from Compose.
-            else -> {}
+            null -> {}
         }
     }
 

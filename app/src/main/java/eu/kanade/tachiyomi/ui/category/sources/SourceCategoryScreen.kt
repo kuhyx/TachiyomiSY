@@ -14,8 +14,7 @@ import eu.kanade.presentation.category.components.CategoryDeleteDialog
 import eu.kanade.presentation.category.components.CategoryRenameDialog
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collectLatest
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
@@ -45,8 +44,8 @@ internal class SourceCategoryScreen : Screen() {
             navigateUp = navigator::pop,
         )
 
-        // No dialog is the `else`: a `when` without one gets a dead "no match" group from Compose.
         when (val dialog = successState.dialog) {
+            null -> {}
             SourceCategoryDialog.Create -> {
                 CategoryCreateDialog(
                     onDismissRequest = screenModel::dismissDialog,
@@ -77,12 +76,14 @@ internal class SourceCategoryScreen : Screen() {
                     // SY <--
                 )
             }
-            else -> {}
         }
 
-        // launchIn rather than collect: the event channel never completes, so nothing would follow a collect.
         LaunchedEffect(Unit) {
-            screenModel.events.onEach { event -> context.toast(event.stringRes) }.launchIn(this)
+            screenModel.events.collectLatest { event ->
+                if (event is SourceCategoryEvent.LocalizedMessage) {
+                    context.toast(event.stringRes)
+                }
+            }
         }
     }
 }

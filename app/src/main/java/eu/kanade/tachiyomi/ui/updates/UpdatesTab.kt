@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.updates
 
-import android.content.Context
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
@@ -30,9 +29,8 @@ import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapLatest
+import eu.kanade.tachiyomi.ui.updates.UpdatesScreenModel.Event
+import kotlinx.coroutines.flow.collectLatest
 import mihon.feature.upcoming.UpcomingScreen
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
@@ -102,7 +100,7 @@ internal data object UpdatesTab : Tab {
         )
 
         UpdatesDialog(screenModel, settingsScreenModel, state.dialog)
-        LaunchedEffect(Unit) { showEvents(screenModel, context) }
+        UpdatesEventsSnackbar(screenModel)
 
         LaunchedEffect(state.selectionMode) {
             HomeScreen.showBottomNav(!state.selectionMode)
@@ -142,16 +140,29 @@ internal data object UpdatesTab : Tab {
                     screenModel = settingsScreenModel,
                 )
             }
-            // No dialog is the `else`: a `when` without one gets a dead "no match" group from Compose.
-            else -> {}
+            null -> {}
         }
     }
 
-    // A plain function rather than a composable, so no Compose memoisation guards: mapLatest/launchIn because a
-    // newer event still replaces the snackbar and the never-ending channel leaves nothing to run after a collect.
-    private fun CoroutineScope.showEvents(screenModel: UpdatesScreenModel, context: Context) {
-        screenModel.events
-            .mapLatest { event -> screenModel.snackbarHostState.showSnackbar(context.stringResource(event.message)) }
-            .launchIn(this)
+    @Composable
+    private fun UpdatesEventsSnackbar(screenModel: UpdatesScreenModel) {
+        val context = LocalContext.current
+        LaunchedEffect(Unit) {
+            screenModel.events.collectLatest { event ->
+                when (event) {
+                    Event.InternalError -> {
+                        screenModel.snackbarHostState.showSnackbar(context.stringResource(MR.strings.internal_error))
+                    }
+                    is Event.LibraryUpdateTriggered -> {
+                        val msg = if (event.started) {
+                            MR.strings.updating_library
+                        } else {
+                            MR.strings.update_already_running
+                        }
+                        screenModel.snackbarHostState.showSnackbar(context.stringResource(msg))
+                    }
+                }
+            }
+        }
     }
 }
