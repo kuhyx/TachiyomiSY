@@ -60,6 +60,8 @@ internal class MangaDialogsTest {
     @Test
     fun selectionFollowsTheList() {
         val model = harness.loaded()
+        // A late first observer write would replace the chapters and drop the selection.
+        harness.awaitObserver(model)
         val rows = model.awaitSuccess().processedChapters
         model.toggleSelection(rows[0], selected = true)
         model.toggleSelection(rows[2], selected = true, fromLongPress = true)

@@ -63,6 +63,8 @@ internal class MangaDownloadsTest {
     private fun emit(value: Download) = runBlocking { harness.statuses.emit(value) }
 
     private fun merged(model: MangaScreenModel, vararg members: Manga) {
+        // The observer's first write replaces merged data; let it land before setting ours.
+        harness.awaitObserver(model)
         val source = mockk<MergedSource>(relaxed = true)
         model.updateSuccessState { it.copy(source = source, mergedData = mergedData(*members)) }
     }

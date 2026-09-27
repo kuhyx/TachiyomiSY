@@ -146,6 +146,7 @@ internal class MangaDownloadActionsTest {
     @Test
     fun mergedDownloadsGoPerMember() {
         val model = harness.loaded()
+        harness.awaitObserver(model)
         val member = manga().copy(id = 1L, source = 8L)
         model.updateSuccessState {
             it.copy(source = mockk<MergedSource>(relaxed = true), mergedData = mergedData(member))

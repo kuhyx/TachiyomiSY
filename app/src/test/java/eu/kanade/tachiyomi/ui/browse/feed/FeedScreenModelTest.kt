@@ -85,7 +85,8 @@ internal class FeedScreenModelTest {
         model.init()
         model.pushed shouldBe false
         eventually { !model.state.value.isLoadingItems }
-        coVerify(timeout = 5_000, exactly = 2) { harness.source.getLatestUpdates(1) }
+        // The reload may land on the main looper, which a blocking verify would starve; poll and idle instead.
+        eventually { runCatching { coVerify(exactly = 2) { harness.source.getLatestUpdates(1) } }.isSuccess }
         model.onDispose()
     }
 

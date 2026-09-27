@@ -19,6 +19,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.i18n.sy.SYMR
+import java.util.concurrent.CopyOnWriteArrayList
 
 @RunWith(RobolectricTestRunner::class)
 internal class SourceFeedScreenModelTest {
@@ -136,7 +137,8 @@ internal class SourceFeedScreenModelTest {
 
     @Test
     fun mangaDexRandomNeedsMangaDex() {
-        val found = mutableListOf<String>()
+        // Appended on the model's IO scope while the test thread reads it.
+        val found = CopyOnWriteArrayList<String>()
         model().onMangaDexRandom { found += it }
         val saved = mangaDexSourceIds
         mangaDexSourceIds = listOf(1L)

@@ -84,8 +84,16 @@ internal class SourcesTabTest {
         unmockkStatic(REGISTRY)
     }
 
-    private fun host(config: SourcesScreen.SmartSearchConfig? = null) =
-        TabHost { sourcesTab(config) }.apply { show(compose) }
+    private fun host(config: SourcesScreen.SmartSearchConfig? = null, awaitRows: Boolean = true) =
+        TabHost { sourcesTab(config) }.apply {
+            show(compose)
+            // The rows arrive through flowOn(Dispatchers.IO), which waitForIdle does not wait for.
+            if (awaitRows) {
+                compose.waitUntil(timeoutMillis = 10_000) {
+                    compose.onAllNodesWithText("Alpha").fetchSemanticsNodes().isNotEmpty()
+                }
+            }
+        }
 
     @Test
     fun clicksOpenTheSource() {
@@ -173,7 +181,7 @@ internal class SourcesTabTest {
     @Test
     fun failuresShowASnackbar() {
         every { getEnabled.subscribe() } returns flow { error("db") }
-        val host = host()
+        val host = host(awaitRows = false)
         compose.waitUntil(timeoutMillis = 10_000) { host.snackbar.currentSnackbarData != null }
         host.snackbar.currentSnackbarData?.visuals?.message shouldBe
             "InternalError: Check crash logs for further information"

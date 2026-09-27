@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.data.track.Tracker
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.verify
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CompletableDeferred
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,9 +48,11 @@ internal class TrackingDialogsTest {
 
     @Test
     fun successfulLoginDismisses() {
-        coEvery { tracker.login("me", "secret") } coAnswers { delay(500) }
+        val release = CompletableDeferred<Unit>()
+        coEvery { tracker.login("me", "secret") } coAnswers { release.await() }
         login()
         compose.awaitMain(timeoutMillis = 10_000) { count("Logging in…") == 1 }
+        release.complete(Unit)
         compose.awaitMain(timeoutMillis = 10_000) { dismissed == 1 }
         dismissed shouldBe 1
     }
@@ -66,13 +68,16 @@ internal class TrackingDialogsTest {
 
     @Test
     fun retryAfterFailureHidesError() {
+        // The retry holds until released, so "Logging in…" lasts as long as the check needs.
+        val release = CompletableDeferred<Unit>()
         coEvery { tracker.login(any(), any()) } throws IllegalStateException("bad credentials") coAndThen {
-            delay(500)
+            release.await()
         }
         login()
         compose.awaitMain(timeoutMillis = 10_000) { count("Login") == 1 }
         compose.onNodeWithText("Login").performClick()
         compose.awaitMain(timeoutMillis = 10_000) { count("Logging in…") == 1 }
+        release.complete(Unit)
         compose.awaitMain(timeoutMillis = 10_000) { dismissed == 1 }
     }
 

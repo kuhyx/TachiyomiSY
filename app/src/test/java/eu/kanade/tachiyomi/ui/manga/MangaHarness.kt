@@ -180,6 +180,21 @@ internal class MangaHarness {
         model(mangaId = mangaId, smartSearched = smartSearched).also { model ->
             model.awaitSuccess { !it.isRefreshingData }
         }
+
+    /**
+     * The chapter observer starts only once the main looper idles, and each of its writes replaces
+     * manga, chapters and merged data -- so a state a test sets by hand before then is overwritten.
+     * Round-trip a marker version through [mangaFlow] to prove the observer is live first. Opt-in:
+     * it costs two observer emissions, which tests counting emissions must not see.
+     */
+    fun awaitObserver(model: MangaScreenModel) {
+        val original = mangaFlow.value
+        val marker = original.first.copy(version = original.first.version + 1)
+        mangaFlow.value = marker to original.second
+        model.awaitSuccess { it.manga == marker }
+        mangaFlow.value = original
+        model.awaitSuccess { it.manga == original.first }
+    }
 }
 
 /** Waits until the model is in a success state matching [predicate]. */
