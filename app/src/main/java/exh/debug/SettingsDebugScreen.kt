@@ -97,9 +97,10 @@ internal class SettingsDebugScreen : Screen() {
             },
         ) { paddingValues ->
             Crossfade(functions == null, label = "debug_functions") {
-                when (it) {
-                    true -> LoadingScreen()
-                    false -> FunctionList(paddingValues, functions.orEmpty(), toggles, scope)
+                if (it) {
+                    LoadingScreen()
+                } else {
+                    FunctionList(paddingValues, functions.orEmpty(), toggles, scope)
                 }
             }
         }

@@ -38,34 +38,37 @@ internal fun MigrationListItemAction(
     var menuExpanded by rememberSaveable { mutableStateOf(false) }
     val closeMenu = { menuExpanded = false }
     Box(modifier) {
-        when (result) {
-            MigratingManga.SearchResult.Searching -> {
-                IconButton(onClick = onSkip) {
-                    Icon(
-                        imageVector = Icons.Outlined.Close,
-                        contentDescription = null,
-                    )
-                }
-            }
-            MigratingManga.SearchResult.NotFound, is MigratingManga.SearchResult.Success -> {
-                IconButton(onClick = { menuExpanded = true }) {
-                    Icon(
-                        imageVector = Icons.Outlined.MoreVert,
-                        contentDescription = null,
-                    )
-                }
-                ActionMenu(
-                    expanded = menuExpanded,
-                    closeMenu = closeMenu,
-                    canMigrate = result is MigratingManga.SearchResult.Success,
-                    onSearchManually = onSearchManually,
-                    onSkip = onSkip,
-                    onMigrate = onMigrate,
-                    onCopy = onCopy,
+        if (result.isSearching()) {
+            IconButton(onClick = onSkip) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = null,
                 )
             }
+        } else {
+            IconButton(onClick = { menuExpanded = true }) {
+                Icon(
+                    imageVector = Icons.Outlined.MoreVert,
+                    contentDescription = null,
+                )
+            }
+            ActionMenu(
+                expanded = menuExpanded,
+                closeMenu = closeMenu,
+                canMigrate = result is MigratingManga.SearchResult.Success,
+                onSearchManually = onSearchManually,
+                onSkip = onSkip,
+                onMigrate = onMigrate,
+                onCopy = onCopy,
+            )
         }
     }
+}
+
+// Plain so the exhaustive `when` stays out of Compose; a new result kind still fails to compile here.
+private fun MigratingManga.SearchResult.isSearching(): Boolean = when (this) {
+    MigratingManga.SearchResult.Searching -> true
+    MigratingManga.SearchResult.NotFound, is MigratingManga.SearchResult.Success -> false
 }
 
 @Composable

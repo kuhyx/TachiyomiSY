@@ -85,39 +85,55 @@ internal fun ExtensionIcon(
     modifier: Modifier = Modifier,
     density: Int = DisplayMetrics.DENSITY_DEFAULT,
 ) {
+    extensionIconContent(extension, modifier, density)()
+}
+
+// This and installedIconContent are plain so their exhaustive `when`s stay out of Compose.
+private fun extensionIconContent(extension: Extension, modifier: Modifier, density: Int): @Composable () -> Unit =
     when (extension) {
         is Extension.Available -> {
-            AsyncImage(
-                model = extension.iconUrl,
-                contentDescription = null,
-                placeholder = ColorPainter(Color(color = 0x1F888888)),
-                error = rememberResourceBitmapPainter(id = R.drawable.cover_error),
-                modifier = modifier
-                    .clip(MaterialTheme.shapes.extraSmall),
-            )
-        }
-        is Extension.Installed -> {
-            val icon by extension.getIcon(density)
-            when (icon) {
-                Result.Loading -> Box(modifier = modifier)
-                is Result.Success -> Image(
-                    bitmap = (icon as Result.Success<ImageBitmap>).value,
+            {
+                AsyncImage(
+                    model = extension.iconUrl,
                     contentDescription = null,
-                    modifier = modifier,
-                )
-                Result.Error -> Image(
-                    bitmap = ImageBitmap.imageResource(id = R.mipmap.ic_default_source),
-                    contentDescription = null,
-                    modifier = modifier,
+                    placeholder = ColorPainter(Color(color = 0x1F888888)),
+                    error = rememberResourceBitmapPainter(id = R.drawable.cover_error),
+                    modifier = modifier
+                        .clip(MaterialTheme.shapes.extraSmall),
                 )
             }
         }
+        is Extension.Installed -> {
+            {
+                val icon by extension.getIcon(density)
+                installedIconContent(icon, modifier)()
+            }
+        }
         is Extension.Untrusted -> {
+            {
+                Image(
+                    imageVector = Icons.Filled.Dangerous,
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
+                    modifier = modifier.then(defaultModifier),
+                )
+            }
+        }
+    }
+
+private fun installedIconContent(icon: Result<ImageBitmap>, modifier: Modifier): @Composable () -> Unit = when (icon) {
+    Result.Loading -> {
+        { Box(modifier = modifier) }
+    }
+    is Result.Success -> {
+        { Image(bitmap = icon.value, contentDescription = null, modifier = modifier) }
+    }
+    Result.Error -> {
+        {
             Image(
-                imageVector = Icons.Filled.Dangerous,
+                bitmap = ImageBitmap.imageResource(id = R.mipmap.ic_default_source),
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
-                modifier = modifier.then(defaultModifier),
+                modifier = modifier,
             )
         }
     }

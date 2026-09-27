@@ -155,23 +155,36 @@ private fun LazyListScope.linkItems(links: List<Triple<StringResource, ImageVect
     }
 }
 
-@Composable
-private fun downloadQueueSubtitle(state: DownloadQueueState): String? = when (state) {
+// What the subtitle shows; null while the queue is stopped. Plain so the exhaustive `when` stays out of Compose.
+private data class QueueProgress(val paused: Boolean, val pending: Int)
+
+private fun queueProgress(state: DownloadQueueState): QueueProgress? = when (state) {
     DownloadQueueState.Stopped -> {
         null
     }
     is DownloadQueueState.Paused -> {
-        val pending = state.pending
-        if (pending == 0) {
+        QueueProgress(paused = true, pending = state.pending)
+    }
+    is DownloadQueueState.Downloading -> {
+        QueueProgress(paused = false, pending = state.pending)
+    }
+}
+
+@Composable
+private fun downloadQueueSubtitle(state: DownloadQueueState): String? {
+    val progress = queueProgress(state) ?: return null
+    val pending = progress.pending
+    return when {
+        !progress.paused -> {
+            pluralStringResource(MR.plurals.download_queue_summary, count = pending, pending)
+        }
+        pending == 0 -> {
             stringResource(MR.strings.paused)
-        } else {
+        }
+        else -> {
             "${stringResource(MR.strings.paused)} • ${
                 pluralStringResource(MR.plurals.download_queue_summary, count = pending, pending)
             }"
         }
-    }
-    is DownloadQueueState.Downloading -> {
-        val pending = state.pending
-        pluralStringResource(MR.plurals.download_queue_summary, count = pending, pending)
     }
 }

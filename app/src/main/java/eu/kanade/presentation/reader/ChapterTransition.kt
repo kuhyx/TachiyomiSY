@@ -28,33 +28,36 @@ internal fun ChapterTransition(
     val goingToChapter = transition.to?.chapter?.toDomainChapter()
 
     ProvideTextStyle(MaterialTheme.typography.bodyMedium) {
-        when (transition) {
-            is ChapterTransition.Prev -> {
-                TransitionText(
-                    topLabel = stringResource(MR.strings.transition_previous),
-                    topChapter = goingToChapter,
-                    topChapterDownloaded = goingToChapterDownloaded,
-                    bottomLabel = stringResource(MR.strings.transition_current),
-                    bottomChapter = currChapter,
-                    bottomChapterDownloaded = currChapterDownloaded,
-                    fallbackLabel = stringResource(MR.strings.transition_no_previous),
-                    chapterGap = calculateChapterGap(currChapter, goingToChapter),
-                )
-            }
-            is ChapterTransition.Next -> {
-                TransitionText(
-                    topLabel = stringResource(MR.strings.transition_finished),
-                    topChapter = currChapter,
-                    topChapterDownloaded = currChapterDownloaded,
-                    bottomLabel = stringResource(MR.strings.transition_next),
-                    bottomChapter = goingToChapter,
-                    bottomChapterDownloaded = goingToChapterDownloaded,
-                    fallbackLabel = stringResource(MR.strings.transition_no_next),
-                    chapterGap = calculateChapterGap(goingToChapter, currChapter),
-                )
-            }
+        if (transition.isPrev()) {
+            TransitionText(
+                topLabel = stringResource(MR.strings.transition_previous),
+                topChapter = goingToChapter,
+                topChapterDownloaded = goingToChapterDownloaded,
+                bottomLabel = stringResource(MR.strings.transition_current),
+                bottomChapter = currChapter,
+                bottomChapterDownloaded = currChapterDownloaded,
+                fallbackLabel = stringResource(MR.strings.transition_no_previous),
+                chapterGap = calculateChapterGap(currChapter, goingToChapter),
+            )
+        } else {
+            TransitionText(
+                topLabel = stringResource(MR.strings.transition_finished),
+                topChapter = currChapter,
+                topChapterDownloaded = currChapterDownloaded,
+                bottomLabel = stringResource(MR.strings.transition_next),
+                bottomChapter = goingToChapter,
+                bottomChapterDownloaded = goingToChapterDownloaded,
+                fallbackLabel = stringResource(MR.strings.transition_no_next),
+                chapterGap = calculateChapterGap(goingToChapter, currChapter),
+            )
         }
     }
+}
+
+// Plain so the exhaustive `when` stays out of Compose; a new transition kind still fails to compile here.
+private fun ChapterTransition.isPrev(): Boolean = when (this) {
+    is ChapterTransition.Prev -> true
+    is ChapterTransition.Next -> false
 }
 
 @Composable

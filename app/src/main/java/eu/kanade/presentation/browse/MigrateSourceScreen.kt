@@ -22,8 +22,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.domain.source.interactor.SetMigrateSorting
 import eu.kanade.presentation.browse.components.BaseSourceItem
 import eu.kanade.presentation.browse.components.SourceIcon
@@ -113,28 +115,12 @@ private fun MigrateSourceList(
                 )
 
                 IconButton(onClick = onToggleSortingMode) {
-                    when (sortingMode) {
-                        SetMigrateSorting.Mode.ALPHABETICAL -> Icon(
-                            Icons.Outlined.SortByAlpha,
-                            contentDescription = stringResource(MR.strings.action_sort_alpha),
-                        )
-                        SetMigrateSorting.Mode.TOTAL -> Icon(
-                            Icons.Outlined.Numbers,
-                            contentDescription = stringResource(MR.strings.action_sort_count),
-                        )
-                    }
+                    val (icon, label) = sortModeIcon(sortingMode)
+                    Icon(icon, contentDescription = stringResource(label))
                 }
                 IconButton(onClick = onToggleSortingDirection) {
-                    when (sortingDirection) {
-                        SetMigrateSorting.Direction.ASCENDING -> Icon(
-                            Icons.Outlined.ArrowUpward,
-                            contentDescription = stringResource(MR.strings.action_asc),
-                        )
-                        SetMigrateSorting.Direction.DESCENDING -> Icon(
-                            Icons.Outlined.ArrowDownward,
-                            contentDescription = stringResource(MR.strings.action_desc),
-                        )
-                    }
+                    val (icon, label) = sortDirectionIcon(sortingDirection)
+                    Icon(icon, contentDescription = stringResource(label))
                 }
             }
         }
@@ -233,3 +219,23 @@ private fun RowScope.MigrateSourceText(source: Source, sourceLangString: String?
         }
     }
 }
+
+// Icon and description per sort option; plain functions so the exhaustive `when`s stay out of Compose.
+private fun sortModeIcon(mode: SetMigrateSorting.Mode): Pair<ImageVector, StringResource> = when (mode) {
+    SetMigrateSorting.Mode.ALPHABETICAL -> {
+        Icons.Outlined.SortByAlpha to MR.strings.action_sort_alpha
+    }
+    SetMigrateSorting.Mode.TOTAL -> {
+        Icons.Outlined.Numbers to MR.strings.action_sort_count
+    }
+}
+
+private fun sortDirectionIcon(direction: SetMigrateSorting.Direction): Pair<ImageVector, StringResource> =
+    when (direction) {
+        SetMigrateSorting.Direction.ASCENDING -> {
+            Icons.Outlined.ArrowUpward to MR.strings.action_asc
+        }
+        SetMigrateSorting.Direction.DESCENDING -> {
+            Icons.Outlined.ArrowDownward to MR.strings.action_desc
+        }
+    }

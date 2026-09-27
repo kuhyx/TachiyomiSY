@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.util.fastAny
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.category.components.ChangeCategoryDialog
 import eu.kanade.presentation.library.DeleteLibraryMangaDialog
@@ -29,8 +30,30 @@ internal fun LibraryTabDialogs(
 ) {
     val navigator = LocalNavigator.currentOrThrow
     val onDismissRequest = screenModel::closeDialog
-    when (val dialog = state.dialog) {
-        is LibraryScreenModel.Dialog.SettingsSheet -> {
+    libraryDialog(
+        state = state,
+        screenModel = screenModel,
+        settingsScreenModel = settingsScreenModel,
+        navigator = navigator,
+        onDismissRequest = onDismissRequest,
+    )()
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+private fun libraryDialog(
+    state: LibraryScreenModel.State,
+    screenModel: LibraryScreenModel,
+    settingsScreenModel: LibrarySettingsScreenModel,
+    navigator: Navigator,
+    onDismissRequest: () -> Unit,
+): @Composable () -> Unit = when (val dialog = state.dialog) {
+    null -> {
+        {
+            // No dialog open.
+        }
+    }
+    is LibraryScreenModel.Dialog.SettingsSheet -> {
+        {
             LibrarySettingsDialog(
                 onDismissRequest = onDismissRequest,
                 screenModel = settingsScreenModel,
@@ -40,7 +63,9 @@ internal fun LibraryTabDialogs(
                 // SY <--
             )
         }
-        is LibraryScreenModel.Dialog.ChangeCategory -> {
+    }
+    is LibraryScreenModel.Dialog.ChangeCategory -> {
+        {
             ChangeCategoryDialog(
                 initialSelection = dialog.initialSelection,
                 onDismissRequest = onDismissRequest,
@@ -54,7 +79,9 @@ internal fun LibraryTabDialogs(
                 },
             )
         }
-        is LibraryScreenModel.Dialog.DeleteManga -> {
+    }
+    is LibraryScreenModel.Dialog.DeleteManga -> {
+        {
             DeleteLibraryMangaDialog(
                 containsLocalManga = dialog.manga.any(Manga::isLocal),
                 onDismissRequest = onDismissRequest,
@@ -64,16 +91,15 @@ internal fun LibraryTabDialogs(
                 },
             )
         }
-        // SY -->
-        is LibraryScreenModel.Dialog.SyncFavoritesWarning,
-        is LibraryScreenModel.Dialog.SyncFavoritesConfirm,
-        is LibraryScreenModel.Dialog.RecommendationSearchSheet,
-        -> {
-            SyDialogs(screenModel, dialog, onDismissRequest)
-        }
-        // SY <--
-        null -> {}
     }
+    // SY -->
+    is LibraryScreenModel.Dialog.SyncFavoritesWarning,
+    is LibraryScreenModel.Dialog.SyncFavoritesConfirm,
+    is LibraryScreenModel.Dialog.RecommendationSearchSheet,
+    -> {
+        { SyDialogs(screenModel, dialog, onDismissRequest) }
+    }
+    // SY <--
 }
 
 // SY --> The fork's favourites-sync and recommendation-search dialogs.

@@ -20,7 +20,6 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import eu.kanade.domain.sync.SyncPreferences
 import eu.kanade.presentation.more.settings.Preference
-import eu.kanade.presentation.more.settings.screen.data.SyncSettingsSelector
 import eu.kanade.presentation.more.settings.screen.data.SyncTriggerOptionsScreen
 import eu.kanade.presentation.more.settings.widget.EditTextPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TrailingWidgetBuffer
@@ -82,30 +81,6 @@ internal fun getSyncServicePreferences(syncPreferences: SyncPreferences, syncSer
         basePreferences + getAdditionalPreferences(syncPreferences)
     } else {
         basePreferences
-    }
-}
-
-@Composable
-internal fun getBasePreferences(
-    syncServiceType: SyncManager.SyncService,
-    syncPreferences: SyncPreferences,
-): List<Preference> {
-    val navigator = LocalNavigator.currentOrThrow
-    val preferences = when (syncServiceType) {
-        SyncManager.SyncService.NONE -> emptyList()
-        SyncManager.SyncService.SYNCYOMI -> getSelfHostPreferences(syncPreferences)
-        SyncManager.SyncService.GOOGLE_DRIVE -> getGoogleDrivePreferences()
-    }
-
-    return if (syncServiceType != SyncManager.SyncService.NONE) {
-        preferences + Preference.PreferenceItem.TextPreference(
-            title = stringResource(SYMR.strings.pref_choose_what_to_sync),
-            onClick = {
-                navigator.push(SyncSettingsSelector())
-            },
-        )
-    } else {
-        preferences
     }
 }
 

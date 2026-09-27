@@ -29,49 +29,53 @@ internal class ClearDatabaseScreen : Screen() {
         val model = rememberScreenModel { ClearDatabaseScreenModel() }
         val state by model.state.collectAsState()
 
-        when (val s = state) {
-            is ClearDatabaseScreenModel.State.Loading -> {
-                LoadingScreen()
+        val s = readyState(state)
+        if (s == null) {
+            LoadingScreen()
+        } else {
+            if (s.showConfirmation) {
+                ConfirmClearDialog(model)
             }
-            is ClearDatabaseScreenModel.State.Ready -> {
-                if (s.showConfirmation) {
-                    ConfirmClearDialog(model)
-                }
 
-                Scaffold(
-                    topBar = { scrollBehavior ->
-                        AppBar(
-                            title = stringResource(MR.strings.pref_clear_database),
-                            navigateUp = navigator::pop,
-                            actions = { if (s.items.isNotEmpty()) SelectionActions(model) },
-                            scrollBehavior = scrollBehavior,
-                        )
-                    },
-                ) { contentPadding ->
-                    if (s.items.isEmpty()) {
-                        EmptyScreen(
-                            message = stringResource(MR.strings.database_clean),
-                            modifier = Modifier.padding(contentPadding),
-                        )
-                    } else {
-                        LazyColumnWithAction(
-                            contentPadding = contentPadding,
-                            actionLabel = stringResource(MR.strings.action_delete),
-                            actionEnabled = s.selection.isNotEmpty(),
-                            onClickAction = model::showConfirmation,
-                        ) {
-                            items(s.items) { sourceWithCount ->
-                                ClearDatabaseItem(
-                                    source = sourceWithCount.source,
-                                    count = sourceWithCount.count,
-                                    isSelected = s.selection.contains(sourceWithCount.id),
-                                    onClickSelect = { model.toggleSelection(sourceWithCount.source) },
-                                )
-                            }
+            Scaffold(
+                topBar = { scrollBehavior ->
+                    AppBar(
+                        title = stringResource(MR.strings.pref_clear_database),
+                        navigateUp = navigator::pop,
+                        actions = { if (s.items.isNotEmpty()) SelectionActions(model) },
+                        scrollBehavior = scrollBehavior,
+                    )
+                },
+            ) { contentPadding ->
+                if (s.items.isEmpty()) {
+                    EmptyScreen(
+                        message = stringResource(MR.strings.database_clean),
+                        modifier = Modifier.padding(contentPadding),
+                    )
+                } else {
+                    LazyColumnWithAction(
+                        contentPadding = contentPadding,
+                        actionLabel = stringResource(MR.strings.action_delete),
+                        actionEnabled = s.selection.isNotEmpty(),
+                        onClickAction = model::showConfirmation,
+                    ) {
+                        items(s.items) { sourceWithCount ->
+                            ClearDatabaseItem(
+                                source = sourceWithCount.source,
+                                count = sourceWithCount.count,
+                                isSelected = s.selection.contains(sourceWithCount.id),
+                                onClickSelect = { model.toggleSelection(sourceWithCount.source) },
+                            )
                         }
                     }
                 }
             }
         }
     }
+}
+
+// Null while loading. Plain so the exhaustive `when` stays out of Compose.
+private fun readyState(state: ClearDatabaseScreenModel.State): ClearDatabaseScreenModel.State.Ready? = when (state) {
+    is ClearDatabaseScreenModel.State.Loading -> null
+    is ClearDatabaseScreenModel.State.Ready -> state
 }

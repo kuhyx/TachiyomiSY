@@ -83,24 +83,39 @@ internal fun GlobalSearchContent(
                     onClick = { onClickSource(source) },
                     modifier = Modifier.animateItem(),
                 ) {
-                    when (result) {
-                        SearchItemResult.Loading -> {
-                            GlobalSearchLoadingResultItem()
-                        }
-                        is SearchItemResult.Success -> {
-                            GlobalSearchCardRow(
-                                titles = result.result,
-                                getManga = getManga,
-                                onClick = onClickItem,
-                                onLongClick = onLongClickItem,
-                            )
-                        }
-                        is SearchItemResult.Error -> {
-                            GlobalSearchErrorResultItem(message = result.throwable.message)
-                        }
-                    }
+                    searchResultContent(
+                        result = result,
+                        getManga = getManga,
+                        onClickItem = onClickItem,
+                        onLongClickItem = onLongClickItem,
+                    )()
                 }
             }
         }
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+private fun searchResultContent(
+    result: SearchItemResult,
+    getManga: @Composable (Manga) -> State<Manga>,
+    onClickItem: (Manga) -> Unit,
+    onLongClickItem: (Manga) -> Unit,
+): @Composable () -> Unit = when (result) {
+    SearchItemResult.Loading -> {
+        { GlobalSearchLoadingResultItem() }
+    }
+    is SearchItemResult.Success -> {
+        {
+            GlobalSearchCardRow(
+                titles = result.result,
+                getManga = getManga,
+                onClick = onClickItem,
+                onLongClick = onLongClickItem,
+            )
+        }
+    }
+    is SearchItemResult.Error -> {
+        { GlobalSearchErrorResultItem(message = result.throwable.message) }
     }
 }

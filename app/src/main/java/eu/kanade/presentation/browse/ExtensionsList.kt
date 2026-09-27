@@ -3,6 +3,7 @@ package eu.kanade.presentation.browse
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -86,12 +87,10 @@ internal fun dispatch(
 
 // A section header; the "updates pending" one carries the update-all button.
 internal fun LazyListScope.extensionHeaderItem(header: ExtensionUiModel.Header, onClickUpdateAll: () -> Unit) {
-    item(
-        contentType = "header",
-        key = "extensionHeader-${header.hashCode()}",
-    ) {
-        when (header) {
-            is ExtensionUiModel.Header.Resource -> {
+    // Chosen here, outside the item's composable content, so the exhaustive `when` gets no Compose dead arm.
+    val content: @Composable LazyItemScope.() -> Unit = when (header) {
+        is ExtensionUiModel.Header.Resource -> {
+            {
                 val action: @Composable RowScope.() -> Unit =
                     if (header.textRes == MR.strings.ext_updates_pending) {
                         {
@@ -111,7 +110,9 @@ internal fun LazyListScope.extensionHeaderItem(header: ExtensionUiModel.Header, 
                     content = action,
                 )
             }
-            is ExtensionUiModel.Header.Text -> {
+        }
+        is ExtensionUiModel.Header.Text -> {
+            {
                 ExtensionHeader(
                     text = header.text,
                     modifier = Modifier.animateItemFastScroll(),
@@ -119,6 +120,11 @@ internal fun LazyListScope.extensionHeaderItem(header: ExtensionUiModel.Header, 
             }
         }
     }
+    item(
+        contentType = "header",
+        key = "extensionHeader-${header.hashCode()}",
+        content = content,
+    )
 }
 
 @Composable

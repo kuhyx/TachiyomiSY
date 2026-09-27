@@ -97,14 +97,18 @@ private enum class ChapterAction(val label: StringResource) {
     DELETE(MR.strings.action_delete),
 }
 
-// Resolved in composition because the "mark previous" glyph is a drawable resource.
+// The "mark previous" glyph is a drawable resource, so only it is resolved in composition.
 @Composable
-private fun ChapterAction.icon(): ImageVector = when (this) {
+private fun ChapterAction.icon(): ImageVector =
+    materialIcon() ?: ImageVector.vectorResource(R.drawable.ic_done_prev_24dp)
+
+// Null for MARK_PREVIOUS_READ, whose glyph is a drawable. Plain so the exhaustive `when` stays out of Compose.
+private fun ChapterAction.materialIcon(): ImageVector? = when (this) {
     ChapterAction.BOOKMARK -> Icons.Outlined.BookmarkAdd
     ChapterAction.REMOVE_BOOKMARK -> Icons.Outlined.BookmarkRemove
     ChapterAction.MARK_READ -> Icons.Outlined.DoneAll
     ChapterAction.MARK_UNREAD -> Icons.Outlined.RemoveDone
-    ChapterAction.MARK_PREVIOUS_READ -> ImageVector.vectorResource(R.drawable.ic_done_prev_24dp)
+    ChapterAction.MARK_PREVIOUS_READ -> null
     ChapterAction.DOWNLOAD -> Icons.Outlined.Download
     ChapterAction.DELETE -> Icons.Outlined.Delete
 }

@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.browse.migration.search.MigrateSearchScreen
@@ -81,37 +82,52 @@ internal class MigrationListScreen(
     @Composable
     private fun MigrationDialogs(screenModel: MigrationListScreenModel, dialog: MigrationListScreenModel.Dialog?) {
         val navigator = LocalNavigator.currentOrThrow
-        when (dialog) {
-            is MigrationListScreenModel.Dialog.Migrate -> {
-                MigrationMangaDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    copy = dialog.copy,
-                    totalCount = dialog.totalCount,
-                    skippedCount = dialog.skippedCount,
-                    onMigrate = {
-                        if (dialog.copy) {
-                            screenModel.copyMangas()
-                        } else {
-                            screenModel.migrateMangas()
-                        }
-                    },
-                )
-            }
-            is MigrationListScreenModel.Dialog.Progress -> {
-                MigrationProgressDialog(
-                    progress = dialog.progress,
-                    exitMigration = screenModel::cancelMigrate,
-                )
-            }
-            MigrationListScreenModel.Dialog.Exit -> {
-                MigrationExitDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    exitMigration = navigator::pop,
-                )
-            }
-            null -> {
-                // Nothing to show.
-            }
+        migrationDialog(screenModel, dialog, navigator)()
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+private fun migrationDialog(
+    screenModel: MigrationListScreenModel,
+    dialog: MigrationListScreenModel.Dialog?,
+    navigator: Navigator,
+): @Composable () -> Unit = when (dialog) {
+    null -> {
+        {
+            // Nothing to show.
+        }
+    }
+    is MigrationListScreenModel.Dialog.Migrate -> {
+        {
+            MigrationMangaDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                copy = dialog.copy,
+                totalCount = dialog.totalCount,
+                skippedCount = dialog.skippedCount,
+                onMigrate = {
+                    if (dialog.copy) {
+                        screenModel.copyMangas()
+                    } else {
+                        screenModel.migrateMangas()
+                    }
+                },
+            )
+        }
+    }
+    is MigrationListScreenModel.Dialog.Progress -> {
+        {
+            MigrationProgressDialog(
+                progress = dialog.progress,
+                exitMigration = screenModel::cancelMigrate,
+            )
+        }
+    }
+    MigrationListScreenModel.Dialog.Exit -> {
+        {
+            MigrationExitDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                exitMigration = navigator::pop,
+            )
         }
     }
 }

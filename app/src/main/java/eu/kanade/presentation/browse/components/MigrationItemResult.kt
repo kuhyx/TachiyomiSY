@@ -41,49 +41,70 @@ internal fun MigrationItemResult(
     onMigrationItemClick: (Manga) -> Unit,
 ) {
     Box(modifier.height(IntrinsicSize.Min)) {
-        when (result) {
-            MigratingManga.SearchResult.Searching -> {
-                Box(
-                    modifier = Modifier
-                        .widthIn(max = 150.dp)
-                        .fillMaxSize()
-                        .aspectRatio(MangaCover.Book.ratio),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
+        migrationResultContent(
+            result = result,
+            migrationItem = migrationItem,
+            getManga = getManga,
+            getChapterInfo = getChapterInfo,
+            getSourceName = getSourceName,
+            onMigrationItemClick = onMigrationItemClick,
+        )()
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+private fun migrationResultContent(
+    result: MigratingManga.SearchResult,
+    migrationItem: MigratingManga,
+    getManga: suspend (MigratingManga.SearchResult.Result) -> Manga?,
+    getChapterInfo: suspend (MigratingManga.SearchResult.Result) -> MigratingManga.ChapterInfo,
+    getSourceName: (Manga) -> String,
+    onMigrationItemClick: (Manga) -> Unit,
+): @Composable () -> Unit = when (result) {
+    MigratingManga.SearchResult.Searching -> {
+        {
+            Box(
+                modifier = Modifier
+                    .widthIn(max = 150.dp)
+                    .fillMaxSize()
+                    .aspectRatio(MangaCover.Book.ratio),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
             }
-            MigratingManga.SearchResult.NotFound -> {
-                NoAlternativesFound()
-            }
-            is MigratingManga.SearchResult.Result -> {
-                val item by produceState<Triple<Manga, MigratingManga.ChapterInfo, String>?>(
-                    initialValue = null,
-                    migrationItem,
-                    result,
-                ) {
-                    value = withIOContext {
-                        getManga(result)?.let { manga ->
-                            Triple(
-                                manga,
-                                getChapterInfo(result),
-                                getSourceName(manga),
-                            )
-                        }
+        }
+    }
+    MigratingManga.SearchResult.NotFound -> {
+        { NoAlternativesFound() }
+    }
+    is MigratingManga.SearchResult.Result -> {
+        {
+            val item by produceState<Triple<Manga, MigratingManga.ChapterInfo, String>?>(
+                initialValue = null,
+                migrationItem,
+                result,
+            ) {
+                value = withIOContext {
+                    getManga(result)?.let { manga ->
+                        Triple(
+                            manga,
+                            getChapterInfo(result),
+                            getSourceName(manga),
+                        )
                     }
                 }
-                if (item != null) {
-                    val (manga, chapterInfo, source) = item!!
-                    MigrationItem(
-                        modifier = Modifier.fillMaxSize(),
-                        manga = manga,
-                        sourcesString = source,
-                        chapterInfo = chapterInfo,
-                        onClick = {
-                            onMigrationItemClick(manga)
-                        },
-                    )
-                }
+            }
+            if (item != null) {
+                val (manga, chapterInfo, source) = item!!
+                MigrationItem(
+                    modifier = Modifier.fillMaxSize(),
+                    manga = manga,
+                    sourcesString = source,
+                    chapterInfo = chapterInfo,
+                    onClick = {
+                        onMigrationItemClick(manga)
+                    },
+                )
             }
         }
     }

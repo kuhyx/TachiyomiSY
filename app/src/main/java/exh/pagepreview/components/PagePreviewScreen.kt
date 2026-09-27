@@ -70,17 +70,7 @@ internal fun PagePreviewScreen(
             )
         },
     ) { paddingValues ->
-        when (state) {
-            is PagePreviewState.Error -> {
-                EmptyScreen(state.error.message.orEmpty())
-            }
-            PagePreviewState.Loading -> {
-                LoadingScreen()
-            }
-            is PagePreviewState.Success -> {
-                PagePreviewGrid(state, onOpenPage, paddingValues)
-            }
-        }
+        pagePreviewContent(state, onOpenPage, paddingValues)()
     }
     if (pageDialogOpen && state is PagePreviewState.Success) {
         PagePreviewPageDialog(
@@ -223,5 +213,22 @@ private fun PagePreviewGrid(
                 }
             }
         }
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+private fun pagePreviewContent(
+    state: PagePreviewState,
+    onOpenPage: (Int) -> Unit,
+    paddingValues: PaddingValues,
+): @Composable () -> Unit = when (state) {
+    is PagePreviewState.Error -> {
+        { EmptyScreen(state.error.message.orEmpty()) }
+    }
+    PagePreviewState.Loading -> {
+        { LoadingScreen() }
+    }
+    is PagePreviewState.Success -> {
+        { PagePreviewGrid(state, onOpenPage, paddingValues) }
     }
 }

@@ -67,8 +67,22 @@ internal class SourceFeedScreen(val sourceId: Long) : Screen() {
     @Composable
     private fun SourceFeedDialogs(screenModel: SourceFeedScreenModel, state: SourceFeedState) {
         val onDismissRequest = screenModel::dismissDialog
-        when (val dialog = state.dialog) {
-            is SourceFeedScreenModel.Dialog.AddFeed -> {
+        sourceFeedDialog(screenModel, state, onDismissRequest)()
+    }
+
+    // Plain so the exhaustive `when` stays out of Compose.
+    private fun sourceFeedDialog(
+        screenModel: SourceFeedScreenModel,
+        state: SourceFeedState,
+        onDismissRequest: () -> Unit,
+    ): @Composable () -> Unit = when (val dialog = state.dialog) {
+        null -> {
+            {
+                // Nothing to show.
+            }
+        }
+        is SourceFeedScreenModel.Dialog.AddFeed -> {
+            {
                 SourceFeedAddDialog(
                     onDismissRequest = onDismissRequest,
                     name = dialog.name,
@@ -78,7 +92,9 @@ internal class SourceFeedScreen(val sourceId: Long) : Screen() {
                     },
                 )
             }
-            is SourceFeedScreenModel.Dialog.DeleteFeed -> {
+        }
+        is SourceFeedScreenModel.Dialog.DeleteFeed -> {
+            {
                 SourceFeedDeleteDialog(
                     onDismissRequest = onDismissRequest,
                     deleteFeed = {
@@ -87,12 +103,9 @@ internal class SourceFeedScreen(val sourceId: Long) : Screen() {
                     },
                 )
             }
-            SourceFeedScreenModel.Dialog.Filter -> {
-                SourceFeedFilterDialog(screenModel, state, onDismissRequest)
-            }
-            null -> {
-                // Nothing to show.
-            }
+        }
+        SourceFeedScreenModel.Dialog.Filter -> {
+            { SourceFeedFilterDialog(screenModel, state, onDismissRequest) }
         }
     }
 

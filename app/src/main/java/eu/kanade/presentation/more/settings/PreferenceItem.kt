@@ -65,44 +65,7 @@ internal fun PreferenceItem(
         item = item,
         highlightKey = highlightKey,
     ) {
-        when (item) {
-            is Preference.PreferenceItem.SwitchPreference -> {
-                SwitchItem(item, scope)
-            }
-            is Preference.PreferenceItem.SliderPreference -> {
-                SliderItem(item, scope)
-            }
-            is Preference.PreferenceItem.ListPreference<*> -> {
-                ListItem(item, scope)
-            }
-            is Preference.PreferenceItem.BasicListPreference -> {
-                BasicListItem(item, scope)
-            }
-            is Preference.PreferenceItem.MultiSelectListPreference<*> -> {
-                MultiSelectItem(item, scope)
-            }
-            is Preference.PreferenceItem.TextPreference -> {
-                TextPreferenceWidget(
-                    title = item.title,
-                    subtitle = item.subtitle,
-                    icon = item.icon,
-                    content = item.widget,
-                    onPreferenceClick = item.onClick,
-                )
-            }
-            is Preference.PreferenceItem.EditTextPreference -> {
-                EditTextItem(item)
-            }
-            is Preference.PreferenceItem.TrackerPreference -> {
-                TrackerItem(item)
-            }
-            is Preference.PreferenceItem.InfoPreference -> {
-                InfoWidget(text = item.title)
-            }
-            is Preference.PreferenceItem.CustomPreference -> {
-                item.content()
-            }
-        }
+        preferenceContent(item, scope)()
     }
 }
 
@@ -225,3 +188,46 @@ private fun EditTextItem(item: Preference.PreferenceItem.EditTextPreference) {
         },
     )
 }
+
+// Plain so the exhaustive `when` stays out of Compose.
+private fun preferenceContent(item: Preference.PreferenceItem<*, *>, scope: CoroutineScope): @Composable () -> Unit =
+    when (item) {
+        is Preference.PreferenceItem.SwitchPreference -> {
+            { SwitchItem(item, scope) }
+        }
+        is Preference.PreferenceItem.SliderPreference -> {
+            { SliderItem(item, scope) }
+        }
+        is Preference.PreferenceItem.ListPreference<*> -> {
+            { ListItem(item, scope) }
+        }
+        is Preference.PreferenceItem.BasicListPreference -> {
+            { BasicListItem(item, scope) }
+        }
+        is Preference.PreferenceItem.MultiSelectListPreference<*> -> {
+            { MultiSelectItem(item, scope) }
+        }
+        is Preference.PreferenceItem.TextPreference -> {
+            {
+                TextPreferenceWidget(
+                    title = item.title,
+                    subtitle = item.subtitle,
+                    icon = item.icon,
+                    content = item.widget,
+                    onPreferenceClick = item.onClick,
+                )
+            }
+        }
+        is Preference.PreferenceItem.EditTextPreference -> {
+            { EditTextItem(item) }
+        }
+        is Preference.PreferenceItem.TrackerPreference -> {
+            { TrackerItem(item) }
+        }
+        is Preference.PreferenceItem.InfoPreference -> {
+            { InfoWidget(text = item.title) }
+        }
+        is Preference.PreferenceItem.CustomPreference -> {
+            { item.content() }
+        }
+    }

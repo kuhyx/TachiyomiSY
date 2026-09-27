@@ -120,23 +120,23 @@ internal fun CategoryCheckboxRow(checkbox: CheckboxState<Category>, onChange: (C
             .clickable { onChange(checkbox) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        when (checkbox) {
-            is CheckboxState.TriState -> {
-                TriStateCheckbox(
-                    state = checkbox.asToggleableState(),
-                    onClick = { onChange(checkbox) },
-                )
-            }
-            is CheckboxState.State -> {
-                Checkbox(
-                    checked = checkbox.isChecked,
-                    onCheckedChange = { onChange(checkbox) },
-                )
-            }
-        }
+        checkboxFor(checkbox, onChange)()
         Text(
             text = checkbox.value.visualName,
             modifier = Modifier.padding(horizontal = MaterialTheme.padding.medium),
         )
+    }
+}
+
+// A tri-state box for include/exclude selection, a plain one otherwise; kept out of Compose (exhaustive `when`).
+private fun checkboxFor(
+    checkbox: CheckboxState<Category>,
+    onChange: (CheckboxState<Category>) -> Unit,
+): @Composable () -> Unit = when (checkbox) {
+    is CheckboxState.TriState -> {
+        { TriStateCheckbox(state = checkbox.asToggleableState(), onClick = { onChange(checkbox) }) }
+    }
+    is CheckboxState.State -> {
+        { Checkbox(checked = checkbox.isChecked, onCheckedChange = { onChange(checkbox) }) }
     }
 }

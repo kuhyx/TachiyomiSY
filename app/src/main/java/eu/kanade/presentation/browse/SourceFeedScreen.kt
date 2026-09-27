@@ -61,22 +61,19 @@ internal fun SourceFeedScreen(
         },
     ) { paddingValues ->
         Crossfade(targetState = isLoading, label = "source_feed") { state ->
-            when (state) {
-                true -> {
-                    LoadingScreen()
-                }
-                false -> {
-                    SourceFeedList(
-                        items = items,
-                        paddingValues = paddingValues,
-                        getMangaState = getMangaState,
-                        onClickBrowse = onClickBrowse,
-                        onClickLatest = onClickLatest,
-                        onClickSavedSearch = onClickSavedSearch,
-                        onClickDelete = onClickDelete,
-                        onClickManga = onClickManga,
-                    )
-                }
+            if (state) {
+                LoadingScreen()
+            } else {
+                SourceFeedList(
+                    items = items,
+                    paddingValues = paddingValues,
+                    getMangaState = getMangaState,
+                    onClickBrowse = onClickBrowse,
+                    onClickLatest = onClickLatest,
+                    onClickSavedSearch = onClickSavedSearch,
+                    onClickDelete = onClickDelete,
+                    onClickManga = onClickManga,
+                )
             }
         }
     }
@@ -111,13 +108,12 @@ internal fun SourceFeedList(
                 } else {
                     null
                 },
-                onClick = when (item) {
-                    is SourceFeedUI.Browse -> onClickBrowse
-                    is SourceFeedUI.Latest -> onClickLatest
-                    is SourceFeedUI.SourceSavedSearch -> {
-                        { onClickSavedSearch(item.savedSearch) }
-                    }
-                },
+                onClick = feedItemClick(
+                    item = item,
+                    onClickBrowse = onClickBrowse,
+                    onClickLatest = onClickLatest,
+                    onClickSavedSearch = onClickSavedSearch,
+                ),
             ) {
                 SourceFeedItem(
                     item = item,
@@ -126,6 +122,24 @@ internal fun SourceFeedList(
                 )
             }
         }
+    }
+}
+
+// The row's click target; plain so the exhaustive `when` stays out of Compose.
+private fun feedItemClick(
+    item: SourceFeedUI,
+    onClickBrowse: () -> Unit,
+    onClickLatest: () -> Unit,
+    onClickSavedSearch: (SavedSearch) -> Unit,
+): () -> Unit = when (item) {
+    is SourceFeedUI.Browse -> {
+        onClickBrowse
+    }
+    is SourceFeedUI.Latest -> {
+        onClickLatest
+    }
+    is SourceFeedUI.SourceSavedSearch -> {
+        { onClickSavedSearch(item.savedSearch) }
     }
 }
 

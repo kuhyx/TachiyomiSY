@@ -95,27 +95,36 @@ internal class InterceptActivity : BaseActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
             ) {
-                when (status) {
-                    InterceptResult.Idle, InterceptResult.Loading -> {
-                        Text(
-                            text = stringResource(SYMR.strings.loading_entry),
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                        CircularProgressIndicator(modifier = Modifier.size(56.dp))
-                    }
-                    is InterceptResult.Success -> {
-                        Text(
-                            text = stringResource(SYMR.strings.launching_app),
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                    }
-                    is InterceptResult.Failure -> {
-                        Text(
-                            text = stringResource(SYMR.strings.error_with_reason, status.reason),
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                    }
-                }
+                interceptStatusContent(status)()
+            }
+        }
+    }
+
+    // Plain so the exhaustive `when` stays out of Compose; a member so `stringResource` stays the Activity's.
+    private fun interceptStatusContent(status: InterceptResult): @Composable () -> Unit = when (status) {
+        InterceptResult.Idle, InterceptResult.Loading -> {
+            {
+                Text(
+                    text = stringResource(SYMR.strings.loading_entry),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                CircularProgressIndicator(modifier = Modifier.size(56.dp))
+            }
+        }
+        is InterceptResult.Success -> {
+            {
+                Text(
+                    text = stringResource(SYMR.strings.launching_app),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
+        }
+        is InterceptResult.Failure -> {
+            {
+                Text(
+                    text = stringResource(SYMR.strings.error_with_reason, status.reason),
+                    style = MaterialTheme.typography.titleLarge,
+                )
             }
         }
     }

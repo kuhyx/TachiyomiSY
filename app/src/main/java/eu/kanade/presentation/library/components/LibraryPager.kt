@@ -101,8 +101,9 @@ private fun LibraryPage(
     } else {
         remember { mutableIntStateOf(0) }
     }
-    when (displayMode) {
-        LibraryDisplayMode.List -> {
+    pageContent(
+        displayMode = displayMode,
+        list = {
             LibraryList(
                 items = items,
                 contentPadding = contentPadding,
@@ -113,11 +114,11 @@ private fun LibraryPage(
                 searchQuery = searchQuery,
                 onGlobalSearchClicked = onGlobalSearchClicked,
             )
-        }
-        LibraryDisplayMode.CompactGrid, LibraryDisplayMode.CoverOnlyGrid -> {
+        },
+        compactGrid = { showTitle ->
             LibraryCompactGrid(
                 items = items,
-                showTitle = displayMode is LibraryDisplayMode.CompactGrid,
+                showTitle = showTitle,
                 columns = columns,
                 contentPadding = contentPadding,
                 selection = selection,
@@ -127,8 +128,8 @@ private fun LibraryPage(
                 searchQuery = searchQuery,
                 onGlobalSearchClicked = onGlobalSearchClicked,
             )
-        }
-        LibraryDisplayMode.ComfortableGrid -> {
+        },
+        comfortableGrid = {
             LibraryComfortableGrid(
                 items = items,
                 columns = columns,
@@ -140,7 +141,26 @@ private fun LibraryPage(
                 searchQuery = searchQuery,
                 onGlobalSearchClicked = onGlobalSearchClicked,
             )
-        }
+        },
+    )()
+}
+
+// Picks the layout for a display mode; plain so the exhaustive `when` stays out of Compose. The two
+// compact modes share one call site, so switching between them keeps the grid's state.
+private fun pageContent(
+    displayMode: LibraryDisplayMode,
+    list: @Composable () -> Unit,
+    compactGrid: @Composable (showTitle: Boolean) -> Unit,
+    comfortableGrid: @Composable () -> Unit,
+): @Composable () -> Unit = when (displayMode) {
+    LibraryDisplayMode.List -> {
+        list
+    }
+    LibraryDisplayMode.CompactGrid, LibraryDisplayMode.CoverOnlyGrid -> {
+        { compactGrid(displayMode is LibraryDisplayMode.CompactGrid) }
+    }
+    LibraryDisplayMode.ComfortableGrid -> {
+        comfortableGrid
     }
 }
 

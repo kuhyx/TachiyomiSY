@@ -11,11 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.GetApp
-import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -213,24 +209,8 @@ private fun IdleActions(
     onClickItemAction: (Extension) -> Unit,
     onClickItemSecondaryAction: (Extension) -> Unit,
 ) {
-    when (extension) {
-        is Extension.Installed -> {
-            ActionIcon(Icons.Outlined.Settings, MR.strings.action_settings) { onClickItemSecondaryAction(extension) }
-            if (extension.hasUpdate) {
-                ActionIcon(Icons.Outlined.GetApp, MR.strings.ext_update) { onClickItemAction(extension) }
-            }
-        }
-        is Extension.Untrusted -> {
-            ActionIcon(Icons.Outlined.VerifiedUser, MR.strings.ext_trust) { onClickItemAction(extension) }
-        }
-        is Extension.Available -> {
-            if (extension.sources.isNotEmpty()) {
-                ActionIcon(Icons.Outlined.Public, MR.strings.action_open_in_web_view) {
-                    onClickItemSecondaryAction(extension)
-                }
-            }
-            ActionIcon(Icons.Outlined.GetApp, MR.strings.ext_install) { onClickItemAction(extension) }
-        }
+    idleActions(extension, onClickItemAction, onClickItemSecondaryAction).forEach {
+        ActionIcon(it.icon, it.label, it.onClick)
     }
 }
 

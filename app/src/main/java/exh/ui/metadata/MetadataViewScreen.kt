@@ -51,22 +51,26 @@ internal class MetadataViewScreen(private val mangaId: Long, private val sourceI
                 )
             },
         ) { paddingValues ->
-            when (val viewState = state) {
-                MetadataViewState.Loading -> {
-                    LoadingScreen()
-                }
-                MetadataViewState.MetadataNotFound -> {
-                    EmptyScreen(MR.strings.no_results_found)
-                }
-                MetadataViewState.SourceNotFound -> {
-                    EmptyScreen(MR.strings.source_empty_screen)
-                }
-                is MetadataViewState.Success -> {
-                    MetadataList(viewState, paddingValues)
-                }
-            }
+            metadataContent(state, paddingValues)()
         }
     }
+
+    // Plain so the exhaustive `when` stays out of Compose.
+    private fun metadataContent(viewState: MetadataViewState, paddingValues: PaddingValues): @Composable () -> Unit =
+        when (viewState) {
+            MetadataViewState.Loading -> {
+                { LoadingScreen() }
+            }
+            MetadataViewState.MetadataNotFound -> {
+                { EmptyScreen(MR.strings.no_results_found) }
+            }
+            MetadataViewState.SourceNotFound -> {
+                { EmptyScreen(MR.strings.source_empty_screen) }
+            }
+            is MetadataViewState.Success -> {
+                { MetadataList(viewState, paddingValues) }
+            }
+        }
 
     @Composable
     private fun MetadataList(viewState: MetadataViewState.Success, paddingValues: PaddingValues) {

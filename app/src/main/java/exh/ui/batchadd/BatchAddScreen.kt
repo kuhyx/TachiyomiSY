@@ -59,24 +59,21 @@ internal class BatchAddScreen : Screen() {
                 )
             },
         ) { paddingValues ->
-            when (state.state) {
-                BatchAddScreenModel.State.INPUT -> {
-                    GalleryInput(
-                        galleries = state.galleries,
-                        onGalleriesChange = screenModel::updateGalleries,
-                        onAdd = { screenModel.addGalleries(context) },
-                        modifier = Modifier.padding(paddingValues),
-                    )
-                }
-                BatchAddScreenModel.State.PROGRESS -> {
-                    AddProgress(state, onFinish = screenModel::finish, contentPadding = paddingValues)
-                }
+            if (state.state.isInput()) {
+                GalleryInput(
+                    galleries = state.galleries,
+                    onGalleriesChange = screenModel::updateGalleries,
+                    onAdd = { screenModel.addGalleries(context) },
+                    modifier = Modifier.padding(paddingValues),
+                )
+            } else {
+                AddProgress(state, onFinish = screenModel::finish, contentPadding = paddingValues)
             }
         }
 
         val onDismissRequest = screenModel::dismissDialog
-        when (state.dialog) {
-            BatchAddScreenModel.Dialog.NoGalleriesSpecified -> AlertDialog(
+        if (showsNoGalleriesDialog(state.dialog)) {
+            AlertDialog(
                 onDismissRequest = onDismissRequest,
                 confirmButton = {
                     TextButton(onClick = onDismissRequest) {
@@ -90,7 +87,6 @@ internal class BatchAddScreen : Screen() {
                     Text(text = stringResource(SYMR.strings.batch_add_no_valid_galleries_message))
                 },
             )
-            null -> Unit
         }
     }
 
@@ -195,4 +191,16 @@ internal class BatchAddScreen : Screen() {
             )
         }
     }
+}
+
+// The two `when`s below are plain so their exhaustive checks stay out of Compose; a new state or dialog
+// still fails to compile here.
+private fun BatchAddScreenModel.State.isInput(): Boolean = when (this) {
+    BatchAddScreenModel.State.INPUT -> true
+    BatchAddScreenModel.State.PROGRESS -> false
+}
+
+private fun showsNoGalleriesDialog(dialog: BatchAddScreenModel.Dialog?): Boolean = when (dialog) {
+    null -> false
+    BatchAddScreenModel.Dialog.NoGalleriesSpecified -> true
 }

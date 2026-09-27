@@ -35,29 +35,42 @@ internal fun ChapterDownloadIndicator(
     onClick: (ChapterDownloadAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    when (val downloadState = downloadStateProvider()) {
-        Download.State.NOT_DOWNLOADED -> NotDownloadedIndicator(
-            enabled = enabled,
-            modifier = modifier,
-            onClick = onClick,
-        )
-        Download.State.QUEUE, Download.State.DOWNLOADING -> DownloadingIndicator(
-            enabled = enabled,
-            modifier = modifier,
-            downloadState = downloadState,
-            downloadProgressProvider = downloadProgressProvider,
-            onClick = onClick,
-        )
-        Download.State.DOWNLOADED -> DownloadedIndicator(
-            enabled = enabled,
-            modifier = modifier,
-            onClick = onClick,
-        )
-        Download.State.ERROR -> ErrorIndicator(
-            enabled = enabled,
-            modifier = modifier,
-            onClick = onClick,
-        )
+    indicatorFor(
+        downloadState = downloadStateProvider(),
+        enabled = enabled,
+        downloadProgressProvider = downloadProgressProvider,
+        onClick = onClick,
+        modifier = modifier,
+    )()
+}
+
+// Out of composition so the exhaustive `when` keeps no Compose-generated dead arm.
+private fun indicatorFor(
+    downloadState: Download.State,
+    enabled: Boolean,
+    downloadProgressProvider: () -> Int,
+    onClick: (ChapterDownloadAction) -> Unit,
+    modifier: Modifier,
+): @Composable () -> Unit = when (downloadState) {
+    Download.State.NOT_DOWNLOADED -> {
+        { NotDownloadedIndicator(enabled = enabled, modifier = modifier, onClick = onClick) }
+    }
+    Download.State.QUEUE, Download.State.DOWNLOADING -> {
+        {
+            DownloadingIndicator(
+                enabled = enabled,
+                modifier = modifier,
+                downloadState = downloadState,
+                downloadProgressProvider = downloadProgressProvider,
+                onClick = onClick,
+            )
+        }
+    }
+    Download.State.DOWNLOADED -> {
+        { DownloadedIndicator(enabled = enabled, modifier = modifier, onClick = onClick) }
+    }
+    Download.State.ERROR -> {
+        { ErrorIndicator(enabled = enabled, modifier = modifier, onClick = onClick) }
     }
 }
 

@@ -138,51 +138,63 @@ internal fun MigrationListItemResult(
     onItemClick: (Manga) -> Unit,
 ) {
     Box(modifier.height(IntrinsicSize.Min)) {
-        when (result) {
-            MigratingManga.SearchResult.Searching -> {
-                Box(
+        migrationResultContent(result, onItemClick)()
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+private fun migrationResultContent(
+    result: MigratingManga.SearchResult,
+    onItemClick: (Manga) -> Unit,
+): @Composable () -> Unit = when (result) {
+    MigratingManga.SearchResult.Searching -> {
+        {
+            Box(
+                modifier = Modifier
+                    .widthIn(max = 150.dp)
+                    .fillMaxSize()
+                    .aspectRatio(MangaCover.Book.ratio),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    }
+    MigratingManga.SearchResult.NotFound -> {
+        {
+            Column(
+                Modifier
+                    .widthIn(max = 150.dp)
+                    .fillMaxSize()
+                    .padding(4.dp),
+            ) {
+                Image(
+                    painter = rememberResourceBitmapPainter(id = R.drawable.cover_error),
+                    contentDescription = null,
                     modifier = Modifier
-                        .widthIn(max = 150.dp)
-                        .fillMaxSize()
-                        .aspectRatio(MangaCover.Book.ratio),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            MigratingManga.SearchResult.NotFound -> {
-                Column(
-                    Modifier
-                        .widthIn(max = 150.dp)
-                        .fillMaxSize()
-                        .padding(4.dp),
-                ) {
-                    Image(
-                        painter = rememberResourceBitmapPainter(id = R.drawable.cover_error),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(MangaCover.Book.ratio)
-                            .clip(MaterialTheme.shapes.extraSmall),
-                        contentScale = ContentScale.Crop,
-                    )
-                    Text(
-                        text = stringResource(MR.strings.migrationListScreen_noMatchFoundText),
-                        modifier = Modifier.padding(MaterialTheme.padding.extraSmall),
-                        style = MaterialTheme.typography.titleSmall,
-                    )
-                }
-            }
-            is MigratingManga.SearchResult.Success -> {
-                MigrationListItem(
-                    modifier = Modifier.fillMaxSize(),
-                    manga = result.manga,
-                    source = result.source,
-                    chapterCount = result.chapterCount,
-                    latestChapter = result.latestChapter,
-                    onClick = { onItemClick(result.manga) },
+                        .fillMaxWidth()
+                        .aspectRatio(MangaCover.Book.ratio)
+                        .clip(MaterialTheme.shapes.extraSmall),
+                    contentScale = ContentScale.Crop,
+                )
+                Text(
+                    text = stringResource(MR.strings.migrationListScreen_noMatchFoundText),
+                    modifier = Modifier.padding(MaterialTheme.padding.extraSmall),
+                    style = MaterialTheme.typography.titleSmall,
                 )
             }
+        }
+    }
+    is MigratingManga.SearchResult.Success -> {
+        {
+            MigrationListItem(
+                modifier = Modifier.fillMaxSize(),
+                manga = result.manga,
+                source = result.source,
+                chapterCount = result.chapterCount,
+                latestChapter = result.latestChapter,
+                onClick = { onItemClick(result.manga) },
+            )
         }
     }
 }

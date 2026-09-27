@@ -68,28 +68,45 @@ internal fun RecommendsContent(
                     subtitle = stringResource(source.category),
                     onClick = { onClickSource(source) },
                 ) {
-                    when (recResult) {
-                        RecommendationItemResult.Loading -> {
-                            GlobalSearchLoadingResultItem()
-                        }
-                        is RecommendationItemResult.Success -> {
-                            GlobalSearchCardRow(
-                                titles = recResult.result,
-                                getManga = getManga,
-                                onClick = onClickItem,
-                                onLongClick = onLongClickItem,
-                            )
-                        }
-                        is RecommendationItemResult.Error -> {
-                            GlobalSearchErrorResultItem(
-                                message = with(LocalContext.current) {
-                                    recResult.throwable.formattedMessage
-                                },
-                            )
-                        }
-                    }
+                    recResultContent(
+                        recResult = recResult,
+                        getManga = getManga,
+                        onClickItem = onClickItem,
+                        onLongClickItem = onLongClickItem,
+                    )()
                 }
             }
+        }
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+private fun recResultContent(
+    recResult: RecommendationItemResult,
+    getManga: @Composable (Manga) -> State<Manga>,
+    onClickItem: (Manga) -> Unit,
+    onLongClickItem: (Manga) -> Unit,
+): @Composable () -> Unit = when (recResult) {
+    RecommendationItemResult.Loading -> {
+        { GlobalSearchLoadingResultItem() }
+    }
+    is RecommendationItemResult.Success -> {
+        {
+            GlobalSearchCardRow(
+                titles = recResult.result,
+                getManga = getManga,
+                onClick = onClickItem,
+                onLongClick = onLongClickItem,
+            )
+        }
+    }
+    is RecommendationItemResult.Error -> {
+        {
+            GlobalSearchErrorResultItem(
+                message = with(LocalContext.current) {
+                    recResult.throwable.formattedMessage
+                },
+            )
         }
     }
 }
