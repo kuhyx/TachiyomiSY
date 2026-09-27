@@ -10,6 +10,8 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import tachiyomi.i18n.MR
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 internal enum class ReadingMode(
     val stringRes: StringResource,
@@ -72,7 +74,12 @@ internal enum class ReadingMode(
                 RIGHT_TO_LEFT -> R2LPagerViewer(activity)
                 VERTICAL -> VerticalPagerViewer(activity)
                 WEBTOON -> WebtoonViewer(activity)
-                CONTINUOUS_VERTICAL -> WebtoonViewer(activity, isContinuous = false)
+                CONTINUOUS_VERTICAL -> WebtoonViewer(
+                    activity,
+                    isContinuous = false,
+                    // SY: the "tapping by page" setting only reaches the viewer through here.
+                    tapByPage = Injekt.get<ReaderPreferences>().continuousVerticalTappingByPage.get(),
+                )
                 DEFAULT -> error("Preference value must be resolved: $preference")
             }
         }
