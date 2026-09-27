@@ -75,7 +75,7 @@ internal class ClearDatabaseScreen : Screen() {
 }
 
 // Null while loading. Plain so the exhaustive `when` stays out of Compose.
-private fun readyState(state: ClearDatabaseScreenModel.State): ClearDatabaseScreenModel.State.Ready? = when (state) {
+internal fun readyState(state: ClearDatabaseScreenModel.State): ClearDatabaseScreenModel.State.Ready? = when (state) {
     is ClearDatabaseScreenModel.State.Loading -> null
     is ClearDatabaseScreenModel.State.Ready -> state
 }

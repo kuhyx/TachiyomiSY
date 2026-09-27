@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -51,7 +52,7 @@ internal class MigrationConfigRecomposeTest {
         compose.setContent {
             churn.Host {
                 MaterialTheme {
-                    val state = model.state.value
+                    val state by model.state.collectAsState()
                     val (selected, available) = state.sources.partition { it.isSelected }
                     Column {
                         SelectionActions(model)

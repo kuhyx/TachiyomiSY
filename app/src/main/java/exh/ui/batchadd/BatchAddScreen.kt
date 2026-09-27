@@ -195,12 +195,12 @@ internal class BatchAddScreen : Screen() {
 
 // The two `when`s below are plain so their exhaustive checks stay out of Compose; a new state or dialog
 // still fails to compile here.
-private fun BatchAddScreenModel.State.isInput(): Boolean = when (this) {
+internal fun BatchAddScreenModel.State.isInput(): Boolean = when (this) {
     BatchAddScreenModel.State.INPUT -> true
     BatchAddScreenModel.State.PROGRESS -> false
 }
 
-private fun showsNoGalleriesDialog(dialog: BatchAddScreenModel.Dialog?): Boolean = when (dialog) {
+internal fun showsNoGalleriesDialog(dialog: BatchAddScreenModel.Dialog?): Boolean = when (dialog) {
     null -> false
     BatchAddScreenModel.Dialog.NoGalleriesSpecified -> true
 }
