@@ -20,6 +20,7 @@ import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.source.interactor.GetRemoteManga
 import tachiyomi.domain.source.model.EXHSavedSearch
 import tachiyomi.i18n.sy.SYMR
+import java.util.concurrent.CopyOnWriteArrayList
 
 @RunWith(RobolectricTestRunner::class)
 internal class BrowseSourceSavedSearchesTest {
@@ -107,20 +108,25 @@ internal class BrowseSourceSavedSearchesTest {
 
     @Test
     fun mangaDexRandomNeedsMangaDex() {
-        val found = mutableListOf<String>()
+        // Appended from an IO thread while the test reads it.
+        val found = CopyOnWriteArrayList<String>()
         harness.model().onMangaDexRandom { found += it }
         val saved = mangaDexSourceIds
         mangaDexSourceIds = listOf(1L)
-        val dex = mockk<MangaDex>(relaxed = true) {
-            every { id } returns 1L
-            every { getFilterList() } returns FilterList()
-            coEvery { fetchRandomMangaUrl() } returns "/random"
+        try {
+            val dex = mockk<MangaDex>(relaxed = true) {
+                every { id } returns 1L
+                every { getFilterList() } returns FilterList()
+                coEvery { fetchRandomMangaUrl() } returns "/random"
+            }
+            every { harness.sourceManager.getOrStub(1L) } returns dex
+            val model = harness.model()
+            model.sourceIsMangaDex shouldBe true
+            model.onMangaDexRandom { found += it }
+            eventually { found == listOf("/random") }
+        } finally {
+            // A JVM-wide list: a failure here must not leave later classes seeing MangaDex.
+            mangaDexSourceIds = saved
         }
-        every { harness.sourceManager.getOrStub(1L) } returns dex
-        val model = harness.model()
-        model.sourceIsMangaDex shouldBe true
-        model.onMangaDexRandom { found += it }
-        eventually { found == listOf("/random") }
-        mangaDexSourceIds = saved
     }
 }

@@ -142,16 +142,20 @@ internal class SourceFeedScreenModelTest {
         model().onMangaDexRandom { found += it }
         val saved = mangaDexSourceIds
         mangaDexSourceIds = listOf(1L)
-        val dex = mockk<MangaDex>(relaxed = true) {
-            every { id } returns 1L
-            every { getFilterList() } returns FilterList()
-            coEvery { fetchRandomMangaUrl() } returns "/random"
+        try {
+            val dex = mockk<MangaDex>(relaxed = true) {
+                every { id } returns 1L
+                every { getFilterList() } returns FilterList()
+                coEvery { fetchRandomMangaUrl() } returns "/random"
+            }
+            every { harness.sourceManager.getOrStub(1L) } returns dex
+            val model = SourceFeedScreenModel(1L)
+            model.sourceIsMangaDex shouldBe true
+            model.onMangaDexRandom { found += it }
+            eventually { found == listOf("/random") }
+        } finally {
+            // A JVM-wide list: a failure here must not leave later classes seeing MangaDex.
+            mangaDexSourceIds = saved
         }
-        every { harness.sourceManager.getOrStub(1L) } returns dex
-        val model = SourceFeedScreenModel(1L)
-        model.sourceIsMangaDex shouldBe true
-        model.onMangaDexRandom { found += it }
-        eventually { found == listOf("/random") }
-        mangaDexSourceIds = saved
     }
 }
