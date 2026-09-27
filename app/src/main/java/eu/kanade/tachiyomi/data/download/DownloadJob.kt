@@ -19,7 +19,9 @@ import eu.kanade.tachiyomi.util.system.networkStateFlow
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.setForegroundSafely
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.onEach
 import tachiyomi.domain.download.service.DownloadPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * This worker is used to manage the downloader. The system can decide to stop the worker, in
@@ -54,31 +57,34 @@ internal class DownloadJob(context: Context, workerParams: WorkerParameters) : C
     }
 
     override suspend fun doWork(): Result {
-        var networkCheck = checkNetworkState(
-            applicationContext.activeNetworkState(),
-            downloadPreferences.downloadOnlyOverWifi.get(),
+        val networkCheck = MutableStateFlow(
+            checkNetworkState(
+                applicationContext.activeNetworkState(),
+                downloadPreferences.downloadOnlyOverWifi.get(),
+            ),
         )
-        var active = networkCheck && downloadManager.downloaderStart()
-
-        if (!active) {
+        if (!networkCheck.value || !downloadManager.downloaderStart()) {
             return Result.failure()
         }
 
         setForegroundSafely()
 
         coroutineScope {
-            combineTransform(
+            // Losing the network (or Wi-Fi when it is required) stops the downloads in checkNetworkState.
+            val watcher = combineTransform(
                 applicationContext.networkStateFlow(),
                 downloadPreferences.downloadOnlyOverWifi.changes(),
                 transform = { a, b -> emit(checkNetworkState(a, b)) },
             )
-                .onEach { networkCheck = it }
+                .onEach { networkCheck.value = it }
                 .launchIn(this)
-        }
 
-        // Keep the worker running when needed
-        while (active) {
-            active = !isStopped && downloadManager.isRunning && networkCheck
+            // Keep the worker running while the downloader works and the network allows it. The network
+            // flow never completes, so the watcher is cancelled here or the worker would never end.
+            while (!isStopped && downloadManager.isRunning && networkCheck.value) {
+                delay(KEEP_ALIVE_POLL)
+            }
+            watcher.cancel()
         }
 
         return Result.success()
@@ -101,6 +107,7 @@ internal class DownloadJob(context: Context, workerParams: WorkerParameters) : C
 
     companion object {
         private const val TAG = "Downloader"
+        private val KEEP_ALIVE_POLL = 1.seconds
 
         fun start(context: Context) {
             val request = OneTimeWorkRequestBuilder<DownloadJob>()
