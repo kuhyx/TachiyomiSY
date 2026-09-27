@@ -56,8 +56,9 @@ internal class ExtensionFilterScreenModelTest {
     fun failuresAreReported() {
         every { getLanguages.subscribe() } returns flow { error("offline") }
         val model = ExtensionFilterScreenModel()
+        // Nobody collects yet: the buffered event cannot park the load, which leaves Loading on its own.
+        eventually { model.state.value == ExtensionFilterState.Success(languages = emptyList()) }
         val event = runBlocking { withTimeout(10_000L) { model.events.first() } }
         event shouldBe ExtensionFilterEvent.FailedFetchingLanguages
-        model.state.value shouldBe ExtensionFilterState.Loading
     }
 }

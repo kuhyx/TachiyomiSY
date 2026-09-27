@@ -27,7 +27,8 @@ internal class MigrateMangaScreenModel(
     private val getFavorites: GetFavorites = Injekt.get(),
 ) : StateScreenModel<MigrateMangaScreenModel.State>(State()) {
 
-    private val _events: Channel<MigrationMangaEvent> = Channel()
+    // Buffered: a failure before the screen collects must not park the load forever.
+    private val _events: Channel<MigrationMangaEvent> = Channel(Channel.UNLIMITED)
     val events: Flow<MigrationMangaEvent> = _events.receiveAsFlow()
 
     init {

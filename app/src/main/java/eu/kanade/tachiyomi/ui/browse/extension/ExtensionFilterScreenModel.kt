@@ -25,7 +25,8 @@ internal class ExtensionFilterScreenModel(
     private val toggleLanguage: ToggleLanguage = Injekt.get(),
 ) : StateScreenModel<ExtensionFilterState>(ExtensionFilterState.Loading) {
 
-    private val _events: Channel<ExtensionFilterEvent> = Channel()
+    // Buffered: a failure before the screen collects must not park the load forever.
+    private val _events: Channel<ExtensionFilterEvent> = Channel(Channel.UNLIMITED)
     val events: Flow<ExtensionFilterEvent> = _events.receiveAsFlow()
 
     init {
@@ -37,6 +38,14 @@ internal class ExtensionFilterScreenModel(
                 .catch { throwable ->
                     logcat(LogPriority.ERROR, throwable)
                     _events.send(ExtensionFilterEvent.FailedFetchingLanguages)
+                    // Leave the spinner, but keep a list the user is already reading.
+                    mutableState.update { state ->
+                        if (state is ExtensionFilterState.Loading) {
+                            ExtensionFilterState.Success(languages = emptyList())
+                        } else {
+                            state
+                        }
+                    }
                 }
                 .collectLatest { (extensionLanguages, enabledLanguages) ->
                     mutableState.update {

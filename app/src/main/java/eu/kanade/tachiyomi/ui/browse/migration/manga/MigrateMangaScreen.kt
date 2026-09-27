@@ -27,7 +27,8 @@ import eu.kanade.presentation.manga.components.BaseMangaListItem
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import mihon.feature.migration.config.MigrationConfigScreen
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
@@ -50,6 +51,17 @@ internal data class MigrateMangaScreen(
         val screenModel = rememberScreenModel { MigrateMangaScreenModel(sourceId) }
 
         val state by screenModel.state.collectAsState()
+
+        // Collected before the loading check: a failure arrives while the screen is still loading.
+        LaunchedEffect(Unit) {
+            screenModel.events
+                .onEach { event ->
+                    when (event) {
+                        MigrationMangaEvent.FailedFetchingFavorites -> context.toast(MR.strings.internal_error)
+                    }
+                }
+                .launchIn(this)
+        }
 
         if (state.isLoading) {
             LoadingScreen()
@@ -91,16 +103,6 @@ internal data class MigrateMangaScreen(
                     onClickItem = screenModel::toggleSelection,
                     onClickCover = { navigator.push(MangaScreen(it.id)) },
                 )
-            }
-        }
-
-        LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { event ->
-                when (event) {
-                    MigrationMangaEvent.FailedFetchingFavorites -> {
-                        context.toast(MR.strings.internal_error)
-                    }
-                }
             }
         }
     }

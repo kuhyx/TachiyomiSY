@@ -106,9 +106,10 @@ internal class MigrationModelsTest {
     fun favouriteFailuresEmptyTheList() {
         every { favorites.subscribe(7L) } returns flow { error("db") }
         val model = MigrateMangaScreenModel(7L)
+        // Nobody collects yet: the buffered event cannot park the load, which leaves loading on its own.
+        eventually { model.state.value.titles.isEmpty() && !model.state.value.isLoading }
         val event = runBlocking { withTimeout(10_000L) { model.events.first() } }
         event shouldBe MigrationMangaEvent.FailedFetchingFavorites
-        eventually { model.state.value.titles.isEmpty() && !model.state.value.isLoading }
         MigrateMangaScreenModel.State().isLoading shouldBe true
         MigrateMangaScreenModel.State(source = plain).isEmpty shouldBe true
     }

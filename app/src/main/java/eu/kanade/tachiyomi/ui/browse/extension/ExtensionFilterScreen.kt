@@ -10,8 +10,9 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.browse.ExtensionFilterScreen
 import eu.kanade.presentation.util.Screen
-import kotlinx.coroutines.flow.collectLatest
-import tachiyomi.core.common.i18n.stringResource
+import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.screens.LoadingScreen
 
@@ -23,6 +24,17 @@ internal class ExtensionFilterScreen : Screen() {
         val navigator = LocalNavigator.currentOrThrow
         val screenModel = rememberScreenModel { ExtensionFilterScreenModel() }
         val state by screenModel.state.collectAsState()
+
+        // Collected before the loading check: a failure arrives while the screen is still loading.
+        LaunchedEffect(Unit) {
+            screenModel.events
+                .onEach { event ->
+                    when (event) {
+                        ExtensionFilterEvent.FailedFetchingLanguages -> context.toast(MR.strings.internal_error)
+                    }
+                }
+                .launchIn(this)
+        }
 
         if (state is ExtensionFilterState.Loading) {
             LoadingScreen()
@@ -36,15 +48,5 @@ internal class ExtensionFilterScreen : Screen() {
             state = successState,
             onClickToggle = screenModel::toggle,
         )
-
-        LaunchedEffect(Unit) {
-            screenModel.events.collectLatest {
-                when (it) {
-                    ExtensionFilterEvent.FailedFetchingLanguages -> {
-                        context.stringResource(MR.strings.internal_error)
-                    }
-                }
-            }
-        }
     }
 }
