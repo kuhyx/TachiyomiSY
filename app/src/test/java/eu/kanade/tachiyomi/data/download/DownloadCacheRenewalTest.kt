@@ -36,12 +36,9 @@ internal class DownloadCacheRenewalTest : DownloadCacheTestBase() {
         waitUntil { cache.getTotalDownloadCount() == 1 }
     }
 
-    /**
-     * Current behaviour, reported upstream-of-fix: the cancelled job's completion handler stamps
-     * `lastRenew`, so the renewal `invalidateCache` asks for right after is skipped as too recent.
-     */
+    /** Invalidating while a renewal is in flight restarts it instead of being skipped as too recent. */
     @Test
-    fun invalidationCancelsTheRenewal() {
+    fun invalidationRestartsRenewal() {
         val extensionsReady = MutableStateFlow(false)
         every { extensionManager.isInitialized } returns extensionsReady
         val cache = newCache()
@@ -50,8 +47,7 @@ internal class DownloadCacheRenewalTest : DownloadCacheTestBase() {
         entry(source = "Alpha", manga = "Title", name = "Ch 1")
         cache.invalidateCache()
         extensionsReady.value = true
-        Thread.sleep(300)
-        cache.getTotalDownloadCount() shouldBe 0
+        waitUntil { cache.getTotalDownloadCount() == 1 }
         logged.none { it.contains("failed to create cache") } shouldBe true
     }
 

@@ -111,8 +111,10 @@ internal class DownloadCache(
     // SY <--
 
     fun invalidateCache() {
-        lastRenew = 0L
+        // Cancelling a renewal still in flight runs its completion handler, which stamps lastRenew;
+        // resetting only afterwards keeps that stamp from turning the renewal below into a no-op.
         renewalJob?.cancel()
+        lastRenew = 0L
         diskCacheFile.delete()
         renewCache()
     }
