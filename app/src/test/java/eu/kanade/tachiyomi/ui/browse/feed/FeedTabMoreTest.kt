@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.core.stack.StackEvent
 import eu.kanade.tachiyomi.ui.browse.TabHost
+import eu.kanade.tachiyomi.ui.manga.eventually
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -56,7 +57,8 @@ internal class FeedTabMoreTest {
         compose.waitForIdle()
         host.navigator.lastEvent shouldBe StackEvent.Idle
         // Loaded when the model starts and on the first idle composition, then once after the pop settles.
-        coVerify(timeout = 5_000, exactly = 3) { harness.source.getLatestUpdates(1) }
+        // The reload runs on the main looper, which a blocking verify would starve: poll and idle instead.
+        eventually { runCatching { coVerify(exactly = 3) { harness.source.getLatestUpdates(1) } }.isSuccess }
     }
 
     @Test
