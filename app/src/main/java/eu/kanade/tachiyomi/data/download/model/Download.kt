@@ -8,8 +8,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import tachiyomi.domain.chapter.interactor.GetChapter
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.interactor.GetManga
@@ -44,18 +45,21 @@ internal class Download(
     val status: State
         get() = _statusFlow.value
 
+    // The page list once the downloader has fetched it.
     @Transient
-    val progressFlow = flow {
-        if (pages == null) {
-            emit(0)
-            while (pages == null) {
-                delay(50.milliseconds)
-            }
+    private val loadedPages = flow {
+        var loaded = pages
+        while (loaded == null) {
+            delay(50.milliseconds)
+            loaded = pages
         }
-
-        val progressFlows = pages!!.map(Page::progressFlow)
-        emitAll(combine(progressFlows) { it.average().toInt() })
+        emit(loaded)
     }
+
+    @Transient
+    val progressFlow = loadedPages
+        .flatMapLatest { loaded -> combine(loaded.map(Page::progressFlow)) { it.average().toInt() } }
+        .onStart { if (pages == null) emit(0) }
         .distinctUntilChanged()
         .debounce(50.milliseconds)
 

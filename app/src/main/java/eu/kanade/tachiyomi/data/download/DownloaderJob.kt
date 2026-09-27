@@ -12,16 +12,17 @@ import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.source.UnmeteredSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.transformLatest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
@@ -34,50 +35,49 @@ import uy.kohesive.injekt.api.get
 internal fun Downloader.launchDownloaderJob() {
     if (isRunning) return
 
-    downloaderJob = scope.launch {
-        val activeDownloadsFlow = combine(
-            queueState,
-            downloadPreferences.parallelSourceLimit.changes(),
-        ) { a, b -> a to b }.transformLatest { (queue, parallelCount) ->
-            while (true) {
-                val activeDownloads = queue.asSequence()
-                    // Ignore completed downloads, leave them in the queue
-                    .filter { it.status.value <= Download.State.DOWNLOADING.value }
-                    .groupBy { it.source }
-                    .toList()
-                    .take(parallelCount)
-                    .map { (_, downloads) -> downloads.first() }
-                emit(activeDownloads)
+    val activeDownloadsFlow = combine(
+        queueState,
+        downloadPreferences.parallelSourceLimit.changes(),
+    ) { a, b -> a to b }.transformLatest { (queue, parallelCount) ->
+        while (true) {
+            val activeDownloads = queue.asSequence()
+                // Ignore completed downloads, leave them in the queue
+                .filter { it.status.value <= Download.State.DOWNLOADING.value }
+                .groupBy { it.source }
+                .toList()
+                .take(parallelCount)
+                .map { (_, downloads) -> downloads.first() }
+            emit(activeDownloads)
 
-                if (activeDownloads.isEmpty()) break
-                // Suspend until a download enters the ERROR state
-                val activeDownloadsErroredFlow =
-                    combine(activeDownloads.map(Download::statusFlow)) { states ->
-                        states.contains(Download.State.ERROR)
-                    }.filter { it }
-                activeDownloadsErroredFlow.first()
-            }
-        }
-            .distinctUntilChanged()
-
-        // Use supervisorScope to cancel child jobs when the downloader job is cancelled
-        supervisorScope {
-            val downloadJobs = mutableMapOf<Download, Job>()
-
-            activeDownloadsFlow.collectLatest { activeDownloads ->
-                val downloadJobsToStop = downloadJobs.filter { it.key !in activeDownloads }
-                downloadJobsToStop.forEach { (download, job) ->
-                    job.cancel()
-                    downloadJobs.remove(download)
-                }
-
-                val downloadsToStart = activeDownloads.filter { it !in downloadJobs }
-                downloadsToStart.forEach { download ->
-                    downloadJobs[download] = launchDownloadJob(download)
-                }
-            }
+            if (activeDownloads.isEmpty()) break
+            // Suspend until a download enters the ERROR state
+            val activeDownloadsErroredFlow =
+                combine(activeDownloads.map(Download::statusFlow)) { states ->
+                    states.contains(Download.State.ERROR)
+                }.filter { it }
+            activeDownloadsErroredFlow.first()
         }
     }
+        .distinctUntilChanged()
+
+    // Download jobs are children of the collecting coroutine, so cancelling the downloader job cancels
+    // them too; launchDownloadJob catches every failure, so a child never fails its parent.
+    val downloadJobs = mutableMapOf<Download, Job>()
+    downloaderJob = activeDownloadsFlow
+        .onEach { activeDownloads ->
+            val downloadJobsToStop = downloadJobs.filter { it.key !in activeDownloads }
+            downloadJobsToStop.forEach { (download, job) ->
+                job.cancel()
+                downloadJobs.remove(download)
+            }
+
+            val collector = CoroutineScope(currentCoroutineContext())
+            val downloadsToStart = activeDownloads.filter { it !in downloadJobs }
+            downloadsToStart.forEach { download ->
+                downloadJobs[download] = collector.launchDownloadJob(download)
+            }
+        }
+        .launchIn(scope)
 }
 
 /**

@@ -33,6 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clearFocusOnSoftKeyboardHide
@@ -141,7 +143,8 @@ internal fun SearchField(
     val bridge = remember(textFieldState) { SearchQueryBridge(searchQuery) }
     LaunchedEffect(textFieldState) {
         snapshotFlow { textFieldState.text.toString() }
-            .collect { if (bridge.fieldChanged(it)) onChangeSearchQuery(it) }
+            .onEach { if (bridge.fieldChanged(it)) onChangeSearchQuery(it) }
+            .launchIn(this)
     }
     LaunchedEffect(searchQuery) {
         if (bridge.callerChanged(searchQuery)) {

@@ -18,6 +18,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.presentation.core.util.animateElevation
 
 /**
@@ -76,7 +78,7 @@ internal class ChipElevation internal constructor(
     ): State<Dp> {
         val interactions = remember { mutableStateListOf<Interaction>() }
         LaunchedEffect(interactionSource) {
-            interactionSource.interactions.collect { interactions.apply(it) }
+            interactionSource.interactions.onEach { interactions.apply(it) }.launchIn(this)
         }
 
         val interaction = interactions.lastOrNull()

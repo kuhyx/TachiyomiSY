@@ -14,6 +14,8 @@ import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.ui.browse.migration.search.MigrateSearchScreen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import mihon.feature.migration.list.components.MigrationExitDialog
 import mihon.feature.migration.list.components.MigrationMangaDialog
 import mihon.feature.migration.list.components.MigrationProgressDialog
@@ -51,9 +53,7 @@ internal class MigrationListScreen(
         }
 
         LaunchedEffect(screenModel) {
-            screenModel.navigateBackEvent.collect {
-                navigator.pop()
-            }
+            screenModel.navigateBackEvent.onEach { navigator.pop() }.launchIn(this)
         }
         MigrationListScreenContent(
             items = state.items,
