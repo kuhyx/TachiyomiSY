@@ -13,10 +13,9 @@ import exh.source.EH_SOURCE_ID
 import exh.source.EXH_SOURCE_ID
 import exh.source.EnhancedHttpSource
 import exh.source.MERGED_SOURCE_ID
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.domain.source.model.StubSource
 import tachiyomi.source.local.LocalSource
 import uy.kohesive.injekt.Injekt
@@ -24,59 +23,53 @@ import uy.kohesive.injekt.api.get
 import java.util.concurrent.ConcurrentHashMap
 
 internal fun AndroidSourceManager.observeExtensions() {
-    scope.launch {
-        extensionManager.installedExtensionsFlow
-            // SY -->
-            .combine(exhPreferences.enableExhentai.changes()) { extensions, enableExhentai ->
-                extensions to enableExhentai
-            }
-            // SY <--
-            .collectLatest { (extensions, enableExhentai) ->
-                val mutableMap: ConcurrentHashMap<Long, Source> = ConcurrentHashMap<Long, Source>(
-                    mapOf(
-                        LocalSource.ID to LocalSource(
-                            context,
-                            Injekt.get(),
-                            Injekt.get(),
-                            // SY -->
-                            sourcePreferences.allowLocalSourceHiddenFolders::get,
-                            // SY <--
-                        ),
+    extensionManager.installedExtensionsFlow
+        // SY -->
+        .combine(exhPreferences.enableExhentai.changes()) { extensions, enableExhentai ->
+            extensions to enableExhentai
+        }
+        // SY <--
+        .onEach { (extensions, enableExhentai) ->
+            val mutableMap: ConcurrentHashMap<Long, Source> = ConcurrentHashMap<Long, Source>(
+                mapOf(
+                    LocalSource.ID to LocalSource(
+                        context,
+                        Injekt.get(),
+                        Injekt.get(),
+                        // SY -->
+                        sourcePreferences.allowLocalSourceHiddenFolders::get,
+                        // SY <--
                     ),
-                )
+                ),
+            )
 
-                mutableMap.apply {
-                    // SY -->
-                    put(EH_SOURCE_ID, EHentai(EH_SOURCE_ID, false, context))
-                    if (enableExhentai) {
-                        put(EXH_SOURCE_ID, EHentai(EXH_SOURCE_ID, true, context))
-                    }
-                    put(MERGED_SOURCE_ID, MergedSource())
-                    // SY <--
+            mutableMap.apply {
+                // SY -->
+                put(EH_SOURCE_ID, EHentai(EH_SOURCE_ID, false, context))
+                if (enableExhentai) {
+                    put(EXH_SOURCE_ID, EHentai(EXH_SOURCE_ID, true, context))
                 }
-
-                extensions.forEach { extension ->
-                    extension.sources.mapNotNull { toInternalSource(it) }.forEach {
-                        mutableMap[it.id] = it
-                        registerStubSource(StubSource.from(it))
-                    }
-                }
-                sourcesMapFlow.value = mutableMap
-                markInitialized()
+                put(MERGED_SOURCE_ID, MergedSource())
+                // SY <--
             }
-    }
+
+            extensions.forEach { extension ->
+                extension.sources.mapNotNull { toInternalSource(it) }.forEach {
+                    mutableMap[it.id] = it
+                    registerStubSource(StubSource.from(it))
+                }
+            }
+            sourcesMapFlow.value = mutableMap
+            markInitialized()
+        }
+        .launchIn(scope)
 }
 
+// Stored stub sources join the map as the repository reports them.
 internal fun AndroidSourceManager.observeStubSources() {
-    scope.launch {
-        sourceRepository.subscribeAll()
-            .collectLatest { sources ->
-                val mutableMap = stubSourcesMap.toMutableMap()
-                sources.forEach {
-                    mutableMap[it.id] = it
-                }
-            }
-    }
+    sourceRepository.subscribeAll()
+        .onEach { sources -> sources.forEach { stubSourcesMap[it.id] = it } }
+        .launchIn(scope)
 }
 
 internal fun AndroidSourceManager.toInternalSource(source: Source): Source? {

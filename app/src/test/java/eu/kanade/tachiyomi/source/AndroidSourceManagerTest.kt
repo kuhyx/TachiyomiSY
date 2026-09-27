@@ -25,6 +25,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -40,8 +41,10 @@ import tachiyomi.source.local.LocalSource
 import tachiyomi.source.local.image.LocalCoverManager
 import tachiyomi.source.local.io.LocalSourceFileSystem
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 private const val WAIT_MS = 10_000L
+private const val POLL_MS = 10L
 
 @RunWith(RobolectricTestRunner::class)
 internal class AndroidSourceManagerTest {
@@ -182,7 +185,16 @@ internal class AndroidSourceManagerTest {
         coVerify(timeout = WAIT_MS) { repository.upsertStubSource(23L, "en", "Fresh") }
         coVerify(exactly = 0) { repository.upsertStubSource(22L, any(), any()) }
         stubs.value = listOf(stored)
-        manager.stubSourcesMap.isEmpty() shouldBe true
+        runBlocking { withTimeout(WAIT_MS) { while (manager.stubSourcesMap[21L] !== stored) delay(POLL_MS) } }
+    }
+
+    @Test
+    fun stubSourceListsAreRead() {
+        val reads = AtomicInteger()
+        val stub = mockk<StubSource> { every { id } answers { reads.incrementAndGet().toLong() } }
+        manager().awaitInitialized()
+        stubs.value = listOf(stub)
+        runBlocking { withTimeout(WAIT_MS) { while (reads.get() == 0) delay(POLL_MS) } }
     }
 
     @Test
