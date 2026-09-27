@@ -20,7 +20,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -41,24 +43,24 @@ internal class ExtensionDetailsScreenModel(
     private val preferences: SourcePreferences = Injekt.get(),
 ) : StateScreenModel<ExtensionDetailsScreenModel.State>(State()) {
 
-    private val _events: Channel<ExtensionDetailsEvent> = Channel()
+    // Buffered: an extension missing from the start must not park the flow before the screen collects.
+    private val _events: Channel<ExtensionDetailsEvent> = Channel(Channel.UNLIMITED)
     val events: Flow<ExtensionDetailsEvent> = _events.receiveAsFlow()
 
     init {
         screenModelScope.launch {
-            launch {
-                extensionManager.installedExtensionsFlow
-                    .map { it.firstOrNull { extension -> extension.pkgName == pkgName } }
-                    .collectLatest { extension ->
-                        if (extension == null) {
-                            _events.send(ExtensionDetailsEvent.Uninstalled)
-                        } else {
-                            mutableState.update { state ->
-                                state.copy(extension = extension)
-                            }
+            extensionManager.installedExtensionsFlow
+                .map { it.firstOrNull { extension -> extension.pkgName == pkgName } }
+                .onEach { extension ->
+                    if (extension == null) {
+                        _events.send(ExtensionDetailsEvent.Uninstalled)
+                    } else {
+                        mutableState.update { state ->
+                            state.copy(extension = extension)
                         }
                     }
-            }
+                }
+                .launchIn(this)
             launch {
                 state.collectLatest { state ->
                     if (state.extension != null) {
@@ -85,15 +87,14 @@ internal class ExtensionDetailsScreenModel(
                     }
                 }
             }
-            launch {
-                preferences.incognitoExtensions
-                    .changes()
-                    .map { pkgName in it }
-                    .distinctUntilChanged()
-                    .collectLatest { isIncognito ->
-                        mutableState.update { it.copy(isIncognito = isIncognito) }
-                    }
-            }
+            preferences.incognitoExtensions
+                .changes()
+                .map { pkgName in it }
+                .distinctUntilChanged()
+                .onEach { isIncognito ->
+                    mutableState.update { it.copy(isIncognito = isIncognito) }
+                }
+                .launchIn(this)
         }
     }
 

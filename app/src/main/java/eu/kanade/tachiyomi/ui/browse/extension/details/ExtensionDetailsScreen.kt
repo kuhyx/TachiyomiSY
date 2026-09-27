@@ -10,7 +10,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.browse.ExtensionDetailsScreen
 import eu.kanade.presentation.util.Screen
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.presentation.core.screens.LoadingScreen
 
 internal data class ExtensionDetailsScreen(
@@ -22,13 +23,24 @@ internal data class ExtensionDetailsScreen(
         val context = LocalContext.current
         val screenModel = rememberScreenModel { ExtensionDetailsScreenModel(pkgName = pkgName, context = context) }
         val state by screenModel.state.collectAsState()
+        val navigator = LocalNavigator.currentOrThrow
+
+        // Collected before the loading check: "uninstalled" can arrive while the screen still loads.
+        LaunchedEffect(Unit) {
+            screenModel.events
+                .onEach { event ->
+                    // Exhaustive, so a new event type is a compile error rather than a silent pop.
+                    when (event) {
+                        ExtensionDetailsEvent.Uninstalled -> navigator.pop()
+                    }
+                }
+                .launchIn(this)
+        }
 
         if (state.isLoading) {
             LoadingScreen()
             return
         }
-
-        val navigator = LocalNavigator.currentOrThrow
 
         ExtensionDetailsScreen(
             navigateUp = navigator::pop,
@@ -41,14 +53,5 @@ internal data class ExtensionDetailsScreen(
             onClickSource = screenModel::toggleSource,
             onClickIncognito = screenModel::toggleIncognito,
         )
-
-        LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { event ->
-                // Exhaustive, so a new event type is a compile error rather than a silent pop.
-                when (event) {
-                    ExtensionDetailsEvent.Uninstalled -> navigator.pop()
-                }
-            }
-        }
     }
 }
