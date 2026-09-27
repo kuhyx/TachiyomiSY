@@ -26,6 +26,8 @@ jobs:
   gates:
     name: file-length, md-naming, binaries, gradle check
     runs-on: ubuntu-latest
+    # A full run takes ~30 min; a hung test JVM should fail the job visibly, not idle for hours.
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v7
 

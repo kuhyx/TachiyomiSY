@@ -56,6 +56,7 @@ internal class AndroidPluginsTest {
         test.maxHeapSize shouldBe "1g"
         test.forkEvery shouldBe 100L
         test.jvmArgs shouldContain "-XX:+UseSerialGC"
+        test.jvmArgs shouldContain "-XX:+ExitOnOutOfMemoryError"
     }
 
     @JupiterTest
