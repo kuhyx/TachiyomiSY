@@ -36,8 +36,8 @@ internal fun ReaderImageActions.shareImage(copyToClipboard: Boolean, useExtraPag
 
     val filename = generateFilename(manga, page)
 
-    try {
-        model.viewModelScope.launchNonCancellable {
+    model.viewModelScope.launchNonCancellable {
+        try {
             destDir.deleteRecursively()
             val uri = imageSaver.save(
                 image = Image.Page(
@@ -47,10 +47,10 @@ internal fun ReaderImageActions.shareImage(copyToClipboard: Boolean, useExtraPag
                 ),
             )
             model.eventChannel.send(if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, page))
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the reader carries on.
+            logcat(LogPriority.ERROR, expected)
         }
-    } catch (expected: Throwable) {
-        // Logged whatever the cause; the caller carries on.
-        logcat(LogPriority.ERROR, expected)
     }
 }
 
@@ -67,8 +67,8 @@ internal fun ReaderImageActions.shareImages(copyToClipboard: Boolean) {
     val context = Injekt.get<Application>()
     val destDir = context.cacheImageDir
 
-    try {
-        model.viewModelScope.launchNonCancellable {
+    model.viewModelScope.launchNonCancellable {
+        try {
             destDir.deleteRecursively()
             val uri = saveImages(
                 page1 = firstPage,
@@ -80,10 +80,10 @@ internal fun ReaderImageActions.shareImages(copyToClipboard: Boolean) {
             )
             val event = if (copyToClipboard) Event.CopyImage(uri) else Event.ShareImage(uri, firstPage, secondPage)
             model.eventChannel.send(event)
+        } catch (expected: Exception) {
+            // Logged whatever the cause; the reader carries on.
+            logcat(LogPriority.ERROR, expected)
         }
-    } catch (expected: Throwable) {
-        // Logged whatever the cause; the caller carries on.
-        logcat(LogPriority.ERROR, expected)
     }
 }
 
