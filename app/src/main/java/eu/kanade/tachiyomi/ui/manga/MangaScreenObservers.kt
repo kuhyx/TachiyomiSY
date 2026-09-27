@@ -48,7 +48,7 @@ internal fun MangaScreenModel.observeMangaAndChapters() {
                 updateSuccessState {
                     it.copy(
                         manga = manga,
-                        chapters = selection.reapply(chapterItems),
+                        chapters = it.selection.reapply(chapterItems),
                         // SY -->
                         meta = raiseMetadata(combined.flatMetadata, it.source),
                         mergedData = mergedData,

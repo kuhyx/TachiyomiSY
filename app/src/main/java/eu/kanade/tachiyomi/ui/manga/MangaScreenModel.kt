@@ -104,7 +104,6 @@ internal class MangaScreenModel(
     val isUpdateIntervalEnabled =
         LibraryPreferences.MANGA_OUTSIDE_RELEASE_PERIOD in libraryPreferences.autoUpdateMangaRestrictions.get()
 
-    internal val selection = ChapterSelection()
     val downloads = MangaDownloads(this, context, lifecycle)
     val library = MangaLibrary(this, mangaId, libraryPreferences)
     val chapterActions = MangaChapterActions(this, context, mangaId)
@@ -212,6 +211,7 @@ internal class MangaScreenModel(
             val alwaysShowReadingProgress: Boolean,
             val previewsRowCount: Int,
             // SY <--
+            val selection: ChapterSelection = ChapterSelection(),
         ) : State {
             val processedChapters by lazy {
                 chapters.applyFilters(manga).toList()

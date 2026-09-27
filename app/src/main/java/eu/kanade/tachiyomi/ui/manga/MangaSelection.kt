@@ -9,19 +9,22 @@ internal fun MangaScreenModel.toggleSelection(
     fromLongPress: Boolean = false,
 ) {
     updateSuccessState { successState ->
-        val chapters = selection.toggle(successState.processedChapters, item, selected, fromLongPress)
-        successState.copy(chapters = chapters)
+        val (chapters, selection) =
+            successState.selection.toggle(successState.processedChapters, item, selected, fromLongPress)
+        successState.copy(chapters = chapters, selection = selection)
     }
 }
 
 internal fun MangaScreenModel.toggleAllSelection(selected: Boolean) {
     updateSuccessState { successState ->
-        successState.copy(chapters = selection.setAll(successState.chapters, selected))
+        val (chapters, selection) = successState.selection.setAll(successState.chapters, selected)
+        successState.copy(chapters = chapters, selection = selection)
     }
 }
 
 internal fun MangaScreenModel.invertSelection() {
     updateSuccessState { successState ->
-        successState.copy(chapters = selection.invert(successState.chapters))
+        val (chapters, selection) = successState.selection.invert(successState.chapters)
+        successState.copy(chapters = chapters, selection = selection)
     }
 }

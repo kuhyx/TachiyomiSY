@@ -61,7 +61,8 @@ internal fun MangaScreenModel.toChapterListItems(
             chapter = chapter,
             downloadState = downloadState,
             downloadProgress = activeDownload?.progress ?: 0,
-            selected = chapter.id in selection.selectedChapterIds,
+            // Selection flags are applied inside the state update (ChapterSelection.reapply).
+            selected = false,
             // SY -->
             sourceName = source?.getNameForMangaInfo(enabledLanguages = enabledLanguages),
             showScanlator = !isExhManga,

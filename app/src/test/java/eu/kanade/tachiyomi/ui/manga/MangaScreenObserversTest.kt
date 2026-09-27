@@ -117,6 +117,22 @@ internal class MangaScreenObserversTest {
     }
 
     @Test
+    fun selectionOutlivesAnEmission() {
+        harness.mangaFlow.value = manga(favorite = true) to listOf(chapter(1L), chapter(2L))
+        val model = harness.loaded()
+        val rows = model.awaitSuccess { it.chapters.size == 2 }.processedChapters
+        model.toggleSelection(rows.first { it.id == 1L }, selected = true)
+        model.awaitSuccess { it.isAnySelected }
+        // The observer builds every item unselected; only the state's selection, reapplied, marks chapter 1.
+        harness.mangaFlow.value = manga(favorite = true).copy(version = 2L) to
+            listOf(chapter(1L), chapter(2L), chapter(3L))
+        val state = model.awaitSuccess { it.manga.version == 2L && it.chapters.size == 3 }
+        state.chapters.filter { it.selected }.map { it.id } shouldBe listOf(1L)
+        state.selection.selectedChapterIds shouldBe setOf(1L)
+        state.isAnySelected shouldBe true
+    }
+
+    @Test
     fun mergedEntryUsesMergedChapters() {
         val merged = manga(source = MERGED_SOURCE_ID, favorite = true)
         harness.mangaFlow.value = merged to listOf(chapter(1L))
