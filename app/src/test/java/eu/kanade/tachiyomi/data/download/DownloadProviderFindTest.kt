@@ -69,7 +69,7 @@ internal class DownloadProviderFindTest : ProviderTestBase() {
     }
 
     @Test
-    fun unmatchedKeepsTempAndStranger() {
+    fun unmatchedFindsTempAndStranger() {
         chapterDir(mangaTitle = "Title", name = "Ch 1")
         chapterDir(mangaTitle = "Title", name = "Ch 9${Downloader.TMP_DIR_SUFFIX}")
         chapterDir(mangaTitle = "Title", name = "stranger")
@@ -79,7 +79,8 @@ internal class DownloadProviderFindTest : ProviderTestBase() {
             manga = testManga("Title"),
             source = source,
         )
-        unmatched.map { it.name } shouldContainExactly listOf("Ch 9${Downloader.TMP_DIR_SUFFIX}")
+        unmatched.mapNotNull { it.name }.sorted() shouldContainExactly
+            listOf("Ch 9${Downloader.TMP_DIR_SUFFIX}", "stranger")
         harness.provider.findUnmatchedChapterDirs(
             chapters = chapters,
             manga = testManga("Absent"),

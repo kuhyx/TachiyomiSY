@@ -135,13 +135,11 @@ internal class DownloadProvider(
         source: Source,
     ): List<UniFile> {
         val mangaDir = findMangaDir(/* SY --> */ manga.ogTitle /* SY <-- */, source) ?: return emptyList()
+        // Each entry is matched against every chapter's valid names; the old check never looked at the
+        // entry itself, so strays survived whenever any chapter was downloaded. A nameless entry is kept.
+        val validNames = chapters.flatMapTo(HashSet()) { getValidChapterDirNames(it.name, it.scanlator, it.url) }
         return mangaDir.listFiles().orEmpty().asList().filter {
-            chapters.find { chp ->
-                getValidChapterDirNames(chp.name, chp.scanlator, chp.url).any { dir ->
-                    mangaDir.findFile(dir) != null
-                }
-            } == null ||
-                it.name?.endsWith(Downloader.TMP_DIR_SUFFIX) == true
+            it.name?.let { name -> name !in validNames || name.endsWith(Downloader.TMP_DIR_SUFFIX) } == true
         }
     }
     // SY <--

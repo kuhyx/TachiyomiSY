@@ -162,7 +162,8 @@ internal suspend fun DownloadManager.getChaptersToDelete(chapters: List<Chapter>
 
     val categoriesForManga = getCategories.await(manga.id)
         .map { it.id }
-        .ifEmpty { listOf(0) }
+        // 0L: an Int 0 never equals the Long ids of the excluded set.
+        .ifEmpty { listOf(0L) }
     val filteredCategoryManga = if (categoriesForManga.intersect(categoriesToExclude).isNotEmpty()) {
         chapters.filterNot { it.read }
     } else {
