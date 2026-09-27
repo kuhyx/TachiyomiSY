@@ -1,5 +1,6 @@
 package exh.recs.sources
 
+import androidx.paging.PagingSource
 import eu.kanade.tachiyomi.source.model.MetadataMangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.InjektStub
@@ -32,6 +33,7 @@ internal class StaticResultPagingSourceTest {
         stub.install()
         val networkToLocal = mockk<NetworkToLocalManga>()
         coEvery { networkToLocal(any<Manga>()) } answers { firstArg() }
+        coEvery { networkToLocal(any<List<Manga>>()) } answers { firstArg<List<Manga>>().map { it.copy(id = 42L) } }
         stub.serve(networkToLocal)
     }
 
@@ -71,6 +73,20 @@ internal class StaticResultPagingSourceTest {
     }
 
     @Test
+    fun loadSavesUnderAssociated() {
+        val page = StaticResultPagingSource(rankedResults(2)).loadFirst()
+        page.data.map { it.first.source to it.first.id } shouldContainExactly listOf(7L to 42L, 7L to 42L)
+        page.data.map { (it.second as RankedSearchMetadata).rank } shouldContainExactly listOf(1, 2)
+    }
+
+    @Test
+    fun loadLeavesUnassociated() {
+        val page = StaticResultPagingSource(rankedResults(1, associatedSourceId = null)).loadFirst()
+        page.data.single().first.source shouldBe -1L
+        page.data.single().first.id shouldBe -1L
+    }
+
+    @Test
     fun resultsDataClass() {
         val results = rankedResults(1)
         results.copy(recSourceName = "Other").recSourceName shouldBe "Other"
@@ -78,3 +94,8 @@ internal class StaticResultPagingSourceTest {
         results.toString().contains("Static") shouldBe true
     }
 }
+
+// The paging page a screen gets for page 1; a failure (the old null-source crash) fails the cast.
+private fun StaticResultPagingSource.loadFirst() = runBlocking {
+    load(PagingSource.LoadParams.Refresh(key = null, loadSize = 25, placeholdersEnabled = false))
+} as PagingSource.LoadResult.Page

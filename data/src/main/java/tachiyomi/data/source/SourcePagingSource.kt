@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.MetadataMangasPage
+import eu.kanade.tachiyomi.source.model.SManga
 import exh.metadata.metadata.RaisedSearchMetadata
 import mihon.domain.manga.model.toDomainManga
 import tachiyomi.core.common.util.lang.withIOContext
@@ -89,12 +90,10 @@ public abstract class BaseSourcePagingSource(
             emptyList()
         }
 
-        val manga = mangasPage.mangas
-            .mapIndexed { index, sManga -> sManga.toDomainManga(source!!.id) to metadata.getOrNull(index) }
+        val unseen = mangasPage.mangas
+            .mapIndexed { index, sManga -> sManga to metadata.getOrNull(index) }
             .filter { seenManga.add(it.first.url) }
-            .let { manga ->
-                manga.zip(networkToLocalManga(manga.map { it.first })).map { it.second to it.first.second }
-            }
+        val manga = toLocalManga(unseen.map { it.first }).zip(unseen) { local, (_, meta) -> local to meta }
         // SY <--
 
         return LoadResult.Page(
@@ -104,6 +103,13 @@ public abstract class BaseSourcePagingSource(
         )
     }
     // SY <--
+
+    /**
+     * The local rows for [manga], in order: upserted under this listing's source. A subclass built
+     * without a source (the recommendation listings) must override this; the base fails the page.
+     */
+    protected open suspend fun toLocalManga(manga: List<SManga>): List<Manga> =
+        networkToLocalManga(manga.map { it.toDomainManga(source!!.id) })
 
     override fun getRefreshKey(
         state: PagingState<Long, /*SY --> */ Pair<Manga, RaisedSearchMetadata?>/*SY <-- */>,

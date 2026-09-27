@@ -13,6 +13,7 @@ import exh.source.getMainSource
 import exh.source.isMdBasedSource
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
+import mihon.domain.manga.model.toDomainManga
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.data.source.BaseSourcePagingSource
 import tachiyomi.data.source.NoResultsException
@@ -43,6 +44,13 @@ internal abstract class RecommendationPagingSource(
      * If null, the user will be prompted to choose a source via SmartSearch when clicking on a recommendation.
      */
     open val associatedSourceId: Long? = null
+
+    // As on RecommendsScreen: results of an associated source are saved under it; the rest stay unsaved
+    // (source -1) and a click sends the user through SmartSearch by title.
+    override suspend fun toLocalManga(manga: List<SManga>): List<Manga> {
+        val sourceId = associatedSourceId ?: return manga.map { it.toDomainManga(-1) }
+        return networkToLocalManga(manga.map { it.toDomainManga(sourceId) })
+    }
 
     companion object {
         fun createSources(manga: Manga, source: Source): List<RecommendationPagingSource> {
