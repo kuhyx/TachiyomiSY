@@ -42,7 +42,7 @@ the sync job execute. Add a gate there, never in a workflow alone.
   test JVM: phase 1 peaks at ~3.7 GiB, phase 2 at ~2.8 GiB, and a push
   passed next to a 2.8 GiB job in the shared `capped.slice`, where the old
   single parallel run (6.5 GiB) was OOM-killed. CI runs one `check` with
-  `-Pmihon.test.forks=3`. `BUILD_TIME` is a commit time on purpose: a clock
+  `-Pmihon.test.forks=2`. `BUILD_TIME` is a commit time on purpose: a clock
   value would recompile all of `:app` in phase 2.
 - One module: `./gradlew :domain:check`; the convention plugins themselves:
   `./gradlew -p gradle/build-logic check` (root `check` depends on it)

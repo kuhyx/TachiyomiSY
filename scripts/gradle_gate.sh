@@ -15,7 +15,10 @@ readonly STATIC_PHASE="static"
 #: build-logic's TEST_FORKS_PROPERTY: test JVMs per test task.
 readonly TEST_FORKS_PROPERTY="mihon.test.forks"
 #: Test JVMs per test task on a runner (4 cores, 16 GiB, nothing else on it).
-readonly CI_TEST_FORKS=3
+# 2, not 3: with the daemon at 8 GiB, three ~2.4 GiB test JVMs left the 16 GiB runner no room once
+# the suite passed ~5000 tests, and two runs on 2026-09-27 were cancelled mid-test,
+# most likely the runner running out of memory (inferred; the runner logs no reason).
+readonly CI_TEST_FORKS=2
 
 # Locally the gate shares ~/.claude's capped.slice (8 GiB for ALL capped jobs
 # together) with whatever else is running, so it has to fit next to them.
