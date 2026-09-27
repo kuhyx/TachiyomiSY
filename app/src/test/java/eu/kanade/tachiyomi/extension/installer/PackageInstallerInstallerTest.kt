@@ -1,11 +1,15 @@
 package eu.kanade.tachiyomi.extension.installer
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInstaller
 import eu.kanade.tachiyomi.extension.model.InstallStep
+import eu.kanade.tachiyomi.util.system.getUriSize
 import io.kotest.matchers.shouldBe
 import io.mockk.every
+import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkAll
 import io.mockk.verify
 import mihon.test.CapturingLogcat
 import org.junit.After
@@ -29,6 +33,7 @@ internal class PackageInstallerInstallerTest {
 
     @After
     fun tearDown() {
+        unmockkAll()
         harness.uninstall()
         logcat.uninstall()
     }
@@ -56,6 +61,14 @@ internal class PackageInstallerInstallerTest {
         verify { harness.extensionInstaller.updateInstallStep(2L, InstallStep.Error) }
         verify { platform.packageInstaller.abandonSession(PackageInstallerHarness.SESSION_ID) }
         logcat.messages.single().startsWith("Failed to install extension 2") shouldBe true
+    }
+
+    @Test
+    fun aSizelessApkIsAnError() {
+        mockkStatic("eu.kanade.tachiyomi.util.system.ContextExtensionsKt")
+        every { any<Context>().getUriSize(any()) } returns null
+        queueOne()
+        verify { harness.extensionInstaller.updateInstallStep(1L, InstallStep.Error) }
     }
 
     @Test

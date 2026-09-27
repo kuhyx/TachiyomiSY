@@ -101,6 +101,13 @@ internal class ExtensionLoaderPkgNameTest {
     }
 
     @Test
+    fun aPrivateNonExtension() {
+        val file = File(ExtensionLoader.getPrivateExtensionDir(context), "$PKG.ext").apply { writeText("apk") }
+        packages.registerArchive(path = file.absolutePath, info = extensionPackage(pkgName = PKG, feature = false))
+        ExtensionLoader.getExtensionPackageInfo(context, PKG).shouldBeNull()
+    }
+
+    @Test
     fun theNewerOfTheTwoPackages() {
         packages.installShared(extensionPackage(pkgName = PKG, versionCode = 1))
         privateFile(versionCode = 9)

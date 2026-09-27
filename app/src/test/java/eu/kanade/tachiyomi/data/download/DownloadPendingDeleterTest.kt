@@ -14,6 +14,8 @@ import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.model.Manga
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.isAccessible
 
 @RunWith(RobolectricTestRunner::class)
 internal class DownloadPendingDeleterTest {
@@ -103,5 +105,29 @@ internal class DownloadPendingDeleterTest {
         } finally {
             stopKoin()
         }
+    }
+
+    @Test
+    fun entriesDefaultTheirScanlator() {
+        // The entry class is private; reflection builds one the way a caller omitting the scanlator would.
+        val entry = Class.forName("eu.kanade.tachiyomi.data.download.DownloadPendingDeleter\$ChapterEntry").kotlin
+        val constructor = requireNotNull(entry.primaryConstructor).apply { isAccessible = true }
+        val params = constructor.parameters.associateBy { it.name }
+        val built = constructor.callBy(
+            mapOf(
+                params.getValue("id") to 1L,
+                params.getValue("url") to "/c1",
+                params.getValue("name") to "Ch 1",
+            ),
+        )
+        built.toString() shouldBe "ChapterEntry(id=1, url=/c1, name=Ch 1, scanlator=null)"
+    }
+
+    @Test
+    fun storedEntriesMayLackScanlator() {
+        val stored = """{"chapters":[{"id":5,"url":"/c5","name":"Ch 5"}],""" +
+            """"manga":{"id":1,"url":"/m1","title":"One","source":4}}"""
+        context.getSharedPreferences("chapters_to_delete", Context.MODE_PRIVATE).edit { putString("1", stored) }
+        deleter().getPendingChapters().values.single().single().scanlator shouldBe null
     }
 }

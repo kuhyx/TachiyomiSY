@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.util.system
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
@@ -11,6 +12,7 @@ import io.kotest.matchers.shouldBe
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
 internal class IntentExtensionsTest {
@@ -57,5 +59,17 @@ internal class IntentExtensionsTest {
         val serialized = Intent().putExtra("text", "value")
         serialized.getSerializableExtraCompat<String>("text") shouldBe "value"
         serialized.getSerializableExtraCompat<String>("missing").shouldBeNull()
+    }
+
+    @Test
+    fun oldPlatformsCastSerializables() {
+        val sdk = Build.VERSION.SDK_INT
+        ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", Build.VERSION_CODES.S)
+        try {
+            Intent().putExtra("text", "value").getSerializableExtraCompat<String>("text") shouldBe "value"
+            Intent().getSerializableExtraCompat<String>("missing").shouldBeNull()
+        } finally {
+            ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", sdk)
+        }
     }
 }

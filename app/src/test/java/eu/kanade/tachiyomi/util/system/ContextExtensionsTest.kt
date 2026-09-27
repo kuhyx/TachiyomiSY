@@ -71,6 +71,7 @@ internal class ContextExtensionsTest {
         val file = context.createFileInCacheDir("size.txt").apply { writeText("12345") }
         context.getUriSize(file.toUri()) shouldBe 5L
         context.getUriSize("content://missing/1".toUri()).shouldBeNull()
+        context.getUriSize("https://example.test/a".toUri()).shouldBeNull()
         val empty = context.createFileInCacheDir("empty.txt")
         context.getUriSize(empty.toUri()) shouldBe 0L
     }
