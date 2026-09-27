@@ -74,6 +74,8 @@ internal class TrackingDialogsTest {
             release.await()
         }
         login()
+        // The failure path logs out; until it has, "Login" can still be the button of the first attempt.
+        verify(timeout = 10_000) { tracker.logout() }
         compose.awaitMain(timeoutMillis = 10_000) { count("Login") == 1 }
         compose.onNodeWithText("Login").performClick()
         compose.awaitMain(timeoutMillis = 10_000) { count("Logging in…") == 1 }

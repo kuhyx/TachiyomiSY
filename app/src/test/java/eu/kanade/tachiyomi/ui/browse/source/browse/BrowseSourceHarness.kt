@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
+import eu.kanade.tachiyomi.ui.base.dropScreenModelIoScopes
 import eu.kanade.tachiyomi.ui.browse.BrowseKoin
 import io.mockk.coEvery
 import io.mockk.every
@@ -78,27 +79,34 @@ internal class BrowseSourceHarness {
         coEvery { getDuplicates(any()) } returns emptyList()
     }
 
-    fun start() = koin.start(
-        module {
-            single { sourceManager }
-            single { coverCache }
-            single { getRemoteManga }
-            single { getDuplicates }
-            single { getCategories }
-            single { setMangaCategories }
-            single { setDefaultFlags }
-            single { getManga }
-            single { updateManga }
-            single { addTracks }
-            single { incognito }
-            single { getFlatMetadata }
-            single { deleteSavedSearch }
-            single { insertSavedSearch }
-            single { exhSavedSearch }
-        },
-    )
+    // Stale IO scopes from an earlier class would leave this class's paging on a cancelled scope.
+    fun start() {
+        dropScreenModelIoScopes()
+        koin.start(
+            module {
+                single { sourceManager }
+                single { coverCache }
+                single { getRemoteManga }
+                single { getDuplicates }
+                single { getCategories }
+                single { setMangaCategories }
+                single { setDefaultFlags }
+                single { getManga }
+                single { updateManga }
+                single { addTracks }
+                single { incognito }
+                single { getFlatMetadata }
+                single { deleteSavedSearch }
+                single { insertSavedSearch }
+                single { exhSavedSearch }
+            },
+        )
+    }
 
-    fun stop() = koin.stop()
+    fun stop() {
+        koin.stop()
+        dropScreenModelIoScopes()
+    }
 
     fun model(
         listing: String? = GetRemoteManga.QUERY_POPULAR,

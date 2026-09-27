@@ -2,10 +2,14 @@ package eu.kanade.domain
 
 import logcat.LogPriority
 import logcat.LogcatLogger
+import java.util.concurrent.CopyOnWriteArrayList
 
-/** Installs a logcat logger that collects every message into the returned list; pair with [releaseLogcat]. */
+/**
+ * Installs a logcat logger that collects every message into the returned list; pair with [releaseLogcat].
+ * Code under test logs from IO threads, so the list is safe to append to concurrently.
+ */
 internal fun captureLogcat(): MutableList<String> {
-    val logged = mutableListOf<String>()
+    val logged = CopyOnWriteArrayList<String>()
     LogcatLogger.install()
     LogcatLogger.loggers += object : LogcatLogger {
         @Deprecated("Superseded by the tagged overload", ReplaceWith("isLoggable(priority, \"\")"))

@@ -4,10 +4,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
+import eu.kanade.presentation.more.settings.screen.awaitMain
 import eu.kanade.presentation.util.invokeClick
 import eu.kanade.tachiyomi.data.track.domainTrack
 import io.mockk.coVerify
@@ -118,8 +120,10 @@ internal class TrackSelectorScreensTest {
     fun startDateCanBeRemoved() {
         show(TrackDateSelectorScreen(track.copy(startDate = 86_400_000L), 1L, start = true))
         compose.onNodeWithText("Remove").invokeClick()
-        compose.waitForIdle()
-        compose.onNodeWithText("Remove date?").assertExists()
+        // The confirmation screen is pushed through the main looper; a slow runner needs more than one idle.
+        compose.awaitMain(timeoutMillis = 10_000) {
+            compose.onAllNodesWithText("Remove date?").fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText("Remove").performClick()
         compose.waitForIdle()
         coVerify(timeout = 5_000) { tracker.setRemoteStartDate(any(), 0L) }
