@@ -14,7 +14,9 @@ import coil3.asImage
 import coil3.decode.DataSource
 import coil3.fetch.Fetcher
 import coil3.fetch.ImageFetchResult
+import eu.kanade.domain.captureLogcat
 import eu.kanade.domain.manga.interactor.UpdateManga
+import eu.kanade.domain.releaseLogcat
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.saver.ImageSaver
 import io.kotest.matchers.shouldBe
@@ -164,6 +166,22 @@ internal class MangaCoverScreenModelTest {
         val model = model()
         model.editCover(activity, saved)
         eventually { model.snack() == "Failed to update cover" }
+    }
+
+    @Test
+    fun failureIsLoggedAtOnce() {
+        val logged = captureLogcat()
+        try {
+            every { coverCache.deleteCustomCover(1L) } throws IllegalStateException("gone")
+            val model = model()
+            model.deleteCustomCover(activity)
+            eventually { model.snack() == "Failed to update cover" }
+            // The snackbar suspends until dismissed; the error is already in the log while it shows.
+            logged.any { "IllegalStateException: gone" in it } shouldBe true
+            model.snack() shouldBe "Failed to update cover"
+        } finally {
+            releaseLogcat()
+        }
     }
 
     @Test

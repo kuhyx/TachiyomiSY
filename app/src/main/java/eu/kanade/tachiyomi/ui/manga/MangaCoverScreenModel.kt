@@ -158,12 +158,13 @@ internal class MangaCoverScreenModel(
     }
 
     private fun notifyFailedCoverUpdate(context: Context, e: Throwable) {
+        // Logged first: the snackbar suspends until dismissed, and the scope may end before that.
+        logcat(LogPriority.ERROR, e)
         screenModelScope.launch {
             snackbarHostState.showSnackbar(
                 context.stringResource(MR.strings.notification_cover_update_failed),
                 withDismissAction = true,
             )
-            logcat(LogPriority.ERROR, e)
         }
     }
 }

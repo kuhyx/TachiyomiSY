@@ -25,12 +25,10 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.take
-import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.lang.launchUI
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.core.common.util.lang.withNonCancellableContext
-import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.screens.LoadingScreen
@@ -72,13 +70,9 @@ internal class MangaScreen(
 
         LaunchedEffect(successState.manga, screenModel.source) {
             if (isHttpSource) {
-                try {
-                    withIOContext {
-                        assistUrl = getMangaUrl(screenModel.manga, screenModel.source)
-                    }
-                } catch (expected: Exception) {
-                    // Logged whatever the cause; the caller carries on.
-                    logcat(LogPriority.ERROR, expected) { "Failed to get manga URL" }
+                // getMangaUrl turns any source failure into null, so there is nothing to catch here.
+                withIOContext {
+                    assistUrl = getMangaUrl(screenModel.manga, screenModel.source)
                 }
             }
         }
