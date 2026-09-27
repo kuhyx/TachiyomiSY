@@ -46,8 +46,10 @@ import java.io.ByteArrayInputStream
 internal class MangaCoverScreenModelTest {
     private val app: Application = ApplicationProvider.getApplicationContext()
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
-    private val manga = MutableStateFlow(manga(favorite = true))
-    private val getManga = mockk<GetManga> { coEvery { subscribe(1L) } returns manga }
+
+    // Built in setUp: a favourite Manga resolves GetCustomMangaInfo, which needs Koin running.
+    private lateinit var manga: MutableStateFlow<Manga>
+    private val getManga = mockk<GetManga>()
     private val imageSaver = mockk<ImageSaver>()
     private val coverCache = mockk<CoverCache>(relaxed = true)
     private val updateManga = mockk<UpdateManga>(relaxed = true)
@@ -68,6 +70,8 @@ internal class MangaCoverScreenModelTest {
                 },
             )
         }
+        manga = MutableStateFlow(manga(favorite = true))
+        coEvery { getManga.subscribe(1L) } returns manga
         val bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888)
         val loader = ImageLoader.Builder(app).components {
             add(

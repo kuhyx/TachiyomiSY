@@ -2,7 +2,8 @@ package tachiyomi.domain.history.model
 
 import tachiyomi.domain.manga.interactor.GetCustomMangaInfo
 import tachiyomi.domain.manga.model.MangaCover
-import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.util.Date
 
 /**
@@ -35,7 +36,9 @@ public data class HistoryWithRelations(
 
     /** The custom-title lookup shared by every row. */
     public companion object {
-        internal val customMangaManager: GetCustomMangaInfo by injectLazy()
+        // Resolved per use, not cached for the life of the JVM: a cached lookup outlives the Koin graph it
+        // came from (a test JVM starts one per class), and one Koin lookup here costs nothing.
+        internal val customMangaManager: GetCustomMangaInfo get() = Injekt.get()
     }
     // SY <--
 }

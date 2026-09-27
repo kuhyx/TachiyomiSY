@@ -10,7 +10,8 @@ import kotlinx.serialization.json.JsonObject
 import mihon.core.common.extensions.EMPTY
 import tachiyomi.domain.manga.interactor.GetCustomMangaInfo
 import tachiyomi.domain.serialization.ProxiedJavaSerializable
-import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.io.ObjectStreamException
 import java.io.Serializable as JavaSerializable
 
@@ -191,7 +192,9 @@ public data class Manga(
         public const val CHAPTER_DISPLAY_MASK: Long = 0x00100000L
 
         // SY -->
-        internal val getCustomMangaInfo: GetCustomMangaInfo by injectLazy()
+        // Resolved per use, not cached for the life of the JVM: a cached lookup outlives the Koin graph it
+        // came from (a test JVM starts one per class), and one Koin lookup here costs nothing.
+        internal val getCustomMangaInfo: GetCustomMangaInfo get() = Injekt.get()
         // SY <--
 
         /** An empty, not yet inserted manga. */

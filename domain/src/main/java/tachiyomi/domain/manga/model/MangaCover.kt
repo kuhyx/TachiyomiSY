@@ -1,7 +1,8 @@
 package tachiyomi.domain.manga.model
 
 import tachiyomi.domain.manga.interactor.GetCustomMangaInfo
-import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 /**
  * What the cover fetcher needs to locate and cache a manga's cover.
@@ -33,7 +34,9 @@ public data class MangaCover(
 
     /** Holds the lazily injected custom-info lookup shared by every cover. */
     public companion object {
-        internal val getCustomMangaInfo: GetCustomMangaInfo by injectLazy()
+        // Resolved per use, not cached for the life of the JVM: a cached lookup outlives the Koin graph it
+        // came from (a test JVM starts one per class), and one Koin lookup here costs nothing.
+        internal val getCustomMangaInfo: GetCustomMangaInfo get() = Injekt.get()
     }
     // SY <--
 }
