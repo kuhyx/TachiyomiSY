@@ -18,6 +18,7 @@ import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.getAppIconForSource
 import eu.kanade.tachiyomi.ui.browse.BrowseKoin
+import eu.kanade.tachiyomi.ui.browse.ScreenHost
 import eu.kanade.tachiyomi.ui.browse.TabHost
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreenModel.Listing
@@ -186,5 +187,11 @@ internal class SourcesTabTest {
         host.snackbar.currentSnackbarData?.visuals?.message shouldBe
             "InternalError: Check crash logs for further information"
         host.content.titleRes shouldBe MR.strings.label_sources
+    }
+
+    @Test
+    fun screenWrapsTheTab() {
+        ScreenHost(SourcesScreen(null)).show(compose)
+        compose.onNodeWithText("Alpha").assertExists()
     }
 }

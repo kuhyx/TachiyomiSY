@@ -71,6 +71,19 @@ internal class TrackerDialogsTest {
     }
 
     @Test
+    fun remoteDeletionSucceeds() {
+        val deletable = mockk<BaseTracker>(relaxed = true, moreInterfaces = arrayOf(DeletableTracker::class))
+        every { deletable.name } returns "Del"
+        every { harness.trackerManager.get(5L) } returns deletable
+        show(TrackerRemoveScreen(1L, track, 5L))
+        compose.onNodeWithText("Also remove from Del").performClick()
+        compose.onNodeWithText("OK").performClick()
+        compose.waitForIdle()
+        coVerify(timeout = 5_000) { (deletable as DeletableTracker).delete(track) }
+        coVerify(timeout = 5_000) { deleteTrack.await(1L, 5L) }
+    }
+
+    @Test
     fun removeCanBeCancelled() {
         show(TrackerRemoveScreen(1L, track, 1L))
         compose.onNodeWithText("Cancel").performClick()
@@ -89,6 +102,8 @@ internal class TrackerDialogsTest {
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodes(hasText("Hit")).fetchSemanticsNodes().isNotEmpty()
         }
+        compose.onNodeWithText("Hit").performClick()
+        compose.waitForIdle()
         compose.onNodeWithText("Track").performClick()
         compose.waitForIdle()
         coVerify(timeout = 5_000) { harness.tracker.register(hit, 1L) }

@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import cafe.adriel.voyager.core.stack.StackEvent
 import eu.kanade.tachiyomi.ui.browse.TabHost
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
@@ -131,5 +132,16 @@ internal class FeedTabTest {
         val host = TabHost { feedTab() }
         host.show(compose)
         compose.waitUntil(timeoutMillis = 5_000) { host.snackbar.currentSnackbarData != null }
+    }
+
+    // A navigator settling back to idle after a push lets the feed reload when it is next composed.
+    @Test
+    fun idleAfterPushRearms() {
+        val host = host()
+        compose.onNodeWithText("Search 5").performClick()
+        compose.waitForIdle()
+        compose.runOnUiThread { host.navigator.clearEvent() }
+        compose.waitForIdle()
+        host.navigator.lastEvent shouldBe StackEvent.Idle
     }
 }

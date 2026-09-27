@@ -26,6 +26,7 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4, private val
     val app: Application = ApplicationProvider.getApplicationContext()
     val vm: ReaderVmHarness = ReaderVmHarness(app)
     val source: HttpSource = mockk(relaxed = true)
+    private val launched = mutableListOf<ActivityController<ReaderActivity>>()
 
     fun start() {
         vm.start(module { single { SecurityPreferences(vm.store) } }, testMain = false)
@@ -45,13 +46,21 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4, private val
     }
 
     fun stop() {
-        vm.stop()
+        try {
+            // A live reader keeps its spinner and effects asking for frames in every later test of the JVM.
+            launched.filterNot { it.get().isDestroyed }.forEach { it.pause().stop().destroy() }
+            launched.clear()
+        } finally {
+            vm.stop()
+        }
     }
 
     /** Builds and resumes the activity for chapter [chapterId], then lets the main looper settle. */
     fun launch(chapterId: Long = 2L, page: Int? = null): ActivityController<ReaderActivity> {
         val intent = ReaderActivity.newIntent(app, mangaId = 10L, chapterId = chapterId, page = page)
-        val controller = Robolectric.buildActivity(ReaderActivity::class.java, intent).setup()
+        val controller = Robolectric.buildActivity(ReaderActivity::class.java, intent)
+        launched += controller
+        controller.setup()
         settle()
         return controller
     }

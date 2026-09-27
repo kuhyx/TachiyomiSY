@@ -143,4 +143,11 @@ internal class ExtensionsScreenModelTest {
         ExtensionUiModel.Header.Text("en").copy().text shouldBe "en"
         ExtensionUiModel.Item(installed("a"), InstallStep.Idle).copy().installStep shouldBe InstallStep.Idle
     }
+
+    @Test
+    fun stateUpdatesApply() {
+        val model = model()
+        model.updateState { it.copy(searchQuery = "needle") }
+        model.state.value.searchQuery shouldBe "needle"
+    }
 }

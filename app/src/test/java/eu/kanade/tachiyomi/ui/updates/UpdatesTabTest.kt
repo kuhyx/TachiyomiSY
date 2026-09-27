@@ -91,6 +91,14 @@ internal class UpdatesTabTest {
     }
 
     @Test
+    fun startedUpdateIsAnnounced() {
+        every { LibraryUpdateJob.startNow(any<Context>()) } returns true
+        show()
+        node("Update library").performClick()
+        waitFor("Updating library")
+    }
+
+    @Test
     fun appBarActions() {
         show()
         node("Update library").performClick()
