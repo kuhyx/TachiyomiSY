@@ -71,9 +71,10 @@ public fun Project.configureTest() {
         // the heap near the live set.
         maxHeapSize = TEST_HEAP
         // An OutOfMemoryError can kill one of Gradle's own worker threads, after which the fork and
-        // the daemon each wait for the other at shutdown forever (gradle/gradle#25085; a local run and
-        // a CI run hung that way on 2026-09-27). Exiting on the error turns that hang into a failed,
-        // named test executor.
+        // the daemon each wait for the other at shutdown forever (gradle/gradle#25085). Exiting on the
+        // error turns that into a failed, named test executor. Runs also hung at fork shutdown on
+        // 2026-09-27 WITHOUT an OOM (a rerun with this flag neither exited nor hung): that trigger is
+        // still unknown, so the CI job carries its own timeout.
         jvmArgs("-XX:+UseSerialGC", "-XX:+ExitOnOutOfMemoryError")
         forkEvery = TEST_CLASSES_PER_FORK
         maxParallelForks = testForks
