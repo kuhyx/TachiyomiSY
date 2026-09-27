@@ -18,7 +18,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -85,7 +84,7 @@ internal class ExtensionsScreenModel(
                     }
                 }
             }
-                .collectLatest { items ->
+                .onEach { items ->
                     mutableState.update { state ->
                         state.copy(
                             isLoading = false,
@@ -93,6 +92,7 @@ internal class ExtensionsScreenModel(
                         )
                     }
                 }
+                .launchIn(this)
         }
 
         screenModelScope.launchIO { findAvailableExtensions() }

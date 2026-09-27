@@ -113,58 +113,68 @@ internal fun SourceFilterDialog(
 
 @Composable
 private fun FilterItem(filter: Filter<*>, onUpdate: () -> Unit/* SY --> */, startExpanded: Boolean /* SY <-- */) {
+    filterItem(filter, onUpdate, startExpanded)()
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+internal fun filterItem(filter: Filter<*>, onUpdate: () -> Unit, startExpanded: Boolean): @Composable () -> Unit =
     when (filter) {
         // SY -->
         is Filter.AutoComplete -> {
-            AutoCompleteItem(
-                name = filter.name,
-                state = filter.state.toList(),
-                hint = filter.hint,
-                values = filter.values,
-                skipAutoFillTags = filter.skipAutoFillTags,
-                validPrefixes = filter.validPrefixes,
-            ) {
-                filter.state = it
-                onUpdate()
+            {
+                AutoCompleteItem(
+                    name = filter.name,
+                    state = filter.state.toList(),
+                    hint = filter.hint,
+                    values = filter.values,
+                    skipAutoFillTags = filter.skipAutoFillTags,
+                    validPrefixes = filter.validPrefixes,
+                ) {
+                    filter.state = it
+                    onUpdate()
+                }
             }
         }
         // SY <--
         is Filter.Header -> {
-            HeadingItem(filter.name)
+            { HeadingItem(filter.name) }
         }
         is Filter.Separator -> {
-            HorizontalDivider()
+            { HorizontalDivider() }
         }
         is Filter.CheckBox -> {
-            CheckboxFilterItem(filter, onUpdate)
+            { CheckboxFilterItem(filter, onUpdate) }
         }
         is Filter.TriState -> {
-            TriStateFilterItem(filter, onUpdate)
+            { TriStateFilterItem(filter, onUpdate) }
         }
         is Filter.Text -> {
-            TextFilterItem(filter, onUpdate)
+            { TextFilterItem(filter, onUpdate) }
         }
         is Filter.Select<*> -> {
-            SelectFilterItem(filter, onUpdate)
+            { SelectFilterItem(filter, onUpdate) }
         }
         is Filter.Sort -> {
-            SortFilterItem(filter, onUpdate, startExpanded)
+            { SortFilterItem(filter, onUpdate, startExpanded) }
         }
         is Filter.Group<*> -> {
-            CollapsibleBox(
-                heading = filter.name,
-                // SY -->
-                startExpanded = startExpanded,
-                // SY <--
-            ) {
-                Column {
-                    filter.state
-                        .filterIsInstance<Filter<*>>()
-                        .map { FilterItem(filter = it, onUpdate = onUpdate /* SY --> */, startExpanded /* SY <-- */) }
+            {
+                CollapsibleBox(
+                    heading = filter.name,
+                    // SY -->
+                    startExpanded = startExpanded,
+                    // SY <--
+                ) {
+                    Column {
+                        filter.state
+                            .filterIsInstance<Filter<*>>()
+                            .map {
+                                FilterItem(filter = it, onUpdate = onUpdate /* SY --> */, startExpanded /* SY <-- */)
+                            }
+                    }
                 }
             }
         }
     }
-}
 
 // Each leaf item writes the new value into the filter and reports the change upward.

@@ -30,9 +30,9 @@ import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.more.MoreTab
 import eu.kanade.tachiyomi.ui.updates.UpdatesTab
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
 import soup.compose.material.motion.animation.materialFadeThroughIn
 import soup.compose.material.motion.animation.materialFadeThroughOut
 import tachiyomi.presentation.core.components.material.Scaffold
@@ -115,15 +115,15 @@ internal object HomeScreen : Screen() {
     private fun TabRequestEffects(tabNavigator: TabNavigator, goToLibraryTab: () -> Unit) {
         val navigator = LocalNavigator.currentOrThrow
         LaunchedEffect(Unit) {
-            launch {
-                librarySearchEvent.receiveAsFlow().collectLatest {
+            librarySearchEvent.receiveAsFlow()
+                .onEach {
                     goToLibraryTab()
                     LibraryTab.search(it)
                 }
-            }
-            launch {
-                openTabEvent.receiveAsFlow().collectLatest { openTab(it, tabNavigator, navigator) }
-            }
+                .launchIn(this)
+            openTabEvent.receiveAsFlow()
+                .onEach { openTab(it, tabNavigator, navigator) }
+                .launchIn(this)
         }
     }
 

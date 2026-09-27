@@ -29,6 +29,8 @@ import eu.kanade.tachiyomi.ui.browse.BrowseTab
 import eu.kanade.tachiyomi.ui.updates.UpdatesTab
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import tachiyomi.domain.library.service.LibraryPreferences
@@ -55,7 +57,7 @@ internal fun HomeNavigationRail(alwaysShowLabel: Boolean) {
 @Composable
 internal fun HomeNavigationBar(alwaysShowLabel: Boolean) {
     val bottomNavVisible by produceState(initialValue = true) {
-        HomeScreen.showBottomNavEvent.receiveAsFlow().collectLatest { value = it }
+        HomeScreen.showBottomNavEvent.receiveAsFlow().onEach { value = it }.launchIn(this)
     }
     AnimatedVisibility(
         visible = bottomNavVisible,

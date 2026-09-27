@@ -21,7 +21,8 @@ import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.TabContent
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import tachiyomi.domain.source.interactor.GetRemoteManga
 import tachiyomi.i18n.MR
@@ -84,57 +85,69 @@ internal fun Screen.feedTab(): TabContent {
 
 @Composable
 private fun FeedDialog(screenModel: FeedScreenModel, dialog: FeedScreenModel.Dialog) {
+    feedDialog(screenModel, dialog)()
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+internal fun feedDialog(screenModel: FeedScreenModel, dialog: FeedScreenModel.Dialog): @Composable () -> Unit =
     when (dialog) {
         is FeedScreenModel.Dialog.AddFeed -> {
-            FeedAddDialog(
-                sources = dialog.options,
-                onDismiss = screenModel::dismissDialog,
-                onClickAdd = {
-                    if (it != null) {
-                        screenModel.openAddSearchDialog(it)
-                    }
-                    screenModel.dismissDialog()
-                },
-            )
+            {
+                FeedAddDialog(
+                    sources = dialog.options,
+                    onDismiss = screenModel::dismissDialog,
+                    onClickAdd = {
+                        if (it != null) {
+                            screenModel.openAddSearchDialog(it)
+                        }
+                        screenModel.dismissDialog()
+                    },
+                )
+            }
         }
         is FeedScreenModel.Dialog.AddFeedSearch -> {
-            FeedAddSearchDialog(
-                source = dialog.source,
-                savedSearches = dialog.options,
-                onDismiss = screenModel::dismissDialog,
-                onClickAdd = { source, savedSearch ->
-                    screenModel.createFeed(source, savedSearch)
-                    screenModel.dismissDialog()
-                },
-            )
+            {
+                FeedAddSearchDialog(
+                    source = dialog.source,
+                    savedSearches = dialog.options,
+                    onDismiss = screenModel::dismissDialog,
+                    onClickAdd = { source, savedSearch ->
+                        screenModel.createFeed(source, savedSearch)
+                        screenModel.dismissDialog()
+                    },
+                )
+            }
         }
         is FeedScreenModel.Dialog.DeleteFeed -> {
-            FeedDeleteConfirmDialog(
-                feed = dialog.feed,
-                onDismiss = screenModel::dismissDialog,
-                onClickDeleteConfirm = {
-                    screenModel.deleteFeed(it)
-                    screenModel.dismissDialog()
-                },
-            )
+            {
+                FeedDeleteConfirmDialog(
+                    feed = dialog.feed,
+                    onDismiss = screenModel::dismissDialog,
+                    onClickDeleteConfirm = {
+                        screenModel.deleteFeed(it)
+                        screenModel.dismissDialog()
+                    },
+                )
+            }
         }
     }
-}
 
 @Composable
 private fun FeedEventsSnackbar(screenModel: FeedScreenModel, snackbarHostState: SnackbarHostState) {
     val internalErrString = stringResource(MR.strings.internal_error)
     val tooManyFeedsString = stringResource(SYMR.strings.too_many_in_feed)
     LaunchedEffect(Unit) {
-        screenModel.events.collectLatest { event ->
-            when (event) {
-                FeedScreenModel.Event.FailedFetchingSources -> {
-                    launch { snackbarHostState.showSnackbar(internalErrString) }
-                }
-                FeedScreenModel.Event.TooManyFeeds -> {
-                    launch { snackbarHostState.showSnackbar(tooManyFeedsString) }
+        screenModel.events
+            .onEach { event ->
+                when (event) {
+                    FeedScreenModel.Event.FailedFetchingSources -> {
+                        launch { snackbarHostState.showSnackbar(internalErrString) }
+                    }
+                    FeedScreenModel.Event.TooManyFeeds -> {
+                        launch { snackbarHostState.showSnackbar(tooManyFeedsString) }
+                    }
                 }
             }
-        }
+            .launchIn(this)
     }
 }

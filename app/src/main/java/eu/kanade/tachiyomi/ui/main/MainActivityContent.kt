@@ -48,7 +48,6 @@ import exh.debug.DebugToggles
 import exh.eh.EHentaiUpdateWorker
 import exh.eh.scheduleBackground
 import exh.log.DebugModeOverlay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
@@ -88,7 +87,8 @@ internal fun MainActivity.MainContent(isLaunch: Boolean, didMigration: Boolean, 
         LaunchedEffect(navigator.lastItem) {
             (navigator.lastItem as? BrowseSourceScreen)?.sourceId
                 .let(getIncognitoState::subscribe)
-                .collectLatest { incognito = it }
+                .onEach { incognito = it }
+                .launchIn(this)
         }
         MainScaffold(navigator, downloadOnly = downloadOnly, incognito = incognito, indexing = indexing)
         IncognitoOffPopsSourceScreens(navigator)

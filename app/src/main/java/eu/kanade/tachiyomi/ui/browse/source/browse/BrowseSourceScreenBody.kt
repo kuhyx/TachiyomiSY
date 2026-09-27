@@ -19,7 +19,8 @@ import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen.Companion.
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen.SearchType
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.webview.WebViewScreen
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import mihon.presentation.core.util.collectAsLazyPagingItems
 import tachiyomi.core.common.Constants
@@ -78,11 +79,12 @@ internal fun BrowseSourceScreen.BrowseSourceBody(
 internal fun BrowseSourceScreen.SearchQueryEffect(screenModel: BrowseSourceScreenModel) {
     LaunchedEffect(Unit) {
         queryEvent.receiveAsFlow()
-            .collectLatest {
+            .onEach {
                 when (it) {
                     is SearchType.Genre -> screenModel.searchGenre(it.txt)
                     is SearchType.Text -> screenModel.search(it.txt)
                 }
             }
+            .launchIn(this)
     }
 }

@@ -22,7 +22,8 @@ import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreenModel.Listi
 import eu.kanade.tachiyomi.ui.browse.source.feed.SourceFeedScreen
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
 import exh.ui.smartsearch.SmartSearchScreen
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
@@ -81,13 +82,15 @@ internal fun Screen.sourcesTab(
 
             val internalErrString = stringResource(MR.strings.internal_error)
             LaunchedEffect(Unit) {
-                screenModel.events.collectLatest { event ->
-                    when (event) {
-                        SourcesScreenModel.Event.FailedFetchingSources -> {
-                            launch { snackbarHostState.showSnackbar(internalErrString) }
+                screenModel.events
+                    .onEach { event ->
+                        when (event) {
+                            SourcesScreenModel.Event.FailedFetchingSources -> {
+                                launch { snackbarHostState.showSnackbar(internalErrString) }
+                            }
                         }
                     }
-                }
+                    .launchIn(this)
             }
         },
     )
@@ -95,8 +98,21 @@ internal fun Screen.sourcesTab(
 
 @Composable
 private fun SourcesDialog(screenModel: SourcesScreenModel, state: SourcesScreenModel.State) {
-    when (val dialog = state.dialog) {
-        is SourcesScreenModel.Dialog.SourceLongClick -> {
+    sourcesDialog(screenModel, state)()
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+internal fun sourcesDialog(
+    screenModel: SourcesScreenModel,
+    state: SourcesScreenModel.State,
+): @Composable () -> Unit = when (val dialog = state.dialog) {
+    null -> {
+        {
+            // Nothing to show.
+        }
+    }
+    is SourcesScreenModel.Dialog.SourceLongClick -> {
+        {
             val source = dialog.source
             SourceOptionsDialog(
                 source = source,
@@ -119,7 +135,9 @@ private fun SourcesDialog(screenModel: SourcesScreenModel, state: SourcesScreenM
                 onDismiss = screenModel::closeDialog,
             )
         }
-        is SourcesScreenModel.Dialog.SourceCategories -> {
+    }
+    is SourcesScreenModel.Dialog.SourceCategories -> {
+        {
             val source = dialog.source
             SourceCategoriesDialog(
                 source = source,
@@ -130,9 +148,6 @@ private fun SourcesDialog(screenModel: SourcesScreenModel, state: SourcesScreenM
                 },
                 onDismissRequest = screenModel::closeDialog,
             )
-        }
-        null -> {
-            // Nothing to show.
         }
     }
 }

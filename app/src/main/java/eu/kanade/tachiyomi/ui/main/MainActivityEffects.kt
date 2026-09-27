@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -17,9 +18,6 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.extension.api.ExtensionApi
 import eu.kanade.tachiyomi.ui.more.NewUpdateScreen
 import eu.kanade.tachiyomi.ui.more.OnboardingScreen
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.collectLatest
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.release.interactor.GetApplicationRelease
@@ -27,14 +25,12 @@ import tachiyomi.domain.release.model.getDownloadLink
 
 @Composable
 internal fun MainActivity.HandleOnNewIntent(context: Context, navigator: Navigator) {
-    LaunchedEffect(Unit) {
-        callbackFlow {
-            val componentActivity = context as ComponentActivity
-            val consumer = Consumer<Intent> { trySend(it) }
-            componentActivity.addOnNewIntentListener(consumer)
-            awaitClose { componentActivity.removeOnNewIntentListener(consumer) }
-        }
-            .collectLatest { handleIntentAction(it, navigator) }
+    // New intents arrive on the main thread; the listener lives exactly as long as this composition.
+    DisposableEffect(Unit) {
+        val componentActivity = context as ComponentActivity
+        val consumer = Consumer<Intent> { handleIntentAction(it, navigator) }
+        componentActivity.addOnNewIntentListener(consumer)
+        onDispose { componentActivity.removeOnNewIntentListener(consumer) }
     }
 }
 

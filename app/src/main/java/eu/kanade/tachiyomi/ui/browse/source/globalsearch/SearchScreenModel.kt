@@ -16,6 +16,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -62,11 +64,11 @@ internal abstract class SearchScreenModel(
     }
 
     init {
-        screenModelScope.launch {
-            preferences.globalSearchFilterState.changes().collectLatest { state ->
+        preferences.globalSearchFilterState.changes()
+            .onEach { state ->
                 mutableState.update { it.copy(onlyShowHasResults = state) }
             }
-        }
+            .launchIn(screenModelScope)
     }
 
     /** Applies [func] to the state; the extension files reach the protected flow through it. */
