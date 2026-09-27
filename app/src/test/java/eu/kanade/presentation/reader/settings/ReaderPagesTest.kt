@@ -84,7 +84,10 @@ internal class ReaderPagesTest {
     fun webtoonViewerShowsItsSettings() {
         val harness = ReaderSettingsHarness(viewer = mockk<WebtoonViewer>())
         readingModePage(harness)
-        compose.onAllNodesWithText("Long strip with gaps").fetchSemanticsNodes().size shouldBe 2
+        // The viewer arrives through an IO-scoped StateFlow that starts at null: wait for its settings.
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodesWithText("Long strip with gaps").fetchSemanticsNodes().size == 2
+        }
         compose.onNodeWithText("Side padding").assertExists()
         compose.setSlider(index = 0, value = 10f)
         harness.preferences.webtoonSidePadding.get() shouldBe 10

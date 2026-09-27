@@ -1,6 +1,7 @@
 package eu.kanade.presentation.reader
 
 import eu.kanade.domain.FlowPreferenceStore
+import eu.kanade.tachiyomi.ui.base.dropScreenModelIoScopes
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
@@ -17,6 +18,12 @@ internal class ReaderSettingsHarness(manga: Manga? = null, viewer: Viewer? = nul
     val orientations: MutableList<ReaderOrientation> = mutableListOf()
     val state: MutableStateFlow<ReaderViewModel.State> =
         MutableStateFlow(ReaderViewModel.State(manga = manga, viewer = viewer))
+    init {
+        // The model's flows run on Voyager's shared IO scope; a cancelled one left by an earlier class
+        // would keep them at their initial null forever.
+        dropScreenModelIoScopes()
+    }
+
     val model: ReaderSettingsScreenModel = ReaderSettingsScreenModel(
         readerState = state,
         onChangeReadingMode = { modes += it },

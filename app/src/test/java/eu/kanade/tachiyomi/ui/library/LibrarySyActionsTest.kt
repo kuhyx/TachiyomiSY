@@ -144,6 +144,8 @@ internal class LibrarySyActionsTest {
         model.recommendationSearch.status.value = SearchStatus.Idle
         model.runRecommendationSearch(emptyList())
         eventually { model.recommendationSearch.status.value == SearchStatus.Finished.WithoutResults }
+        // The status flips just before the job returns; cancelling a finished job must be a no-op.
+        runBlocking { model.recommendationSearchJob!!.join() }
         model.cancelRecommendationSearch()
         model.recommendationSearchJob!!.isCancelled shouldBe false
     }
