@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import cafe.adriel.voyager.navigator.Navigator
+import eu.kanade.tachiyomi.ui.library.waitForLabel
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldStartWith
@@ -37,6 +38,7 @@ import tachiyomi.domain.manga.interactor.GetAllManga
 import tachiyomi.domain.manga.interactor.GetFavorites
 import tachiyomi.domain.manga.interactor.GetSearchMetadata
 import tachiyomi.domain.manga.model.Manga
+import kotlin.reflect.full.declaredFunctions
 
 private const val SLOW_MILLIS = 300L
 private const val SLOW_RESULT = 7
@@ -47,6 +49,11 @@ private const val EXTRA_ROWS = 3
 /** A menu entry of this test's own, so that the listing can be slow without touching a real function. */
 internal object SlowFunctions {
     fun slowCount(): Int = SLOW_RESULT
+
+    fun slowRun(): Int {
+        Thread.sleep(SLOW_MILLIS * 2)
+        return SLOW_RESULT
+    }
 }
 
 @RunWith(RobolectricTestRunner::class)
@@ -173,5 +180,16 @@ internal class SettingsDebugScreenTest {
         val text = handler.invoke(SettingsDebugScreen(), entry) as String
         text shouldStartWith "Function threw exception:"
         text shouldContain "no metadata table"
+    }
+
+    @Test
+    fun runningDimsTheMenu() {
+        mockkObject(DebugFunctions)
+        // The menu calls `function.call(owner)`, so the entry needs the unbound member.
+        val slowRun = SlowFunctions::class.declaredFunctions.first { it.name == "slowRun" }
+        every { DebugFunctions.entries() } returns listOf(DebugFunctions.Entry(SlowFunctions, slowRun))
+        showScreen()
+        compose.onNodeWithText("Slow run").performClick()
+        compose.waitForLabel("Function returned result:\n\n7")
     }
 }

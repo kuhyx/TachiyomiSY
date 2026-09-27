@@ -11,6 +11,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.core.app.ApplicationProvider
+import com.kevinnzou.web.AccompanistWebChromeClient
+import com.kevinnzou.web.AccompanistWebViewClient
 import com.kevinnzou.web.WebContent
 import com.kevinnzou.web.WebViewNavigator
 import io.kotest.matchers.shouldBe
@@ -70,6 +72,31 @@ internal class WebViewClientsTest {
         shown = false
         compose.waitForIdle()
         session?.isActive shouldBe false
+        // Once inactive, the session's own chrome client dismisses dialogs by itself.
+        val result = mockk<JsResult>(relaxed = true)
+        checkNotNull(session).webChromeClient.onJsAlert(WebView(context), "u", "m", result) shouldBe true
+    }
+
+    @Test
+    fun closedWindowDestroysWebView() {
+        var shown by mutableStateOf(true)
+        val window = WebViewWindow(WebContent.NavigatorOnly, WebViewNavigator(MainScope()))
+        compose.setContent {
+            if (shown) {
+                WindowWebView(
+                    currentWindow = window,
+                    windowStack = emptyList(),
+                    headers = emptyMap(),
+                    client = AccompanistWebViewClient(),
+                    chromeClient = AccompanistWebChromeClient(),
+                )
+            }
+        }
+        compose.waitForIdle()
+        compose.webViews().size shouldBe 1
+        shown = false
+        compose.waitForIdle()
+        compose.webViews().size shouldBe 0
     }
 
     @Test

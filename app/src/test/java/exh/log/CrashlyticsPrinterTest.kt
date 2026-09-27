@@ -36,4 +36,10 @@ internal class CrashlyticsPrinterTest {
         val printer = CrashlyticsPrinter(LogLevel.Warn.int)
         shouldThrow<RuntimeException> { printer.println(LogLevel.Error.int, "t", "m") }
     }
+
+    @Test
+    fun releaseBuildsSwallowFailures() {
+        crashOnDebug(IllegalStateException("ignored"), isDebug = false)
+        shouldThrow<IllegalStateException> { crashOnDebug(IllegalStateException("thrown"), isDebug = true) }
+    }
 }

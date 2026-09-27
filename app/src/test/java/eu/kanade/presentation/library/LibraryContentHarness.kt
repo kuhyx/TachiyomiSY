@@ -2,7 +2,10 @@ package eu.kanade.presentation.library
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import eu.kanade.core.preference.PreferenceMutableState
 import eu.kanade.domain.FlowPreferenceStore
@@ -18,6 +21,9 @@ internal class LibraryContentHarness(private val compose: ComposeContentTestRule
     val store: FlowPreferenceStore = FlowPreferenceStore()
     var refreshStarts: Boolean = true
 
+    /** The categories on screen; replace to recompose with a different set. */
+    var shownCategories: List<Category> by mutableStateOf(emptyList())
+
     fun show(categories: List<Category>, items: Map<Long, List<LibraryItem>>, options: LibraryShow = LibraryShow()) {
         val displayMode = options.displayMode
         val modePref = store.getObjectFromString(
@@ -27,12 +33,13 @@ internal class LibraryContentHarness(private val compose: ComposeContentTestRule
             deserializer = { LibraryDisplayMode.deserialize(it) },
         )
         val columnsPref = store.getInt("columns", options.columns)
+        shownCategories = categories
         val continueReading: (LibraryManga) -> Unit = { events += "continue ${it.id}" }
         compose.setContent {
             val scope = rememberCoroutineScope()
             MaterialTheme {
                 LibraryContent(
-                    categories = categories,
+                    categories = shownCategories,
                     searchQuery = options.searchQuery,
                     selection = options.selection,
                     contentPadding = PaddingValues(),

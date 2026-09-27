@@ -60,4 +60,23 @@ internal class DisplayRefreshHostTest {
 
     @Test
     fun whiteThenBlackFlash() = flashWith(ReaderPreferences.FlashColor.WHITE_BLACK)
+
+    @Test
+    fun aBlackFlashEndsByItself() = flashToTheEnd(ReaderPreferences.FlashColor.BLACK)
+
+    @Test
+    fun aFlashEndsByItself() = flashToTheEnd(ReaderPreferences.FlashColor.WHITE_BLACK)
+
+    private fun flashToTheEnd(color: ReaderPreferences.FlashColor) {
+        preferences.flashColor.set(color)
+        preferences.flashDurationMillis.set(100)
+        val host = DisplayRefreshHost()
+        compose.setContent { DisplayRefreshHost(hostState = host) }
+        compose.waitForIdle()
+        compose.runOnIdle { host.flash() }
+        compose.runOnIdle { host.currentDisplayRefresh shouldBe true }
+        compose.mainClock.advanceTimeBy(500L)
+        compose.waitForIdle()
+        host.currentDisplayRefresh shouldBe false
+    }
 }

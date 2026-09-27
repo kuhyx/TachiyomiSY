@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import eu.kanade.presentation.reader.ReaderSettingsHarness
+import eu.kanade.presentation.util.setSlider
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.dualPageRotateToFitInvert
 import eu.kanade.tachiyomi.ui.reader.setting.dualPageSplitPaged
@@ -85,6 +86,8 @@ internal class ReaderPagesTest {
         readingModePage(harness)
         compose.onAllNodesWithText("Long strip with gaps").fetchSemanticsNodes().size shouldBe 2
         compose.onNodeWithText("Side padding").assertExists()
+        compose.setSlider(index = 0, value = 10f)
+        harness.preferences.webtoonSidePadding.get() shouldBe 10
         click("Split wide pages")
         click("Rotate wide pages to fit")
         click("L shaped")

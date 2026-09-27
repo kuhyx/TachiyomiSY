@@ -46,4 +46,22 @@ internal class HistoryPreviewsTest {
         }
         compose.onAllNodesWithText("History").fetchSemanticsNodes().size shouldBe 1
     }
+
+    // The preview examples always pass a builder; the default, identity one is reached reflectively.
+    @Test
+    fun defaultBuilderKeepsItem() {
+        val provider = "eu.kanade.presentation.history.HistoryScreenModelStateProvider"
+        val examples = Class.forName("$provider\$HistoryUiModelExamples")
+        val instance = examples.getField("INSTANCE").get(null)
+        val randItem = examples.getDeclaredMethod(
+            "randItem\$default",
+            examples,
+            Function1::class.java,
+            Int::class.java,
+            Any::class.java,
+        )
+        randItem.isAccessible = true
+        val item = randItem.invoke(null, instance, null, 1, null) as HistoryUiModel.Item
+        item.item.ogTitle shouldBe "Test Title"
+    }
 }

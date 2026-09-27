@@ -4,18 +4,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.category.CategoryScreenState
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.category.model.Category
+
+private const val DRAG_STEPS = 20
 
 @RunWith(RobolectricTestRunner::class)
 internal class CategoryScreenTest {
@@ -80,5 +86,21 @@ internal class CategoryScreenTest {
         compose.waitForIdle()
         compose.onNodeWithText("Cat 3").assertExists()
         compose.onNodeWithText("Cat 1").assertDoesNotExist()
+    }
+
+    @Test
+    fun draggingReorders() {
+        show(CategoryScreenState.Success(listOf(category(1L), category(2L), category(3L))))
+        compose.onNodeWithText("Cat 1").performTouchInput {
+            down(Offset(36.dp.toPx(), centerY))
+            repeat(DRAG_STEPS) {
+                advanceEventTime(16L)
+                moveBy(Offset(0f, height * 2.5f / DRAG_STEPS))
+            }
+            advanceEventTime(16L)
+            up()
+        }
+        compose.waitForIdle()
+        events.first() shouldBe "order 1 1"
     }
 }

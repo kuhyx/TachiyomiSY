@@ -55,6 +55,13 @@ internal class EHentaiUpdateHistoryTest {
     }
 
     @Test
+    fun anUnreadEntryNeverWins() {
+        val history = listOf(ehHistory(5, 22, readAt = null), ehHistory(6, 22, readAt = 50), ehHistory(7, 22, null))
+        val (newHistory, _) = helper.getHistory(current, chainChapters, history)
+        newHistory shouldContainExactly listOf(HistoryUpdate(12, Date(50), 6))
+    }
+
+    @Test
     fun unreadHistoryIsDropped() {
         val (newHistory, toDelete) = helper.getHistory(current, chainChapters, listOf(ehHistory(5, 22, null)))
         newHistory.shouldBeEmpty()

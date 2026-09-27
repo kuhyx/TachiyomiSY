@@ -4,10 +4,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import eu.kanade.presentation.util.setSlider
 import io.kotest.matchers.collections.shouldContain
 import org.junit.Rule
@@ -15,6 +19,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+
+private const val DRAG_STEPS = 10
 
 @RunWith(RobolectricTestRunner::class)
 internal class ChapterNavigatorTest {
@@ -97,5 +103,22 @@ internal class ChapterNavigatorTest {
         compose.setContent { ChapterNavigatorPreview() }
         compose.setSlider(index = 0, value = 3f)
         compose.onNodeWithText("10").assertExists()
+    }
+
+    @Test
+    fun draggingTheSliderTicks() {
+        show(ChapterNavigatorType.HORIZONTAL_LTR)
+        val slider = compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsActions.SetProgress))[0]
+        slider.performTouchInput {
+            down(Offset(width * 0.1f, centerY))
+            repeat(DRAG_STEPS) {
+                advanceEventTime(16L)
+                moveBy(Offset(width * 0.8f / DRAG_STEPS, 0f))
+            }
+        }
+        compose.waitForIdle()
+        slider.performTouchInput { up() }
+        compose.waitForIdle()
+        events shouldContain "finished"
     }
 }

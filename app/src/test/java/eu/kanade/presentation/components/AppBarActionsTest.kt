@@ -6,9 +6,11 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import eu.kanade.presentation.util.tapOutsidePopup
 import io.kotest.matchers.collections.shouldContainExactly
 import org.junit.Rule
@@ -82,5 +84,17 @@ internal class AppBarActionsTest {
         compose.onNodeWithText("Refresh").assertExists()
         compose.tapOutsidePopup()
         compose.onNodeWithText("Refresh").assertDoesNotExist()
+    }
+
+    @Test
+    fun holdingShowsATooltip() {
+        compose.setContent {
+            MaterialTheme {
+                AppBarActions(listOf(AppBar.Action(title = "Star", icon = Icons.Outlined.Star, onClick = {})))
+            }
+        }
+        compose.onNodeWithContentDescription("Star").performTouchInput { longClick() }
+        compose.waitForIdle()
+        compose.onNodeWithText("Star").assertExists()
     }
 }

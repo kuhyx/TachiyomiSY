@@ -77,6 +77,14 @@ internal class LocalFavoritesStorageTest {
         remoteRemoved.shouldForAll { it.gid == "gid6" && it.token == "token6" }
     }
 
+    /** The same gallery in another category is a move: added there and removed from the old one. */
+    @Test
+    fun aCategoryMoveIsAChange() = runBlocking<Unit> {
+        val remote = listOf(EHentai.ParsedManga(1, SManga("/g/gid/token", "a"), EHentaiSearchMetadata()))
+        val (remoteAdded, _) = storage().getChangedRemoteEntries(remote)
+        remoteAdded.map { it.gid to it.category } shouldContainExactly listOf("gid" to 1)
+    }
+
     private fun storage(dbFavorites: List<Manga> = favorites): LocalFavoritesStorage {
         val getFavorites = mockk<GetFavorites>()
         coEvery { getFavorites.await() } returns dbFavorites

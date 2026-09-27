@@ -98,6 +98,15 @@ internal class SyncChaptersCarryOverTest {
     }
 
     @Test
+    fun ehProgressTakesTheFurthest() {
+        val eh = libraryManga(source = EH_SOURCE_ID)
+        val pages = listOf(3L, 9L, 5L).map { dbChapter("/v$it").copy(lastPageRead = it) }
+        val toAdd = listOf(dbChapter("/new"))
+        interactor.carryOverEhProgress(eh, pages, toAdd, emptySet()).single().lastPageRead shouldBe 9L
+        interactor.carryOverEhProgress(eh, pages.reversed(), toAdd, emptySet()).single().lastPageRead shouldBe 9L
+    }
+
+    @Test
     fun persistWritesOnlyWhatChanged() = runTest {
         harness.stubWrites()
         val manga = libraryManga()

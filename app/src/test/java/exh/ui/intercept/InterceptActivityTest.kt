@@ -31,6 +31,7 @@ import tachiyomi.core.common.Constants
 import java.util.concurrent.TimeUnit
 
 private const val WAIT_MS = 20_000L
+private const val FRAME_MS = 16L
 
 @RunWith(RobolectricTestRunner::class)
 internal class InterceptActivityTest {
@@ -62,7 +63,8 @@ internal class InterceptActivityTest {
     private fun waitFor(condition: () -> Boolean) {
         val deadline = System.currentTimeMillis() + WAIT_MS
         while (!condition() && System.currentTimeMillis() < deadline) {
-            ShadowLooper.idleMainLooper()
+            // Advancing the clock lets the paused Choreographer draw frames, so each status gets composed.
+            ShadowLooper.idleMainLooper(FRAME_MS, TimeUnit.MILLISECONDS)
             Thread.sleep(20)
         }
         condition() shouldBe true
@@ -134,5 +136,13 @@ internal class InterceptActivityTest {
         val controller = launch(Intent())
         controller.get().finish()
         controller.get().isFinishing shouldBe true
+    }
+
+    @Test
+    fun theIdleStatusShowsLoading() {
+        val controller = launch(Intent())
+        ShadowLooper.idleMainLooper(FRAME_MS * 10, TimeUnit.MILLISECONDS)
+        controller.get().isFinishing shouldBe false
+        controller.get().finish()
     }
 }

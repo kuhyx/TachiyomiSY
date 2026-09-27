@@ -1,9 +1,11 @@
 package eu.kanade.presentation.updates
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import eu.kanade.presentation.util.PresentationKoin
 import eu.kanade.tachiyomi.ui.updates.UpdatesScreenModel
 import io.kotest.matchers.collections.shouldContainExactly
@@ -13,6 +15,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+
+private const val PULL_STEPS = 30
 
 @RunWith(RobolectricTestRunner::class)
 internal class UpdatesScreenTest {
@@ -87,5 +91,31 @@ internal class UpdatesScreenTest {
         harness.show(twoDays.copy(items = twoDays.items.map { it.copy(selected = true) }))
         compose.runOnIdle { harness.back.pressBack() }
         harness.events shouldContainExactly listOf("selectAll false")
+    }
+
+    // A slow drag from the top of the list, well past the refresh threshold.
+    private fun pull() {
+        compose.onNodeWithText("Library last updated: Never").performTouchInput {
+            down(center)
+            repeat(PULL_STEPS) {
+                advanceEventTime(16L)
+                moveBy(Offset(0f, 20f))
+            }
+            up()
+        }
+    }
+
+    @Test
+    fun pullingRefreshesTheLibrary() {
+        harness.updateStarts = false
+        // Enough rows to scroll: a list that fits never starts the drag the refresh listens to.
+        harness.show(twoDays.copy(items = (1L..30L).map { updatesItem(mangaId = it, dateFetch = day) }))
+        pull()
+        compose.waitForIdle()
+        harness.updateStarts = true
+        pull()
+        compose.mainClock.advanceTimeBy(2_000L)
+        compose.waitForIdle()
+        harness.events shouldContainExactly listOf("update", "update")
     }
 }

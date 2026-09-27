@@ -1,10 +1,12 @@
 package exh.eh
 
+import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.work.ListenableWorker
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.source.online.all.EHentai
+import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import exh.debug.DebugToggles
 import exh.metadata.metadata.EHentaiSearchMetadata
 import exh.metadata.metadata.RaisedSearchMetadata
@@ -18,7 +20,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.junit.After
@@ -53,6 +57,19 @@ internal class EHentaiUpdateWorkerTest {
         coVerify(exactly = 0) { harness.getExhFavoriteMangaWithMetadata.await() }
         harness.exhPreferences.exhAutoUpdateRequirements.set(emptySet())
         worker.requiresWifiConnection(harness.exhPreferences).shouldBeFalse()
+    }
+
+    @Test
+    fun onWifiTheRunGoesAhead() = runBlocking<Unit> {
+        harness.exhPreferences.exhAutoUpdateRequirements.set(setOf(DEVICE_ONLY_ON_WIFI))
+        mockkStatic("eu.kanade.tachiyomi.util.system.NetworkExtensionsKt")
+        try {
+            every { any<Context>().isConnectedToWifi() } returns true
+            harness.worker().doWork().shouldBeInstanceOf<ListenableWorker.Result.Success>()
+            coVerify { harness.getExhFavoriteMangaWithMetadata.await() }
+        } finally {
+            unmockkStatic("eu.kanade.tachiyomi.util.system.NetworkExtensionsKt")
+        }
     }
 
     @Test
