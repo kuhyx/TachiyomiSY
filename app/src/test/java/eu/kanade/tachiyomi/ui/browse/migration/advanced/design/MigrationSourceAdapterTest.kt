@@ -98,6 +98,7 @@ internal class MigrationSourceAdapterTest {
     fun itemsCompareBySource() {
         val item = MigrationSourceItem(http(1L, "one"), sourceEnabled = true)
         (item == MigrationSourceItem(http(1L, "other"), sourceEnabled = false)) shouldBe true
+        (item == MigrationSourceItem(http(2L, "one"), sourceEnabled = true)) shouldBe false
         item.equals(item) shouldBe true
         item.equals("x") shouldBe false
         item.hashCode() shouldBe 1L.hashCode()

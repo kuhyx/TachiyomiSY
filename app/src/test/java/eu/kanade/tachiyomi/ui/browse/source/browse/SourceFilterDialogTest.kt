@@ -48,6 +48,7 @@ internal class SourceFilterDialogTest {
         searches: List<EXHSavedSearch> = listOf(saved),
         mangaDex: Boolean = true,
         followsOnly: Boolean = false,
+        randomOnly: Boolean = false,
     ) {
         compose.setContent {
             MaterialTheme {
@@ -63,7 +64,7 @@ internal class SourceFilterDialogTest {
                     onSavedSearch = { events += "search:${it.name}" },
                     onSavedSearchPress = { events += "press:${it.name}" },
                     openMangaDexRandom = random.takeIf { mangaDex && !followsOnly },
-                    openMangaDexFollows = follows.takeIf { mangaDex },
+                    openMangaDexFollows = follows.takeIf { mangaDex && !randomOnly },
                 )
             }
         }
@@ -114,6 +115,12 @@ internal class SourceFilterDialogTest {
     fun mangaDexRowNeedsBoth() {
         show(followsOnly = true)
         compose.hasLabel("MangaDex follows") shouldBe false
+    }
+
+    @Test
+    fun randomAloneIsNotEnough() {
+        show(randomOnly = true)
+        compose.hasLabel("Random") shouldBe false
     }
 
     @Test

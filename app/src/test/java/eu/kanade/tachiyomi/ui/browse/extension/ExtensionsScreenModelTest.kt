@@ -121,6 +121,7 @@ internal class ExtensionsScreenModelTest {
         model.searchQueryPredicate("ext en")(ext) shouldBe true
         model.searchQueryPredicate("https://ext")(ext) shouldBe true
         model.searchQueryPredicate("5")(ext) shouldBe true
+        model.searchQueryPredicate("7")(ext) shouldBe false
         model.searchQueryPredicate("none")(ext) shouldBe false
     }
 

@@ -134,6 +134,21 @@ internal class ExtensionDetailsScreenModelTest {
     }
 
     @Test
+    fun blankUrlsAreSkipped() {
+        val blank = mockk<HttpSource>(relaxed = true) {
+            every { id } returns 4L
+            every { baseUrl } returns ""
+            every { getHomeUrl() } returns ""
+        }
+        every { getSources.subscribe(any()) } returns MutableStateFlow(emptyList())
+        installedFlow.value = listOf(installed("Blank").copy(sources = listOf(blank)))
+        val model = ExtensionDetailsScreenModel("pkg.Blank", koin.app)
+        eventually { model.state.value.extension != null }
+        model.clearCookies()
+        verify(exactly = 0) { network.cookieJar.remove(any()) }
+    }
+
+    @Test
     fun incognitoFollowsThePreference() {
         every { getSources.subscribe(any()) } returns MutableStateFlow(emptyList())
         val model = model()

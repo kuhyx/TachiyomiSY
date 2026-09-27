@@ -63,6 +63,14 @@ internal class BrowseSourceFavoritesTest {
     }
 
     @Test
+    fun automaticDefaultAddsDirectly() {
+        harness.categories.value = listOf(category(4L))
+        harness.koin.libraryPreferences.defaultCategory.set(0)
+        harness.model().addFavorite(manga())
+        coVerify(timeout = 5_000) { harness.setMangaCategories.await(mangaId = 1L, categoryIds = emptyList()) }
+    }
+
+    @Test
     fun unsetDefaultAsksForCategories() {
         val user = category(4L)
         harness.categories.value = listOf(user)

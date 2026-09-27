@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.ui.browse
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.domain.extension.interactor.GetExtensionsByType
@@ -23,6 +25,7 @@ import eu.kanade.tachiyomi.ui.base.resetUiDispatcher
 import eu.kanade.tachiyomi.ui.browse.feed.FeedHarness
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
 import eu.kanade.tachiyomi.ui.browse.source.source
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
@@ -39,6 +42,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.manga.interactor.GetFavorites
 
@@ -126,6 +130,16 @@ internal class BrowseTabTest {
         compose.pollLabel("Extensions")
         val channel = readObjectMember(BrowseTab::class, "switchToExtensionTabChannel") as Channel<*>
         channel.tryReceive().isSuccess shouldBe false
+    }
+
+    @Test
+    fun mainActivityIsReadied() {
+        val main = Robolectric.buildActivity(MainActivity::class.java).get()
+        compose.setContent {
+            CompositionLocalProvider(LocalContext provides main) { TabHost(BrowseTab) }
+        }
+        compose.pollLabel("tab:Browse")
+        compose.waitUntil(timeoutMillis = 10_000) { main.ready }
     }
 
     @Test
