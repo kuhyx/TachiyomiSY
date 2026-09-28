@@ -59,6 +59,14 @@ internal class EditMergedSettingsStateTest {
     }
 
     @Test
+    fun noReferencesDismiss() {
+        open()
+        ShadowToast.shownToastCount() shouldBe 1
+        dismissed shouldBe 1
+        state.mergedMangas shouldBe emptyList()
+    }
+
+    @Test
     fun priorityModeEnablesDragging() {
         open(selfReference(), reference(2L), reference(1L, isInfoManga = true))
         state.mergeReference shouldBe selfReference()

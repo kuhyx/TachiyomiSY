@@ -109,7 +109,7 @@ internal class EditMergedHeaderTest {
         open(selfReference(), reference(1L), reference(2L))
         // Bound holders come back in no fixed order; take reference 1's (its absence fails the test).
         val holder = state.mergedMangaAdapter!!.allBoundViewHolders.filterIsInstance<EditMergedMangaHolder>()
-            .first { it.reference?.id == 1L }
+            .first { it.reference.id == 1L }
         holder.binding.remove.performClick()
         holder.binding.getChapterUpdates.performClick()
         holder.binding.download.performClick()

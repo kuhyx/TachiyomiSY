@@ -14,14 +14,6 @@ internal class BuildConfigTest {
         isPreviewBuildType shouldBe false
         isReleaseBuildType shouldBe false
         isBenchmarkBuildType shouldBe false
-    }
-
-    // The benchmark flag has an inline getter, so its own line belongs to the compiled copy.
-    @Test
-    fun theCompiledBenchmarkGetter() {
-        val getter = Class.forName("eu.kanade.tachiyomi.util.system.BuildConfigKt")
-            .getDeclaredMethod("isBenchmarkBuildType")
-        getter.isAccessible = true
-        getter.invoke(null) shouldBe false
+        isReleaseTestBuildType shouldBe false
     }
 }

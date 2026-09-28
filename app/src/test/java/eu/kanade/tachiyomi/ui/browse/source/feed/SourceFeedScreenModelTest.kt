@@ -93,7 +93,7 @@ internal class SourceFeedScreenModelTest {
     @Test
     fun filterBrowsesWithChanges() {
         val model = model()
-        val calls = mutableListOf<Pair<String?, String?>>()
+        val calls = CopyOnWriteArrayList<Pair<String?, String?>>()
         model.search(" ")
         model.onFilter { query, filters -> calls += query to filters }
         eventually { calls.size == 1 }
@@ -109,8 +109,9 @@ internal class SourceFeedScreenModelTest {
     @Test
     fun savedSearchesBrowseOrWarn() {
         val model = model()
-        val browsed = mutableListOf<Long>()
-        val toasts = mutableListOf<StringResource>()
+        // Written from the model's IO coroutine while this thread compares them: copy-on-write, or equals races.
+        val browsed = CopyOnWriteArrayList<Long>()
+        val toasts = CopyOnWriteArrayList<StringResource>()
         model.onSavedSearch(harness.search(2L, "b", filters = null), { _, id -> browsed += id }, { toasts += it })
         eventually { toasts == listOf(SYMR.strings.save_search_invalid) }
         model.onSavedSearch(harness.search(3L, "A"), { _, id -> browsed += id }, { toasts += it })
@@ -127,7 +128,7 @@ internal class SourceFeedScreenModelTest {
     @Test
     fun addToFeedRespectsTheLimit() {
         val model = model()
-        val toasts = mutableListOf<StringResource>()
+        val toasts = CopyOnWriteArrayList<StringResource>()
         model.onSavedSearchAddToFeed(harness.search(3L, "A")) { toasts += it }
         eventually { model.state.value.dialog == SourceFeedScreenModel.Dialog.AddFeed(3L, "A") }
         coEvery { harness.count.await(1L) } returns 11L

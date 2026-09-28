@@ -106,4 +106,37 @@ internal class EditMergedEdgesTest {
         val switch = binding.root.findViewById<MaterialSwitch>(R.id.dedupe_switch)
         switch.isChecked shouldBe false
     }
+
+    // A member whose entry was deleted keeps its reference with no manga id (ON DELETE SET NULL).
+    @Test
+    fun memberWithoutMangaId() {
+        val orphan = reference(3L).copy(mangaId = null)
+        open(selfReference(), reference(1L), orphan)
+        state.mergedMangas.first { it.second.id == 3L }.first shouldBe null
+    }
+
+    // Like releasing or deleting, toggling before the list is built changes nothing.
+    @Test
+    fun togglesBeforeTheListIsBuilt() {
+        val fresh = EditMergedSettingsState(context, {}, {}, {})
+        fresh.onToggleChapterUpdatesClicked(0)
+        confirm()
+        fresh.onToggleDownloadsClicked(0)
+        confirm()
+        fresh.mergedMangas shouldBe emptyList()
+    }
+
+    // Bound holders sit in a hash set, so toggling both rows makes one search pass the other row's holder first.
+    @Test
+    fun bothRowsToggle() {
+        open(selfReference(), reference(1L), reference(2L))
+        for (position in 0..1) {
+            state.onToggleChapterUpdatesClicked(position)
+            confirm()
+            state.onToggleDownloadsClicked(position)
+            confirm()
+        }
+        member(1L).getChapterUpdates shouldBe false
+        member(2L).downloadChapters shouldBe false
+    }
 }

@@ -5,9 +5,13 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
 import eu.kanade.presentation.more.settings.screen.about.Changelog
 import eu.kanade.presentation.more.settings.screen.about.toDisplayChangelog
+import eu.kanade.tachiyomi.ui.more.OnboardingScreen
+import eu.kanade.tachiyomi.util.system.isBenchmarkBuildType
 import eu.kanade.tachiyomi.util.system.isDebuggable
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
+import eu.kanade.tachiyomi.util.system.isReleaseTestBuildType
 import exh.SY_DEBUG_VERSION
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -64,5 +68,39 @@ internal class MainNonDebuggableTest {
         every { Firebase.analytics } returns analytics
         rig.launch()
         verify { analytics.setUserProperty("preview_version", SY_DEBUG_VERSION) }
+    }
+
+    // A benchmark build (here a releaseTest one) skips the debug overlay, onboarding, update check and changelog.
+    @Test
+    fun benchmarkSkipsLaunchDialogs() {
+        every { isReleaseTestBuildType } returns true
+        every { isBenchmarkBuildType } returns true
+        rig.harness.basePreferences.shownOnboardingFlow.set(false)
+        mockkStatic("eu.kanade.presentation.more.settings.screen.about.WhatsNewDialogKt")
+        var decoded = false
+        every { any<Changelog>().toDisplayChangelog() } answers {
+            decoded = true
+            callOriginal()
+        }
+        val activity = rig.launch().get()
+        rig.until { activity.ready }
+        rig.frames()
+        activity.navigator?.items?.any { it is OnboardingScreen } shouldBe false
+        decoded shouldBe false
+    }
+
+    @Test
+    fun debuggableSkipsTheChangelog() {
+        every { isDebuggable } returns true
+        mockkStatic("eu.kanade.presentation.more.settings.screen.about.WhatsNewDialogKt")
+        var decoded = false
+        every { any<Changelog>().toDisplayChangelog() } answers {
+            decoded = true
+            callOriginal()
+        }
+        val activity = rig.launch().get()
+        rig.until { activity.ready }
+        rig.frames()
+        decoded shouldBe false
     }
 }
