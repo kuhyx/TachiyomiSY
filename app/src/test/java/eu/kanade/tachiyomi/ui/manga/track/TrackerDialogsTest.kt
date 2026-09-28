@@ -1,10 +1,12 @@
 package eu.kanade.tachiyomi.ui.manga.track
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import eu.kanade.tachiyomi.data.track.BaseTracker
@@ -15,6 +17,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -24,6 +27,7 @@ import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import tachiyomi.domain.track.interactor.DeleteTrack
+import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 internal class TrackerDialogsTest {
@@ -97,7 +101,13 @@ internal class TrackerDialogsTest {
             title = "Hit"
             trackingUrl = "u"
         }
-        coEvery { harness.tracker.search("Needle") } returns listOf(hit)
+        val miss = TrackSearch.create(1L).apply {
+            remoteId = 2L
+            title = "Miss"
+            trackingUrl = "other"
+        }
+        // The entry's current url picks its result, wherever it is in the list.
+        coEvery { harness.tracker.search("Needle") } returns listOf(miss, hit)
         show(TrackerSearchScreen(1L, "Needle", "u", 1L))
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodes(hasText("Hit")).fetchSemanticsNodes().isNotEmpty()
@@ -107,6 +117,32 @@ internal class TrackerDialogsTest {
         compose.onNodeWithText("Track").performClick()
         compose.waitForIdle()
         coVerify(timeout = 5_000) { harness.tracker.register(hit, 1L) }
+    }
+
+    // A new search clears the pick; "Track", tapped while its bar is still fading out, then registers nothing.
+    @Test
+    fun trackDuringNewSearchIsIgnored() {
+        val hit = TrackSearch.create(1L).apply {
+            title = "Hit"
+            trackingUrl = "u"
+        }
+        val pending = CompletableDeferred<List<TrackSearch>>()
+        val searches = AtomicInteger()
+        coEvery { harness.tracker.search("Needle") } coAnswers {
+            if (searches.getAndIncrement() == 0) listOf(hit) else pending.await()
+        }
+        show(TrackerSearchScreen(1L, "Needle", "u", 1L))
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodes(hasText("Track")).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.mainClock.autoAdvance = false
+        compose.onNode(hasText("Needle") and hasSetTextAction()).performImeAction()
+        compose.mainClock.advanceTimeByFrame()
+        compose.onNodeWithText("Track").performClick()
+        compose.mainClock.autoAdvance = true
+        pending.complete(emptyList())
+        compose.waitForIdle()
+        coVerify(exactly = 0) { harness.tracker.register(any(), any()) }
     }
 
     @Test

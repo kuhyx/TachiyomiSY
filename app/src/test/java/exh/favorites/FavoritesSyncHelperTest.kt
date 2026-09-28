@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.net.wifi.WifiManager
 import android.os.Looper
-import android.os.PowerManager
 import androidx.work.Operation
 import eu.kanade.tachiyomi.source.online.all.fetchFavorites
 import exh.eh.EHentaiUpdateWorker
@@ -21,13 +20,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.job
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadows.ShadowPowerManager
 import tachiyomi.domain.category.interactor.UpdateCategory
+import java.util.concurrent.CopyOnWriteArrayList
 
 @RunWith(RobolectricTestRunner::class)
 internal class FavoritesSyncHelperTest {
@@ -42,18 +44,22 @@ internal class FavoritesSyncHelperTest {
 
     @After
     fun tearDown() {
+        ShadowPowerManager.clearWakeLocks()
         scope.cancel()
         harness.stop()
     }
 
     private fun sync(helper: FavoritesSyncHelper): FavoritesSyncStatus {
         helper.runSync(scope)
-        // Idle the main looper while waiting so the UI-thread steps of the sync can run.
+        // Idle the main looper while waiting so the UI-thread steps of the sync can run. The status settles
+        // before the sync's finally (lock release, update scheduling) has run: wait for the job itself too,
+        // or tearDown stops Koin under it and its failure surfaces in a later class's TestScope.
         val deadline = System.currentTimeMillis() + 20_000
         while (System.currentTimeMillis() < deadline) {
             shadowOf(Looper.getMainLooper()).idle()
             val status = helper.status.value
-            if (status !is FavoritesSyncStatus.Initializing && status !is FavoritesSyncStatus.Processing) return status
+            val settled = status !is FavoritesSyncStatus.Initializing && status !is FavoritesSyncStatus.Processing
+            if (settled && scope.coroutineContext.job.children.none()) return status
             Thread.sleep(20)
         }
         error("sync did not finish: ${helper.status.value}")
@@ -127,8 +133,6 @@ internal class FavoritesSyncHelperTest {
         sync(harness.helper()).shouldBeInstanceOf<FavoritesSyncStatus.SyncError.GallerySyncError.InvalidGalleryFail>()
     }
 
-    // Robolectric's locks throw when released without being acquired (as Android's do), which the
-    // helper swallows; the second run then finds the previous run's locks still referenced.
     @Test
     fun unexpectedErrorsAreReported() {
         coEvery { harness.getCategories.await() } throws IllegalStateException("db")
@@ -140,17 +144,19 @@ internal class FavoritesSyncHelperTest {
     }
 
     @Test
-    fun acquiredLocksAreReleased() {
-        val helper = harness.helper()
-        // Acquire the locks once the helper holds them, so that releasing them is legal.
+    fun locksAreHeldWhileSyncing() {
+        val held = CopyOnWriteArrayList<Boolean>()
         every { harness.workManager.cancelAllWorkByTag(any()) } answers {
-            (helper.lock("wakeLock") as PowerManager.WakeLock).acquire()
-            (helper.lock("wifiLock") as WifiManager.WifiLock).acquire()
+            held += ShadowPowerManager.getLatestWakeLock()?.isHeld == true
+            held += wifiLocks() == 1
             mockk<Operation>()
         }
-        sync(helper) shouldBe FavoritesSyncStatus.Idle
-        helper.lock("wakeLock") shouldBe null
-        helper.lock("wifiLock") shouldBe null
+        sync(harness.helper()) shouldBe FavoritesSyncStatus.Idle
+        held shouldContainExactly listOf(true, true)
+        val wake = checkNotNull(ShadowPowerManager.getLatestWakeLock())
+        wake.isHeld shouldBe false
+        shadowOf(wake).timesHeld shouldBe 1
+        wifiLocks() shouldBe 0
     }
 
     @Test
@@ -162,12 +168,9 @@ internal class FavoritesSyncHelperTest {
                 else -> super.getSystemService(name)
             }
         }
-        val helper = FavoritesSyncHelper(context)
-        sync(helper) shouldBe FavoritesSyncStatus.Idle
-        helper.lock("wakeLock") shouldBe null
-        helper.lock("wifiLock") shouldBe null
+        sync(FavoritesSyncHelper(context)) shouldBe FavoritesSyncStatus.Idle
+        ShadowPowerManager.getLatestWakeLock() shouldBe null
     }
 
-    private fun FavoritesSyncHelper.lock(name: String): Any? =
-        FavoritesSyncHelper::class.java.getDeclaredField(name).also { it.isAccessible = true }.get(this)
+    private fun wifiLocks(): Int = shadowOf(harness.context.getSystemService(WifiManager::class.java)).activeLockCount
 }

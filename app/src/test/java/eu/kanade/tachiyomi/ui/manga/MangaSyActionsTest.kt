@@ -7,7 +7,9 @@ import eu.kanade.tachiyomi.ui.browse.source.SourcesScreen
 import eu.kanade.tachiyomi.ui.webview.WebViewScreen
 import exh.pagepreview.PagePreviewScreen
 import exh.recs.RecommendsScreen
+import exh.source.MERGED_SOURCE_ID
 import exh.ui.metadata.MetadataViewScreen
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
@@ -60,6 +62,19 @@ internal class MangaSyActionsTest {
         model.awaitSuccess().dialog.shouldBeInstanceOf<MangaScreenModel.Dialog.EditMangaInfo>()
         host.actions.sy.merge.onMergedSettingsClicked()
         host.actions.sy.previews.onOpenPagePreview(2)
+        ShadowLooper.idleMainLooper()
+    }
+
+    // A favourite merged entry is not migrated as a whole; with no chapter, previews open without one.
+    @Test
+    fun mergedEntryWithoutChapters() {
+        val model = harness.loaded()
+        model.updateSuccessState {
+            it.copy(manga = it.manga.copy(source = MERGED_SOURCE_ID), chapters = emptyList())
+        }
+        host.show(model)
+        host.actions.toolbar.onMigrateClicked.shouldBeNull()
+        host.actions.sy.previews.onOpenPagePreview(1)
         ShadowLooper.idleMainLooper()
     }
 

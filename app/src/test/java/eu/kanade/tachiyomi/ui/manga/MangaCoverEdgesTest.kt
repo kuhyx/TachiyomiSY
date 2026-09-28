@@ -114,7 +114,7 @@ internal class MangaCoverEdgesTest {
         serve(null)
         val model = model()
         model.saveCover(activity)
-        eventually { model.snack() == "Cover saved" }
+        eventually { model.snack() == "Error saving cover" }
         model.shareCover(activity)
         shadowOf(activity).nextStartedActivity shouldBe null
         verify(exactly = 0) { imageSaver.save(any()) }
@@ -125,7 +125,7 @@ internal class MangaCoverEdgesTest {
         serve(ColorDrawable(Color.RED).asImage())
         val model = model()
         model.saveCover(activity)
-        eventually { model.snack() == "Cover saved" }
+        eventually { model.snack() == "Error saving cover" }
         verify(exactly = 0) { imageSaver.save(any()) }
     }
 

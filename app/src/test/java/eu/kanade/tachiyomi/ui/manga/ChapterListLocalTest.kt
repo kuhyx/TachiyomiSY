@@ -28,4 +28,10 @@ internal class ChapterListLocalTest {
         val local = manga(flags = Manga.CHAPTER_SHOW_DOWNLOADED, source = LocalSource.ID)
         listOf(item(chapter(1L))).applyFilters(local).map { it.id }.toList() shouldContainExactly listOf(1L)
     }
+
+    @Test
+    fun localChaptersFailNotDownloaded() {
+        val local = manga(flags = Manga.CHAPTER_SHOW_NOT_DOWNLOADED, source = LocalSource.ID)
+        listOf(item(chapter(1L))).applyFilters(local).toList() shouldContainExactly emptyList()
+    }
 }

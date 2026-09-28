@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.ui.reader.setting.useAutoWebtoon
 import eu.kanade.tachiyomi.ui.reader.viewer.Viewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.every
@@ -16,6 +17,9 @@ import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowToast
+import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.i18n.sy.SYMR
 
 /** Swapping the viewer: after a shared-element entry, without a manga, for webtoon-typed entries, and insets. */
 @RunWith(RobolectricTestRunner::class)
@@ -69,6 +73,17 @@ internal class ReaderViewerSwapTest {
         val activity = launch(ReadingMode.WEBTOON.flagValue.toLong(), genres = listOf("Webtoon"))
         harness.vm.readerPreferences.useAutoWebtoon.get() shouldBe true
         activity.viewModel.state.value.viewer.shouldBeInstanceOf<WebtoonViewer>()
+    }
+
+    @Test
+    fun autoWebtoonCanBeOff() {
+        harness = ReaderActivityHarness(pageCount = 2)
+        harness.start()
+        harness.vm.readerPreferences.useAutoWebtoon.set(false)
+        coEvery { harness.vm.getManga.await(10L) } returns harness.vm.manga.copy(ogGenre = listOf("Webtoon"))
+        every { harness.vm.sourceManager.get(any()) } returns null
+        val activity = harness.launch().get()
+        ShadowToast.getTextOfLatestToast() shouldNotBe activity.stringResource(SYMR.strings.eh_auto_webtoon_snack)
     }
 
     @Test

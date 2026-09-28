@@ -86,7 +86,13 @@ internal class PagerViewerEdgesTest {
         viewer.adapter.notifyDataSetChanged()
         viewer.moveToReaderPage(second)
         viewer.pager.currentItem shouldBe 0
-        viewer.getPageHolder(second)
+        // The right-hand page of a spread is found through the holder showing it.
+        val left = ReaderPage(20).also { it.chapter = first.chapter }
+        val right = ReaderPage(21).also { it.chapter = first.chapter }
+        val spread = PagerPageHolder(activity, viewer, left, right)
+        viewer.pager.addView(spread)
+        viewer.getPageHolder(right) shouldBe spread
+        viewer.pager.removeView(spread)
         viewer.moveToReaderPage(ReaderPage(9).also { it.chapter = readerChapter(id = 9L) })
         viewer.pager.currentItem shouldBe 0
     }

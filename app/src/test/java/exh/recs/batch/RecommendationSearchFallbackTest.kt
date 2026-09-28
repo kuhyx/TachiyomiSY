@@ -1,9 +1,10 @@
 package exh.recs.batch
 
+import android.content.Context
+import android.content.ContextWrapper
+import android.net.wifi.WifiManager
 import eu.kanade.tachiyomi.source.model.MangasPage
 import exh.recs.sources.sourceManga
-import exh.util.createPartialWakeLock
-import exh.util.createWifiLock
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -19,6 +20,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadows.ShadowPowerManager
+import java.util.concurrent.CopyOnWriteArrayList
 
 /** The helper's error, cancellation and lock paths, around a source tied to neither a source nor a tracker. */
 @RunWith(RobolectricTestRunner::class)
@@ -35,6 +39,7 @@ internal class RecommendationSearchFallbackTest {
 
     @After
     fun tearDown() {
+        ShadowPowerManager.clearWakeLocks()
         unmockkAll()
         rig.uninstall()
     }
@@ -47,16 +52,32 @@ internal class RecommendationSearchFallbackTest {
     }
 
     @Test
-    fun leftoverLocksAreReleased() {
-        val wake = rig.application.createPartialWakeLock("t")
-        val wifi = rig.application.createWifiLock("t")
-        wake.acquire(FAKE_WAIT_MS)
-        wifi.acquire()
-        setField("wakeLock", wake)
-        setField("wifiLock", wifi)
+    fun locksAreHeldWhileSearching() {
+        val held = CopyOnWriteArrayList<Boolean>()
+        answer = {
+            held += ShadowPowerManager.getLatestWakeLock()?.isHeld == true
+            held += wifiLocks() == 1
+            pageOf("Kept title")
+        }
         helper.finish().shouldBeInstanceOf<SearchStatus.Finished.WithResults>()
+        held shouldContainExactly listOf(true, true)
+        val wake = checkNotNull(ShadowPowerManager.getLatestWakeLock())
         wake.isHeld shouldBe false
-        wifi.isHeld shouldBe false
+        shadowOf(wake).timesHeld shouldBe 1
+        wifiLocks() shouldBe 0
+    }
+
+    @Test
+    fun missingLockServicesTolerated() {
+        val noLocks = object : ContextWrapper(rig.application) {
+            override fun getApplicationContext(): Context = this
+            override fun getSystemService(name: String): Any? = when (name) {
+                Context.POWER_SERVICE, Context.WIFI_SERVICE -> null
+                else -> super.getSystemService(name)
+            }
+        }
+        RecommendationSearchHelper(noLocks).finish().shouldBeInstanceOf<SearchStatus.Finished.WithResults>()
+        ShadowPowerManager.getLatestWakeLock() shouldBe null
     }
 
     @Test
@@ -91,7 +112,5 @@ internal class RecommendationSearchFallbackTest {
         helper.status.value.shouldBeInstanceOf<SearchStatus.Processing>()
     }
 
-    private fun setField(name: String, value: Any) {
-        RecommendationSearchHelper::class.java.getDeclaredField(name).apply { isAccessible = true }.set(helper, value)
-    }
+    private fun wifiLocks(): Int = shadowOf(rig.application.getSystemService(WifiManager::class.java)).activeLockCount
 }

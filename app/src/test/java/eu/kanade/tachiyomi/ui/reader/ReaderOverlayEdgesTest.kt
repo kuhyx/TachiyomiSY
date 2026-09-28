@@ -32,10 +32,11 @@ internal class ReaderOverlayEdgesTest {
     private var harness = ReaderActivityHarness(pageCount = 3)
     private lateinit var activity: ReaderActivity
 
-    private fun launch(mode: ReadingMode = ReadingMode.LEFT_TO_RIGHT) {
+    private fun launch(mode: ReadingMode = ReadingMode.LEFT_TO_RIGHT, before: () -> Unit = {}) {
         harness = ReaderActivityHarness(pageCount = 3, viewerFlags = mode.flagValue.toLong())
         harness.start()
         harness.vm.readerPreferences.readerBottomButtons.set(ReaderBottomButton.entries.map { it.value }.toSet())
+        before()
         activity = harness.launch().get()
     }
 
@@ -61,6 +62,13 @@ internal class ReaderOverlayEdgesTest {
         harness.vm.readerPreferences.showPageNumber.set(false)
         activity.viewModel.updateState { it.copy(menuVisible = false) }
         harness.settle()
+        activity.viewModel.state.value.menuVisible shouldBe false
+    }
+
+    // With the page number off from the start, the overlay's first frame, menu hidden, draws no indicator.
+    @Test
+    fun pageNumberOffFromTheStart() {
+        launch { harness.vm.readerPreferences.showPageNumber.set(false) }
         activity.viewModel.state.value.menuVisible shouldBe false
     }
 

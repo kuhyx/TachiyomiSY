@@ -85,6 +85,10 @@ internal class PagerAdapterSplitTest {
         adapter.splitDoublePages(adapter.page(0))
         adapter.splitDoublePages(adapter.page(2))
         ShadowLooper.idleMainLooper(1, TimeUnit.SECONDS)
+        // Splitting a page that lies before the one on screen.
+        adapter.viewer.pager.currentItem = adapter.joinedItems.indexOfFirst { it.first == adapter.page(2) }
+        adapter.splitDoublePages(adapter.page(0))
+        ShadowLooper.idleMainLooper(1, TimeUnit.SECONDS)
         adapter.viewer.pager.currentItem = adapter.joinedItems.size + 5
         adapter.splitDoublePages(adapter.page(1))
         ShadowLooper.idleMainLooper(1, TimeUnit.SECONDS)

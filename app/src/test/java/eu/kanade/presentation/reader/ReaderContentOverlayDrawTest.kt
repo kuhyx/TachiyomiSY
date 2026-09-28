@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -19,6 +21,8 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.GraphicsMode
+
+private const val FLASH_FRAMES = 5
 
 /** Draws the overlays into a bitmap: their Canvas lambdas only run when a frame is actually drawn. */
 @RunWith(RobolectricTestRunner::class)
@@ -48,11 +52,17 @@ internal class ReaderContentOverlayDrawTest {
             val host = DisplayRefreshHost()
             compose.setContent { Box(Modifier.size(20.dp)) { DisplayRefreshHost(hostState = host) } }
             compose.waitForIdle()
+            // Before any flash the canvas has nothing to paint.
+            compose.onRoot().captureToImage()
             compose.mainClock.autoAdvance = false
             compose.runOnIdle { host.flash() }
-            compose.mainClock.advanceTimeByFrame()
-            compose.mainClock.advanceTimeByFrame()
-            (compose.onRoot().captureToImage().width > 0) shouldBe true
+            // A few frames in, the effect has picked the flash colour and the canvas paints it.
+            repeat(FLASH_FRAMES) {
+                compose.mainClock.advanceTimeByFrame()
+                compose.waitForIdle()
+            }
+            val pixels = compose.onRoot().captureToImage().toPixelMap()
+            pixels[pixels.width / 2, pixels.height / 2] shouldBe Color.Black
         } finally {
             stopKoin()
         }

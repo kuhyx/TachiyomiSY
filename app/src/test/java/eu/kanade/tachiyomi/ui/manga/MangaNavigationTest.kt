@@ -81,6 +81,8 @@ internal class MangaNavigationTest {
     @Test
     fun webViewNeedsAUrl() {
         openMangaInWebView(navigator, null, http)
+        openMangaInWebView(navigator, manga(), null)
+        openMangaInWebView(navigator, manga(), mockk<Source>())
         verify(exactly = 0) { navigator.push(any<Screen>()) }
         openMangaInWebView(navigator, manga(), http)
         pushed().shouldBeInstanceOf<WebViewScreen>()
@@ -109,6 +111,16 @@ internal class MangaNavigationTest {
         dialog.listView.adapter.count shouldBe 1
         dialog.listView.performItemClick(null, 0, 0L)
         pushed().shouldBeInstanceOf<WebViewScreen>()
+    }
+
+    // A member whose source is not a website (an uninstalled extension's stub) has no page to open.
+    @Test
+    fun mergedMemberNeedsAWebsite() {
+        every { sourceManager.getOrStub(any()) } returns mockk<Source>()
+        val member = manga().copy(id = 4L, source = 7L)
+        openMergedMangaWebview(themedActivity(), navigator, mergedData(member))
+        (ShadowDialog.getLatestDialog() as AlertDialog).listView.performItemClick(null, 0, 0L)
+        verify(exactly = 0) { navigator.push(any<Screen>()) }
     }
 
     @Test

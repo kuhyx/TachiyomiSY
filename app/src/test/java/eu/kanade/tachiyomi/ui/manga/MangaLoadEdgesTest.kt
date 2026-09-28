@@ -9,6 +9,7 @@ import exh.source.EH_SOURCE_ID
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -55,6 +56,26 @@ internal class MangaLoadEdgesTest {
         state.showMergeInOverflow shouldBe true
         state.showMergeWithAnother shouldBe true
         state.isFromSource shouldBe true
+    }
+
+    // An entry never fetched but with chapters stored refreshes its details alone; merge stays in the toolbar.
+    @Test
+    fun unfetchedEntryRefreshesDetails() {
+        refreshFails()
+        harness.uiPreferences.mergeInOverflow.set(false)
+        harness.mangaFlow.value = manga(favorite = true).copy(initialized = false) to listOf(chapter(1L))
+        harness.loaded().awaitSuccess { !it.isRefreshingData }.showMergeInOverflow shouldBe false
+        coVerify {
+            harness.updateMangaFromRemote(
+                source = any(),
+                manga = any(),
+                fetchDetails = true,
+                fetchChapters = false,
+                manualFetch = false,
+                fetchWindow = any(),
+                throttleFunc = any(),
+            )
+        }
     }
 
     @Test

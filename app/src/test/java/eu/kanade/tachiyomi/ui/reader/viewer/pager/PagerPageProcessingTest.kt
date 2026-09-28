@@ -76,6 +76,9 @@ internal class PagerPageProcessingTest {
         rig.holder().splitInHalf(source)
         rig.holder(page = rig.insert()).splitInHalf(source)
         every { rig.config.centerMarginType } returns PagerConfig.CenterMarginType.DOUBLE_PAGE_CENTER_MARGIN
+        // A double-page margin only applies while pages are shown in pairs.
+        every { rig.config.doublePages } returns false
+        rig.holder().splitInHalf(source)
         every { rig.config.doublePages } returns true
         rig.holder().splitInHalf(source)
         every { rig.config.imageCropBorders } returns true
@@ -118,6 +121,9 @@ internal class PagerPageProcessingTest {
         holder.decodeImage(Buffer().writeUtf8("not an image")).shouldBeNull()
         PagerDecodes.throwNext = true
         holder.decodeImage(Buffer().writeUtf8("corrupt")).shouldBeNull()
+        // The native decoder refuses to open a stream that is no image at all.
+        PagerDecodes.refuseAfter = 0
+        holder.decodeImage(Buffer().writeUtf8("no image")).shouldBeNull()
     }
 
     @Test

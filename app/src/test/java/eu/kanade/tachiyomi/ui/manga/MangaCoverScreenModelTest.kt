@@ -139,14 +139,14 @@ internal class MangaCoverScreenModelTest {
     }
 
     @Test
-    fun missingEntryDoesNothing() {
+    fun missingEntryFailsToSave() {
         coEvery { getManga.subscribe(1L) } returns emptyFlow()
         val model = MangaCoverScreenModel(1L)
         model.shareCover(activity)
         model.saveCover(activity)
         model.editCover(activity, saved)
         model.deleteCustomCover(activity)
-        eventually { model.snack() == "Cover saved" }
+        eventually { model.snack() == "Error saving cover" }
         shadowOf(activity).nextStartedActivity shouldBe null
     }
 

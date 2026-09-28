@@ -122,6 +122,15 @@ internal class EditMangaFieldsTest {
         binding.mangaGenresTags.getTextStrings() shouldBe emptyList()
         resetTags(rig.sourced().copy(ogGenre = emptyList()), binding, rig.scope)
         binding.mangaGenresTags.getTextStrings() shouldBe emptyList()
+        resetTags(rig.sourced().copy(ogGenre = null), binding, rig.scope)
+        binding.mangaGenresTags.getTextStrings() shouldBe emptyList()
+        // Tags the user added to an entry whose source reports none reset to none.
+        val ownTags = rig.edited(
+            CustomMangaInfo(id = 1L, title = null, genre = listOf("mine")),
+            base = rig.sourced().copy(ogGenre = null),
+        )
+        resetTags(ownTags, binding, rig.scope)
+        binding.mangaGenresTags.getTextStrings() shouldBe emptyList()
     }
 
     @Test

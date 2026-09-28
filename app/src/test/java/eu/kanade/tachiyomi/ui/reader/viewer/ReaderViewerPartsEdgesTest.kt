@@ -70,6 +70,19 @@ internal class ReaderViewerPartsEdgesTest {
                 skipCache = true,
             )
         }
+        // The next chapter already downloaded.
+        every {
+            downloads.isChapterDownloaded(
+                chapterName = any(),
+                chapterScanlator = any(),
+                chapterUrl = any(),
+                mangaTitle = any(),
+                sourceId = any(),
+                skipCache = true,
+            )
+        } returns true
+        view.bind(ChapterTransition.Next(from, readerChapter(id = 4L)), downloads, Manga.create())
+        ShadowLooper.idleMainLooper()
     }
 
     @Test

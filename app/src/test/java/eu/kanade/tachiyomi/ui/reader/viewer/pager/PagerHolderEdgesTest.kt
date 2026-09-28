@@ -20,7 +20,9 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLooper
 import tachiyomi.core.common.util.system.ImageUtil
+import java.io.BufferedInputStream
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /** A page holder's rarer paths: spinner present or not, spreads without a second stream, detaching twice. */
 @RunWith(RobolectricTestRunner::class)
@@ -60,6 +62,26 @@ internal class PagerHolderEdgesTest {
         page.status = Page.State.Ready
         eventually { holder.pageView != null }
         holder.progressIndicator.shouldBeNull()
+    }
+
+    // Streams that come already buffered are read as they are, the spread's second one included.
+    @Test
+    fun bufferedStreamsAreKept() {
+        val opened = AtomicBoolean()
+        val extra = rig.page(index = 1).also {
+            it.stream = {
+                opened.set(true)
+                BufferedInputStream(rig.png(width = 2, height = 4).inputStream())
+            }
+        }
+        // A full page is shown alone, so the second stream is opened but never merged in.
+        val page = rig.page(withLoader = true).also {
+            it.fullPage = true
+            it.stream = { BufferedInputStream(rig.png(width = 2, height = 4).inputStream()) }
+        }
+        val holder = rig.holder(page, extra = extra)
+        page.status = Page.State.Ready
+        eventually { opened.get() && (holder.pageView != null || holder.errorLayout != null) }
     }
 
     @Test

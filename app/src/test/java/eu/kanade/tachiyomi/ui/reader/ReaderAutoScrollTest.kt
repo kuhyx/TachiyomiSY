@@ -69,4 +69,14 @@ internal class ReaderAutoScrollTest {
         scrolled(activity, enabled = false)
         activity.viewModel.state.value.viewer.shouldBeInstanceOf<WebtoonViewer>()
     }
+
+    @Test
+    fun webtoonStepsWhenNotSmooth() {
+        val activity = launch(ReadingMode.WEBTOON.flagValue.toLong())
+        harness.vm.readerPreferences.smoothAutoScroll.set(false)
+        activity.viewModel.updateState { it.copy(menuVisible = false) }
+        scrolled(activity, enabled = true)
+        scrolled(activity, enabled = false)
+        activity.viewModel.state.value.autoScroll shouldBe false
+    }
 }

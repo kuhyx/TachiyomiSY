@@ -15,6 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadows.ShadowLooper
 import tachiyomi.core.common.util.system.ImageUtil
 
 /** Webtoon holders before binding, without a manga, and with every crop-borders combination. */
@@ -64,6 +65,15 @@ internal class WebtoonHolderEdgesTest {
         holder.bind(page)
         page.status = Page.State.Ready
         eventually { holder.frame.pageView != null }
+    }
+
+    // A page whose chapter has no loader (it was let go) is bound but never loaded.
+    @Test
+    fun pageWithoutLoaderIsLeftAlone() {
+        val holder = rig.holder()
+        holder.bind(rig.page())
+        ShadowLooper.idleMainLooper()
+        holder.frame.pageView shouldBe null
     }
 
     @Test

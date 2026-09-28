@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivityHarness
 import eu.kanade.tachiyomi.ui.reader.loadedPages
@@ -35,12 +36,13 @@ internal class PagerViewerMovesTest {
         pageCount = 3,
         viewerFlags = ReadingMode.LEFT_TO_RIGHT.flagValue.toLong(),
     )
+    private lateinit var activity: ReaderActivity
     private lateinit var viewer: PagerViewer
 
     @Before
     fun setUp() {
         harness.start()
-        val activity: ReaderActivity = harness.launch().get()
+        activity = harness.launch().get()
         viewer = activity.viewModel.state.value.viewer as PagerViewer
     }
 
@@ -72,6 +74,26 @@ internal class PagerViewerMovesTest {
         viewer.pager.currentItem shouldBe start
         verify { any<ReaderPageImageView>().panRight() }
         verify { any<ReaderPageImageView>().panLeft() }
+    }
+
+    @Test
+    fun leftTurnsWhenPanningIsOff() {
+        harness.vm.readerPreferences.navigateToPan.set(false)
+        harness.settle()
+        viewer.moveToNext()
+        val start = viewer.pager.currentItem
+        viewer.moveLeft()
+        viewer.pager.currentItem shouldBe start - 1
+    }
+
+    // Before its first layout, a viewer handed a chapter whose pages are not loaded yet stays hidden.
+    @Test
+    fun unloadedChapterHidesPager() {
+        val fresh = L2RPagerViewer(activity)
+        fresh.config.alwaysShowChapterTransition = false
+        fresh.setChapters(ViewerChapters(readerChapter(id = 70L), null, null))
+        fresh.pager.isVisible shouldBe false
+        fresh.destroy()
     }
 
     @Test

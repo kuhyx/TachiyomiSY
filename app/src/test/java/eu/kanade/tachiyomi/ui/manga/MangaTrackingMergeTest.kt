@@ -25,8 +25,8 @@ private const val MANGADEX = 2_499_283_573_021_220_255L
 
 /**
  * The MdList track of a merged entry whose MangaDex member leaves the merge after the tracker
- * observer started: the observer decided from the merge it saw first, the track is built from the
- * current one.
+ * observer started: every track change reads the current merge, so none is created and the
+ * observer keeps counting.
  */
 @RunWith(RobolectricTestRunner::class)
 internal class MangaTrackingMergeTest {
@@ -75,24 +75,30 @@ internal class MangaTrackingMergeTest {
 
     private fun failed(): Boolean = logged.any { "Could not create initial track" in it }
 
-    @Test
-    fun unmergedMemberFailsTheTrack() {
-        val model = load()
-        members.value = emptyList()
-        model.awaitSuccess { it.mergedData == null }
+    // Every later track change still reaches the count, and no MdList track is made for the gone member.
+    private fun keepsCounting(model: MangaScreenModel) {
         tracks.value = listOf(domainTrack(trackerId = 1L))
-        eventually { failed() }
+        model.awaitSuccess { it.trackingCount == 1 }
+        tracks.value = listOf(domainTrack(trackerId = 1L), domainTrack(id = 2L, trackerId = 1L))
+        model.awaitSuccess { it.trackingCount == 2 }
+        failed() shouldBe false
         created.get() shouldBe false
     }
 
     @Test
-    fun nonMangaDexMergeFailsTheTrack() {
+    fun unmergedMemberKeepsCounting() {
+        val model = load()
+        members.value = emptyList()
+        model.awaitSuccess { it.mergedData == null }
+        keepsCounting(model)
+    }
+
+    @Test
+    fun nonMangaDexMergeKeepsCounting() {
         val model = load()
         members.value = listOf(other)
         model.awaitSuccess { state -> state.mergedData?.manga?.keys == setOf(6L) }
-        tracks.value = listOf(domainTrack(trackerId = 1L))
-        eventually { failed() }
-        created.get() shouldBe false
+        keepsCounting(model)
     }
 
     @Test

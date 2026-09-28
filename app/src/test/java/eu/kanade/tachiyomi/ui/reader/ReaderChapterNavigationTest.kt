@@ -145,6 +145,12 @@ internal class ReaderChapterNavigationTest {
             every { online.isLocal } returns true
             readerVm().preload(chapter)
             coVerify(exactly = 2) { loader.loadChapter(chapter, null) }
+            // A chapter that failed before, and has no loader to recheck, is simply tried again.
+            val failed = readerChapter(id = 9L).also {
+                it.state = ReaderChapter.State.Error(IllegalStateException("y"))
+            }
+            readerVm().preload(failed)
+            coVerify(exactly = 1) { loader.loadChapter(failed, null) }
         }
     }
 
