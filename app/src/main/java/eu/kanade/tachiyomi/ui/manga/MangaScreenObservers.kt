@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import logcat.LogPriority
@@ -143,10 +144,12 @@ internal fun MangaScreenModel.observeAvailableScanlators() {
             ) { mangaScanlators, mergeScanlators ->
                 mangaScanlators + mergeScanlators
             } // SY <--
-            .collectLatest { availableScanlators ->
+            // launchIn rather than collect: the combined model state never completes, so nothing follows a collect.
+            .onEach { availableScanlators ->
                 updateSuccessState {
                     it.copy(availableScanlators = availableScanlators)
                 }
             }
+            .launchIn(this)
     }
 }
