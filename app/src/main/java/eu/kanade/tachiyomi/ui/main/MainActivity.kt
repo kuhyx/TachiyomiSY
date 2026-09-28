@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.util.system.isBenchmarkBuildType
+import eu.kanade.tachiyomi.util.system.isDebuggable
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import exh.SY_DEBUG_VERSION
@@ -136,7 +137,7 @@ internal class MainActivity : BaseActivity() {
 
     // SY -->
     private fun addAnalytics() {
-        if (!BuildConfig.DEBUG && isPreviewBuildType) {
+        if (!isDebuggable && isPreviewBuildType) {
             Firebase.analytics.setUserProperty("preview_version", SY_DEBUG_VERSION)
         }
     }

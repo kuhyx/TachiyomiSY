@@ -38,11 +38,11 @@ import eu.kanade.presentation.components.IndexingBannerBackgroundColor
 import eu.kanade.presentation.more.settings.screen.ConfigureExhDialog
 import eu.kanade.presentation.more.settings.screen.about.WhatsNewDialog
 import eu.kanade.presentation.util.DefaultScreenTransition
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
 import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.util.system.isBenchmarkBuildType
+import eu.kanade.tachiyomi.util.system.isDebuggable
 import eu.kanade.tachiyomi.util.system.isNavigationBarNeedsScrim
 import exh.debug.DebugToggles
 import exh.eh.EHentaiUpdateWorker
@@ -107,7 +107,7 @@ internal fun MainActivity.MainContent(isLaunch: Boolean, didMigration: Boolean, 
         }
     }
     // SY <--
-    var showChangelog by remember { mutableStateOf(didMigration && !BuildConfig.DEBUG && !isBenchmarkBuildType) }
+    var showChangelog by remember { mutableStateOf(didMigration && !isDebuggable && !isBenchmarkBuildType) }
     if (showChangelog) {
         // SY -->
         WhatsNewDialog(onDismissRequest = { showChangelog = false })
