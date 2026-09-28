@@ -46,15 +46,18 @@ internal class EditMergedSettingsState(
         val isPriorityOrder =
             mergeReference?.let { it.chapterSortMode == MergedMangaReference.CHAPTER_SORT_PRIORITY } ?: false
 
-        mergedMangaAdapter = EditMergedMangaAdapter(this, isPriorityOrder)
-        mergedMangaHeaderAdapter = EditMergedSettingsHeaderAdapter(this, mergedMangaAdapter!!)
+        // Locals, so nothing below re-reads the nullable state just assigned.
+        val adapter = EditMergedMangaAdapter(this, isPriorityOrder)
+        val headerAdapter = EditMergedSettingsHeaderAdapter(this, adapter)
+        mergedMangaAdapter = adapter
+        mergedMangaHeaderAdapter = headerAdapter
 
-        binding.recycler.adapter = ConcatAdapter(mergedMangaHeaderAdapter, mergedMangaAdapter)
+        binding.recycler.adapter = ConcatAdapter(headerAdapter, adapter)
         binding.recycler.layoutManager = LinearLayoutManager(context)
 
-        mergedMangaAdapter?.isHandleDragEnabled = isPriorityOrder
+        adapter.isHandleDragEnabled = isPriorityOrder
 
-        mergedMangaAdapter?.updateDataSet(
+        adapter.updateDataSet(
             mergedMangas.map {
                 it.toModel()
             }.sortedBy { it.mergedMangaReference.chapterPriority },
@@ -99,16 +102,16 @@ internal class EditMergedSettingsState(
     }
 
     private fun toggleChapterUpdates(position: Int) {
-        val adapterReference = mergedMangaAdapter?.currentItems?.getOrNull(position)?.mergedMangaReference
-            ?: return
+        val adapter = mergedMangaAdapter ?: return
+        val adapterReference = adapter.currentItems.getOrNull(position)?.mergedMangaReference ?: return
         mergedMangas = mergedMangas.map { pair ->
             val (manga, reference) = pair
             if (reference.id != adapterReference.id) {
                 pair
             } else {
-                mergedMangaAdapter?.allBoundViewHolders
-                    ?.filterIsInstance<EditMergedMangaHolder>()
-                    ?.firstOrNull { it.reference?.id == reference.id }
+                adapter.allBoundViewHolders
+                    .filterIsInstance<EditMergedMangaHolder>()
+                    .firstOrNull { it.reference.id == reference.id }
                     ?.updateChapterUpdatesIcon(!reference.getChapterUpdates)
                     ?: context.toast(SYMR.strings.merged_chapter_updates_error)
 
@@ -129,16 +132,16 @@ internal class EditMergedSettingsState(
     }
 
     private fun toggleChapterDownloads(position: Int) {
-        val adapterReference = mergedMangaAdapter?.currentItems?.getOrNull(position)?.mergedMangaReference
-            ?: return
+        val adapter = mergedMangaAdapter ?: return
+        val adapterReference = adapter.currentItems.getOrNull(position)?.mergedMangaReference ?: return
         mergedMangas = mergedMangas.map { pair ->
             val (manga, reference) = pair
             if (reference.id != adapterReference.id) {
                 pair
             } else {
-                mergedMangaAdapter?.allBoundViewHolders
-                    ?.filterIsInstance<EditMergedMangaHolder>()
-                    ?.firstOrNull { it.reference?.id == reference.id }
+                adapter.allBoundViewHolders
+                    .filterIsInstance<EditMergedMangaHolder>()
+                    .firstOrNull { it.reference.id == reference.id }
                     ?.updateDownloadChaptersIcon(!reference.downloadChapters)
                     ?: context.toast(SYMR.strings.merged_toggle_download_chapters_error)
 

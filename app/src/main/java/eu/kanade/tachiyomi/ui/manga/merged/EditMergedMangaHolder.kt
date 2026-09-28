@@ -19,12 +19,14 @@ private const val DISABLED_ALPHA = 0.5F
 internal class EditMergedMangaHolder(
     view: View,
     val adapter: EditMergedMangaAdapter,
+    // SY --> The creating item's reference until bind sets the shown one, so a bound holder is never without one.
+    var reference: MergedMangaReference,
+    // SY <--
 ) : FlexibleViewHolder(
     view,
     adapter,
 ) {
 
-    var reference: MergedMangaReference? = null
     var binding = EditMergedSettingsItemBinding.bind(view)
 
     init {

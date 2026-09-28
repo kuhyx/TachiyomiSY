@@ -85,9 +85,9 @@ internal class MangaChapterActions(
     }
 
     fun markPreviousChapterRead(pointer: Chapter) {
-        val manga = model.successState?.manga ?: return
-        val chapters = model.filteredChapters.orEmpty().map { it.chapter }
-        val prevChapters = if (manga.sortDescending()) chapters.asReversed() else chapters
+        val successState = model.successState ?: return
+        val chapters = successState.processedChapters.map { it.chapter }
+        val prevChapters = if (successState.manga.sortDescending()) chapters.asReversed() else chapters
         val pointerPos = prevChapters.indexOf(pointer)
         if (pointerPos != -1) markChaptersRead(prevChapters.take(pointerPos), true)
     }
@@ -112,7 +112,8 @@ internal class MangaChapterActions(
                 autoTrack != AutoTrackState.NEVER
             if (trackable) {
                 refreshTrackers()
-                pushProgressToTrackers(chapters.maxOf { it.chapterNumber }, autoTrack)
+                // Never empty here (checked above), so no empty-list arm.
+                pushProgressToTrackers(chapters.map { it.chapterNumber }.max(), autoTrack)
             }
         }
     }

@@ -76,6 +76,12 @@ internal class LibraryScreenModel(
     internal var recommendationSearchJob: Job? = null
     // SY <--
 
+    // Before init: its observers can run their first combine synchronously and read these.
+    internal val pipeline = LibraryItemPipeline(preferences, libraryPreferences)
+    internal val search = LibrarySearch()
+    internal val downloads = LibraryDownloads()
+    internal val selection = LibrarySelection()
+
     init {
         restoreActiveCategory()
         observeLibraryData()
@@ -88,11 +94,6 @@ internal class LibraryScreenModel(
         observeSyncService()
         // SY <--
     }
-
-    internal val pipeline = LibraryItemPipeline(preferences, libraryPreferences)
-    internal val search = LibrarySearch()
-    internal val downloads = LibraryDownloads()
-    internal val selection = LibrarySelection()
 
     private fun restoreActiveCategory() {
         mutableState.update { state ->
@@ -216,8 +217,8 @@ internal class LibraryScreenModel(
 }
 
 internal fun LibraryScreenModel.State.getItemsForCategoryId(categoryId: Long?): List<LibraryItem> {
-    if (categoryId == null) return emptyList()
-    val category = displayedCategories.find { it.id == categoryId } ?: return emptyList()
+    val id = categoryId ?: return emptyList()
+    val category = displayedCategories.find { it.id == id } ?: return emptyList()
     return getItemsForCategory(category)
 }
 

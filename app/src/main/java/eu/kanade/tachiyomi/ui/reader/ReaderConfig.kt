@@ -96,12 +96,8 @@ internal class ReaderConfig(private val activity: ReaderActivity) {
         activity.readerPreferences.pageLayout.changes()
             .drop(1)
             .onEach {
-                activity.viewModel.setDoublePages(
-                    (activity.viewModel.state.value.viewer as? PagerViewer)
-                        ?.config
-                        ?.doublePages
-                        ?: false,
-                )
+                val pagerViewer = activity.viewModel.state.value.viewer as? PagerViewer
+                activity.viewModel.setDoublePages(pagerViewer != null && pagerViewer.config.doublePages)
             }
             .launchIn(activity.lifecycleScope)
 

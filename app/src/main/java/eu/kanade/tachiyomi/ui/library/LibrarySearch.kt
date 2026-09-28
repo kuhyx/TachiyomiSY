@@ -91,14 +91,17 @@ internal class LibrarySearch(
             // one without metadata yet falls back to the title like any other.
             val hasMeta = isMetadataSource(sourceId) && mangaWithMetaIds.binarySearch(mangaId) >= 0
             return if (hasMeta) {
+                // Looked up before the call, so no argument is held across a suspension.
+                val searchTags = getSearchTags.await(mangaId)
+                val searchTitles = getSearchTitles.await(mangaId)
                 filterManga(
                     queries = parsedQuery,
                     libraryManga = item.libraryManga,
                     tracks = tracks[mangaId],
                     source = sources[sourceId],
                     checkGenre = false,
-                    searchTags = getSearchTags.await(mangaId),
-                    searchTitles = getSearchTitles.await(mangaId),
+                    searchTags = searchTags,
+                    searchTitles = searchTitles,
                     loggedInTrackServices = loggedInTrackServices,
                 )
             } else {
@@ -201,20 +204,20 @@ internal class LibrarySearch(
 
         fun excludes(component: Namespace): Boolean {
             val searchedTag = component.tag?.asQuery()
-            return searchTags == null ||
-                (component.namespace.isBlank() && searchedTag.isNullOrBlank()) ||
-                searchTags.fastAll { mangaTag ->
-                    when {
-                        component.namespace.isBlank() && !searchedTag.isNullOrBlank() ->
-                            !mangaTag.name.contains(searchedTag, true)
-                        searchedTag.isNullOrBlank() ->
-                            mangaTag.namespace == null || !mangaTag.namespace.equals(component.namespace, true)
-                        mangaTag.namespace.isNullOrBlank() -> true
-                        else ->
-                            !mangaTag.name.contains(searchedTag, true) ||
-                                !mangaTag.namespace.equals(component.namespace, true)
+            // The per-tag test is picked once: which of namespace and tag were searched does not vary per tag.
+            return when {
+                searchTags == null -> true
+                searchedTag.isNullOrBlank() -> component.namespace.isBlank() ||
+                    searchTags.fastAll { mangaTag ->
+                        mangaTag.namespace == null || !mangaTag.namespace.equals(component.namespace, true)
                     }
+                component.namespace.isBlank() -> searchTags.fastAll { !it.name.contains(searchedTag, true) }
+                else -> searchTags.fastAll { mangaTag ->
+                    mangaTag.namespace.isNullOrBlank() ||
+                        !mangaTag.name.contains(searchedTag, true) ||
+                        !mangaTag.namespace.equals(component.namespace, true)
                 }
+            }
         }
     }
 

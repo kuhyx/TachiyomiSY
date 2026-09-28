@@ -50,18 +50,21 @@ internal value class SearchMetadataChips(
     companion object {
         operator fun invoke(meta: RaisedSearchMetadata?, sourceId: Long, tags: List<String>?): SearchMetadataChips? {
             return when {
-                meta != null -> SearchMetadataChips(
-                    meta.tags
-                        .filterNot { it.type == RaisedSearchMetadata.TAG_TYPE_VIRTUAL }
-                        .map { it.toDisplayTag(sourceId) }
-                        .groupBy { it.namespace.orEmpty() },
-                )
+                meta != null -> fromMetadata(meta, sourceId)
+                // Every tag has a ':', so each one's namespace is the text before it.
                 tags != null && tags.all { it.contains(':') } -> SearchMetadataChips(
-                    tags.map(::parseNamespacedTag).groupBy { it.namespace.orEmpty() },
+                    tags.groupBy({ it.substringBefore(':').trim() }, ::parseNamespacedTag),
                 )
                 else -> null
             }
         }
+
+        fun fromMetadata(meta: RaisedSearchMetadata, sourceId: Long): SearchMetadataChips = SearchMetadataChips(
+            meta.tags
+                .filterNot { it.type == RaisedSearchMetadata.TAG_TYPE_VIRTUAL }
+                .map { it.toDisplayTag(sourceId) }
+                .groupBy { it.namespace.orEmpty() },
+        )
     }
 }
 
@@ -178,7 +181,7 @@ internal fun NamespaceTagsPreview() {
         Surface {
             NamespaceTags(
                 tags = remember {
-                    EHentaiSearchMetadata().apply {
+                    val meta = EHentaiSearchMetadata().apply {
                         this.tags.addAll(
                             arrayOf(
                                 RaisedTag(
@@ -213,7 +216,8 @@ internal fun NamespaceTagsPreview() {
                                 ),
                             ),
                         )
-                    }.let { SearchMetadataChips(it, EXH_SOURCE_ID, emptyList()) }!!
+                    }
+                    SearchMetadataChips.fromMetadata(meta, EXH_SOURCE_ID)
                 },
                 onClick = {},
             )

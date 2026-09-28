@@ -49,11 +49,7 @@ internal class SourceCategoryScreen : Screen() {
 
         LaunchedEffect(Unit) {
             screenModel.events
-                .onEach { event ->
-                    if (event is SourceCategoryEvent.LocalizedMessage) {
-                        context.toast(event.stringRes)
-                    }
-                }
+                .onEach { event -> context.toast(event.stringRes) }
                 .launchIn(this)
         }
     }

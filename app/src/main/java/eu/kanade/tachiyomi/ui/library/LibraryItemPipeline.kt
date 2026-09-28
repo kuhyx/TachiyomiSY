@@ -181,11 +181,10 @@ internal class LibraryItemPipeline(
             val status = tracks[item.libraryManga.manga.id]?.firstNotNullOfOrNull { track ->
                 TrackStatus.parseTrackerStatus(trackerManager, track.trackerId, track.status)
             } ?: TrackStatus.OTHER
-            status.int
-        }.mapKeys { (id) ->
-            val status = TrackStatus.entries.find { it.int == id } ?: TrackStatus.OTHER
+            status
+        }.mapKeys { (status) ->
             Category(
-                id = id.toLong(),
+                id = status.int.toLong(),
                 name = context.stringResource(status.res),
                 order = TrackStatus.entries.indexOf(status).toLong(),
                 flags = 0,

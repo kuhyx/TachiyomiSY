@@ -2,6 +2,7 @@ package eu.kanade.presentation.reader.settings
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
@@ -32,6 +33,12 @@ internal fun ReaderSettingsDialog(
         stringResource(MR.strings.pref_category_general),
         stringResource(MR.strings.custom_filter),
     )
+    // Parallel to the titles, so every pager index has its page and none falls through.
+    val pages: List<@Composable ColumnScope.() -> Unit> = listOf(
+        { ReadingModePage(screenModel) },
+        { GeneralPage(screenModel) },
+        { ColorFilterPage(screenModel) },
+    )
     val pagerState = rememberPagerState { tabTitles.size }
 
     BoxWithConstraints {
@@ -44,14 +51,15 @@ internal fun ReaderSettingsDialog(
             tabTitles = tabTitles,
             pagerState = pagerState,
         ) { page ->
-            val window = (LocalView.current.parent as? DialogWindowProvider)?.window
+            // TabbedDialog always hosts its pages in a Dialog, whose layout provides the window.
+            val window = (LocalView.current.parent as DialogWindowProvider).window
 
             LaunchedEffect(pagerState.currentPage) {
                 if (pagerState.currentPage == 2) {
-                    window?.setDimAmount(0f)
+                    window.setDimAmount(0f)
                     onHideMenus()
                 } else {
-                    window?.setDimAmount(DIM_AMOUNT)
+                    window.setDimAmount(DIM_AMOUNT)
                     onShowMenus()
                 }
             }
@@ -61,11 +69,7 @@ internal fun ReaderSettingsDialog(
                     .padding(vertical = TabbedDialogPaddings.Vertical)
                     .verticalScroll(rememberScrollState()),
             ) {
-                when (page) {
-                    0 -> ReadingModePage(screenModel)
-                    1 -> GeneralPage(screenModel)
-                    2 -> ColorFilterPage(screenModel)
-                }
+                pages[page]()
             }
         }
     }

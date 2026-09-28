@@ -168,11 +168,12 @@ internal fun DownloadQueueList(
     val top = with(density) { contentPadding.calculateTopPadding().toPx().roundToInt() }
     val right = with(density) { contentPadding.calculateRightPadding(layoutDirection).toPx().roundToInt() }
     val bottom = with(density) { contentPadding.calculateBottomPadding().toPx().roundToInt() }
+    // Held here, not read back from the model, so the update below never sees a null adapter.
+    val adapter = remember { DownloadAdapter(screenModel.listener) }
     AndroidView(
         modifier = Modifier.fillMaxWidth(),
         factory = { context ->
             val binding = DownloadListBinding.inflate(LayoutInflater.from(context))
-            val adapter = DownloadAdapter(screenModel.listener)
             screenModel.controllerBinding = binding
             screenModel.adapter = adapter
             binding.root.adapter = adapter
@@ -189,7 +190,7 @@ internal fun DownloadQueueList(
         },
         update = { view ->
             view.updatePadding(left = left, top = top, right = right, bottom = bottom)
-            screenModel.adapter?.updateDataSet(downloadList)
+            adapter.updateDataSet(downloadList)
         },
     )
 }

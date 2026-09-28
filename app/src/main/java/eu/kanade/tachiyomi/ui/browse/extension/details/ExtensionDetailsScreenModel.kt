@@ -130,9 +130,8 @@ internal class ExtensionDetailsScreenModel(
     }
 
     fun toggleSources(enable: Boolean) {
-        state.value.extension?.sources
-            ?.map { it.id }
-            ?.let { toggleSource.await(it, enable) }
+        val extension = state.value.extension ?: return
+        toggleSource.await(extension.sources.map { it.id }, enable)
     }
 
     fun toggleIncognito(enable: Boolean) {

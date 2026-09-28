@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import eu.kanade.tachiyomi.databinding.EditMangaDialogBinding
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.lang.chop
@@ -73,23 +74,20 @@ internal fun EditMangaDialogBinding.fillLocalFields(manga: Manga, context: Conte
     mangaGenresTags.setChips(manga.genre.orEmpty().dropBlank(), scope)
 }
 
+// A value that differs from the source's is an override, so it is never null: a missing one falls back to the source's.
+private fun TextView.appendOverride(value: String?, sourceValue: String?) {
+    if (value != null && value != sourceValue) append(value)
+}
+
 /** A sourced entry shows only its overrides as text; the source values sit in the hints. */
 internal fun EditMangaDialogBinding.fillSourcedFields(manga: Manga, context: Context, scope: CoroutineScope) {
     if (manga.title != manga.ogTitle) {
         title.append(manga.title)
     }
-    if (manga.author != manga.ogAuthor) {
-        mangaAuthor.append(manga.author.orEmpty())
-    }
-    if (manga.artist != manga.ogArtist) {
-        mangaArtist.append(manga.artist.orEmpty())
-    }
-    if (manga.thumbnailUrl != manga.ogThumbnailUrl) {
-        thumbnailUrl.append(manga.thumbnailUrl.orEmpty())
-    }
-    if (manga.description != manga.ogDescription) {
-        mangaDescription.append(manga.description.orEmpty())
-    }
+    mangaAuthor.appendOverride(manga.author, manga.ogAuthor)
+    mangaArtist.appendOverride(manga.artist, manga.ogArtist)
+    thumbnailUrl.appendOverride(manga.thumbnailUrl, manga.ogThumbnailUrl)
+    mangaDescription.appendOverride(manga.description, manga.ogDescription)
     mangaGenresTags.setChips(manga.genre.orEmpty().dropBlank(), scope)
 
     title.hint = context.stringResource(SYMR.strings.title_hint, manga.ogTitle)

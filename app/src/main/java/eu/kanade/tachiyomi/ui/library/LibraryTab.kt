@@ -101,10 +101,8 @@ internal data object LibraryTab : Tab {
         // SY <--
 
         BackHandler(enabled = state.selectionMode || state.searchQuery != null) {
-            when {
-                state.selectionMode -> screenModel.clearSelection()
-                state.searchQuery != null -> screenModel.search(null)
-            }
+            // Enabled only in one of the two states, so a plain if/else covers both.
+            if (state.selectionMode) screenModel.clearSelection() else screenModel.search(null)
         }
         LaunchedEffect(state.selectionMode, state.dialog) {
             HomeScreen.showBottomNav(!state.selectionMode)

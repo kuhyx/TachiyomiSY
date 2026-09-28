@@ -60,7 +60,8 @@ internal fun extensionsTab(
                 },
                 onClickItemCancel = extensionsScreenModel::cancelInstallUpdateExtension,
                 onClickUpdateAll = extensionsScreenModel::updateAllExtensions,
-                onOpenWebView = { extension -> extension.sources.getOrNull(0)?.let { navigator.push(webViewFor(it)) } },
+                // The web view action is only offered for an extension with sources (IdleAction).
+                onOpenWebView = { extension -> navigator.push(webViewFor(extension.sources.first())) },
                 onInstallExtension = extensionsScreenModel::installExtension,
                 onOpenExtension = { navigator.push(ExtensionDetailsScreen(it.pkgName)) },
                 onTrustExtension = { extensionsScreenModel.trustExtension(it) },

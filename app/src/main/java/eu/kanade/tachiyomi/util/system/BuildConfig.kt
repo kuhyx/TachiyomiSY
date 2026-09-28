@@ -18,5 +18,10 @@ internal val isPreviewBuildType: Boolean
 internal val isReleaseBuildType: Boolean
     get() = BuildConfig.BUILD_TYPE == "release" /* SY --> */ && SY_DEBUG_VERSION == "0" /* SY <-- */
 
+// SY --> A plain getter (not inline) so tests can stub it; `or` evaluates both, so no branch the debug build misses.
 internal val isBenchmarkBuildType: Boolean
-    inline get() = BuildConfig.BUILD_TYPE.contains("nonMinified") || BuildConfig.BUILD_TYPE.contains("benchmark")
+    get() = BuildConfig.BUILD_TYPE.contains("nonMinified") or BuildConfig.BUILD_TYPE.contains("benchmark")
+
+internal val isReleaseTestBuildType: Boolean
+    get() = BuildConfig.BUILD_TYPE == "releaseTest"
+// SY <--

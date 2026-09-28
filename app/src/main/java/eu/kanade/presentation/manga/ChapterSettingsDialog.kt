@@ -2,6 +2,7 @@ package eu.kanade.presentation.manga
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -58,6 +59,30 @@ internal fun ChapterSettingsDialog(
 
     val downloadedOnly = remember { Injekt.get<BasePreferences>().downloadedOnly.get() }
 
+    // Parallel to the tab titles, so every pager index has its page and none falls through.
+    val pages: List<@Composable ColumnScope.() -> Unit> = listOf(
+        {
+            FilterPage(
+                downloadFilter = manga?.downloadedFilter ?: TriState.DISABLED,
+                onDownloadFilterChanged = onDownloadFilterChanged.takeUnless { downloadedOnly },
+                unreadFilter = manga?.unreadFilter ?: TriState.DISABLED,
+                onUnreadFilterChanged = onUnreadFilterChanged,
+                bookmarkedFilter = manga?.bookmarkedFilter ?: TriState.DISABLED,
+                onBookmarkedFilterChanged = onBookmarkedFilterChanged,
+                scanlatorFilterActive = scanlatorFilterActive,
+                onScanlatorFilterClicked = onScanlatorFilterClicked,
+            )
+        },
+        {
+            SortPage(
+                sortingMode = manga?.sorting ?: 0,
+                sortDescending = manga?.sortDescending() ?: false,
+                onItemSelected = onSortModeChanged,
+            )
+        },
+        { DisplayPage(displayMode = manga?.displayMode ?: 0, onItemSelected = onDisplayModeChanged) },
+    )
+
     TabbedDialog(
         onDismissRequest = onDismissRequest,
         tabTitles = listOf(
@@ -78,28 +103,7 @@ internal fun ChapterSettingsDialog(
                 .padding(vertical = TabbedDialogPaddings.Vertical)
                 .verticalScroll(rememberScrollState()),
         ) {
-            when (page) {
-                0 -> FilterPage(
-                    downloadFilter = manga?.downloadedFilter ?: TriState.DISABLED,
-                    onDownloadFilterChanged = onDownloadFilterChanged
-                        .takeUnless { downloadedOnly },
-                    unreadFilter = manga?.unreadFilter ?: TriState.DISABLED,
-                    onUnreadFilterChanged = onUnreadFilterChanged,
-                    bookmarkedFilter = manga?.bookmarkedFilter ?: TriState.DISABLED,
-                    onBookmarkedFilterChanged = onBookmarkedFilterChanged,
-                    scanlatorFilterActive = scanlatorFilterActive,
-                    onScanlatorFilterClicked = onScanlatorFilterClicked,
-                )
-                1 -> SortPage(
-                    sortingMode = manga?.sorting ?: 0,
-                    sortDescending = manga?.sortDescending() ?: false,
-                    onItemSelected = onSortModeChanged,
-                )
-                2 -> DisplayPage(
-                    displayMode = manga?.displayMode ?: 0,
-                    onItemSelected = onDisplayModeChanged,
-                )
-            }
+            pages[page]()
         }
     }
 }

@@ -1,18 +1,17 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.content.ClipData
-import android.content.ClipboardManager
 import android.net.Uri
 import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.core.content.getSystemService
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.system.toShareIntent
 import eu.kanade.tachiyomi.util.system.toast
+import exh.util.clipboardManager
 import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
@@ -57,9 +56,8 @@ internal fun ReaderActivity.onShareImageResult(
 }
 
 internal fun ReaderActivity.onCopyImageResult(uri: Uri) {
-    val clipboardManager = applicationContext.getSystemService<ClipboardManager>() ?: return
     val clipData = ClipData.newUri(applicationContext.contentResolver, "", uri)
-    clipboardManager.setPrimaryClip(clipData)
+    applicationContext.clipboardManager.setPrimaryClip(clipData)
 }
 
 // Called from the presenter when a page is saved or fails. It shows a message or logs the

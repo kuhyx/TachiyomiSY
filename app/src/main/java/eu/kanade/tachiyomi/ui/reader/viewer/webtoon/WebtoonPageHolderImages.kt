@@ -60,19 +60,20 @@ internal fun WebtoonPageHolder.createProgressIndicator(): ReaderProgressIndicato
 
 // Initializes a button to retry pages.
 internal fun WebtoonPageHolder.initErrorLayout(error: Throwable?): ReaderErrorBinding {
-    if (errorLayout == null) {
-        errorLayout = ReaderErrorBinding.inflate(LayoutInflater.from(context), frame, true)
-        errorLayout?.root?.layoutParams =
+    // A local, so nothing below re-reads the nullable property it was just assigned to.
+    val layout = errorLayout ?: ReaderErrorBinding.inflate(LayoutInflater.from(context), frame, true).also { inflated ->
+        errorLayout = inflated
+        inflated.root.layoutParams =
             FrameLayout.LayoutParams(MATCH_PARENT, (parentHeight * ERROR_LAYOUT_HEIGHT).toInt())
-        errorLayout?.actionRetry?.setOnClickListener {
+        inflated.actionRetry.setOnClickListener {
             page?.let { it.chapter.pageLoader?.retryPage(it) }
         }
     }
 
     val imageUrl = page?.imageUrl
-    errorLayout?.actionOpenInWebView?.isVisible = imageUrl != null
+    layout.actionOpenInWebView.isVisible = imageUrl != null
     if (imageUrl != null && imageUrl.startsWith("http", true)) {
-        errorLayout?.actionOpenInWebView?.setOnClickListener {
+        layout.actionOpenInWebView.setOnClickListener {
             val sourceId = viewer.activity.viewModel.manga?.source
 
             val intent = WebViewActivity.newIntent(context, imageUrl, sourceId)
@@ -80,10 +81,10 @@ internal fun WebtoonPageHolder.initErrorLayout(error: Throwable?): ReaderErrorBi
         }
     }
 
-    errorLayout?.errorMessage?.text = with(context) { error?.formattedMessage }
+    layout.errorMessage.text = with(context) { error?.formattedMessage }
         ?: context.stringResource(MR.strings.decode_image_error)
 
-    return errorLayout!!
+    return layout
 }
 
 // Removes the decode error layout from the holder, if found.

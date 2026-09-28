@@ -84,8 +84,7 @@ internal fun SortFilterItem(filter: Filter.Sort, onUpdate: () -> Unit, startExpa
     ) {
         Column {
             filter.values.mapIndexed { index, item ->
-                val sortAscending = filter.state?.ascending
-                    ?.takeIf { index == filter.state?.index }
+                val sortAscending = filter.state?.takeIf { it.index == index }?.ascending
                 SortItem(
                     label = item,
                     sortDescending = sortAscending?.let { !it },

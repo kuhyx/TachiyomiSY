@@ -21,7 +21,11 @@ internal class EditMergedMangaItem(
     override fun createViewHolder(
         view: View,
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-    ): EditMergedMangaHolder = EditMergedMangaHolder(view, adapter as EditMergedMangaAdapter)
+    ): EditMergedMangaHolder = EditMergedMangaHolder(
+        view,
+        adapter as EditMergedMangaAdapter,
+        mergedMangaReference,
+    )
 
     override fun bindViewHolder(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>?,

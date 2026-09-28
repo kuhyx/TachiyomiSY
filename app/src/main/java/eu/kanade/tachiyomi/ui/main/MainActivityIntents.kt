@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.main
 
 import android.app.SearchManager
 import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.lifecycleScope
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
@@ -100,7 +101,7 @@ private fun internalSearchTarget(intent: Intent): IntentTarget {
 
 // Opening a backup file, or the deep link that adds an extension store.
 private fun viewTarget(intent: Intent): IntentTarget {
-    val repoUrl = intent.takeIf { it.isAddExtensionStoreIntent() }?.data?.getQueryParameter("url")
+    val repoUrl = intent.data?.takeIf { it.isAddExtensionStoreUri() }?.getQueryParameter("url")
     return when {
         intent.data.toString().endsWith(".tachibk") -> IntentTarget.Push(RestoreBackupScreen(intent.data.toString()))
         repoUrl != null -> IntentTarget.Push(ExtensionStoresScreen(repoUrl))
@@ -108,7 +109,8 @@ private fun viewTarget(intent: Intent): IntentTarget {
     }
 }
 
-private fun Intent.isAddExtensionStoreIntent(): Boolean {
-    return (scheme == "tachiyomi" && data?.host == "add-repo") ||
-        (scheme == "mihon" && data?.host == "extension-store")
+// On the Uri, not the Intent: an Intent's scheme is read from its data, so the host needs no null check.
+private fun Uri.isAddExtensionStoreUri(): Boolean {
+    return (scheme == "tachiyomi" && host == "add-repo") ||
+        (scheme == "mihon" && host == "extension-store")
 }

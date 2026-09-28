@@ -14,6 +14,12 @@ import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import eu.kanade.tachiyomi.util.system.dpToPx
 
 private const val SPLASH_EXIT_ANIM_DURATION = 400L // ms
+private const val SPLASH_MIN_DURATION = 500 // ms
+private const val SPLASH_MAX_DURATION = 5000 // ms
+
+// The splash stays at least SPLASH_MIN_DURATION, then until the app is ready, but never past SPLASH_MAX_DURATION.
+internal fun keepSplashOnScreen(elapsed: Long, ready: Boolean): Boolean =
+    elapsed <= SPLASH_MIN_DURATION || (!ready && elapsed <= SPLASH_MAX_DURATION)
 
 // Sets custom splash screen exit animation on devices prior to Android 12.
 // When custom animation is used, status and navigation bar color will be set to transparent and will be restored

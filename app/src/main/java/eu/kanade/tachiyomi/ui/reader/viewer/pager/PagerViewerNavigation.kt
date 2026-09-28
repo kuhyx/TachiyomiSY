@@ -7,8 +7,10 @@ import eu.kanade.tachiyomi.ui.reader.toggleMenu
 import tachiyomi.core.common.util.system.logcat
 
 internal fun PagerViewer.moveToReaderPage(page: ReaderPage) {
-    val position = adapter.joinedItems.indexOfFirst { it.first == page || it.second == page }
+    val joinedItems = adapter.joinedItems
+    val position = joinedItems.indexOfFirst { it.first == page || it.second == page }
     if (position != -1) {
+        val joinedItem = joinedItems[position]
         val currentPosition = pager.currentItem
         pager.setCurrentItem(position, true)
         // manually call onPageChange since ViewPager listener is not triggered in this case
@@ -17,10 +19,10 @@ internal fun PagerViewer.moveToReaderPage(page: ReaderPage) {
         } else {
             // Call this since with double shift onPageChange wont get called (it shouldn't)
             // Instead just update the page count in ui
-            val joinedItem = adapter.joinedItems.firstOrNull { it.first == page || it.second == page }
+            // A transition is never paired, so a spread holding [page] starts with a page.
             activity.onPageSelected(
-                joinedItem?.first as? ReaderPage ?: page,
-                joinedItem?.second != null,
+                joinedItem.first as ReaderPage,
+                joinedItem.second != null,
             )
         }
     } else {

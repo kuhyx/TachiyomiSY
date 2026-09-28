@@ -108,7 +108,7 @@ internal class SourcesScreenModel(
                     .flatMap {
                         val header = SourceUiModel.Header(
                             it.key.removePrefix(CATEGORY_KEY_PREFIX),
-                            it.value.firstOrNull()?.category != null,
+                            it.value.first().category != null,
                         )
                         listOf(header) + it.value.map { source -> SourceUiModel.Item(source) }
                     },

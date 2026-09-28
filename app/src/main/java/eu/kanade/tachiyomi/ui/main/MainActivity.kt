@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.main
 import android.app.assist.AssistContent
 import android.os.Bundle
 import android.os.Looper
+import android.os.SystemClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,13 +16,13 @@ import com.google.firebase.analytics.analytics
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.source.interactor.GetIncognitoState
 import eu.kanade.presentation.util.AssistContentScreen
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.util.system.isBenchmarkBuildType
 import eu.kanade.tachiyomi.util.system.isDebuggable
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
+import eu.kanade.tachiyomi.util.system.isReleaseTestBuildType
 import eu.kanade.tachiyomi.util.view.setComposeContent
 import exh.SY_DEBUG_VERSION
 import exh.source.BlacklistedSources
@@ -99,17 +100,13 @@ internal class MainActivity : BaseActivity() {
         }
 
         // SY -->
-        @Suppress("KotlinConstantConditions", "SimplifyBooleanWithConstants")
-        val hasDebugOverlay = (BuildConfig.DEBUG || BuildConfig.BUILD_TYPE == "releaseTest") && !isBenchmarkBuildType
+        val hasDebugOverlay = (isDebuggable || isReleaseTestBuildType) && !isBenchmarkBuildType
         // SY <--
 
         setComposeContent { MainContent(isLaunch, didMigration, hasDebugOverlay) }
 
-        val startTime = System.currentTimeMillis()
-        splashScreen?.setKeepOnScreenCondition {
-            val elapsed = System.currentTimeMillis() - startTime
-            elapsed <= SPLASH_MIN_DURATION || (!ready && elapsed <= SPLASH_MAX_DURATION)
-        }
+        val startTime = SystemClock.uptimeMillis()
+        splashScreen?.setKeepOnScreenCondition { keepSplashOnScreen(SystemClock.uptimeMillis() - startTime, ready) }
         setSplashScreenExitAnimation(splashScreen)
 
         if (isLaunch && libraryPreferences.autoClearChapterCache.get()) {
@@ -149,7 +146,3 @@ internal class MainActivity : BaseActivity() {
         const val INTENT_SEARCH_FILTER = "filter"
     }
 }
-
-// Splash screen
-private const val SPLASH_MIN_DURATION = 500 // ms
-private const val SPLASH_MAX_DURATION = 5000 // ms

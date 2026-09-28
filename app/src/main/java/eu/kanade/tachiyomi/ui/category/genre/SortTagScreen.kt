@@ -47,11 +47,7 @@ internal class SortTagScreen : Screen() {
 
         LaunchedEffect(Unit) {
             screenModel.events
-                .onEach { event ->
-                    if (event is SortTagEvent.LocalizedMessage) {
-                        context.toast(event.stringRes)
-                    }
-                }
+                .onEach { event -> context.toast(event.stringRes) }
                 .launchIn(this)
         }
     }

@@ -80,11 +80,7 @@ internal class BiometricTimesScreen : Screen() {
 
         LaunchedEffect(Unit) {
             screenModel.events
-                .onEach { event ->
-                    if (event is BiometricTimesEvent.LocalizedMessage) {
-                        context.toast(event.stringRes)
-                    }
-                }
+                .onEach { event -> context.toast(event.stringRes) }
                 .launchIn(this)
         }
     }
