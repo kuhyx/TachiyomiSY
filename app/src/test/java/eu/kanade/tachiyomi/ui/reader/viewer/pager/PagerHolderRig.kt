@@ -29,6 +29,7 @@ import org.robolectric.Robolectric
 import org.robolectric.android.controller.ActivityController
 import tachiyomi.core.common.util.system.ImageUtil
 import java.io.ByteArrayOutputStream
+import java.util.concurrent.Executor
 
 /** The file of the viewer's double-page extensions a page holder calls. */
 internal const val DOUBLE_PAGES_KT: String = "eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewerDoublePagesKt"
@@ -56,6 +57,10 @@ internal class PagerHolderRig {
         startKoin { modules(module { single { BasePreferences(context.application, MapPreferenceStore()) } }) }
         PagerDecodes.bitmaps.clear()
         PagerDecodes.throwNext = false
+        PagerDecodes.refuseAfter = null
+        // The still image view decodes on AsyncTask threads that report back whenever they finish, possibly after
+        // the assertion or into the next test (and with a profile the decoder shadow refuses): never start them.
+        overrideAsyncExecutor(Executor { _ -> })
         mockkObject(ImageUtil)
         every { ImageUtil.canUseHardwareBitmap(any<BufferedSource>()) } returns false
         every { config.imageScaleType } returns SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE
@@ -71,6 +76,7 @@ internal class PagerHolderRig {
             holders.forEach { it.scope.cancel() }
             host.pause().stop().destroy()
         } finally {
+            overrideAsyncExecutor(null)
             unmockkAll()
             stopKoin()
         }
@@ -103,4 +109,12 @@ internal class PagerHolderRig {
         Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).compress(Bitmap.CompressFormat.PNG, 100, out)
         return Buffer().write(out.toByteArray())
     }
+}
+
+// Robolectric's paused-looper AsyncTask shadow is deprecated as a type, so its static hook is reached reflectively;
+// a null executor restores the task's own.
+private fun overrideAsyncExecutor(executor: Executor?) {
+    Class.forName("org.robolectric.shadows.ShadowPausedAsyncTask")
+        .getMethod("overrideExecutor", Executor::class.java)
+        .invoke(null, executor)
 }

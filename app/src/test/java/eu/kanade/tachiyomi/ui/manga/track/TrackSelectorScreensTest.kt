@@ -117,6 +117,12 @@ internal class TrackSelectorScreensTest {
     }
 
     @Test
+    fun unsetFinishDateIsShown() {
+        show(TrackDateSelectorScreen(track, 1L, start = false))
+        compose.onNodeWithText("Finish date").assertExists()
+    }
+
+    @Test
     fun startDateCanBeRemoved() {
         show(TrackDateSelectorScreen(track.copy(startDate = 86_400_000L), 1L, start = true))
         compose.onNodeWithText("Remove").invokeClick()

@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.app.Application
+import android.provider.Settings
 import androidx.test.core.app.ApplicationProvider
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.source.model.Page
@@ -29,6 +30,10 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4, private val
     private val launched = mutableListOf<ActivityController<ReaderActivity>>()
 
     fun start() {
+        // The page spinner animates forever and Robolectric's choreographer feeds it frames endlessly, so the first
+        // reader of a fresh test JVM never let `idleMainLooper()` return (an OOM after minutes). With the system
+        // animation scale at 0, Compose ends infinite animations at once, as on a device with animations off.
+        Settings.Global.putFloat(app.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
         vm.start(module { single { SecurityPreferences(vm.store) } }, testMain = false)
         every { vm.sourceManager.getOrStub(1L) } returns source
         every { vm.sourceManager.get(1L) } returns source

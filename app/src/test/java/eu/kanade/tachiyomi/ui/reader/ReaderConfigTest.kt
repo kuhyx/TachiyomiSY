@@ -5,6 +5,8 @@ import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.view.View
 import android.view.WindowManager
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+import eu.kanade.tachiyomi.data.coil.TachiyomiImageDecoder
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import eu.kanade.tachiyomi.ui.reader.setting.dualPageSplitPaged
 import eu.kanade.tachiyomi.ui.reader.setting.pageLayout
@@ -24,8 +26,14 @@ internal class ReaderConfigTest {
     private var harness = ReaderActivityHarness(pageCount = 2)
     private val prefs get() = harness.vm.readerPreferences
 
+    // The display profile is process-wide (both decoders keep it in statics): left set, it reaches every later
+    // image test of this JVM, whose decoder shadows only accept the default (empty) profile.
     @After
-    fun tearDown() = harness.stop()
+    fun tearDown() {
+        SubsamplingScaleImageView.setDisplayProfile(ByteArray(0))
+        TachiyomiImageDecoder.displayProfile = null
+        harness.stop()
+    }
 
     private fun launch(flags: Long = 0L): ReaderActivity {
         harness = ReaderActivityHarness(pageCount = 2, viewerFlags = flags)

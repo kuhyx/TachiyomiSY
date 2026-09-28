@@ -113,6 +113,8 @@ internal class MangaCoverScreenModelTest {
         val model = model()
         model.saveCover(activity)
         eventually { model.snack() == "Error saving cover" }
+        model.snackbarHostState.currentSnackbarData?.dismiss()
+        eventually { model.snack() == null }
     }
 
     @Test
@@ -166,6 +168,8 @@ internal class MangaCoverScreenModelTest {
         val model = model()
         model.editCover(activity, saved)
         eventually { model.snack() == "Failed to update cover" }
+        model.snackbarHostState.currentSnackbarData?.dismiss()
+        eventually { model.snack() == null }
     }
 
     @Test

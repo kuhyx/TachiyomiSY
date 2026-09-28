@@ -23,6 +23,9 @@ internal object PagerDecodes {
     /** Makes the next decode throw, as the native decoder does on a corrupt image. */
     var throwNext: Boolean = false
 
+    /** When set, that many more streams open and the next is refused, as the native decoder refuses a non-image. */
+    var refuseAfter: Int? = null
+
     fun portrait(): Bitmap = Bitmap.createBitmap(2, 4, Bitmap.Config.ARGB_8888)
 
     fun landscape(): Bitmap = Bitmap.createBitmap(4, 2, Bitmap.Config.ARGB_8888)
@@ -63,8 +66,15 @@ internal class PagerShadowDecoder {
 internal class PagerShadowDecoderCompanion {
     @Implementation
     fun newInstance(stream: InputStream, cropBorders: Boolean, displayProfile: ByteArray?): ImageDecoder? {
-        check(!cropBorders && displayProfile == null) { "only the default options" }
+        check(!cropBorders && displayProfile == null) {
+            "only the default options, not crop=$cropBorders profile=${displayProfile?.size}"
+        }
         stream.readBytes()
+        val remaining = PagerDecodes.refuseAfter
+        if (remaining != null) {
+            PagerDecodes.refuseAfter = (remaining - 1).takeIf { remaining > 0 }
+            if (remaining == 0) return null
+        }
         val decoder = ReflectionHelpers.callConstructor(
             ImageDecoder::class.java,
             ClassParameter.from(java.lang.Long.TYPE, 0L),
