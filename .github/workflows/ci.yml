@@ -64,4 +64,11 @@ jobs:
       - name: Run every gate
         env:
           UTILS_ROOT: ${{ github.workspace }}/.utils
-        run: bash scripts/ci_gates.sh
+        # Memory and disk every 15 s, into this step's own log: a runner that is cut off says only
+        # "canceled" or exit 143, and a separate if-always step never runs on a dying runner.
+        run: |
+          (while sleep 15; do
+            echo "== runner $(date -u +%T)"; free -m | sed -n 2,3p; df -h / | tail -1
+            ps -eo rss=,args= --sort=-rss | head -5 | cut -c1-120
+          done) &
+          bash scripts/ci_gates.sh

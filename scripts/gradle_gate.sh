@@ -18,7 +18,11 @@ readonly TEST_FORKS_PROPERTY="mihon.test.forks"
 # 2, not 3: with the daemon at 8 GiB, three ~2.4 GiB test JVMs left the 16 GiB runner no room once
 # the suite passed ~5000 tests, and two runs on 2026-09-27 were cancelled mid-test,
 # most likely the runner running out of memory (inferred; the runner logs no reason).
+# 2 forks alone did not fix it (2026-09-28: killed 2 min into :app's tests, with :domain's
+# tests still running beside them), so the runner now also caps workers and JVMs, below.
 readonly CI_TEST_FORKS=2
+#: Concurrent Gradle workers on a runner: two test tasks of two forks each, at most.
+readonly CI_MAX_WORKERS=2
 
 # Locally the gate shares ~/.claude's capped.slice (8 GiB for ALL capped jobs
 # together) with whatever else is running, so it has to fit next to them.
@@ -76,10 +80,15 @@ gradle_gate() {
         banner "gradle phase 2/2: $GRADLE_TASKS (tests and coverage)"
         local_gradle_run "$capped" 1g "${tasks[@]}" "${scope[@]}"
     else
-        # A GitHub runner has 4 cores and 16 GiB and runs one build: give
-        # the daemon (R8 runs inside it) half the machine.
+        # A GitHub runner has 4 cores and 16 GiB. The budget: a 4 GiB daemon that also runs the
+        # Kotlin compiler (in-process, so no second daemon JVM), plus at most CI_MAX_WORKERS test
+        # tasks of CI_TEST_FORKS JVMs each (~2.4 GiB apiece), where default workers let four
+        # modules' tests overlap. `check` never runs R8, so the daemon needs no more.
         "$REPO_ROOT/gradlew" -p "$REPO_ROOT" "${tasks[@]}" \
             "-P$TEST_FORKS_PROPERTY=$CI_TEST_FORKS" \
-            -Dorg.gradle.jvmargs="-Xmx8g -Dfile.encoding=UTF-8"
+            --max-workers="$CI_MAX_WORKERS" \
+            -Dorg.gradle.jvmargs="-Xmx4g -Dfile.encoding=UTF-8" \
+            -Pkotlin.daemon.jvmargs=-Xmx2g \
+            -Pkotlin.compiler.execution.strategy=in-process
     fi
 }
