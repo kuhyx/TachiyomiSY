@@ -121,6 +121,19 @@ a whole slice, read `app/src/test/java/eu/kanade/tachiyomi/data/track/` (Koin gr
   2026-09-26). Instead add one line to `app/coverage-exceptions.txt`:
   `<fully.qualified.ClassKt> <missed-branches> <reason>`. The gate fails on any class that
   misses a branch without an entry, misses more than its entry allows, or has a stale entry.
+  An exhaustive `when` inside a `@Composable` moves out into a plain function first (still
+  exhaustive, never `else`; a nullable subject's `null ->` arm goes FIRST). The helper is
+  `internal`, not `private`, when a lambda calls it: Android Lint's SyntheticAccessor is an error.
+- **Compose-compiler branches** (`$changed` bits, `remember` cache checks) are not test
+  targets: they get per-class entries in `app/coverage-exceptions.txt`. No tests that poke
+  the `$changed` bits through reflection (decided 2026-09-27).
+- **Release-only paths.** The debug variant is the measured one, so code behind
+  `!BuildConfig.DEBUG` is unreachable as written. Read the flag through the getters in
+  `util/system/BuildConfig.kt` (`isDebuggable`, `isPreviewBuildType`, ...) and stub them with
+  `mockkStatic("eu.kanade.tachiyomi.util.system.BuildConfigKt")`.
+- **No "Release" in a test class name.** `app/build.gradle.kts` applies google-services when the
+  task request contains "Release", so `--tests '*.FooReleaseTest'` fails on a missing
+  `google-services.json` before any test runs.
 - Traps from the other modules (all real): a mockk field initialised before `@BeforeEach` runs
   the mocked class's `<clinit>`; coroutine stack-trace recovery copies exceptions (compare the
   cause chain); `when(Boolean)` keeps a default arm JaCoCo counts; a `by lazy` is a branch

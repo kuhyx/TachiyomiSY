@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.browse.source.browse
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -135,10 +134,8 @@ internal fun AutoCompleteTextField(
             value = TextFieldValue("")
         }
     }
-    BackHandler(expanded) {
-        focusManager.clearFocus()
-        expanded = false
-    }
+    // SY: no BackHandler of our own. ExposedDropdownMenuBox registers one after it and collapses the menu, so
+    // a handler here never received the press.
 
     ExposedDropdownMenuBox(
         expanded = expanded,
