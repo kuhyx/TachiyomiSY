@@ -110,7 +110,8 @@ internal class DuplicateMangaDialogTest {
         withModifier = true
         show()
         compose.onNodeWithText("Possible duplicates").assertExists()
-        duplicates = listOf(duplicate(4L, author = null, artist = "Art"))
+        // A blank artist is no artist, whatever the author.
+        duplicates = listOf(duplicate(4L, author = null, artist = "Art"), duplicate(5L, author = "Ann", artist = " "))
         withModifier = false
         compose.waitForIdle()
         compose.onNodeWithText("Art").assertExists()

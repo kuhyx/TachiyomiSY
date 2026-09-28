@@ -149,6 +149,20 @@ internal class MangaDownloadsTest {
     }
 
     @Test
+    fun offerAfterFavoriteIsNoop() {
+        harness.mangaFlow.value = manga() to listOf(chapter(1L))
+        val model = harness.loaded()
+        model.downloads.startDownload(listOf(chapter(1L)), startNow = false)
+        eventually { model.snackbarHostState.currentSnackbarData != null }
+        // Added to the library some other way while the offer was showing.
+        harness.mangaFlow.value = manga(favorite = true) to listOf(chapter(1L))
+        eventually { model.isFavorited }
+        model.snackbarHostState.currentSnackbarData?.performAction()
+        eventually { model.snackbarHostState.currentSnackbarData == null }
+        coVerify(exactly = 0) { harness.updateManga.awaitUpdateFavorite(any(), any()) }
+    }
+
+    @Test
     fun dismissedOfferKeepsEntryOut() {
         harness.mangaFlow.value = manga() to listOf(chapter(1L))
         val model = harness.loaded()

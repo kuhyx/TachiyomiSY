@@ -3,6 +3,7 @@ package eu.kanade.presentation.reader.appbars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import eu.kanade.presentation.util.invokeClick
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import io.kotest.matchers.collections.shouldContainExactly
@@ -94,5 +95,15 @@ internal class ReaderBottomBarTest {
         show(callbacks, syState(mode = ReadingMode.CONTINUOUS_VERTICAL))
         click("Crop borders")
         callbacks.events shouldContainExactly listOf("crop")
+    }
+
+    @Test
+    fun touchesStopAtTheBar() {
+        val callbacks = ReaderBarCallbacks()
+        show(callbacks, syState())
+        // A real touch, so the bar's own pointer handler (which swallows touches between buttons) starts.
+        compose.onNodeWithContentDescription("Chapters").performClick()
+        compose.waitForIdle()
+        callbacks.events shouldContainExactly listOf("chapters")
     }
 }

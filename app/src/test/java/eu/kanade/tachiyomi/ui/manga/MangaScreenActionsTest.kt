@@ -91,7 +91,8 @@ internal class MangaScreenActionsTest {
         host.show(harness.loaded())
         host.pushedBy { host.actions.info.onEditNotesClicked() }.shouldBeInstanceOf<MangaNotesScreen>()
         host.pushedBy { host.actions.info.onSearch("q", true) }.shouldBeInstanceOf<GlobalSearchScreen>()
-        host.actions.info.onTagSearch("Action")
+        // The tag search runs in the screen's scope: let it finish on the idle main looper.
+        host.pushedBy { host.actions.info.onTagSearch("Action") }
         host.actions.info.onContinueReading()
         host.actions.info.onCoverClicked()
         host.actions.chapters.onChapterClicked(chapter(1L))

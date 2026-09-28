@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.ui.base.ScreenHost
 import eu.kanade.tachiyomi.ui.base.poll
 import eu.kanade.tachiyomi.ui.base.pollLabel
 import eu.kanade.tachiyomi.ui.base.resetUiDispatcher
+import eu.kanade.tachiyomi.ui.browse.source.SourcesScreen
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -88,5 +89,12 @@ internal class MangaScreenContentTest {
         }
         compose.pollLabel("opened:MangaScreen")
         sender.isCompleted shouldBe true
+    }
+
+    @Test
+    fun smartSearchOffersTheMerge() {
+        show(MangaScreen(1L, fromSource = true, smartSearchConfig = SourcesScreen.SmartSearchConfig("t", 5L)))
+        compose.pollLabel("Needle")
+        model().awaitSuccess().showMergeWithAnother shouldBe true
     }
 }

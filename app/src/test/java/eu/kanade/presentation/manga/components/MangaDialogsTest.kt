@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import eu.kanade.tachiyomi.util.system.isDebugBuildType
+import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -97,5 +98,18 @@ internal class MangaDialogsTest {
             }
         }
         compose.onNodeWithText("Custom update frequency:").assertDoesNotExist()
+    }
+
+    @Test
+    fun previewBuildsShowThePicker() {
+        mockkStatic("eu.kanade.tachiyomi.util.system.BuildConfigKt")
+        every { isDebugBuildType } returns false
+        every { isPreviewBuildType } returns true
+        compose.setContent {
+            MaterialTheme {
+                SetIntervalDialog(interval = 0, nextUpdate = null, onDismissRequest = {}, onValueChanged = {})
+            }
+        }
+        compose.onNodeWithText("Custom update frequency:").assertExists()
     }
 }

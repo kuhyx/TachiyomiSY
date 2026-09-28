@@ -65,6 +65,17 @@ internal class WebtoonEdgesTest {
     }
 
     @Test
+    fun pageLeavesTransitionsOptional() {
+        launch()
+        val fresh = WebtoonViewer(activity)
+        fresh.config.alwaysShowChapterTransition = false
+        fresh.currentPage = ReaderPage(0)
+        fresh.setChapters(ViewerChapters(readerChapter(id = 34L), null, null))
+        fresh.adapter.items.size shouldBe 2
+        fresh.destroy()
+    }
+
+    @Test
     fun loneChapterGetsBothEnds() {
         launch()
         viewer.adapter.setChapters(ViewerChapters(readerChapter(id = 33L), null, null), forceTransition = false)

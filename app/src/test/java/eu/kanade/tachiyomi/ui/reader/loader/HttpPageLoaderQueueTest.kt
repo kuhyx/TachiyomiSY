@@ -128,4 +128,19 @@ internal class HttpPageLoaderQueueTest {
         loader.queue.single().page shouldBe pages[0]
         loader.recycle()
     }
+
+    @Test
+    fun boostedPageIsLoaded() {
+        val harness = HttpLoaderHarness(threads = 1)
+        harness.cacheServes(File(dir, "img"), byteArrayOf(2))
+        every { harness.chapterCache.isImageInCache("https://b") } returns true
+        val loader = harness.loader()
+        val page = ReaderPage(0, imageUrl = "https://b").also { it.chapter = harness.chapter }
+        loader.boostPage(page)
+        // Only a queued page is boosted: a loaded one is left as it is.
+        awaitStatus(page) { it == Page.State.Ready }
+        loader.boostPage(page)
+        page.status shouldBe Page.State.Ready
+        loader.recycle()
+    }
 }

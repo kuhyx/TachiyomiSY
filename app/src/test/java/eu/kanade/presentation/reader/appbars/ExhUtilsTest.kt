@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -20,14 +21,19 @@ internal class ExhUtilsTest {
     @get:Rule
     val compose = createComposeRule()
 
-    private fun show(callbacks: ReaderBarCallbacks, visible: Boolean, enabled: Boolean = true) {
+    private fun show(
+        callbacks: ReaderBarCallbacks,
+        visible: Boolean,
+        enabled: Boolean = true,
+        scrolling: Boolean = false,
+    ) {
         compose.setContent {
             MaterialTheme {
                 ExhUtils(
                     isVisible = visible,
                     onSetExhUtilsVisibility = { callbacks.events += "visible $it" },
                     backgroundColor = Color.Black,
-                    autoScroll = callbacks.autoScroll(enabled),
+                    autoScroll = callbacks.autoScroll(enabled).copy(isAutoScroll = scrolling),
                     pageActions = callbacks.pageActions(),
                 )
             }
@@ -78,5 +84,15 @@ internal class ExhUtilsTest {
     fun previewRenders() {
         compose.setContent { MaterialTheme { ExhUtilsPreview() } }
         compose.onNodeWithText("Retry all").assertExists()
+    }
+
+    @Test
+    fun scrollingUtilitiesTurnOff() {
+        val callbacks = ReaderBarCallbacks()
+        show(callbacks, visible = true, scrolling = true)
+        compose.onNodeWithText("Autoscroll").performClick()
+        // The visibility toggle is the last clickable, under the utilities.
+        compose.onAllNodes(hasClickAction()).onLast().performClick()
+        callbacks.events shouldContainExactly listOf("autoscroll false", "visible false")
     }
 }
