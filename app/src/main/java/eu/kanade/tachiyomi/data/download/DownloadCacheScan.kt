@@ -12,7 +12,7 @@ internal fun UniFile?.namedSubDirectories(): List<UniFile> =
 internal fun UniFile?.chapterDirNames(): MutableSet<String> = this?.listFiles().orEmpty()
     .mapNotNull {
         when {
-            it.name?.endsWith(Downloader.TMP_DIR_SUFFIX) == true -> null
+            it.name?.let(::isTempName) == true -> null
             it.isDirectory -> it.name
             it.isFile && it.extension == "cbz" -> it.nameWithoutExtension
             else -> null

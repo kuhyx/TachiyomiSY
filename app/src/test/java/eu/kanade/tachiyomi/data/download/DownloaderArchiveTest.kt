@@ -33,9 +33,9 @@ internal class DownloaderArchiveTest : DownloaderTestBase() {
 
     private fun archive(name: String) {
         val mangaDir = requireNotNull(UniFile.fromFile(File(root, "Source/Title").apply { mkdirs() }))
-        val tmpDir = requireNotNull(mangaDir.createDirectory("${name}_tmp"))
+        val tmpDir = requireNotNull(mangaDir.createDirectory(tempName(name)))
         shouldThrow<LinkageError> { downloader.archiveChapter(mangaDir, name, tmpDir) }
-        File(root, "Source/Title/$name.cbz_tmp").exists() shouldBe true
+        File(root, "Source/Title/${tempName("$name.cbz")}").exists() shouldBe true
     }
 
     @Test

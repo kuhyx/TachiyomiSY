@@ -71,7 +71,7 @@ internal class DownloadProviderFindTest : ProviderTestBase() {
     @Test
     fun unmatchedFindsTempAndStranger() {
         chapterDir(mangaTitle = "Title", name = "Ch 1")
-        chapterDir(mangaTitle = "Title", name = "Ch 9${Downloader.TMP_DIR_SUFFIX}")
+        chapterDir(mangaTitle = "Title", name = tempName("Ch 9"))
         chapterDir(mangaTitle = "Title", name = "stranger")
         val chapters = listOf(testChapter(name = "Ch 1"))
         val unmatched = harness.provider.findUnmatchedChapterDirs(
@@ -80,7 +80,7 @@ internal class DownloadProviderFindTest : ProviderTestBase() {
             source = source,
         )
         unmatched.mapNotNull { it.name }.sorted() shouldContainExactly
-            listOf("Ch 9${Downloader.TMP_DIR_SUFFIX}", "stranger")
+            listOf(tempName("Ch 9"), "stranger")
         harness.provider.findUnmatchedChapterDirs(
             chapters = chapters,
             manga = testManga("Absent"),
@@ -101,15 +101,15 @@ internal class DownloadProviderFindTest : ProviderTestBase() {
     }
 
     @Test
-    fun aTempNamedChapterIsTemp() {
-        // A chapter whose own name ends like a temp dir cannot be told apart from one, so it is swept too.
-        val tempNamed = "Draft${Downloader.TMP_DIR_SUFFIX}"
-        chapterDir(mangaTitle = "Title", name = tempNamed)
+    fun aTempLookingChapterIsKept() {
+        // A chapter whose own name ends like the old temp suffix is a chapter; cleanup must not sweep it.
+        val tempLooking = "Draft${Downloader.TMP_DIR_SUFFIX}"
+        chapterDir(mangaTitle = "Title", name = tempLooking)
         val unmatched = harness.provider.findUnmatchedChapterDirs(
-            chapters = listOf(testChapter(name = tempNamed)),
+            chapters = listOf(testChapter(name = tempLooking)),
             manga = testManga("Title"),
             source = source,
         )
-        unmatched.mapNotNull { it.name } shouldContainExactly listOf(tempNamed)
+        unmatched shouldBe emptyList()
     }
 }

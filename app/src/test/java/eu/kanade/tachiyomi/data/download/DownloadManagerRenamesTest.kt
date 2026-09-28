@@ -45,7 +45,7 @@ internal class DownloadManagerRenamesTest : DownloadManagerTestBase() {
     @Test
     fun sourceRenameFailuresAreLogged() {
         dir("Source")
-        dir("SOURCE_tmp", withFile = true)
+        dir(tempName("SOURCE"), withFile = true)
         manager.renameSource(source, httpSource(name = "SOURCE", id = 6L))
         dir("Other", withFile = true)
         manager.renameSource(source, httpSource(name = "Other", id = 6L))
@@ -75,7 +75,7 @@ internal class DownloadManagerRenamesTest : DownloadManagerTestBase() {
         dir("Source/Title")
         dir("Source/New", withFile = true)
         manager.renameManga(manga, "New")
-        dir("Source/TITLE_tmp", withFile = true)
+        dir("Source/${tempName("TITLE")}", withFile = true)
         manager.renameManga(manga, "TITLE")
         failures() shouldBe 2
         coVerify(exactly = 0) { cache.renameManga(any(), any(), any()) }

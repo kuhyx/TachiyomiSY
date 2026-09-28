@@ -111,7 +111,7 @@ internal class DownloaderJobTest : DownloaderPipelineBase() {
     fun brokenDirectoryStopsTheJob() {
         // A plain file where the temporary chapter directory goes makes createDirectory fail.
         File(root, "Source/Title").mkdirs()
-        File(root, "Source/Title/Ch 1_tmp").writeText("in the way")
+        File(root, "Source/Title/${tempName("Ch 1")}").writeText("in the way")
         runBlocking { with(downloader) { scope.launchDownloadJob(download(1L)).join() } }
         verify { workManager.cancelUniqueWork("Downloader") }
     }

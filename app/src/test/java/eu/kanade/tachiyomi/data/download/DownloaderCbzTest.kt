@@ -29,17 +29,17 @@ internal class DownloaderCbzTest : DownloaderPipelineBase() {
 
     @Test
     fun pagesAreArchivedAndFolderGoes() {
-        val tmpDir = requireNotNull(mangaDir.createDirectory("Ch 1_tmp"))
+        val tmpDir = requireNotNull(mangaDir.createDirectory(tempName("Ch 1")))
         requireNotNull(tmpDir.createFile("001.png")).openOutputStream().use { it.write(1) }
         downloader.archiveChapter(mangaDir, "Ch 1", tmpDir)
         verify(exactly = 1) { anyConstructed<ZipWriter>().write(match<UniFile> { it.name == "001.png" }) }
         File(root, "Source/Title/Ch 1.cbz").exists() shouldBe true
-        File(root, "Source/Title/Ch 1_tmp").exists() shouldBe false
+        File(root, "Source/Title/${tempName("Ch 1")}").exists() shouldBe false
     }
 
     @Test
     fun aFolderThatIsAFileArchives() {
-        val notADir = requireNotNull(mangaDir.createFile("Ch 2_tmp"))
+        val notADir = requireNotNull(mangaDir.createFile(tempName("Ch 2")))
         downloader.archiveChapter(mangaDir, "Ch 2", notADir)
         File(root, "Source/Title/Ch 2.cbz").exists() shouldBe true
     }

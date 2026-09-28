@@ -4,7 +4,6 @@ package eu.kanade.tachiyomi.data.download
 
 import eu.kanade.tachiyomi.data.download.Downloader.Companion.CHAPTERS_PER_SOURCE_QUEUE_WARNING_THRESHOLD
 import eu.kanade.tachiyomi.data.download.Downloader.Companion.DOWNLOADS_QUEUED_WARNING_THRESHOLD
-import eu.kanade.tachiyomi.data.download.Downloader.Companion.TMP_DIR_SUFFIX
 import eu.kanade.tachiyomi.data.download.Downloader.Companion.WARNING_NOTIF_TIMEOUT_MS
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateNotifier
@@ -150,7 +149,7 @@ internal suspend fun Downloader.downloadChapter(download: Download) {
         download.chapter.scanlator,
         download.chapter.url,
     )
-    val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)!!
+    val tmpDir = mangaDir.createDirectory(tempName(chapterDirname))!!
 
     try {
         // If the page list already exists, start from the file; otherwise pull it from the network.

@@ -44,12 +44,14 @@ internal class DownloadCacheScanTest : DownloadCacheTestBase() {
         every { mangaDir.listFiles() } returns arrayOf(
             stub(name = "Ch 1", directory = true),
             stub(name = "Ch 2.cbz", directory = false),
-            stub(name = "Ch 3_tmp", directory = true),
+            stub(name = tempName("Ch 3"), directory = true),
+            stub(name = "Draft_tmp", directory = true),
+            stub(name = ".nomedia", directory = false),
             stub(name = "readme.txt", directory = false),
             stub(name = null, directory = true),
             stub(name = "odd", directory = false, file = false),
         )
-        mangaDir.chapterDirNames() shouldBe mutableSetOf("Ch 1", "Ch 2")
+        mangaDir.chapterDirNames() shouldBe mutableSetOf("Ch 1", "Ch 2", "Draft_tmp")
         val missing: UniFile? = null
         missing.chapterDirNames() shouldBe mutableSetOf()
     }

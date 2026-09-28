@@ -32,16 +32,17 @@ internal class DownloadCacheTest : DownloadCacheTestBase() {
     fun renewIndexesTheTree() {
         entry(source = "Alpha", manga = "Title", name = "Ch 1")
         entry(source = "Alpha", manga = "Title", name = "Ch 2.cbz", file = true)
-        entry(source = "Alpha", manga = "Title", name = "Ch 3_tmp")
+        entry(source = "Alpha", manga = "Title", name = tempName("Ch 3"))
+        entry(source = "Alpha", manga = "Title", name = "Ch 4_tmp")
         entry(source = "Alpha", manga = "Title", name = "notes.txt", file = true)
         entry(source = "Beta", manga = "Other", name = "Ch 1")
         File(root, "Unknown").mkdirs()
         val cache = newCache()
-        waitUntil { cache.getTotalDownloadCount() == 2 }
+        waitUntil { cache.getTotalDownloadCount() == 3 }
         cache.isDownloaded("Ch 1") shouldBe true
         cache.isDownloaded("Ch 2") shouldBe true
         cache.isDownloaded("Ch 3") shouldBe false
-        cache.getDownloadCount(manga) shouldBe 2
+        cache.getDownloadCount(manga) shouldBe 3
     }
 
     @Test

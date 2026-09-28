@@ -22,12 +22,9 @@ internal fun DownloadManager.renameSource(oldSource: Source, newSource: Source) 
     if (oldFolder.name == newName) return
 
     val capitalizationChanged = oldFolder.name.equals(newName, ignoreCase = true)
-    if (capitalizationChanged) {
-        val tempName = newName + Downloader.TMP_DIR_SUFFIX
-        if (!oldFolder.renameTo(tempName)) {
-            logcat(LogPriority.ERROR) { "Failed to rename source download folder: ${oldFolder.name}" }
-            return
-        }
+    if (capitalizationChanged && !oldFolder.renameTo(tempName(newName))) {
+        logcat(LogPriority.ERROR) { "Failed to rename source download folder: ${oldFolder.name}" }
+        return
     }
 
     if (!oldFolder.renameTo(newName)) {
@@ -53,7 +50,7 @@ internal suspend fun DownloadManager.renameManga(manga: Manga, newTitle: String)
 
     // A case-only change goes through a temporary name: the filesystem may treat both names as one folder.
     val capitalizationChanged = oldFolder.name.equals(newName, ignoreCase = true)
-    val renamed = (!capitalizationChanged || oldFolder.renameTo(newName + Downloader.TMP_DIR_SUFFIX)) &&
+    val renamed = (!capitalizationChanged || oldFolder.renameTo(tempName(newName))) &&
         oldFolder.renameTo(newName)
     if (renamed) {
         cache.renameManga(manga, oldFolder, newTitle)

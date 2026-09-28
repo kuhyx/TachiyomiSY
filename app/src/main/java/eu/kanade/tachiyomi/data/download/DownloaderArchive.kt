@@ -22,7 +22,7 @@ internal fun Downloader.archiveChapter(
     val encrypt = CbzCrypto.getPasswordProtectDlPref() && CbzCrypto.isPasswordSet()
     // SY <--
 
-    val zip = mangaDir.createFile("$dirname.cbz${Downloader.TMP_DIR_SUFFIX}")!!
+    val zip = mangaDir.createFile(tempName("$dirname.cbz"))!!
     ZipWriter(context, zip, /* SY --> */ encrypt /* SY <-- */).use { writer ->
         tmpDir.listFiles()?.forEach { file ->
             writer.write(file)

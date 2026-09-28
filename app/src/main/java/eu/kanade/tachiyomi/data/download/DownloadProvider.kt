@@ -137,9 +137,10 @@ internal class DownloadProvider(
         val mangaDir = findMangaDir(/* SY --> */ manga.ogTitle /* SY <-- */, source) ?: return emptyList()
         // Each entry is matched against every chapter's valid names; the old check never looked at the
         // entry itself, so strays survived whenever any chapter was downloaded. A nameless entry is kept.
+        // Temp names can never be valid names (see tempName), so they are swept with the strays.
         val validNames = chapters.flatMapTo(HashSet()) { getValidChapterDirNames(it.name, it.scanlator, it.url) }
         return mangaDir.listFiles().orEmpty().asList().filter {
-            it.name?.let { name -> name !in validNames || name.endsWith(Downloader.TMP_DIR_SUFFIX) } == true
+            it.name?.let { name -> name !in validNames } == true
         }
     }
     // SY <--

@@ -195,3 +195,10 @@ internal const val DOWNLOAD_RETRIES = 3
 internal const val HTTP_RANGE_NOT_SATISFIABLE = 416
 
 internal fun inProgressFileName(filename: String) = "$filename.tmp"
+
+// Where a download or rename is staged. Every source, manga and chapter name comes from
+// DiskUtil.buildValidFilename, which strips leading dots, so a temp name can never be a real one:
+// a chapter called "Draft_tmp" is a chapter, not a leftover to sweep.
+internal fun tempName(name: String) = ".$name${Downloader.TMP_DIR_SUFFIX}"
+
+internal fun isTempName(name: String) = name.startsWith('.') && name.endsWith(Downloader.TMP_DIR_SUFFIX)
