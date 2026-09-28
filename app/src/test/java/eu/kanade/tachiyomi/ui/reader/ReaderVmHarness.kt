@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.download.getQueuedDownloadOrNull
 import eu.kanade.tachiyomi.data.saver.ImageSaver
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
+import eu.kanade.tachiyomi.ui.base.forgetRecordedCalls
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import io.mockk.coEvery
 import io.mockk.every
@@ -154,6 +155,7 @@ internal class ReaderVmHarness(val context: Application = mockk(relaxed = true))
             }
         } finally {
             createdModels.clear()
+            forgetRecordedCalls()
             unmockkAll()
             stopKoin()
             if (testMain) Dispatchers.resetMain()

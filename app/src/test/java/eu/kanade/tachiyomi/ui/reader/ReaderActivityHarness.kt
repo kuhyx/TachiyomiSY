@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.ui.base.release
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -53,7 +54,7 @@ internal class ReaderActivityHarness(private val pageCount: Int = 4, private val
     fun stop() {
         try {
             // A live reader keeps its spinner and effects asking for frames in every later test of the JVM.
-            launched.filterNot { it.get().isDestroyed }.forEach { it.pause().stop().destroy() }
+            launched.forEach { it.release() }
             launched.clear()
         } finally {
             vm.stop()

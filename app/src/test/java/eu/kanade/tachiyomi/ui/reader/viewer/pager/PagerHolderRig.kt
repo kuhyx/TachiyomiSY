@@ -6,6 +6,8 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
+import eu.kanade.tachiyomi.ui.base.forgetRecordedCalls
+import eu.kanade.tachiyomi.ui.base.release
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.hideMenu
 import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
@@ -74,9 +76,10 @@ internal class PagerHolderRig {
     fun stop() {
         try {
             holders.forEach { it.scope.cancel() }
-            host.pause().stop().destroy()
+            host.release()
         } finally {
             overrideAsyncExecutor(null)
+            forgetRecordedCalls()
             unmockkAll()
             stopKoin()
         }

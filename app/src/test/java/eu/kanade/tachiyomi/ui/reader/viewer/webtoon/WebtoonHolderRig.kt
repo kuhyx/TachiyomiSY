@@ -4,6 +4,8 @@ import androidx.fragment.app.FragmentActivity
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.MapPreferenceStore
+import eu.kanade.tachiyomi.ui.base.forgetRecordedCalls
+import eu.kanade.tachiyomi.ui.base.release
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.hideMenu
 import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
@@ -53,8 +55,9 @@ internal class WebtoonHolderRig {
     fun stop() {
         try {
             holders.forEach { it.recycle() }
-            host.pause().stop().destroy()
+            host.release()
         } finally {
+            forgetRecordedCalls()
             unmockkAll()
             stopKoin()
         }
