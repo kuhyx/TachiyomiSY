@@ -51,7 +51,10 @@ internal class MangaCoverScreenModel(
     fun saveCover(context: Context) {
         screenModelScope.launch {
             try {
-                saveCoverInternal(context, temp = false)
+                // SY -->
+                // Nothing saved (no entry yet, a failed load, an animated cover) is a failure, not a success.
+                checkNotNull(saveCoverInternal(context, temp = false)) { "Cover not saved" }
+                // SY <--
                 snackbarHostState.showSnackbar(
                     context.stringResource(MR.strings.cover_saved),
                     withDismissAction = true,

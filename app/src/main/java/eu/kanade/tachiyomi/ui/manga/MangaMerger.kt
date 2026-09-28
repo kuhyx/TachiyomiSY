@@ -156,11 +156,10 @@ internal class MangaMerger(
             if (existingManga.favorite) {
                 throw IllegalArgumentException(context.stringResource(SYMR.strings.merge_duplicate))
             }
+            val staleId = existingManga.id
             withNonCancellableContext {
-                existingManga?.id?.let {
-                    deleteByMergeId.await(it)
-                    deleteMangaById.await(it)
-                }
+                deleteByMergeId.await(staleId)
+                deleteMangaById.await(staleId)
             }
             existingManga = getManga.await(draft.url, draft.source)
         }

@@ -79,7 +79,9 @@ internal class WebtoonPageHolder(
     fun bind(page: ReaderPage) {
         this.page = page
         loadJob?.cancel()
-        loadJob = scope.launch { loadPageAndProcessStatus() }
+        // SY --> the job gets the page it loads, so it never finds the holder without one
+        loadJob = scope.launch { loadPageAndProcessStatus(page) }
+        // SY <--
         refreshLayoutParams()
     }
 
@@ -109,11 +111,10 @@ internal class WebtoonPageHolder(
     }
 
     // Loads the page and processes changes to the page's status.
-    // Returns immediately if there is no page or the page has no PageLoader.
+    // Returns immediately if the page has no PageLoader.
     // Otherwise, this function does not return. It will continue to process status changes until
     // the Job is cancelled.
-    private suspend fun loadPageAndProcessStatus() {
-        val page = page ?: return
+    private suspend fun loadPageAndProcessStatus(page: ReaderPage) {
         val loader = page.chapter.pageLoader ?: return
         supervisorScope {
             launchIO {

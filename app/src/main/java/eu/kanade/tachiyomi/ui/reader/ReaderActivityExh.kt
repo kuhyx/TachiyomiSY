@@ -71,8 +71,10 @@ private fun ReaderActivity.autoScrollStep(interval: Duration) {
 internal fun ReaderActivity.exhRetryAll() {
     var retried = 0
 
-    viewModel.state.value.viewerChapters
-        ?.currChapter
+    // SY --> the chapter on screen, once one is set
+    val chapter = viewModel.state.value.viewerChapters?.currChapter
+    // SY <--
+    chapter
         ?.pages
         ?.filter { it.status is Page.State.Error }
         ?.forEach { page ->
@@ -113,7 +115,9 @@ internal fun ReaderActivity.exhBoostPage() {
     } else if (curPage.status == Page.State.Ready) {
         toast(SYMR.strings.eh_boost_page_downloaded)
     } else {
-        val loader = viewModel.state.value.viewerChapters?.currChapter?.pageLoader as? HttpPageLoader
+        // SY --> the page comes from the current chapter, whose loader it carries
+        val loader = curPage.chapter.pageLoader as? HttpPageLoader
+        // SY <--
         if (loader != null) {
             loader.boostPage(curPage)
             toast(SYMR.strings.eh_boost_boosted)

@@ -1,8 +1,6 @@
 package exh.recs.batch
 
 import android.content.Context
-import android.net.wifi.WifiManager
-import android.os.PowerManager
 import androidx.annotation.StringRes
 import androidx.core.net.toUri
 import eu.kanade.domain.manga.model.toSManga
@@ -38,8 +36,14 @@ import tachiyomi.domain.track.model.Track
 import uy.kohesive.injekt.injectLazy
 import java.io.Serializable
 import java.util.Collections
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+
+// SY -->
+// A search that outlives this lets the device sleep rather than hold the CPU awake indefinitely.
+private val WAKE_LOCK_TIMEOUT = 1.hours
+// SY <--
 
 internal class RecommendationSearchHelper(val context: Context) {
     private val getLibraryManga: GetLibraryManga by injectLazy()
@@ -47,9 +51,6 @@ internal class RecommendationSearchHelper(val context: Context) {
     private val networkToLocalManga: NetworkToLocalManga by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
     private val preferences: SourcePreferences by injectLazy()
-
-    private var wifiLock: WifiManager.WifiLock? = null
-    private var wakeLock: PowerManager.WakeLock? = null
 
     private val smartSearchEngine by lazy { SmartLibrarySearchEngine() }
 
@@ -81,13 +82,15 @@ internal class RecommendationSearchHelper(val context: Context) {
             initial = if (stricterThrottling) 2.seconds else 0.seconds,
         )
 
+        // SY -->
+        // Take wake + wifi locks, held until the finally below releases them
+        val wakeLock = ignore {
+            context.createPartialWakeLock("tsy:RecommendationSearchWakelock")
+                .apply { acquire(WAKE_LOCK_TIMEOUT.inWholeMilliseconds) }
+        }
+        val wifiLock = ignore { context.createWifiLock("tsy:RecommendationSearchWifiLock").apply { acquire() } }
+        // SY <--
         try {
-            // Take wake + wifi locks
-            ignore { wakeLock?.release() }
-            wakeLock = ignore { context.createPartialWakeLock("tsy:RecommendationSearchWakelock") }
-            ignore { wifiLock?.release() }
-            wifiLock = ignore { context.createWifiLock("tsy:RecommendationSearchWifiLock") }
-
             // Map of results grouped by recommendation source
             val resultsMap = Collections.synchronizedMap(mutableMapOf<String, SearchResults>())
             mangaList.forEachIndexed { index, sourceManga ->
@@ -112,14 +115,8 @@ internal class RecommendationSearchHelper(val context: Context) {
             logger.e("Error during recommendation search", expected)
         } finally {
             // Release wake + wifi locks
-            ignore {
-                wakeLock?.release()
-                wakeLock = null
-            }
-            ignore {
-                wifiLock?.release()
-                wifiLock = null
-            }
+            ignore { wakeLock?.release() }
+            ignore { wifiLock?.release() }
         }
     }
 
@@ -167,6 +164,12 @@ internal class RecommendationSearchHelper(val context: Context) {
     }
 
     // The source's results ordered by how many of the searched entries recommended each one.
+    // SY --> the id arrives as a plain number, so it is not re-checked for null per track
+    private fun List<Track>.hasTrack(trackerId: Long, manga: SManga): Boolean = any {
+        it.trackerId == trackerId && it.remoteUrl.toUri().path == manga.url.toUri().path
+    }
+    // SY <--
+
     private fun SearchResults.ranked(): RankedSearchResults = RankedSearchResults(
         recSourceName = recSourceName,
         recSourceCategoryResId = recSourceCategoryResId,
@@ -201,9 +204,9 @@ internal class RecommendationSearchHelper(val context: Context) {
                 srcId != null -> networkToLocalManga(manga.toDomainManga(srcId))
                     .let { local -> libraryManga.any { it.id == local.id } }
                 // Tracker recommendations can be resolved by checking if the tracker is attached to the recommendation
-                trackerId != null -> tracks.any {
-                    it.trackerId == trackerId && it.remoteUrl.toUri().path == manga.url.toUri().path
-                }
+                // SY -->
+                trackerId != null -> tracks.hasTrack(trackerId, manga)
+                // SY <--
                 // Fallback to smart search otherwise
                 else -> smartSearchEngine.smartSearch(libraryManga, manga.title) != null
             }

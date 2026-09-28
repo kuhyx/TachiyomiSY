@@ -81,12 +81,14 @@ internal class PagerPageHolder(
         extraLoadJob = null
     }
 
-    private fun initProgressIndicator() {
-        if (progressIndicator == null) {
-            progressIndicator = ReaderProgressIndicator(context)
-            addView(progressIndicator)
+    // SY -->
+    // The progress indicator, added on first use.
+    private fun initProgressIndicator(): ReaderProgressIndicator =
+        progressIndicator ?: ReaderProgressIndicator(context).also {
+            progressIndicator = it
+            addView(it)
         }
-    }
+    // SY <--
 
     // Loads the page and processes changes to the page's status.
     // Returns immediately if the page has no PageLoader.
@@ -113,7 +115,7 @@ internal class PagerPageHolder(
                     Page.State.DownloadImage -> {
                         setDownloading()
                         page.progressFlow.collectLatest { value ->
-                            progressIndicator?.setProgress(value)
+                            initProgressIndicator().setProgress(value)
                         }
                     }
                     Page.State.Ready -> {
@@ -129,22 +131,19 @@ internal class PagerPageHolder(
 
     // Called when the page is queued.
     private fun setQueued() {
-        initProgressIndicator()
-        progressIndicator?.show()
+        initProgressIndicator().show()
         removeErrorLayout()
     }
 
     // Called when the page is loading.
     private fun setLoading() {
-        initProgressIndicator()
-        progressIndicator?.show()
+        initProgressIndicator().show()
         removeErrorLayout()
     }
 
     // Called when the page is downloading.
     private fun setDownloading() {
-        initProgressIndicator()
-        progressIndicator?.show()
+        initProgressIndicator().show()
         removeErrorLayout()
     }
 
@@ -192,7 +191,7 @@ internal class PagerPageHolder(
     private suspend fun decode(streamFn: () -> InputStream, streamFn2: (() -> InputStream)?) = withIOContext {
         streamFn().buffered(STREAM_BUFFER_SIZE).use { source ->
             // SY -->
-            extraPage?.let { streamFn2?.invoke()?.buffered(STREAM_BUFFER_SIZE) }.use { source2 ->
+            extraPage?.let { streamFn2?.let { open -> open().buffered(STREAM_BUFFER_SIZE) } }.use { source2 ->
                 val itemSource = if (viewer.config.dualPageSplit) {
                     process(item.first, Buffer().readFrom(source))
                 } else {

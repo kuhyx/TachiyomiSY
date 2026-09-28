@@ -112,13 +112,15 @@ internal class PagerViewerAdapter(internal val viewer: PagerViewer) : ViewPagerA
     private fun insertPreprocessed(pages: MutableList<ReaderPage>): InsertPage? {
         val lastPage = pages.last()
         var insertPageLastPage: InsertPage? = null
-        preprocessed.keys.sortedDescending()
-            .forEach { key ->
+        // SY -->
+        preprocessed.entries.sortedByDescending { it.key }
+            .forEach { (key, insertPage) ->
                 if (lastPage.index == key) {
-                    insertPageLastPage = preprocessed[key]
+                    insertPageLastPage = insertPage
                 }
-                preprocessed[key]?.let { pages.add(key + 1, it) }
+                pages.add(key + 1, insertPage)
             }
+        // SY <--
         return insertPageLastPage
     }
 

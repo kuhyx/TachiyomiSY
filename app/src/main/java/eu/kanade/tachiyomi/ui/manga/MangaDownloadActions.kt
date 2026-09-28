@@ -44,11 +44,14 @@ internal fun MangaDownloads.runChapterDownloadActions(
 }
 
 internal fun MangaDownloads.runDownloadAction(action: DownloadAction) {
-    val chaptersToDownload = when (action) {
-        DownloadAction.UNREAD_CHAPTERS -> model.getUnreadChapters()
-        DownloadAction.BOOKMARKED_CHAPTERS -> model.getBookmarkedChapters()
-        else -> model.getUnreadChaptersSorted().take(checkNotNull(action.nextChapters))
+    // SY --> a count action queues that many unread chapters, the other two name their own set
+    val count = action.nextChapters
+    val chaptersToDownload = when {
+        count != null -> model.getUnreadChaptersSorted().take(count)
+        action == DownloadAction.UNREAD_CHAPTERS -> model.getUnreadChapters()
+        else -> model.getBookmarkedChapters()
     }
+    // SY <--
     if (chaptersToDownload.isNotEmpty()) {
         startDownload(chaptersToDownload, false)
     }

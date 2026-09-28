@@ -58,7 +58,8 @@ internal fun ReaderActivity.updateViewer() {
     )
     val usesDefaultReadingMode =
         (manga?.readingMode?.toInt() ?: ReadingMode.DEFAULT.flagValue) == ReadingMode.DEFAULT.flagValue
-    val autoWebtoon = readerPreferences.useAutoWebtoon.get() && defaultReaderType == ReadingMode.WEBTOON.flagValue
+    val autoWebtoon =
+        readerPreferences.useAutoWebtoon.get() && ReadingMode.fromPreference(defaultReaderType) == ReadingMode.WEBTOON
     if (autoWebtoon && usesDefaultReadingMode) {
         readingModeToast?.cancel()
         readingModeToast = toast(SYMR.strings.eh_auto_webtoon_snack)

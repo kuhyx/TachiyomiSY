@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.content.res.ColorStateList
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -26,7 +26,9 @@ internal fun ChipGroup.setChips(items: List<String>, scope: CoroutineScope) {
             text = item
 
             isCloseIconVisible = true
-            closeIcon?.setTint(context.getResourceColor(R.attr.colorAccent))
+            // SY --> tinted through the chip, which holds the icon its style gives it
+            closeIconTint = ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent))
+            // SY <--
             setOnCloseIconClickListener {
                 removeView(this)
             }
@@ -38,10 +40,11 @@ internal fun ChipGroup.setChips(items: List<String>, scope: CoroutineScope) {
     val addTagChip = Chip(context).apply {
         setText(SYMR.strings.add_tags.getString(context))
 
-        chipIcon = ContextCompat.getDrawable(context, R.drawable.ic_add_24dp)?.apply {
-            isChipIconVisible = true
-            setTint(context.getResourceColor(R.attr.colorAccent))
-        }
+        // SY -->
+        setChipIconResource(R.drawable.ic_add_24dp)
+        isChipIconVisible = true
+        chipIconTint = ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent))
+        // SY <--
 
         setOnClickListener {
             var newTags: String? = null
@@ -61,10 +64,9 @@ internal fun ChipGroup.setChips(items: List<String>, scope: CoroutineScope) {
     addView(addTagChip)
 }
 
-internal fun ChipGroup.getTextStrings(): List<String> = children.mapNotNull {
-    if (it is Chip && !it.text.toString().contains(context.stringResource(SYMR.strings.add_tags), ignoreCase = true)) {
-        it.text.toString()
-    } else {
-        null
-    }
-}.toList()
+// SY --> the group only ever holds chips (see setChips); the "add tags" one is not a tag
+internal fun ChipGroup.getTextStrings(): List<String> = children.filterIsInstance<Chip>()
+    .map { it.text.toString() }
+    .filterNot { it.contains(context.stringResource(SYMR.strings.add_tags), ignoreCase = true) }
+    .toList()
+// SY <--

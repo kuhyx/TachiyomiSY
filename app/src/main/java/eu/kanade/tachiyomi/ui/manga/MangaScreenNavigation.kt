@@ -30,12 +30,15 @@ internal fun openChapter(context: Context, chapter: Chapter) {
 }
 
 internal fun openMangaInWebView(navigator: Navigator, manga: Manga?, source: Source?) {
+    // SY -->
+    if (manga == null || source == null) return
+    // SY <--
     getMangaUrl(manga, source)?.let { url ->
         navigator.push(
             WebViewScreen(
                 url = url,
-                initialTitle = manga?.title,
-                sourceId = source?.id,
+                initialTitle = manga.title,
+                sourceId = source.id,
             ),
         )
     }

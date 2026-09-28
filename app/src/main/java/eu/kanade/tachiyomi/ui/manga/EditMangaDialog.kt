@@ -49,10 +49,10 @@ internal fun EditMangaDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    binding?.let {
-                        it.submit(onPositiveClick)
-                        onDismissRequest()
-                    }
+                    // SY --> the form is inflated with the dialog's first frame, before any click
+                    binding!!.submit(onPositiveClick)
+                    onDismissRequest()
+                    // SY <--
                 },
             ) {
                 Text(stringResource(MR.strings.action_save))

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import logcat.LogPriority
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.system.logcat
+import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.track.interactor.GetTracks
 import tachiyomi.domain.track.interactor.InsertTrack
 import tachiyomi.domain.track.model.Track
@@ -36,22 +37,20 @@ internal class MangaTracking(
     private val insertTrack: InsertTrack = Injekt.get(),
 ) {
     fun observe() {
-        val state = model.successState
-        val manga = state?.manga ?: return
+        val manga = model.successState?.manga ?: return
 
         model.screenModelScope.launchIO {
             combine(
                 getTracks.subscribe(manga.id)
                     // SY -->
                     .map { trackItems ->
-                        if (manga.source in mangaDexSourceIds ||
-                            state.mergedData?.manga?.values.orEmpty().any {
-                                it.source in mangaDexSourceIds
-                            }
-                        ) {
+                        // The merge is read per change: its MangaDex member may have left since this started.
+                        val state = model.successState!!
+                        val mdManga = state.mangaDexMember()
+                        if (mdManga != null) {
                             val mdTrack = trackItems.firstOrNull { it.trackerId == TrackerManager.MDLIST }
                             if (trackerManager.mdList.isLoggedIn && mdTrack == null) {
-                                trackItems + createMdListTrack()
+                                trackItems + createMdListTrack(state.manga, mdManga)
                             } else {
                                 trackItems
                             }
@@ -91,12 +90,13 @@ internal class MangaTracking(
     }
 
     // SY -->
-    private suspend fun createMdListTrack(): Track {
-        val state = model.successState!!
-        val mdManga = state.manga.takeIf { it.source in mangaDexSourceIds }
-            ?: state.mergedData?.manga?.values?.find { it.source in mangaDexSourceIds }
-            ?: throw IllegalArgumentException("Could not create initial track")
-        val track = trackerManager.mdList.createInitialTracker(state.manga, mdManga)
+    // The entry itself when it is a MangaDex one, else its merged MangaDex member, if any.
+    private fun MangaScreenModel.State.Success.mangaDexMember(): Manga? =
+        manga.takeIf { it.source in mangaDexSourceIds }
+            ?: mergedData?.manga?.values?.find { it.source in mangaDexSourceIds }
+
+    private suspend fun createMdListTrack(manga: Manga, mdManga: Manga): Track {
+        val track = trackerManager.mdList.createInitialTracker(manga, mdManga)
             .toDomainTrack(false)!!
         insertTrack.await(track)
         return getTracks.await(mangaId).first { it.trackerId == trackerManager.mdList.id }

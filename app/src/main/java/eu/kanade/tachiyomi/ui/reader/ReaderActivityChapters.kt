@@ -25,9 +25,13 @@ internal fun ReaderActivity.setChapters(viewerChapters: ViewerChapters) {
     binding.readerContainer.removeView(loadingIndicator)
     // SY -->
     val state = viewModel.state.value
-    if (state.indexChapterToShift != null && state.indexPageToShift != null) {
+    val chapterToShift = state.indexChapterToShift
+    val pageToShift = state.indexPageToShift
+    if (chapterToShift != null && pageToShift != null) {
+        // A plain index, so the lookup below does not re-check it for null per page.
+        val pageIndex: Int = pageToShift
         viewerChapters.currChapter.pages?.find {
-            it.index == state.indexPageToShift && it.chapter.chapter.id == state.indexChapterToShift
+            it.index == pageIndex && it.chapter.chapter.id == state.indexChapterToShift
         }?.let {
             (viewModel.state.value.viewer as? PagerViewer)?.updateShifting(it)
         }
@@ -37,11 +41,8 @@ internal fun ReaderActivity.setChapters(viewerChapters: ViewerChapters) {
         val currentChapter = viewerChapters.currChapter
         (viewModel.state.value.viewer as? PagerViewer)?.config?.shiftDoublePage = (
             currentChapter.requestedPage +
-                (
-                    currentChapter.pages?.take(currentChapter.requestedPage)
-                        ?.count { it.fullPage || it.isolatedPage }
-                        ?: 0
-                    )
+                currentChapter.pages.orEmpty().take(currentChapter.requestedPage)
+                    .count { it.fullPage || it.isolatedPage }
             ) % 2 != 0
     }
     // SY <--

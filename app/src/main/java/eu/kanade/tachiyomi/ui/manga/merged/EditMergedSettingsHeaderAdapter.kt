@@ -82,7 +82,7 @@ internal class EditMergedSettingsHeaderAdapter(
                 ) {
                     state.mergeReference = state.mergeReference?.copy(
                         chapterSortMode =
-                        DEDUPE_MODES.getOrElse(position) { MergedMangaReference.CHAPTER_SORT_NO_DEDUPE },
+                        DEDUPE_MODES.getOrNull(position) ?: MergedMangaReference.CHAPTER_SORT_NO_DEDUPE,
                     )
                     xLogD(state.mergeReference?.chapterSortMode)
                     editMergedMangaItemSortingListener.onSetPrioritySort(canMove())
@@ -124,9 +124,10 @@ internal class EditMergedSettingsHeaderAdapter(
                     position: Int,
                     id: Long,
                 ) {
+                    val selected = mergedMangas.getOrNull(position)
                     state.mergedMangas = state.mergedMangas.map { (manga, reference) ->
                         manga to reference.copy(
-                            isInfoManga = reference.id == mergedMangas.getOrNull(position)?.second?.id,
+                            isInfoManga = selected != null && reference.id == selected.second.id,
                         )
                     }
                 }

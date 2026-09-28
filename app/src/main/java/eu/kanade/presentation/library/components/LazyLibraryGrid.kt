@@ -35,7 +35,9 @@ internal fun LazyGridScope.globalSearchItem(
     if (!searchQuery.isNullOrEmpty()) {
         item(
             span = { GridItemSpan(maxLineSpan) },
-            contentType = { "library_global_search_item" },
+            // SY -->
+            contentType = "library_global_search_item",
+            // SY <--
         ) {
             GlobalSearchItem(
                 searchQuery = searchQuery,

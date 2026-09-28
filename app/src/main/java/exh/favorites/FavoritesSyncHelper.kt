@@ -1,8 +1,6 @@
 package exh.favorites
 
 import android.content.Context
-import android.net.wifi.WifiManager
-import android.os.PowerManager
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.all.EHentai
@@ -37,6 +35,7 @@ import tachiyomi.i18n.sy.SYMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 
 // Follow-up: only apply database changes after sync (https://github.com/kuhyx/TachiyomiSY/issues/24)
@@ -61,9 +60,6 @@ internal class FavoritesSyncHelper(val context: Context) {
     internal val galleryAdder by lazy { GalleryAdder() }
 
     internal val throttleManager by lazy { ThrottleManager() }
-
-    private var wifiLock: WifiManager.WifiLock? = null
-    private var wakeLock: PowerManager.WakeLock? = null
 
     internal val logger by lazy { xLog() }
 
@@ -139,13 +135,15 @@ internal class FavoritesSyncHelper(val context: Context) {
         favorites: Pair<List<EHentai.ParsedManga>, List<String>>,
         errorList: MutableList<FavoritesSyncStatus.SyncError.GallerySyncError>,
     ): Boolean {
+        // SY -->
+        // Take wake + wifi locks, held until the finally below releases them
+        val wakeLock = ignore {
+            context.createPartialWakeLock("teh:ExhFavoritesSyncWakelock")
+                .apply { acquire(LOCK_TIMEOUT.inWholeMilliseconds) }
+        }
+        val wifiLock = ignore { context.createWifiLock("teh:ExhFavoritesSyncWifi").apply { acquire() } }
+        // SY <--
         return try {
-            // Take wake + wifi locks
-            ignore { wakeLock?.release() }
-            wakeLock = ignore { context.createPartialWakeLock("teh:ExhFavoritesSyncWakelock") }
-            ignore { wifiLock?.release() }
-            wifiLock = ignore { context.createWifiLock("teh:ExhFavoritesSyncWifi") }
-
             // Do not update galleries while syncing favorites
             EHentaiUpdateWorker.cancelBackground(context)
 
@@ -186,14 +184,8 @@ internal class FavoritesSyncHelper(val context: Context) {
             false
         } finally {
             // Release wake + wifi locks
-            ignore {
-                wakeLock?.release()
-                wakeLock = null
-            }
-            ignore {
-                wifiLock?.release()
-                wifiLock = null
-            }
+            ignore { wakeLock?.release() }
+            ignore { wifiLock?.release() }
             // Update galleries again!
             EHentaiUpdateWorker.scheduleBackground(context)
         }
@@ -208,5 +200,10 @@ internal class FavoritesSyncHelper(val context: Context) {
 
     companion object {
         private val THROTTLE_WARN = 1.seconds
+
+        // SY -->
+        // A sync that outlives this lets the device sleep rather than hold the CPU awake indefinitely.
+        private val LOCK_TIMEOUT = 1.hours
+        // SY <--
     }
 }
