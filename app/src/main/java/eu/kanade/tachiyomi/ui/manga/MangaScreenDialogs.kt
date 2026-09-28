@@ -40,45 +40,7 @@ internal fun MangaScreen.MangaScreenDialogs(
     val navigator = LocalNavigator.currentOrThrow
     var showScanlatorsDialog by remember { mutableStateOf(false) }
     val onDismissRequest = { screenModel.dismissDialog() }
-    when (val dialog = successState.dialog) {
-        null -> Unit
-        is MangaScreenModel.Dialog.ChangeCategory -> ChangeCategory(screenModel, dialog, onDismissRequest)
-        is MangaScreenModel.Dialog.DuplicateManga -> DuplicateManga(screenModel, dialog, onDismissRequest)
-        is MangaScreenModel.Dialog.Migrate -> Migrate(dialog, onDismissRequest)
-        is MangaScreenModel.Dialog.SetFetchInterval -> SetFetchInterval(screenModel, dialog, onDismissRequest)
-        is MangaScreenModel.Dialog.DeleteChapters -> DeleteChaptersDialog(
-            onDismissRequest = onDismissRequest,
-            onConfirm = {
-                screenModel.toggleAllSelection(false)
-                screenModel.downloads.deleteChapters(dialog.chapters)
-            },
-        )
-        MangaScreenModel.Dialog.SettingsSheet ->
-            ChapterSettingsSheet(screenModel, successState, onDismissRequest) { showScanlatorsDialog = true }
-        MangaScreenModel.Dialog.TrackSheet -> NavigatorAdaptiveSheet(
-            screen = TrackInfoDialogHomeScreen(
-                mangaId = successState.manga.id,
-                mangaTitle = successState.manga.title,
-                sourceId = successState.source.id,
-            ),
-            enableSwipeDismiss = { it.lastItem is TrackInfoDialogHomeScreen },
-            onDismissRequest = onDismissRequest,
-        )
-        MangaScreenModel.Dialog.FullCover -> FullCoverDialog(successState, onDismissRequest)
-        // SY -->
-        is MangaScreenModel.Dialog.EditMangaInfo -> EditMangaDialog(
-            manga = dialog.manga,
-            onDismissRequest = screenModel::dismissDialog,
-            onPositiveClick = screenModel::updateMangaInfo,
-        )
-        is MangaScreenModel.Dialog.EditMergedSettings -> EditMergedSettingsDialog(
-            mergedData = dialog.mergedData,
-            onDismissRequest = screenModel::dismissDialog,
-            onDeleteClick = screenModel::deleteMerge,
-            onPositiveClick = screenModel::updateMergeSettings,
-        )
-        // SY <--
-    }
+    mangaDialogContent(screenModel, successState, onDismissRequest) { showScanlatorsDialog = true }()
 
     if (showScanlatorsDialog) {
         ScanlatorFilterDialog(
@@ -90,9 +52,87 @@ internal fun MangaScreen.MangaScreenDialogs(
     }
 }
 
+// Plain so the exhaustive `when` stays out of Compose.
+private fun MangaScreen.mangaDialogContent(
+    screenModel: MangaScreenModel,
+    successState: MangaScreenModel.State.Success,
+    onDismissRequest: () -> Unit,
+    onScanlatorFilterClicked: () -> Unit,
+): @Composable () -> Unit = when (val dialog = successState.dialog) {
+    null -> {
+        {}
+    }
+    is MangaScreenModel.Dialog.ChangeCategory -> {
+        { ChangeCategory(screenModel, dialog, onDismissRequest) }
+    }
+    is MangaScreenModel.Dialog.DuplicateManga -> {
+        { DuplicateManga(screenModel, dialog, onDismissRequest) }
+    }
+    is MangaScreenModel.Dialog.Migrate -> {
+        { Migrate(dialog, onDismissRequest) }
+    }
+    is MangaScreenModel.Dialog.SetFetchInterval -> {
+        { SetFetchInterval(screenModel, dialog, onDismissRequest) }
+    }
+    is MangaScreenModel.Dialog.DeleteChapters -> {
+        {
+            DeleteChaptersDialog(
+                onDismissRequest = onDismissRequest,
+                onConfirm = {
+                    screenModel.toggleAllSelection(false)
+                    screenModel.downloads.deleteChapters(dialog.chapters)
+                },
+            )
+        }
+    }
+    MangaScreenModel.Dialog.SettingsSheet -> {
+        { ChapterSettingsSheet(screenModel, successState, onDismissRequest, onScanlatorFilterClicked) }
+    }
+    MangaScreenModel.Dialog.TrackSheet -> {
+        { TrackSheet(successState, onDismissRequest) }
+    }
+    MangaScreenModel.Dialog.FullCover -> {
+        { FullCoverDialog(successState, onDismissRequest) }
+    }
+    // SY -->
+    is MangaScreenModel.Dialog.EditMangaInfo -> {
+        {
+            EditMangaDialog(
+                manga = dialog.manga,
+                onDismissRequest = screenModel::dismissDialog,
+                onPositiveClick = screenModel::updateMangaInfo,
+            )
+        }
+    }
+    is MangaScreenModel.Dialog.EditMergedSettings -> {
+        {
+            EditMergedSettingsDialog(
+                mergedData = dialog.mergedData,
+                onDismissRequest = screenModel::dismissDialog,
+                onDeleteClick = screenModel::deleteMerge,
+                onPositiveClick = screenModel::updateMergeSettings,
+            )
+        }
+    }
+    // SY <--
+}
+
+@Composable
+internal fun TrackSheet(successState: MangaScreenModel.State.Success, onDismissRequest: () -> Unit) {
+    NavigatorAdaptiveSheet(
+        screen = TrackInfoDialogHomeScreen(
+            mangaId = successState.manga.id,
+            mangaTitle = successState.manga.title,
+            sourceId = successState.source.id,
+        ),
+        enableSwipeDismiss = { it.lastItem is TrackInfoDialogHomeScreen },
+        onDismissRequest = onDismissRequest,
+    )
+}
+
 // Add-to-library flow (categories, duplicate check, migration) and the fetch-interval editor.
 @Composable
-private fun ChangeCategory(
+internal fun ChangeCategory(
     screenModel: MangaScreenModel,
     dialog: MangaScreenModel.Dialog.ChangeCategory,
     onDismissRequest: () -> Unit,
@@ -109,7 +149,7 @@ private fun ChangeCategory(
 }
 
 @Composable
-private fun DuplicateManga(
+internal fun DuplicateManga(
     screenModel: MangaScreenModel,
     dialog: MangaScreenModel.Dialog.DuplicateManga,
     onDismissRequest: () -> Unit,
@@ -125,7 +165,7 @@ private fun DuplicateManga(
 }
 
 @Composable
-private fun MangaScreen.Migrate(dialog: MangaScreenModel.Dialog.Migrate, onDismissRequest: () -> Unit) {
+internal fun MangaScreen.Migrate(dialog: MangaScreenModel.Dialog.Migrate, onDismissRequest: () -> Unit) {
     val navigator = LocalNavigator.currentOrThrow
     MigrateMangaDialog(
         current = dialog.current,
@@ -137,7 +177,7 @@ private fun MangaScreen.Migrate(dialog: MangaScreenModel.Dialog.Migrate, onDismi
 }
 
 @Composable
-private fun SetFetchInterval(
+internal fun SetFetchInterval(
     screenModel: MangaScreenModel,
     dialog: MangaScreenModel.Dialog.SetFetchInterval,
     onDismissRequest: () -> Unit,
@@ -152,7 +192,7 @@ private fun SetFetchInterval(
 }
 
 @Composable
-private fun ChapterSettingsSheet(
+internal fun ChapterSettingsSheet(
     screenModel: MangaScreenModel,
     successState: MangaScreenModel.State.Success,
     onDismissRequest: () -> Unit,
@@ -174,7 +214,7 @@ private fun ChapterSettingsSheet(
 }
 
 @Composable
-private fun MangaScreen.FullCoverDialog(successState: MangaScreenModel.State.Success, onDismissRequest: () -> Unit) {
+internal fun MangaScreen.FullCoverDialog(successState: MangaScreenModel.State.Success, onDismissRequest: () -> Unit) {
     val context = LocalContext.current
     val sm = rememberScreenModel { MangaCoverScreenModel(successState.manga.id) }
     val manga by sm.state.collectAsState()

@@ -31,65 +31,89 @@ internal fun ReaderActivity.ReaderDialogs(
     state: ReaderViewModel.State,
     settingsScreenModel: ReaderSettingsScreenModel,
 ) {
+    readerDialogContent(state, settingsScreenModel)()
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+private fun ReaderActivity.readerDialogContent(
+    state: ReaderViewModel.State,
+    settingsScreenModel: ReaderSettingsScreenModel,
+): @Composable () -> Unit {
     val onDismissRequest = viewModel::closeDialog
-    when (val dialog = state.dialog) {
+    return when (val dialog = state.dialog) {
+        null -> {
+            {}
+        }
         is ReaderViewModel.Dialog.Loading -> {
-            LoadingDialog()
+            { LoadingDialog() }
         }
         is ReaderViewModel.Dialog.Settings -> {
-            ReaderSettingsDialog(
-                onDismissRequest = onDismissRequest,
-                onShowMenus = { setMenuVisibility(true) },
-                onHideMenus = { setMenuVisibility(false) },
-                screenModel = settingsScreenModel,
-            )
+            {
+                ReaderSettingsDialog(
+                    onDismissRequest = onDismissRequest,
+                    onShowMenus = { setMenuVisibility(true) },
+                    onHideMenus = { setMenuVisibility(false) },
+                    screenModel = settingsScreenModel,
+                )
+            }
         }
         is ReaderViewModel.Dialog.ReadingModeSelect -> {
-            ReadingModeSelectDialog(
-                onDismissRequest = onDismissRequest,
-                screenModel = settingsScreenModel,
-                // The reader already shows the mode as an overlay when that preference is on.
-                onChange = { showModeToast(it, unless = readerPreferences.showReadingMode.get()) },
-            )
+            {
+                ReadingModeSelectDialog(
+                    onDismissRequest = onDismissRequest,
+                    screenModel = settingsScreenModel,
+                    // The reader already shows the mode as an overlay when that preference is on.
+                    onChange = { showModeToast(it, unless = readerPreferences.showReadingMode.get()) },
+                )
+            }
         }
         is ReaderViewModel.Dialog.OrientationModeSelect -> {
-            OrientationSelectDialog(
-                onDismissRequest = onDismissRequest,
-                screenModel = settingsScreenModel,
-                onChange = { showModeToast(it, unless = false) },
-            )
+            {
+                OrientationSelectDialog(
+                    onDismissRequest = onDismissRequest,
+                    screenModel = settingsScreenModel,
+                    onChange = { showModeToast(it, unless = false) },
+                )
+            }
         }
         is ReaderViewModel.Dialog.PageActions -> {
-            ReaderPageActionsDialog(
-                onDismissRequest = onDismissRequest,
-                onSetAsCover = viewModel.images::setAsCover,
-                onShare = viewModel.images::shareImage,
-                onSave = viewModel.images::saveImage,
-                onShareCombined = viewModel.images::shareImages,
-                onSaveCombined = viewModel.images::saveImages,
-                hasExtraPage = dialog.extraPage != null,
-            )
+            { PageActionsDialog(dialog, onDismissRequest) }
         }
         is ReaderViewModel.Dialog.ChapterList -> {
-            ReaderChapterListDialog(state, settingsScreenModel, onDismissRequest)
+            { ReaderChapterListDialog(state, settingsScreenModel, onDismissRequest) }
         }
         // SY -->
         ReaderViewModel.Dialog.AutoScrollHelp -> {
-            HelpDialog(SYMR.strings.eh_autoscroll_help, SYMR.strings.eh_autoscroll_help_message, onDismissRequest)
+            { HelpDialog(SYMR.strings.eh_autoscroll_help, SYMR.strings.eh_autoscroll_help_message, onDismissRequest) }
         }
         ReaderViewModel.Dialog.BoostPageHelp -> {
-            HelpDialog(SYMR.strings.eh_boost_page_help, SYMR.strings.eh_boost_page_help_message, onDismissRequest)
+            { HelpDialog(SYMR.strings.eh_boost_page_help, SYMR.strings.eh_boost_page_help_message, onDismissRequest) }
         }
         ReaderViewModel.Dialog.RetryAllHelp -> {
-            HelpDialog(SYMR.strings.eh_retry_all_help, SYMR.strings.eh_retry_all_help_message, onDismissRequest)
+            { HelpDialog(SYMR.strings.eh_retry_all_help, SYMR.strings.eh_retry_all_help_message, onDismissRequest) }
         }
         // SY <--
-        null -> {}
     }
 }
 
+@Composable
+internal fun ReaderActivity.PageActionsDialog(
+    dialog: ReaderViewModel.Dialog.PageActions,
+    onDismissRequest: () -> Unit,
+) {
+    ReaderPageActionsDialog(
+        onDismissRequest = onDismissRequest,
+        onSetAsCover = viewModel.images::setAsCover,
+        onShare = viewModel.images::shareImage,
+        onSave = viewModel.images::saveImage,
+        onShareCombined = viewModel.images::shareImages,
+        onSaveCombined = viewModel.images::saveImages,
+        hasExtraPage = dialog.extraPage != null,
+    )
+}
+
 // Replaces any earlier mode toast so quick successive changes don't queue up.
-private fun ReaderActivity.showModeToast(stringRes: StringResource, unless: Boolean) {
+internal fun ReaderActivity.showModeToast(stringRes: StringResource, unless: Boolean) {
     menuToggleToast?.cancel()
     if (!unless) {
         menuToggleToast = toast(stringRes)
@@ -97,7 +121,7 @@ private fun ReaderActivity.showModeToast(stringRes: StringResource, unless: Bool
 }
 
 @Composable
-private fun LoadingDialog() {
+internal fun LoadingDialog() {
     AlertDialog(
         onDismissRequest = {},
         confirmButton = {},
@@ -114,7 +138,7 @@ private fun LoadingDialog() {
 }
 
 @Composable
-private fun ReaderActivity.ReaderChapterListDialog(
+internal fun ReaderActivity.ReaderChapterListDialog(
     state: ReaderViewModel.State,
     settingsScreenModel: ReaderSettingsScreenModel,
     onDismissRequest: () -> Unit,
@@ -144,7 +168,7 @@ private fun ReaderActivity.ReaderChapterListDialog(
 
 // SY -->
 @Composable
-private fun HelpDialog(title: StringResource, text: StringResource, onDismissRequest: () -> Unit) {
+internal fun HelpDialog(title: StringResource, text: StringResource, onDismissRequest: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {

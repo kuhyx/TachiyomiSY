@@ -12,6 +12,8 @@ import eu.kanade.tachiyomi.data.download.startDownloadNow
 import eu.kanade.tachiyomi.source.online.all.MergedSource
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import logcat.LogPriority
 import mihon.domain.chapter.interactor.FilterChaptersForDownload
 import tachiyomi.core.common.i18n.stringResource
@@ -57,11 +59,13 @@ internal class MangaDownloads(
                 }
                 .catch { error -> logcat(LogPriority.ERROR, error) }
                 .flowWithLifecycle(lifecycle)
-                .collect {
+                // launchIn rather than collect: the download queue never completes, so nothing follows a collect.
+                .onEach {
                     withUIContext {
                         updateDownloadState(it)
                     }
                 }
+                .launchIn(this)
         }
 
         model.screenModelScope.launchIO {
@@ -77,11 +81,13 @@ internal class MangaDownloads(
                 }
                 .catch { error -> logcat(LogPriority.ERROR, error) }
                 .flowWithLifecycle(lifecycle)
-                .collect {
+                // launchIn rather than collect: the download queue never completes, so nothing follows a collect.
+                .onEach {
                     withUIContext {
                         updateDownloadState(it)
                     }
                 }
+                .launchIn(this)
         }
     }
 
