@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.updates
 
+import android.content.Context
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
@@ -30,7 +31,9 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.updates.UpdatesScreenModel.Event
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import mihon.feature.upcoming.UpcomingScreen
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
@@ -100,7 +103,7 @@ internal data object UpdatesTab : Tab {
         )
 
         UpdatesDialog(screenModel, settingsScreenModel, state.dialog)
-        UpdatesEventsSnackbar(screenModel)
+        LaunchedEffect(Unit) { showEvents(screenModel, context) }
 
         LaunchedEffect(state.selectionMode) {
             HomeScreen.showBottomNav(!state.selectionMode)
@@ -126,33 +129,15 @@ internal data object UpdatesTab : Tab {
         settingsScreenModel: UpdatesSettingsScreenModel,
         dialog: UpdatesScreenModel.Dialog?,
     ) {
-        val onDismissDialog = { screenModel.setDialog(null) }
-        when (dialog) {
-            is UpdatesScreenModel.Dialog.DeleteConfirmation -> {
-                UpdatesDeleteConfirmDialog(
-                    onDismissRequest = onDismissDialog,
-                    onConfirm = { screenModel.deleteChapters(dialog.toDelete) },
-                )
-            }
-            is UpdatesScreenModel.Dialog.FilterSheet -> {
-                UpdatesFilterDialog(
-                    onDismissRequest = onDismissDialog,
-                    screenModel = settingsScreenModel,
-                )
-            }
-            null -> {}
-        }
+        updatesDialog(screenModel, settingsScreenModel, dialog)()
     }
 
-    @Composable
-    private fun UpdatesEventsSnackbar(screenModel: UpdatesScreenModel) {
-        val context = LocalContext.current
-        LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { event ->
+    // A plain function rather than a composable, so no Compose memoisation guards: mapLatest/launchIn because a
+    // newer event still cancels the snackbar in flight and the never-ending channel leaves nothing after a collect.
+    private fun CoroutineScope.showEvents(screenModel: UpdatesScreenModel, context: Context) {
+        screenModel.events
+            .mapLatest { event ->
                 when (event) {
-                    Event.InternalError -> {
-                        screenModel.snackbarHostState.showSnackbar(context.stringResource(MR.strings.internal_error))
-                    }
                     is Event.LibraryUpdateTriggered -> {
                         val msg = if (event.started) {
                             MR.strings.updating_library
@@ -162,6 +147,38 @@ internal data object UpdatesTab : Tab {
                         screenModel.snackbarHostState.showSnackbar(context.stringResource(msg))
                     }
                 }
+            }
+            .launchIn(this)
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+internal fun updatesDialog(
+    screenModel: UpdatesScreenModel,
+    settingsScreenModel: UpdatesSettingsScreenModel,
+    dialog: UpdatesScreenModel.Dialog?,
+): @Composable () -> Unit {
+    val onDismissDialog = { screenModel.setDialog(null) }
+    return when (dialog) {
+        null -> {
+            {
+                // Nothing to show.
+            }
+        }
+        is UpdatesScreenModel.Dialog.DeleteConfirmation -> {
+            {
+                UpdatesDeleteConfirmDialog(
+                    onDismissRequest = onDismissDialog,
+                    onConfirm = { screenModel.deleteChapters(dialog.toDelete) },
+                )
+            }
+        }
+        is UpdatesScreenModel.Dialog.FilterSheet -> {
+            {
+                UpdatesFilterDialog(
+                    onDismissRequest = onDismissDialog,
+                    screenModel = settingsScreenModel,
+                )
             }
         }
     }

@@ -25,6 +25,8 @@ internal class DeepLinkActivity : Activity() {
 
     private companion object {
         /** The string extras MainActivity reads off a search, share or SY search intent. */
+        // A field, not a property: the activity reads it directly, and a getter would be dead code.
+        @JvmField
         val FORWARDED_EXTRAS = listOf(
             SearchManager.QUERY,
             Intent.EXTRA_TEXT,

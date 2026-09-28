@@ -12,7 +12,8 @@ import eu.kanade.presentation.category.components.CategoryCreateDialog
 import eu.kanade.presentation.category.components.CategoryDeleteDialog
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
@@ -42,34 +43,50 @@ internal class SortTagScreen : Screen() {
             navigateUp = navigator::pop,
         )
 
-        when (val dialog = successState.dialog) {
-            null -> {}
-            SortTagDialog.Create -> {
-                CategoryCreateDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    onCreate = { screenModel.createTag(it) },
-                    categories = successState.tags,
-                    title = stringResource(SYMR.strings.add_tag),
-                    extraMessage = stringResource(SYMR.strings.action_add_tags_message),
-                    alreadyExistsError = SYMR.strings.error_tag_exists,
-                )
-            }
-            is SortTagDialog.Delete -> {
-                CategoryDeleteDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    onDelete = { screenModel.delete(dialog.tag) },
-                    title = stringResource(SYMR.strings.delete_tag),
-                    text = stringResource(SYMR.strings.delete_tag_confirmation, dialog.tag),
-                )
-            }
-        }
+        sortTagDialog(screenModel, successState)()
 
         LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { event ->
-                if (event is SortTagEvent.LocalizedMessage) {
-                    context.toast(event.stringRes)
+            screenModel.events
+                .onEach { event ->
+                    if (event is SortTagEvent.LocalizedMessage) {
+                        context.toast(event.stringRes)
+                    }
                 }
-            }
+                .launchIn(this)
+        }
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+internal fun sortTagDialog(
+    screenModel: SortTagScreenModel,
+    successState: SortTagScreenState.Success,
+): @Composable () -> Unit = when (val dialog = successState.dialog) {
+    null -> {
+        {
+            // Nothing to show.
+        }
+    }
+    SortTagDialog.Create -> {
+        {
+            CategoryCreateDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                onCreate = { screenModel.createTag(it) },
+                categories = successState.tags,
+                title = stringResource(SYMR.strings.add_tag),
+                extraMessage = stringResource(SYMR.strings.action_add_tags_message),
+                alreadyExistsError = SYMR.strings.error_tag_exists,
+            )
+        }
+    }
+    is SortTagDialog.Delete -> {
+        {
+            CategoryDeleteDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                onDelete = { screenModel.delete(dialog.tag) },
+                title = stringResource(SYMR.strings.delete_tag),
+                text = stringResource(SYMR.strings.delete_tag_confirmation, dialog.tag),
+            )
         }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -106,57 +107,7 @@ internal data object HistoryTab : Tab {
 
     @Composable
     private fun HistoryDialogs(screenModel: HistoryScreenModel, dialog: HistoryScreenModel.Dialog?) {
-        val navigator = LocalNavigator.currentOrThrow
-        val onDismissRequest = { screenModel.setDialog(null) }
-        when (dialog) {
-            is HistoryScreenModel.Dialog.Delete -> {
-                HistoryDeleteDialog(
-                    onDismissRequest = onDismissRequest,
-                    onDelete = { all ->
-                        if (all) {
-                            screenModel.removeAllFromHistory(dialog.history.mangaId)
-                        } else {
-                            screenModel.removeFromHistory(dialog.history)
-                        }
-                    },
-                )
-            }
-            is HistoryScreenModel.Dialog.DeleteAll -> {
-                HistoryDeleteAllDialog(
-                    onDismissRequest = onDismissRequest,
-                    onDelete = screenModel::removeAllHistory,
-                )
-            }
-            is HistoryScreenModel.Dialog.DuplicateManga -> {
-                DuplicateMangaDialog(
-                    duplicates = dialog.duplicates,
-                    onDismissRequest = onDismissRequest,
-                    onConfirm = { screenModel.addFavorite(dialog.manga) },
-                    onOpenManga = { navigator.push(MangaScreen(it.id)) },
-                    onMigrate = { screenModel.showMigrateDialog(dialog.manga, it) },
-                )
-            }
-            is HistoryScreenModel.Dialog.ChangeCategory -> {
-                ChangeCategoryDialog(
-                    initialSelection = dialog.initialSelection,
-                    onDismissRequest = onDismissRequest,
-                    onEditCategories = { navigator.push(CategoryScreen()) },
-                    onConfirm = { include, _ ->
-                        screenModel.addToLibraryInCategories(dialog.manga, include)
-                    },
-                )
-            }
-            is HistoryScreenModel.Dialog.Migrate -> {
-                MigrateMangaDialog(
-                    current = dialog.current,
-                    target = dialog.target,
-                    // Initiated from the context of [dialog.target] so we show [dialog.current].
-                    onClickTitle = { navigator.push(MangaScreen(dialog.current.id)) },
-                    onDismissRequest = onDismissRequest,
-                )
-            }
-            null -> {}
-        }
+        historyDialog(screenModel, dialog, LocalNavigator.currentOrThrow)()
     }
 
     // A plain function rather than a composable, so no Compose memoisation guards: mapLatest/launchIn because a
@@ -186,4 +137,80 @@ internal data object HistoryTab : Tab {
             snackbarHostState.showSnackbar(context.stringResource(MR.strings.no_next_chapter))
         }
     }
+}
+
+// Plain so the exhaustive `when` stays out of Compose; a Screen receiver because the migrate dialog needs one.
+internal fun Screen.historyDialog(
+    screenModel: HistoryScreenModel,
+    dialog: HistoryScreenModel.Dialog?,
+    navigator: Navigator,
+): @Composable () -> Unit {
+    val onDismissRequest = { screenModel.setDialog(null) }
+    return when (dialog) {
+        null -> {
+            {
+                // Nothing to show.
+            }
+        }
+        is HistoryScreenModel.Dialog.Delete -> deleteDialog(screenModel, dialog, onDismissRequest)
+        is HistoryScreenModel.Dialog.DeleteAll -> {
+            {
+                HistoryDeleteAllDialog(
+                    onDismissRequest = onDismissRequest,
+                    onDelete = screenModel::removeAllHistory,
+                )
+            }
+        }
+        is HistoryScreenModel.Dialog.DuplicateManga -> {
+            {
+                DuplicateMangaDialog(
+                    duplicates = dialog.duplicates,
+                    onDismissRequest = onDismissRequest,
+                    onConfirm = { screenModel.addFavorite(dialog.manga) },
+                    onOpenManga = { navigator.push(MangaScreen(it.id)) },
+                    onMigrate = { screenModel.showMigrateDialog(dialog.manga, it) },
+                )
+            }
+        }
+        is HistoryScreenModel.Dialog.ChangeCategory -> {
+            {
+                ChangeCategoryDialog(
+                    initialSelection = dialog.initialSelection,
+                    onDismissRequest = onDismissRequest,
+                    onEditCategories = { navigator.push(CategoryScreen()) },
+                    onConfirm = { include, _ ->
+                        screenModel.addToLibraryInCategories(dialog.manga, include)
+                    },
+                )
+            }
+        }
+        is HistoryScreenModel.Dialog.Migrate -> {
+            {
+                MigrateMangaDialog(
+                    current = dialog.current,
+                    target = dialog.target,
+                    // Initiated from the context of [dialog.target] so we show [dialog.current].
+                    onClickTitle = { navigator.push(MangaScreen(dialog.current.id)) },
+                    onDismissRequest = onDismissRequest,
+                )
+            }
+        }
+    }
+}
+
+private fun deleteDialog(
+    screenModel: HistoryScreenModel,
+    dialog: HistoryScreenModel.Dialog.Delete,
+    onDismissRequest: () -> Unit,
+): @Composable () -> Unit = {
+    HistoryDeleteDialog(
+        onDismissRequest = onDismissRequest,
+        onDelete = { all ->
+            if (all) {
+                screenModel.removeAllFromHistory(dialog.history.mangaId)
+            } else {
+                screenModel.removeFromHistory(dialog.history)
+            }
+        },
+    )
 }

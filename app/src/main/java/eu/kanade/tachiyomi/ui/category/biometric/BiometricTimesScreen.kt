@@ -14,7 +14,8 @@ import eu.kanade.presentation.category.BiometricTimesScreen
 import eu.kanade.presentation.category.components.CategoryDeleteDialog
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
@@ -75,30 +76,46 @@ internal class BiometricTimesScreen : Screen() {
             picker.show(activity.supportFragmentManager, null)
         }
 
-        when (val dialog = successState.dialog) {
-            null -> {}
-            BiometricTimesDialog.Create -> {
-                LaunchedEffect(Unit) {
-                    showTimePicker()
-                }
-            }
-            is BiometricTimesDialog.Delete -> {
-                CategoryDeleteDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    onDelete = { screenModel.deleteTimeRanges(dialog.timeRange) },
-                    title = stringResource(SYMR.strings.delete_time_range),
-                    text =
-                    stringResource(SYMR.strings.delete_time_range_confirmation, dialog.timeRange.formattedString),
-                )
-            }
-        }
+        biometricTimesDialog(screenModel, successState.dialog) { showTimePicker() }()
 
         LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { event ->
-                if (event is BiometricTimesEvent.LocalizedMessage) {
-                    context.toast(event.stringRes)
+            screenModel.events
+                .onEach { event ->
+                    if (event is BiometricTimesEvent.LocalizedMessage) {
+                        context.toast(event.stringRes)
+                    }
                 }
+                .launchIn(this)
+        }
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+internal fun biometricTimesDialog(
+    screenModel: BiometricTimesScreenModel,
+    dialog: BiometricTimesDialog?,
+    showTimePicker: () -> Unit,
+): @Composable () -> Unit = when (dialog) {
+    null -> {
+        {
+            // Nothing to show.
+        }
+    }
+    BiometricTimesDialog.Create -> {
+        {
+            LaunchedEffect(Unit) {
+                showTimePicker()
             }
+        }
+    }
+    is BiometricTimesDialog.Delete -> {
+        {
+            CategoryDeleteDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                onDelete = { screenModel.deleteTimeRanges(dialog.timeRange) },
+                title = stringResource(SYMR.strings.delete_time_range),
+                text = stringResource(SYMR.strings.delete_time_range_confirmation, dialog.timeRange.formattedString),
+            )
         }
     }
 }

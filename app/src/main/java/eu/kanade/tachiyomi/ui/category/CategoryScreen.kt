@@ -15,7 +15,8 @@ import eu.kanade.presentation.category.components.CategoryDeleteDialog
 import eu.kanade.presentation.category.components.CategoryRenameDialog
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.presentation.core.screens.LoadingScreen
 
 internal class CategoryScreen : Screen() {
@@ -44,38 +45,56 @@ internal class CategoryScreen : Screen() {
             navigateUp = navigator::pop,
         )
 
-        when (val dialog = successState.dialog) {
-            null -> {}
-            CategoryDialog.Create -> {
-                CategoryCreateDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    onCreate = screenModel::createCategory,
-                    categories = successState.categories.fastMap { it.name },
-                )
-            }
-            is CategoryDialog.Rename -> {
-                CategoryRenameDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    onRename = { screenModel.renameCategory(dialog.category, it) },
-                    categories = successState.categories.fastMap { it.name },
-                    category = dialog.category.name,
-                )
-            }
-            is CategoryDialog.Delete -> {
-                CategoryDeleteDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    onDelete = { screenModel.deleteCategory(dialog.category.id) },
-                    category = dialog.category.name,
-                )
-            }
-        }
+        categoryDialog(screenModel, successState)()
 
         LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { event ->
-                if (event is CategoryEvent.LocalizedMessage) {
-                    context.toast(event.stringRes)
+            screenModel.events
+                .onEach { event ->
+                    if (event is CategoryEvent.LocalizedMessage) {
+                        context.toast(event.stringRes)
+                    }
                 }
-            }
+                .launchIn(this)
+        }
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+internal fun categoryDialog(
+    screenModel: CategoryScreenModel,
+    successState: CategoryScreenState.Success,
+): @Composable () -> Unit = when (val dialog = successState.dialog) {
+    null -> {
+        {
+            // Nothing to show.
+        }
+    }
+    CategoryDialog.Create -> {
+        {
+            CategoryCreateDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                onCreate = screenModel::createCategory,
+                categories = successState.categories.fastMap { it.name },
+            )
+        }
+    }
+    is CategoryDialog.Rename -> {
+        {
+            CategoryRenameDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                onRename = { screenModel.renameCategory(dialog.category, it) },
+                categories = successState.categories.fastMap { it.name },
+                category = dialog.category.name,
+            )
+        }
+    }
+    is CategoryDialog.Delete -> {
+        {
+            CategoryDeleteDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                onDelete = { screenModel.deleteCategory(dialog.category.id) },
+                category = dialog.category.name,
+            )
         }
     }
 }

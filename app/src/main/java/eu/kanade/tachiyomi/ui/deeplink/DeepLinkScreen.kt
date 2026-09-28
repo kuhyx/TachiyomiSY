@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.deeplink
 
+import android.content.Context
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -8,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.util.Screen
@@ -41,31 +44,47 @@ internal class DeepLinkScreen(
                 )
             },
         ) { contentPadding ->
-            when (state) {
-                is DeepLinkScreenModel.State.Loading -> {
-                    LoadingScreen(Modifier.padding(contentPadding))
-                }
-                is DeepLinkScreenModel.State.NoResults -> {
-                    navigator.replace(GlobalSearchScreen(query))
-                }
-                is DeepLinkScreenModel.State.Result -> {
-                    val resultState = state as DeepLinkScreenModel.State.Result
-                    if (resultState.chapterId == null) {
-                        navigator.replace(
-                            MangaScreen(
-                                resultState.manga.id,
-                                true,
-                            ),
-                        )
-                    } else {
-                        navigator.pop()
-                        ReaderActivity.newIntent(
-                            context,
-                            resultState.manga.id,
-                            resultState.chapterId,
-                        ).also(context::startActivity)
-                    }
-                }
+            deepLinkContent(
+                state = state,
+                query = query,
+                navigator = navigator,
+                context = context,
+                contentPadding = contentPadding,
+            )()
+        }
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose; the returned content still runs during composition.
+internal fun deepLinkContent(
+    state: DeepLinkScreenModel.State,
+    query: String,
+    navigator: Navigator,
+    context: Context,
+    contentPadding: PaddingValues,
+): @Composable () -> Unit = when (state) {
+    is DeepLinkScreenModel.State.Loading -> {
+        { LoadingScreen(Modifier.padding(contentPadding)) }
+    }
+    is DeepLinkScreenModel.State.NoResults -> {
+        { navigator.replace(GlobalSearchScreen(query)) }
+    }
+    is DeepLinkScreenModel.State.Result -> {
+        {
+            if (state.chapterId == null) {
+                navigator.replace(
+                    MangaScreen(
+                        state.manga.id,
+                        true,
+                    ),
+                )
+            } else {
+                navigator.pop()
+                ReaderActivity.newIntent(
+                    context,
+                    state.manga.id,
+                    state.chapterId,
+                ).also(context::startActivity)
             }
         }
     }

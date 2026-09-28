@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.stats
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,10 +53,18 @@ internal class StatsScreen : Screen() {
                 )
             },
         ) { paddingValues ->
-            when (val current = state) {
-                is StatsScreenState.Loading -> LoadingScreen()
-                is StatsScreenState.Success -> StatsScreenContent(state = current, paddingValues = paddingValues)
-            }
+            statsContent(state, paddingValues)()
         }
     }
 }
+
+// Plain so the exhaustive `when` stays out of Compose.
+internal fun statsContent(state: StatsScreenState, paddingValues: PaddingValues): @Composable () -> Unit =
+    when (state) {
+        is StatsScreenState.Loading -> {
+            { LoadingScreen() }
+        }
+        is StatsScreenState.Success -> {
+            { StatsScreenContent(state = state, paddingValues = paddingValues) }
+        }
+    }

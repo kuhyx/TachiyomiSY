@@ -14,7 +14,8 @@ import eu.kanade.presentation.category.components.CategoryDeleteDialog
 import eu.kanade.presentation.category.components.CategoryRenameDialog
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
@@ -44,46 +45,64 @@ internal class SourceCategoryScreen : Screen() {
             navigateUp = navigator::pop,
         )
 
-        when (val dialog = successState.dialog) {
-            null -> {}
-            SourceCategoryDialog.Create -> {
-                CategoryCreateDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    onCreate = { screenModel.createCategory(it) },
-                    // SY -->
-                    categories = successState.categories,
-                    title = stringResource(MR.strings.action_add_category),
-                    // SY <--
-                )
-            }
-            is SourceCategoryDialog.Rename -> {
-                CategoryRenameDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    onRename = { screenModel.renameCategory(dialog.category, it) },
-                    // SY -->
-                    categories = successState.categories,
-                    category = dialog.category,
-                    // SY <--
-                )
-            }
-            is SourceCategoryDialog.Delete -> {
-                CategoryDeleteDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    onDelete = { screenModel.deleteCategory(dialog.category) },
-                    // SY -->
-                    title = stringResource(MR.strings.delete_category),
-                    text = stringResource(MR.strings.delete_category_confirmation, dialog.category),
-                    // SY <--
-                )
-            }
-        }
+        sourceCategoryDialog(screenModel, successState)()
 
         LaunchedEffect(Unit) {
-            screenModel.events.collectLatest { event ->
-                if (event is SourceCategoryEvent.LocalizedMessage) {
-                    context.toast(event.stringRes)
+            screenModel.events
+                .onEach { event ->
+                    if (event is SourceCategoryEvent.LocalizedMessage) {
+                        context.toast(event.stringRes)
+                    }
                 }
-            }
+                .launchIn(this)
+        }
+    }
+}
+
+// Plain so the exhaustive `when` stays out of Compose.
+internal fun sourceCategoryDialog(
+    screenModel: SourceCategoryScreenModel,
+    successState: SourceCategoryScreenState.Success,
+): @Composable () -> Unit = when (val dialog = successState.dialog) {
+    null -> {
+        {
+            // Nothing to show.
+        }
+    }
+    SourceCategoryDialog.Create -> {
+        {
+            CategoryCreateDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                onCreate = { screenModel.createCategory(it) },
+                // SY -->
+                categories = successState.categories,
+                title = stringResource(MR.strings.action_add_category),
+                // SY <--
+            )
+        }
+    }
+    is SourceCategoryDialog.Rename -> {
+        {
+            CategoryRenameDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                onRename = { screenModel.renameCategory(dialog.category, it) },
+                // SY -->
+                categories = successState.categories,
+                category = dialog.category,
+                // SY <--
+            )
+        }
+    }
+    is SourceCategoryDialog.Delete -> {
+        {
+            CategoryDeleteDialog(
+                onDismissRequest = screenModel::dismissDialog,
+                onDelete = { screenModel.deleteCategory(dialog.category) },
+                // SY -->
+                title = stringResource(MR.strings.delete_category),
+                text = stringResource(MR.strings.delete_category_confirmation, dialog.category),
+                // SY <--
+            )
         }
     }
 }

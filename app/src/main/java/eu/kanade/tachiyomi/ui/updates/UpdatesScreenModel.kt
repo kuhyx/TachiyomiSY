@@ -117,7 +117,6 @@ internal class UpdatesScreenModel(
     }
 
     sealed interface Event {
-        data object InternalError : Event
         data class LibraryUpdateTriggered(val started: Boolean) : Event
     }
 }
