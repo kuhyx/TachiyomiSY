@@ -1,6 +1,6 @@
 package eu.kanade.presentation.more.settings.widget
 
-import android.app.Activity
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.tachiyomi.util.system.DeviceUtil
@@ -49,7 +50,7 @@ internal class AppThemePreferenceWidgetTest {
         stopKoin()
     }
 
-    private fun show(dynamic: Boolean, activity: Activity?) {
+    private fun show(dynamic: Boolean, activity: Context?) {
         mockkStatic("eu.kanade.tachiyomi.util.system.DeviceUtilExtensionsKt")
         every { DeviceUtil.isDynamicColorAvailable } returns dynamic
         compose.setContent {
@@ -84,6 +85,13 @@ internal class AppThemePreferenceWidgetTest {
     fun clickRecreatesActivity() {
         val activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
         show(dynamic = false, activity = activity)
+        compose.onAllNodesWithContentDescription("Selected").onFirst().performClick()
+        picked shouldBe listOf(AppTheme.DEFAULT)
+    }
+
+    @Test
+    fun clickOutsideAnActivity() {
+        show(dynamic = false, activity = ApplicationProvider.getApplicationContext())
         compose.onAllNodesWithContentDescription("Selected").onFirst().performClick()
         picked shouldBe listOf(AppTheme.DEFAULT)
     }

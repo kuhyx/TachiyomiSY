@@ -2,9 +2,11 @@ package eu.kanade.presentation.track
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SelectableDates
+import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import eu.kanade.presentation.util.invokeClick
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
@@ -54,6 +56,10 @@ internal class TrackSelectorsTest {
                 )
             }
         }
+        compose.onNodeWithText("Status").assertExists()
+        // Scrolled to the end, the list can scroll back and the top divider shows too.
+        compose.onNode(hasScrollToIndexAction()).performScrollToIndex(40)
+        compose.waitForIdle()
         compose.onNodeWithText("Status").assertExists()
     }
 

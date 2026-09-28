@@ -71,6 +71,14 @@ internal class WebViewScreenTest {
     private fun chrome() = shadowOf(webView()).webChromeClient as AccompanistWebChromeClient
 
     @Test
+    fun thePageTitleWins() {
+        show()
+        compose.runOnIdle { chrome().onReceivedTitle(webView(), "Page title") }
+        compose.waitForIdle()
+        compose.onNodeWithText("Page title").assertExists()
+    }
+
+    @Test
     fun overflowUsesCurrentUrl() {
         show()
         compose.onNodeWithText("Initial").assertExists()

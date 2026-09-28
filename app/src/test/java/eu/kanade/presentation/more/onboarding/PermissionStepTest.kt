@@ -1,5 +1,6 @@
 package eu.kanade.presentation.more.onboarding
 
+import android.Manifest
 import android.app.Application
 import android.content.Context
 import android.os.Build
@@ -105,5 +106,13 @@ internal class PermissionStepTest {
         show(step)
         step.notificationGranted shouldBe true
         compose.onAllNodesWithText("Notification permission").fetchSemanticsNodes().size shouldBe 0
+    }
+
+    @Test
+    fun grantedNotificationsAreSeen() {
+        shadowOf(context as Application).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
+        val step = PermissionStep()
+        show(step)
+        step.notificationGranted shouldBe true
     }
 }

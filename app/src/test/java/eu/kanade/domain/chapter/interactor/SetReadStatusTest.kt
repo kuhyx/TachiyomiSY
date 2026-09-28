@@ -86,6 +86,8 @@ internal class SetReadStatusTest {
         interactor.await(4, true) shouldBe SetReadStatus.Result.Success
         interactor.await(Manga.create().copy(id = 4), true) shouldBe SetReadStatus.Result.Success
         coVerify(exactly = 2) { chapterRepository.updateAll(listOf(ChapterUpdate(id = 1, read = true))) }
+        // Marking unread goes the same way and touches only the read chapter.
+        interactor.await(4, false) shouldBe SetReadStatus.Result.Success
     }
 
     @Test
@@ -95,6 +97,7 @@ internal class SetReadStatusTest {
         val merged = Manga.create().copy(id = 4, source = MERGED_SOURCE_ID)
         interactor.await(merged, true) shouldBe SetReadStatus.Result.Success
         coVerify(exactly = 1) { chapterRepository.updateAll(listOf(ChapterUpdate(id = 1, read = true))) }
+        interactor.await(merged, false) shouldBe SetReadStatus.Result.NoChapters
         SetReadStatus.Result.Success.toString() shouldBe "Success"
         SetReadStatus.Result.NoChapters.toString() shouldBe "NoChapters"
     }

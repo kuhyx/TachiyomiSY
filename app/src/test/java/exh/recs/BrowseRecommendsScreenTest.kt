@@ -7,6 +7,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import eu.kanade.presentation.browse.UiDispatcherReset
+import eu.kanade.presentation.browse.resetUiDispatcher
 import eu.kanade.tachiyomi.ui.base.ScreenHost
 import eu.kanade.tachiyomi.ui.library.hasLabel
 import eu.kanade.tachiyomi.ui.library.waitForLabel
@@ -16,19 +18,26 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 internal class BrowseRecommendsScreenTest {
-    @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
+
+    // Paging collects on the shared AndroidUiDispatcher.Main; an earlier class can leave it stuck.
+    @get:Rule
+    val chain: RuleChain = RuleChain.outerRule(UiDispatcherReset()).around(compose)
 
     private val rig = BrowseRecsRig()
 
     @Before
-    fun setUp() = rig.start()
+    fun setUp() {
+        resetUiDispatcher()
+        rig.start()
+    }
 
     @After
     fun tearDown() = rig.stop()

@@ -86,6 +86,15 @@ internal class MetadataViewScreenTest {
     }
 
     @Test
+    fun aMissingMangaHasNoTitle() {
+        coEvery { getManga.await(5L) } returns null
+        coEvery { getFlatMetadataById.await(5L) } returns null
+        compose.setContent { ScreenHost(MetadataViewScreen(mangaId = 5L, sourceId = 8L)) }
+        compose.waitForLabel("No results found")
+        compose.hasLabel("Gallery") shouldBe false
+    }
+
+    @Test
     fun anUnknownSourceIsSaid() {
         every { sourceManager.get(8L) } returns null
         coEvery { getFlatMetadataById.await(5L) } returns null

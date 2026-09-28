@@ -67,6 +67,8 @@ internal class SettingsEhDialogsTest {
         harness.count("Must be between -9999 and 0!") shouldBe 1
         type("5")
         harness.count("Must be between -9999 and 0!") shouldBe 1
+        type("-10000")
+        harness.count("Must be between -9999 and 0!") shouldBe 1
         type("-10")
         harness.count("Must be between -9999 and 0!") shouldBe 0
         tap("OK")
@@ -106,7 +108,8 @@ internal class SettingsEhDialogsTest {
     fun frontPageToggleAndStore() {
         val before = koin.exh.exhEnabledCategories.get()
         harness.click("Front Page Categories")
-        tap("Manga")
+        // Three taps: the box goes both ways and ends flipped.
+        repeat(3) { tap("Manga") }
         tap("OK")
         koin.exh.exhEnabledCategories.get() shouldNotBe before
         harness.click("Front Page Categories")

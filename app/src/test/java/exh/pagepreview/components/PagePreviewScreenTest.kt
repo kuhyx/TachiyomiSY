@@ -69,6 +69,13 @@ internal class PagePreviewScreenTest {
     }
 
     @Test
+    fun anErrorWithoutMessage() {
+        show(PagePreviewState.Error(IllegalStateException()))
+        compose.onNodeWithText("Page previews").assertIsDisplayed()
+        compose.onAllNodesWithText("Go to").fetchSemanticsNodes().size shouldBe 0
+    }
+
+    @Test
     fun loadingShowsNoPages() {
         show(PagePreviewState.Loading)
         compose.onNodeWithText("Page previews").assertIsDisplayed()

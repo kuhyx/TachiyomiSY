@@ -35,6 +35,19 @@ internal class LayoutsTest {
     }
 
     @Test
+    fun aroundLayoutTallestFirst() {
+        compose.setContent {
+            AroundLayout(
+                startLayout = { Box(Modifier.size(80.dp)) { Text("tall start") } },
+                endLayout = { Box(Modifier.size(4.dp)) },
+                content = { Text("short body") },
+            )
+        }
+        compose.onNodeWithText("tall start").assertExists()
+        compose.onNodeWithText("short body").assertExists()
+    }
+
+    @Test
     fun aroundLayoutWithEmptySides() {
         compose.setContent { AroundLayout(startLayout = {}, endLayout = {}, content = { Text("only") }) }
         compose.onNodeWithText("only").assertExists()

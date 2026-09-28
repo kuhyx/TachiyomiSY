@@ -111,6 +111,16 @@ internal class SettingsLibraryScreenTest {
     }
 
     @Test
+    fun excludedCategoryIsKept() {
+        koin.library.updateCategoriesExclude.set(setOf("1"))
+        harness.show(SettingsLibraryScreen)
+        harness.click("Categories")
+        compose.onNodeWithText("OK").performClick()
+        compose.waitForIdle()
+        koin.library.updateCategoriesExclude.get() shouldBe setOf("1")
+    }
+
+    @Test
     fun sortTagsOpensScreen() {
         harness.show(SettingsLibraryScreen)
         harness.item("Tag sorting tags").subtitle.toString() shouldStartWith "0 tags"

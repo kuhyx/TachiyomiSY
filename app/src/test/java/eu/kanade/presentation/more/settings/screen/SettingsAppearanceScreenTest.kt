@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import eu.kanade.domain.ui.model.TabletUiMode
 import eu.kanade.domain.ui.model.ThemeMode
 import eu.kanade.presentation.more.settings.screen.appearance.AppLanguageScreen
@@ -53,7 +54,8 @@ internal class SettingsAppearanceScreenTest {
     @Test
     fun amoledOutsideActivity() {
         koin.ui.themeMode.set(ThemeMode.DARK)
-        harness.show(SettingsAppearanceScreen)
+        // The compose host is itself an Activity, so the application context stands in for "outside".
+        harness.show(SettingsAppearanceScreen, context = ApplicationProvider.getApplicationContext())
         harness.item("Pure black dark mode").enabled shouldBe true
         harness.switch("Pure black dark mode", value = true) shouldBe true
     }

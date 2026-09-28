@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import eu.kanade.tachiyomi.util.system.isDebugBuildType
+import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
@@ -46,5 +47,15 @@ internal class LibraryColumnsTest {
         val harness = LibrarySettingsHarness(trackerCount = 0)
         compose.setContent { MaterialTheme { Column { FilterPage(harness.model) } } }
         compose.onNodeWithText("Customized update frequency").assertDoesNotExist()
+    }
+
+    @Test
+    fun previewShowsIntervalFilter() {
+        mockkStatic("eu.kanade.tachiyomi.util.system.BuildConfigKt")
+        every { isDebugBuildType } returns false
+        every { isPreviewBuildType } returns true
+        val harness = LibrarySettingsHarness(trackerCount = 0)
+        compose.setContent { MaterialTheme { Column { FilterPage(harness.model) } } }
+        compose.onNodeWithText("Customized update frequency").assertExists()
     }
 }

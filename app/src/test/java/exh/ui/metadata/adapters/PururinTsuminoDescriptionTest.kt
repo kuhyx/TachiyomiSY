@@ -22,6 +22,8 @@ internal class PururinTsuminoDescriptionTest {
     @Test
     fun pururinFields() {
         val meta = PururinSearchMetadata().apply {
+            // The category is found past a tag of another namespace.
+            tags += RaisedTag(namespace = "artist", name = "someone", type = 0)
             tags += RaisedTag(namespace = PururinSearchMetadata.TAG_NAMESPACE_CATEGORY, name = "manga", type = 0)
             uploaderDisp = "Shown"
             fileSize = "3 MB"

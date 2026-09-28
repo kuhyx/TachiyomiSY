@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import cafe.adriel.voyager.navigator.Navigator
+import eu.kanade.presentation.util.invokeClick
 import eu.kanade.tachiyomi.ui.library.waitForLabel
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -191,5 +192,18 @@ internal class SettingsDebugScreenTest {
         showScreen()
         compose.onNodeWithText("Slow run").performClick()
         compose.waitForLabel("Function returned result:\n\n7")
+    }
+
+    @Test
+    fun runningUnderAResultNoDim() {
+        mockkObject(DebugFunctions)
+        val slow = SlowFunctions::class.declaredFunctions.filter { it.name.startsWith("slow") }
+        every { DebugFunctions.entries() } returns slow.map { DebugFunctions.Entry(SlowFunctions, it) }
+        showScreen()
+        compose.onNodeWithText("Slow count").performClick()
+        compose.waitForLabel("Function returned result:\n\n7")
+        // A second run while the first result is still shown leaves the menu undimmed.
+        compose.onNodeWithText("Slow run").invokeClick()
+        compose.waitUntil(timeoutMillis = 10_000) { nodesWithText("Slow run") == 2 }
     }
 }

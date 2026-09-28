@@ -4,12 +4,14 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -84,6 +86,25 @@ internal class SearchToolbarTest {
         compose.onNode(hasSetTextAction()).performImeAction()
         query = "needle"
         compose.waitForIdle()
+        compose.onNode(hasSetTextAction()).performImeAction()
+        compose.waitForIdle()
+        events shouldContainExactly listOf("search needle")
+    }
+
+    @Test
+    fun searchWithoutAKeyboard() {
+        query = "needle"
+        compose.setContent {
+            CompositionLocalProvider(LocalSoftwareKeyboardController provides null) {
+                MaterialTheme {
+                    SearchToolbar(
+                        searchQuery = query,
+                        onChangeSearchQuery = { query = it },
+                        onSearch = { events += "search $it" },
+                    )
+                }
+            }
+        }
         compose.onNode(hasSetTextAction()).performImeAction()
         compose.waitForIdle()
         events shouldContainExactly listOf("search needle")

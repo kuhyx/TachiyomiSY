@@ -144,7 +144,8 @@ internal class RecommendsScreenTest {
     @Test
     fun mergedSourcesBrowseResults() {
         show()
-        click("Free")
+        // A source tied to an installed one; the tracker-backed "AniList" below covers the untied kind.
+        click("Linked")
         compose.waitForLabel("opened:BrowseRecommendsScreen")
     }
 

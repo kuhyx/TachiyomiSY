@@ -77,6 +77,17 @@ internal class SettingsDownloadScreenTest {
     }
 
     @Test
+    fun includedCategoryIsKept() {
+        koin.download.downloadNewChapters.set(true)
+        koin.download.downloadNewChapterCategories.set(setOf("1"))
+        harness.show(SettingsDownloadScreen)
+        harness.click("Categories")
+        compose.onNodeWithText("OK").performClick()
+        compose.waitForIdle()
+        koin.download.downloadNewChapterCategories.get() shouldBe setOf("1")
+    }
+
+    @Test
     fun downloadAheadEntries() {
         harness.show(SettingsDownloadScreen)
         harness.list("Auto download while reading", 2) shouldBe true
