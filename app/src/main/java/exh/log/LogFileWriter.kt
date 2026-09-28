@@ -5,6 +5,7 @@ import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import java.io.BufferedWriter
 import java.io.IOException
+import java.io.OutputStreamWriter
 
 /**
  * Used to write the flattened logs to the log file.
@@ -43,7 +44,8 @@ internal class LogFileWriter {
      */
     fun open(file: UniFile): Boolean {
         return try {
-            bufferedWriter = file.openOutputStream().bufferedWriter()
+            // Built by hand: the stdlib's bufferedWriter() re-checks for a BufferedWriter it can never get here.
+            bufferedWriter = BufferedWriter(OutputStreamWriter(file.openOutputStream(), Charsets.UTF_8))
             lastFileName = file.name
             this.file = file
             true
@@ -60,9 +62,10 @@ internal class LogFileWriter {
      * @return true if closed successfully, false otherwise
      */
     fun close(): Boolean {
-        if (bufferedWriter != null) {
+        val writer = bufferedWriter
+        if (writer != null) {
             try {
-                bufferedWriter?.close()
+                writer.close()
             } catch (failed: IOException) {
                 logcat(LogPriority.ERROR, failed) { "Could not close the log file" }
                 return false

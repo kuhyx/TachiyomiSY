@@ -82,7 +82,8 @@ internal object MetadataUIUtil {
         }
 
     fun TextView.bindDrawable(context: Context, @DrawableRes drawable: Int) {
-        ContextCompat.getDrawable(context, drawable)?.apply {
+        // Only this app's own drawables are bound, so the lookup never comes back empty.
+        ContextCompat.getDrawable(context, drawable)!!.apply {
             setTint(context.getResourceColor(R.attr.colorAccent))
             setBounds(0, 0, 20.dpToPx, 20.dpToPx)
             setCompoundDrawables(this, null, null, null)

@@ -78,7 +78,7 @@ private suspend fun LibraryUpdateJob.selectByGroup(
             .distinct()
             .sorted()
             .getOrNull(sourceExtra ?: -1)
-        if (source != null) libraryManga.filter { it.manga.source == source } else emptyList()
+        if (source != null) libraryManga.fromSource(source) else emptyList()
     }
     LibraryGroup.BY_STATUS -> {
         val statusExtra = groupExtra?.toLongOrNull() ?: -1
@@ -129,3 +129,6 @@ private fun skipReason(
         MR.strings.skipped_reason_not_in_release_period
     else -> null
 }
+
+// The entries of one source; a plain Long, so the comparison compiles without a boxed null check.
+private fun List<LibraryManga>.fromSource(source: Long): List<LibraryManga> = filter { it.manga.source == source }

@@ -72,8 +72,8 @@ private fun BrowseSourceListItem(
     // SY -->
     metadata: RaisedSearchMetadata?,
     // SY <--
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = onClick,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
 ) {
     MangaListItem(
         title = manga.title,

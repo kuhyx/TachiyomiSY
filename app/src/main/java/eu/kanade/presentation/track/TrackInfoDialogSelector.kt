@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -188,10 +187,9 @@ internal fun TrackDateSelector(
 @Composable
 private fun BaseSelector(
     title: String,
-    content: @Composable BoxScope.() -> Unit,
     onConfirm: () -> Unit,
     onDismissRequest: () -> Unit,
-    thirdButton: @Composable (RowScope.() -> Unit)? = null,
+    content: @Composable BoxScope.() -> Unit,
 ) {
     AlertDialogContent(
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
@@ -207,10 +205,6 @@ private fun BaseSelector(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small, Alignment.End),
             ) {
-                if (thirdButton != null) {
-                    thirdButton()
-                    Spacer(modifier = Modifier.weight(1f))
-                }
                 TextButton(onClick = onDismissRequest) {
                     Text(text = stringResource(MR.strings.action_cancel))
                 }

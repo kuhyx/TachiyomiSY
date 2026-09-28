@@ -19,8 +19,7 @@ internal fun ExtensionLoader.extensionHeader(context: Context, pkgInfo: PackageI
     val libVersion = versionName?.let { name ->
         appInfo.metaData.getFloat(METADATA_EXTENSION_LIB)
             .takeUnless { it == 0.0f }
-            ?.toString()
-            ?.toDouble()
+            ?.toLibVersion()
             ?: name.substringBeforeLast('.').toDoubleOrNull()
     }
     val isNsfw = appInfo.metaData.getInt(METADATA_CONTENT_WARNING) > 0 ||
@@ -111,3 +110,6 @@ internal fun ExtensionLoader.nsfwNotAllowed(pkgName: String): LoadResult {
     logcat(LogPriority.WARN) { "NSFW extension $pkgName not allowed" }
     return LoadResult.Error
 }
+
+// The metadata float as the version number its text spells (0.1f is 0.1, not 0.10000000149011612).
+private fun Float.toLibVersion(): Double = toString().toDouble()

@@ -96,11 +96,12 @@ internal class SettingsDebugScreen : Screen() {
                 )
             },
         ) { paddingValues ->
-            Crossfade(functions == null, label = "debug_functions") {
-                if (it) {
+            // Crossfades once, from null (loading) to the loaded list.
+            Crossfade(functions, label = "debug_functions") { loaded ->
+                if (loaded == null) {
                     LoadingScreen()
                 } else {
-                    FunctionList(paddingValues, functions.orEmpty(), toggles, scope)
+                    FunctionList(paddingValues, loaded, toggles, scope)
                 }
             }
         }
@@ -158,7 +159,8 @@ internal class SettingsDebugScreen : Screen() {
                     Modifier
                         .fillMaxSize()
                         .background(color = Color.White.copy(alpha = 0.3F))
-                        .pointerInput(running && result == null) {},
+                        // Shown only while running with no result; the empty handler needs no restart key.
+                        .pointerInput(Unit) {},
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()

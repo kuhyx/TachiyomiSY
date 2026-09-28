@@ -160,7 +160,7 @@ internal class MergedSource : UnsupportedHelpersHttpSource() {
         downloadChapters: Boolean,
     ): List<Chapter> {
         val (source, loadedManga, loaded) = reference.load()
-        if (loadedManga == null || !loaded.getChapterUpdates) return emptyList()
+        if (!loaded.getChapterUpdates) return emptyList()
 
         val results = updateMangaFromRemote(
             source,
@@ -198,5 +198,5 @@ internal class MergedSource : UnsupportedHelpersHttpSource() {
         return LoadedMangaSource(source, manga, this)
     }
 
-    data class LoadedMangaSource(val source: Source, val manga: Manga?, val reference: MergedMangaReference)
+    data class LoadedMangaSource(val source: Source, val manga: Manga, val reference: MergedMangaReference)
 }

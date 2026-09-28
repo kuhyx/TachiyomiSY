@@ -114,8 +114,8 @@ internal class MemAutoFlushingLookupTable<T>(
                 withContext(NonCancellable) {
                     writeSynchronously()
 
-                    // Yes there is a race here, no it's isn't critical
-                    if (id == writeCounter) flushed = true
+                    // Only put() moves writeCounter, and only under the lock this block holds.
+                    flushed = true
                 }
             }
         }
@@ -145,8 +145,11 @@ internal class MemAutoFlushingLookupTable<T>(
     }
 
     suspend fun put(key: Int, value: T) {
-        mutex.withLock { table.put(key, value) }
-        tryWrite()
+        // The write is scheduled under the lock too, so a flush in progress never races a newer write.
+        mutex.withLock {
+            table.put(key, value)
+            tryWrite()
+        }
     }
 
     suspend fun get(key: Int): T? = mutex.withLock { table.get(key) }

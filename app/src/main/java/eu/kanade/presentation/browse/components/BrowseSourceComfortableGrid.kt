@@ -79,8 +79,8 @@ private fun BrowseComfortableGridItem(
     // SY -->
     metadata: RaisedSearchMetadata?,
     // SY <--
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = onClick,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
 ) {
     MangaComfortableGridItem(
         title = manga.title,

@@ -47,7 +47,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 internal class InterceptActivity : BaseActivity() {
-    private var statusJob: Job? = null
+    // An idle placeholder until the first onStart, so there is always a job to cancel.
+    private var statusJob: Job = Job()
 
     private val status: MutableStateFlow<InterceptResult> = MutableStateFlow(InterceptResult.Idle)
 
@@ -141,7 +142,7 @@ internal class InterceptActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        statusJob?.cancel()
+        statusJob.cancel()
         statusJob = status
             .onEach {
                 when (it) {
@@ -177,7 +178,7 @@ internal class InterceptActivity : BaseActivity() {
 
     override fun onStop() {
         super.onStop()
-        statusJob?.cancel()
+        statusJob.cancel()
     }
 
     override fun finish() {

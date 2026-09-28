@@ -119,10 +119,6 @@ internal abstract class BaseSmartSearchEngine<T>(
         val splitCleanedTitle = cleanedTitle.split(" ")
         val splitSortedByLargest = splitCleanedTitle.sortedByDescending { it.length }
 
-        if (splitCleanedTitle.isEmpty()) {
-            return emptyList()
-        }
-
         // Search cleaned title
         // Search two largest words
         // Search largest word

@@ -18,12 +18,15 @@ internal class ChildFirstPathClassLoader(
     parent: ClassLoader,
 ) : PathClassLoader(dexPath, librarySearchPath, parent) {
 
-    private val systemClassLoader: ClassLoader? = getSystemClassLoader()
+    // SY -->
+    // Never null on Android, and the parent is a constructor argument, so neither is checked below.
+    private val systemClassLoader: ClassLoader = getSystemClassLoader()
+    // SY <--
 
     override fun loadClass(name: String?, resolve: Boolean): Class<*> {
         var c = findLoadedClass(name)
 
-        if (c == null && systemClassLoader != null) {
+        if (c == null) {
             try {
                 c = systemClassLoader.loadClass(name)
             } catch (_: ClassNotFoundException) {}
@@ -45,25 +48,25 @@ internal class ChildFirstPathClassLoader(
     }
 
     override fun getResource(name: String?): URL? {
-        return systemClassLoader?.getResource(name)
+        return systemClassLoader.getResource(name)
             ?: findResource(name)
             ?: super.getResource(name)
     }
 
     override fun getResources(name: String?): Enumeration<URL> {
-        val systemUrls = systemClassLoader?.getResources(name)
+        val systemUrls = systemClassLoader.getResources(name)
         val localUrls = findResources(name)
-        val parentUrls = parent?.getResources(name)
+        val parentUrls = parent.getResources(name)
         val urls = buildList {
-            while (systemUrls?.hasMoreElements() == true) {
+            while (systemUrls.hasMoreElements()) {
                 add(systemUrls.nextElement())
             }
 
-            while (localUrls?.hasMoreElements() == true) {
+            while (localUrls.hasMoreElements()) {
                 add(localUrls.nextElement())
             }
 
-            while (parentUrls?.hasMoreElements() == true) {
+            while (parentUrls.hasMoreElements()) {
                 add(parentUrls.nextElement())
             }
         }

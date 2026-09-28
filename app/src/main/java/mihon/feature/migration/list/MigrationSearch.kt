@@ -32,12 +32,15 @@ internal suspend fun MigrationListScreenModel.searchByMostChapters(
     sources.map { source ->
         async {
             sourceSemaphore.withPermit {
-                searchSource(manga.manga, source, deepSearchMode)?.takeIf { it.second.chapterCount > 0 }
+                // A match without chapters has no latest chapter, and drops out here.
+                searchSource(manga.manga, source, deepSearchMode)
+                    ?.let { match -> match.second.latestChapter?.let { latest -> match to latest } }
             }
         }
     }
         .mapNotNull { it.await() }
-        .maxByOrNull { it.second.latestChapter ?: 0.0 }
+        .maxByOrNull { (_, latest) -> latest }
+        ?.first
 }
 
 // Sources in order; the first that knows the manga wins.
@@ -45,7 +48,7 @@ internal suspend fun MigrationListScreenModel.searchFirstMatch(
     manga: MigratingManga,
     sources: List<Source>,
     deepSearchMode: Boolean,
-): Pair<Manga, ChapterInfo>? = sources.firstNotNullOfOrNull { searchSource(manga.manga, source = it, deepSearchMode) }
+): Pair<Manga, ChapterInfo>? = sources.firstNotNullOfOrNull { searchSource(manga.manga, it, deepSearchMode) }
 
 internal suspend fun MigrationListScreenModel.searchSource(
     manga: Manga,

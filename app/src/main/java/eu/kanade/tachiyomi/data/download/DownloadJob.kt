@@ -22,7 +22,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -71,10 +71,10 @@ internal class DownloadJob(context: Context, workerParams: WorkerParameters) : C
 
         coroutineScope {
             // Losing the network (or Wi-Fi when it is required) stops the downloads in checkNetworkState.
-            val watcher = combineTransform(
+            val watcher = combine(
                 applicationContext.networkStateFlow(),
                 downloadPreferences.downloadOnlyOverWifi.changes(),
-                transform = { a, b -> emit(checkNetworkState(a, b)) },
+                transform = { a, b -> checkNetworkState(a, b) },
             )
                 .onEach { networkCheck.value = it }
                 .launchIn(this)

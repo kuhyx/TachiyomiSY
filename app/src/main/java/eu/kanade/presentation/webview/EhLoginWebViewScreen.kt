@@ -35,7 +35,7 @@ import com.kevinnzou.web.WebViewState
 import com.kevinnzou.web.rememberWebViewNavigator
 import com.kevinnzou.web.rememberWebViewState
 import eu.kanade.presentation.components.AppBar
-import eu.kanade.tachiyomi.BuildConfig
+import eu.kanade.tachiyomi.util.system.isDebuggable
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
@@ -134,7 +134,7 @@ private fun LoginWebView(
                 webView.setDefaultSettings()
 
                 // Debug mode (chrome://inspect/#devices)
-                if (BuildConfig.DEBUG &&
+                if (isDebuggable &&
                     0 != webView.context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
                 ) {
                     WebView.setWebContentsDebuggingEnabled(true)

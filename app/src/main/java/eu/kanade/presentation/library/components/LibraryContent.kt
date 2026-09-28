@@ -108,7 +108,8 @@ internal fun LibraryContent(
     }
 }
 
-// The category tab strip; a category that disappears under the pager snaps it back to the last one.
+// The category tab strip. A category that disappears under the pager needs no snap-back here: the pager
+// clamps its current page to the new page count on its next measure, as it does with the tabs hidden.
 @Composable
 private fun CategoryTabs(
     categories: List<Category>,
@@ -116,11 +117,6 @@ private fun CategoryTabs(
     getItemCountForCategory: (Category) -> Int?,
 ) {
     val scope = rememberCoroutineScope()
-    LaunchedEffect(categories) {
-        if (categories.size <= pagerState.currentPage) {
-            pagerState.scrollToPage(categories.size - 1)
-        }
-    }
     LibraryTabs(
         categories = categories,
         pagerState = pagerState,

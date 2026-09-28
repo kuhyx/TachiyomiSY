@@ -41,14 +41,14 @@ internal fun EHentaiDescription(state: State.Success, openMetadataViewer: () -> 
 }
 
 private fun DescriptionAdapterEhBinding.bindMetadata(context: Context, meta: EHentaiSearchMetadata) {
-    genre.text =
-        meta.genre?.let { MetadataUIUtil.getGenreAndColour(context, it) }
-            ?.let {
-                genre.setBackgroundColor(it.first)
-                it.second
-            }
-            ?: meta.genre
-            ?: context.stringResource(MR.strings.unknown)
+    // A known genre gets its colour and label; any other shows as written, or as unknown.
+    val genreAndColour = meta.genre?.let { MetadataUIUtil.getGenreAndColour(context, it) }
+    genre.text = if (genreAndColour != null) {
+        genre.setBackgroundColor(genreAndColour.first)
+        genreAndColour.second
+    } else {
+        meta.genre ?: context.stringResource(MR.strings.unknown)
+    }
     visible.text = context.stringResource(
         SYMR.strings.is_visible,
         meta.visible ?: context.stringResource(MR.strings.unknown),

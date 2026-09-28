@@ -79,8 +79,8 @@ private fun BrowseSourceCompactGridItem(
     // SY -->
     metadata: RaisedSearchMetadata?,
     // SY <--
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = onClick,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
 ) {
     MangaCompactGridItem(
         title = manga.title,

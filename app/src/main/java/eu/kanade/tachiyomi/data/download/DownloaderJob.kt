@@ -120,7 +120,8 @@ internal fun Downloader.queueChapters(manga: Manga, chapters: List<Chapter>, aut
             val maxDownloadsFromSource = queueState.value
                 .groupBy { it.source }
                 .filterKeys { it !is UnmeteredSource }
-                .maxOfOrNull { it.value.size }
+                .map { it.value.size }
+                .maxOrNull()
                 ?: 0
             if (
                 queuedDownloads > DOWNLOADS_QUEUED_WARNING_THRESHOLD ||

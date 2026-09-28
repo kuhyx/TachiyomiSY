@@ -59,12 +59,12 @@ internal class MangaDexLoginHelper(
 
     suspend fun logout(): Boolean {
         val oauth = MdUtil.loadOAuth(preferences, mdList)
-        val sessionToken = oauth?.accessToken
-        val refreshToken = oauth?.refreshToken
-        if (refreshToken.isNullOrEmpty() || sessionToken.isNullOrEmpty()) {
+        if (oauth == null || oauth.refreshToken.isEmpty() || oauth.accessToken.isEmpty()) {
             mdList.logout()
             return true
         }
+        val sessionToken = oauth.accessToken
+        val refreshToken = oauth.refreshToken
 
         val formBody = FormBody.Builder()
             .add("client_id", MdConstants.Login.clientId)

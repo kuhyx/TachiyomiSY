@@ -141,7 +141,7 @@ internal class MigrationListScreenModel(
             fetchCoverQuietly(result.first)
         }
 
-        manga.searchResult.value = result?.first?.toSuccessSearchResult() ?: SearchResult.NotFound
+        manga.searchResult.value = if (result != null) result.first.toSuccessSearchResult() else SearchResult.NotFound
 
         if (shouldHide(manga, result)) {
             removeManga(manga)

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source
 
+import android.content.Context
 import eu.kanade.tachiyomi.source.AndroidSourceManager.Companion.DELEGATED_SOURCES
 import eu.kanade.tachiyomi.source.AndroidSourceManager.Companion.DelegatedSource
 import eu.kanade.tachiyomi.source.AndroidSourceManager.Companion.currentDelegatedSources
@@ -82,17 +83,19 @@ internal fun AndroidSourceManager.toInternalSource(source: Source): Source? {
         val matched = factories.find { qualifiedName.startsWith(it) }
         DELEGATED_SOURCES[matched ?: qualifiedName]
     }
-    val newSource = if (source is HttpSource && delegate != null) {
+    val newSource = if (source is HttpSource && sourceQName != null && delegate != null) {
         xLogD("Delegating source: %s -> %s!", sourceQName, delegate.newSourceClass.qualifiedName)
         val enhancedSource = EnhancedHttpSource(
             source,
-            delegate.newSourceClass.constructors.find { it.parameters.size == 2 }!!.call(source, context),
+            // Plain Java reflection: R8 may strip the Kotlin metadata that primaryConstructor would need.
+            delegate.newSourceClass.java.getConstructor(HttpSource::class.java, Context::class.java)
+                .newInstance(source, context),
         )
 
         currentDelegatedSources[enhancedSource.originalSource.id] = DelegatedSource(
             enhancedSource.originalSource.name,
             enhancedSource.originalSource.id,
-            enhancedSource.originalSource::class.qualifiedName ?: delegate.originalSourceQualifiedClassName,
+            sourceQName,
             (enhancedSource.enhancedSource as DelegatedHttpSource)::class,
             delegate.factory,
         )

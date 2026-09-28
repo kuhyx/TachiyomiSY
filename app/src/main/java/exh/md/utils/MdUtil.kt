@@ -47,7 +47,8 @@ internal object MdUtil {
     fun getScanlatorString(scanlators: Set<String>): String = scanlators.sorted().joinToString(scanlatorSeparator)
 
     fun parseDate(dateAsString: String): Long =
-        dateFormatter.parse(dateAsString)?.time ?: 0
+        // parse(String) throws instead of returning null; the platform stub still says nullable.
+        dateFormatter.parse(dateAsString)!!.time
 
     fun createMangaEntry(json: MangaDataDto, lang: String): SManga {
         return SManga(

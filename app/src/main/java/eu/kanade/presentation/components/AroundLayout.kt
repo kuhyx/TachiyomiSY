@@ -41,8 +41,9 @@ internal fun AroundLayout(
             }
         }.fastMap { it.measure(looseConstraints.copy(maxWidth = bodyContentWidth)) }
 
-        // The body is always wrapped in a Box, so the list is never empty.
-        val height = (startLayoutPlaceables + endLayoutPlaceables + bodyContentPlaceables).maxOf { it.height }
+        // The tallest placeable; heights are never negative, so folding from 0 is the plain maximum.
+        val height = (startLayoutPlaceables + endLayoutPlaceables + bodyContentPlaceables)
+            .fold(0) { tallest, placeable -> maxOf(tallest, placeable.height) }
 
         layout(constraints.maxWidth, height) {
             // Placing to control drawing order to match default elevation of each placeable

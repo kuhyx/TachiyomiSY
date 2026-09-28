@@ -54,9 +54,12 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.extension.installer.ACTION_INSTALL_RESULT
 import rikka.shizuku.SystemServiceHelper
 import java.io.OutputStream
-import kotlin.system.exitProcess
 
-internal class ShellInterface : IShellInterface.Stub() {
+// SY -->
+// [exit] is System.exit; a test passes its own, since the real one would end the test JVM. Every
+// parameter has a default, so Shizuku still finds the no-argument constructor it instantiates.
+internal class ShellInterface(private val exit: (Int) -> Unit = System::exit) : IShellInterface.Stub() {
+    // SY <--
 
     private val context = createContext()
     private val userId = UserHandle::class.java
@@ -154,7 +157,7 @@ internal class ShellInterface : IShellInterface.Stub() {
     }
 
     override fun destroy() {
-        exitProcess(0)
+        exit(0)
     }
 
     @SuppressLint("PrivateApi")

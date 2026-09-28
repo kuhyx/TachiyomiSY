@@ -11,7 +11,7 @@ import com.kevinnzou.web.AccompanistWebChromeClient
 import com.kevinnzou.web.AccompanistWebViewClient
 import com.kevinnzou.web.WebContent
 import com.kevinnzou.web.WebView
-import eu.kanade.tachiyomi.BuildConfig
+import eu.kanade.tachiyomi.util.system.isDebuggable
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 
 // The current window's WebView; popup windows adopt the WebView Android hands them via WebViewTransport.
@@ -32,7 +32,7 @@ internal fun WindowWebView(
             webView.setDefaultSettings()
 
             // Debug mode (chrome://inspect/#devices)
-            if (BuildConfig.DEBUG &&
+            if (isDebuggable &&
                 0 != webView.context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
             ) {
                 WebView.setWebContentsDebuggingEnabled(true)

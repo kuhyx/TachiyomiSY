@@ -12,6 +12,7 @@ import tachiyomi.domain.chapter.model.NoChaptersException
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.model.SourceNotInstalledException
 import tachiyomi.i18n.MR
+import java.io.BufferedWriter
 import java.io.File
 import java.io.Writer
 import java.util.concurrent.CopyOnWriteArrayList
@@ -97,7 +98,8 @@ internal fun LibraryUpdateJob.writeErrorFile(errors: List<Pair<Manga, String?>>)
     if (errors.isEmpty()) return File("")
     return try {
         val file = applicationContext.createFileInCacheDir("mihon_update_errors.txt")
-        file.bufferedWriter().use { out ->
+        // Built by hand: the stdlib's bufferedWriter() re-checks for a BufferedWriter it can never get here.
+        BufferedWriter(file.writer()).use { out ->
             val helpUrl = LibraryUpdateJob.ERROR_LOG_HELP_URL
             out.write(applicationContext.stringResource(MR.strings.library_errors_help, helpUrl) + "\n\n")
             writeErrorReport(out, errors)

@@ -93,7 +93,8 @@ internal class Lanraragi(delegate: HttpSource, val context: Context) :
 
             tags.clear()
             archive.tags?.split(',')
-                ?.mapTo(tags) {
+                .orEmpty()
+                .mapTo(tags) {
                     val tag = it.trim()
                     if (
                         tag.startsWith(LanraragiSearchMetadata.LANRARAGI_NAMESPACE_DATE_ADDED) ||

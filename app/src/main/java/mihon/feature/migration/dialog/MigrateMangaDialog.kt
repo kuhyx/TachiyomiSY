@@ -52,11 +52,12 @@ internal fun Screen.MigrateMangaDialog(
 
     val screenModel = rememberScreenModel { MigrateDialogScreenModel() }
     LaunchedEffect(current, target) {
-        screenModel.init(current, target)
+        screenModel.init(current)
     }
     val state by screenModel.state.collectAsState()
 
-    if (state.isMigrated) return
+    // Nothing to offer once migrated, nor until init has run, so a button never acts on an uninitialised model.
+    if (state.isMigrated || state.current == null) return
 
     if (state.isMigrating) {
         LoadingScreen(
@@ -91,7 +92,7 @@ internal fun Screen.MigrateMangaDialog(
                 },
                 onMigrate = { replace ->
                     scope.launchIO {
-                        screenModel.migrateManga(replace = replace)
+                        screenModel.migrateManga(current, target, replace = replace)
                         withUIContext { onComplete() }
                     }
                 },
@@ -125,7 +126,7 @@ private class MigrateDialogScreenModel(
     private val migrateManga: MigrateMangaUseCase = Injekt.get(),
 ) : StateScreenModel<MigrateDialogScreenModel.State>(State()) {
 
-    fun init(current: Manga, target: Manga) {
+    fun init(current: Manga) {
         val applicableFlags = buildList {
             MigrationFlag.entries.forEach {
                 val applicable = when (it) {
@@ -142,7 +143,6 @@ private class MigrateDialogScreenModel(
         mutableState.update {
             State(
                 current = current,
-                target = target,
                 applicableFlags = applicableFlags,
                 selectedFlags = selectedFlags,
             )
@@ -158,19 +158,16 @@ private class MigrateDialogScreenModel(
         }
     }
 
-    suspend fun migrateManga(replace: Boolean) {
-        val state = state.value
-        val current = state.current ?: return
-        val target = state.target ?: return
-        sourcePreference.migrationFlags.set(state.selectedFlags)
+    suspend fun migrateManga(current: Manga, target: Manga, replace: Boolean) {
+        sourcePreference.migrationFlags.set(state.value.selectedFlags)
         mutableState.update { it.copy(isMigrating = true) }
-        migrateManga(current, target, replace)
+        // The use case, not this function: both take the same arguments now.
+        migrateManga.invoke(current, target, replace)
         mutableState.update { it.copy(isMigrating = false, isMigrated = true) }
     }
 
     data class State(
         val current: Manga? = null,
-        val target: Manga? = null,
         val applicableFlags: List<MigrationFlag> = emptyList(),
         val selectedFlags: Set<MigrationFlag> = emptySet(),
         val isMigrating: Boolean = false,

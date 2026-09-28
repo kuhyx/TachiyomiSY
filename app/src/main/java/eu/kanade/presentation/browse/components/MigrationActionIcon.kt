@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.tachiyomi.ui.browse.migration.advanced.process.MigratingManga
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
@@ -38,56 +39,47 @@ internal fun MigrationActionIcon(
     val closeMenu = { moreExpanded = false }
 
     Box(modifier) {
-        if (result is MigratingManga.SearchResult.Searching) {
-            IconButton(onClick = skipManga) {
-                Icon(
-                    imageVector = Icons.Outlined.Close,
-                    contentDescription = stringResource(SYMR.strings.action_stop),
-                )
-            }
-        } else if (result is MigratingManga.SearchResult.Result || result is MigratingManga.SearchResult.NotFound) {
-            IconButton(onClick = { moreExpanded = !moreExpanded }) {
-                Icon(
-                    imageVector = Icons.Outlined.MoreVert,
-                    contentDescription = stringResource(MR.strings.action_menu_overflow_description),
-                )
-            }
-            DropdownMenu(
-                expanded = moreExpanded,
-                onDismissRequest = closeMenu,
-                offset = DpOffset(8.dp, (-MENU_ANCHOR_HEIGHT).dp),
-            ) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(SYMR.strings.action_search_manually)) },
-                    onClick = {
-                        searchManually()
-                        closeMenu()
-                    },
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(SYMR.strings.action_skip_entry)) },
-                    onClick = {
-                        skipManga()
-                        closeMenu()
-                    },
-                )
-                if (result is MigratingManga.SearchResult.Result) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(SYMR.strings.action_migrate_now)) },
-                        onClick = {
-                            migrateNow()
-                            closeMenu()
-                        },
+        when (result) {
+            MigratingManga.SearchResult.Searching -> {
+                IconButton(onClick = skipManga) {
+                    Icon(
+                        imageVector = Icons.Outlined.Close,
+                        contentDescription = stringResource(SYMR.strings.action_stop),
                     )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(SYMR.strings.action_copy_now)) },
-                        onClick = {
-                            copyNow()
-                            closeMenu()
-                        },
+                }
+            }
+            MigratingManga.SearchResult.NotFound, is MigratingManga.SearchResult.Result -> {
+                IconButton(onClick = { moreExpanded = !moreExpanded }) {
+                    Icon(
+                        imageVector = Icons.Outlined.MoreVert,
+                        contentDescription = stringResource(MR.strings.action_menu_overflow_description),
                     )
+                }
+                DropdownMenu(
+                    expanded = moreExpanded,
+                    onDismissRequest = closeMenu,
+                    offset = DpOffset(8.dp, (-MENU_ANCHOR_HEIGHT).dp),
+                ) {
+                    MenuItem(SYMR.strings.action_search_manually, searchManually, closeMenu)
+                    MenuItem(SYMR.strings.action_skip_entry, skipManga, closeMenu)
+                    if (result is MigratingManga.SearchResult.Result) {
+                        MenuItem(SYMR.strings.action_migrate_now, migrateNow, closeMenu)
+                        MenuItem(SYMR.strings.action_copy_now, copyNow, closeMenu)
+                    }
                 }
             }
         }
     }
+}
+
+// One overflow entry: runs its action, then closes the menu.
+@Composable
+private fun MenuItem(label: StringResource, action: () -> Unit, closeMenu: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text(stringResource(label)) },
+        onClick = {
+            action()
+            closeMenu()
+        },
+    )
 }

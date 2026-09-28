@@ -37,16 +37,16 @@ internal fun SyncFavoritesProgressDialog(
         AlertDialog(
             onDismissRequest = {},
             confirmButton = {
-                if (dialog.positiveButton != null && dialog.positiveButtonText != null) {
-                    TextButton(onClick = dialog.positiveButton) {
-                        Text(text = dialog.positiveButtonText)
+                dialog.positiveButton?.let { button ->
+                    TextButton(onClick = button.onClick) {
+                        Text(text = button.text)
                     }
                 }
             },
             dismissButton = {
-                if (dialog.negativeButton != null && dialog.negativeButtonText != null) {
-                    TextButton(onClick = dialog.negativeButton) {
-                        Text(text = dialog.negativeButtonText)
+                dialog.negativeButton?.let { button ->
+                    TextButton(onClick = button.onClick) {
+                        Text(text = button.text)
                     }
                 }
             },

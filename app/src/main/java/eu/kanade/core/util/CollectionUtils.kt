@@ -10,12 +10,13 @@ internal fun <T : R, R : Any> List<T>.insertSeparators(
 ): List<R> {
     if (isEmpty()) return emptyList()
     val newList = mutableListOf<R>()
-    for (i in -1..lastIndex) {
-        val before = getOrNull(i)
+    // Every neighbouring pair, from (null, first) to (last, null); the trailing null ends the list.
+    var before: T? = null
+    for (after in this + null) {
         before?.let(newList::add)
-        val after = getOrNull(i + 1)
         val separator = generator.invoke(before, after)
         separator?.let(newList::add)
+        before = after
     }
     return newList
 }

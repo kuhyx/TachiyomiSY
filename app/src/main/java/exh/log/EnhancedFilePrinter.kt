@@ -24,23 +24,20 @@ internal class EnhancedFilePrinter internal constructor(
     // Log writer.
     private val writer: LogFileWriter
 
-    @Volatile
-    private var worker: LogWorker? = null
+    // SY -->
+    // Always built (a queue and a flag, started on first use); println alone decides whether it is used.
+    private val worker = LogWorker(this)
+    // SY <--
 
     private val maxTimeMillis = 7.days.inWholeMilliseconds
 
     init {
         writer = LogFileWriter()
-        if (USE_WORKER) {
-            worker = LogWorker(this)
-        }
     }
 
     override fun println(logLevel: Int, tag: String, msg: String) {
         val timeMillis = System.currentTimeMillis()
         if (USE_WORKER) {
-            // Assigned in init whenever USE_WORKER holds.
-            val worker = checkNotNull(worker)
             if (!worker.isStarted()) {
                 worker.start()
             }

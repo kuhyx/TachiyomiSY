@@ -1,6 +1,7 @@
 package eu.kanade.presentation.library.components
 
 import android.content.Context
+import eu.kanade.presentation.components.DialogButton
 import exh.favorites.FavoritesSyncStatus
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.i18n.MR
@@ -23,13 +24,17 @@ internal fun Context.syncProperties(
                 status.categories.joinToString(),
             ),
         ),
-        positiveButtonText = stringResource(SYMR.strings.show_gallery),
-        positiveButton = {
-            openManga(status.mangaId)
-            setStatusIdle()
-        },
-        negativeButtonText = stringResource(MR.strings.action_ok),
-        negativeButton = setStatusIdle,
+        positiveButton = DialogButton(
+            text = stringResource(SYMR.strings.show_gallery),
+            onClick = {
+                openManga(status.mangaId)
+                setStatusIdle()
+            },
+        ),
+        negativeButton = DialogButton(
+            text = stringResource(MR.strings.action_ok),
+            onClick = setStatusIdle,
+        ),
     )
     is FavoritesSyncStatus.CompleteWithErrors -> SyncFavoritesProgressProperties(
         title = stringResource(SYMR.strings.favorites_sync_done_errors),
@@ -37,8 +42,10 @@ internal fun Context.syncProperties(
             SYMR.strings.favorites_sync_done_errors_message,
             status.messages.joinToString(separator = "\n") { galleryErrorText(it) },
         ),
-        positiveButtonText = stringResource(MR.strings.action_ok),
-        positiveButton = setStatusIdle,
+        positiveButton = DialogButton(
+            text = stringResource(MR.strings.action_ok),
+            onClick = setStatusIdle,
+        ),
     )
     is FavoritesSyncStatus.Idle -> null
     is FavoritesSyncStatus.Initializing -> SyncFavoritesProgressProperties(
@@ -48,8 +55,10 @@ internal fun Context.syncProperties(
     is FavoritesSyncStatus.SyncError -> SyncFavoritesProgressProperties(
         title = stringResource(SYMR.strings.favorites_sync_error),
         text = stringResource(SYMR.strings.favorites_sync_error_string, syncErrorText(status)),
-        positiveButtonText = stringResource(MR.strings.action_ok),
-        positiveButton = setStatusIdle,
+        positiveButton = DialogButton(
+            text = stringResource(MR.strings.action_ok),
+            onClick = setStatusIdle,
+        ),
     )
     is FavoritesSyncStatus.Processing -> SyncFavoritesProgressProperties(
         title = stringResource(SYMR.strings.favorites_syncing),

@@ -22,7 +22,7 @@ internal suspend fun FavoritesSyncHelper.applyRemoteCategories(categories: List<
         .filterNot(Category::isSystemCategory)
 
     categories.forEachIndexed { index, remote ->
-        val local = localCategories.getOrElse(index) {
+        val local = localCategories.getOrNull(index) ?: run {
             when (val createCategoryWithNameResult = createCategoryWithName.await(remote)) {
                 is CreateCategoryWithName.Result.InternalError -> throw createCategoryWithNameResult.error
                 is CreateCategoryWithName.Result.Success -> createCategoryWithNameResult.category

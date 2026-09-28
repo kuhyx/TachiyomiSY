@@ -73,6 +73,14 @@ internal fun SelectionActions(screenModel: MigrationConfigScreenModel) {
     )
 }
 
+// Both drag keys' positions among the selected sources, or null when either is not a selected source
+// (the selection can change mid-drag, and removeAt(-1) would crash).
+internal fun reorderIndices(selectedIds: List<Long>, fromKey: Any, toKey: Any): Pair<Int, Int>? {
+    val fromIndex = selectedIds.indexOf(fromKey)
+    val toIndex = selectedIds.indexOf(toKey)
+    return if (fromIndex == -1 || toIndex == -1) null else fromIndex to toIndex
+}
+
 // The selected sources (reorderable) above the available ones, each under its header.
 @Composable
 internal fun SourceLists(
@@ -84,9 +92,7 @@ internal fun SourceLists(
     contentPadding: PaddingValues,
 ) {
     val reorderableState = rememberReorderableLazyListState(lazyListState, contentPadding) { from, to ->
-        val fromIndex = selectedSources.indexOfFirst { it.id == from.key }
-        val toIndex = selectedSources.indexOfFirst { it.id == to.key }
-        if (!(fromIndex == -1 || toIndex == -1)) {
+        reorderIndices(selectedSources.map { it.id }, from.key, to.key)?.let { (fromIndex, toIndex) ->
             screenModel.orderSource(fromIndex, toIndex)
         }
     }
