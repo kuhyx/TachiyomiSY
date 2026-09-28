@@ -55,6 +55,12 @@ internal class ChipTest {
     }
 
     @Test
+    fun disabledChipKeepsItsBorder() {
+        compose.setContent { MaterialTheme { SuggestionChip(label = { Text("dim") }, enabled = false) } }
+        compose.onNodeWithText("dim").assertExists()
+    }
+
+    @Test
     fun clickableChipForwardsClicks() {
         compose.setContent {
             MaterialTheme {

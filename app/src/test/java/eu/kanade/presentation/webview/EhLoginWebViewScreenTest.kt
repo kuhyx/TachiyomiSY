@@ -12,7 +12,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.kevinnzou.web.AccompanistWebViewClient
+import eu.kanade.tachiyomi.util.system.isDebuggable
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -84,5 +90,24 @@ internal class EhLoginWebViewScreenTest {
         val nodes = compose.onAllNodes(hasText(text) and hasClickAction())
         nodes[nodes.fetchSemanticsNodes().size - 1].performClick()
         compose.waitForIdle()
+    }
+
+    @After
+    fun tearDown() = unmockkAll()
+
+    @Test
+    fun releaseBuildsSkipInspection() {
+        mockkStatic("eu.kanade.tachiyomi.util.system.BuildConfigKt")
+        every { isDebuggable } returns false
+        show()
+        compose.webViews().size shouldBe 1
+    }
+
+    @Test
+    fun releaseFlagsSkipInspection() {
+        val info = ApplicationProvider.getApplicationContext<Context>().applicationInfo
+        info.flags = info.flags and ApplicationInfo.FLAG_DEBUGGABLE.inv()
+        show()
+        compose.webViews().size shouldBe 1
     }
 }

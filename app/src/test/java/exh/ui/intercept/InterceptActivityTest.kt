@@ -4,14 +4,19 @@ import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
+import eu.kanade.tachiyomi.ui.base.forgetRecordedCalls
+import eu.kanade.tachiyomi.ui.base.release
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import exh.GALLERY_URL
 import exh.GalleryAdderHarness
+import exh.MANGA_URL
 import exh.importableSource
 import exh.ui.baseActivityModule
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.every
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -37,6 +42,7 @@ private const val FRAME_MS = 16L
 internal class InterceptActivityTest {
     private val harness = GalleryAdderHarness()
     private val sdk = Build.VERSION.SDK_INT
+    private val launched = mutableListOf<ActivityController<InterceptActivity>>()
 
     @Before
     fun setUp() {
@@ -50,13 +56,15 @@ internal class InterceptActivityTest {
 
     @After
     fun tearDown() {
+        launched.forEach { it.release() }
+        forgetRecordedCalls()
         ShadowChoreographer.setPaused(false)
         ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", sdk)
         harness.stop()
     }
 
     private fun launch(intent: Intent = viewIntent()): ActivityController<InterceptActivity> =
-        Robolectric.buildActivity(InterceptActivity::class.java, intent).setup()
+        Robolectric.buildActivity(InterceptActivity::class.java, intent).setup().also { launched += it }
 
     private fun viewIntent() = Intent(Intent.ACTION_VIEW, GALLERY_URL.toUri())
 
@@ -144,5 +152,20 @@ internal class InterceptActivityTest {
         ShadowLooper.idleMainLooper(FRAME_MS * 10, TimeUnit.MILLISECONDS)
         controller.get().isFinishing shouldBe false
         controller.get().finish()
+    }
+
+    @Test
+    fun loadingShowsWhileAdding() {
+        val gate = CompletableDeferred<Unit>()
+        coEvery { harness.source.mapUrlToMangaUrl(any()) } coAnswers {
+            gate.await()
+            MANGA_URL
+        }
+        val activity = launch().get()
+        // Frames pass while the gallery is still being added, so the loading status is composed.
+        ShadowLooper.idleMainLooper(FRAME_MS * 10, TimeUnit.MILLISECONDS)
+        activity.isFinishing shouldBe false
+        gate.complete(Unit)
+        waitFor { activity.isFinishing }
     }
 }

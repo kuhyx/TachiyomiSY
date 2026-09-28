@@ -74,6 +74,20 @@ internal class DownloadManagerCleanupTest : DownloadManagerTestBase() {
     }
 
     @Test
+    fun unreadableFolderIsKept() {
+        // A folder that cannot be listed (listFiles() is null) is kept, like an empty one.
+        val title = File(root, "Source/Title").apply { mkdirs() }
+        every { cache.getDownloadCount(manga) } returns 0
+        title.setReadable(false)
+        try {
+            cleanup() shouldBe 0
+        } finally {
+            title.setReadable(true)
+        }
+        title.exists() shouldBe true
+    }
+
+    @Test
     fun noStorageCleansNothing() {
         val detached = DownloadManager(
             context = context,

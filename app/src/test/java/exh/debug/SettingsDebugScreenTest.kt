@@ -135,10 +135,12 @@ internal class SettingsDebugScreenTest {
         showScreen()
         scrollTo("Enable debug overlay")
         nodesWithText("MODIFIED") shouldBe modifiedRows
+        // One toggle that defaults on and one that defaults off: a click flips each way, whichever store is live.
         compose.onNodeWithText("Enable exh root redirect").performClick()
         compose.waitForIdle()
         scrollTo("Include only root when loading exh versions")
-        compose.onNodeWithText("Include only root when loading exh versions").assertIsDisplayed()
+        compose.onNodeWithText("Include only root when loading exh versions").assertIsDisplayed().performClick()
+        compose.waitForIdle()
         // The list ends with a spacer for the navigation bar, past the last toggle.
         val rows = compose.onAllNodes(hasScrollToIndexAction()).onFirst()
         rows.performScrollToIndex(DebugFunctions.entries().size + DebugToggles.entries.size + EXTRA_ROWS)

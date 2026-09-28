@@ -15,10 +15,15 @@ import com.kevinnzou.web.AccompanistWebChromeClient
 import com.kevinnzou.web.AccompanistWebViewClient
 import com.kevinnzou.web.WebContent
 import com.kevinnzou.web.WebViewNavigator
+import eu.kanade.tachiyomi.util.system.isDebuggable
 import io.kotest.matchers.shouldBe
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.MainScope
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -130,6 +135,27 @@ internal class WebViewClientsTest {
     fun releaseFlagsSkipInspection() {
         val info = context.applicationInfo
         info.flags = info.flags and ApplicationInfo.FLAG_DEBUGGABLE.inv()
+        compose.setContent {
+            WebViewScreenContent(
+                onNavigateUp = {},
+                initialTitle = null,
+                url = "https://example.com/",
+                onShare = {},
+                onOpenInBrowser = {},
+                onClearCookies = {},
+            )
+        }
+        compose.waitForIdle()
+        compose.webViews().size shouldBe 1
+    }
+
+    @After
+    fun tearDown() = unmockkAll()
+
+    @Test
+    fun releaseBuildsSkipInspection() {
+        mockkStatic("eu.kanade.tachiyomi.util.system.BuildConfigKt")
+        every { isDebuggable } returns false
         compose.setContent {
             WebViewScreenContent(
                 onNavigateUp = {},

@@ -118,14 +118,20 @@ internal class MangaDexAuthInterceptorTest {
         val interceptor = MangaDexAuthInterceptor(preferences, mdList)
         val expired = unauthorized("The access token expired")
         interceptor.intercept(chain(expired, cannedResponse("not json"))) shouldBe expired
+        // The failed refresh logged the interceptor out, so the rest go through a live one of their own.
         val other401 = unauthorized(null)
-        interceptor.intercept(chain(other401)) shouldBe other401
+        liveInterceptor().intercept(chain(other401)) shouldBe other401
         val other401Header = unauthorized("nope")
-        interceptor.intercept(chain(other401Header)) shouldBe other401Header
+        liveInterceptor().intercept(chain(other401Header)) shouldBe other401Header
         val okExpiredHeader = cannedResponse("ok").newBuilder()
             .header("www-authenticate", "The access token expired")
             .build()
-        interceptor.intercept(chain(okExpiredHeader)) shouldBe okExpiredHeader
+        liveInterceptor().intercept(chain(okExpiredHeader)) shouldBe okExpiredHeader
+    }
+
+    private fun liveInterceptor(): MangaDexAuthInterceptor {
+        MdUtil.saveOAuth(preferences, mdList, liveOAuth("live"))
+        return MangaDexAuthInterceptor(preferences, mdList)
     }
 
     @Test

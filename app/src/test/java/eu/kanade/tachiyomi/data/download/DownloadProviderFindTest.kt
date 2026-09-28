@@ -99,4 +99,17 @@ internal class DownloadProviderFindTest : ProviderTestBase() {
         )
         unmatched.mapNotNull { it.name }.sorted() shouldContainExactly listOf("Ch 1", "stranger")
     }
+
+    @Test
+    fun aTempNamedChapterIsTemp() {
+        // A chapter whose own name ends like a temp dir cannot be told apart from one, so it is swept too.
+        val tempNamed = "Draft${Downloader.TMP_DIR_SUFFIX}"
+        chapterDir(mangaTitle = "Title", name = tempNamed)
+        val unmatched = harness.provider.findUnmatchedChapterDirs(
+            chapters = listOf(testChapter(name = tempNamed)),
+            manga = testManga("Title"),
+            source = source,
+        )
+        unmatched.mapNotNull { it.name } shouldContainExactly listOf(tempNamed)
+    }
 }

@@ -32,8 +32,8 @@ internal class SyncFavoritesTextTest {
         val props = props(FavoritesSyncStatus.BadLibraryState.MangaInMultipleCategories(7L, "Title", listOf("a", "b")))
             .shouldNotBeNull()
         props.text shouldContain "Title"
-        props.positiveButton?.invoke()
-        props.negativeButton?.invoke()
+        props.positiveButton?.onClick?.invoke()
+        props.negativeButton?.onClick?.invoke()
         calls shouldBe listOf("open 7", "idle", "idle")
     }
 
@@ -48,7 +48,7 @@ internal class SyncFavoritesTextTest {
         val props = props(FavoritesSyncStatus.CompleteWithErrors(errors)).shouldNotBeNull()
         props.text shouldContain "why"
         props.text shouldContain "gid"
-        props.positiveButton?.invoke()
+        props.positiveButton?.onClick?.invoke()
         calls shouldBe listOf("idle")
     }
 

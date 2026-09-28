@@ -1,6 +1,7 @@
 package exh.recs
 
 import cafe.adriel.voyager.core.model.ScreenModelStore
+import eu.kanade.presentation.util.ioCoroutineScope
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.CannedServer
 import eu.kanade.tachiyomi.source.online.SourceTestHarness
@@ -15,7 +16,11 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
@@ -39,6 +44,7 @@ internal class RecommendsScreenModelTest {
     private val manga = sourceManga(id = 4L, title = "Needle")
     private val getManga = mockk<GetManga>()
     private var tracks = emptyList<Track>()
+    private val networkToLocal = mockk<NetworkToLocalManga>()
 
     @Before
     fun setUp() {
@@ -55,7 +61,6 @@ internal class RecommendsScreenModelTest {
         coEvery { getManga.await(4L) } returns manga
         every { getManga.subscribe(any(), any()) } returns kotlinx.coroutines.flow.flowOf(manga)
         harness.serve(getManga)
-        val networkToLocal = mockk<NetworkToLocalManga>()
         coEvery { networkToLocal(any<Manga>()) } answers { firstArg() }
         harness.serve(networkToLocal)
         val source = mockk<Source> {
@@ -142,5 +147,29 @@ internal class RecommendsScreenModelTest {
         state.progress shouldBe 0
         state.total shouldBe 0
         state.copy(title = "t").title shouldBe "t"
+    }
+
+    // The model is cancelled while its one merged source resolves a title; [resolved] is what resolving then does.
+    private fun cancelWhileResolving(resolved: suspend (Manga) -> Manga): RecommendsScreenModel.State {
+        val built = CompletableDeferred<RecommendsScreenModel>()
+        coEvery { networkToLocal(any<Manga>()) } coAnswers {
+            built.await().ioCoroutineScope.cancel()
+            resolved(firstArg())
+        }
+        val model = RecommendsScreenModel(RecommendsScreen.Args.MergedSourceMangas(listOf(rankedResults(1))))
+        built.complete(model)
+        runBlocking { withTimeout(WAIT_MS) { model.ioCoroutineScope.coroutineContext.job.join() } }
+        return model.state.value
+    }
+
+    @Test
+    fun cancelledResultsAreDropped() {
+        cancelWhileResolving { it }.items.values.single() shouldBe RecommendationItemResult.Loading
+    }
+
+    @Test
+    fun cancelledFailuresAreDropped() {
+        val state = cancelWhileResolving { throw CancellationException("disposed") }
+        state.items.values.single() shouldBe RecommendationItemResult.Loading
     }
 }

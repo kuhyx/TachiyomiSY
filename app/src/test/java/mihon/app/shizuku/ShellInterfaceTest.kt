@@ -95,4 +95,11 @@ internal class ShellInterfaceTest {
         installOn(Build.VERSION_CODES.O)
         session.commits.last().endsWith(":false") shouldBe false
     }
+
+    @Test
+    fun destroyExitsTheProcess() {
+        val exits = mutableListOf<Int>()
+        ShellInterface(exit = { exits += it }).destroy()
+        exits shouldContainExactly listOf(0)
+    }
 }
