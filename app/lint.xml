@@ -23,6 +23,12 @@
          and would contradict a justified allowlist entry forever. -->
     <issue id="NewerVersionAvailable" severity="ignore" />
 
+    <!-- The offline half of the same check: it reports any newer version this
+         machine's Gradle cache happens to hold, so a version held on purpose in
+         dependency-freshness.allowlist.yaml (kover 0.9.9, 2026-09-28) failed lint
+         only where 0.9.10 had once been downloaded. The freshness gate owns it. -->
+    <issue id="GradleDependency" severity="ignore" />
+
     <!-- Ids referenced only through ViewBinding (binding.viewerContainer) are
          reported unused: https://issuetracker.google.com/issues/233912817. The
          ids that were genuinely unreferenced were deleted. -->
