@@ -1,8 +1,11 @@
 package eu.kanade.tachiyomi.ui.reader.setting
 
 import cafe.adriel.voyager.core.model.ScreenModel
-import eu.kanade.presentation.util.ioCoroutineScope
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -18,13 +21,24 @@ internal class ReaderSettingsScreenModel(
     val preferences: ReaderPreferences = Injekt.get(),
 ) : ScreenModel {
 
+    // SY -->
+    // Its own scope, not Voyager's ioCoroutineScope: the reader builds this model outside any Navigator,
+    // so the store keyed that scope by whichever screen model was registered last and never disposed it,
+    // and every closed reader stayed reachable through these stateIn coroutines.
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    // SY <--
+
     val viewerFlow = readerState
         .map { it.viewer }
         .distinctUntilChanged()
-        .stateIn(ioCoroutineScope, SharingStarted.Lazily, null)
+        .stateIn(scope, SharingStarted.Lazily, null)
 
     val mangaFlow = readerState
         .map { it.manga }
         .distinctUntilChanged()
-        .stateIn(ioCoroutineScope, SharingStarted.Lazily, null)
+        .stateIn(scope, SharingStarted.Lazily, null)
+
+    override fun onDispose() {
+        scope.cancel()
+    }
 }
