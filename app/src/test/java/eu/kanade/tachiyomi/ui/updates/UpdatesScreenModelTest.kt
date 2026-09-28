@@ -8,12 +8,14 @@ import eu.kanade.tachiyomi.ui.base.await
 import eu.kanade.tachiyomi.ui.base.mainReset
 import eu.kanade.tachiyomi.ui.base.mainUnconfined
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
+import mihon.test.CapturingLogcat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -117,6 +119,25 @@ internal class UpdatesScreenModelTest {
         model.state.value.dialog shouldBe null
     }
 
+    // A failing download status stream is logged; the screen keeps what it has.
+    @Test
+    fun brokenStatusIsLogged() {
+        val logcat = CapturingLogcat().install()
+        try {
+            harness.statuses = flow { error("broken") }
+            harness.model().state.await { !it.isLoading }
+            val deadline = System.currentTimeMillis() + LOG_WAIT_MILLIS
+            // The failure is caught on the IO pool; poll until its log line lands.
+            while (logcat.messages.isEmpty()) {
+                check(System.currentTimeMillis() < deadline) { "nothing logged" }
+                Thread.sleep(POLL_MILLIS)
+            }
+            logcat.messages.first() shouldContain "broken"
+        } finally {
+            logcat.uninstall()
+        }
+    }
+
     @Test
     fun preferencesAreExposed() {
         harness.libraryPreferences.newUpdatesCount.set(4)
@@ -140,3 +161,5 @@ internal class UpdatesScreenModelTest {
 
 private const val RESENDS = 20
 private const val RESEND_MILLIS = 50L
+private const val LOG_WAIT_MILLIS = 5_000L
+private const val POLL_MILLIS = 10L

@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.coEvery
 import io.mockk.coVerify
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -42,6 +43,20 @@ internal class LibrarySearchRunTest {
         runBlocking { parts.search.filterLibrary(emptyList(), "x", emptyMap()) }.shouldBeEmpty()
         search(null) shouldContainExactly listOf(1L, 2L, 3L)
         search("  ") shouldContainExactly listOf(1L, 2L, 3L)
+    }
+
+    // Lookups that really suspend resume into the same match.
+    @Test
+    fun suspendingLookupsMatch() {
+        coEvery { parts.getSearchTags.await(2L) } coAnswers {
+            yield()
+            listOf(searchTag("misc", "needle"))
+        }
+        coEvery { parts.getSearchTitles.await(2L) } coAnswers {
+            yield()
+            emptyList()
+        }
+        search("needle") shouldContainExactly listOf(1L, 2L)
     }
 
     @Test

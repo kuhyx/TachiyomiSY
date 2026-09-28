@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.ui.library.waitForLabel
 import eu.kanade.tachiyomi.ui.manga.track.BlankScreen
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
@@ -50,6 +51,7 @@ internal class SettingsTabletTest {
 
     @After
     fun tearDown() {
+        clearAllMocks()
         unmockkAll()
         koin.stop()
     }
@@ -89,4 +91,12 @@ internal class SettingsTabletTest {
         navigateUp()
         host.top.shouldBeInstanceOf<BlankScreen>()
     }
+
+    @Test
+    fun unknownIdFallsBack() {
+        show(SettingsScreen(destination = UNKNOWN_ID), "Theme")
+    }
 }
+
+// Matches no destination, so the default screen opens.
+private const val UNKNOWN_ID = 9

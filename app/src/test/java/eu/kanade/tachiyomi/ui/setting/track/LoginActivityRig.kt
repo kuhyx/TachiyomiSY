@@ -2,13 +2,16 @@ package eu.kanade.tachiyomi.ui.setting.track
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Looper
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.ui.base.ActivityKoin
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.eventually
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
@@ -38,6 +41,9 @@ internal class LoginActivityRig(private val extra: Module = module {}) {
             // Their spinners would animate forever once the choreographer runs again.
             launched.forEach { it.pause().stop().destroy() }
             launched.clear()
+            shadowOf(Looper.getMainLooper()).idle()
+            clearAllMocks()
+            unmockkAll()
             stopKoin()
         } finally {
             ShadowChoreographer.setPaused(false)

@@ -81,6 +81,13 @@ internal class TrackLoginActivityTest {
         coVerify { baka.logout() }
     }
 
+    // Present but blank, the query and then the fragment are skipped: nothing to log in with.
+    @Test
+    fun blankPartsLogOut() {
+        open("tachiyomi://anilist-auth? # ")
+        coVerify { trackers.aniList.logout() }
+    }
+
     @Test
     fun unknownHostOnlyReturns() {
         open("tachiyomi://elsewhere?code=1")

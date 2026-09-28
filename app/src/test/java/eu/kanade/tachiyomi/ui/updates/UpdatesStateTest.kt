@@ -46,7 +46,6 @@ internal class UpdatesStateTest {
 
     @Test
     fun modelMembers() {
-        UpdatesScreenModel.Event.InternalError.toString() shouldBe "InternalError"
         val prefs = UpdatesScreenModel.ItemPreferences(
             filterDownloaded = TriState.DISABLED,
             filterUnread = TriState.DISABLED,

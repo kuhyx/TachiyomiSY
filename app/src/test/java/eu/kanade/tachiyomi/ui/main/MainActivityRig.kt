@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.main
 
 import android.content.Intent
+import android.os.Looper
 import eu.kanade.domain.source.interactor.GetIncognitoState
 import eu.kanade.tachiyomi.core.security.PrivacyPreferences
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
@@ -13,6 +14,7 @@ import exh.eh.EHentaiUpdateWorker
 import exh.eh.scheduleBackground
 import exh.log.EHLogLevel
 import exh.source.BlacklistedSources
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -74,9 +76,11 @@ internal class MainActivityRig {
             // A live activity keeps its home screen collecting the global tab channel into later classes.
             launched.forEach { it.pause().stop().destroy() }
             launched.clear()
+            shadowOf(Looper.getMainLooper()).idle()
             disposeScreenModels(HomeScreen, *HomeScreen.TABS.toTypedArray())
             harness.stop()
         } finally {
+            clearAllMocks()
             unmockkAll()
             HomeScreen.showBottomNavEvent.tryReceive()
             BlacklistedSources.HIDDEN_SOURCES = hidden

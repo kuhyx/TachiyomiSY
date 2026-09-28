@@ -3,6 +3,10 @@ package eu.kanade.tachiyomi.ui.webview
 import android.app.assist.AssistContent
 import android.content.Intent
 import android.net.Uri
+import android.os.Looper
+import android.view.View
+import android.view.ViewGroup
+import android.webkit.WebView
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -17,6 +21,7 @@ import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.toShareIntent
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -68,6 +73,7 @@ internal class WebViewActivityTest {
     @After
     fun tearDown() {
         stopKoin()
+        clearAllMocks()
         unmockkAll()
     }
 
@@ -109,6 +115,22 @@ internal class WebViewActivityTest {
         launch(otherSource).state shouldBe Lifecycle.State.RESUMED
         every { http.headers } throws IllegalStateException("headers")
         launch().state shouldBe Lifecycle.State.RESUMED
+    }
+
+    // A page the WebView moves to becomes the URL the activity offers the assistant.
+    @Test
+    fun visitedPageIsAssisted() {
+        launch().use { scenario ->
+            compose.waitForIdle()
+            scenario.onActivity { activity ->
+                val view = checkNotNull(activity.window.decorView.firstWebView())
+                view.webViewClient.doUpdateVisitedHistory(view, OTHER_URL, false)
+                val content = AssistContent()
+                activity.onProvideAssistContent(content)
+                content.webUri.toString() shouldBe OTHER_URL
+            }
+        }
+        shadowOf(Looper.getMainLooper()).idle()
     }
 
     @Test
@@ -160,3 +182,11 @@ internal class WebViewActivityTest {
 }
 
 private const val URL = "https://example.org/page"
+
+private const val OTHER_URL = "https://example.org/other"
+
+private fun View.firstWebView(): WebView? = when (this) {
+    is WebView -> this
+    is ViewGroup -> (0 until childCount).firstNotNullOfOrNull { getChildAt(it).firstWebView() }
+    else -> null
+}

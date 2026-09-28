@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.ui.download.DownloadQueueScreen
 import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -58,6 +59,7 @@ internal class UpdatesTabTest {
     @After
     fun tearDown() {
         stopKoin()
+        clearAllMocks()
         unmockkAll()
         HomeScreen.showBottomNavEvent.tryReceive()
     }
