@@ -23,3 +23,23 @@ exceptions:
       The Gradle plugin half of moko-resources; same version, same reason as
       dev.icerock.moko:resources above.
     blocked_by: upstream:jobobby04/TachiyomiSY
+  - ecosystem: maven
+    package: org.jetbrains.kotlinx:kover-gradle-plugin
+    pinned: "0.9.9"
+    reason: >-
+      0.9.10's fix for Kotlin/kotlinx-kover#827 (skip test tasks without a binary
+      report) drops the JaCoCo engine's test.exec from the report artifact, so
+      every module on `useJacoco` reads 0% line and branch coverage and
+      koverVerify fails. Reproduced 2026-09-28 on build-logic with a fresh test
+      run: test.exec written, jvm.artifact lists no binary report. The JaCoCo
+      engine stays (its Kotlin filters are what 100% branch coverage rests on).
+    blocked_by: regression:kotlinx-kover-0.9.10-jacoco-binary-reports
+    expires: "2026-12-27"
+  - ecosystem: maven
+    package: org.jetbrains.kotlinx.kover:org.jetbrains.kotlinx.kover.gradle.plugin
+    pinned: "0.9.9"
+    reason: >-
+      The plugin-marker half of kover-gradle-plugin; same version, same reason
+      as org.jetbrains.kotlinx:kover-gradle-plugin above.
+    blocked_by: regression:kotlinx-kover-0.9.10-jacoco-binary-reports
+    expires: "2026-12-27"
