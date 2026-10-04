@@ -67,6 +67,12 @@ the sync job execute. Add a gate there, never in a workflow alone.
 - Phone: `phone-deploy` skill, `adb install -r`, device `23181JEGR08034`.
   The stock TachiyomiSY must be uninstalled once first (signature differs);
   that wipes its data, so it is the user's call every time.
+- run: `./gradlew installDebug` (phone: see Phone above)
+- test: `./gradlew testDebugUnitTest testAndroidHostTest --quiet` (JDK 17: `JAVA_HOME=/usr/lib/jvm/java-17-openjdk`; scripts' own tests: `python3 -m pytest -q scripts`)
+- test-changed: `scripts/test_changed.sh`
+- lint: `bash scripts/ci_gates.sh --no-gradle` (shell gates, seconds; full Gradle lint is the gate script without the flag)
+- coverage: `./gradlew koverXmlReport --quiet` (per module: `<module>/build/reports/kover/report.xml`)
+- coverage-gaps: `coverage-gaps source-api/build/reports/kover/report.xml` (any module's report)
 
 ## Upstream sync mechanics
 
